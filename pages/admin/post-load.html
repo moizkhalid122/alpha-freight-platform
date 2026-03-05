@@ -1,0 +1,1371 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Load - Admin Portal</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        // Immediate auth check before page loads
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            --sidebar-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-gradient);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 0;
+        }
+        .header-section {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 1.5rem 2rem;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+        }
+        .content-section {
+            padding: 0 2rem 2rem;
+        }
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .form-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .section-title {
+            color: #6f42c1;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .form-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .upload-area {
+            border: 2px dashed #6f42c1;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            background: #e3f2fd;
+            border-color: #e83e8c;
+        }
+        .upload-area.dragover {
+            background: #e3f2fd;
+            border-color: #e83e8c;
+            transform: scale(1.02);
+        }
+        .preview-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: white;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.5rem;
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .step.active {
+            background: #6f42c1;
+            color: white;
+        }
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        /* Required Field Highlighting - Light Red */
+        label.required-field {
+            color: #ff6b6b !important;
+            font-weight: 600;
+        }
+
+        label.required-field::after {
+            content: ' *';
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+
+        /* Valid field label - Green */
+        label.required-field.field-valid {
+            color: #28a745 !important;
+        }
+
+        label.required-field.field-valid::after {
+            color: #28a745;
+        }
+
+        /* Required input/select border highlight - Light Red */
+        input[required]:not(:focus):invalid,
+        select[required]:not(:focus):invalid,
+        textarea[required]:not(:focus):invalid {
+            border-color: #ff6b6b !important;
+            border-width: 2px;
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.15);
+        }
+
+        /* Valid/Filled required fields - Green highlight */
+        input[required]:valid:not(:placeholder-shown),
+        select[required]:valid,
+        textarea[required]:valid:not(:placeholder-shown) {
+            border-color: #28a745 !important;
+            border-width: 2px;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+            background-color: #f8fff9;
+        }
+
+        /* Green tick icon for valid fields */
+        .field-valid-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #28a745;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        /* Required checkbox label - Light Red */
+        .form-check-label.required-field {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        /* Checkbox valid state */
+        input[type="checkbox"][required]:checked + .form-check-label.required-field {
+            color: #28a745 !important;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+
+            .admin-sidebar.show {
+                left: 0;
+            }
+
+            .admin-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1040;
+            }
+
+            .mobile-menu-btn {
+                background: var(--primary-gradient);
+                border: none;
+                color: white;
+                padding: 0.5rem;
+                border-radius: 8px;
+                font-size: 1.2rem;
+            }
+
+            .content-section {
+                padding: 1rem;
+            }
+
+            .header-section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-header { display: none; }
+        }
+
+        /* Sidebar overlay for mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            display: none;
+        }
+        .sidebar-overlay.show { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h5 class="mb-0 fw-bold text-primary">Admin Portal</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm" onclick="scrollToTop()">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white active" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Desktop Header -->
+                <div class="header-section d-none d-md-block">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Post New Load</h5>
+                            <small class="text-muted">Create a new freight load for carriers to bid on</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="saveDraft()">
+                                <i class="fas fa-save"></i> Save Draft
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="previewLoad()">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Steps -->
+                <div class="p-3 bg-light">
+                    <div class="step-indicator">
+                        <div class="step active" id="step1">1</div>
+                        <div class="step" id="step2">2</div>
+                        <div class="step" id="step3">3</div>
+                        <div class="step" id="step4">4</div>
+                    </div>
+                    <div class="text-center">
+                        <small class="text-muted">Step 1: Load Details → Step 2: Cargo Information → Step 3: Documents → Step 4: Review & Post</small>
+                    </div>
+                </div>
+
+                <!-- Post Load Content -->
+                <div class="content-section">
+                    <form id="postLoadForm" onsubmit="return postLoad(event)">
+                        <!-- Step 1: Load Details -->
+                        <div class="form-section" id="section1">
+                            <div class="form-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h5 class="section-title text-center">Load Details</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="pickupLocation" class="form-label required-field">Pickup Location</label>
+                                    <input type="text" class="form-control" id="pickupLocation" placeholder="Enter pickup address" required>
+                                    <div class="form-text">Full address including postcode</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="deliveryLocation" class="form-label required-field">Delivery Location</label>
+                                    <input type="text" class="form-control" id="deliveryLocation" placeholder="Enter delivery address" required>
+                                    <div class="form-text">Full address including postcode</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="pickupDate" class="form-label required-field">Pickup Date</label>
+                                    <input type="date" class="form-control" id="pickupDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="deliveryDate" class="form-label required-field">Delivery Date</label>
+                                    <input type="date" class="form-control" id="deliveryDate" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="pickupTime" class="form-label required-field">Pickup Time</label>
+                                    <input type="time" class="form-control" id="pickupTime" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="deliveryTime" class="form-label required-field">Delivery Time</label>
+                                    <input type="time" class="form-control" id="deliveryTime" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="specialInstructions" class="form-label">Special Instructions</label>
+                                <textarea class="form-control" id="specialInstructions" rows="3" placeholder="Any special requirements, access instructions, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Cargo Information -->
+                        <div class="form-section" id="section2">
+                            <div class="form-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <h5 class="section-title text-center">Cargo Information</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="cargoType" class="form-label required-field">Cargo Type</label>
+                                    <select class="form-select" id="cargoType" required>
+                                        <option value="">Select cargo type</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="furniture">Furniture</option>
+                                        <option value="textiles">Textiles</option>
+                                        <option value="food">Food & Beverages</option>
+                                        <option value="machinery">Machinery</option>
+                                        <option value="automotive">Automotive Parts</option>
+                                        <option value="pharmaceuticals">Pharmaceuticals</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cargoDescription" class="form-label required-field">Cargo Description</label>
+                                    <input type="text" class="form-control" id="cargoDescription" placeholder="Brief description of cargo" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="cargoWeight" class="form-label required-field">Weight (tonnes)</label>
+                                    <input type="number" class="form-control" id="cargoWeight" step="0.1" min="0.1" max="44" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="cargoVolume" class="form-label">Volume (m³)</label>
+                                    <input type="number" class="form-control" id="cargoVolume" step="0.1" min="0.1" placeholder="Optional">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="cargoValue" class="form-label">Value (£)</label>
+                                    <input type="number" class="form-control" id="cargoValue" min="0" placeholder="Optional">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="vehicleType" class="form-label required-field">Required Vehicle Type</label>
+                                    <select class="form-select" id="vehicleType" required>
+                                        <option value="">Select vehicle type</option>
+                                        <option value="van">Van (up to 3.5t)</option>
+                                        <option value="7.5t">7.5 Tonne</option>
+                                        <option value="18t">18 Tonne</option>
+                                        <option value="artic">Articulated Lorry</option>
+                                        <option value="refrigerated">Refrigerated</option>
+                                        <option value="flatbed">Flatbed</option>
+                                        <option value="curtainside">Curtainside</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="specialRequirements" class="form-label">Special Requirements</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="tailLift">
+                                                <label class="form-check-label" for="tailLift">Tail Lift</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="refrigerated">
+                                                <label class="form-check-label" for="refrigerated">Refrigerated</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="adr">
+                                                <label class="form-check-label" for="adr">ADR Certified</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="whiteGlove">
+                                                <label class="form-check-label" for="whiteGlove">White Glove Service</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Documents & Payment -->
+                        <div class="form-section" id="section3">
+                            <div class="form-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h5 class="section-title text-center">Documents & Payment</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="budget" class="form-label">Budget Range</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="minBudget" placeholder="Min £" min="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="maxBudget" placeholder="Max £" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paymentMethod" class="form-label required-field">Payment Method</label>
+                                    <select class="form-select" id="paymentMethod" required>
+                                        <option value="">Select payment method</option>
+                                        <option value="50-50">50% upfront, 50% on delivery</option>
+                                        <option value="full-upfront">Full payment upfront</option>
+                                        <option value="on-delivery">Payment on delivery</option>
+                                        <option value="net-30">Net 30 days</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="documents" class="form-label">Upload Documents</label>
+                                <div class="upload-area" id="uploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                    <h5>Drag & Drop Files Here</h5>
+                                    <p class="text-muted">or click to browse</p>
+                                    <input type="file" class="d-none" id="documentUpload" multiple accept=".pdf,.jpg,.png,.doc,.docx">
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('documentUpload').click()">
+                                        <i class="fas fa-plus"></i> Choose Files
+                                    </button>
+                                </div>
+                                <div class="form-text">Upload invoice, proof of ownership, or other relevant documents (PDF, JPG, PNG, DOC)</div>
+                            </div>
+                            
+                            <div id="documentPreview" class="mt-3"></div>
+                        </div>
+
+                        <!-- Step 4: Review & Post -->
+                        <div class="form-section" id="section4">
+                            <div class="form-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h5 class="section-title text-center">Review & Post</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="loadTitle" class="form-label required-field">Load Title</label>
+                                    <input type="text" class="form-control" id="loadTitle" placeholder="e.g., Electronics Delivery London to Manchester" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="urgency" class="form-label required-field">Urgency Level</label>
+                                    <select class="form-select" id="urgency" required>
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent (+10% premium)</option>
+                                        <option value="same-day">Same Day (+25% premium)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="additionalNotes" class="form-label">Additional Notes</label>
+                                <textarea class="form-control" id="additionalNotes" rows="3" placeholder="Any additional information for carriers"></textarea>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsAccepted" required>
+                                <label class="form-check-label required-field" for="termsAccepted">
+                                    I agree to the <a href="../../pages/legal/terms.html" target="_blank">Terms of Service</a> and <a href="../../pages/legal/privacy.html" target="_blank">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="notificationsEnabled" checked>
+                                <label class="form-check-label" for="notificationsEnabled">
+                                    Enable notifications for carrier bids and updates
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="postLoadSubmitBtn" 
+                                    style="animation: none !important; transition: none !important; pointer-events: auto !important;">
+                                <i class="fas fa-paper-plane"></i> Post Load
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="previewModalLabel">
+                        <i class="fas fa-eye"></i> Load Preview
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h4 class="fw-bold text-primary" id="preview_loadTitle">-</h4>
+                        <span class="badge bg-info" id="preview_urgency">Normal</span>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border-start border-primary border-3">
+                                <small class="text-muted d-block mb-1">Pickup Location</small>
+                                <strong id="preview_pickupLocation">-</strong>
+                                <small class="text-muted d-block mt-1" id="preview_pickupDateTime">-</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border-start border-success border-3">
+                                <small class="text-muted d-block mb-1">Delivery Location</small>
+                                <strong id="preview_deliveryLocation">-</strong>
+                                <small class="text-muted d-block mt-1" id="preview_deliveryDateTime">-</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Cargo Type</small>
+                                <strong id="preview_cargoType">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Vehicle Type</small>
+                                <strong id="preview_vehicleType">-</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Weight</small>
+                                <strong id="preview_cargoWeight">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Volume</small>
+                                <strong id="preview_cargoVolume">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Value</small>
+                                <strong id="preview_cargoValue">-</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Budget Range</small>
+                                <strong id="preview_budget">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-1">Payment Method</small>
+                                <strong id="preview_paymentMethod">-</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Cargo Description</small>
+                        <div class="p-3 bg-light rounded" id="preview_cargoDescription">-</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Special Requirements</small>
+                        <div class="p-3 bg-light rounded" id="preview_specialReqs">-</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Special Instructions</small>
+                        <div class="p-3 bg-light rounded" id="preview_specialInstructions">-</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Additional Notes</small>
+                        <div class="p-3 bg-light rounded" id="preview_additionalNotes">-</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('postLoadForm').scrollIntoView({behavior: 'smooth'}); const modal = bootstrap.Modal.getInstance(document.getElementById('previewModal')); modal.hide();">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    
+    <!-- Firebase v10+ Modular SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Flag to prevent double submission
+        let isPosting = false;
+
+        // Protect button from any modifications - NO spinner, NO animation
+        const protectButton = () => {
+            const submitBtn = document.getElementById('postLoadSubmitBtn');
+            if (submitBtn) {
+                // Force no animation styles immediately
+                submitBtn.style.setProperty('animation', 'none', 'important');
+                submitBtn.style.setProperty('transition', 'none', 'important');
+                submitBtn.style.setProperty('pointer-events', 'auto', 'important');
+                submitBtn.style.setProperty('transform', 'none', 'important');
+                submitBtn.style.setProperty('opacity', '1', 'important');
+                
+                // Lock button HTML content - prevent spinner/loading text
+                const originalHTML = '<i class="fas fa-paper-plane"></i> Post Load';
+                
+                // Monitor for any changes to button content
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                            const currentHTML = submitBtn.innerHTML;
+                            if (currentHTML.includes('spinner') || 
+                                currentHTML.includes('loading') || 
+                                currentHTML.includes('Posting...') ||
+                                currentHTML.includes('Processing')) {
+                                // Restore original HTML if spinner detected
+                                setTimeout(() => {
+                                    submitBtn.innerHTML = originalHTML;
+                                    submitBtn.style.setProperty('animation', 'none', 'important');
+                                    submitBtn.style.setProperty('transition', 'none', 'important');
+                                }, 0);
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(submitBtn, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true
+                });
+                
+                // Also prevent classes that might trigger animations
+                const classObserver = new MutationObserver(() => {
+                    if (submitBtn.classList.contains('spinner-border') || 
+                        submitBtn.classList.contains('loading') ||
+                        submitBtn.classList.contains('disabled')) {
+                        submitBtn.classList.remove('spinner-border', 'loading');
+                        submitBtn.style.setProperty('animation', 'none', 'important');
+                        submitBtn.style.setProperty('pointer-events', 'auto', 'important');
+                    }
+                });
+                
+                classObserver.observe(submitBtn, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
+        };
+
+        // Initialize button protection
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', protectButton);
+        } else {
+            protectButton();
+        }
+
+        // Make postLoad function globally available
+        window.postLoad = async function(event) {
+            // Prevent default form submission immediately
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }
+            
+            // Prevent double submission
+            if (isPosting) return false;
+            isPosting = true;
+            
+            const form = document.getElementById('postLoadForm');
+            const submitBtn = document.getElementById('postLoadSubmitBtn');
+            const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+            
+            // Force button styles - no animation
+            if (submitBtn) {
+                submitBtn.style.setProperty('animation', 'none', 'important');
+                submitBtn.style.setProperty('transition', 'none', 'important');
+                submitBtn.style.setProperty('transform', 'none', 'important');
+                submitBtn.style.setProperty('opacity', '1', 'important');
+            }
+            
+            // Check authentication - instant
+            if (!adminAuth.isLoggedIn && !adminAuth.email) {
+                isPosting = false;
+                if (submitBtn) {
+                    submitBtn.style.setProperty('animation', 'none', 'important');
+                    submitBtn.style.setProperty('transform', 'none', 'important');
+                }
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('error', 'You must be logged in as admin to post a load!');
+                } else {
+                    alert('You must be logged in as admin to post a load!');
+                }
+                return false;
+            }
+            
+            // Validate all required fields - instant check
+            if (!form.checkValidity()) {
+                isPosting = false;
+                if (submitBtn) {
+                    submitBtn.style.setProperty('animation', 'none', 'important');
+                    submitBtn.style.setProperty('transform', 'none', 'important');
+                }
+                form.classList.add('was-validated');
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('error', 'Please fill all required fields.');
+                } else {
+                    alert('Please fill all required fields.');
+                }
+                return false;
+            }
+            
+            // Get all form values - optimized single pass
+            const getEl = (id) => document.getElementById(id);
+            const minBudget = getEl('minBudget').value ? parseFloat(getEl('minBudget').value) : null;
+            const maxBudget = getEl('maxBudget').value ? parseFloat(getEl('maxBudget').value) : null;
+            let originalBudget = null;
+            if (minBudget && maxBudget) {
+                originalBudget = (minBudget + maxBudget) / 2;
+            } else if (maxBudget) {
+                originalBudget = maxBudget;
+            } else if (minBudget) {
+                originalBudget = minBudget;
+            } else {
+                const cargoVal = getEl('cargoValue').value ? parseFloat(getEl('cargoValue').value) : null;
+                if (cargoVal) originalBudget = cargoVal;
+            }
+            
+            // Prepare form data
+            const formData = {
+                pickupLocation: getEl('pickupLocation').value.trim(),
+                deliveryLocation: getEl('deliveryLocation').value.trim(),
+                pickupDate: getEl('pickupDate').value,
+                deliveryDate: getEl('deliveryDate').value,
+                pickupTime: getEl('pickupTime').value,
+                deliveryTime: getEl('deliveryTime').value,
+                specialInstructions: getEl('specialInstructions').value.trim(),
+                cargoType: getEl('cargoType').value,
+                cargoDescription: getEl('cargoDescription').value.trim(),
+                cargoWeight: parseFloat(getEl('cargoWeight').value),
+                cargoVolume: getEl('cargoVolume').value ? parseFloat(getEl('cargoVolume').value) : null,
+                cargoValue: getEl('cargoValue').value ? parseFloat(getEl('cargoValue').value) : null,
+                vehicleType: getEl('vehicleType').value,
+                tailLift: getEl('tailLift').checked,
+                refrigerated: getEl('refrigerated').checked,
+                adr: getEl('adr').checked,
+                whiteGlove: getEl('whiteGlove').checked,
+                minBudget: minBudget,
+                maxBudget: maxBudget,
+                budget: originalBudget,
+                paymentMethod: getEl('paymentMethod').value,
+                loadTitle: getEl('loadTitle').value.trim(),
+                urgency: getEl('urgency').value,
+                additionalNotes: getEl('additionalNotes').value.trim(),
+                termsAccepted: getEl('termsAccepted').checked,
+                notificationsEnabled: getEl('notificationsEnabled').checked,
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                postedBy: 'admin',
+                adminId: adminAuth.email || adminAuth.adminId || 'admin'
+            };
+            
+            // INSTANT Firebase write
+            try {
+                // Force button styles before posting
+                if (submitBtn) {
+                    submitBtn.style.setProperty('animation', 'none', 'important');
+                    submitBtn.style.setProperty('transition', 'none', 'important');
+                    submitBtn.style.setProperty('transform', 'none', 'important');
+                    submitBtn.style.setProperty('opacity', '1', 'important');
+                }
+                
+                // Use Firebase v10+ push() function
+                const loadsRef = ref(database, 'loads');
+                const newLoadRef = push(loadsRef);
+                await set(newLoadRef, formData);
+                
+                // INSTANT success handling - clear form IMMEDIATELY
+                form.reset();
+                
+                // Force button styles again after posting
+                if (submitBtn) {
+                    submitBtn.style.setProperty('animation', 'none', 'important');
+                    submitBtn.style.setProperty('transition', 'none', 'important');
+                    submitBtn.style.setProperty('transform', 'none', 'important');
+                    submitBtn.style.setProperty('opacity', '1', 'important');
+                }
+                
+                // Show success message IMMEDIATELY
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('success', 'Load Posted Successfully!');
+                } else {
+                    alert('Load Posted Successfully!');
+                }
+                
+                // Reset flag after successful post
+                isPosting = false;
+                
+            } catch (error) {
+                // Reset flag on error
+                isPosting = false;
+                
+                // Force button styles on error
+                if (submitBtn) {
+                    submitBtn.style.setProperty('animation', 'none', 'important');
+                    submitBtn.style.setProperty('transition', 'none', 'important');
+                    submitBtn.style.setProperty('transform', 'none', 'important');
+                    submitBtn.style.setProperty('opacity', '1', 'important');
+                }
+                
+                // Show error message
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('error', 'Error posting load: ' + error.message);
+                } else {
+                    alert('Error posting load: ' + error.message);
+                }
+                console.error('Post load error:', error);
+            }
+            
+            return false;
+        };
+    </script>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function updateStepIndicator() {
+            for (let i = 1; i <= totalSteps; i++) {
+                const step = document.getElementById(`step${i}`);
+                if (i < currentStep) {
+                    step.className = 'step completed';
+                } else if (i === currentStep) {
+                    step.className = 'step active';
+                } else {
+                    step.className = 'step';
+                }
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStepIndicator();
+                scrollToTop();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepIndicator();
+                scrollToTop();
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveDraft() {
+            try {
+                // Collect current form data
+                const formData = {
+                    pickupLocation: document.getElementById('pickupLocation').value,
+                    deliveryLocation: document.getElementById('deliveryLocation').value,
+                    pickupDate: document.getElementById('pickupDate').value,
+                    deliveryDate: document.getElementById('deliveryDate').value,
+                    pickupTime: document.getElementById('pickupTime').value,
+                    deliveryTime: document.getElementById('deliveryTime').value,
+                    specialInstructions: document.getElementById('specialInstructions').value,
+                    cargoType: document.getElementById('cargoType').value,
+                    cargoDescription: document.getElementById('cargoDescription').value,
+                    cargoWeight: document.getElementById('cargoWeight').value,
+                    cargoVolume: document.getElementById('cargoVolume').value,
+                    cargoValue: document.getElementById('cargoValue').value,
+                    vehicleType: document.getElementById('vehicleType').value,
+                    tailLift: document.getElementById('tailLift').checked,
+                    refrigerated: document.getElementById('refrigerated').checked,
+                    adr: document.getElementById('adr').checked,
+                    whiteGlove: document.getElementById('whiteGlove').checked,
+                    minBudget: document.getElementById('minBudget').value,
+                    maxBudget: document.getElementById('maxBudget').value,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    loadTitle: document.getElementById('loadTitle').value,
+                    urgency: document.getElementById('urgency').value,
+                    additionalNotes: document.getElementById('additionalNotes').value,
+                    termsAccepted: document.getElementById('termsAccepted').checked,
+                    notificationsEnabled: document.getElementById('notificationsEnabled').checked,
+                    savedAt: new Date().toISOString()
+                };
+                
+                // Save draft to localStorage
+                localStorage.setItem('adminLoadDraft', JSON.stringify(formData));
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('success', 'Draft saved successfully! You can continue later.');
+                } else {
+                    alert('Draft saved successfully! You can continue later.');
+                }
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('error', 'Error saving draft. Please try again.');
+                } else {
+                    alert('Error saving draft. Please try again.');
+                }
+            }
+        }
+
+        function previewLoad() {
+            // Get all form values
+            const getEl = (id) => document.getElementById(id);
+            const pickupLocation = getEl('pickupLocation').value || 'Not specified';
+            const deliveryLocation = getEl('deliveryLocation').value || 'Not specified';
+            const pickupDate = getEl('pickupDate').value || 'Not specified';
+            const deliveryDate = getEl('deliveryDate').value || 'Not specified';
+            const pickupTime = getEl('pickupTime').value || 'Not specified';
+            const deliveryTime = getEl('deliveryTime').value || 'Not specified';
+            const loadTitle = getEl('loadTitle').value || 'Not specified';
+            const cargoType = getEl('cargoType').value || 'Not specified';
+            const cargoDescription = getEl('cargoDescription').value || 'Not specified';
+            const cargoWeight = getEl('cargoWeight').value || 'Not specified';
+            const cargoVolume = getEl('cargoVolume').value || 'Not specified';
+            const cargoValue = getEl('cargoValue').value || 'Not specified';
+            const vehicleType = getEl('vehicleType').value || 'Not specified';
+            const urgency = getEl('urgency').value || 'Normal';
+            const paymentMethod = getEl('paymentMethod').value || 'Not specified';
+            const minBudget = getEl('minBudget').value || '';
+            const maxBudget = getEl('maxBudget').value || '';
+            const specialInstructions = getEl('specialInstructions').value || 'None';
+            const additionalNotes = getEl('additionalNotes').value || 'None';
+            
+            // Special requirements
+            const specialReqs = [];
+            if (getEl('tailLift').checked) specialReqs.push('Tail Lift');
+            if (getEl('refrigerated').checked) specialReqs.push('Refrigerated');
+            if (getEl('adr').checked) specialReqs.push('ADR Certified');
+            if (getEl('whiteGlove').checked) specialReqs.push('White Glove Service');
+            
+            // Build budget string
+            let budgetText = 'Not specified';
+            if (minBudget && maxBudget) {
+                budgetText = `£${minBudget} - £${maxBudget}`;
+            } else if (maxBudget) {
+                budgetText = `Up to £${maxBudget}`;
+            } else if (minBudget) {
+                budgetText = `From £${minBudget}`;
+            }
+            
+            // Update preview modal content
+            document.getElementById('preview_loadTitle').textContent = loadTitle;
+            document.getElementById('preview_pickupLocation').textContent = pickupLocation;
+            document.getElementById('preview_deliveryLocation').textContent = deliveryLocation;
+            document.getElementById('preview_pickupDateTime').textContent = `${pickupDate} ${pickupTime}`;
+            document.getElementById('preview_deliveryDateTime').textContent = `${deliveryDate} ${deliveryTime}`;
+            document.getElementById('preview_cargoType').textContent = cargoType;
+            document.getElementById('preview_cargoDescription').textContent = cargoDescription;
+            document.getElementById('preview_cargoWeight').textContent = cargoWeight + ' tonnes';
+            document.getElementById('preview_cargoVolume').textContent = cargoVolume || 'Not specified';
+            document.getElementById('preview_cargoValue').textContent = cargoValue ? `£${cargoValue}` : 'Not specified';
+            document.getElementById('preview_vehicleType').textContent = vehicleType;
+            document.getElementById('preview_specialReqs').textContent = specialReqs.length > 0 ? specialReqs.join(', ') : 'None';
+            document.getElementById('preview_budget').textContent = budgetText;
+            document.getElementById('preview_paymentMethod').textContent = paymentMethod;
+            document.getElementById('preview_urgency').textContent = urgency.charAt(0).toUpperCase() + urgency.slice(1);
+            document.getElementById('preview_specialInstructions').textContent = specialInstructions;
+            document.getElementById('preview_additionalNotes').textContent = additionalNotes;
+            
+            // Show preview modal
+            const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            previewModal.show();
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('documentUpload');
+        const previewArea = document.getElementById('documentPreview');
+
+        if (uploadArea && fileInput && previewArea) {
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            }
+
+            function handleDragLeave(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            }
+
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                handleFiles(files);
+            }
+
+            function handleFiles(files) {
+                Array.from(files).forEach(file => {
+                    const previewCard = document.createElement('div');
+                    previewCard.className = 'preview-card';
+                    previewCard.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file text-primary me-2"></i>
+                                <strong>${file.name}</strong>
+                                <small class="text-muted ms-2">(${(file.size / 1024).toFixed(1)} KB)</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    previewArea.appendChild(previewCard);
+                });
+            }
+
+            window.removeFile = function(button) {
+                button.closest('.preview-card').remove();
+            };
+        }
+
+        // Real-time validation with green tick and label color
+        function validateField(field) {
+            if (!field.hasAttribute('required')) return;
+            
+            const fieldGroup = field.closest('.mb-3') || field.closest('.col-md-6') || field.closest('.col-md-4');
+            if (!fieldGroup) return;
+            
+            // Get label for this field
+            const label = document.querySelector(`label[for="${field.id}"]`);
+            
+            // Remove existing tick icon
+            const existingIcon = fieldGroup.querySelector('.field-valid-icon');
+            if (existingIcon) {
+                existingIcon.remove();
+            }
+            
+            // Check if field is valid
+            const isValid = field.checkValidity() && field.value.trim() !== '';
+            
+            if (isValid) {
+                // Add green tick icon
+                const tickIcon = document.createElement('i');
+                tickIcon.className = 'fas fa-check-circle field-valid-icon';
+                tickIcon.style.position = 'absolute';
+                tickIcon.style.right = '10px';
+                tickIcon.style.top = '50%';
+                tickIcon.style.transform = 'translateY(-50%)';
+                tickIcon.style.color = '#28a745';
+                tickIcon.style.fontSize = '0.875rem';
+                tickIcon.style.zIndex = '10';
+                
+                // Make parent relative if not already
+                if (!fieldGroup.style.position) {
+                    fieldGroup.style.position = 'relative';
+                }
+                
+                fieldGroup.appendChild(tickIcon);
+                
+                // Change label color to green
+                if (label && label.classList.contains('required-field')) {
+                    label.classList.add('field-valid');
+                }
+            } else {
+                // Remove green color from label if field becomes invalid
+                if (label && label.classList.contains('required-field')) {
+                    label.classList.remove('field-valid');
+                }
+            }
+        }
+
+        // Form validation and step navigation with real-time validation
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            // Validate on input/change
+            element.addEventListener('input', function() {
+                validateField(this);
+                
+                // Auto-validate current section
+                const section = this.closest('.form-section');
+                if (section) {
+                    const requiredFields = section.querySelectorAll('[required]');
+                    let isValid = true;
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            isValid = false;
+                        }
+                    });
+                    
+                    if (isValid && currentStep < totalSteps) {
+                        setTimeout(() => nextStep(), 500);
+                    }
+                }
+            });
+            
+            // Validate on change (for selects)
+            element.addEventListener('change', function() {
+                validateField(this);
+            });
+            
+            // Validate checkbox
+            if (element.type === 'checkbox') {
+                element.addEventListener('change', function() {
+                    const label = document.querySelector(`label[for="${this.id}"]`);
+                    if (label) {
+                        if (this.checked && this.hasAttribute('required')) {
+                            label.classList.add('field-valid');
+                            label.classList.add('text-success');
+                        } else if (this.hasAttribute('required')) {
+                            label.classList.remove('field-valid');
+                            label.classList.remove('text-success');
+                        }
+                    }
+                });
+            }
+            
+            // Initial validation for pre-filled fields
+            if (element.value) {
+                validateField(element);
+            }
+        });
+
+        // Load draft data if available
+        function loadDraft() {
+            const draft = localStorage.getItem('adminLoadDraft');
+            if (draft) {
+                const formData = JSON.parse(draft);
+                Object.keys(formData).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = formData[key];
+                        } else {
+                            element.value = formData[key];
+                        }
+                    }
+                });
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('info', 'Draft loaded successfully!');
+                } else {
+                    alert('Draft loaded successfully!');
+                }
+            }
+        }
+
+        // Initialize
+        updateStepIndicator();
+        loadDraft();
+
+        // Mobile Navigation
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            window.addEventListener('resize', function() {
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (sidebar && overlay && window.innerWidth > 768) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Account Type - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="shortcut icon" type="image/png" href="../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --purple: #7c3aed;
+            --purple-light: #a78bfa;
+            --success: #10b981;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: var(--text-medium);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .option-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--border-gray);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .option-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-light);
+        }
+
+        .option-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .option-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #1e3a8a15 0%, #7c3aed15 100%);
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .option-card:hover .option-icon {
+            background: var(--gradient-primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .option-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .option-description {
+            font-size: 1rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-features {
+            list-style: none;
+            text-align: left;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .option-features li {
+            padding: 0.5rem 0;
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .option-features li i {
+            color: var(--success);
+            font-size: 0.875rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-medium);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .option-card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+
+        <div class="header">
+            <h1>Sign In to Your Account</h1>
+            <p>Select your account type to continue to the login page</p>
+        </div>
+
+        <div class="options-grid">
+            <a href="carrier/signin.html" class="option-card">
+                <div class="option-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h2 class="option-title">Carrier Login</h2>
+                <p class="option-description">Sign in to your carrier account to access loads and manage your shipments</p>
+                <ul class="option-features">
+                    <li><i class="fas fa-check-circle"></i> Access to available loads</li>
+                    <li><i class="fas fa-check-circle"></i> Real-time tracking</li>
+                    <li><i class="fas fa-check-circle"></i> View payments</li>
+                    <li><i class="fas fa-check-circle"></i> Manage your profile</li>
+                </ul>
+            </a>
+
+            <a href="supplier/signin.html" class="option-card">
+                <div class="option-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <h2 class="option-title">Supplier Login</h2>
+                <p class="option-description">Sign in to your supplier account to post loads and track shipments</p>
+                <ul class="option-features">
+                    <li><i class="fas fa-check-circle"></i> Post and manage loads</li>
+                    <li><i class="fas fa-check-circle"></i> Connect with carriers</li>
+                    <li><i class="fas fa-check-circle"></i> Track shipments</li>
+                    <li><i class="fas fa-check-circle"></i> View payment history</li>
+                </ul>
+            </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <p style="color: var(--text-medium); margin-bottom: 1rem;">Don't have an account?</p>
+            <a href="carrier/register.html" style="color: var(--primary); text-decoration: none; margin-right: 1rem; font-weight: 600;">Register as Carrier</a>
+            <span style="color: var(--text-light);">|</span>
+            <a href="supplier/supplier-registration.html" style="color: var(--primary); text-decoration: none; margin-left: 1rem; font-weight: 600;">Register as Supplier</a>
+        </div>
+    </div>
+</body>
+</html>

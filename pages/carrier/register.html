@@ -1,0 +1,2521 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Become a Verified Carrier - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="shortcut icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google OAuth -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #5851ea;
+            --secondary: #00d4ff;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --text-dark: #1f2937;
+            --text-medium: #6b7280;
+            --text-light: #9ca3af;
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #eef2f6;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-link {
+            color: var(--text-medium);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-link {
+            color: var(--text-medium);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .header-link:hover {
+            color: var(--primary);
+        }
+
+        .header-link.sign-in {
+            color: var(--primary);
+            font-weight: 600;
+            padding-bottom: 2px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-medium);
+            margin-bottom: 1rem;
+        }
+
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            margin-top: 1rem;
+        }
+
+        .trust-badge .stars {
+            color: #fbbf24;
+        }
+
+        /* Two Column Layout */
+        .registration-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 3rem;
+            align-items: start;
+        }
+
+        .benefits-column {
+            grid-column: 2;
+            order: 2;
+        }
+
+        .form-column {
+            grid-column: 1;
+            order: 1;
+        }
+
+        /* Progress Indicator */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+            width: 100%;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--bg-gradient-end);
+            z-index: 0;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            z-index: 1;
+            transition: width 0.5s ease;
+        }
+
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--bg-gradient-end);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .progress-step.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .progress-step.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .progress-step.completed .step-circle::after {
+            content: '✓';
+            font-size: 1.2rem;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .glass-card:nth-child(1) { animation-delay: 0.1s; }
+        .glass-card:nth-child(2) { animation-delay: 0.2s; }
+        .glass-card:nth-child(3) { animation-delay: 0.3s; }
+        .glass-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(99, 91, 255, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 1rem;
+            border: 2px solid var(--bg-gradient-end);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.1);
+        }
+
+        .form-input:valid + .floating-label,
+        .form-input:focus + .floating-label,
+        .form-input:not(:placeholder-shown) + .floating-label {
+            transform: translateY(-28px) scale(0.85);
+            color: var(--primary);
+        }
+
+        .phone-input:valid + .phone-floating-label,
+        .phone-input:focus + .phone-floating-label,
+        .phone-input:not(:placeholder-shown) + .phone-floating-label {
+            transform: translateY(-28px) scale(0.85);
+            color: var(--primary);
+            left: 5rem !important;
+        }
+
+        .floating-label {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            color: var(--text-medium);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: white;
+            padding: 0 0.25rem;
+        }
+
+        .validation-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        /* Password Toggle Icon */
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-medium);
+            font-size: 1rem;
+            z-index: 4;
+            transition: all 0.3s ease;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+            background: rgba(99, 91, 255, 0.1);
+        }
+
+        .toggle-password:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        /* Password field with toggle icon */
+        #password {
+            padding-right: 3rem;
+        }
+
+        #password ~ .validation-icon {
+            right: 3.5rem;
+        }
+
+        .phone-input-wrapper .validation-icon {
+            right: 8rem;
+        }
+
+        .form-input.valid + .validation-icon {
+            opacity: 1;
+            color: var(--success);
+        }
+
+        .form-input.invalid + .validation-icon {
+            opacity: 1;
+            color: var(--error);
+        }
+
+        .phone-input-wrapper .form-input.valid ~ .phone-verified-badge {
+            display: flex;
+        }
+
+        .phone-input-wrapper .form-input.invalid ~ .phone-verified-badge {
+            display: none;
+        }
+
+        /* Confirm Password Toggle */
+        #confirmPassword {
+            padding-right: 3rem;
+        }
+
+        #confirmPassword ~ .validation-icon {
+            right: 3.5rem;
+        }
+
+        .confirm-password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-medium);
+            font-size: 1rem;
+            z-index: 4;
+            transition: all 0.3s ease;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .confirm-password-toggle:hover {
+            color: var(--primary);
+            background: rgba(99, 91, 255, 0.1);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .form-input.invalid ~ .error-message {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: var(--bg-gradient-end);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .password-strength.weak .password-strength-bar {
+            width: 33%;
+            background: var(--error);
+        }
+
+        .password-strength.medium .password-strength-bar {
+            width: 66%;
+            background: var(--warning);
+        }
+
+        .password-strength.strong .password-strength-bar {
+            width: 100%;
+            background: var(--success);
+        }
+
+        .password-requirements {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            transition: all 0.3s ease;
+        }
+
+        .requirement-item.met {
+            color: var(--success);
+        }
+
+        .requirement-item.met .requirement-icon {
+            color: var(--success);
+        }
+
+        .requirement-item .requirement-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--bg-gradient-end);
+            color: var(--text-light);
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .requirement-item.met .requirement-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Checkboxes */
+        .checkbox-group {
+            margin-bottom: 1rem;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .custom-checkbox:hover {
+            background: rgba(99, 91, 255, 0.05);
+        }
+
+        .checkbox-input {
+            display: none;
+        }
+
+        .checkbox-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--bg-gradient-end);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox-input:checked + .checkbox-box {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox-input:checked + .checkbox-box::after {
+            content: '✓';
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .checkbox-label {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .checkbox-label a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        .discount-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-primary.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid var(--bg-gradient-end);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Google Sign Up Button (From Uiverse.io by Yaya12085, scoped to .google-signup-btn) */
+        .google-signup-btn {
+            max-width: 320px;
+            width: 100%;
+            display: flex;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            vertical-align: middle;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            gap: 0.75rem;
+            color: rgb(65, 63, 63);
+            background-color: #fff;
+            cursor: pointer;
+            transition: all .6s ease;
+            margin: 1rem auto 0 auto;
+        }
+
+        .google-signup-btn svg {
+            height: 24px;
+        }
+
+        .google-signup-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* Benefits Column */
+        .benefits-column {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            grid-column: 2;
+            order: 2;
+        }
+
+        .benefits-column .progress-steps,
+        .benefits-column .progress-step,
+        .benefits-column .progress-line,
+        .benefits-column .step-circle,
+        .benefits-column .step-label {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .benefit-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInRight 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .benefit-card:nth-child(1) { animation-delay: 0.2s; }
+        .benefit-card:nth-child(2) { animation-delay: 0.4s; }
+        .benefit-card:nth-child(3) { animation-delay: 0.6s; }
+
+        .benefit-card:hover {
+            transform: translateY(-4px) translateX(4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(99, 91, 255, 0.3);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-title {
+            font-size: 1.25rem;
+                font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            }
+
+        .benefit-stats {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+                margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .benefit-description {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Social Proof */
+        .social-proof {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .live-counter {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(99, 91, 255, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .counter-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .counter-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-top: 0.5rem;
+        }
+
+        .testimonial {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.5s ease;
+        }
+
+        .testimonial.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .testimonial-info h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .testimonial-info p {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        .testimonial-stars {
+            color: #fbbf24;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .testimonial-text {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .trust-badges {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .trust-badge-item {
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            border: 1px solid var(--bg-gradient-end);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+        }
+
+        .feature-list li i {
+            color: var(--success);
+            font-size: 1rem;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--bg-gradient-end);
+        }
+
+        .logo-cloud {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo-cloud-title {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .logo-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .logo-item {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-item:hover {
+            filter: grayscale(0%);
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .faq-section {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .faq-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+            opacity: 1;
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        .faq-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .faq-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .faq-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 91, 255, 0.15);
+        }
+
+        .faq-item.active {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(99, 91, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: color 0.3s ease;
+            user-select: none;
+        }
+
+        .faq-item:hover .faq-question {
+            color: var(--primary);
+        }
+
+        .faq-item.active .faq-question {
+            color: var(--primary);
+        }
+
+        .faq-icon {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-medium);
+            font-size: 0.875rem;
+        }
+
+        .faq-item:hover .faq-icon {
+            color: var(--primary);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.4s ease,
+                        margin-top 0.4s ease,
+                        padding-top 0.4s ease;
+            margin-top: 0;
+            padding-top: 0;
+            opacity: 0;
+            color: var(--text-medium);
+            line-height: 1.6;
+            transform: translateY(-10px);
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            margin-top: 1rem;
+            padding-top: 0;
+            opacity: 1;
+            transform: translateY(0);
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.5s ease 0.1s,
+                        margin-top 0.4s ease,
+                        transform 0.4s ease 0.1s;
+        }
+
+        /* Notification Animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+            opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 960px) {
+            .registration-layout {
+                grid-template-columns: 1fr;
+                gap: 1.75rem;
+            }
+
+            .benefits-column {
+                position: static;
+            }
+
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            .glass-card,
+            .benefit-card {
+                padding: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.4rem 1.1rem 2.3rem;
+            }
+
+            .header {
+                padding: 0.75rem 1rem;
+            }
+
+            .hero {
+                margin-bottom: 1.75rem;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.9375rem;
+            }
+
+            .trust-badge {
+                font-size: 0.8125rem;
+                padding: 0.4rem 0.75rem;
+            }
+
+            .glass-card {
+                padding: 24px;
+            }
+
+            /* Hide benefits column on mobile */
+            .benefits-column {
+                display: none;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .form-input {
+                padding: 0.875rem;
+                font-size: 0.9375rem;
+            }
+
+            .floating-label {
+                font-size: 0.9375rem;
+            }
+
+            .section-title {
+                font-size: 1rem;
+            }
+
+            .benefit-icon {
+                font-size: 2rem;
+            }
+
+            .benefit-title {
+                font-size: 1.125rem;
+            }
+
+            .benefit-stats {
+                font-size: 0.8125rem;
+            }
+
+            .benefit-description {
+                font-size: 0.8125rem;
+            }
+
+            .progress-steps {
+                margin-bottom: 1.5rem;
+            }
+
+            .step-circle {
+                width: 36px;
+                height: 36px;
+            }
+
+            .step-label {
+                font-size: 0.6875rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.9375rem;
+            }
+
+            .phone-input {
+                padding-left: 4.5rem !important;
+                padding-right: 7rem !important;
+            }
+
+            .phone-floating-label {
+                left: 4.5rem !important;
+            }
+
+            .phone-input-wrapper .validation-icon {
+                right: 7rem;
+            }
+
+            .country-selector {
+                left: 0.75rem;
+            }
+
+            .country-code {
+                font-size: 0.875rem;
+            }
+
+            .tooltip {
+                right: 2.5rem !important;
+            }
+
+            .tooltip-text {
+                width: 180px;
+                right: -80px;
+            }
+
+            .tooltip-text::after {
+                right: 80px;
+            }
+
+            select.form-input {
+                background-position: right 1.5rem center;
+            }
+
+            .chat-button {
+                width: 50px;
+                height: 50px;
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+
+        /* Live Chat Widget */
+        .chat-widget {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+        }
+
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(99, 91, 255, 0.4);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            right: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .tooltip-icon {
+            color: var(--text-medium);
+            cursor: help;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(99, 91, 255, 0.1);
+        }
+
+        .tooltip-icon:hover {
+            color: var(--primary);
+            background: rgba(99, 91, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background: var(--text-dark);
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: calc(100% + 10px);
+            right: 0;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+        }
+
+        .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 20px;
+            border: 6px solid transparent;
+            border-top-color: var(--text-dark);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .input-wrapper .tooltip {
+            right: 3.5rem;
+        }
+
+        .input-wrapper .form-input.valid ~ .tooltip {
+            right: 3.5rem;
+        }
+
+        .input-wrapper .form-input.valid ~ .validation-icon ~ .tooltip {
+            right: 3.5rem;
+        }
+
+        .input-wrapper .form-input:focus ~ .tooltip .tooltip-icon {
+            color: var(--primary);
+        }
+
+        /* Country Selector */
+        .phone-input-wrapper {
+            position: relative;
+        }
+
+        .country-selector {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .country-flag {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .country-code {
+            color: var(--text-medium);
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        /* Select Dropdown Arrow */
+        select.form-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.75rem center;
+            background-size: 12px;
+            padding-right: 2.75rem;
+            cursor: pointer;
+        }
+
+        select.form-input:focus {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23635bff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-position: right 1.75rem center;
+        }
+
+        select.form-input:hover {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23635bff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-position: right 1.75rem center;
+        }
+
+        .phone-input {
+            padding-left: 5rem !important;
+            padding-right: 8rem !important;
+        }
+
+        .phone-verified-badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .phone-verified-badge i {
+            font-size: 0.875rem;
+        }
+
+        .phone-floating-label {
+            left: 5rem !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="../../index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+        <div class="header-right">
+            <a href="#" class="header-link">Help?</a>
+            <a href="signin.html" class="header-link sign-in">Sign In</a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1 class="hero-title">Become a Verified Carrier</h1>
+            <p class="hero-subtitle">Join 5,000+ carriers earning more with Alpha Freight</p>
+            <div class="trust-badge">
+                <span class="stars">⭐⭐⭐⭐⭐</span>
+                <span>4.9/5 from 1,200+ carrier reviews</span>
+            </div>
+    </div>
+
+        <!-- Two Column Layout -->
+        <div class="registration-layout">
+            <!-- Left Column: Benefits -->
+            <div class="benefits-column">
+                <!-- Benefit Cards -->
+                <div class="benefit-card">
+                    <div class="benefit-icon">📦</div>
+                    <h3 class="benefit-title">Access to Premium Loads</h3>
+                    <div class="benefit-stats">5,000+ loads monthly</div>
+                    <p class="benefit-description">Get matched with quality loads from verified UK suppliers</p>
+                    <span class="benefit-badge">Exclusive</span>
+            </div>
+            
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3 class="benefit-title">7-Day Guaranteed Payments</h3>
+                    <div class="benefit-stats">£2.3M paid to carriers</div>
+                    <p class="benefit-description">No more 60-day waits. Get paid within 7 business days</p>
+                    <span class="benefit-badge">Fast</span>
+            </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎧</div>
+                    <h3 class="benefit-title">24/7 Support</h3>
+                    <div class="benefit-stats">&lt; 2min response time</div>
+                    <p class="benefit-description">Dedicated carrier support team always available</p>
+                    <span class="benefit-badge">Priority</span>
+                            </div>
+
+                <!-- Social Proof -->
+                <div class="social-proof">
+                    <div class="live-counter">
+                        <div class="counter-number" id="liveCounter">0</div>
+                        <div class="counter-label">carriers joined this week</div>
+                        </div>
+
+                    <div class="testimonial active" id="testimonial1">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">JD</div>
+                            <div class="testimonial-info">
+                                <h4>John Davies</h4>
+                                <p>Davies Transport Ltd</p>
+                            </div>
+                                </div>
+                        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                        <p class="testimonial-text">"Alpha Freight transformed our business. We've doubled our revenue in 6 months!"</p>
+                            </div>
+
+                    <div class="trust-badges">
+                        <div class="trust-badge-item">ISO 27001</div>
+                        <div class="trust-badge-item">GDPR Compliant</div>
+                        <div class="trust-badge-item">PCI DSS Level 1</div>
+                        <div class="trust-badge-item">UK Reg: 16860760</div>
+                        </div>
+
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Free registration</li>
+                        <li><i class="fas fa-check-circle"></i> No hidden fees</li>
+                        <li><i class="fas fa-check-circle"></i> Instant document verification</li>
+                        <li><i class="fas fa-check-circle"></i> Live GPS tracking included</li>
+                        <li><i class="fas fa-check-circle"></i> Fuel card discounts</li>
+                        <li><i class="fas fa-check-circle"></i> Insurance benefits</li>
+                    </ul>
+                            </div>
+                        </div>
+
+            <!-- Right Column: Registration Form -->
+            <div class="form-column">
+                <!-- Progress Steps (single step as requested) -->
+                <div class="progress-steps">
+                    <div class="progress-line" id="progressLine" style="width: 0%;"></div>
+                    <div class="progress-step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <span class="step-label">Account</span>
+                            </div>
+                            </div>
+
+                <form id="registrationForm">
+                    <!-- Section 1: Personal Details -->
+                    <div class="glass-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Personal Details
+                        </h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <input type="text" class="form-input" id="firstName" required>
+                                    <label class="floating-label" for="firstName">First Name</label>
+                                    <i class="fas fa-check-circle validation-icon"></i>
+                        </div>
+                                <div class="error-message">Please enter your first name</div>
+                        </div>
+
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <input type="text" class="form-input" id="lastName" required>
+                                    <label class="floating-label" for="lastName">Last Name</label>
+                                    <i class="fas fa-check-circle validation-icon"></i>
+                </div>
+                                <div class="error-message">Please enter your last name</div>
+        </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="email" class="form-input" id="email" required>
+                                <label class="floating-label" for="email">Email Address</label>
+                                <i class="fas fa-check-circle validation-icon"></i>
+            </div>
+                            <div class="error-message">Please enter a valid email address</div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="input-wrapper phone-input-wrapper">
+                                <div class="country-selector">
+                                    <span class="country-flag">🇬🇧</span>
+                                    <span class="country-code">+44</span>
+                </div>
+                                <input type="tel" class="form-input phone-input" id="phone" required placeholder=" ">
+                                <label class="floating-label phone-floating-label" for="phone">Phone Number</label>
+                                <i class="fas fa-check-circle validation-icon"></i>
+                                <span class="phone-verified-badge">
+                                    <i class="fas fa-shield-alt"></i> Verified
+                                    </span>
+                        </div>
+                            <div class="error-message">Please enter a valid phone number</div>
+                    </div>
+    </div>
+
+                    <!-- Section 2: Business Details -->
+                    <div class="glass-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-building"></i>
+                            Business Details
+                        </h3>
+
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="text" class="form-input" id="companyName" required placeholder=" ">
+                                <label class="floating-label" for="companyName">Company Name</label>
+                                <span class="tooltip">
+                                    <i class="fas fa-info-circle tooltip-icon"></i>
+                                    <span class="tooltip-text">As registered with Companies House</span>
+                                </span>
+                                <i class="fas fa-check-circle validation-icon"></i>
+                </div>
+                            <div class="error-message">Please enter your company name</div>
+            </div>
+
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="text" class="form-input" id="companyReg">
+                                <label class="floating-label" for="companyReg">Company Registration Number (Optional)</label>
+                                <i class="fas fa-check-circle validation-icon"></i>
+        </div>
+    </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <select class="form-input" id="fleetSize" required style="padding-top: 1.25rem;">
+                                        <option value="">Fleet Size</option>
+                                        <option value="1-5">1-5 vehicles</option>
+                                        <option value="6-20">6-20 vehicles</option>
+                                        <option value="21+">21+ vehicles</option>
+                                    </select>
+                                    <label class="floating-label" for="fleetSize" style="transform: translateY(-28px) scale(0.85);">Fleet Size</label>
+            </div>
+                </div>
+
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <select class="form-input" id="yearsOperation" required style="padding-top: 1.25rem;">
+                                        <option value="">Years in Operation</option>
+                                        <option value="0-1">0-1 years</option>
+                                        <option value="2-5">2-5 years</option>
+                                        <option value="6-10">6-10 years</option>
+                                        <option value="10+">10+ years</option>
+                                    </select>
+                                    <label class="floating-label" for="yearsOperation" style="transform: translateY(-28px) scale(0.85);">Years in Operation</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    <!-- Section 3: Security -->
+                    <div class="glass-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-lock"></i>
+                            Security
+                        </h3>
+
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="password" class="form-input" id="password" required placeholder=" ">
+                                <label class="floating-label" for="password">Password</label>
+                                <i class="fas fa-eye toggle-password" id="passwordToggle"></i>
+                                <i class="fas fa-check-circle validation-icon"></i>
+                            </div>
+                            <div class="password-strength" id="passwordStrength">
+                                <div class="password-strength-bar"></div>
+                                </div>
+                            <div class="password-requirements" id="passwordRequirements">
+                                <div class="requirement-item" data-requirement="length">
+                                    <span class="requirement-icon">○</span>
+                                    <span>At least 8 characters</span>
+                            </div>
+                                <div class="requirement-item" data-requirement="uppercase">
+                                    <span class="requirement-icon">○</span>
+                                    <span>One uppercase letter</span>
+                        </div>
+                                <div class="requirement-item" data-requirement="number">
+                                    <span class="requirement-icon">○</span>
+                                    <span>One number</span>
+                                </div>
+                                <div class="requirement-item" data-requirement="special">
+                                    <span class="requirement-icon">○</span>
+                                    <span>One special character</span>
+                            </div>
+                            </div>
+                            <div class="error-message">Password does not meet requirements</div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="password" class="form-input" id="confirmPassword" required placeholder=" ">
+                                <label class="floating-label" for="confirmPassword">Confirm Password</label>
+                                <i class="fas fa-eye confirm-password-toggle" id="confirmPasswordToggle"></i>
+                                <i class="fas fa-check-circle validation-icon"></i>
+                            </div>
+                            <div class="error-message">Passwords do not match</div>
+                        </div>
+
+                    <!-- Section 4: Agreements -->
+                    <div class="glass-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-file-contract"></i>
+                            Agreements
+                        </h3>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" class="checkbox-input" id="terms" required>
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">
+                                    I agree to the <a href="#" target="_blank">Terms & Conditions</a>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" class="checkbox-input" id="privacy" required>
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">
+                                    I agree to the <a href="#" target="_blank">Privacy Policy</a>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" class="checkbox-input" id="marketing">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">
+                                    I'd like to receive marketing emails
+                                    <span class="discount-badge">
+                                        <i class="fas fa-gift"></i> Get 5% off first load
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div style="margin-top: 1rem; padding: 1rem; background: rgba(99, 91, 255, 0.05); border-radius: 8px; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-shield-alt" style="color: var(--primary);"></i>
+                            <span style="font-size: 0.75rem; color: var(--text-medium);">
+                                Your data is processed in accordance with GDPR regulations
+                            </span>
+                </div>
+            </div>
+
+                    <!-- CTA Buttons -->
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        Create Account
+                    </button>
+
+                    <div id="google-signin-button" style="width: 100%; display: flex; justify-content: center; margin-top: 1rem;"></div>
+                    <!-- Fallback Google Sign Up Button (Uiverse.io by Yaya12085) -->
+                    <button type="button" class="google-signup-btn" onclick="signInWithGoogle()" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
+                            <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
+                            <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
+                            <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
+                            <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
+                        </svg>
+                        Continue with Google
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bottom Section -->
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <div class="faq-section">
+                <h3 style="text-align: center; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700;">Frequently Asked Questions</h3>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How long does verification take?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Our verification process typically takes 24-48 hours. We verify licenses, insurance, and vehicle documentation to ensure platform safety.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Are there any fees to join?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Registration is completely free. We only charge a small commission on completed loads, with no monthly fees or hidden charges.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What documents do I need?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        You'll need: Operator License, Insurance Certificate, Vehicle Registration Documents, and Driver License. All documents are verified securely.
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">View all FAQs →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Chat Widget -->
+    <div class="chat-widget">
+        <button class="chat-button" onclick="openChat()" title="Need help? Chat with us">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+    
+    <script>
+        // Live Counter Animation
+        function animateCounter() {
+            const counter = document.getElementById('liveCounter');
+            const target = 1234;
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    counter.textContent = Math.floor(current).toLocaleString();
+                    requestAnimationFrame(updateCounter);
+                    } else {
+                    counter.textContent = target.toLocaleString();
+                }
+            };
+
+            updateCounter();
+        }
+
+        // Password Strength Checker
+        const passwordInput = document.getElementById('password');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordRequirements = document.getElementById('passwordRequirements');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[^A-Za-z0-9]/.test(password)
+            };
+
+            // Update requirements UI
+            Object.keys(requirements).forEach(key => {
+                const item = passwordRequirements.querySelector(`[data-requirement="${key}"]`);
+                if (requirements[key]) {
+                    item.classList.add('met');
+                    item.querySelector('.requirement-icon').textContent = '✓';
+                    strength++;
+                } else {
+                    item.classList.remove('met');
+                    item.querySelector('.requirement-icon').textContent = '○';
+                }
+            });
+
+            // Update strength meter
+            passwordStrength.className = 'password-strength';
+            if (strength <= 1) {
+                passwordStrength.classList.add('weak');
+            } else if (strength <= 2) {
+                passwordStrength.classList.add('medium');
+            } else if (strength >= 3) {
+                passwordStrength.classList.add('strong');
+                // Confetti effect
+                if (strength === 4) {
+                    createConfetti();
+                }
+            }
+
+            // Validate password
+            if (strength >= 3 && password.length >= 8) {
+                passwordInput.classList.add('valid');
+                passwordInput.classList.remove('invalid');
+            } else {
+                passwordInput.classList.remove('valid');
+            }
+        });
+
+        // Confetti Effect
+        function createConfetti() {
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${['#635bff', '#00d4ff', '#10b981', '#f59e0b'][Math.floor(Math.random() * 4)]};
+                    left: ${Math.random() * 100}vw;
+                    top: 50vh;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 10000;
+                    animation: confetti 1s ease-out forwards;
+                `;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 1000);
+            }
+        }
+
+        // Password Toggle
+        const passwordToggle = document.getElementById('passwordToggle');
+        if (passwordToggle) {
+            passwordToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const passwordField = document.getElementById('password');
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
+                    this.setAttribute('title', 'Hide password');
+                } else {
+                    passwordField.type = 'password';
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
+                    this.setAttribute('title', 'Show password');
+                }
+            });
+        }
+
+        // Form Validation
+        const form = document.getElementById('registrationForm');
+        const inputs = form.querySelectorAll('.form-input');
+
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+
+            input.addEventListener('input', function() {
+                if (this.classList.contains('invalid')) {
+                    validateField(this);
+                }
+            });
+        });
+
+        function validateField(field) {
+            const value = field.value.trim();
+            let isValid = true;
+
+            if (field.hasAttribute('required') && !value) {
+                isValid = false;
+            } else if (field.type === 'email' && value) {
+                isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            } else if (field.type === 'tel' && value) {
+                isValid = /^[\d\s\+\-\(\)]+$/.test(value) && value.length >= 10;
+            } else if (field.id === 'confirmPassword') {
+                isValid = value === document.getElementById('password').value;
+            }
+
+            if (isValid && value) {
+                field.classList.add('valid');
+                field.classList.remove('invalid');
+            } else if (!isValid && value) {
+                field.classList.add('invalid');
+                field.classList.remove('valid');
+            }
+        }
+
+        // Password Match Check
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            if (this.value === password && password) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+            } else if (this.value) {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            }
+        });
+
+        // Confirm Password Toggle
+        const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+        if (confirmPasswordToggle) {
+            confirmPasswordToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const confirmPasswordField = document.getElementById('confirmPassword');
+                if (confirmPasswordField.type === 'password') {
+                    confirmPasswordField.type = 'text';
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
+                    this.setAttribute('title', 'Hide password');
+                    } else {
+                    confirmPasswordField.type = 'password';
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
+                    this.setAttribute('title', 'Show password');
+                }
+            });
+        }
+
+        // Helper: Save profile and go to dashboard
+        function saveProfileAndGoToDashboard(profile) {
+            if (!profile || !profile.email) {
+                console.error('Missing profile email in saveProfileAndGoToDashboard');
+                alert('Something went wrong. Please make sure your email is valid.');
+                return;
+            }
+
+            const email = profile.email.trim();
+            const key = `carrierProfile_${email}`;
+
+            try {
+                // Store full profile for lookups
+                localStorage.setItem(key, JSON.stringify(profile));
+                // Store auth object used by dashboard
+                localStorage.setItem('carrierAuth', JSON.stringify(profile));
+                sessionStorage.setItem('currentCarrierEmail', email);
+                localStorage.setItem('lastCarrierProfile', JSON.stringify(profile));
+            } catch (storageError) {
+                console.error('Error saving profile locally:', storageError);
+            }
+
+            // Go to carrier dashboard
+                                window.location.href = 'dashboard.html';
+                            }
+
+        // Form Submission (manual registration)
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Validate all fields
+            let isValid = true;
+            inputs.forEach(input => {
+                validateField(input);
+                if (input.hasAttribute('required') && !input.value.trim()) {
+                    isValid = false;
+                }
+                if (input.classList.contains('invalid')) {
+                    isValid = false;
+                }
+            });
+
+            // Check checkboxes
+            if (!document.getElementById('terms').checked || !document.getElementById('privacy').checked) {
+                isValid = false;
+                alert('Please accept Terms & Conditions and Privacy Policy');
+            }
+
+            if (!isValid) {
+                                        return;
+                                    }
+                                    
+            // Build profile object from form (manual registration)
+            const profile = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                companyName: document.getElementById('companyName').value.trim(),
+                companyReg: document.getElementById('companyReg').value.trim(),
+                fleetSize: document.getElementById('fleetSize').value,
+                yearsOperation: document.getElementById('yearsOperation').value,
+                createdAt: new Date().toISOString(),
+                marketingOptIn: document.getElementById('marketing').checked,
+                source: 'manual-form'
+            };
+
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // Simulate API call then save locally and go to dashboard
+            setTimeout(() => {
+                saveProfileAndGoToDashboard(profile);
+            }, 800);
+        });
+
+        // Progress Steps
+        function updateProgress(step) {
+            const steps = document.querySelectorAll('.progress-step');
+            const progressLine = document.getElementById('progressLine');
+            
+            steps.forEach((s, index) => {
+                if (index + 1 < step) {
+                    s.classList.add('completed');
+                    s.classList.remove('active');
+                } else if (index + 1 === step) {
+                    s.classList.add('active');
+                    s.classList.remove('completed');
+                                    } else {
+                    s.classList.remove('active', 'completed');
+                }
+            });
+
+            const totalSteps = steps.length;
+            const progressPercent = totalSteps > 1 ? ((step - 1) / (totalSteps - 1)) * 100 : 0;
+            progressLine.style.width = `${progressPercent}%`;
+        }
+
+        // Testimonial Carousel
+        const testimonials = [
+            {
+                name: 'John Davies',
+                company: 'Davies Transport Ltd',
+                text: '"Alpha Freight transformed our business. We\'ve doubled our revenue in 6 months!"',
+                avatar: 'JD'
+            },
+            {
+                name: 'Sarah Mitchell',
+                company: 'Mitchell Logistics',
+                text: '"The 7-day payment guarantee is a game-changer. No more waiting months for payment!"',
+                avatar: 'SM'
+            },
+            {
+                name: 'Michael Brown',
+                company: 'Brown Haulage',
+                text: '"Best platform I\'ve used. Loads are quality and support is always there when needed."',
+                avatar: 'MB'
+            }
+        ];
+
+        let currentTestimonial = 0;
+        setInterval(() => {
+            const testimonialEl = document.querySelector('.testimonial.active');
+            testimonialEl.classList.remove('active');
+            
+            currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+            const testimonial = testimonials[currentTestimonial];
+            
+                setTimeout(() => {
+                testimonialEl.querySelector('.testimonial-avatar').textContent = testimonial.avatar;
+                testimonialEl.querySelector('.testimonial-info h4').textContent = testimonial.name;
+                testimonialEl.querySelector('.testimonial-info p').textContent = testimonial.company;
+                testimonialEl.querySelector('.testimonial-text').textContent = testimonial.text;
+                testimonialEl.classList.add('active');
+                    }, 300);
+        }, 5000);
+
+        // FAQ Toggle with Smooth Animation
+        function toggleFAQ(element) {
+            const faqItem = element.closest('.faq-item');
+            const isActive = faqItem.classList.contains('active');
+            const answer = faqItem.querySelector('.faq-answer');
+            
+            // Close all other FAQ items smoothly
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem && item.classList.contains('active')) {
+                    const otherAnswer = item.querySelector('.faq-answer');
+                    otherAnswer.style.transition = 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease, transform 0.3s ease';
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Toggle current FAQ item
+            if (isActive) {
+                // Close
+                answer.style.transition = 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease, transform 0.3s ease';
+                faqItem.classList.remove('active');
+            } else {
+                // Open
+                answer.style.transition = 'max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease 0.1s, margin-top 0.4s ease, transform 0.4s ease 0.1s';
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Chat Widget
+        function openChat() {
+            alert('Chat widget would open here. In production, integrate with your chat service.');
+        }
+
+        // Google Sign In with OAuth
+        function signInWithGoogle() {
+            // This function is called when custom button is clicked
+            // The actual sign-in is handled by Google button
+            if (typeof google !== 'undefined' && google.accounts) {
+                // Trigger the Google button click programmatically
+                const googleButton = document.querySelector('#google-signin-button iframe');
+                if (googleButton) {
+                    googleButton.click();
+                } else {
+                    // Fallback: Use token client
+                    const CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
+                    const tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: 'email profile openid',
+                        callback: (response) => {
+                            if (response.access_token) {
+                                fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                                    headers: {
+                                        'Authorization': `Bearer ${response.access_token}`
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    handleGoogleSignInData(data);
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    showNotification('Error signing in. Please try again.', 'error');
+                                });
+                            }
+                        }
+                    });
+                    tokenClient.requestAccessToken();
+                }
+            }
+        }
+
+        // Initialize Google Sign-In (we use our own Uiverse-styled button + token client)
+        function initializeGoogleSignIn() {
+            const CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
+
+            if (typeof google !== 'undefined') {
+                // Ensure custom button is visible
+                const customBtn = document.querySelector('.google-signup-btn');
+                if (customBtn) {
+                    customBtn.style.display = 'flex';
+                }
+
+                // Prepare token client (used in signInWithGoogle)
+                if (google.accounts && google.accounts.oauth2) {
+                    // Nothing else needed here; token client is created on demand in signInWithGoogle()
+                    console.log('Google Identity Services ready for custom button.');
+                }
+            } else {
+                // If script not loaded for some reason, still show custom button (click will fail gracefully)
+                const customBtn = document.querySelector('.google-signup-btn');
+                if (customBtn) {
+                    customBtn.style.display = 'flex';
+                }
+            }
+        }
+
+        // Handle Google Sign-In Callback (JWT token)
+        function handleGoogleSignIn(response) {
+            try {
+                // Decode JWT token
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                
+                // Extract user information
+                const userData = {
+                    email: payload.email,
+                    firstName: payload.given_name,
+                    lastName: payload.family_name,
+                    fullName: payload.name,
+                    picture: payload.picture,
+                    googleId: payload.sub,
+                    verified: payload.email_verified
+                };
+
+                handleGoogleSignInData(userData);
+                
+                // Store Google auth data
+                sessionStorage.setItem('googleAuth', JSON.stringify(userData));
+                sessionStorage.setItem('googleToken', response.credential);
+                
+            } catch (error) {
+                console.error('Google Sign-In Error:', error);
+                showNotification('Error connecting Google account. Please try again.', 'error');
+            }
+        }
+
+        // Handle Google Sign-In Data (from OAuth token)
+        function handleGoogleSignInData(userData) {
+            if (!userData || !userData.email) {
+                console.error('Google user has no email in payload');
+                showNotification('Google did not return an email. Please try a different account.', 'error');
+                return;
+            }
+
+            const email = (userData.email || '').trim();
+
+            // Auto-fill form with Google data (for UX)
+            if (document.getElementById('email')) {
+                document.getElementById('email').value = email;
+                document.getElementById('email').dispatchEvent(new Event('input'));
+            }
+            if (document.getElementById('firstName')) {
+                document.getElementById('firstName').value = userData.firstName || '';
+                document.getElementById('firstName').dispatchEvent(new Event('input'));
+            }
+            if (document.getElementById('lastName')) {
+                document.getElementById('lastName').value = userData.lastName || '';
+                document.getElementById('lastName').dispatchEvent(new Event('input'));
+            }
+
+            // Store Google user so we can use it across pages
+            try {
+                const key = `carrierProfile_${email}`;
+                const existingProfileRaw = localStorage.getItem(key);
+
+                sessionStorage.setItem('currentCarrierEmail', email);
+                localStorage.setItem('pendingGoogleUser', JSON.stringify(userData));
+
+                if (existingProfileRaw) {
+                    // Existing carrier – use existing manual profile and log them in
+                    const existingProfile = JSON.parse(existingProfileRaw);
+                    // Ensure auth object is set for dashboard
+                    localStorage.setItem('carrierAuth', JSON.stringify(existingProfile));
+                    localStorage.setItem('lastCarrierProfile', JSON.stringify(existingProfile));
+                    // Go straight to dashboard (no new account created)
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // New carrier – ask for company details on dedicated page
+                    window.location.href = 'company-details.html';
+                }
+            } catch (err) {
+                console.error('Post Google sign-in handling failed:', err);
+                showNotification('Something went wrong after Google sign-in. Please try again.', 'error');
+            }
+        }
+
+        // Handle OAuth callback from URL
+        function handleOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+
+            if (error) {
+                showNotification('Google sign-in was cancelled.', 'error');
+                return;
+            }
+
+            if (code && state) {
+                const savedState = sessionStorage.getItem('oauth_state');
+                if (state === savedState) {
+                    // Exchange code for token (this should be done on backend)
+                    // For now, we'll show a message
+                    showNotification('Google authentication successful! Please complete the form.', 'success');
+                    
+                    // Clean up URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                    showNotification('Security error. Please try again.', 'error');
+                }
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--primary)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: var(--shadow-lg);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+                max-width: 400px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            handleOAuthCallback();
+            
+            // Wait for Google script to load, then initialize
+            if (typeof google !== 'undefined' && google.accounts) {
+                initializeGoogleSignIn();
+            } else {
+                // Wait for Google script to load
+                const checkGoogle = setInterval(() => {
+                    if (typeof google !== 'undefined' && google.accounts) {
+                        clearInterval(checkGoogle);
+                        initializeGoogleSignIn();
+                    }
+                }, 100);
+                
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    clearInterval(checkGoogle);
+                    if (typeof google === 'undefined' || !google.accounts) {
+                        document.querySelector('.btn-secondary').style.display = 'block';
+                    }
+                }, 5000);
+            }
+        });
+
+        // Phone Formatting
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                value = value.match(/.{1,4}/g).join(' ');
+            }
+            e.target.value = value;
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            animateCounter();
+            updateProgress(1);
+            
+            // Session recovery
+            const savedData = localStorage.getItem('carrierRegistrationData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                Object.keys(data).forEach(key => {
+                    const field = document.getElementById(key);
+                    if (field) {
+                        field.value = data[key];
+                        validateField(field);
+                    }
+                });
+                
+                // Show welcome back message
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.style.cssText = 'position: fixed; top: 100px; right: 2rem; background: var(--success); color: white; padding: 1rem; border-radius: 8px; z-index: 10000; box-shadow: var(--shadow-lg);';
+                welcomeMsg.textContent = 'Welcome back! Complete your registration';
+                document.body.appendChild(welcomeMsg);
+                setTimeout(() => welcomeMsg.remove(), 5000);
+            }
+
+            // Auto-save form data
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const formData = {};
+                    inputs.forEach(inp => {
+                        if (inp.value) {
+                            formData[inp.id] = inp.value;
+                        }
+                    });
+                    localStorage.setItem('carrierRegistrationData', JSON.stringify(formData));
+                });
+            });
+        });
+    </script>
+</body>
+</html>

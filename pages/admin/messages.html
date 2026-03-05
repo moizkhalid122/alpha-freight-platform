@@ -1,0 +1,966 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Messages - Alpha Freight</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Sidebar Styling */
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .admin-sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff !important;
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff !important;
+            font-weight: 600;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                position: fixed;
+                left: -100%;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            .admin-sidebar.show {
+                left: 0;
+            }
+        }
+
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .messages-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 200px);
+        }
+
+        @media (max-width: 1024px) {
+            .messages-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .conversations-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .conversations-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversations-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .conversation-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background: #F9FAFB;
+            border-color: #E5E7EB;
+        }
+
+        .conversation-item.active {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.5) 100%);
+            border-color: #2563EB;
+        }
+
+        .conversation-item.unread {
+            background: #F0F9FF;
+        }
+
+        .conversation-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .conversation-content {
+            flex: 1;
+            min-width: 0;
+            margin-left: 0.75rem;
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.25rem;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: #0F172A;
+            font-size: 0.875rem;
+        }
+
+        .conversation-type {
+            font-size: 0.7rem;
+            color: #64748B;
+            background: #F1F5F9;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .conversation-time {
+            font-size: 0.75rem;
+            color: #64748B;
+            white-space: nowrap;
+        }
+
+        .conversation-preview {
+            font-size: 0.8125rem;
+            color: #64748B;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-item.unread .conversation-preview {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .unread-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2563EB;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+        }
+
+        .chat-area {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-status {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #F9FAFB;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            word-wrap: break-word;
+        }
+
+        .message-sent {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-received {
+            background: white;
+            color: #0F172A;
+            border: 1px solid #E5E7EB;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.25rem;
+        }
+
+        .message-received .message-time {
+            color: #64748B;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+            border-top: 1px solid #E5E7EB;
+            background: white;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            resize: none;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-chat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #64748B;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-chat-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-conversations {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #64748B;
+        }
+
+        .empty-conversations-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: #64748B;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem; text-decoration: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white active" href="messages.html">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <div style="padding: 2rem;">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-4 fw-bold">Messages</h4>
+                    
+                    <div class="messages-container">
+                        <!-- Conversations Sidebar -->
+                        <div class="conversations-sidebar">
+                            <div class="conversations-header">
+                                <h6 class="conversations-title">Users</h6>
+                            </div>
+                            <div class="conversations-list" id="conversationsList">
+                                <div class="empty-conversations">
+                                    <div class="empty-conversations-icon">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                    <p>Loading users...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div class="chat-area">
+                            <div id="emptyChat" class="empty-chat">
+                                <div class="empty-chat-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h5>Select a user</h5>
+                                <p class="text-muted">Choose a user from the list to start messaging</p>
+                            </div>
+
+                            <div id="chatView" style="display: none;">
+                                <div class="chat-header">
+                                    <div class="chat-header-info">
+                                        <div class="chat-avatar" id="chatAvatar"></div>
+                                        <div>
+                                            <div class="chat-name" id="chatName">Loading...</div>
+                                            <div class="chat-status" id="chatStatus">Loading...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chat-messages" id="chatMessages"></div>
+                                <div class="chat-input-area">
+                                    <div class="chat-input-wrapper">
+                                        <textarea class="chat-input" id="messageInput" placeholder="Type a message..." rows="1" onkeydown="handleKeyDown(event)"></textarea>
+                                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Check Authentication
+        const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+        if (!adminAuth.isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        let currentConversation = null;
+        let messagesRef = null;
+
+        // Get Avatar Initials
+        function getAvatarInitials(name) {
+            if (!name) return 'U';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // Load Users with Messages
+        function loadUsers() {
+            const container = document.getElementById('conversationsList');
+            
+            // Get all users who have messages
+            db.ref('messages').once('value', (snapshot) => {
+                const userMap = {};
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const msg = child.val();
+                        let userId, userName, userType;
+                        
+                        if (msg.supplierId && msg.supplierId !== 'support') {
+                            userId = msg.supplierId;
+                            userName = msg.supplierName || 'Supplier';
+                            userType = 'supplier';
+                        } else if (msg.carrierId && msg.carrierId !== 'support') {
+                            userId = msg.carrierId;
+                            userName = msg.carrierName || 'Carrier';
+                            userType = 'carrier';
+                        }
+                        
+                        if (userId) {
+                            if (!userMap[userId]) {
+                                userMap[userId] = {
+                                    userId: userId,
+                                    userName: userName,
+                                    userType: userType,
+                                    lastMessage: msg.message || '',
+                                    lastMessageTime: msg.timestamp || msg.createdAt || Date.now(),
+                                    unread: !msg.read && msg.senderType !== 'support'
+                                };
+                            } else {
+                                const user = userMap[userId];
+                                const msgTime = msg.timestamp || msg.createdAt || Date.now();
+                                if (msgTime > user.lastMessageTime) {
+                                    user.lastMessage = msg.message || '';
+                                    user.lastMessageTime = msgTime;
+                                    if (!msg.read && msg.senderType !== 'support') {
+                                        user.unread = true;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Also load all users from suppliers and carriers tables
+                Promise.all([
+                    db.ref('suppliers').once('value'),
+                    db.ref('carriers').once('value')
+                ]).then(([suppliersSnapshot, carriersSnapshot]) => {
+                    // Add suppliers
+                    if (suppliersSnapshot.exists()) {
+                        suppliersSnapshot.forEach((child) => {
+                            const supplier = child.val();
+                            const userId = child.key;
+                            if (!userMap[userId]) {
+                                userMap[userId] = {
+                                    userId: userId,
+                                    userName: (supplier.firstName || '') + ' ' + (supplier.lastName || '') || supplier.companyName || supplier.email || 'Supplier',
+                                    userType: 'supplier',
+                                    lastMessage: '',
+                                    lastMessageTime: 0,
+                                    unread: false
+                                };
+                            }
+                        });
+                    }
+
+                    // Add carriers
+                    if (carriersSnapshot.exists()) {
+                        carriersSnapshot.forEach((child) => {
+                            const carrier = child.val();
+                            const userId = child.key;
+                            if (!userMap[userId]) {
+                                userMap[userId] = {
+                                    userId: userId,
+                                    userName: (carrier.firstName || '') + ' ' + (carrier.lastName || '') || carrier.companyName || carrier.email || 'Carrier',
+                                    userType: 'carrier',
+                                    lastMessage: '',
+                                    lastMessageTime: 0,
+                                    unread: false
+                                };
+                            }
+                        });
+                    }
+
+                    displayUsers(Object.values(userMap));
+                });
+            });
+        }
+
+        // Display Users
+        function displayUsers(users) {
+            const container = document.getElementById('conversationsList');
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-conversations">
+                        <div class="empty-conversations-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <p>No users found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by last message time (users with messages first)
+            users.sort((a, b) => {
+                if (a.lastMessageTime > 0 && b.lastMessageTime > 0) {
+                    return b.lastMessageTime - a.lastMessageTime;
+                }
+                if (a.lastMessageTime > 0) return -1;
+                if (b.lastMessageTime > 0) return 1;
+                return a.userName.localeCompare(b.userName);
+            });
+
+            const usersHtml = users.map(user => {
+                const initials = getAvatarInitials(user.userName);
+                const time = user.lastMessageTime > 0 ? formatMessageTime(user.lastMessageTime) : '';
+                const unreadClass = user.unread ? 'unread' : '';
+                const typeLabel = user.userType === 'supplier' ? 'Supplier' : 'Carrier';
+                
+                return `
+                    <div class="conversation-item ${unreadClass}" onclick="openConversation('${user.userId}', '${user.userName.replace(/'/g, "\\'")}', '${user.userType}')">
+                        <div class="d-flex align-items-center">
+                            <div class="conversation-avatar">${initials}</div>
+                            <div class="conversation-content">
+                                <div class="conversation-header">
+                                    <div>
+                                        <span class="conversation-name">${user.userName}</span>
+                                        <span class="conversation-type">${typeLabel}</span>
+                                    </div>
+                                    ${time ? `<span class="conversation-time">${time}</span>` : ''}
+                                </div>
+                                <div class="conversation-preview">${user.lastMessage || 'No messages yet'}</div>
+                            </div>
+                            ${user.unread ? '<div class="unread-badge"></div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = usersHtml;
+        }
+
+        // Format Message Time
+        function formatMessageTime(timestamp) {
+            if (!timestamp) return 'Just now';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Open Conversation
+        function openConversation(userId, userName, userType) {
+            currentConversation = { userId, userName, userType };
+            
+            // Update UI
+            document.getElementById('emptyChat').style.display = 'none';
+            document.getElementById('chatView').style.display = 'flex';
+            document.getElementById('chatView').style.flexDirection = 'column';
+            
+            document.getElementById('chatName').textContent = userName;
+            document.getElementById('chatAvatar').textContent = getAvatarInitials(userName);
+            document.getElementById('chatStatus').textContent = userType === 'supplier' ? 'Supplier' : 'Carrier';
+
+            // Update active conversation
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const eventTarget = event && event.currentTarget;
+            if (eventTarget) {
+                eventTarget.classList.add('active');
+            }
+
+            // Load messages
+            loadMessages(userId, userType);
+        }
+
+        // Load Messages
+        function loadMessages(userId, userType) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Clear previous listener
+            if (messagesRef) {
+                messagesRef.off();
+            }
+
+            // Listen for messages
+            messagesRef = db.ref('messages')
+                .on('value', (snapshot) => {
+                    const messages = [];
+                    
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => {
+                            const msg = child.val();
+                            const matchesUser = (userType === 'supplier' && msg.supplierId === userId) ||
+                                              (userType === 'carrier' && msg.carrierId === userId);
+                            if (matchesUser) {
+                                messages.push({
+                                    ...msg,
+                                    id: child.key
+                                });
+                            }
+                        });
+                    }
+
+                    // Sort by timestamp
+                    messages.sort((a, b) => {
+                        const timeA = a.timestamp || a.createdAt || 0;
+                        const timeB = b.timestamp || b.createdAt || 0;
+                        return timeA - timeB;
+                    });
+
+                    displayMessages(messages);
+                    
+                    // Mark as read
+                    markAsRead(userId, userType);
+                });
+        }
+
+        // Display Messages
+        function displayMessages(messages) {
+            const container = document.getElementById('chatMessages');
+            
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-chat">
+                        <div class="empty-chat-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const messagesHtml = messages.map(msg => {
+                const isSent = msg.senderType === 'support';
+                const time = formatMessageTime(msg.timestamp || msg.createdAt);
+                const messageText = (msg.message || '').replace(/\n/g, '<br>');
+                
+                return `
+                    <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
+                        <div>${messageText}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = messagesHtml;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send Message
+        function sendMessage() {
+            if (!currentConversation) {
+                alert('Please select a user first');
+                return;
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+
+            const messageData = {
+                supplierId: currentConversation.userType === 'supplier' ? currentConversation.userId : null,
+                supplierName: currentConversation.userType === 'supplier' ? currentConversation.userName : null,
+                carrierId: currentConversation.userType === 'carrier' ? currentConversation.userId : (currentConversation.userType === 'supplier' ? 'support' : null),
+                carrierName: currentConversation.userType === 'carrier' ? currentConversation.userName : (currentConversation.userType === 'supplier' ? 'Alpha Freight Support' : null),
+                message: message,
+                senderType: 'support',
+                senderId: 'support',
+                recipientType: currentConversation.userType,
+                recipientId: currentConversation.userId,
+                read: false,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            // Disable send button
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            db.ref('messages').push(messageData)
+                .then(() => {
+                    messageInput.value = '';
+                    messageInput.style.height = 'auto';
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                    alert('Failed to send message. Please try again.');
+                })
+                .finally(() => {
+                    sendBtn.disabled = false;
+                });
+        }
+
+        // Handle Key Down
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Mark as Read
+        function markAsRead(userId, userType) {
+            db.ref('messages')
+                .once('value', (snapshot) => {
+                    const updates = {};
+                    snapshot.forEach((child) => {
+                        const msg = child.val();
+                        const matchesUser = (userType === 'supplier' && msg.supplierId === userId) ||
+                                          (userType === 'carrier' && msg.carrierId === userId);
+                        if (matchesUser && msg.senderType !== 'support' && !msg.read) {
+                            updates[`messages/${child.key}/read`] = true;
+                        }
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        db.ref().update(updates);
+                    }
+                });
+        }
+
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        // Admin Logout
+        function adminLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('adminAuth');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+
+            // Auto-resize textarea
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+
+            // Close sidebar on overlay click
+            document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+        });
+    </script>
+</body>
+</html>
+

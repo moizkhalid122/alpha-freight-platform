@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Shipment - Swift Logistics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <style>
+        :root {
+            --tenant-primary: #0066cc;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gray);
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border-gray);
+            padding: 1rem 0;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--tenant-primary);
+            text-decoration: none;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tracking-input-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tracking-header {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .track-input {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--tenant-primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            background: var(--tenant-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #0052a3;
+        }
+
+        .tracking-results {
+            display: none;
+        }
+
+        .tracking-results.active {
+            display: block;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--tenant-primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .map-container {
+            height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .load-details-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .detail-item {
+            padding: 1rem;
+            background: var(--bg-gray);
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .no-load-found {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .no-load-found.active {
+            display: block;
+        }
+
+        .no-load-icon {
+            font-size: 4rem;
+            color: var(--text-medium);
+            margin-bottom: 1rem;
+        }
+
+        .no-load-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-load-text {
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+
+        .support-link {
+            color: var(--tenant-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .support-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 968px) {
+            .info-grid,
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .track-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="tenant-index.html" class="logo">Swift Logistics</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="tracking-input-card">
+            <h1 class="tracking-header">Track Your Shipment</h1>
+            <div class="track-input">
+                <input type="text" class="form-input" id="trackingNumber" placeholder="Enter Load ID (e.g., LON-MAN-001)">
+                <button class="btn" onclick="trackLoad()">
+                    <i class="fas fa-search"></i>
+                    Track Load
+                </button>
+            </div>
+        </div>
+
+        <!-- No Load Found State -->
+        <div class="no-load-found" id="noLoadFound">
+            <div class="no-load-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h2 class="no-load-title">No shipment found</h2>
+            <p class="no-load-text">No shipment found with that ID. Please check your Load ID and try again.</p>
+            <a href="#" class="support-link">Contact Support</a>
+        </div>
+
+        <!-- Tracking Results -->
+        <div class="tracking-results" id="trackingResults">
+            <div class="status-card">
+                <div class="status-header">
+                    <div>
+                        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Load ID: LON-MAN-001</h2>
+                        <p style="color: var(--text-medium);">Last updated: 2 minutes ago</p>
+                    </div>
+                    <span class="status-badge">
+                        <i class="fas fa-truck"></i> In Transit
+                    </span>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <span>Picked Up</span>
+                        <span>In Transit</span>
+                        <span>Out for Delivery</span>
+                        <span>Delivered</span>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">ETA</span>
+                        <span class="info-value" style="color: var(--success);">2h 15m remaining</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Location</span>
+                        <span class="info-value">Birmingham, M6 Junction 7</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+
+            <div class="load-details-card">
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Load Details</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Route</div>
+                        <div class="detail-value">London → Manchester</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Carrier</div>
+                        <div class="detail-value">Swift Haulage</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Pickup</div>
+                        <div class="detail-value">Today, 09:30</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Estimated Delivery</div>
+                        <div class="detail-value">Today, 16:45</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map (Mapbox)
+        mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN'; // Replace with actual token
+        let map = null;
+
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [-1.8904, 52.4862], // Birmingham
+                zoom: 10
+            });
+
+            // Add route line
+            const route = {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                [-0.1276, 51.5074], // London
+                                [-1.8904, 52.4862], // Birmingham (current)
+                                [-2.2374, 53.4808]  // Manchester (destination)
+                            ]
+                        }
+                    }
+                ]
+            };
+
+            map.on('load', () => {
+                map.addSource('route', {
+                    'type': 'geojson',
+                    'data': route
+                });
+
+                map.addLayer({
+                    'id': 'route',
+                    'type': 'line',
+                    'source': 'route',
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    'paint': {
+                        'line-color': '#0066cc',
+                        'line-width': 4
+                    }
+                });
+
+                // Add markers
+                new mapboxgl.Marker({ color: '#10b981' })
+                    .setLngLat([-0.1276, 51.5074])
+                    .setPopup(new mapboxgl.Popup().setHTML('<strong>Pickup: London</strong>'))
+                    .addTo(map);
+
+                new mapboxgl.Marker({ color: '#f59e0b' })
+                    .setLngLat([-1.8904, 52.4862])
+                    .setPopup(new mapboxgl.Popup().setHTML('<strong>Current: Birmingham</strong>'))
+                    .addTo(map);
+
+                new mapboxgl.Marker({ color: '#0066cc' })
+                    .setLngLat([-2.2374, 53.4808])
+                    .setPopup(new mapboxgl.Popup().setHTML('<strong>Delivery: Manchester</strong>'))
+                    .addTo(map);
+            });
+        }
+
+        function trackLoad() {
+            const trackingNumber = document.getElementById('trackingNumber').value.trim();
+            
+            if (!trackingNumber) {
+                alert('Please enter a Load ID');
+                return;
+            }
+
+            // Backend: GET /api/tenant/loads/:loadId/tracking
+            // For demo, show results if ID matches
+            if (trackingNumber.toUpperCase() === 'LON-MAN-001') {
+                document.getElementById('noLoadFound').classList.remove('active');
+                document.getElementById('trackingResults').classList.add('active');
+                
+                if (!map) {
+                    initMap();
+                }
+            } else {
+                document.getElementById('trackingResults').classList.remove('active');
+                document.getElementById('noLoadFound').classList.add('active');
+            }
+        }
+
+        // Auto-track if load ID in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('load');
+        if (loadId) {
+            document.getElementById('trackingNumber').value = loadId;
+            trackLoad();
+        }
+
+        // Initialize map on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Map will be initialized when tracking is performed
+        });
+    </script>
+</body>
+</html>

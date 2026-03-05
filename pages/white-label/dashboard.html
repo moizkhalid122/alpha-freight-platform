@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - White Label Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .company-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-medium);
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .notification-bell {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-medium);
+        }
+
+        .notification-bell:hover {
+            background: var(--bg-gray);
+            color: var(--primary);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-button:hover {
+            border-color: var(--primary);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            width: 260px;
+            height: calc(100vh - 64px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-gray);
+            padding: 2rem 0;
+            overflow-y: auto;
+            z-index: 99;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 2rem;
+            color: var(--text-medium);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-link:hover {
+            background: var(--bg-gray);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav-link.active {
+            background: rgba(99, 91, 255, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        /* Header Section */
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.1);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+        }
+
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-content h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .welcome-content p {
+            font-size: 1.125rem;
+            color: var(--text-medium);
+            margin-bottom: 0.75rem;
+        }
+
+        .date-display {
+            font-size: 0.9375rem;
+            color: var(--text-light);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: stretch;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 200px;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.15);
+            border-color: rgba(99, 91, 255, 0.3);
+        }
+
+        .stat-card-header {
+            position: relative;
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+            padding-right: 60px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: transparent;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+            margin-top: 0;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 600;
+        }
+
+        .stat-sparkline {
+            height: 40px;
+            width: 100%;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+            position: relative;
+            bottom: 0;
+        }
+
+        .stat-card.no-sparkline .stat-sparkline {
+            display: none;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-card:hover {
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .section-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+
+        .section-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            background: var(--bg-gray);
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+            font-size: 0.9375rem;
+        }
+
+        .data-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(99, 91, 255, 0.02);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-badge.delivered {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.transit {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        /* Carrier List */
+        .carrier-list {
+            list-style: none;
+        }
+
+        .carrier-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .carrier-item:hover {
+            background: rgba(99, 91, 255, 0.02);
+        }
+
+        .carrier-item:last-child {
+            border-bottom: none;
+        }
+
+        .carrier-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .carrier-time {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .chart-card:hover {
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .timeframe-selector {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-gray);
+            padding: 0.25rem;
+            border-radius: 10px;
+        }
+
+        .timeframe-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-medium);
+        }
+
+        .timeframe-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Quick Actions */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: stretch;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .action-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.15);
+            border-color: rgba(99, 91, 255, 0.3);
+        }
+
+        .action-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: white;
+            margin: 0 auto 1.5rem;
+        }
+
+        .action-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .action-description {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alerts */
+        .alerts-section {
+            margin-bottom: 2rem;
+        }
+
+        .alert-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .alert-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .alert-card.warning {
+            border-left-color: var(--warning);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.02) 100%);
+        }
+
+        .alert-card.info {
+            border-left-color: var(--info);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+        }
+
+        .alert-card.success {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+        }
+
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .alert-card.warning .alert-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .alert-card.info .alert-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .alert-card.success .alert-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-message {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-action {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .alert-action:hover {
+            text-decoration: underline;
+        }
+
+        /* Bottom Section */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .task-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .task-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .task-text {
+            flex: 1;
+        }
+
+        .task-status {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .feature-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .feature-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .feature-badge.coming-soon {
+            background: rgba(99, 91, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .feature-badge.beta {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .feature-badge.preview {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 91, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 91, 255, 0.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid,
+            .charts-grid,
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .top-bar-left {
+                gap: 1rem;
+            }
+
+            .search-bar {
+                width: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-section {
+                flex-direction: column;
+            }
+
+            .top-bar {
+                padding: 1rem;
+            }
+
+            .search-bar {
+                display: none;
+            }
+
+            .data-table {
+                font-size: 0.875rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="company-logo" id="companyLogo">Swift Logistics</div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search loads, carriers...">
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <div class="notification-bell" onclick="toggleNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="profile-dropdown">
+                <div class="profile-button" onclick="toggleProfileDropdown()">
+                    <div class="profile-avatar">SL</div>
+                    <span style="font-weight: 600;">Settings</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.625rem 1rem;">
+                <i class="fas fa-question-circle"></i>
+                Help
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="dashboard.html" class="sidebar-nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-box"></i>
+                        <span>Loads</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-truck"></i>
+                        <span>Carriers</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-pound-sign"></i>
+                        <span>Payments</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="api-settings.html" class="sidebar-nav-link">
+                        <i class="fas fa-code"></i>
+                        <span>API</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-headset"></i>
+                        <span>Support</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="welcome-section">
+                <div class="welcome-content">
+                    <h1>Welcome back, <span id="companyName">Swift Logistics</span>!</h1>
+                    <p>Here's what's happening with your platform today</p>
+                    <div class="date-display" id="currentDate"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-content">
+                        <div class="stat-value">1,234</div>
+                        <div class="stat-label">Total loads this month</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+12.3% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="stat-sparkline" id="loadsSparkline"></canvas>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon">🚛</div>
+                    <div class="stat-content">
+                        <div class="stat-value">567</div>
+                        <div class="stat-label">Verified carriers</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+8 new this week</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="stat-sparkline" id="carriersSparkline"></canvas>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-value">£45,678</div>
+                        <div class="stat-label">Monthly revenue</div>
+                        <div class="stat-change">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+15.2% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="stat-sparkline" id="revenueSparkline"></canvas>
+            </div>
+
+            <div class="stat-card no-sparkline">
+                <div class="stat-card-header">
+                    <div class="stat-icon">🟢</div>
+                    <div class="stat-content">
+                        <div class="stat-value">99.9%</div>
+                        <div class="stat-label">Uptime (last 30 days)</div>
+                        <div class="stat-change" style="color: var(--success);">
+                            <i class="fas fa-check-circle"></i>
+                            <span>No incidents reported</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="content-grid">
+            <!-- Recent Loads -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Loads</h2>
+                    <a href="#" class="section-link">View All →</a>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Load ID</th>
+                            <th>Route</th>
+                            <th>Carrier</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>LON-MAN-239</strong></td>
+                            <td>London → Manchester</td>
+                            <td>Swift Haulage</td>
+                            <td>£450</td>
+                            <td><span class="status-badge delivered">✅ Delivered</span></td>
+                            <td>2 hours ago</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BIR-LEE-456</strong></td>
+                            <td>Birmingham → Leeds</td>
+                            <td>Premier Logistics</td>
+                            <td>£380</td>
+                            <td><span class="status-badge transit">🚚 In Transit</span></td>
+                            <td>4 hours ago</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LIV-GLA-789</strong></td>
+                            <td>Liverpool → Glasgow</td>
+                            <td>Northern Express</td>
+                            <td>£520</td>
+                            <td><span class="status-badge pending">⏳ Pending</span></td>
+                            <td>1 day ago</td>
+                        </tr>
+                        <tr>
+                            <td><strong>EDN-NOR-321</strong></td>
+                            <td>Edinburgh → Norwich</td>
+                            <td>Coastal Transport</td>
+                            <td>£610</td>
+                            <td><span class="status-badge delivered">✅ Delivered</span></td>
+                            <td>1 day ago</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent Carriers -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">Recently Joined Carriers</h2>
+                    <a href="#" class="section-link">View All →</a>
+                </div>
+                <ul class="carrier-list">
+                    <li class="carrier-item">
+                        <div>
+                            <div class="carrier-name">Road Kings Ltd</div>
+                            <div class="carrier-time">Joined 1 hour ago</div>
+                        </div>
+                    </li>
+                    <li class="carrier-item">
+                        <div>
+                            <div class="carrier-name">Welsh Freight Co</div>
+                            <div class="carrier-time">Joined 3 hours ago</div>
+                        </div>
+                    </li>
+                    <li class="carrier-item">
+                        <div>
+                            <div class="carrier-name">Highland Haulage</div>
+                            <div class="carrier-time">Joined 5 hours ago</div>
+                        </div>
+                    </li>
+                    <li class="carrier-item">
+                        <div>
+                            <div class="carrier-name">Channel Logistics</div>
+                            <div class="carrier-time">Joined 1 day ago</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Performance Charts -->
+        <div class="section-card" style="margin-bottom: 2rem;">
+            <div class="section-header">
+                <h2 class="section-title">Platform Performance</h2>
+                <div class="timeframe-selector">
+                    <button class="timeframe-btn" onclick="changeTimeframe('today')">Today</button>
+                    <button class="timeframe-btn active" onclick="changeTimeframe('week')">Week</button>
+                    <button class="timeframe-btn" onclick="changeTimeframe('month')">Month</button>
+                    <button class="timeframe-btn" onclick="changeTimeframe('year')">Year</button>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1.5rem;">Loads Over Time</h3>
+                    <canvas id="loadsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1.5rem;">Revenue Trend</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="actions-grid">
+            <div class="action-card">
+                <div class="action-icon">➕</div>
+                <h3 class="action-title">Post New Load</h3>
+                <p class="action-description">Create a new load posting</p>
+                <button class="btn btn-primary">
+                    Post Load
+                </button>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">✓</div>
+                <h3 class="action-title">Verify Carriers</h3>
+                <p class="action-description">Pending verifications: 12</p>
+                <button class="btn btn-primary">
+                    Review Now
+                </button>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">📊</div>
+                <h3 class="action-title">View Reports</h3>
+                <p class="action-description">Generate financial reports</p>
+                <button class="btn btn-primary">
+                    View Reports
+                </button>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">🔑</div>
+                <h3 class="action-title">API Settings</h3>
+                <p class="action-description">Manage API access</p>
+                <a href="api-settings.html" class="btn btn-primary">
+                    Configure
+                </a>
+            </div>
+        </div>
+
+        <!-- Alerts & Notifications -->
+        <div class="alerts-section">
+            <div class="alert-card warning">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-message">12 carriers pending verification</div>
+                    <a href="#" class="alert-action">Review now →</a>
+                </div>
+            </div>
+
+            <div class="alert-card info">
+                <div class="alert-icon">ℹ️</div>
+                <div class="alert-content">
+                    <div class="alert-message">API usage at 78% of monthly limit</div>
+                    <a href="api-settings.html" class="alert-action">View usage →</a>
+                </div>
+            </div>
+
+            <div class="alert-card success">
+                <div class="alert-icon">✅</div>
+                <div class="alert-content">
+                    <div class="alert-message">Latest update v2.3.0 deployed successfully</div>
+                    <a href="#" class="alert-action">Release notes →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="bottom-grid">
+            <!-- Pending Tasks -->
+            <div class="section-card">
+                <h2 class="section-title">Pending Tasks</h2>
+                <div class="task-item">
+                    <div class="task-checkbox"></div>
+                    <div class="task-text">
+                        <div style="font-weight: 600; color: var(--text-dark);">Complete profile setup</div>
+                        <div class="task-status">2 steps remaining</div>
+                    </div>
+                </div>
+                <div class="task-item">
+                    <div class="task-checkbox"></div>
+                    <div class="task-text">
+                        <div style="font-weight: 600; color: var(--text-dark);">Verify business documents</div>
+                        <div class="task-status">Pending</div>
+                    </div>
+                </div>
+                <div class="task-item">
+                    <div class="task-checkbox checked">
+                        <i class="fas fa-check" style="font-size: 0.75rem;"></i>
+                    </div>
+                    <div class="task-text">
+                        <div style="font-weight: 600; color: var(--text-dark);">Set up payment method</div>
+                        <div class="task-status" style="color: var(--success);">Completed ✓</div>
+                    </div>
+                </div>
+                <div class="task-item">
+                    <div class="task-checkbox checked">
+                        <i class="fas fa-check" style="font-size: 0.75rem;"></i>
+                    </div>
+                    <div class="task-text">
+                        <div style="font-weight: 600; color: var(--text-dark);">Invite team members</div>
+                        <div class="task-status" style="color: var(--success);">3 invites sent</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Features -->
+            <div class="section-card">
+                <h2 class="section-title">Upcoming Features</h2>
+                <div class="feature-item">
+                    <div class="feature-name">AI Load Matching</div>
+                    <span class="feature-badge coming-soon">Coming next week</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-name">Mobile App Beta</div>
+                    <span class="feature-badge beta">Sign up for early access</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-name">New Reports Dashboard</div>
+                    <span class="feature-badge preview">Preview now</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Set current date
+        const date = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDate').textContent = date.toLocaleDateString('en-GB', options);
+
+        // Load company name from localStorage
+        const savedBranding = localStorage.getItem('brandingData');
+        if (savedBranding) {
+            const data = JSON.parse(savedBranding);
+            if (data.general && data.general.businessName) {
+                document.getElementById('companyName').textContent = data.general.businessName;
+                document.getElementById('companyLogo').textContent = data.general.businessName;
+            }
+        }
+
+        // Sparkline Charts
+        function createSparkline(canvasId, data, color) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(data.length).fill(''),
+                    datasets: [{
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 5,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: { 
+                            display: false,
+                            grid: { display: false }
+                        },
+                        y: { 
+                            display: false,
+                            grid: { display: false }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            right: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize sparklines
+        createSparkline('loadsSparkline', [120, 150, 140, 180, 160, 200, 190], '#635bff');
+        createSparkline('carriersSparkline', [50, 55, 52, 58, 56, 60, 59], '#10b981');
+        createSparkline('revenueSparkline', [4000, 4500, 4200, 4800, 4600, 5000, 4900], '#f59e0b');
+
+        // Main Charts
+        let loadsChart = null;
+        let revenueChart = null;
+
+        function initCharts() {
+            const loadsCtx = document.getElementById('loadsChart');
+            const revenueCtx = document.getElementById('revenueChart');
+
+            if (loadsChart) loadsChart.destroy();
+            if (revenueChart) revenueChart.destroy();
+
+            // Loads Chart
+            loadsChart = new Chart(loadsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Loads',
+                        data: [45, 52, 48, 61, 55, 67, 59],
+                        backgroundColor: 'rgba(99, 91, 255, 0.1)',
+                        borderColor: '#635bff',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Chart
+            revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [6500, 7200, 6800, 8100, 7500, 9200, 8800],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '£' + value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Timeframe Change
+        function changeTimeframe(period) {
+            document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update chart data based on period
+            if (loadsChart && revenueChart) {
+                const labels = period === 'today' 
+                    ? ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00']
+                    : period === 'week'
+                    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    : period === 'month'
+                    ? ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+                    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+                const loadsData = period === 'today'
+                    ? [12, 15, 18, 22, 20, 25]
+                    : period === 'week'
+                    ? [45, 52, 48, 61, 55, 67, 59]
+                    : period === 'month'
+                    ? [180, 220, 200, 240]
+                    : [2000, 2400, 2200, 2600, 2500, 2800];
+
+                const revenueData = period === 'today'
+                    ? [1200, 1500, 1800, 2200, 2000, 2500]
+                    : period === 'week'
+                    ? [6500, 7200, 6800, 8100, 7500, 9200, 8800]
+                    : period === 'month'
+                    ? [28000, 32000, 30000, 36000]
+                    : [120000, 140000, 130000, 150000, 145000, 160000];
+
+                loadsChart.data.labels = labels;
+                loadsChart.data.datasets[0].data = loadsData;
+                loadsChart.update();
+
+                revenueChart.data.labels = labels;
+                revenueChart.data.datasets[0].data = revenueData;
+                revenueChart.update();
+            }
+        }
+
+        // Toggle Functions
+        function toggleNotifications() {
+            alert('Notifications panel would open here');
+        }
+
+        function toggleProfileDropdown() {
+            alert('Profile dropdown would open here');
+        }
+
+        // Initialize charts on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initCharts, 100);
+        });
+    </script>
+</body>
+</html>

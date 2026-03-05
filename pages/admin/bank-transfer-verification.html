@@ -1,0 +1,880 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Transfer Verification - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .payment-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 1.5rem;
+        }
+        .payment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .payment-card.verified {
+            border-left-color: #28a745;
+        }
+        .payment-card.rejected {
+            border-left-color: #dc3545;
+        }
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .info-value {
+            color: #212529;
+            text-align: right;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-verified {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .amount-highlight {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #28a745;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white active" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Bank Transfer Verification</h5>
+                            <small class="text-muted">Verify supplier bank transfer payments manually</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshPayments()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary active" onclick="filterTransfers('all')">All</button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="filterTransfers('pending')">Pending</button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="filterTransfers('verified')">Verified</button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="filterTransfers('rejected')">Rejected</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4">
+                    <!-- Summary Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-clock text-warning fa-2x"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="text-muted mb-0">Pending</h6>
+                                            <h4 class="fw-bold text-warning mb-0" id="pendingCount">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="text-muted mb-0">Verified</h6>
+                                            <h4 class="fw-bold text-success mb-0" id="verifiedCount">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-times-circle text-danger fa-2x"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="text-muted mb-0">Rejected</h6>
+                                            <h4 class="fw-bold text-danger mb-0" id="rejectedCount">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-pound-sign text-primary fa-2x"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="text-muted mb-0">Total Pending</h6>
+                                            <h4 class="fw-bold text-primary mb-0" id="totalPendingAmount">£0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bank Transfers List -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>Pending Bank Transfers
+                            </h5>
+                        </div>
+                        <div class="card-body" id="bankTransfersContainer">
+                            <div class="text-center py-5" id="noTransfersMessage">
+                                <i class="fas fa-university fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No bank transfers pending</h5>
+                                <p class="text-muted">Bank transfers will appear here once suppliers make payments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Payment Modal -->
+    <div class="modal fade" id="verifyPaymentModal" tabindex="-1" aria-labelledby="verifyPaymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="verifyPaymentModalLabel">
+                        <i class="fas fa-check-circle me-2"></i>Verify Bank Transfer
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="verifyPaymentModalBody">
+                    <!-- Content will be populated dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="rejectPayment()">
+                        <i class="fas fa-times me-2"></i>Reject
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="verifyPayment()">
+                        <i class="fas fa-check me-2"></i>Verify Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        let db = null;
+
+        function initFirebase() {
+            if (typeof firebase === 'undefined') {
+                return null;
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            return db;
+        }
+
+        function getLocalTransferRequests() {
+            return JSON.parse(localStorage.getItem('bankTransferRequestsLocal') || '[]');
+        }
+
+        function updateLocalTransferRequest(requestId, status, notes = '') {
+            const localRequests = getLocalTransferRequests();
+            const idx = localRequests.findIndex(req => req.requestId === requestId);
+            if (idx === -1) return null;
+
+            const now = new Date().toISOString();
+            localRequests[idx].status = status;
+            if (status === 'verified') {
+                localRequests[idx].verifiedAt = now;
+                localRequests[idx].notes = notes;
+            } else if (status === 'rejected') {
+                localRequests[idx].rejectedAt = now;
+                localRequests[idx].rejectionNotes = notes;
+            }
+            localStorage.setItem('bankTransferRequestsLocal', JSON.stringify(localRequests));
+            return localRequests[idx];
+        }
+
+        function updateLocalPayLetter(loadId, status) {
+            const pending = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+            const updated = pending.map(order => {
+                if (order.loadId === loadId) {
+                    return {
+                        ...order,
+                        status: status,
+                        paidAt: status === 'paid' ? new Date().toISOString() : order.paidAt
+                    };
+                }
+                return order;
+            });
+            localStorage.setItem('payLetterPendingLocal', JSON.stringify(updated));
+        }
+
+        class BankTransferVerification {
+            constructor() {
+                this.currentFilter = 'pending';
+                this.currentPaymentId = null;
+                this.transfers = [];
+                this.init();
+            }
+
+            init() {
+                this.loadBankTransfers();
+                this.setupEventListeners();
+            }
+
+            async loadBankTransfers() {
+                const database = initFirebase();
+                let requests = [];
+
+                if (database) {
+                    try {
+                        const snapshot = await database.ref('bankTransferRequests').once('value');
+                        snapshot.forEach(child => {
+                            const request = child.val() || {};
+                            request.requestId = child.key;
+                            requests.push(request);
+                        });
+                    } catch (error) {
+                        console.warn('Bank transfer requests fetch failed, using local fallback:', error);
+                    }
+                }
+
+                if (!requests.length) {
+                    requests = getLocalTransferRequests();
+                }
+
+                const transfers = await Promise.all(requests.map(async (request) => {
+                    let loadData = {};
+                    try {
+                        const loadSnapshot = await database.ref('loads').child(request.loadId).once('value');
+                        if (loadSnapshot.exists()) {
+                            loadData = loadSnapshot.val();
+                        }
+                    } catch (error) {
+                        console.error('Error loading load data:', error);
+                    }
+
+                    const amount = parseFloat(request.amount) || loadData.budget || loadData.price || loadData.maxBudget || loadData.minBudget || 0;
+                    return {
+                        requestId: request.requestId,
+                        loadId: request.loadId,
+                        load: loadData || {},
+                        amount: amount,
+                        status: request.status || 'pending',
+                        createdAt: request.createdAt || new Date().toISOString(),
+                        transferDetails: {
+                            transferDate: request.createdAt,
+                            reference: request.reference || request.loadId || 'N/A',
+                            paymentType: request.paymentType || 'Bank Transfer',
+                            verifiedDate: request.verifiedAt,
+                            rejectedDate: request.rejectedAt
+                        },
+                        supplier: {
+                            name: request.supplierName || 'N/A',
+                            email: request.supplierEmail || request.supplierId || 'N/A',
+                            phone: request.supplierPhone || 'N/A',
+                            company: request.companyName || 'N/A'
+                        },
+                        rawRequest: request
+                    };
+                }));
+
+                transfers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                this.transfers = transfers;
+                this.updateSummary(transfers);
+                this.renderBankTransfers(transfers);
+            }
+
+            updateSummary(transfers) {
+                const pending = transfers.filter(t => t.status === 'pending').length;
+                const verified = transfers.filter(t => t.status === 'verified').length;
+                const rejected = transfers.filter(t => t.status === 'rejected').length;
+                const totalPendingAmount = transfers
+                    .filter(t => t.status === 'pending')
+                    .reduce((sum, t) => sum + t.amount, 0);
+
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('verifiedCount').textContent = verified;
+                document.getElementById('rejectedCount').textContent = rejected;
+                document.getElementById('totalPendingAmount').textContent = `£${totalPendingAmount.toFixed(2)}`;
+            }
+
+            renderBankTransfers(transfers) {
+                const container = document.getElementById('bankTransfersContainer');
+                const noTransfersMessage = document.getElementById('noTransfersMessage');
+
+                // Filter based on current filter
+                let filteredTransfers = transfers;
+                if (this.currentFilter === 'pending') {
+                    filteredTransfers = transfers.filter(t => t.status === 'pending');
+                } else if (this.currentFilter === 'verified') {
+                    filteredTransfers = transfers.filter(t => t.status === 'verified');
+                } else if (this.currentFilter === 'rejected') {
+                    filteredTransfers = transfers.filter(t => t.status === 'rejected');
+                }
+
+                if (filteredTransfers.length === 0) {
+                    noTransfersMessage.style.display = 'block';
+                    container.innerHTML = '';
+                    return;
+                }
+
+                noTransfersMessage.style.display = 'none';
+
+                let html = '';
+                filteredTransfers.forEach(transfer => {
+                    const load = transfer.load || {};
+                    const supplier = transfer.supplier || {};
+
+                    const statusClass = transfer.status === 'verified' ? 'verified' : 
+                                       transfer.status === 'rejected' ? 'rejected' : 'pending';
+                    const statusBadgeClass = transfer.status === 'verified' ? 'status-verified' : 
+                                           transfer.status === 'rejected' ? 'status-rejected' : 'status-pending';
+
+                    html += `
+                        <div class="payment-card card ${statusClass}">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h6 class="fw-bold mb-2">
+                                                    <i class="fas fa-box me-2"></i>Load: ${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}
+                                                </h6>
+                                                <span class="status-badge ${statusBadgeClass}">${transfer.status.toUpperCase()}</span>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="amount-highlight">£${transfer.amount.toFixed(2)}</div>
+                                                <small class="text-muted">Payment Amount</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-section">
+                                                    <h6 class="fw-bold mb-2"><i class="fas fa-user me-2"></i>Supplier Details</h6>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Name:</span>
+                                                        <span class="info-value">${supplier.name || 'N/A'}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Email:</span>
+                                                        <span class="info-value">${supplier.email || 'N/A'}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Phone:</span>
+                                                        <span class="info-value">${supplier.phone || 'N/A'}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Company:</span>
+                                                        <span class="info-value">${supplier.company || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-section">
+                                                    <h6 class="fw-bold mb-2"><i class="fas fa-university me-2"></i>Transfer Details</h6>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Transfer Date:</span>
+                                                        <span class="info-value">${transfer.transferDetails.transferDate ? new Date(transfer.transferDetails.transferDate).toLocaleDateString() : 'N/A'}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Reference:</span>
+                                                        <span class="info-value">${transfer.transferDetails.reference || 'N/A'}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Payment Type:</span>
+                                                        <span class="info-value">${transfer.transferDetails.paymentType || 'Bank Transfer'}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Submitted:</span>
+                                                        <span class="info-value">${new Date(transfer.createdAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-section mt-2">
+                                            <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-2"></i>Load Details</h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="info-item">
+                                                        <span class="info-label">Cargo Type:</span>
+                                                        <span class="info-value">${load.cargoType || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="info-item">
+                                                        <span class="info-label">Weight:</span>
+                                                        <span class="info-value">${load.cargoWeight || 'N/A'} tonnes</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="info-item">
+                                                        <span class="info-label">Vehicle Type:</span>
+                                                        <span class="info-value">${load.vehicleType || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-grid gap-2">
+                                            ${transfer.status === 'pending' ? `
+                                                <button class="btn btn-success btn-lg" onclick="bankTransferVerification.openVerifyModal('${transfer.requestId}')">
+                                                    <i class="fas fa-check me-2"></i>Verify Payment
+                                                </button>
+                                                <button class="btn btn-danger" onclick="bankTransferVerification.rejectPaymentAction('${transfer.requestId}')">
+                                                    <i class="fas fa-times me-2"></i>Reject
+                                                </button>
+                                            ` : transfer.status === 'verified' ? `
+                                                <button class="btn btn-success" disabled>
+                                                    <i class="fas fa-check me-2"></i>Verified
+                                                </button>
+                                                <small class="text-muted text-center">Verified on: ${transfer.transferDetails.verifiedDate ? new Date(transfer.transferDetails.verifiedDate).toLocaleString() : 'N/A'}</small>
+                                            ` : `
+                                                <button class="btn btn-danger" disabled>
+                                                    <i class="fas fa-times me-2"></i>Rejected
+                                                </button>
+                                                <small class="text-muted text-center">Rejected on: ${transfer.transferDetails.rejectedDate ? new Date(transfer.transferDetails.rejectedDate).toLocaleString() : 'N/A'}</small>
+                                            `}
+                                            <button class="btn btn-outline-primary" onclick="bankTransferVerification.viewDetails('${transfer.loadId}')">
+                                                <i class="fas fa-eye me-2"></i>View Full Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            openVerifyModal(requestId) {
+                const transfer = this.transfers.find(t => t.requestId === requestId);
+
+                if (!transfer) {
+                    alert('Payment request not found!');
+                    return;
+                }
+
+                this.currentPaymentId = requestId;
+                const load = transfer.load || {};
+                const transferDetails = transfer.transferDetails || {};
+                const amount = transfer.amount || 0;
+                const supplier = transfer.supplier || {};
+
+                const modalBody = document.getElementById('verifyPaymentModalBody');
+                modalBody.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Please verify that the payment of <strong>£${amount.toFixed(2)}</strong> has been received in your bank account.
+                    </div>
+                    
+                    <div class="info-section">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-user me-2"></i>Supplier Information</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Name:</strong> ${supplier.name || 'N/A'}</p>
+                                <p><strong>Email:</strong> ${supplier.email || 'N/A'}</p>
+                                <p><strong>Phone:</strong> ${supplier.phone || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Company:</strong> ${supplier.company || 'N/A'}</p>
+                                <p><strong>Payment Type:</strong> ${transferDetails.paymentType || 'Bank Transfer'}</p>
+                                <p><strong>Amount:</strong> <span class="amount-highlight">£${amount.toFixed(2)}</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-university me-2"></i>Transfer Information</h6>
+                        <p><strong>Transfer Date:</strong> ${transferDetails.transferDate ? new Date(transferDetails.transferDate).toLocaleDateString() : 'N/A'}</p>
+                        <p><strong>Transaction Reference:</strong> ${transferDetails.reference || 'N/A'}</p>
+                        <p><strong>Load Route:</strong> ${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}</p>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="verificationNotes" class="form-label">Verification Notes (Optional)</label>
+                        <textarea class="form-control" id="verificationNotes" rows="3" placeholder="Add any notes about this verification..."></textarea>
+                    </div>
+                `;
+
+                const modal = new bootstrap.Modal(document.getElementById('verifyPaymentModal'));
+                modal.show();
+            }
+
+            async verifyPayment() {
+                if (!this.currentPaymentId) return;
+
+                const database = initFirebase();
+                const transfer = this.transfers.find(t => t.requestId === this.currentPaymentId);
+                if (!transfer) {
+                    alert('Payment request not found!');
+                    return;
+                }
+
+                const notes = document.getElementById('verificationNotes').value;
+                const now = new Date().toISOString();
+
+                if (database && !String(this.currentPaymentId).startsWith('local-')) {
+                    await database.ref('bankTransferRequests').child(this.currentPaymentId).update({
+                        status: 'verified',
+                        verifiedAt: now,
+                        verifiedBy: 'admin',
+                        notes: notes || ''
+                    });
+                } else {
+                    updateLocalTransferRequest(this.currentPaymentId, 'verified', notes || '');
+                }
+
+                if (database && !String(this.currentPaymentId).startsWith('local-')) {
+                    const loadRef = database.ref('loads').child(transfer.loadId);
+                    const loadSnapshot = await loadRef.once('value');
+                    if (loadSnapshot.exists()) {
+                        const load = loadSnapshot.val();
+                        const paymentStatus = load.paymentStatus || {};
+                        paymentStatus.bankTransfer = {
+                            status: 'verified',
+                            amount: transfer.amount,
+                            paymentType: transfer.transferDetails.paymentType || 'bank',
+                            reference: transfer.transferDetails.reference || transfer.loadId,
+                            verifiedDate: now,
+                            verifiedBy: 'admin'
+                        };
+                        if (notes) {
+                            paymentStatus.bankTransfer.notes = notes;
+                        }
+
+                        await loadRef.update({
+                            paymentStatus: paymentStatus,
+                            status: 'available'
+                        });
+                    }
+
+                    const pendingSnapshot = await database.ref('payLetterPending').orderByChild('loadId').equalTo(transfer.loadId).once('value');
+                    if (pendingSnapshot.exists()) {
+                        const updates = {};
+                        pendingSnapshot.forEach(child => {
+                            updates[`${child.key}/status`] = 'paid';
+                            updates[`${child.key}/paidAt`] = now;
+                        });
+                        await database.ref('payLetterPending').update(updates);
+                    }
+                } else {
+                    updateLocalPayLetter(transfer.loadId, 'paid');
+                }
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('verifyPaymentModal'));
+                modal.hide();
+
+                // Show success message
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('success', 'Payment verified successfully!');
+                } else {
+                    alert('Payment verified successfully!');
+                }
+
+                // Reload transfers
+                this.loadBankTransfers();
+            }
+
+            rejectPaymentAction(loadId) {
+                if (confirm('Are you sure you want to reject this payment? This action cannot be undone.')) {
+                    this.currentPaymentId = loadId;
+                    this.rejectPayment();
+                }
+            }
+
+            async rejectPayment() {
+                if (!this.currentPaymentId) return;
+                const database = initFirebase();
+                const transfer = this.transfers.find(t => t.requestId === this.currentPaymentId);
+                if (!transfer) {
+                    alert('Payment request not found!');
+                    return;
+                }
+
+                const notes = document.getElementById('verificationNotes').value || 'Payment rejected by admin';
+                const now = new Date().toISOString();
+
+                if (database && !String(this.currentPaymentId).startsWith('local-')) {
+                    await database.ref('bankTransferRequests').child(this.currentPaymentId).update({
+                        status: 'rejected',
+                        rejectedAt: now,
+                        rejectedBy: 'admin',
+                        rejectionNotes: notes
+                    });
+                } else {
+                    updateLocalTransferRequest(this.currentPaymentId, 'rejected', notes);
+                }
+
+                if (database && !String(this.currentPaymentId).startsWith('local-')) {
+                    const loadRef = database.ref('loads').child(transfer.loadId);
+                    const loadSnapshot = await loadRef.once('value');
+                    if (loadSnapshot.exists()) {
+                        const load = loadSnapshot.val();
+                        const paymentStatus = load.paymentStatus || {};
+                        paymentStatus.bankTransfer = {
+                            status: 'rejected',
+                            amount: transfer.amount,
+                            paymentType: transfer.transferDetails.paymentType || 'bank',
+                            reference: transfer.transferDetails.reference || transfer.loadId,
+                            rejectedDate: now,
+                            rejectedBy: 'admin',
+                            rejectionNotes: notes
+                        };
+
+                        await loadRef.update({
+                            paymentStatus: paymentStatus,
+                            status: 'pay-letter-pending'
+                        });
+
+                        const pendingRef = database.ref('payLetterPending');
+                        const pendingSnapshot = await pendingRef.orderByChild('loadId').equalTo(transfer.loadId).once('value');
+                        const pendingData = {
+                            supplierId: load.supplierId || transfer.rawRequest.supplierId || '',
+                            loadId: transfer.loadId,
+                            loadTitle: load.loadTitle || transfer.rawRequest.paymentFor || 'Load Payment',
+                            pickupLocation: load.pickupLocation || '',
+                            deliveryLocation: load.deliveryLocation || '',
+                            amount: transfer.amount,
+                            status: 'pending',
+                            paymentSource: 'bank-transfer',
+                            rejectedAt: now
+                        };
+
+                        if (pendingSnapshot.exists()) {
+                            const update = {};
+                            pendingSnapshot.forEach(child => {
+                                update[child.key] = pendingData;
+                            });
+                            await pendingRef.update(update);
+                        } else {
+                            await pendingRef.push(pendingData);
+                        }
+                    }
+                } else {
+                    updateLocalPayLetter(transfer.loadId, 'pending');
+                }
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('verifyPaymentModal'));
+                if (modal) modal.hide();
+
+                // Show message
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('error', 'Payment rejected.');
+                } else {
+                    alert('Payment rejected.');
+                }
+
+                // Reload transfers
+                this.loadBankTransfers();
+            }
+
+            viewDetails(loadId) {
+                alert('Full load details would be shown here. Load ID: ' + loadId);
+            }
+
+            setupEventListeners() {
+                // Auto refresh every 30 seconds
+                setInterval(() => {
+                    this.loadBankTransfers();
+                }, 30000);
+            }
+        }
+
+        // Initialize
+        const bankTransferVerification = new BankTransferVerification();
+        window.bankTransferVerification = bankTransferVerification;
+
+        // Global functions
+        function refreshPayments() {
+            bankTransferVerification.loadBankTransfers();
+            if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                window.AlphaBrokrage.showAlert('success', 'Payments refreshed!');
+            }
+        }
+
+        function filterTransfers(status) {
+            bankTransferVerification.currentFilter = status;
+            
+            // Update button states
+            document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            bankTransferVerification.loadBankTransfers();
+        }
+
+        function verifyPayment() {
+            bankTransferVerification.verifyPayment();
+        }
+
+        function rejectPayment() {
+            if (confirm('Are you sure you want to reject this payment?')) {
+                bankTransferVerification.rejectPayment();
+            }
+        }
+
+        function adminLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('adminAuth');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>
+
+

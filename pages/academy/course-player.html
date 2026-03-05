@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Player - Alpha Freight Driver Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #fafafa;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #635bff;
+            text-decoration: none;
+        }
+
+        nav .back-link {
+            color: #635bff;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Course Layout */
+        .course-layout {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 24px;
+            overflow-y: auto;
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+        }
+
+        .course-info {
+            margin-bottom: 32px;
+        }
+
+        .course-info h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #635bff 0%, #8b5cf6 100%);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #635bff;
+            min-width: 50px;
+        }
+
+        .modules-list {
+            list-style: none;
+        }
+
+        .module-item {
+            margin-bottom: 8px;
+        }
+
+        .module-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #4b5563;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .module-link:hover {
+            background: #f8f9ff;
+            color: #635bff;
+        }
+
+        .module-link.active {
+            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .module-link.completed {
+            color: #10b981;
+        }
+
+        .module-link.active.completed {
+            color: white;
+        }
+
+        .module-icon {
+            width: 24px;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .module-number {
+            font-weight: 600;
+            min-width: 24px;
+        }
+
+        .module-title {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .video-section {
+            background: #000;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            position: relative;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .video-placeholder p {
+            font-size: 1.125rem;
+            opacity: 0.8;
+        }
+
+        .lesson-header {
+            margin-bottom: 24px;
+        }
+
+        .lesson-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .lesson-meta {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .lesson-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lesson-description {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .lesson-description p {
+            color: #4b5563;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .lesson-description ul {
+            margin-left: 24px;
+            color: #4b5563;
+            line-height: 1.8;
+        }
+
+        .lesson-actions {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #635bff;
+            border: 2px solid #635bff;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Resources Section */
+        .resources-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 32px;
+        }
+
+        .resources-section h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1f2937;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .resource-item:hover {
+            background: #f8f9ff;
+        }
+
+        .resource-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .resource-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #635bff;
+        }
+
+        .resource-details h4 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+
+        .resource-details p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Discussion Section */
+        .discussion-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .discussion-section h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1f2937;
+        }
+
+        .discussion-placeholder {
+            text-align: center;
+            padding: 48px 24px;
+            color: #6b7280;
+        }
+
+        .discussion-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .course-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .main-content {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="academy.html" class="logo">Alpha Freight Academy</a>
+            <a href="my-courses.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to My Courses
+            </a>
+        </div>
+    </nav>
+
+    <!-- Course Layout -->
+    <div class="course-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="course-info">
+                <h2 id="course-title">CPC Training</h2>
+                <div class="progress-info">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 50%"></div>
+                    </div>
+                    <span class="progress-text" id="progress-text">50%</span>
+                </div>
+            </div>
+
+            <ul class="modules-list" id="modules-list">
+                <!-- Modules will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Video Player -->
+            <div class="video-section">
+                <div class="video-placeholder">
+                    <i class="fas fa-play-circle"></i>
+                    <p>Video Player</p>
+                    <p style="font-size: 0.875rem; margin-top: 8px; opacity: 0.6;">Video content will load here</p>
+                </div>
+            </div>
+
+            <!-- Lesson Header -->
+            <div class="lesson-header">
+                <h1 id="lesson-title">Digital Tachographs - Part 1</h1>
+                <div class="lesson-meta">
+                    <span>
+                        <i class="far fa-clock"></i>
+                        <span id="lesson-duration">15:30</span>
+                    </span>
+                    <span>
+                        <i class="fas fa-book"></i>
+                        <span id="lesson-module">Module 3</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Lesson Description -->
+            <div class="lesson-description">
+                <p>
+                    In this lesson, you'll learn the fundamentals of digital tachographs, including how to operate 
+                    the device, insert and remove driver cards, and interpret the data displayed.
+                </p>
+                <p><strong>What you'll learn:</strong></p>
+                <ul>
+                    <li>Understanding tachograph components and functions</li>
+                    <li>Proper card insertion and removal procedures</li>
+                    <li>Reading and interpreting tachograph data</li>
+                    <li>Common errors and how to avoid them</li>
+                    <li>Legal requirements for tachograph use</li>
+                </ul>
+            </div>
+
+            <!-- Lesson Actions -->
+            <div class="lesson-actions">
+                <button class="btn btn-success" id="mark-complete-btn" onclick="markAsComplete()">
+                    <i class="fas fa-check"></i>
+                    Mark as Complete
+                </button>
+                <a href="#" class="btn btn-primary" id="next-lesson-btn" onclick="goToNextLesson(); return false;">
+                    Next Lesson
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Resources -->
+            <div class="resources-section">
+                <h3>Downloadable Resources</h3>
+                <div class="resource-item">
+                    <div class="resource-info">
+                        <div class="resource-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="resource-details">
+                            <h4>Digital Tachograph Guide</h4>
+                            <p>PDF • 2.4 MB</p>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-secondary" style="padding: 8px 16px;" onclick="downloadResource('tachograph-guide'); return false;">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-info">
+                        <div class="resource-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="resource-details">
+                            <h4>Practice Quiz - Module 3</h4>
+                            <p>PDF • 1.2 MB</p>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-secondary" style="padding: 8px 16px;" onclick="downloadResource('quiz-module3'); return false;">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Discussion -->
+            <div class="discussion-section">
+                <h3>Discussion</h3>
+                <div class="discussion-placeholder">
+                    <i class="fas fa-comments"></i>
+                    <p>Course discussions coming soon</p>
+                    <p style="font-size: 0.875rem; margin-top: 8px;">Ask questions and interact with other students</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Course data
+        const courses = {
+            cpc: {
+                title: 'CPC Training',
+                modules: [
+                    { id: 1, title: 'Driver CPC Rules & Regulations', completed: true, duration: '20:15' },
+                    { id: 2, title: 'Working Time Directive', completed: true, duration: '18:30' },
+                    { id: 3, title: 'Digital Tachographs', completed: false, duration: '15:30', active: true },
+                    { id: 4, title: 'Driver Safety & Well-being', completed: false, duration: '22:45' },
+                    { id: 5, title: 'Emergency First Aid', completed: false, duration: '25:20' },
+                    { id: 6, title: 'Final Assessment', completed: false, duration: '30:00' }
+                ],
+                progress: 50
+            },
+            safety: {
+                title: 'Safety & Compliance',
+                modules: [
+                    { id: 1, title: 'Vehicle Safety Checks', completed: true, duration: '12:30' },
+                    { id: 2, title: 'Load Security Standards', completed: false, duration: '16:45', active: true },
+                    { id: 3, title: 'Hazard Perception', completed: false, duration: '14:20' },
+                    { id: 4, title: 'Accident Reporting', completed: false, duration: '18:10' }
+                ],
+                progress: 30
+            },
+            load: {
+                title: 'Load Securing',
+                modules: [
+                    { id: 1, title: 'Weight Distribution Basics', completed: false, duration: '10:15', active: true },
+                    { id: 2, title: 'Strapping Methods', completed: false, duration: '12:30' },
+                    { id: 3, title: 'Load Type Handling', completed: false, duration: '14:45' },
+                    { id: 4, title: 'Practical Demonstrations', completed: false, duration: '16:20' }
+                ],
+                progress: 0
+            }
+        };
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseType = urlParams.get('course') || 'cpc';
+        const moduleId = parseInt(urlParams.get('module')) || 1;
+
+        const course = courses[courseType] || courses.cpc;
+        const currentModule = course.modules.find(m => m.id === moduleId) || course.modules[0];
+
+        // Initialize page
+        function initializePage() {
+            document.getElementById('course-title').textContent = course.title;
+            document.getElementById('progress-fill').style.width = course.progress + '%';
+            document.getElementById('progress-text').textContent = course.progress + '%';
+            
+            document.getElementById('lesson-title').textContent = currentModule.title;
+            document.getElementById('lesson-duration').textContent = currentModule.duration;
+            document.getElementById('lesson-module').textContent = `Module ${currentModule.id}`;
+
+            // Render modules list
+            const modulesList = document.getElementById('modules-list');
+            modulesList.innerHTML = course.modules.map(module => {
+                const isActive = module.active || (module.id === moduleId && !currentModule.completed);
+                const isCompleted = module.completed;
+                const icon = isCompleted ? 'fas fa-check-circle' : (isActive ? 'fas fa-play' : 'far fa-circle');
+                
+                return `
+                    <li class="module-item">
+                        <a href="course-player.html?course=${courseType}&module=${module.id}" 
+                           class="module-link ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}">
+                            <span class="module-icon">
+                                <i class="${icon}"></i>
+                            </span>
+                            <span class="module-number">${module.id}</span>
+                            <span class="module-title">${module.title}</span>
+                        </a>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        // Mark lesson as complete
+        function markAsComplete() {
+            // Firebase integration placeholder
+            // const auth = getCarrierAuth();
+            // const db = firebase.database();
+            // Update progress in Firebase
+            
+            const btn = document.getElementById('mark-complete-btn');
+            btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+            btn.style.background = '#10b981';
+            btn.disabled = true;
+
+            // Update progress
+            course.progress = Math.min(100, course.progress + (100 / course.modules.length));
+            document.getElementById('progress-fill').style.width = course.progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(course.progress) + '%';
+
+            // Mark module as completed
+            currentModule.completed = true;
+            initializePage();
+        }
+
+        // Go to next lesson
+        function goToNextLesson() {
+            const currentIndex = course.modules.findIndex(m => m.id === currentModule.id);
+            if (currentIndex < course.modules.length - 1) {
+                const nextModule = course.modules[currentIndex + 1];
+                window.location.href = `course-player.html?course=${courseType}&module=${nextModule.id}`;
+            } else {
+                alert('Congratulations! You have completed all modules. You can now take the final assessment.');
+            }
+        }
+
+        // Download resource
+        function downloadResource(resourceId) {
+            // Implement resource download
+            alert(`Downloading ${resourceId}...`);
+        }
+
+        // Initialize on page load
+        initializePage();
+    </script>
+</body>
+</html>

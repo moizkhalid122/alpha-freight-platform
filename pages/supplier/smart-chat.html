@@ -1,0 +1,1626 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Chat - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            width: 260px;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                margin-left: 0;
+            }
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.5s ease 0.1s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: navItemSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes navItemSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-nav .nav-link:nth-of-type(1) { animation-delay: 0.1s; }
+        .sidebar-nav .nav-link:nth-of-type(2) { animation-delay: 0.15s; }
+        .sidebar-nav .nav-link:nth-of-type(3) { animation-delay: 0.2s; }
+        .sidebar-nav .nav-link:nth-of-type(4) { animation-delay: 0.25s; }
+        .sidebar-nav .nav-link:nth-of-type(5) { animation-delay: 0.3s; }
+        .sidebar-nav .nav-link:nth-of-type(6) { animation-delay: 0.35s; }
+        .sidebar-nav .nav-link:nth-of-type(7) { animation-delay: 0.4s; }
+        .sidebar-nav .nav-link:nth-of-type(8) { animation-delay: 0.45s; }
+        .sidebar-nav .nav-link:nth-of-type(9) { animation-delay: 0.5s; }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.6) 100%);
+            color: var(--primary) !important;
+            transform: translateX(4px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, var(--sidebar-active) 0%, rgba(235, 244, 255, 0.8) 100%);
+            color: var(--primary) !important;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-group {
+            margin-bottom: 0.4rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .header-section {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .header-icon-btn:hover {
+            background: #F3F4F6;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .header-profile {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-profile:hover {
+            border-color: var(--primary);
+            transform: scale(1.08);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .header-actions .dropdown {
+            position: relative;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .messages-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 200px);
+        }
+
+        @media (max-width: 1024px) {
+            .messages-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .conversations-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .conversations-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversations-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .new-message-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .new-message-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .conversation-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background: #F9FAFB;
+            border-color: var(--border);
+        }
+
+        .conversation-item.active {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.5) 100%);
+            border-color: var(--primary);
+        }
+
+        .conversation-item.unread {
+            background: #F0F9FF;
+        }
+
+        .conversation-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .conversation-content {
+            flex: 1;
+            min-width: 0;
+            margin-left: 0.75rem;
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.25rem;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.875rem;
+        }
+
+        .conversation-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .conversation-preview {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-item.unread .conversation-preview {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .unread-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+        }
+
+        .chat-area {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #F9FAFB;
+            min-height: 0;
+            max-height: none;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            word-wrap: break-word;
+        }
+
+        .message-sent {
+            background: var(--primary-gradient);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-received {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.25rem;
+        }
+
+        .message-received .message-time {
+            color: var(--text-muted);
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            resize: none;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-chat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-chat-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-conversations {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-conversations-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .profile-dropdown-menu {
+            min-width: 280px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-top: 12px;
+            background: white;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 1050;
+            overflow: hidden;
+            display: none;
+        }
+
+        .header-actions .dropdown.show .profile-dropdown-menu,
+        .profile-dropdown-menu.show {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        .profile-dropdown-header {
+            padding: 1.75rem 1.5rem 1.25rem;
+            background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-dropdown-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-dropdown-header h6 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0.75rem 0 0.5rem;
+            text-align: center;
+        }
+
+        .profile-status-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            background: #F9FAFB;
+            color: var(--text-main);
+            margin-top: 0.75rem;
+        }
+
+        .profile-dropdown-item {
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .profile-dropdown-item:hover {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.5) 100%);
+            color: var(--primary);
+            padding-left: 1.75rem;
+        }
+
+        .profile-dropdown-item i {
+            width: 22px;
+            margin-right: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .profile-dropdown-item:hover i {
+            color: var(--primary);
+        }
+
+        .profile-dropdown-footer {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #F9FAFB 0%, #FAFBFC 100%);
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            .messages-container {
+                height: calc(100vh - 150px);
+            }
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <img src="image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="post-load.html" class="nav-link">
+                <i class="fas fa-plus-circle"></i>
+                Post Load
+            </a>
+            <a href="my-loads.html" class="nav-link">
+                <i class="fas fa-boxes"></i>
+                My Loads
+            </a>
+            <a href="track.html" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                Track Carrier
+            </a>
+            <a href="payments.html" class="nav-link">
+                <i class="fas fa-credit-card"></i>
+                Payments
+            </a>
+            <a href="pay-letter-pending.html" class="nav-link">
+                <i class="fas fa-file-invoice"></i>
+                Pay Letter Pending
+            </a>
+            <div class="nav-group">
+                <div class="nav-link nav-group-toggle">
+                    <i class="fas fa-comments"></i>
+                    Chat
+                </div>
+                <div class="nav-group-items">
+                    <a href="messages.html" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        Messages
+                        <span class="badge bg-danger ms-auto" id="messagesBadge" style="display: none;">0</span>
+                    </a>
+                    <a href="smart-chat.html" class="nav-link active">
+                        <i class="fas fa-robot"></i>
+                        Smart Chat
+                    </a>
+                </div>
+            </div>
+            <a href="profile.html" class="nav-link">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <hr class="my-3">
+            <a href="#" class="nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold">Messages</h5>
+                </div>
+                <div class="header-actions">
+                    <button class="header-icon-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </button>
+                    <div class="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=Supplier+User&background=2563EB&color=fff&size=128" 
+                             alt="Profile" 
+                             class="header-profile" 
+                             id="profileImage"
+                             data-bs-toggle="dropdown">
+                        <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu">
+                            <li class="profile-dropdown-header">
+                                <img src="https://ui-avatars.com/api/?name=Supplier+User&background=2563EB&color=fff&size=128" 
+                                     alt="Profile" 
+                                     class="profile-dropdown-avatar"
+                                     id="profileDropdownImage">
+                                <h6 id="profileName">Loading...</h6>
+                                <input type="text" 
+                                       class="profile-status-input" 
+                                       id="profileStatus" 
+                                       value="Active" 
+                                       readonly>
+                            </li>
+                            <li><a class="profile-dropdown-item" href="profile.html">
+                                <i class="fas fa-user"></i> My Profile
+                            </a></li>
+                            <li><a class="profile-dropdown-item" href="messages.html">
+                                <i class="fas fa-comments"></i> Messages
+                            </a></li>
+                            <li><a class="profile-dropdown-item" href="#">
+                                <i class="fas fa-cog"></i> Settings
+                            </a></li>
+                            <li class="profile-dropdown-footer">
+                                <button class="btn btn-danger w-100" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="messages-container">
+                <!-- Conversations Sidebar -->
+                <div class="conversations-sidebar">
+                    <div class="conversations-header">
+                        <h6 class="conversations-title">Conversations</h6>
+                        <button class="new-message-btn" onclick="openNewMessageModal()" title="New Message">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="conversations-list" id="conversationsList">
+                        <div class="empty-conversations">
+                            <div class="empty-conversations-icon">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <p>Loading conversations...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-area">
+                    <div id="emptyChat" class="empty-chat">
+                        <div class="empty-chat-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h5>Select a conversation</h5>
+                        <p class="text-muted">Choose a conversation from the list to start messaging</p>
+                    </div>
+
+                    <div id="chatView" style="display: none;">
+                        <div class="chat-header">
+                            <div class="chat-header-info">
+                                <div class="chat-avatar" id="chatAvatar"></div>
+                                <div>
+                                    <div class="chat-name" id="chatName">Loading...</div>
+                                    <div class="chat-status" id="chatStatus">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-area">
+                            <div class="chat-input-wrapper">
+                                <textarea class="chat-input" id="messageInput" placeholder="Type a message..." rows="1" onkeydown="handleKeyDown(event)"></textarea>
+                                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Check Authentication
+        const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+        if (!auth.isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        let currentConversation = null;
+        let conversationsRef = null;
+        let messagesRef = null;
+
+        // Load User Data
+        function loadUserData() {
+            const userName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier User';
+            document.getElementById('profileName').textContent = userName;
+            const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=2563EB&color=fff&size=128`;
+            document.getElementById('profileImage').src = profileImageUrl;
+            document.getElementById('profileDropdownImage').src = profileImageUrl;
+
+            const status = auth.status || 'pending';
+            const statusEl = document.getElementById('profileStatus');
+            if (status === 'active' || status === 'verified') {
+                statusEl.value = 'Active';
+            } else if (status === 'pending' || status === 'pending_verification') {
+                statusEl.value = 'Pending Review';
+            } else {
+                statusEl.value = 'Inactive';
+            }
+        }
+
+        // Get Avatar Initials
+        function getAvatarInitials(name) {
+            if (!name) return 'SU';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // Check and Send Welcome Message
+        function checkAndSendWelcomeMessage() {
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId) return;
+            
+            // Check if supplier already has messages
+            db.ref('messages').orderByChild('supplierId').equalTo(supplierId).once('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    // No messages yet, send welcome message
+                    const supplierName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier';
+                    const welcomeMessage = {
+                        supplierId: supplierId,
+                        supplierName: supplierName,
+                        carrierId: 'support',
+                        carrierName: 'Alpha Freight Support',
+                        message: `Hello ${auth.firstName || 'Supplier'}! ðŸ‘‹\n\nWelcome to Alpha Freight! Your supplier account is now active. You can start posting loads from the Post Load page.\n\nIf you need any help with anything, feel free to message us here or chat with our support team. We're always here to help you!\n\nThank you!`,
+                        senderType: 'support',
+                        senderId: 'support',
+                        recipientType: 'supplier',
+                        recipientId: supplierId,
+                        read: false,
+                        timestamp: Date.now(),
+                        createdAt: new Date().toISOString(),
+                        type: 'welcome'
+                    };
+                    
+                    db.ref('messages').push(welcomeMessage)
+                        .then(() => {
+                            console.log('Welcome message sent');
+                        })
+                        .catch((error) => {
+                            console.error('Error sending welcome message:', error);
+                        });
+                }
+            });
+        }
+
+        // Load Conversations
+        function loadConversations() {
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId) return;
+
+            // Listen for conversations where supplier is involved
+            conversationsRef = db.ref('messages').orderByChild('supplierId').equalTo(supplierId);
+            
+            conversationsRef.on('value', (snapshot) => {
+                const conversations = {};
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const msg = child.val();
+                        const carrierId = msg.carrierId;
+                        
+                        if (carrierId) {
+                            if (!conversations[carrierId]) {
+                                conversations[carrierId] = {
+                                    carrierId: carrierId,
+                                    carrierName: msg.carrierName || 'Carrier',
+                                    lastMessage: msg.message || '',
+                                    lastMessageTime: msg.timestamp || msg.createdAt || Date.now(),
+                                    unread: !msg.read && (msg.senderType === 'carrier' || msg.senderType === 'support')
+                                };
+                            } else {
+                                const conv = conversations[carrierId];
+                                const msgTime = msg.timestamp || msg.createdAt || Date.now();
+                                if (msgTime > conv.lastMessageTime) {
+                                    conv.lastMessage = msg.message || '';
+                                    conv.lastMessageTime = msgTime;
+                                    if (!msg.read && (msg.senderType === 'carrier' || msg.senderType === 'support')) {
+                                        conv.unread = true;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                displayConversations(Object.values(conversations));
+            });
+        }
+
+        // Display Conversations
+        function displayConversations(conversations) {
+            const container = document.getElementById('conversationsList');
+            
+            if (conversations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-conversations">
+                        <div class="empty-conversations-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <p>No conversations yet</p>
+                        <p class="small">Start a conversation with a carrier</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by last message time
+            conversations.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
+
+            const conversationsHtml = conversations.map(conv => {
+                const initials = getAvatarInitials(conv.carrierName);
+                const time = formatMessageTime(conv.lastMessageTime);
+                const unreadClass = conv.unread ? 'unread' : '';
+                
+                return `
+                    <div class="conversation-item ${unreadClass}" onclick="openConversation('${conv.carrierId}', '${conv.carrierName.replace(/'/g, "\\'")}')">
+                        <div class="d-flex align-items-center">
+                            <div class="conversation-avatar">${initials}</div>
+                            <div class="conversation-content">
+                                <div class="conversation-header">
+                                    <span class="conversation-name">${conv.carrierName}</span>
+                                    <span class="conversation-time">${time}</span>
+                                </div>
+                                <div class="conversation-preview">${conv.lastMessage || 'No messages yet'}</div>
+                            </div>
+                            ${conv.unread ? '<div class="unread-badge"></div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = conversationsHtml;
+        }
+
+        // Format Message Time
+        function formatMessageTime(timestamp) {
+            if (!timestamp) return 'Just now';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Open Conversation
+        function openConversation(carrierId, carrierName) {
+            currentConversation = { carrierId, carrierName };
+            
+            // Update UI
+            document.getElementById('emptyChat').style.display = 'none';
+            document.getElementById('chatView').style.display = 'flex';
+            document.getElementById('chatView').style.flexDirection = 'column';
+            
+            document.getElementById('chatName').textContent = carrierName;
+            document.getElementById('chatAvatar').textContent = getAvatarInitials(carrierName);
+            document.getElementById('chatStatus').textContent = carrierId === 'support' ? 'Always Available' : 'Online';
+
+            // Update active conversation
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const eventTarget = event && event.currentTarget;
+            if (eventTarget) {
+                eventTarget.classList.add('active');
+            } else {
+                // Find the conversation item and mark it as active
+                setTimeout(() => {
+                    const items = document.querySelectorAll('.conversation-item');
+                    items.forEach(item => {
+                        if (item.onclick && item.onclick.toString().includes(carrierId)) {
+                            item.classList.add('active');
+                        }
+                    });
+                }, 100);
+            }
+
+            // Load messages
+            loadMessages(carrierId);
+        }
+
+        // Load Messages
+        function loadMessages(carrierId) {
+            const supplierId = auth.supplierId || auth.id;
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Clear previous listener
+            if (messagesRef) {
+                messagesRef.off();
+            }
+
+            // Listen for messages between supplier and carrier/support
+            messagesRef = db.ref('messages')
+                .orderByChild('supplierId')
+                .equalTo(supplierId)
+                .on('value', (snapshot) => {
+                    const messages = [];
+                    
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => {
+                            const msg = child.val();
+                            if (msg.carrierId === carrierId) {
+                                messages.push({
+                                    ...msg,
+                                    id: child.key
+                                });
+                            }
+                        });
+                    }
+
+                    // Sort by timestamp
+                    messages.sort((a, b) => {
+                        const timeA = a.timestamp || a.createdAt || 0;
+                        const timeB = b.timestamp || b.createdAt || 0;
+                        return timeA - timeB;
+                    });
+
+                    displayMessages(messages);
+                    
+                    // Mark as read
+                    markAsRead(carrierId);
+                });
+        }
+
+        // Display Messages
+        function displayMessages(messages) {
+            const container = document.getElementById('chatMessages');
+            const supplierId = auth.supplierId || auth.id;
+            
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-chat">
+                        <div class="empty-chat-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const messagesHtml = messages.map(msg => {
+                const isSent = msg.senderType === 'supplier' && msg.senderId === supplierId;
+                const isSupport = msg.senderType === 'support';
+                const time = formatMessageTime(msg.timestamp || msg.createdAt);
+                // Replace newlines with <br> for proper formatting
+                const messageText = (msg.message || '').replace(/\n/g, '<br>');
+                
+                return `
+                    <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
+                        <div>${messageText}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = messagesHtml;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send Message
+        function sendMessage() {
+            if (!currentConversation) {
+                alert('Please select a conversation first');
+                return;
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+
+            const supplierId = auth.supplierId || auth.id;
+            const supplierName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier';
+            
+            const isSupport = currentConversation.carrierId === 'support';
+            const messageData = {
+                supplierId: supplierId,
+                supplierName: supplierName,
+                carrierId: currentConversation.carrierId,
+                carrierName: currentConversation.carrierName,
+                message: message,
+                senderType: 'supplier',
+                senderId: supplierId,
+                recipientType: isSupport ? 'support' : 'carrier',
+                recipientId: currentConversation.carrierId,
+                read: false,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            // Disable send button
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            db.ref('messages').push(messageData)
+                .then(() => {
+                    messageInput.value = '';
+                    messageInput.style.height = 'auto';
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                    alert('Failed to send message. Please try again.');
+                })
+                .finally(() => {
+                    sendBtn.disabled = false;
+                });
+        }
+
+        // Handle Key Down
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Mark as Read
+        function markAsRead(carrierId) {
+            const supplierId = auth.supplierId || auth.id;
+            
+            db.ref('messages')
+                .orderByChild('supplierId')
+                .equalTo(supplierId)
+                .once('value', (snapshot) => {
+                    const updates = {};
+                    snapshot.forEach((child) => {
+                        const msg = child.val();
+                        if (msg.carrierId === carrierId && (msg.senderType === 'carrier' || msg.senderType === 'support') && !msg.read) {
+                            updates[`messages/${child.key}/read`] = true;
+                        }
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        db.ref().update(updates);
+                    }
+                });
+        }
+
+        // Open New Message Modal - Start chat with Support
+        function openNewMessageModal() {
+            // Open support conversation
+            openConversation('support', 'Alpha Freight Support');
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+        }
+
+        // Notifications Toggle
+        function toggleNotifications() {
+            console.log('Notifications clicked');
+        }
+
+        // Logout
+        // Custom Confirm Dialog
+        function showConfirmLogout() {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmLogoutOverlay');
+                const messageEl = document.getElementById('confirmLogoutMessage');
+                const okBtn = document.getElementById('confirmLogoutOkBtn');
+                const cancelBtn = document.getElementById('confirmLogoutCancelBtn');
+
+                messageEl.textContent = 'Are you sure you want to logout?';
+                okBtn.textContent = 'Yes, Logout';
+                cancelBtn.textContent = 'Cancel';
+
+                const cleanup = () => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    overlay.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                };
+
+                const onOk = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (e) => {
+                    if (e.target === overlay) {
+                        onCancel();
+                    }
+                };
+
+                const onKeydown = (e) => {
+                    if (e.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                overlay.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        // Logout
+        async function logout() {
+            const confirmed = await showConfirmLogout();
+            if (confirmed) {
+                localStorage.removeItem('supplierAuth');
+                window.location.href = '../../index.html';
+            }
+        }
+
+        // Profile Dropdown Hover with Delay
+        let profileDropdownTimeout = null;
+
+        function setupProfileDropdown() {
+            const profileDropdown = document.querySelector('.header-actions .dropdown');
+            const profileImage = document.getElementById('profileImage');
+            const profileMenu = document.querySelector('.profile-dropdown-menu');
+
+            if (!profileDropdown || !profileImage || !profileMenu) return;
+
+            profileDropdown.addEventListener('mouseenter', function() {
+                clearTimeout(profileDropdownTimeout);
+                profileDropdown.classList.add('show');
+                profileMenu.classList.add('show');
+            });
+
+            profileMenu.addEventListener('mouseenter', function() {
+                clearTimeout(profileDropdownTimeout);
+            });
+
+            profileDropdown.addEventListener('mouseleave', function(e) {
+                if (e.relatedTarget && profileMenu.contains(e.relatedTarget)) {
+                    return;
+                }
+                clearTimeout(profileDropdownTimeout);
+                profileDropdownTimeout = setTimeout(function() {
+                    profileDropdown.classList.remove('show');
+                    profileMenu.classList.remove('show');
+                }, 2000);
+            });
+
+            profileMenu.addEventListener('mouseleave', function(e) {
+                if (e.relatedTarget && profileDropdown.contains(e.relatedTarget)) {
+                    return;
+                }
+                clearTimeout(profileDropdownTimeout);
+                profileDropdownTimeout = setTimeout(function() {
+                    profileDropdown.classList.remove('show');
+                    profileMenu.classList.remove('show');
+                }, 2000);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            loadConversations();
+            setupProfileDropdown();
+
+            // Check and send welcome message for new users
+            setTimeout(() => {
+                checkAndSendWelcomeMessage();
+            }, 1000);
+
+            // Close sidebar on mobile when clicking outside
+            document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
+
+            // Close sidebar on navigation click (mobile)
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            // Auto-resize textarea
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        });
+    </script>
+
+    <!-- Confirm Logout Modal -->
+    <div id="confirmLogoutOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmLogoutTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h6 id="confirmLogoutTitle" class="confirm-title">Confirm Logout</h6>
+            </div>
+            <div id="confirmLogoutMessage" class="confirm-message">Are you sure you want to logout?</div>
+            <div class="confirm-actions">
+                <button id="confirmLogoutCancelBtn" class="confirm-btn cancel" type="button">Cancel</button>
+                <button id="confirmLogoutOkBtn" class="confirm-btn danger" type="button">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

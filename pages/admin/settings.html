@@ -1,0 +1,635 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .settings-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .settings-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .section-title {
+            color: #6f42c1;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .settings-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #6f42c1;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .danger-zone {
+            border: 2px solid #dc3545;
+            background: #fff5f5;
+        }
+        .warning-zone {
+            border: 2px solid #ffc107;
+            background: #fffbf0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white active" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">System Settings</h5>
+                            <small class="text-muted">Configure platform settings and preferences</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" onclick="saveAllSettings()">
+                                <i class="fas fa-save"></i> Save All
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="resetSettings()">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="p-4">
+                    <!-- General Settings -->
+                    <div class="settings-section">
+                        <div class="settings-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h5 class="section-title text-center">General Settings</h5>
+                        <form id="generalSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="siteName" class="form-label">Site Name</label>
+                                    <input type="text" class="form-control" id="siteName" value="Alpha Freight" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="siteUrl" class="form-label">Site URL</label>
+                                    <input type="url" class="form-control" id="siteUrl" value="https://alphabrokrage.co.uk" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="adminEmail" class="form-label">Admin Email</label>
+                                    <input type="email" class="form-control" id="adminEmail" value="admin@alphabrokrage.co.uk" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="supportEmail" class="form-label">Support Email</label>
+                                    <input type="email" class="form-control" id="supportEmail" value="support@alphabrokrage.co.uk" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="siteDescription" class="form-label">Site Description</label>
+                                <textarea class="form-control" id="siteDescription" rows="3">Fast & Reliable Freight Brokerage Worldwide</textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="timezone" class="form-label">Timezone</label>
+                                    <select class="form-select" id="timezone" required>
+                                        <option value="Europe/London" selected>Europe/London (GMT)</option>
+                                        <option value="Europe/Dublin">Europe/Dublin (GMT)</option>
+                                        <option value="UTC">UTC</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="currency" class="form-label">Default Currency</label>
+                                    <select class="form-select" id="currency" required>
+                                        <option value="GBP" selected>British Pound (£)</option>
+                                        <option value="EUR">Euro (€)</option>
+                                        <option value="USD">US Dollar ($)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Commission Settings -->
+                    <div class="settings-section">
+                        <div class="settings-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <h5 class="section-title text-center">Commission Settings</h5>
+                        <form id="commissionSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="defaultCommission" class="form-label">Default Commission Rate (%)</label>
+                                    <input type="number" class="form-control" id="defaultCommission" value="10" min="0" max="50" step="0.1" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="minCommission" class="form-label">Minimum Commission (£)</label>
+                                    <input type="number" class="form-control" id="minCommission" value="25" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="maxCommission" class="form-label">Maximum Commission (£)</label>
+                                    <input type="number" class="form-control" id="maxCommission" value="500" min="0" step="0.01" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="commissionType" class="form-label">Commission Type</label>
+                                    <select class="form-select" id="commissionType" required>
+                                        <option value="percentage" selected>Percentage</option>
+                                        <option value="fixed">Fixed Amount</option>
+                                        <option value="tiered">Tiered</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="autoCommission" checked>
+                                <label class="form-check-label" for="autoCommission">
+                                    Automatically calculate commission
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Payment Settings -->
+                    <div class="settings-section">
+                        <div class="settings-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h5 class="section-title text-center">Payment Settings</h5>
+                        <form id="paymentSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="paymentGateway" class="form-label">Payment Gateway</label>
+                                    <select class="form-select" id="paymentGateway" required>
+                                        <option value="stripe" selected>Stripe</option>
+                                        <option value="paypal">PayPal</option>
+                                        <option value="square">Square</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paymentMode" class="form-label">Payment Mode</label>
+                                    <select class="form-select" id="paymentMode" required>
+                                        <option value="live">Live</option>
+                                        <option value="sandbox" selected>Sandbox</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="stripeKey" class="form-label">Stripe Public Key</label>
+                                    <input type="text" class="form-control" id="stripeKey" placeholder="pk_test_...">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="stripeSecret" class="form-label">Stripe Secret Key</label>
+                                    <input type="password" class="form-control" id="stripeSecret" placeholder="sk_test_...">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="paypalClientId" class="form-label">PayPal Client ID</label>
+                                    <input type="text" class="form-control" id="paypalClientId" placeholder="PayPal Client ID">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paypalSecret" class="form-label">PayPal Secret</label>
+                                    <input type="password" class="form-control" id="paypalSecret" placeholder="PayPal Secret">
+                                </div>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enablePayments" checked>
+                                <label class="form-check-label" for="enablePayments">
+                                    Enable payment processing
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Email Settings -->
+                    <div class="settings-section">
+                        <div class="settings-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h5 class="section-title text-center">Email Settings</h5>
+                        <form id="emailSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtpHost" class="form-label">SMTP Host</label>
+                                    <input type="text" class="form-control" id="smtpHost" value="smtp.gmail.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtpPort" class="form-label">SMTP Port</label>
+                                    <input type="number" class="form-control" id="smtpPort" value="587" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtpUsername" class="form-label">SMTP Username</label>
+                                    <input type="email" class="form-control" id="smtpUsername" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtpPassword" class="form-label">SMTP Password</label>
+                                    <input type="password" class="form-control" id="smtpPassword" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtpEncryption" class="form-label">Encryption</label>
+                                    <select class="form-select" id="smtpEncryption" required>
+                                        <option value="tls" selected>TLS</option>
+                                        <option value="ssl">SSL</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="emailFrom" class="form-label">From Email</label>
+                                    <input type="email" class="form-control" id="emailFrom" value="noreply@alphabrokrage.co.uk" required>
+                                </div>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableEmails" checked>
+                                <label class="form-check-label" for="enableEmails">
+                                    Enable email notifications
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-section">
+                        <div class="settings-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h5 class="section-title text-center">Security Settings</h5>
+                        <form id="securitySettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                    <input type="number" class="form-control" id="sessionTimeout" value="30" min="5" max="480" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="maxLoginAttempts" class="form-label">Max Login Attempts</label>
+                                    <input type="number" class="form-control" id="maxLoginAttempts" value="5" min="3" max="10" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="passwordMinLength" class="form-label">Password Min Length</label>
+                                    <input type="number" class="form-control" id="passwordMinLength" value="8" min="6" max="20" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="twoFactorRequired" class="form-label">Two-Factor Authentication</label>
+                                    <div class="d-flex align-items-center">
+                                        <label class="toggle-switch me-3">
+                                            <input type="checkbox" id="twoFactorRequired" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                        <span>Required for all users</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableAuditLog" checked>
+                                <label class="form-check-label" for="enableAuditLog">
+                                    Enable audit logging
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="settings-section">
+                        <div class="settings-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h5 class="section-title text-center">Notification Settings</h5>
+                        <form id="notificationSettings">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3">Email Notifications</h6>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailNewUser" checked>
+                                        <label class="form-check-label" for="emailNewUser">
+                                            New user registration
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailNewLoad" checked>
+                                        <label class="form-check-label" for="emailNewLoad">
+                                            New load posted
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailLoadCompleted" checked>
+                                        <label class="form-check-label" for="emailLoadCompleted">
+                                            Load completed
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailPaymentReceived" checked>
+                                        <label class="form-check-label" for="emailPaymentReceived">
+                                            Payment received
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3">SMS Notifications</h6>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="smsUrgentLoad">
+                                        <label class="form-check-label" for="smsUrgentLoad">
+                                            Urgent load alerts
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="smsPaymentFailed" checked>
+                                        <label class="form-check-label" for="smsPaymentFailed">
+                                            Payment failed
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="smsSystemDown" checked>
+                                        <label class="form-check-label" for="smsSystemDown">
+                                            System downtime
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="smsSecurityAlert" checked>
+                                        <label class="form-check-label" for="smsSecurityAlert">
+                                            Security alerts
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- System Maintenance -->
+                    <div class="settings-section warning-zone">
+                        <div class="settings-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <h5 class="section-title text-center">System Maintenance</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-warning w-100" onclick="clearCache()">
+                                    <i class="fas fa-trash"></i> Clear Cache
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-info w-100" onclick="optimizeDatabase()">
+                                    <i class="fas fa-database"></i> Optimize Database
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-secondary w-100" onclick="backupData()">
+                                    <i class="fas fa-download"></i> Backup Data
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-primary w-100" onclick="updateSystem()">
+                                    <i class="fas fa-sync-alt"></i> Update System
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="settings-section danger-zone">
+                        <div class="settings-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h5 class="section-title text-center text-danger">Danger Zone</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-danger w-100" onclick="resetAllData()">
+                                    <i class="fas fa-trash-alt"></i> Reset All Data
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-outline-danger w-100" onclick="deleteAllUsers()">
+                                    <i class="fas fa-user-times"></i> Delete All Users
+                                </button>
+                            </div>
+                        </div>
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Warning:</strong> These actions are irreversible and will permanently delete data.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    
+    <script>
+        function saveAllSettings() {
+            const forms = ['generalSettings', 'commissionSettings', 'paymentSettings', 'emailSettings', 'securitySettings', 'notificationSettings'];
+            let isValid = true;
+            
+            forms.forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form && !form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    isValid = false;
+                }
+            });
+            
+            if (isValid) {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    AlphaBrokrage.showAlert('success', 'All settings saved successfully!');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                AlphaBrokrage.showAlert('error', 'Please fill in all required fields.');
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to default values?')) {
+                AlphaBrokrage.showAlert('warning', 'Settings reset to default values');
+            }
+        }
+
+        function clearCache() {
+            if (confirm('Clear system cache?')) {
+                AlphaBrokrage.showAlert('success', 'Cache cleared successfully!');
+            }
+        }
+
+        function optimizeDatabase() {
+            if (confirm('Optimize database? This may take a few minutes.')) {
+                AlphaBrokrage.showAlert('info', 'Database optimization started...');
+            }
+        }
+
+        function backupData() {
+            AlphaBrokrage.showAlert('success', 'Data backup started!');
+        }
+
+        function updateSystem() {
+            if (confirm('Update system to latest version?')) {
+                AlphaBrokrage.showAlert('info', 'System update started...');
+            }
+        }
+
+        function resetAllData() {
+            if (confirm('Are you sure you want to reset ALL data? This action cannot be undone!')) {
+                if (confirm('This will delete ALL users, loads, payments, and settings. Are you absolutely sure?')) {
+                    AlphaBrokrage.showAlert('error', 'All data has been reset!');
+                }
+            }
+        }
+
+        function deleteAllUsers() {
+            if (confirm('Are you sure you want to delete ALL users? This action cannot be undone!')) {
+                AlphaBrokrage.showAlert('error', 'All users have been deleted!');
+            }
+        }
+
+        // Auto-save functionality
+        let autoSaveTimeout;
+        document.querySelectorAll('input, textarea, select').forEach(element => {
+            element.addEventListener('input', function() {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    console.log('Auto-saving settings...');
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
+

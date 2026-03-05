@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - Broker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            padding: 2rem 0;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #1E293B;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .profile-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            border: 1px solid #E5E7EB;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 25%, #A855F7 50%, #C084FC 75%, #7C3AED 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+            padding: 3.5rem 2rem 2.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #E5E7EB;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .profile-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-logo {
+            max-width: 220px;
+            max-height: 100px;
+            margin: 0 auto 1.5rem;
+            display: block;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+            transition: transform 0.3s ease;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.75rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-header h2 i {
+            margin-right: 0.75rem;
+            font-size: 1.8rem;
+            vertical-align: middle;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .profile-header p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 0.5rem 1.25rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .premium-badge:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .decoration-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: decorationFloat 10s ease-in-out infinite;
+        }
+
+        .decoration-circle:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .decoration-circle:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .decoration-circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes decorationFloat {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(15px, -15px); }
+        }
+
+        .profile-body {
+            padding: 2.5rem;
+            background: #FFFFFF;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1E293B;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            letter-spacing: -0.2px;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #E2E8F0;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #FFFFFF;
+            color: #1E293B;
+            line-height: 1.5;
+        }
+
+        .form-control:hover {
+            border-color: #CBD5E1;
+        }
+
+        .form-control:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 2px 8px rgba(99, 102, 241, 0.15);
+            outline: none;
+            background: #FFFFFF;
+        }
+
+        .form-control::placeholder {
+            color: #94A3B8;
+            font-weight: 400;
+        }
+
+        .form-control.is-invalid {
+            border-color: #EF4444;
+            background: #FEF2F2;
+        }
+
+        .form-control.is-invalid:focus {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        input[type="date"].form-control,
+        input[type="tel"].form-control,
+        input[type="email"].form-control,
+        input[type="url"].form-control {
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #6366F1;
+            border-color: #6366F1;
+            border-radius: 10px;
+            padding: 0.65rem 1rem;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #4F46E5;
+            border-color: #4F46E5;
+        }
+
+        .skip-link a {
+            color: #6366F1;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .skip-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Multi-step form styles */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .step-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-item::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #E5E7EB;
+            z-index: 0;
+        }
+
+        .step-item:last-child::after {
+            display: none;
+        }
+
+        .step-item.active .step-number {
+            background: #6366F1;
+            color: white;
+            border-color: #6366F1;
+        }
+
+        .step-item.completed .step-number {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748B;
+            letter-spacing: 0.2px;
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active .step-label {
+            color: #6366F1;
+            font-weight: 700;
+            transform: scale(1.05);
+        }
+
+        .step-item.completed .step-label {
+            color: #10B981;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tier-section {
+            background: linear-gradient(to bottom, #FFFFFF 0%, #F8FAFC 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .tier-section:hover {
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            border-color: #CBD5E1;
+        }
+
+        .tier-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .tier-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .tier-icon.tier1 {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        }
+
+        .tier-icon.tier2 {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        }
+
+        .tier-icon.tier3 {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+
+        .tier-icon.tier4 {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        }
+
+        .tier-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin: 0;
+            letter-spacing: -0.5px;
+            line-height: 1.3;
+        }
+
+        .tier-subtitle {
+            font-size: 0.95rem;
+            color: #64748B;
+            margin: 0.5rem 0 0 0;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin: 2rem 0 1.25rem 0;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #E5E7EB;
+            letter-spacing: -0.3px;
+            position: relative;
+        }
+
+        .form-section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            border-radius: 2px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #CBD5E1;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            background: linear-gradient(to bottom, #FFFFFF 0%, #F8FAFC 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .file-upload-area:hover::before {
+            left: 100%;
+        }
+
+        .file-upload-area:hover {
+            border-color: #6366F1;
+            background: linear-gradient(to bottom, #EEF2FF 0%, #F8FAFC 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #6366F1;
+            background: linear-gradient(to bottom, #EEF2FF 0%, #E0E7FF 100%);
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+        }
+
+        .file-upload-icon {
+            font-size: 3.5rem;
+            color: #CBD5E1;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover .file-upload-icon {
+            color: #6366F1;
+            transform: scale(1.1);
+        }
+
+        .file-upload-text {
+            color: #64748B;
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: linear-gradient(to right, #F0FDF4 0%, #FFFFFF 100%);
+            border-radius: 10px;
+            border: 2px solid #D1FAE5;
+            margin-top: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .uploaded-file:hover {
+            border-color: #10B981;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.15);
+            transform: translateX(4px);
+        }
+
+        .uploaded-file-icon {
+            color: #10B981;
+            font-size: 1.5rem;
+            animation: checkmark 0.5s ease;
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .uploaded-file-name {
+            flex: 1;
+            font-size: 0.95rem;
+            color: #1E293B;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .remove-file {
+            color: #EF4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .remove-file:hover {
+            background: #FEF2F2;
+            transform: scale(1.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #E5E7EB;
+            background: linear-gradient(to bottom, transparent 0%, #F8FAFC 100%);
+            padding-bottom: 1rem;
+        }
+
+        .btn-secondary {
+            background: #FFFFFF;
+            border: 2px solid #E5E7EB;
+            color: #64748B;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+        }
+
+        .btn-secondary:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+            color: #475569;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(15, 23, 42, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .required-field::after {
+            content: ' *';
+            color: #EF4444;
+            font-weight: 700;
+            margin-left: 2px;
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+            font-style: italic;
+            display: block;
+        }
+
+        .form-check {
+            padding: 1rem;
+            background: #F8FAFC;
+            border-radius: 10px;
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+
+        .form-check:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0.25rem;
+            cursor: pointer;
+        }
+
+        .form-check-input:checked {
+            background-color: #6366F1;
+            border-color: #6366F1;
+        }
+
+        .form-check-label {
+            font-size: 0.95rem;
+            color: #1E293B;
+            font-weight: 500;
+            cursor: pointer;
+            line-height: 1.6;
+            margin-left: 0.5rem;
+        }
+
+        .client-reference-item {
+            background: linear-gradient(to bottom, #FFFFFF 0%, #F8FAFC 100%);
+            border: 2px solid #E5E7EB !important;
+            transition: all 0.3s ease;
+        }
+
+        .client-reference-item:hover {
+            border-color: #CBD5E1 !important;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        .client-reference-item h6 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #E5E7EB;
+            letter-spacing: -0.3px;
+        }
+
+        /* Additional text improvements */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+            color: #1E293B;
+        }
+
+        p {
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        small {
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Row spacing improvements */
+        .row.g-3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .row.g-3 > * {
+            margin-bottom: 1rem;
+        }
+
+        /* Input group improvements */
+        .input-group {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .input-group .form-control {
+            border-radius: 0;
+        }
+
+        .input-group-text {
+            background: #F8FAFC;
+            border: 2px solid #E2E8F0;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        /* Select improvements */
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236366F1' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 12px;
+            padding-right: 2.5rem;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        /* Number input improvements */
+        input[type="number"].form-control {
+            font-variant-numeric: tabular-nums;
+        }
+
+        input[type="number"].form-control::-webkit-inner-spin-button,
+        input[type="number"].form-control::-webkit-outer-spin-button {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        /* Date input improvements */
+        input[type="date"].form-control {
+            position: relative;
+        }
+
+        input[type="date"].form-control::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        input[type="date"].form-control:hover::-webkit-calendar-picker-indicator {
+            opacity: 1;
+        }
+
+        /* Textarea improvements */
+        textarea.form-control {
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        /* Loading spinner */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+        }
+
+        @media (max-width: 768px) {
+            .profile-body {
+                padding: 1.5rem;
+            }
+
+            .step-indicator {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0;
+            }
+
+            .step-item::after {
+                display: none;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                margin-top: 2rem;
+                padding-top: 1.5rem;
+            }
+
+            .form-actions button {
+                width: 100%;
+            }
+
+            .tier-section {
+                padding: 1.5rem;
+            }
+
+            .tier-title {
+                font-size: 1.25rem;
+            }
+
+            .form-section-title {
+                font-size: 1rem;
+            }
+
+            .file-upload-area {
+                padding: 2rem 1.5rem;
+            }
+
+            .file-upload-icon {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 1rem 0;
+            }
+
+            .profile-card {
+                border-radius: 12px;
+                margin: 0 1rem;
+            }
+
+            .profile-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .profile-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .tier-section {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="header-decoration">
+                    <div class="decoration-circle"></div>
+                    <div class="decoration-circle"></div>
+                    <div class="decoration-circle"></div>
+                </div>
+                <div class="header-content">
+                    <img src="../../image-removebg-preview - 2025-10-29T072620.142.png" alt="Alpha Freight Logo" class="header-logo">
+                    <h2><i class="fas fa-user-circle"></i> Complete Broker Profile</h2>
+                    <p>Add broker details to activate your account and unlock full platform access.</p>
+                    <div class="premium-badge">
+                        <i class="fas fa-shield-check"></i>
+                        <span>Secure & Verified Platform</span>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-body">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-item active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Personal & Business</div>
+                    </div>
+                    <div class="step-item" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Legal Documents</div>
+                    </div>
+                    <div class="step-item" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Financial</div>
+                    </div>
+                    <div class="step-item" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Industry Specific</div>
+                    </div>
+                </div>
+
+                        <form id="brokerCompleteProfileForm">
+                    <!-- TIER 1: Personal & Business Details -->
+                    <div class="step-content active" id="step1">
+                        <div class="tier-section">
+                            <div class="tier-header">
+                                <div class="tier-icon tier1">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <h3 class="tier-title">TIER 1: Personal & Business Details</h3>
+                                    <p class="tier-subtitle">Complete your personal and business information</p>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Personal Details</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Full Legal Name (as per ID)</label>
+                                    <input type="text" class="form-control" id="fullLegalName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Date of Birth</label>
+                                    <input type="date" class="form-control" id="dateOfBirth" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Nationality</label>
+                                    <input type="text" class="form-control" id="nationality" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Personal Phone Number</label>
+                                    <input type="tel" class="form-control" id="personalPhone" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Personal Email Address</label>
+                                    <input type="email" class="form-control" id="personalEmail" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Current Residential Address</label>
+                                    <textarea class="form-control" id="residentialAddress" rows="2" required></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Photo/Selfie for Facial Verification</label>
+                                    <input type="file" class="form-control" id="facialPhoto" accept="image/*" required>
+                                    <small class="help-text">Upload a clear photo of yourself for verification</small>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Business Details</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business/Company Name</label>
+                                    <input type="text" class="form-control" id="businessName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Trading Name (if different)</label>
+                                    <input type="text" class="form-control" id="tradingName">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business Registration Number (Companies House)</label>
+                                    <input type="text" class="form-control" id="businessRegNumber" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VAT Registration Number (if applicable)</label>
+                                    <input type="text" class="form-control" id="vatNumber">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">UTR Number (Unique Taxpayer Reference)</label>
+                                    <input type="text" class="form-control" id="utrNumber" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business Address (Registered Office)</label>
+                                    <textarea class="form-control" id="businessAddress" rows="2" required></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business Phone Number</label>
+                                    <input type="tel" class="form-control" id="businessPhone" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business Email Address</label>
+                                    <input type="email" class="form-control" id="businessEmail" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Website URL (if any)</label>
+                                    <input type="url" class="form-control" id="websiteUrl" placeholder="https://">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIER 2: Legal Documents -->
+                    <div class="step-content" id="step2">
+                        <div class="tier-section">
+                            <div class="tier-header">
+                                <div class="tier-icon tier2">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                <div>
+                                    <h3 class="tier-title">TIER 2: Legal Documents (Verification Proof)</h3>
+                                    <p class="tier-subtitle">Upload required documents for verification</p>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Identity Proof (Any One)</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">UK Passport (Front + Back)</label>
+                                    <div class="file-upload-area" data-upload="passportFront">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Passport Front</div>
+                                        <input type="file" class="d-none" id="passportFront" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="passportFrontPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">UK Passport (Back)</label>
+                                    <div class="file-upload-area" data-upload="passportBack">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Passport Back</div>
+                                        <input type="file" class="d-none" id="passportBack" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="passportBackPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">UK Driving Licence (Both Sides)</label>
+                                    <div class="file-upload-area" data-upload="drivingLicense">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Driving Licence</div>
+                                        <input type="file" class="d-none" id="drivingLicense" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="drivingLicensePreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Biometric Residence Permit</label>
+                                    <div class="file-upload-area" data-upload="brp">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload BRP</div>
+                                        <input type="file" class="d-none" id="brp" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="brpPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">National Identity Card</label>
+                                    <div class="file-upload-area" data-upload="nationalId">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload National ID</div>
+                                        <input type="file" class="d-none" id="nationalId" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="nationalIdPreview"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Address Proof (Any One - Last 3 months)</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Utility Bill (Gas/Electric/Water)</label>
+                                    <div class="file-upload-area" data-upload="utilityBill">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Utility Bill</div>
+                                        <input type="file" class="d-none" id="utilityBill" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="utilityBillPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Council Tax Bill</label>
+                                    <div class="file-upload-area" data-upload="councilTax">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Council Tax Bill</div>
+                                        <input type="file" class="d-none" id="councilTax" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="councilTaxPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Bank Statement</label>
+                                    <div class="file-upload-area" data-upload="bankStatement">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Bank Statement</div>
+                                        <input type="file" class="d-none" id="bankStatement" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="bankStatementPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tenancy Agreement</label>
+                                    <div class="file-upload-area" data-upload="tenancyAgreement">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Tenancy Agreement</div>
+                                        <input type="file" class="d-none" id="tenancyAgreement" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="tenancyAgreementPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">HMRC Tax Document</label>
+                                    <div class="file-upload-area" data-upload="hmrcTax">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload HMRC Tax Document</div>
+                                        <input type="file" class="d-none" id="hmrcTax" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="hmrcTaxPreview"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Business Proof (Mandatory)</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Certificate of Incorporation</label>
+                                    <div class="file-upload-area" data-upload="incorporationCert">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Certificate</div>
+                                        <input type="file" class="d-none" id="incorporationCert" accept="image/*,application/pdf" required>
+                                    </div>
+                                    <div id="incorporationCertPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Memorandum & Articles of Association</label>
+                                    <div class="file-upload-area" data-upload="memorandum">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Memorandum</div>
+                                        <input type="file" class="d-none" id="memorandum" accept="image/*,application/pdf" required>
+                                    </div>
+                                    <div id="memorandumPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Companies House Registration Document</label>
+                                    <div class="file-upload-area" data-upload="companiesHouse">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Registration Document</div>
+                                        <input type="file" class="d-none" id="companiesHouse" accept="image/*,application/pdf" required>
+                                    </div>
+                                    <div id="companiesHousePreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VAT Registration Certificate</label>
+                                    <div class="file-upload-area" data-upload="vatCert">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload VAT Certificate</div>
+                                        <input type="file" class="d-none" id="vatCert" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="vatCertPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business Bank Statement</label>
+                                    <div class="file-upload-area" data-upload="businessBankStatement">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Business Bank Statement</div>
+                                        <input type="file" class="d-none" id="businessBankStatement" accept="image/*,application/pdf" required>
+                                    </div>
+                                    <div id="businessBankStatementPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Insurance Certificate (Public Liability)</label>
+                                    <div class="file-upload-area" data-upload="insuranceCert">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Insurance Certificate</div>
+                                        <input type="file" class="d-none" id="insuranceCert" accept="image/*,application/pdf" required>
+                                    </div>
+                                    <div id="insuranceCertPreview"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIER 3: Financial Verification -->
+                    <div class="step-content" id="step3">
+                        <div class="tier-section">
+                            <div class="tier-header">
+                                <div class="tier-icon tier3">
+                                    <i class="fas fa-pound-sign"></i>
+                                </div>
+                                <div>
+                                    <h3 class="tier-title">TIER 3: Financial Verification</h3>
+                                    <p class="tier-subtitle">Provide your financial and banking information</p>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Bank Details</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Business Bank Account Name</label>
+                                    <input type="text" class="form-control" id="bankAccountName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Account Number</label>
+                                    <input type="text" class="form-control" id="accountNumber" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Sort Code</label>
+                                    <input type="text" class="form-control" id="sortCode" placeholder="XX-XX-XX" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">IBAN (if international)</label>
+                                    <input type="text" class="form-control" id="iban">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">SWIFT/BIC Code</label>
+                                    <input type="text" class="form-control" id="swiftBic">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Bank Name & Branch</label>
+                                    <input type="text" class="form-control" id="bankName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Bank Confirmation Letter (Optional)</label>
+                                    <div class="file-upload-area" data-upload="bankConfirmation">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Bank Confirmation Letter</div>
+                                        <input type="file" class="d-none" id="bankConfirmation" accept="image/*,application/pdf">
+                                    </div>
+                                    <div id="bankConfirmationPreview"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Financial History</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">6 Months Business Bank Statements</label>
+                                    <div class="file-upload-area" data-upload="bankStatements6Months">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Bank Statements (PDF/ZIP)</div>
+                                        <input type="file" class="d-none" id="bankStatements6Months" accept="image/*,application/pdf,.zip" multiple required>
+                                    </div>
+                                    <div id="bankStatements6MonthsPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Tax Returns (Last 1-2 Years)</label>
+                                    <div class="file-upload-area" data-upload="taxReturns">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Tax Returns</div>
+                                        <input type="file" class="d-none" id="taxReturns" accept="image/*,application/pdf" multiple required>
+                                    </div>
+                                    <div id="taxReturnsPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Proof of Previous Logistics Earnings</label>
+                                    <div class="file-upload-area" data-upload="logisticsEarnings">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Proof of Earnings</div>
+                                        <input type="file" class="d-none" id="logisticsEarnings" accept="image/*,application/pdf" required>
+                                    </div>
+                                    <div id="logisticsEarningsPreview"></div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="creditCheckConsent" required>
+                                        <label class="form-check-label" for="creditCheckConsent">
+                                            I consent to credit check <span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="noBankruptcy" required>
+                                        <label class="form-check-label" for="noBankruptcy">
+                                            I declare that I have no bankruptcy/IVA <span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIER 4: Industry Specific -->
+                    <div class="step-content" id="step4">
+                        <div class="tier-section">
+                            <div class="tier-header">
+                                <div class="tier-icon tier4">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div>
+                                    <h3 class="tier-title">TIER 4: Industry Specific</h3>
+                                    <p class="tier-subtitle">Share your logistics experience and qualifications</p>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Experience & Qualifications</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required-field">Years in Logistics Industry</label>
+                                    <input type="number" class="form-control" id="yearsExperience" min="0" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Previous Companies Worked With</label>
+                                    <textarea class="form-control" id="previousCompanies" rows="3" placeholder="List previous companies"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Industry Certifications (if any)</label>
+                                    <div class="file-upload-area" data-upload="certifications">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Certifications</div>
+                                        <input type="file" class="d-none" id="certifications" accept="image/*,application/pdf" multiple>
+                                    </div>
+                                    <div id="certificationsPreview"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Professional Memberships (FTA, RHA etc.)</label>
+                                    <input type="text" class="form-control" id="memberships" placeholder="e.g., FTA, RHA">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Training Certificates</label>
+                                    <div class="file-upload-area" data-upload="trainingCerts">
+                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                        <div class="file-upload-text">Click or drag to upload Training Certificates</div>
+                                        <input type="file" class="d-none" id="trainingCerts" accept="image/*,application/pdf" multiple>
+                                    </div>
+                                    <div id="trainingCertsPreview"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title">Client References (2-3 Required)</div>
+                            <div id="clientReferences">
+                                <div class="client-reference-item mb-4 p-3 border rounded">
+                                    <h6 class="mb-3">Reference 1</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Contact Name</label>
+                                            <input type="text" class="form-control" name="refName[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Phone</label>
+                                            <input type="tel" class="form-control" name="refPhone[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Email</label>
+                                            <input type="email" class="form-control" name="refEmail[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Company Name</label>
+                                            <input type="text" class="form-control" name="refCompany[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Approximate Monthly Volume Handled</label>
+                                            <input type="text" class="form-control" name="refVolume[]" placeholder="e.g., 50 loads/month" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Years Working With This Client</label>
+                                            <input type="number" class="form-control" name="refYears[]" min="0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="client-reference-item mb-4 p-3 border rounded">
+                                    <h6 class="mb-3">Reference 2</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Contact Name</label>
+                                            <input type="text" class="form-control" name="refName[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Phone</label>
+                                            <input type="tel" class="form-control" name="refPhone[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Email</label>
+                                            <input type="email" class="form-control" name="refEmail[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Company Name</label>
+                                            <input type="text" class="form-control" name="refCompany[]" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Approximate Monthly Volume Handled</label>
+                                            <input type="text" class="form-control" name="refVolume[]" placeholder="e.g., 50 loads/month" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Years Working With This Client</label>
+                                            <input type="number" class="form-control" name="refYears[]" min="0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="client-reference-item mb-4 p-3 border rounded">
+                                    <h6 class="mb-3">Reference 3 (Optional)</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Contact Name</label>
+                                            <input type="text" class="form-control" name="refName[]">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Phone</label>
+                                            <input type="tel" class="form-control" name="refPhone[]">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control" name="refEmail[]">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Company Name</label>
+                                            <input type="text" class="form-control" name="refCompany[]">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Approximate Monthly Volume Handled</label>
+                                            <input type="text" class="form-control" name="refVolume[]" placeholder="e.g., 50 loads/month">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Years Working With This Client</label>
+                                            <input type="number" class="form-control" name="refYears[]" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">Previous</button>
+                        <div class="ms-auto">
+                            <button type="button" class="btn btn-secondary" id="nextBtn">Next</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit Profile</button>
+                        </div>
+                    </div>
+                        </form>
+            </div>
+            <div class="text-center mt-3 skip-link">
+                <a href="dashboard.html">Skip for now</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        // Initialize Firebase if not already initialized
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+                authDomain: "alpha-brokerage.firebaseapp.com",
+                databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+                projectId: "alpha-brokerage",
+                storageBucket: "alpha-brokerage.firebasestorage.app",
+                messagingSenderId: "834712514965",
+                appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        let currentStep = 1;
+        const totalSteps = 4;
+        const uploadedFiles = {};
+
+        // Step Navigation
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show current step
+            document.getElementById('step' + step).classList.add('active');
+
+            // Update step indicators
+            document.querySelectorAll('.step-item').forEach((item, index) => {
+                const stepNum = index + 1;
+                item.classList.remove('active', 'completed');
+                if (stepNum < step) {
+                    item.classList.add('completed');
+                } else if (stepNum === step) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update buttons
+            document.getElementById('prevBtn').style.display = step > 1 ? 'block' : 'none';
+            document.getElementById('nextBtn').style.display = step < totalSteps ? 'block' : 'none';
+            document.getElementById('submitBtn').style.display = step === totalSteps ? 'block' : 'none';
+        }
+
+        // Next Step
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        });
+
+        // Previous Step
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
+
+        // Validate Step
+        function validateStep(step) {
+            const stepElement = document.getElementById('step' + step);
+            const requiredFields = stepElement.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim() && field.type !== 'file') {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+
+                if (field.type === 'file' && field.hasAttribute('required')) {
+                    if (!uploadedFiles[field.id]) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill in all required fields in this step.');
+            }
+
+            return isValid;
+        }
+
+        // File Upload Handler
+        function setupFileUpload(uploadArea, fileInput, previewContainer) {
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileUpload(fileInput, previewContainer);
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                handleFileUpload(fileInput, previewContainer);
+            });
+        }
+
+        function handleFileUpload(fileInput, previewContainer) {
+            const file = fileInput.files[0];
+            if (file) {
+                uploadedFiles[fileInput.id] = file;
+                
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'uploaded-file';
+                fileDiv.innerHTML = `
+                    <i class="fas fa-file-check uploaded-file-icon"></i>
+                    <span class="uploaded-file-name">${file.name}</span>
+                    <i class="fas fa-times remove-file" onclick="removeFile('${fileInput.id}')"></i>
+                `;
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(fileDiv);
+            }
+        }
+
+        window.removeFile = function(fileId) {
+            delete uploadedFiles[fileId];
+            const fileInput = document.getElementById(fileId);
+            if (fileInput) {
+                fileInput.value = '';
+                const previewContainer = document.getElementById(fileId + 'Preview');
+                if (previewContainer) {
+                    previewContainer.innerHTML = '';
+                }
+            }
+        };
+
+        // Setup all file uploads
+        document.querySelectorAll('.file-upload-area').forEach(area => {
+            const uploadId = area.getAttribute('data-upload');
+            const fileInput = document.getElementById(uploadId);
+            if (fileInput) {
+                const previewId = uploadId + 'Preview';
+                const previewContainer = document.getElementById(previewId);
+                if (previewContainer) {
+                    setupFileUpload(area, fileInput, previewContainer);
+                }
+            }
+        });
+
+        // Form Submission
+        document.getElementById('brokerCompleteProfileForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Validate all steps
+            for (let i = 1; i <= totalSteps; i++) {
+                if (!validateStep(i)) {
+                    showStep(i);
+                    alert('Please complete all required fields before submitting.');
+                    return;
+                }
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            submitBtn.disabled = true;
+
+            try {
+                const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+                if (!auth || !auth.isLoggedIn) {
+                    alert('Please login first.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const db = firebase.database();
+                const storage = firebase.storage();
+                const brokerId = auth.brokerId || auth.id;
+
+                if (!brokerId) {
+                    alert('Broker ID not found. Please login again.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Collect form data
+                const profileData = {
+                    // Tier 1: Personal & Business
+                    fullLegalName: document.getElementById('fullLegalName').value.trim(),
+                    dateOfBirth: document.getElementById('dateOfBirth').value,
+                    nationality: document.getElementById('nationality').value.trim(),
+                    personalPhone: document.getElementById('personalPhone').value.trim(),
+                    personalEmail: document.getElementById('personalEmail').value.trim(),
+                    residentialAddress: document.getElementById('residentialAddress').value.trim(),
+                    businessName: document.getElementById('businessName').value.trim(),
+                    tradingName: document.getElementById('tradingName').value.trim(),
+                    businessRegNumber: document.getElementById('businessRegNumber').value.trim(),
+                    vatNumber: document.getElementById('vatNumber').value.trim(),
+                    utrNumber: document.getElementById('utrNumber').value.trim(),
+                    businessAddress: document.getElementById('businessAddress').value.trim(),
+                    businessPhone: document.getElementById('businessPhone').value.trim(),
+                    businessEmail: document.getElementById('businessEmail').value.trim(),
+                    websiteUrl: document.getElementById('websiteUrl').value.trim(),
+
+                    // Tier 3: Financial
+                    bankAccountName: document.getElementById('bankAccountName').value.trim(),
+                    accountNumber: document.getElementById('accountNumber').value.trim(),
+                    sortCode: document.getElementById('sortCode').value.trim(),
+                    iban: document.getElementById('iban').value.trim(),
+                    swiftBic: document.getElementById('swiftBic').value.trim(),
+                    bankName: document.getElementById('bankName').value.trim(),
+                    creditCheckConsent: document.getElementById('creditCheckConsent').checked,
+                    noBankruptcy: document.getElementById('noBankruptcy').checked,
+
+                    // Tier 4: Industry
+                    yearsExperience: parseInt(document.getElementById('yearsExperience').value) || 0,
+                    previousCompanies: document.getElementById('previousCompanies').value.trim(),
+                    memberships: document.getElementById('memberships').value.trim(),
+
+                    // Client References
+                    clientReferences: []
+                };
+
+                // Collect client references
+                const refNames = document.querySelectorAll('input[name="refName[]"]');
+                const refPhones = document.querySelectorAll('input[name="refPhone[]"]');
+                const refEmails = document.querySelectorAll('input[name="refEmail[]"]');
+                const refCompanies = document.querySelectorAll('input[name="refCompany[]"]');
+                const refVolumes = document.querySelectorAll('input[name="refVolume[]"]');
+                const refYears = document.querySelectorAll('input[name="refYears[]"]');
+
+                for (let i = 0; i < refNames.length; i++) {
+                    if (refNames[i].value.trim()) {
+                        profileData.clientReferences.push({
+                            name: refNames[i].value.trim(),
+                            phone: refPhones[i].value.trim(),
+                            email: refEmails[i].value.trim(),
+                            company: refCompanies[i].value.trim(),
+                            volume: refVolumes[i].value.trim(),
+                            years: parseInt(refYears[i].value) || 0
+                        });
+                    }
+                }
+
+                // Upload files to Firebase Storage
+                const fileUploadPromises = [];
+                for (const [fileId, file] of Object.entries(uploadedFiles)) {
+                    const fileRef = storage.ref(`brokers/${brokerId}/${fileId}/${file.name}`);
+                    const uploadTask = fileRef.put(file);
+                    
+                    fileUploadPromises.push(
+                        uploadTask.then(snapshot => snapshot.ref.getDownloadURL())
+                            .then(url => {
+                                profileData[fileId] = url;
+                            })
+                            .catch(error => {
+                                console.error(`Error uploading ${fileId}:`, error);
+                            })
+                    );
+                }
+
+                // Wait for all file uploads
+                await Promise.all(fileUploadPromises);
+
+                // Update profile in database
+                profileData.profileComplete = true;
+                profileData.completedAt = firebase.database.ServerValue.TIMESTAMP;
+                profileData.updatedAt = firebase.database.ServerValue.TIMESTAMP;
+
+                await db.ref('brokers/' + brokerId).update(profileData);
+
+                // Update local auth
+                const updatedAuth = {
+                    ...auth,
+                    profileComplete: true
+                };
+                localStorage.setItem('brokerAuth', JSON.stringify(updatedAuth));
+
+                alert('Profile completed successfully!');
+            window.location.href = 'dashboard.html';
+
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('Error saving profile. Please try again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initialize
+        showStep(1);
+    </script>
+</body>
+</html>

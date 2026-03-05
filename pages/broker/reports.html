@@ -1,0 +1,1481 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Broker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 240px;
+            z-index: 1000;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dashboard-sidebar.collapsed {
+            width: 70px;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            display: block;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content img {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content hr {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .broker-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px solid #6f42c1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #6f42c1;
+            font-size: 0.85rem;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: #6f42c1;
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(111, 66, 193, 0.35);
+        }
+
+        .sidebar-toggle-btn:active {
+            transform: scale(1.05);
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-toggle-btn i {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-content {
+            transition: opacity 0.3s ease;
+            width: 100%;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .dashboard-sidebar img {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-sidebar img:hover {
+            transform: scale(1.05);
+        }
+
+        .broker-nav .nav-link {
+            padding: 0.65rem 0.75rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .broker-nav .nav-link span {
+            transition: opacity 0.2s ease, display 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .broker-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+            color: white !important;
+        }
+
+        .broker-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            font-weight: 600;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .broker-nav .nav-link i {
+            width: 18px;
+            margin-right: 0.65rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .broker-nav hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+
+        .dashboard-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            margin-left: 240px;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: calc(100% - 240px);
+        }
+
+        .dashboard-sidebar.collapsed ~ .dashboard-content {
+            margin-left: 70px;
+            width: calc(100% - 70px);
+        }
+
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-menu-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: #1e293b;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn:hover {
+            color: #6f42c1;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1049;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .header-section {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            padding: 0.75rem 2rem;
+            border-radius: 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .topbar-search {
+            flex: 1;
+            max-width: 520px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: #f4f6fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            padding: 0.45rem 1rem;
+        }
+
+        .topbar-search i {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .topbar-search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .topbar-icon,
+        .topbar-avatar-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .topbar-icon:hover,
+        .topbar-avatar-btn:hover,
+        .topbar-avatar-btn.active {
+            color: #6f42c1;
+            border-color: #c084fc;
+            background: rgba(111, 66, 193, 0.08);
+        }
+
+        .topbar-avatar-btn {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .topbar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .quick-links-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 48px;
+            width: 260px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            padding: 0.9rem;
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: top right;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .quick-links-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .quick-links-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .quick-links-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.6rem;
+        }
+
+        .quick-link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .quick-link-item:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+        }
+
+        .quick-link-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 280px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: top right;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .profile-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .profile-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .profile-menu-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .profile-menu-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .profile-menu-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .profile-menu-email {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.15rem;
+        }
+
+        .profile-menu-links {
+            padding: 0.5rem;
+        }
+
+        .profile-menu-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.75rem;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .profile-menu-links a:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+        }
+
+        .profile-menu-links a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-menu-footer {
+            padding: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .profile-menu-signout {
+            width: 100%;
+        }
+
+        .report-template-card {
+            transition: all 0.3s ease;
+        }
+
+        .report-template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+            border-color: #6f42c1 !important;
+        }
+
+        .report-item {
+            border-left: 4px solid #6f42c1;
+            transition: all 0.2s ease;
+        }
+
+        .report-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateX(4px);
+        }
+
+        .report-badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.65rem;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .dashboard-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                z-index: 1050;
+                width: 240px;
+                transition: transform 0.3s ease;
+            }
+
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .dashboard-content {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+
+            .dashboard-sidebar.collapsed {
+                width: 240px;
+            }
+
+            .sidebar-toggle-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" class="img-fluid" style="max-height: 36px; object-fit: contain;">
+        <div></div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="dashboard-sidebar" id="dashboardSidebar">
+            <button class="sidebar-toggle-btn" onclick="toggleSidebarDesktop()" title="Toggle Sidebar">
+                <i class="fas fa-chevron-left" id="toggleIcon"></i>
+            </button>
+            <div class="sidebar-content p-3">
+                <div class="mb-4 text-center">
+                    <img src="../../image-removebg-preview - 2026-02-10T062943.516.png" alt="Alpha Freight Logo" class="img-fluid" style="max-width: 100%; max-height: 60px; object-fit: contain;">
+                </div>
+                    <nav class="nav flex-column broker-nav">
+                        <a class="nav-link text-white" href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                        <i class="fas fa-boxes"></i> <span>All Loads</span>
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                        <i class="fas fa-clipboard-check"></i> <span>My Loads</span>
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                        <i class="fas fa-plus-circle"></i> <span>Post Load</span>
+                        </a>
+                        <a class="nav-link text-white" href="matching.html">
+                        <i class="fas fa-random"></i> <span>Matching</span>
+                        </a>
+                    <a class="nav-link text-white" href="carriers.html">
+                        <i class="fas fa-truck"></i> <span>Carriers</span>
+                        </a>
+                    <a class="nav-link text-white" href="suppliers.html">
+                        <i class="fas fa-warehouse"></i> <span>Suppliers</span>
+                        </a>
+                    <a class="nav-link text-white" href="payments.html">
+                        <i class="fas fa-credit-card"></i> <span>Payments</span>
+                        </a>
+                    <a class="nav-link text-white" href="invoices.html">
+                        <i class="fas fa-file-invoice"></i> <span>Invoices</span>
+                        </a>
+                    <a class="nav-link text-white" href="commission.html">
+                        <i class="fas fa-chart-line"></i> <span>Commission</span>
+                        </a>
+                    <a class="nav-link text-white" href="payouts.html">
+                        <i class="fas fa-hand-holding-dollar"></i> <span>Payouts</span>
+                        </a>
+                    <a class="nav-link text-white" href="messages.html">
+                        <i class="fas fa-comments"></i> <span>Messages</span>
+                        </a>
+                    <a class="nav-link text-white" href="disputes.html">
+                        <i class="fas fa-scale-balanced"></i> <span>Disputes</span>
+                        </a>
+                    <a class="nav-link text-white" href="support-tickets.html">
+                        <i class="fas fa-life-ring"></i> <span>Support</span>
+                        </a>
+                    <a class="nav-link text-white" href="analytics.html">
+                        <i class="fas fa-chart-bar"></i> <span>Analytics</span>
+                        </a>
+                    <a class="nav-link text-white" href="reports.html">
+                        <i class="fas fa-file-alt"></i> <span>Reports</span>
+                        </a>
+                        <a class="nav-link text-white" href="profile.html">
+                        <i class="fas fa-user"></i> <span>Profile</span>
+                        </a>
+                        <a class="nav-link text-white" href="complete-profile.html">
+                        <i class="fas fa-id-card"></i> <span>Complete Profile</span>
+                        </a>
+                    <a class="nav-link text-white" href="settings.html">
+                        <i class="fas fa-cog"></i> <span>Settings</span>
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="login.html">
+                        <i class="fas fa-right-from-bracket"></i> <span>Logout</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="dashboard-content p-0">
+            <!-- Desktop Header -->
+            <div class="header-section d-none d-md-block">
+                <div class="topbar">
+                    <div class="topbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search..." aria-label="Search">
+                    </div>
+                    <div class="topbar-actions position-relative">
+                        <button class="topbar-icon" type="button" title="Theme">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <button class="topbar-icon" type="button" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="topbar-icon" type="button" id="quickLinksToggle" title="Quick Links">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <div class="quick-links-menu" id="quickLinksMenu">
+                            <div class="quick-links-title">Quick Links</div>
+                            <div class="quick-links-grid">
+                                <a class="quick-link-item" href="loads.html">
+                                    <i class="fas fa-boxes"></i> Loads
+                                </a>
+                                <a class="quick-link-item" href="carriers.html">
+                                    <i class="fas fa-truck"></i> Carriers
+                                </a>
+                                <a class="quick-link-item" href="suppliers.html">
+                                    <i class="fas fa-warehouse"></i> Suppliers
+                                </a>
+                                <a class="quick-link-item" href="payments.html">
+                                    <i class="fas fa-money-bill-wave"></i> Payments
+                                </a>
+                                <a class="quick-link-item" href="messages.html">
+                                    <i class="fas fa-comments"></i> Messages
+                                </a>
+                                <a class="quick-link-item" href="profile.html">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                            </div>
+                        </div>
+                        <button class="topbar-avatar-btn" type="button" id="profileMenuToggle" title="Profile">
+                            <div class="topbar-avatar" id="avatarInitials">B</div>
+                        </button>
+
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-menu-header">
+                                <div class="profile-menu-avatar" id="menuAvatarInitials">B</div>
+                        <div>
+                                    <div class="profile-menu-name" id="menuUserName">Broker</div>
+                                    <div class="profile-menu-email" id="menuUserEmail">broker@alphabrokrage.com</div>
+                                </div>
+                            </div>
+                            <div class="profile-menu-links">
+                                <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                                <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                                <a href="messages.html"><i class="fas fa-comments"></i> Messages</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> Settings & Privacy</a>
+                            </div>
+                            <div class="profile-menu-footer">
+                                <button class="btn btn-outline-primary profile-menu-signout" type="button" onclick="logout()">
+                                    <i class="fas fa-right-from-bracket me-2"></i> Sign out
+                                </button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="mb-0 fw-bold">Reports</h5>
+                        <small class="text-muted">Generate and manage comprehensive reports</small>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="showGenerateReportModal()">
+                        <i class="fas fa-plus-circle me-2"></i>Generate Report
+                    </button>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Reports</h6>
+                                        <h3 class="fw-bold mb-0" id="totalReportsStat">0</h3>
+                                        <small class="text-muted">All time</small>
+                                    </div>
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-file-alt fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">This Month</h6>
+                                        <h3 class="fw-bold text-success mb-0" id="monthReportsStat">0</h3>
+                                        <small class="text-muted">Generated reports</small>
+                                    </div>
+                                    <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-calendar-check fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Financial Reports</h6>
+                                        <h3 class="fw-bold text-info mb-0" id="financialReportsStat">0</h3>
+                                        <small class="text-muted">Revenue & commission</small>
+                                    </div>
+                                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-pound-sign fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Load Reports</h6>
+                                        <h3 class="fw-bold text-warning mb-0" id="loadReportsStat">0</h3>
+                                        <small class="text-muted">Load analytics</small>
+                                    </div>
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-boxes fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Report Templates -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-file-invoice text-primary me-2"></i>
+                            Quick Report Templates
+                        </h6>
+                        <small class="text-muted">Generate common reports instantly</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card border h-100 report-template-card" onclick="generateQuickReport('financial')" style="cursor: pointer; transition: all 0.3s;">
+                                    <div class="card-body text-center">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-chart-line fa-2x"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Financial Report</h6>
+                                        <p class="text-muted small mb-0">Revenue, commission, and financial overview</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card border h-100 report-template-card" onclick="generateQuickReport('loads')" style="cursor: pointer; transition: all 0.3s;">
+                                    <div class="card-body text-center">
+                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-boxes fa-2x"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Load Report</h6>
+                                        <p class="text-muted small mb-0">Load status, routes, and performance</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card border h-100 report-template-card" onclick="generateQuickReport('carriers')" style="cursor: pointer; transition: all 0.3s;">
+                                    <div class="card-body text-center">
+                                        <div class="rounded-circle bg-info bg-opacity-10 text-info d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-truck fa-2x"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Carrier Report</h6>
+                                        <p class="text-muted small mb-0">Carrier performance and statistics</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card border h-100 report-template-card" onclick="generateQuickReport('suppliers')" style="cursor: pointer; transition: all 0.3s;">
+                                    <div class="card-body text-center">
+                                        <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-warehouse fa-2x"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Supplier Report</h6>
+                                        <p class="text-muted small mb-0">Supplier activity and load history</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card border h-100 report-template-card" onclick="generateQuickReport('commission')" style="cursor: pointer; transition: all 0.3s;">
+                                    <div class="card-body text-center">
+                                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-hand-holding-dollar fa-2x"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Commission Report</h6>
+                                        <p class="text-muted small mb-0">Commission earnings and breakdown</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card border h-100 report-template-card" onclick="generateQuickReport('custom')" style="cursor: pointer; transition: all 0.3s;">
+                                    <div class="card-body text-center">
+                                        <div class="rounded-circle bg-secondary bg-opacity-10 text-secondary d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-cog fa-2x"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Custom Report</h6>
+                                        <p class="text-muted small mb-0">Create a custom report with filters</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="reportTypeFilter" class="form-label small fw-bold">Report Type</label>
+                                <select class="form-select form-select-sm" id="reportTypeFilter">
+                                    <option value="">All Types</option>
+                                    <option value="financial">Financial</option>
+                                    <option value="loads">Loads</option>
+                                    <option value="carriers">Carriers</option>
+                                    <option value="suppliers">Suppliers</option>
+                                    <option value="commission">Commission</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dateRangeFilter" class="form-label small fw-bold">Date Range</label>
+                                <select class="form-select form-select-sm" id="dateRangeFilter">
+                                    <option value="">All Time</option>
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                    <option value="year">This Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="searchReports" class="form-label small fw-bold">Search</label>
+                                <input type="text" class="form-control form-control-sm" id="searchReports" placeholder="Search reports...">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearFilters()">
+                                    <i class="fas fa-times me-2"></i>Clear Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports List -->
+                <div id="reportsLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading reports...</p>
+                </div>
+                <div id="noReportsMessage" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="fw-bold">No reports found</h5>
+                    <p class="text-muted">Generate your first report to get started.</p>
+                    <button class="btn btn-primary mt-3" onclick="showGenerateReportModal()">
+                        <i class="fas fa-plus-circle me-2"></i>Generate Report
+                    </button>
+                </div>
+                <div id="reportsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Report Modal -->
+    <div class="modal fade" id="generateReportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-file-alt text-primary me-2"></i>Generate Report
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateReportForm">
+                        <div class="mb-3">
+                            <label for="reportTypeSelect" class="form-label fw-bold">Report Type</label>
+                            <select class="form-select" id="reportTypeSelect" required>
+                                <option value="">Select report type...</option>
+                                <option value="financial">Financial Report</option>
+                                <option value="loads">Load Report</option>
+                                <option value="carriers">Carrier Report</option>
+                                <option value="suppliers">Supplier Report</option>
+                                <option value="commission">Commission Report</option>
+                                <option value="custom">Custom Report</option>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label fw-bold">Start Date</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label fw-bold">End Date</label>
+                                <input type="date" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportFormat" class="form-label fw-bold">Export Format</label>
+                            <select class="form-select" id="reportFormat">
+                                <option value="pdf">PDF</option>
+                                <option value="csv">CSV</option>
+                                <option value="excel">Excel</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Include Sections</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeSummary" checked>
+                                <label class="form-check-label" for="includeSummary">Summary</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeCharts" checked>
+                                <label class="form-check-label" for="includeCharts">Charts & Graphs</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeDetails" checked>
+                                <label class="form-check-label" for="includeDetails">Detailed Data</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="generateReport()">
+                        <i class="fas fa-file-download me-2"></i>Generate & Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        function toggleSidebarDesktop() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+                
+                if (toggleIcon) {
+                    if (sidebar.classList.contains('collapsed')) {
+                        toggleIcon.classList.remove('fa-chevron-left');
+                        toggleIcon.classList.add('fa-chevron-right');
+                    } else {
+                        toggleIcon.classList.remove('fa-chevron-right');
+                        toggleIcon.classList.add('fa-chevron-left');
+                    }
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('brokerAuth');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize Firebase if not already initialized
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+                authDomain: "alpha-brokerage.firebaseapp.com",
+                databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+                projectId: "alpha-brokerage",
+                storageBucket: "alpha-brokerage.firebasestorage.app",
+                messagingSenderId: "834712514965",
+                appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        // Reports Variables
+        let allReports = [];
+        let filteredReports = [];
+        let brokerId = null;
+
+        // Initialize Reports
+        function initializeReports() {
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (!auth || !auth.isLoggedIn) {
+                document.getElementById('reportsLoading').style.display = 'none';
+                document.getElementById('noReportsMessage').style.display = 'block';
+                return;
+            }
+
+            brokerId = auth.brokerId || auth.id || null;
+
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                console.error('Firebase database not available');
+                document.getElementById('reportsLoading').style.display = 'none';
+                document.getElementById('noReportsMessage').style.display = 'block';
+                return;
+            }
+
+            // Listen to Reports
+            db.ref('brokerReports').orderByChild('brokerId').equalTo(brokerId).on('value', function(snapshot) {
+                try {
+                    const reports = [];
+                    if (snapshot && snapshot.exists && snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            const report = child.val();
+                            if (report) {
+                                report.id = child.key;
+                                reports.push(report);
+                            }
+                        });
+                    }
+                    allReports = reports.sort((a, b) => {
+                        const timeA = a.createdAt || a.timestamp || 0;
+                        const timeB = b.createdAt || b.timestamp || 0;
+                        return timeB - timeA;
+                    });
+                    filteredReports = [...allReports];
+                    updateStatistics();
+                    renderReports();
+                } catch (error) {
+                    console.error('Error loading reports:', error);
+                    document.getElementById('reportsLoading').style.display = 'none';
+                    document.getElementById('noReportsMessage').style.display = 'block';
+                }
+            }, function(error) {
+                console.error('Error listening to reports:', error);
+                document.getElementById('reportsLoading').style.display = 'none';
+                document.getElementById('noReportsMessage').style.display = 'block';
+            });
+        }
+
+        // Update Statistics
+        function updateStatistics() {
+            const totalReports = allReports.length;
+            document.getElementById('totalReportsStat').textContent = totalReports;
+
+            // This month reports
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+            const monthReports = allReports.filter(r => {
+                const createdAt = r.createdAt || r.timestamp || 0;
+                return createdAt >= startOfMonth;
+            }).length;
+            document.getElementById('monthReportsStat').textContent = monthReports;
+
+            // Financial reports
+            const financialReports = allReports.filter(r => r.type === 'financial').length;
+            document.getElementById('financialReportsStat').textContent = financialReports;
+
+            // Load reports
+            const loadReports = allReports.filter(r => r.type === 'loads').length;
+            document.getElementById('loadReportsStat').textContent = loadReports;
+        }
+
+        // Render Reports
+        function renderReports() {
+            const container = document.getElementById('reportsContainer');
+            const loading = document.getElementById('reportsLoading');
+            const noReports = document.getElementById('noReportsMessage');
+
+            loading.style.display = 'none';
+
+            if (filteredReports.length === 0) {
+                noReports.style.display = 'block';
+                container.innerHTML = '';
+                return;
+            }
+
+            noReports.style.display = 'none';
+            container.innerHTML = filteredReports.map(report => {
+                const date = new Date(report.createdAt || report.timestamp || Date.now());
+                const formattedDate = date.toLocaleDateString('en-GB', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const typeColors = {
+                    financial: 'primary',
+                    loads: 'success',
+                    carriers: 'info',
+                    suppliers: 'warning',
+                    commission: 'danger',
+                    custom: 'secondary'
+                };
+
+                const typeIcons = {
+                    financial: 'chart-line',
+                    loads: 'boxes',
+                    carriers: 'truck',
+                    suppliers: 'warehouse',
+                    commission: 'hand-holding-dollar',
+                    custom: 'cog'
+                };
+
+                const color = typeColors[report.type] || 'secondary';
+                const icon = typeIcons[report.type] || 'file-alt';
+
+                return `
+                    <div class="card border-0 shadow-sm mb-3 report-item">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-${color} report-badge">
+                                            <i class="fas fa-${icon} me-1"></i>${report.type.charAt(0).toUpperCase() + report.type.slice(1)}
+                                        </span>
+                                        <span class="badge bg-light text-dark report-badge">
+                                            ${report.format ? report.format.toUpperCase() : 'PDF'}
+                                        </span>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">${report.title || `${report.type.charAt(0).toUpperCase() + report.type.slice(1)} Report`}</h6>
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-calendar me-1"></i>${formattedDate}
+                                        ${report.startDate && report.endDate ? ` | ${new Date(report.startDate).toLocaleDateString()} - ${new Date(report.endDate).toLocaleDateString()}` : ''}
+                                    </p>
+                                    ${report.description ? `<p class="text-muted small mb-0">${report.description}</p>` : ''}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="downloadReport('${report.id}')" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteReport('${report.id}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Show Generate Report Modal
+        function showGenerateReportModal() {
+            const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
+            const today = new Date().toISOString().split('T')[0];
+            const lastMonth = new Date();
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            const lastMonthStr = lastMonth.toISOString().split('T')[0];
+            
+            document.getElementById('startDate').value = lastMonthStr;
+            document.getElementById('endDate').value = today;
+            modal.show();
+        }
+
+        // Generate Quick Report
+        function generateQuickReport(type) {
+            const today = new Date().toISOString().split('T')[0];
+            const lastMonth = new Date();
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            const lastMonthStr = lastMonth.toISOString().split('T')[0];
+
+            document.getElementById('reportTypeSelect').value = type;
+            document.getElementById('startDate').value = lastMonthStr;
+            document.getElementById('endDate').value = today;
+            
+            const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
+            modal.show();
+        }
+
+        // Generate Report
+        function generateReport() {
+            const reportType = document.getElementById('reportTypeSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const format = document.getElementById('reportFormat').value;
+
+            if (!reportType || !startDate || !endDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (!auth || !auth.isLoggedIn) {
+                alert('Please log in to generate reports');
+                return;
+            }
+
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                alert('Database connection error');
+                return;
+            }
+
+            // Create report data
+            const reportData = {
+                brokerId: brokerId || auth.brokerId || auth.id,
+                type: reportType,
+                title: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`,
+                startDate: startDate,
+                endDate: endDate,
+                format: format,
+                createdAt: Date.now(),
+                timestamp: Date.now(),
+                description: `Report generated for period ${startDate} to ${endDate}`,
+                includeSummary: document.getElementById('includeSummary').checked,
+                includeCharts: document.getElementById('includeCharts').checked,
+                includeDetails: document.getElementById('includeDetails').checked
+            };
+
+            // Save report to database
+            db.ref('brokerReports').push(reportData).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('generateReportModal'));
+                modal.hide();
+                
+                // Simulate download (in real app, this would generate actual file)
+                alert(`Report generated successfully! Downloading ${format.toUpperCase()} file...`);
+            }).catch(error => {
+                console.error('Error generating report:', error);
+                alert('Error generating report. Please try again.');
+            });
+        }
+
+        // Download Report
+        function downloadReport(reportId) {
+            const report = allReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            // In a real application, this would download the actual file
+            alert(`Downloading ${report.format.toUpperCase()} report: ${report.title}`);
+        }
+
+        // Delete Report
+        function deleteReport(reportId) {
+            if (!confirm('Are you sure you want to delete this report?')) return;
+
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                alert('Database connection error');
+                return;
+            }
+
+            db.ref('brokerReports').child(reportId).remove().then(() => {
+                alert('Report deleted successfully');
+            }).catch(error => {
+                console.error('Error deleting report:', error);
+                alert('Error deleting report. Please try again.');
+            });
+        }
+
+        // Clear Filters
+        function clearFilters() {
+            document.getElementById('reportTypeFilter').value = '';
+            document.getElementById('dateRangeFilter').value = '';
+            document.getElementById('searchReports').value = '';
+            filteredReports = [...allReports];
+            renderReports();
+        }
+
+        // Filter Reports
+        function filterReports() {
+            const typeFilter = document.getElementById('reportTypeFilter').value;
+            const dateFilter = document.getElementById('dateRangeFilter').value;
+            const searchTerm = document.getElementById('searchReports').value.toLowerCase();
+
+            filteredReports = allReports.filter(report => {
+                // Type filter
+                if (typeFilter && report.type !== typeFilter) return false;
+
+                // Search filter
+                if (searchTerm) {
+                    const title = (report.title || '').toLowerCase();
+                    const description = (report.description || '').toLowerCase();
+                    if (!title.includes(searchTerm) && !description.includes(searchTerm)) return false;
+                }
+
+                // Date range filter
+                if (dateFilter) {
+                    const now = new Date();
+                    const reportDate = new Date(report.createdAt || report.timestamp || 0);
+                    let startDate;
+
+                    switch(dateFilter) {
+                        case 'today':
+                            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                            break;
+                        case 'week':
+                            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            break;
+                        case 'month':
+                            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                            break;
+                        case 'quarter':
+                            startDate = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+                            break;
+                        case 'year':
+                            startDate = new Date(now.getFullYear(), 0, 1);
+                            break;
+                        default:
+                            startDate = null;
+                    }
+
+                    if (startDate && reportDate < startDate) return false;
+                }
+
+                return true;
+            });
+
+            renderReports();
+        }
+
+        // Close sidebar when clicking on a nav link on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.broker-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            // Quick Links Toggle
+            const quickLinksToggle = document.getElementById('quickLinksToggle');
+            const quickLinksMenu = document.getElementById('quickLinksMenu');
+            
+            if (quickLinksToggle && quickLinksMenu) {
+                quickLinksToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    quickLinksMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!quickLinksMenu.contains(e.target) && !quickLinksToggle.contains(e.target)) {
+                        quickLinksMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Profile Menu Toggle
+            const profileMenuToggle = document.getElementById('profileMenuToggle');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (profileMenuToggle && profileMenu) {
+                profileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('show');
+                    if (profileMenu.classList.contains('show')) {
+                        quickLinksMenu.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileMenu.contains(e.target) && !profileMenuToggle.contains(e.target)) {
+                        profileMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Update avatar initials
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (auth) {
+                const firstName = auth.firstName || '';
+                const lastName = auth.lastName || '';
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || 'B';
+                
+                const avatarElements = document.querySelectorAll('#avatarInitials, #menuAvatarInitials');
+                avatarElements.forEach(el => {
+                    if (el) el.textContent = initials;
+                });
+
+                const nameEl = document.getElementById('menuUserName');
+                if (nameEl) {
+                    nameEl.textContent = `${firstName} ${lastName}`.trim() || 'Broker';
+                }
+
+                const emailEl = document.getElementById('menuUserEmail');
+                if (emailEl && auth.email) {
+                    emailEl.textContent = auth.email;
+                }
+            }
+
+            // Initialize Reports
+            initializeReports();
+
+            // Filter event listeners
+            document.getElementById('reportTypeFilter').addEventListener('change', filterReports);
+            document.getElementById('dateRangeFilter').addEventListener('change', filterReports);
+            document.getElementById('searchReports').addEventListener('input', filterReports);
+        });
+    </script>
+</body>
+</html>

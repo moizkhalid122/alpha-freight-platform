@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics & Reports - White Label Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .notification-btn, .profile-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-gray);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-medium);
+            transition: all 0.2s ease;
+        }
+
+        .notification-btn:hover, .profile-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.625rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            width: 260px;
+            height: calc(100vh - 64px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-gray);
+            padding: 2rem 0;
+            overflow-y: auto;
+            z-index: 99;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 2rem;
+            color: var(--text-medium);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-link:hover {
+            background: var(--bg-gray);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav-link.active {
+            background: rgba(99, 91, 255, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            margin-top: 64px;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-medium);
+            font-size: 1rem;
+        }
+
+        /* Date Range Selector */
+        .date-range-selector {
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-gray);
+        }
+
+        .date-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-btn:hover {
+            background: var(--bg-gray);
+        }
+
+        .date-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-gray);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-gray);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.875rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 600;
+        }
+
+        .metric-change.negative {
+            color: var(--danger);
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Reports List */
+        .reports-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .report-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            background: var(--bg-gray);
+            border-radius: 12px;
+            border: 1px solid var(--border-gray);
+            transition: all 0.2s ease;
+        }
+
+        .report-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .report-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .report-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .report-details p {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-gray);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-gray);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+        }
+
+        /* Export Options */
+        .export-section {
+            background: var(--bg-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .export-option {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 2px solid var(--border-gray);
+            transition: all 0.2s ease;
+        }
+
+        .export-option:hover {
+            border-color: var(--primary);
+        }
+
+        .export-option h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .export-option p {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="logo">Alpha Freight</div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search...">
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="notification-btn" onclick="toggleNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </button>
+            <button class="profile-btn" onclick="toggleProfileDropdown()">
+                <i class="fas fa-user"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="client-dashboard.html" class="sidebar-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-box"></i>
+                        <span>Loads</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-truck"></i>
+                        <span>Carriers</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-pound-sign"></i>
+                        <span>Payments</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="analytics.html" class="sidebar-nav-link active">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="branding.html" class="sidebar-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="api-settings.html" class="sidebar-nav-link">
+                        <i class="fas fa-code"></i>
+                        <span>API</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="user-management.html" class="sidebar-nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Team</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="billing.html" class="sidebar-nav-link">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Billing</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="support.html" class="sidebar-nav-link">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Support</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Analytics & Reports</h1>
+                <p class="page-subtitle">Track your platform performance and generate detailed reports</p>
+            </div>
+            <div class="date-range-selector">
+                <button class="date-btn" onclick="changeDateRange('today')">Today</button>
+                <button class="date-btn" onclick="changeDateRange('yesterday')">Yesterday</button>
+                <button class="date-btn active" onclick="changeDateRange('week')">Last 7 days</button>
+                <button class="date-btn" onclick="changeDateRange('month')">Last 30 days</button>
+                <button class="date-btn" onclick="changeDateRange('custom')">Custom</button>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Loads</div>
+                <div class="metric-value">1,234</div>
+                <div class="metric-change">
+                    <i class="fas fa-arrow-up"></i>
+                    +12.3% from last period
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Revenue</div>
+                <div class="metric-value">£45,678</div>
+                <div class="metric-change">
+                    <i class="fas fa-arrow-up"></i>
+                    +15.2% from last period
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Avg Load Value</div>
+                <div class="metric-value">£370</div>
+                <div class="metric-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    -2.1% from last period
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Carrier Utilization</div>
+                <div class="metric-value">87%</div>
+                <div class="metric-change">
+                    <i class="fas fa-arrow-up"></i>
+                    +5.4% from last period
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Loads by Route</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="loadsByRouteChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Revenue Trend</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Carrier Performance</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="carrierPerformanceChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Daily Transactions</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="dailyTransactionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="export-section">
+            <h3 style="margin-bottom: 1rem; font-size: 1.25rem; font-weight: 700;">Export Reports</h3>
+            <div class="export-options">
+                <div class="export-option">
+                    <h4>Format</h4>
+                    <p>Choose export format</p>
+                    <select class="form-select" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-gray); border-radius: 8px;">
+                        <option>PDF</option>
+                        <option>CSV</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="export-option">
+                    <h4>Schedule</h4>
+                    <p>Automated report delivery</p>
+                    <select class="form-select" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-gray); border-radius: 8px;">
+                        <option>One-time</option>
+                        <option>Daily</option>
+                        <option>Weekly</option>
+                        <option>Monthly</option>
+                    </select>
+                </div>
+                <div class="export-option">
+                    <h4>Action</h4>
+                    <p>Generate or schedule report</p>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="generateReport()">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports List -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Available Reports</h2>
+                <button class="btn btn-primary" onclick="openReportBuilder()">
+                    <i class="fas fa-plus"></i>
+                    Custom Report Builder
+                </button>
+            </div>
+            <div class="reports-list">
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="report-details">
+                            <h4>Monthly Financial Report</h4>
+                            <p>Complete financial overview for February 2026 • Generated 2 days ago</p>
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="downloadReport('financial-feb-2026')">
+                            <i class="fas fa-download"></i>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-icon" style="background: var(--success);">
+                            <i class="fas fa-file-csv"></i>
+                        </div>
+                        <div class="report-details">
+                            <h4>Carrier Performance Report</h4>
+                            <p>Detailed carrier statistics and ratings • Generated 5 days ago</p>
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="downloadReport('carrier-performance')">
+                            <i class="fas fa-download"></i>
+                            Download CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-icon" style="background: var(--warning);">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="report-details">
+                            <h4>Load Analysis Report</h4>
+                            <p>Comprehensive load data and trends • Generated 1 week ago</p>
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="downloadReport('load-analysis')">
+                            <i class="fas fa-download"></i>
+                            Download Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-icon" style="background: var(--primary-light);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="report-details">
+                            <h4>Revenue Analytics Report</h4>
+                            <p>Revenue breakdown and forecasting • Generated 2 weeks ago</p>
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="downloadReport('revenue-analytics')">
+                            <i class="fas fa-download"></i>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let loadsByRouteChart, revenueTrendChart, carrierPerformanceChart, dailyTransactionsChart;
+
+        function initCharts() {
+            // Loads by Route Chart
+            const loadsCtx = document.getElementById('loadsByRouteChart');
+            loadsByRouteChart = new Chart(loadsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['London-Manchester', 'Birmingham-Leeds', 'Liverpool-Glasgow', 'Edinburgh-Norwich', 'Bristol-Cardiff'],
+                    datasets: [{
+                        label: 'Loads',
+                        data: [245, 189, 156, 134, 98],
+                        backgroundColor: 'rgba(99, 91, 255, 0.8)',
+                        borderColor: '#635bff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Trend Chart
+            const revenueCtx = document.getElementById('revenueTrendChart');
+            revenueTrendChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [6500, 7200, 6800, 8100, 7500, 9200, 8800],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '£' + value.toLocaleString();
+                                }
+                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Carrier Performance Chart
+            const carrierCtx = document.getElementById('carrierPerformanceChart');
+            carrierPerformanceChart = new Chart(carrierCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Excellent', 'Good', 'Average', 'Needs Improvement'],
+                    datasets: [{
+                        data: [45, 30, 20, 5],
+                        backgroundColor: [
+                            '#10b981',
+                            '#635bff',
+                            '#f59e0b',
+                            '#ef4444'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Daily Transactions Chart
+            const transactionsCtx = document.getElementById('dailyTransactionsChart');
+            dailyTransactionsChart = new Chart(transactionsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Transactions',
+                        data: [45, 52, 48, 61, 55, 67, 59],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function changeDateRange(range) {
+            document.querySelectorAll('.date-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update charts based on date range
+            // Backend: GET /api/analytics?range=range
+            console.log('Date range changed to:', range);
+        }
+
+        function downloadReport(id) {
+            alert('Downloading report: ' + id);
+            // Backend: GET /api/reports/:id/download
+        }
+
+        function generateReport() {
+            alert('Generating report...');
+            // Backend: POST /api/reports/generate
+        }
+
+        function openReportBuilder() {
+            alert('Opening custom report builder...');
+            // Redirect to report builder page
+        }
+
+        function toggleNotifications() {
+            alert('Notifications panel');
+        }
+
+        function toggleProfileDropdown() {
+            alert('Profile dropdown');
+        }
+
+        // Initialize charts on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initCharts, 100);
+        });
+    </script>
+</body>
+</html>

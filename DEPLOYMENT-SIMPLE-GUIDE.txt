@@ -1,0 +1,256 @@
+================================================================================
+  ALPHA FREIGHT - WEBSITE DEPLOYMENT KA SIMPLE GUIDE
+================================================================================
+
+Abhi aapke paas complete project hai lekin wo abhi tak online nahi hai.
+Is guide mein main aapko step-by-step batata hoon ke kaise website ko online
+kar sakte ho.
+
+================================================================================
+  PEHLE YE SAMJHO - DO OPTIONS HAIN
+================================================================================
+
+OPTION 1: RENDER.COM (YEH BEST HAI) ✅
+----------------------------------------
+- Aapki puri website chalegi (frontend + backend dono)
+- Payment APIs kaam karengi
+- OTP emails kaam karengi
+- FREE hai (credit card nahi chahiye)
+- Custom domain (alphafreightuk.com) connect kar sakte ho
+
+OPTION 2: HOSTINGER HOSTING (SIRF STATIC FILES)
+------------------------------------------------
+- Sirf HTML/CSS/JS files chalengi
+- Backend server nahi chalega
+- Payment/OTP APIs kaam nahi karengi
+- Sirf frontend website dikhegi
+
+RECOMMENDATION: Option 1 (Render.com) use karo kyunki aapke paas backend
+server hai jo Render par hi chalega.
+
+================================================================================
+  RENDER.COM PAR DEPLOYMENT (STEP BY STEP)
+================================================================================
+
+STEP 1: GITHUB ACCOUNT BANAYEIN
+--------------------------------
+1. Browser mein https://github.com kholo
+2. "Sign up" button click karo
+3. Email, password, username fill karo
+4. Account verify karo (email check karo)
+
+STEP 2: GITHUB PAR REPOSITORY BANAYEIN
+--------------------------------------
+1. GitHub par login karo
+2. Top right corner mein "+" icon click karo
+3. "New repository" click karo
+4. Repository name: "alpha-freight" (ya koi bhi naam)
+5. Public ya Private select karo (dono chalega)
+6. "Create repository" button click karo
+
+STEP 3: APNA CODE GITHUB PAR UPLOAD KARO
+-----------------------------------------
+Ab aapko apna code GitHub par upload karna hai.
+
+PowerShell ya Command Prompt kholo aur yeh commands type karo:
+
+cd "d:\Alpha Brokrage"
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/alpha-freight.git
+git push -u origin main
+
+IMPORTANT: 
+- YOUR_USERNAME ki jagah apna GitHub username likho
+- Agar password puchhe to GitHub password dalo (ya token use karo)
+
+Agar git install nahi hai to pehle install karo:
+https://git-scm.com/download/win
+
+STEP 4: RENDER.COM ACCOUNT BANAYEIN
+-----------------------------------
+1. Browser mein https://render.com kholo
+2. "Get Started for Free" button click karo
+3. "Sign up with GitHub" select karo (yeh best option hai)
+4. GitHub se login karo
+5. Render ko GitHub access de do (Allow button click karo)
+
+STEP 5: RENDER PAR WEB SERVICE BANAYEIN
+----------------------------------------
+1. Render dashboard mein "New +" button click karo (top right corner)
+2. "Web Service" select karo
+
+3. Repository Connect Karo:
+   - Agar pehle se GitHub connected hai to apna repo select karo
+   - Agar nahi hai to "Connect account" click karo aur GitHub se connect karo
+   - Apna repository select karo: "alpha-freight"
+
+4. Settings Fill Karo:
+   
+   Name: alpha-freight-server (ya koi bhi naam)
+   
+   Region: Apne najdik wala select karo (US/EU/Asia)
+   
+   Branch: main
+   
+   Root Directory: server (YEH BOHOT IMPORTANT HAI!)
+   
+   Environment: Node
+   
+   Build Command: (kuch mat likho, khali chhod do)
+   
+   Start Command: node server.js
+   
+   Auto-Deploy: Yes (select karo)
+
+5. "Create Web Service" button click karo
+
+STEP 6: ENVIRONMENT VARIABLES ADD KARO
+---------------------------------------
+Render dashboard mein apne service ko click karo, phir:
+
+1. "Environment" tab click karo
+2. "Add Environment Variable" button click karo
+3. Yeh variables add karo (ek ek karke):
+
+   Variable 1:
+   Name: PORT
+   Value: 3000
+   
+   Variable 2:
+   Name: NODE_ENV
+   Value: production
+   
+   Variable 3:
+   Name: STRIPE_SECRET_KEY
+   Value: your-stripe-secret-key-here
+
+4. Har variable add karne ke baad "Save Changes" click karo
+
+STEP 7: DEPLOYMENT WAIT KARO
+-----------------------------
+1. Render automatically code clone karega
+2. Dependencies install karega (2-3 minutes)
+3. Server start hoga
+4. Deploy complete hone ke baad aapko URL milega:
+   https://alpha-freight-server.onrender.com
+   (Ya koi aur URL - Render automatically generate karega)
+
+STEP 8: TEST KARO
+------------------
+1. Browser mein yeh URL kholo:
+   https://alpha-freight-server.onrender.com/api/health
+   
+   Agar yeh response aaye to server chal raha hai:
+   {"status":"OK","message":"Alpha Freight OTP API is running",...}
+
+2. Main website check karo:
+   https://alpha-freight-server.onrender.com
+   
+   Puri website dikhni chahiye!
+
+================================================================================
+  CUSTOM DOMAIN CONNECT KARNA (alphafreightuk.com)
+================================================================================
+
+STEP 1: RENDER DASHBOARD MEIN
+------------------------------
+1. Apne service ko click karo
+2. "Settings" tab mein jao
+3. "Custom Domains" section mein scroll karo
+4. "Add Custom Domain" button click karo
+5. "alphafreightuk.com" type karo aur "Add" click karo
+6. "www.alphafreightuk.com" bhi add karo (ek aur time "Add Custom Domain")
+
+STEP 2: DNS RECORDS ADD KARO (HOSTINGER)
+----------------------------------------
+Hostinger dashboard mein jao:
+
+1. "Domains" section mein jao
+2. "alphafreightuk.com" select karo
+3. "DNS / Nameservers" click karo
+4. "DNS Zone Editor" mein yeh records add karo:
+
+   Record 1 (Type A):
+   Name: @ (ya blank chhod do)
+   Points to: Render ka IP address (Render dashboard mein dikhega)
+   TTL: 3600
+   
+   Record 2 (Type CNAME):
+   Name: www
+   Points to: alpha-freight-server.onrender.com (ya jo bhi Render URL ho)
+   TTL: 3600
+
+5. Save karo
+
+NOTE: DNS changes ko propagate hone mein 5-10 minutes lag sakte hain.
+
+STEP 3: VERIFY KARO
+-------------------
+1. 10 minutes wait karo
+2. Browser mein https://www.alphafreightuk.com kholo
+3. Agar website dikhe to success! ✅
+
+================================================================================
+  AGAR KISI STEP MEIN PROBLEM HO
+================================================================================
+
+PROBLEM: GitHub par code upload nahi ho raha
+SOLUTION: 
+- Git install karo: https://git-scm.com/download/win
+- GitHub username aur password sahi hai na check karo
+- Repository name sahi hai na verify karo
+
+PROBLEM: Render par deploy fail ho raha hai
+SOLUTION:
+- Render dashboard → Logs tab check karo
+- Root Directory "server" hai na verify karo
+- Environment variables sahi add kiye hain na check karo
+
+PROBLEM: Domain kaam nahi kar raha
+SOLUTION:
+- DNS records sahi add kiye hain na check karo
+- 10-15 minutes wait karo (DNS propagation time)
+- Browser cache clear karo (Ctrl+Shift+Delete)
+
+PROBLEM: Payment APIs kaam nahi kar rahi
+SOLUTION:
+- Render URL sahi hai na check karo
+- Health endpoint test karo: /api/health
+- Browser console mein errors check karo (F12 press karo)
+
+================================================================================
+  SUMMARY (SAB KUCH EK SAATH)
+================================================================================
+
+1. GitHub account banao
+2. GitHub par repository banao
+3. Code GitHub par upload karo (git commands se)
+4. Render.com account banao (GitHub se sign up)
+5. Render par Web Service banao
+6. Root Directory: "server" set karo
+7. Start Command: "node server.js" set karo
+8. Environment variables add karo (PORT, NODE_ENV, STRIPE_SECRET_KEY)
+9. Deploy wait karo
+10. Custom domain connect karo (alphafreightuk.com)
+11. DNS records add karo (Hostinger mein)
+12. Test karo - website chal jayegi! ✅
+
+================================================================================
+  IMPORTANT NOTES
+================================================================================
+
+- Render free tier mein first request pe 30-60 seconds lag sakta hai (cold start)
+- Baad mein fast ho jayega
+- Agar paid plan ($7/month) lo to always on rahega
+- Auto-deploy enabled hai to GitHub push = Auto deploy
+
+================================================================================
+  DONE!
+================================================================================
+
+Agar kisi step mein problem ho to mujhe batao, main help karunga!
+
+Good luck! 🚀

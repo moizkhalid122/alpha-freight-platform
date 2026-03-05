@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Purchase - Payment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #635bff 0%, #7c3aed 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .payment-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .payment-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .payment-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-content {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 0;
+        }
+
+        .left-column {
+            padding: 3rem;
+            border-right: 1px solid var(--border-gray);
+        }
+
+        .right-column {
+            padding: 3rem;
+            background: var(--bg-gray);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-gray);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: var(--text-medium);
+            font-size: 0.9375rem;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 2px solid var(--border-gray);
+        }
+
+        .summary-total .summary-label {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .summary-total .summary-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* Stripe Card Element */
+        .card-element-container {
+            background: white;
+            border: 2px solid var(--border-gray);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card-element-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.1);
+        }
+
+        #card-element {
+            padding: 0.5rem 0;
+        }
+
+        .card-errors {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            min-height: 20px;
+        }
+
+        /* Billing Address */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Coupon Code */
+        .coupon-section {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .coupon-input {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid var(--border-gray);
+            background: white;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-gray);
+        }
+
+        /* Pay Button */
+        .btn-primary {
+            width: 100%;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Right Column */
+        .plan-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-gray);
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .plan-features li i {
+            color: var(--success);
+            font-size: 0.75rem;
+        }
+
+        .price-breakdown {
+            border-top: 1px solid var(--border-gray);
+            padding-top: 1.5rem;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.9375rem;
+        }
+
+        .price-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 2px solid var(--border-gray);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .guarantee-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 2rem;
+        }
+
+        /* Security Badges */
+        .security-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .security-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        .security-badge i {
+            font-size: 1.5rem;
+            color: var(--success);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-medium);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 968px) {
+            .payment-content {
+                grid-template-columns: 1fr;
+            }
+
+            .left-column {
+                border-right: none;
+                border-bottom: 1px solid var(--border-gray);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .security-badges {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>Complete Your Purchase</h1>
+        </div>
+
+        <div class="payment-content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <a href="signup.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to signup
+                </a>
+
+                <h2 class="section-title">Order Summary</h2>
+                <div class="order-summary">
+                    <div class="summary-item">
+                        <span class="summary-label" id="planName">Pro Plan</span>
+                        <span class="summary-value">Setup Fee</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Setup Fee</span>
+                        <span class="summary-value" id="setupFee">£5,000</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">First Month</span>
+                        <span class="summary-value" id="firstMonth">£599</span>
+                    </div>
+                    <div class="summary-total">
+                        <span class="summary-label">Total Today</span>
+                        <span class="summary-value" id="totalAmount">£5,599</span>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Payment Method</h2>
+                <div class="card-element-container">
+                    <div id="card-element"></div>
+                </div>
+                <div class="card-errors" id="card-errors" role="alert"></div>
+
+                <h2 class="section-title" style="margin-top: 2rem;">Billing Address</h2>
+                <div class="form-group">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" class="form-input" id="fullName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address Line 1 *</label>
+                    <input type="text" class="form-input" id="addressLine1" required placeholder="123 Main Street">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address Line 2</label>
+                    <input type="text" class="form-input" id="addressLine2" placeholder="Apartment, suite, etc.">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">City *</label>
+                        <input type="text" class="form-input" id="city" required placeholder="London">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Postcode *</label>
+                        <input type="text" class="form-input" id="postcode" required placeholder="SW1A 1AA">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Country *</label>
+                    <select class="form-select" id="country" required>
+                        <option value="GB">United Kingdom</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="AU">Australia</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                    </select>
+                </div>
+
+                <div class="coupon-section">
+                    <div class="form-group coupon-input">
+                        <label class="form-label">Coupon Code</label>
+                        <input type="text" class="form-input" id="couponCode" placeholder="Enter code">
+                    </div>
+                    <div style="display: flex; align-items: end;">
+                        <button type="button" class="btn-secondary" onclick="applyCoupon()" style="height: fit-content; padding: 0.875rem 1.5rem;">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="submitBtn" onclick="handlePayment()">
+                    <i class="fas fa-lock"></i>
+                    Pay <span id="payAmount">£5,599</span>
+                </button>
+
+                <div class="security-badges">
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secured by Stripe</span>
+                    </div>
+                    <div class="security-badge">
+                        <i class="fas fa-lock"></i>
+                        <span>256-bit encryption</span>
+                    </div>
+                    <div class="security-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>PCI Compliant</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <div class="plan-card">
+                    <div class="plan-name" id="rightPlanName">Pro Plan</div>
+                    <ul class="plan-features" id="planFeaturesList">
+                        <li><i class="fas fa-check"></i> Everything in Starter</li>
+                        <li><i class="fas fa-check"></i> API access</li>
+                        <li><i class="fas fa-check"></i> Custom domain</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                        <li><i class="fas fa-check"></i> 5 user accounts</li>
+                    </ul>
+                    <div class="price-breakdown">
+                        <div class="price-item">
+                            <span>Setup Fee</span>
+                            <span id="rightSetupFee">£5,000</span>
+                        </div>
+                        <div class="price-item">
+                            <span>First Month</span>
+                            <span id="rightFirstMonth">£599</span>
+                        </div>
+                        <div class="price-total">
+                            <span>Total Today</span>
+                            <span id="rightTotal">£5,599</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem; font-size: 0.875rem; color: var(--text-medium);">
+                        <strong>Next billing:</strong> Monthly on the same date
+                    </div>
+                </div>
+
+                <div class="guarantee-badge">
+                    <i class="fas fa-shield-alt" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <div>30-day money-back guarantee</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.25rem;">Not satisfied? Get a full refund</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe('pk_test_your_publishable_key_here');
+        const elements = stripe.elements();
+        
+        // Load signup data
+        const signupData = JSON.parse(localStorage.getItem('signupData') || '{}');
+        
+        // Plan details
+        const plans = {
+            starter: { 
+                setup: 3000, 
+                monthly: 299, 
+                name: 'Starter Plan',
+                features: [
+                    'Basic load board',
+                    'Carrier matching',
+                    'Your logo & branding',
+                    'Subdomain',
+                    'No API access'
+                ]
+            },
+            pro: { 
+                setup: 5000, 
+                monthly: 599, 
+                name: 'Pro Plan',
+                features: [
+                    'Everything in Starter',
+                    'API access',
+                    'Custom domain',
+                    'Priority support',
+                    '5 user accounts'
+                ]
+            },
+            enterprise: { 
+                setup: 10000, 
+                monthly: 999, 
+                name: 'Enterprise Plan',
+                features: [
+                    'Everything in Pro',
+                    'Dedicated server',
+                    'White-glove onboarding',
+                    'SLA guarantee',
+                    'Unlimited users'
+                ]
+            }
+        };
+
+        const selectedPlan = signupData.plan || 'pro';
+        const plan = plans[selectedPlan];
+        const total = plan.setup + plan.monthly;
+
+        // Update UI
+        document.getElementById('planName').textContent = plan.name;
+        document.getElementById('setupFee').textContent = `£${plan.setup.toLocaleString()}`;
+        document.getElementById('firstMonth').textContent = `£${plan.monthly}`;
+        document.getElementById('totalAmount').textContent = `£${total.toLocaleString()}`;
+        document.getElementById('payAmount').textContent = `£${total.toLocaleString()}`;
+
+        document.getElementById('rightPlanName').textContent = plan.name;
+        document.getElementById('rightSetupFee').textContent = `£${plan.setup.toLocaleString()}`;
+        document.getElementById('rightFirstMonth').textContent = `£${plan.monthly}`;
+        document.getElementById('rightTotal').textContent = `£${total.toLocaleString()}`;
+
+        // Update features list
+        const featuresList = document.getElementById('planFeaturesList');
+        featuresList.innerHTML = plan.features.map(f => 
+            `<li><i class="fas fa-check"></i> ${f}</li>`
+        ).join('');
+
+        // Create card element
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#1f2937',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    '::placeholder': {
+                        color: '#6b7280',
+                    },
+                },
+                invalid: {
+                    color: '#ef4444',
+                },
+            },
+        });
+
+        cardElement.mount('#card-element');
+
+        cardElement.on('change', function(event) {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        function applyCoupon() {
+            const code = document.getElementById('couponCode').value;
+            if (code) {
+                // Backend: POST /api/payments/apply-coupon
+                alert('Coupon code applied!');
+            }
+        }
+
+        // API Base URL
+        const API_BASE = window.location.origin.includes('localhost') 
+            ? 'http://localhost:3000/api/white-label'
+            : '/api/white-label';
+
+        async function handlePayment() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            // Get signup data
+            const signupData = JSON.parse(localStorage.getItem('signupData') || '{}');
+            const clientData = JSON.parse(localStorage.getItem('clientData') || '{}');
+            
+            if (!signupData.plan || !clientData.id) {
+                showError('Missing signup information. Please start over.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="payAmount">£' + total.toLocaleString() + '</span>';
+                return;
+            }
+
+            // Get billing details
+            const billingDetails = {
+                name: document.getElementById('fullName').value,
+                address: {
+                    line1: document.getElementById('addressLine1').value,
+                    line2: document.getElementById('addressLine2').value,
+                    city: document.getElementById('city').value,
+                    postal_code: document.getElementById('postcode').value,
+                    country: document.getElementById('country').value,
+                }
+            };
+
+            try {
+                // Create PaymentIntent
+                const intentResponse = await fetch(`${API_BASE}/payments/create-intent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        planType: signupData.plan,
+                        tenantId: clientData.id,
+                        amount: total * 100 // Convert to pence
+                    })
+                });
+
+                const intentResult = await intentResponse.json();
+                
+                if (!intentResponse.ok) {
+                    throw new Error(intentResult.error || 'Failed to create payment intent');
+                }
+
+                // Confirm payment with Stripe
+                const { error, paymentIntent } = await stripe.confirmCardPayment(intentResult.clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: billingDetails,
+                    },
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (paymentIntent.status === 'succeeded') {
+                    // Confirm payment with backend
+                    const confirmResponse = await fetch(`${API_BASE}/payments/confirm`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            paymentIntentId: paymentIntent.id,
+                            tenantId: clientData.id
+                        })
+                    });
+
+                    const confirmResult = await confirmResponse.json();
+                    
+                    if (!confirmResponse.ok) {
+                        throw new Error(confirmResult.error || 'Failed to confirm payment');
+                    }
+
+                    // Store auth token if provided
+                    if (confirmResult.token) {
+                        localStorage.setItem('authToken', confirmResult.token);
+                    }
+
+                    // Clear signup data
+                    localStorage.removeItem('signupData');
+                    
+                    // Show success and redirect
+                    showSuccess('Payment successful! Redirecting to dashboard...');
+                    setTimeout(() => {
+                        window.location.href = 'client-dashboard.html';
+                    }, 2000);
+                } else {
+                    throw new Error('Payment not completed');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                document.getElementById('card-errors').textContent = error.message || 'Payment failed. Please try again.';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="payAmount">£' + total.toLocaleString() + '</span>';
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('card-errors');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            } else {
+                alert(message);
+            }
+        }
+
+        function showSuccess(message) {
+            // Create success message element if doesn't exist
+            let successEl = document.getElementById('successMessage');
+            if (!successEl) {
+                successEl = document.createElement('div');
+                successEl.id = 'successMessage';
+                successEl.style.cssText = 'background: var(--success); color: white; padding: 1rem; border-radius: 8px; margin-top: 1rem; text-align: center;';
+                document.querySelector('.payment-form').appendChild(successEl);
+            }
+            successEl.textContent = message;
+        }
+    </script>
+</body>
+</html>

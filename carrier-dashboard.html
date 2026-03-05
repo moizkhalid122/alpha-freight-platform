@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Alpha Freight – Carrier Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --bg: #030712;
+            --surface: #0f172a;
+            --surface-light: rgba(255, 255, 255, 0.08);
+            --surface-card: rgba(15, 23, 42, 0.85);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-2: #facc15;
+            --success: #34d399;
+            --danger: #f87171;
+            --border: rgba(148, 163, 184, 0.25);
+            color-scheme: dark;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.18), transparent 55%),
+                        radial-gradient(circle at 80% 0%, rgba(250,204,21,0.22), transparent 45%),
+                        radial-gradient(circle at 0% 80%, rgba(14,165,233,0.15), transparent 45%),
+                        var(--bg);
+            color: var(--text);
+            padding: 32px 20px 48px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url("https://www.transparenttextures.com/patterns/stardust.png");
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 60% 20%, rgba(59,130,246,0.35), transparent 50%);
+            filter: blur(120px);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .device {
+            width: min(440px, 100%);
+            position: relative;
+            z-index: 1;
+        }
+        .app-frame {
+            background: rgba(2, 6, 23, 0.9);
+            border-radius: 36px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 34px 24px 40px;
+            box-shadow: 0 25px 70px rgba(2,6,23,0.9), 0 0 0 1px rgba(255,255,255,0.02);
+            backdrop-filter: blur(26px);
+            position: relative;
+            overflow: hidden;
+        }
+        .notch {
+            width: 120px;
+            height: 26px;
+            border-radius: 14px;
+            background: #020617;
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            padding: 0 4px;
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.45rem;
+            letter-spacing: -0.02em;
+        }
+        header p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        .pill {
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56,189,248,0.12);
+        }
+        .section-title {
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 16px;
+            font-weight: 600;
+        }
+        .section-title span {
+            color: var(--muted);
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 26px 0;
+        }
+        .metric-card {
+            border-radius: 20px;
+            padding: 20px;
+            background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(30,41,70,0.65));
+            border: 1px solid rgba(56,189,248,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 0%, rgba(56,189,248,0.35), transparent 45%);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .metric-trend.success {
+            color: var(--success);
+        }
+        .metric-trend.warning {
+            color: var(--accent-2);
+        }
+        .active-load {
+            border-radius: 24px;
+            padding: 24px;
+            background: linear-gradient(145deg, rgba(56,189,248,0.22), rgba(15,23,42,0.9));
+            border: 1px solid rgba(56,189,248,0.35);
+            margin-bottom: 28px;
+            box-shadow: 0 20px 40px rgba(15,118,255,0.15);
+        }
+        .active-load h3 {
+            margin: 0 0 6px;
+            font-size: 1.15rem;
+        }
+        .route {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 14px 0;
+        }
+        .route::before {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .route i {
+            color: var(--accent);
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 14px 0 0;
+        }
+        .tag {
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            background: rgba(4, 12, 34, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+        }
+        .progress {
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .progress span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #38bdf8, #2563eb);
+            width: 68%;
+        }
+        .list {
+            border-radius: 28px;
+            padding: 24px;
+            background: rgba(14,20,39,0.85);
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 28px;
+            box-shadow: 0 20px 40px rgba(2,6,23,0.4);
+        }
+        .list .item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 14px;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .list .item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-top: 6px;
+        }
+        .status-dot.green { background: var(--success); }
+        .status-dot.yellow { background: var(--accent-2); }
+        .status-dot.red { background: var(--danger); }
+        .item h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+        .item p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        .item span {
+            font-weight: 600;
+        }
+        .cta-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-top: 6px;
+        }
+        .cta-card {
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid rgba(56,189,248,0.25);
+            background: linear-gradient(145deg, rgba(56,189,248,0.15), rgba(2,6,23,0.8));
+            text-align: left;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: var(--text);
+        }
+        .cta-card.secondary {
+            border-color: rgba(250,204,21,0.35);
+            background: linear-gradient(145deg, rgba(250,204,21,0.18), rgba(2,6,23,0.85));
+        }
+        .cta-card i {
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+        .cta-card.secondary i {
+            color: var(--accent-2);
+        }
+        .bottom-nav {
+            margin-top: 32px;
+            border-radius: 999px;
+            background: rgba(2,6,23,0.85);
+            padding: 16px 26px;
+            display: flex;
+            justify-content: space-around;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 20px 40px rgba(2,6,23,0.6);
+        }
+        .bottom-nav button {
+            background: none;
+            border: none;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.78rem;
+            gap: 6px;
+            letter-spacing: 0.02em;
+        }
+        .bottom-nav button i {
+            font-size: 1.05rem;
+        }
+        .bottom-nav button.active {
+            color: var(--accent);
+        }
+        .fab {
+            position: absolute;
+            bottom: 120px;
+            right: 32px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #38bdf8, #2563eb);
+            color: #020617;
+            font-size: 1.5rem;
+            box-shadow: 0 18px 30px rgba(37, 99, 235, 0.35);
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 12px 28px;
+            }
+            .app-frame {
+                border-radius: 24px;
+                padding: 26px 16px 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="device">
+        <div class="app-frame">
+            <span class="notch" aria-hidden="true"></span>
+            <div class="status-bar">
+                <span>09:41</span>
+                <span><i class="fa-solid fa-location-arrow"></i> Hull, UK</span>
+                <span><i class="fa-solid fa-battery-three-quarters"></i></span>
+            </div>
+
+            <header>
+                <div>
+                    <h1>Hi, Marcus</h1>
+                    <p>Ready for today’s runs?</p>
+                </div>
+                <div class="avatar">MC</div>
+            </header>
+            <div class="pill"><i class="fa-solid fa-truck"></i> Fleet: FH-1208</div>
+
+            <section class="metrics" aria-label="Performance metrics">
+                <article class="metric-card">
+                    <span class="metric-label">Loaded miles</span>
+                    <span class="metric-value">1,847</span>
+                    <span class="metric-trend success"><i class="fa-solid fa-arrow-up-right"></i> +12% vs last week</span>
+                </article>
+                <article class="metric-card">
+                    <span class="metric-label">Avg. rate / mile</span>
+                    <span class="metric-value">£3.21</span>
+                    <span class="metric-trend warning"><i class="fa-solid fa-minus"></i> stable</span>
+                </article>
+            </section>
+
+            <section class="active-load" aria-label="Active load">
+                <h3>Active Load</h3>
+                <div class="route">
+                    <div>
+                        <strong>Manchester</strong>
+                        <p style="margin:4px 0 0;color:var(--muted);">Pickup • 13:45</p>
+                    </div>
+                    <i class="fa-solid fa-location-arrow"></i>
+                    <div>
+                        <strong>Glasgow</strong>
+                        <p style="margin:4px 0 0;color:var(--muted);">Drop • ETA 22:10</p>
+                    </div>
+                </div>
+                <div class="tags">
+                    <span class="tag"><i class="fa-solid fa-weight-hanging"></i> 18t Dry Van</span>
+                    <span class="tag"><i class="fa-solid fa-box"></i> Pharma goods</span>
+                    <span class="tag"><i class="fa-solid fa-shield-alt"></i> Temp controlled</span>
+                </div>
+                <div class="progress"><span></span></div>
+            </section>
+
+            <section class="list" aria-label="Upcoming loads">
+                <div class="section-title">
+                    <strong>Upcoming loads</strong>
+                    <span>View all</span>
+                </div>
+                <article class="item">
+                    <span class="status-dot green"></span>
+                    <div>
+                        <h4>Leeds ➝ Birmingham</h4>
+                        <p>Pickup 21 Nov • 08:30</p>
+                    </div>
+                    <span>£2,480</span>
+                </article>
+                <article class="item">
+                    <span class="status-dot yellow"></span>
+                    <div>
+                        <h4>York ➝ Bristol</h4>
+                        <p>Pickup 22 Nov • 05:00</p>
+                    </div>
+                    <span>£3,020</span>
+                </article>
+                <article class="item">
+                    <span class="status-dot red"></span>
+                    <div>
+                        <h4>Liverpool ➝ London</h4>
+                        <p>Awaiting docs</p>
+                    </div>
+                    <span>£2,140</span>
+                </article>
+            </section>
+
+            <section class="list" aria-label="Alerts">
+                <div class="section-title">
+                    <strong>Alerts & tasks</strong>
+                    <span>2 pending</span>
+                </div>
+                <article class="item">
+                    <span class="status-dot yellow"></span>
+                    <div>
+                        <h4>Trailer inspection due</h4>
+                        <p>Upload DVIR for trailer TX-09</p>
+                    </div>
+                    <span>Today</span>
+                </article>
+                <article class="item">
+                    <span class="status-dot red"></span>
+                    <div>
+                        <h4>Insurance proof missing</h4>
+                        <p>Policy renewal required before 25 Nov</p>
+                    </div>
+                    <span>Urgent</span>
+                </article>
+            </section>
+
+            <section class="cta-row">
+                <button class="cta-card" type="button">
+                    <i class="fa-solid fa-plus"></i>
+                    <strong>Find new loads</strong>
+                    Refresh board in Midlands
+                </button>
+                <button class="cta-card secondary" type="button">
+                    <i class="fa-solid fa-camera"></i>
+                    <strong>Upload POD</strong>
+                    Scan delivery paperwork
+                </button>
+            </section>
+
+            <button class="fab" type="button" aria-label="Start new load">
+                <i class="fa-solid fa-bolt"></i>
+            </button>
+
+            <nav class="bottom-nav" aria-label="Primary navigation">
+                <button class="active" type="button">
+                    <i class="fa-solid fa-gauge"></i>
+                    Dashboard
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Loads
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-comments"></i>
+                    Chat
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </button>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>
+

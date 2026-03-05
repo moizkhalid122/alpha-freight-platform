@@ -1,0 +1,1136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Panel - Live Location Sender</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --secondary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --info-gradient: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            width: 220px;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+            animation: brandFadeIn 0.6s ease 0.1s both;
+        }
+
+        @keyframes brandFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sidebar-brand:hover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 45px;
+            object-fit: contain;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-brand:hover img {
+            transform: scale(1.05);
+        }
+
+        .sidebar-nav {
+            position: relative;
+            z-index: 2;
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.6s ease 0.2s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.65rem 0.875rem;
+            margin-bottom: 0.35rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-active);
+            transform: translateX(3px);
+            color: var(--primary) !important;
+        }
+
+        .nav-link.active {
+            background: var(--sidebar-active);
+            color: var(--primary) !important;
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.1);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem 2rem;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content-section {
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: var(--hover-shadow);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-header-custom {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .status-on {
+            background-color: #10B981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-off {
+            background-color: #EF4444;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .info-card {
+            background: var(--info-gradient);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-badge:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(37, 99, 235, 0.4);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .icon-box:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-item {
+            padding: 1rem;
+            border-radius: 10px;
+            background: var(--card-bg);
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+        }
+
+        .feature-item:hover {
+            background: var(--sidebar-active);
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                left: 0;
+            }
+            .dashboard-content {
+                margin-left: 0;
+                width: 100%;
+                flex: 1 !important;
+            }
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.875rem 1rem;
+                background: white;
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+                z-index: 1040;
+            }
+            .mobile-header img {
+                max-height: 35px;
+                width: auto;
+                object-fit: contain;
+            }
+            .sidebar-brand {
+                padding: 1rem 0.875rem !important;
+            }
+            .sidebar-brand img {
+                max-height: 40px !important;
+            }
+            .sidebar-nav {
+                padding: 0.875rem 0.5rem !important;
+            }
+            .nav-link {
+                padding: 0.6rem 0.75rem !important;
+                font-size: 0.85rem !important;
+            }
+            .nav-link i {
+                width: 16px !important;
+                height: 16px !important;
+                font-size: 0.9rem !important;
+                margin-right: 0.5rem !important;
+            }
+            .mobile-menu-btn {
+                background: var(--primary);
+                border: none;
+                color: white;
+                padding: 0.5rem 0.75rem;
+                border-radius: 8px;
+                font-size: 1.125rem;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .mobile-header .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            .header-section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            .content-section {
+                padding: 1rem;
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* From Uiverse.io by satyamchaudharydev */
+        .button {
+            position: relative;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+            padding-block: 0.5rem;
+            padding-inline: 1.25rem;
+            background-color: rgb(0 107 179);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffff;
+            gap: 10px;
+            font-weight: bold;
+            border: 3px solid #ffffff4d;
+            outline: none;
+            overflow: hidden;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .button .icon {
+            width: 24px;
+            height: 24px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            border-color: #fff9;
+        }
+
+        .button:hover .icon {
+            transform: translate(4px);
+        }
+
+        .button:hover::before {
+            animation: shine 1.5s ease-out infinite;
+        }
+
+        .button::before {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100%;
+            background-image: linear-gradient(
+                120deg,
+                rgba(255, 255, 255, 0) 30%,
+                rgba(255, 255, 255, 0.8),
+                rgba(255, 255, 255, 0) 70%
+            );
+            top: 0;
+            left: -100px;
+            opacity: 0.6;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100px;
+            }
+
+            60% {
+                left: 100%;
+            }
+
+            to {
+                left: 100%;
+            }
+        }
+
+        /* From Uiverse.io by absoluteSTrange */
+        .stop-button {
+            padding: 17px 40px;
+            border-radius: 10px;
+            border: 0;
+            background-color: rgb(255, 56, 86);
+            letter-spacing: 1.5px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
+            color: hsl(0, 0%, 100%);
+            cursor: pointer;
+        }
+
+        .stop-button:hover {
+            box-shadow: rgb(201, 46, 70) 0px 7px 0px 0px;
+        }
+
+        .stop-button:active {
+            background-color: rgb(255, 56, 86);
+            box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;
+            transform: translateY(5px);
+            transition: 200ms;
+        }
+
+        .stop-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
+        }
+
+        .stop-button:disabled:hover {
+            box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
+        }
+
+        .stop-button:disabled:active {
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" class="img-fluid">
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary btn-sm" href="../carrier/dashboard.html"><i class="fas fa-home"></i></a>
+        </div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="row g-0" style="display: flex; flex-wrap: nowrap;">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar p-0" style="flex: 0 0 220px; max-width: 220px; min-width: 220px;">
+                <div class="sidebar-brand">
+                    <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" class="img-fluid">
+                </div>
+                <div class="sidebar-nav">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="../carrier/dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link" href="../carrier/available-loads.html">
+                            <i class="fas fa-search"></i> Available Loads
+                        </a>
+                        <a class="nav-link" href="../carrier/my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link" href="../carrier/vehicles.html">
+                            <i class="fas fa-truck"></i> Vehicles
+                        </a>
+                        <a class="nav-link" href="../carrier/payment-received.html">
+                            <i class="fas fa-money-bill-wave"></i> Payment Received
+                        </a>
+                        <a class="nav-link" href="../carrier/profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a class="nav-link" href="../social/feed.html">
+                            <i class="fas fa-users"></i> Social Hub Feed
+                        </a>
+                        <hr class="my-3" style="border-color: var(--border);">
+                        <a class="nav-link text-danger" href="javascript:void(0)" onclick="logout()" id="logoutLink">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="dashboard-content p-0" style="flex: 1; min-width: 0;">
+                <!-- Desktop Header -->
+                <div class="header-section d-none d-md-block">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fas fa-location-dot me-2"></i>Driver Live GPS</h5>
+                            <small class="text-muted" style="color: var(--text-muted);">Real-time location sharing for suppliers</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Section -->
+                <div class="content-section">
+            <!-- Header Card -->
+            <div class="card mb-4">
+                <div class="card-header-custom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-1"><i class="fa-solid fa-truck me-2"></i>Driver Live GPS</h3>
+                            <p class="mb-0" style="opacity: 0.9;">Real-time location sharing for suppliers</p>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-location-dot fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fas fa-id-card me-2"></i>Driver ID *</label>
+                        <input id="driverId" type="text" class="form-control form-control-lg" placeholder="e.g. DRIVER_123" />
+                        <div class="form-text">Enter your unique Driver ID assigned by carrier</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fas fa-box me-2"></i>Load ID (Optional)</label>
+                        <input id="loadId" type="text" class="form-control form-control-lg" placeholder="e.g. LOAD_456" />
+                        <div class="form-text">If provided, location will also be saved under this load</div>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-4">
+                        <button id="startBtn" class="button flex-fill"><i class="fa-solid fa-play icon"></i>Start Sharing</button>
+                        <button id="stopBtn" class="stop-button flex-fill" disabled><i class="fa-solid fa-stop me-2"></i>Stop</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Current Status</h5>
+                    <div class="info-card">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span id="statusDot" class="status-dot status-off me-2"></span>
+                                <span id="statusText" class="fw-bold" style="font-size: 1.1rem;">Not sharing</span>
+                            </div>
+                            <div class="stat-badge">
+                                <i class="fas fa-clock me-1"></i>Updated: <span id="lastUpdate">—</span>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="stat-badge">
+                                    <small><i class="fas fa-map-marker-alt me-1"></i>Lat</small><br>
+                                    <strong id="lat">—</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-badge">
+                                    <small><i class="fas fa-map-marker-alt me-1"></i>Lng</small><br>
+                                    <strong id="lng">—</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-badge">
+                                    <small><i class="fas fa-tachometer-alt me-1"></i>Speed</small><br>
+                                    <strong id="speed">—</strong> km/h
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-badge">
+                                    <small><i class="fas fa-compass me-1"></i>Heading</small><br>
+                                    <strong id="heading">—</strong>°
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="stat-badge me-2 mb-2">
+                                <small><i class="fas fa-signal me-1"></i>Network</small><br>
+                                <strong id="netStatus">Detecting…</strong>
+                            </div>
+                            <div class="stat-badge mb-2">
+                                <small><i class="fas fa-database me-1"></i>Firebase</small><br>
+                                <strong id="fbStatus">Checking…</strong>
+                            </div>
+                        </div>
+                        <div id="warnBox" class="alert alert-warning mt-3 d-none" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-star me-2"></i>Features</h5>
+                    <div class="feature-item">
+                        <i class="fas fa-wifi me-2" style="color: var(--primary);"></i><strong>Real-time Updates</strong> - Location updates automatically every few seconds
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-mobile-alt me-2" style="color: var(--primary);"></i><strong>Mobile Friendly</strong> - Works perfectly on smartphones
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-eye me-2" style="color: var(--primary);"></i><strong>Visible to Supplier</strong> - Supplier can track your location live
+                    </div>
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/script.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+// Firebase config (same project as supplier pages)
+var firebaseConfig = {
+  apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+  authDomain: "alpha-brokerage.firebaseapp.com",
+  databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+  projectId: "alpha-brokerage",
+  storageBucket: "alpha-brokerage.firebasestorage.app",
+  messagingSenderId: "834712514965",
+  appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+};
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+
+(function(){
+  var startBtn = document.getElementById('startBtn');
+  var stopBtn = document.getElementById('stopBtn');
+  var statusDot = document.getElementById('statusDot');
+  var statusText = document.getElementById('statusText');
+  var lastUpdateEl = document.getElementById('lastUpdate');
+  var latEl = document.getElementById('lat');
+  var lngEl = document.getElementById('lng');
+  var speedEl = document.getElementById('speed');
+  var headingEl = document.getElementById('heading');
+  var netStatusEl = document.getElementById('netStatus');
+  var fbStatusEl = document.getElementById('fbStatus');
+  var warnBox = document.getElementById('warnBox');
+
+  var watchId = null;
+  var db = firebase.database();
+  var firebaseConnected = false; // Track Firebase connection status
+
+  function setStatus(on) {
+    if (on) {
+      statusDot.classList.remove('status-off');
+      statusDot.classList.add('status-on');
+      statusText.textContent = 'Sharing live location';
+      statusText.classList.remove('text-danger');
+      statusText.style.color = '#10B981';
+    } else {
+      statusDot.classList.remove('status-on');
+      statusDot.classList.add('status-off');
+      statusText.textContent = 'Not sharing';
+      statusText.style.color = '';
+      statusText.classList.add('text-danger');
+    }
+  }
+
+  function toKmh(speedMetersPerSec) {
+    if (typeof speedMetersPerSec !== 'number' || isNaN(speedMetersPerSec)) return null;
+    return (speedMetersPerSec * 3.6).toFixed(1);
+  }
+
+  function saveLocation(driverId, loadId, coords) {
+    var now = Date.now();
+    var payload = {
+      lat: coords.latitude,
+      lng: coords.longitude,
+      accuracy: coords.accuracy || null,
+      altitude: coords.altitude || null,
+      speed: typeof coords.speed === 'number' ? Number(coords.speed.toFixed(2)) : null,
+      heading: typeof coords.heading === 'number' ? Number(coords.heading.toFixed(2)) : null,
+      updatedAt: now
+    };
+    var updates = {};
+    updates['driverLocations/' + driverId] = payload;
+    if (loadId) {
+      updates['loadLocations/' + loadId + '/' + driverId] = payload;
+    }
+    
+    // Check Firebase connection before attempting to save
+    if (!firebaseConnected) {
+      return Promise.reject(new Error('Firebase not connected. Please check your internet connection.'));
+    }
+    
+    // Try to save
+    return db.ref().update(updates).catch(function(err) {
+      // More detailed error handling
+      console.error('Firebase update error:', err);
+      if (err && err.code === 'PERMISSION_DENIED') {
+        throw new Error('Permission denied. Firebase database rules may need to be updated.');
+      } else if (err && (err.code === 'NETWORK_ERROR' || (err.message && err.message.includes('network')))) {
+        throw new Error('Network error. Check your internet connection.');
+      } else {
+        throw err;
+      }
+    });
+  }
+
+  function getNetworkType() {
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!conn) {
+      // Connection API not available, check if online
+      return navigator.onLine ? 'Internet' : 'Offline';
+    }
+    if (conn.type) {
+      if (conn.type === 'wifi' || conn.type === 'ethernet') {
+        return 'WiFi';
+      } else if (conn.type === 'cellular' || conn.type === '2g' || conn.type === '3g' || conn.type === '4g' || conn.type === '5g') {
+        return 'Mobile Data';
+      } else {
+        return conn.type.charAt(0).toUpperCase() + conn.type.slice(1);
+      }
+    }
+    // If type not available but connection exists, check effectiveType
+    if (conn.effectiveType) {
+      return 'Internet (' + conn.effectiveType.toUpperCase() + ')';
+    }
+    return navigator.onLine ? 'Internet' : 'Offline';
+  }
+
+  function handlePosition(pos) {
+    var coords = pos.coords;
+    latEl.textContent = coords.latitude.toFixed(6);
+    lngEl.textContent = coords.longitude.toFixed(6);
+    var kmh = toKmh(coords.speed);
+    speedEl.textContent = kmh == null ? '—' : kmh;
+    headingEl.textContent = coords.heading == null ? '—' : coords.heading.toFixed(0);
+    lastUpdateEl.textContent = new Date().toLocaleTimeString();
+
+    var driverId = document.getElementById('driverId').value.trim();
+    var loadId = document.getElementById('loadId').value.trim();
+    if (!driverId) return;
+    
+    // Check if online before attempting to save
+    if (!navigator.onLine) {
+      showWarning('No internet connection. Location will be saved when connection is restored.');
+      return;
+    }
+    
+    var networkType = getNetworkType();
+    
+    // Save location to Firebase (works on both WiFi and Mobile Data)
+    saveLocation(driverId, loadId || null, coords).then(function() {
+      // Clear any warnings on successful save
+      if (warnBox) warnBox.classList.add('d-none');
+      console.log('Location saved successfully via', networkType);
+    }).catch(function(err){ 
+      console.error('Save failed on', networkType, err);
+      var errorMsg = 'Failed to send location';
+      if (err && err.message) {
+        if (err.message.includes('permission') || err.message.includes('PERMISSION_DENIED')) {
+          errorMsg = 'Permission denied. Please check Firebase permissions.';
+        } else if (err.message.includes('network') || err.message.includes('NETWORK_ERROR')) {
+          errorMsg = 'Network error. Check your internet connection (' + networkType + ').';
+        } else {
+          errorMsg = 'Error: ' + err.message;
+        }
+      } else {
+        errorMsg = 'Failed to send location via ' + networkType + '. Check your internet connection.';
+      }
+      showWarning(errorMsg);
+    });
+  }
+
+  function showWarning(message) {
+    if (!warnBox) return;
+    warnBox.textContent = message;
+    warnBox.classList.remove('d-none');
+  }
+
+  function updateNetworkStatus() {
+    var parts = [];
+    parts.push(navigator.onLine ? 'Online' : 'Offline');
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (conn) {
+      // Detect WiFi vs Mobile Data
+      if (conn.type) {
+        var networkType = '';
+        if (conn.type === 'wifi' || conn.type === 'ethernet') {
+          networkType = 'WiFi';
+        } else if (conn.type === 'cellular' || conn.type === '2g' || conn.type === '3g' || conn.type === '4g' || conn.type === '5g') {
+          networkType = 'Mobile Data';
+        } else {
+          networkType = conn.type.charAt(0).toUpperCase() + conn.type.slice(1);
+        }
+        parts.push(networkType);
+      }
+      // Show connection quality
+      if (conn.effectiveType) {
+        parts.push(conn.effectiveType.toUpperCase());
+      }
+      // Show downlink speed if available
+      if (conn.downlink) {
+        parts.push(Math.round(conn.downlink) + 'Mbps');
+      }
+    } else {
+      // Connection API not available, just show online status
+      if (navigator.onLine) {
+        parts.push('Connected');
+      }
+    }
+    netStatusEl.textContent = parts.join(' · ');
+    
+    // Update network status periodically to catch changes
+    if (conn) {
+      // Remove old listener if exists to avoid duplicates
+      if (conn.removeEventListener) {
+        conn.removeEventListener('change', updateNetworkStatus);
+      }
+      conn.addEventListener('change', updateNetworkStatus);
+    }
+  }
+
+  function setCarrierLocationSharing(isOn) {
+    try {
+      localStorage.setItem('carrierLocationSharing', JSON.stringify({
+        on: !!isOn,
+        updatedAt: new Date().toISOString()
+      }));
+    } catch (_) {}
+  }
+
+  function startSharing() {
+    var driverId = document.getElementById('driverId').value.trim();
+    if (!driverId) {
+      if (window.AlphaBrokrage) { AlphaBrokrage.showAlert('warning','Please enter Driver ID'); } else { alert('Please enter Driver ID'); }
+      return;
+    }
+    // persist IDs for convenience
+    try {
+      localStorage.setItem('driverPanel_lastDriverId', driverId);
+      var loadId = document.getElementById('loadId').value.trim();
+      if (loadId) localStorage.setItem('driverPanel_lastLoadId', loadId);
+    } catch(_) {}
+    if (!('geolocation' in navigator)) {
+      if (window.AlphaBrokrage) { AlphaBrokrage.showAlert('error','Geolocation is not supported on this device/browser.'); } else { alert('Geolocation is not supported on this device/browser.'); }
+      return;
+    }
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    setStatus(true);
+    setCarrierLocationSharing(true);
+
+    // Secure context check: required by browsers for geolocation on mobile data
+    var isSecure = (location.protocol === 'https:') || (location.hostname === 'localhost') || (location.hostname === '127.0.0.1');
+    if (!isSecure) {
+      showWarning('Geolocation requires HTTPS. Please open this page over HTTPS (not HTTP).');
+    }
+
+    // Optimize geolocation settings based on network type
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    var isMobileData = conn && (conn.type === 'cellular' || conn.type === '2g' || conn.type === '3g' || conn.type === '4g' || conn.type === '5g');
+    
+    // For mobile data, use longer timeout but still high accuracy
+    // For WiFi, can use shorter timeout
+    var geoOptions = {
+      enableHighAccuracy: true,  // Always use GPS for best accuracy on both WiFi and mobile data
+      maximumAge: 5000,          // Accept cached location up to 5 seconds old
+      timeout: isMobileData ? 25000 : 20000  // Slightly longer timeout for mobile data
+    };
+
+    watchId = navigator.geolocation.watchPosition(
+      handlePosition,
+      function(err){
+        console.error('Geolocation error:', err);
+        var networkType = conn && conn.type === 'wifi' ? 'WiFi' : (conn && conn.type === 'cellular' ? 'Mobile Data' : 'Network');
+        if (err && err.code === 1) {
+          showWarning('Location permission denied. Please allow location access for live tracking.');
+          setCarrierLocationSharing(false);
+        } else if (err && err.code === 2) {
+          showWarning('Location unavailable on ' + networkType + '. Ensure GPS is on and you have network visibility.');
+        } else if (err && err.code === 3) {
+          showWarning('Location timeout on ' + networkType + '. Try moving to open sky or enable High Accuracy mode in device settings.');
+        } else {
+          showWarning('Location error on ' + networkType + '. Please check your GPS and network connection.');
+        }
+      },
+      geoOptions
+    );
+  }
+
+  function stopSharing() {
+    if (watchId != null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    setStatus(false);
+    setCarrierLocationSharing(false);
+  }
+
+  startBtn.addEventListener('click', startSharing);
+  stopBtn.addEventListener('click', stopSharing);
+  // Prefill last used IDs
+  try {
+    var lastDriver = localStorage.getItem('driverPanel_lastDriverId');
+    var lastLoad = localStorage.getItem('driverPanel_lastLoadId');
+    if (lastDriver) document.getElementById('driverId').value = lastDriver;
+    if (lastLoad) document.getElementById('loadId').value = lastLoad;
+    if (!lastDriver) {
+      var auth = JSON.parse(localStorage.getItem('carrierAuth') || 'null');
+      var carrierId = auth && (auth.carrierId || auth.carrier_id || auth.id);
+      if (carrierId) {
+        document.getElementById('driverId').value = carrierId;
+      }
+    }
+  } catch(_) {}
+
+  // Auto-fill active load ID for better supplier tracking
+  function resolveActiveLoadId() {
+    var driverIdEl = document.getElementById('driverId');
+    var loadIdEl = document.getElementById('loadId');
+    if (!driverIdEl || !loadIdEl || loadIdEl.value.trim()) return;
+    var carrierId = driverIdEl.value.trim();
+    if (!carrierId || !firebase || !firebase.database) return;
+    var statusList = ['pending', 'accepted', 'picked-up', 'in-transit', 'on-route', 'active'];
+    var matches = [];
+
+    function collectMatches(snapshot) {
+      if (!snapshot || !snapshot.exists()) return;
+      snapshot.forEach(function(child) {
+        var load = child.val();
+        var status = (load && load.status ? String(load.status).toLowerCase() : '');
+        if (statusList.includes(status)) {
+          matches.push({ id: child.key, status: status, updatedAt: load.updatedAt || load.acceptedAt || load.createdAt || 0 });
+        }
+      });
+    }
+
+    var dbRef = firebase.database().ref('loads');
+    Promise.all([
+      dbRef.orderByChild('carrierId').equalTo(carrierId).once('value'),
+      dbRef.orderByChild('carrier_id').equalTo(carrierId).once('value')
+    ]).then(function(results) {
+      results.forEach(collectMatches);
+      if (!matches.length) return;
+      matches.sort(function(a, b) { return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(); });
+      loadIdEl.value = matches[0].id;
+      try {
+        localStorage.setItem('driverPanel_lastLoadId', matches[0].id);
+      } catch (_) {}
+    }).catch(function() {
+      // ignore auto-fill failure
+    });
+  }
+
+  resolveActiveLoadId();
+
+  // Network status and Firebase connectivity indicators
+  updateNetworkStatus();
+  window.addEventListener('online', function() {
+    updateNetworkStatus();
+    console.log('Device came online');
+  });
+  window.addEventListener('offline', function() {
+    updateNetworkStatus();
+    showWarning('No internet connection. Location will be saved when connection is restored.');
+  });
+  
+  // Monitor network type changes (WiFi to Mobile Data and vice versa)
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    conn.addEventListener('change', function() {
+      updateNetworkStatus();
+      console.log('Network type changed:', conn.type);
+      if (watchId !== null) {
+        // Location tracking is active, show info about network change
+        var networkType = conn.type === 'wifi' ? 'WiFi' : (conn.type === 'cellular' ? 'Mobile Data' : conn.type);
+        console.log('Location tracking continues on', networkType);
+      }
+    });
+  }
+
+  // Firebase connection indicator
+  try {
+    var connectedRef = firebase.database().ref('.info/connected');
+    connectedRef.on('value', function(snap){
+      firebaseConnected = !!(snap && snap.val());
+      fbStatusEl.textContent = firebaseConnected ? 'Connected' : 'Disconnected';
+      if (!firebaseConnected && watchId !== null) {
+        // Location tracking is active but Firebase disconnected
+        showWarning('Firebase disconnected. Location will be saved when connection is restored.');
+      } else if (firebaseConnected && watchId !== null) {
+        // Clear warning when Firebase reconnects
+        if (warnBox) warnBox.classList.add('d-none');
+      }
+    });
+  } catch (e) {
+    console.error('Firebase connection check error:', e);
+    fbStatusEl.textContent = 'Error';
+    firebaseConnected = false;
+    if (watchId !== null) {
+      showWarning('Firebase connection error. Please refresh the page.');
+    }
+  }
+})();
+
+// Sidebar toggle function
+function toggleSidebar() {
+    const sidebar = document.querySelector('.dashboard-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+    }
+}
+
+// Logout function
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        try {
+            localStorage.removeItem('carrierAuth');
+            localStorage.removeItem('carrierProfile');
+            window.location.href = '../../index.html';
+        } catch (e) {
+            console.error('Logout error:', e);
+            window.location.href = '../../index.html';
+        }
+    }
+}
+</script>
+</body>
+</html>
+
+
+
+

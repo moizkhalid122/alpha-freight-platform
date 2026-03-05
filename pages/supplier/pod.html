@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proof of Delivery - Alpha Freight</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="shortcut icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            width: 260px;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                margin-left: 0;
+            }
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.5s ease 0.1s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: navItemSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes navItemSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-nav .nav-link:nth-of-type(1) { animation-delay: 0.1s; }
+        .sidebar-nav .nav-link:nth-of-type(2) { animation-delay: 0.15s; }
+        .sidebar-nav .nav-link:nth-of-type(3) { animation-delay: 0.2s; }
+        .sidebar-nav .nav-link:nth-of-type(4) { animation-delay: 0.25s; }
+        .sidebar-nav .nav-link:nth-of-type(5) { animation-delay: 0.3s; }
+        .sidebar-nav .nav-link:nth-of-type(6) { animation-delay: 0.35s; }
+        .sidebar-nav .nav-link:nth-of-type(7) { animation-delay: 0.4s; }
+        .sidebar-nav .nav-link:nth-of-type(8) { animation-delay: 0.45s; }
+        .sidebar-nav .nav-link:nth-of-type(9) { animation-delay: 0.5s; }
+        .sidebar-nav .nav-link:nth-of-type(10) { animation-delay: 0.55s; }
+        .sidebar-nav .nav-link:nth-of-type(11) { animation-delay: 0.6s; }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.6) 100%);
+            color: var(--primary) !important;
+            transform: translateX(4px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, var(--sidebar-active) 0%, rgba(235, 244, 255, 0.8) 100%);
+            color: var(--primary) !important;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .header-section {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .header-icon-btn:hover {
+            background: #F3F4F6;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: min(92vw, 380px);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+            z-index: 1050;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        .notification-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+        }
+
+        .notification-header h6 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .notification-header button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .notification-header button:hover {
+            background: #EBF4FF;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .notification-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            background: #F9FAFB;
+        }
+
+        .notification-item.unread {
+            background: #EBF4FF;
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .notification-icon.info {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .notification-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .notification-icon.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .notification-icon.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .notification-message {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .notification-empty {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .notification-empty i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .notification-empty p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .header-profile {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .header-profile:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .profile-dropdown-menu {
+            min-width: 280px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-top: 12px;
+            background: white;
+        }
+
+        .profile-dropdown-header {
+            padding: 1.75rem 1.5rem 1.25rem;
+            background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-dropdown-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-dropdown-header h6 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0.75rem 0 0.5rem;
+            text-align: center;
+        }
+
+        .profile-status-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            background: #F9FAFB;
+            color: var(--text-main);
+            margin-top: 0.75rem;
+        }
+
+        .profile-dropdown-item {
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+
+        .profile-dropdown-item:hover {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.5) 100%);
+            color: var(--primary);
+        }
+
+        .profile-dropdown-item i {
+            width: 22px;
+            margin-right: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .profile-dropdown-item:hover i {
+            color: var(--primary);
+        }
+
+        .profile-dropdown-footer {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #F9FAFB 0%, #FAFBFC 100%);
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-group {
+            margin-bottom: 0.4rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .pod-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .pod-card:hover {
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        .pod-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pod-load-info h6 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .pod-load-info small {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .pod-status {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .pod-route {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .pod-route i {
+            color: var(--primary);
+        }
+
+        .pod-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pod-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .pod-detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pod-detail-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .pod-preview {
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #F9FAFB;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .pod-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .pod-preview img:hover {
+            transform: scale(1.05);
+        }
+
+        .pod-preview.pdf-preview {
+            padding: 2rem;
+        }
+
+        .pod-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-pod {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-pod-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-pod-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-pod-outline {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-pod-outline:hover {
+            background: #F9FAFB;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* POD Modal */
+        .pod-modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 8px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .pod-modal-pdf {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <img src="image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="post-load.html" class="nav-link">
+                <i class="fas fa-plus-circle"></i>
+                Post Load
+            </a>
+            <a href="my-loads.html" class="nav-link">
+                <i class="fas fa-boxes"></i>
+                My Loads
+            </a>
+            <a href="pod.html" class="nav-link active">
+                <i class="fas fa-file-invoice"></i>
+                Proof of Delivery
+            </a>
+            <a href="track.html" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                Track Carrier
+            </a>
+            <a href="payments.html" class="nav-link">
+                <i class="fas fa-credit-card"></i>
+                Payments
+            </a>
+            <a href="pay-letter-pending.html" class="nav-link">
+                <i class="fas fa-file-invoice"></i>
+                Pay Letter Pending
+            </a>
+            <div class="nav-group">
+                <div class="nav-link nav-group-toggle">
+                    <i class="fas fa-comments"></i>
+                    Chat
+                </div>
+                <div class="nav-group-items">
+                    <a href="messages.html" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        Messages
+                        <span class="badge bg-danger ms-auto" id="messagesBadge" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+            <a href="profile.html" class="nav-link">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <a href="settings.html" class="nav-link">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+            <a href="../admin/dashboard.html" class="nav-link" id="adminPanelLink" style="display: none;">
+                <i class="fas fa-shield-alt"></i>
+                Admin Panel
+            </a>
+            <hr class="my-3">
+            <a href="#" class="nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold">Proof of Delivery</h5>
+                </div>
+                <div class="header-actions">
+                    <div style="position: relative;">
+                        <button class="header-icon-btn" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                        </button>
+                        <!-- Notification Dropdown -->
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="notification-header">
+                                <h6>Notifications</h6>
+                                <button onclick="markAllAsRead()">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <div class="notification-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No notifications yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=Supplier+User&background=2563EB&color=fff&size=128" 
+                             alt="Profile" 
+                             class="header-profile" 
+                             id="profileImage"
+                             data-bs-toggle="dropdown">
+                        <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu">
+                            <li class="profile-dropdown-header">
+                                <img src="https://ui-avatars.com/api/?name=Supplier+User&background=2563EB&color=fff&size=128" 
+                                     alt="Profile" 
+                                     class="profile-dropdown-avatar"
+                                     id="profileDropdownImage">
+                                <h6 id="profileName">Loading...</h6>
+                                <input type="text" 
+                                       class="profile-status-input" 
+                                       id="profileStatus" 
+                                       value="Active" 
+                                       readonly>
+                            </li>
+                            <li><a class="profile-dropdown-item" href="profile.html">
+                                <i class="fas fa-user"></i> My Profile
+                            </a></li>
+                            <li><a class="profile-dropdown-item" href="messages.html">
+                                <i class="fas fa-comments"></i> Messages
+                            </a></li>
+                            <li><a class="profile-dropdown-item" href="settings.html">
+                                <i class="fas fa-cog"></i> Settings
+                            </a></li>
+                            <li class="profile-dropdown-footer">
+                                <button class="btn btn-danger w-100" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-file-invoice text-primary me-2"></i>
+                    Proof of Delivery
+                </h1>
+                <p class="page-subtitle">View and download POD documents for your completed loads</p>
+            </div>
+
+            <!-- POD List -->
+            <div id="podContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p class="empty-state-text">Loading POD documents...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POD View Modal -->
+    <div class="modal fade" id="podViewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-invoice me-2"></i>
+                        Proof of Delivery
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="podModalBody">
+                    <!-- POD content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="downloadPODBtn">
+                        <i class="fas fa-download me-1"></i>
+                        Download POD
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        // Initialize Firebase
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            var db = firebase.database();
+        } else {
+            console.error('Firebase SDK not loaded');
+            var db = null;
+        }
+        let currentPODData = null;
+
+        // Check Authentication (using localStorage like other supplier pages)
+        const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+        if (!auth.isLoggedIn) {
+            window.location.href = 'login.html';
+        } else {
+            // Load PODs after authentication check
+            loadPODs();
+        }
+
+        // Load User Data
+        function loadUserData() {
+            const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+            const userName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier User';
+            document.getElementById('profileName').textContent = userName;
+            const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=2563EB&color=fff&size=128`;
+            document.getElementById('profileImage').src = profileImageUrl;
+            document.getElementById('profileDropdownImage').src = profileImageUrl;
+
+            const status = auth.status || 'pending';
+            const statusEl = document.getElementById('profileStatus');
+            if (status === 'active' || status === 'verified') {
+                statusEl.value = 'Active';
+            } else if (status === 'pending' || status === 'pending_verification') {
+                statusEl.value = 'Pending Review';
+            } else {
+                statusEl.value = 'Inactive';
+            }
+        }
+
+        // Toggle Sidebar (Mobile)
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        // Toggle Notifications
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
+                loadNotifications();
+            }
+        }
+
+        // Load Notifications
+        function loadNotifications() {
+            const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId || !db) return;
+
+            const notificationList = document.getElementById('notificationList');
+            const notificationBadge = document.getElementById('notificationBadge');
+
+            db.ref('notifications/suppliers/' + supplierId).orderByChild('timestamp').limitToLast(10).once('value', function(snapshot) {
+                const notifications = [];
+                let unreadCount = 0;
+
+                snapshot.forEach(function(child) {
+                    const notif = child.val();
+                    notif.id = child.key;
+                    notifications.unshift(notif);
+                    if (!notif.read) {
+                        unreadCount++;
+                    }
+                });
+
+                if (unreadCount > 0) {
+                    notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    notificationBadge.style.display = 'flex';
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = `
+                        <div class="notification-empty">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>No notifications yet</p>
+                        </div>
+                    `;
+                } else {
+                    notificationList.innerHTML = notifications.map(notif => {
+                        const isUnread = !notif.read;
+                        const timeAgo = getTimeAgo(notif.timestamp || notif.createdAt);
+                        const iconClass = getNotificationIconClass(notif.type);
+                        const icon = getNotificationIcon(notif.type);
+                        const message = notif.message || notif.title || 'Notification';
+                        
+                        return `
+                            <div class="notification-item ${isUnread ? 'unread' : ''}" onclick="openNotification('${notif.id}', '${notif.loadId || ''}')">
+                                <div class="notification-icon ${iconClass}">
+                                    <i class="fas ${icon}"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <h6 class="notification-title">${message}</h6>
+                                    <p class="notification-time">${timeAgo}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            });
+        }
+
+        function getNotificationIconClass(type) {
+            switch(type) {
+                case 'success': return 'success';
+                case 'warning': return 'warning';
+                case 'danger': return 'danger';
+                case 'info':
+                default: return 'info';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'fa-check-circle';
+                case 'warning': return 'fa-exclamation-triangle';
+                case 'danger': return 'fa-times-circle';
+                case 'load_status_update': return 'fa-truck';
+                case 'info':
+                default: return 'fa-info-circle';
+            }
+        }
+
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Just now';
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+                if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            } catch (e) {
+                return 'Recently';
+            }
+        }
+
+        function openNotification(notificationId, loadId) {
+            if (db) {
+                db.ref('notifications/suppliers').child(notificationId).update({
+                    read: true,
+                    readAt: new Date().toISOString()
+                }).catch(err => console.error('Error marking notification as read:', err));
+            }
+
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.remove('show');
+
+            if (loadId) {
+                window.location.href = `my-loads.html`;
+            }
+        }
+
+        function markAllAsRead() {
+            const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId || !db) return;
+
+            db.ref('notifications/suppliers/' + supplierId).once('value', function(snapshot) {
+                const updates = {};
+                snapshot.forEach(function(child) {
+                    const notif = child.val();
+                    if (!notif.read) {
+                        updates[child.key + '/read'] = true;
+                        updates[child.key + '/readAt'] = new Date().toISOString();
+                    }
+                });
+
+                if (Object.keys(updates).length > 0) {
+                    db.ref('notifications/suppliers/' + supplierId).update(updates).catch(err => {
+                        console.error('Error marking all as read:', err);
+                    });
+                }
+            });
+        }
+
+        // Custom Confirm Dialog
+        function showConfirmLogout() {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmLogoutOverlay');
+                const messageEl = document.getElementById('confirmLogoutMessage');
+                const okBtn = document.getElementById('confirmLogoutOkBtn');
+                const cancelBtn = document.getElementById('confirmLogoutCancelBtn');
+
+                messageEl.textContent = 'Are you sure you want to logout?';
+                okBtn.textContent = 'Yes, Logout';
+                cancelBtn.textContent = 'Cancel';
+
+                const cleanup = () => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    overlay.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                };
+
+                const onOk = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (e) => {
+                    if (e.target === overlay) {
+                        onCancel();
+                    }
+                };
+
+                const onKeydown = (e) => {
+                    if (e.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                overlay.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        // Logout Function
+        async function logout() {
+            const confirmed = await showConfirmLogout();
+            if (confirmed) {
+                localStorage.removeItem('supplierAuth');
+                window.location.href = '../../index.html';
+            }
+        }
+
+        // Close notification dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const btn = document.querySelector('.header-icon-btn');
+            if (dropdown && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Initialize
+        loadUserData();
+        loadNotifications();
+
+        // Load PODs
+        function loadPODs() {
+            if (!db) {
+                console.error('Database not initialized');
+                document.getElementById('podContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <p class="empty-state-text">Database not initialized. Please refresh the page.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Get supplier ID from localStorage auth
+            const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+            const supplierId = auth.supplierId || auth.id;
+            
+            if (!supplierId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const container = document.getElementById('podContainer');
+
+            // Load PODs from loads (where POD is saved in load object)
+            // This avoids permission issues with /pods/ path
+            db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value')
+                .then(loadsSnapshot => {
+                    const pods = [];
+                    
+                    loadsSnapshot.forEach(loadChild => {
+                        const load = loadChild.val();
+                        // Check if load has POD and is completed/delivered
+                        if (load.hasPOD && load.podUrl && (load.status === 'completed' || load.status === 'delivered')) {
+                            pods.push({
+                                id: loadChild.key,
+                                loadId: loadChild.key,
+                                podUrl: load.podUrl,
+                                podFileName: load.podFileName || 'POD Document',
+                                podFileType: load.podFileType || 'image/jpeg',
+                                podFileSize: load.podFileSize || 0,
+                                podUploadedAt: load.podUploadedAt || load.completedAt || load.createdAt,
+                                podUploadedBy: load.podUploadedBy || load.carrierId || 'Carrier',
+                                pickupLocation: load.pickupLocation,
+                                deliveryLocation: load.deliveryLocation,
+                                carrierName: load.carrierName || 'Carrier',
+                                carrierId: load.carrierId,
+                                loadPrice: load.price || load.budget || load.maxBudget || load.minBudget
+                            });
+                        }
+                    });
+
+                    // Sort by upload date (newest first)
+                    pods.sort((a, b) => {
+                        const dateA = new Date(a.podUploadedAt || 0);
+                        const dateB = new Date(b.podUploadedAt || 0);
+                        return dateB - dateA;
+                    });
+
+                    displayPODs(pods);
+                })
+                .catch(error => {
+                    console.error('Error loading PODs:', error);
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <p class="empty-state-text">Error loading POD documents: ${error.message || 'Unknown error'}</p>
+                            <small class="text-muted">Please try refreshing the page.</small>
+                        </div>
+                    `;
+                });
+        }
+
+        // Display PODs
+        function displayPODs(pods) {
+            const container = document.getElementById('podContainer');
+
+            if (pods.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <p class="empty-state-text">No POD documents found</p>
+                        <small class="text-muted">POD documents will appear here once carriers upload them for completed loads.</small>
+                    </div>
+                `;
+                return;
+            }
+
+            const podsHtml = pods.map(pod => {
+                const uploadDate = pod.podUploadedAt ? new Date(pod.podUploadedAt).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'N/A';
+
+                return `
+                    <div class="pod-card">
+                        <div class="pod-header">
+                            <div class="pod-load-info">
+                                <h6>Load #${(pod.loadId || pod.id).substring(0, 8)}</h6>
+                                <small>Uploaded: ${uploadDate}</small>
+                            </div>
+                            <span class="pod-status">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Verified
+                            </span>
+                        </div>
+                        <div class="pod-route">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${pod.pickupLocation || 'N/A'} → ${pod.deliveryLocation || 'N/A'}</span>
+                        </div>
+                        <div class="pod-details">
+                            <div class="pod-detail-item">
+                                <span class="pod-detail-label">Carrier</span>
+                                <span class="pod-detail-value">${pod.carrierName || 'N/A'}</span>
+                            </div>
+                            <div class="pod-detail-item">
+                                <span class="pod-detail-label">File Name</span>
+                                <span class="pod-detail-value">${pod.podFileName || 'POD Document'}</span>
+                            </div>
+                            <div class="pod-detail-item">
+                                <span class="pod-detail-label">File Type</span>
+                                <span class="pod-detail-value">${pod.podFileType ? pod.podFileType.split('/')[1].toUpperCase() : 'IMAGE'}</span>
+                            </div>
+                        </div>
+                        <div class="pod-actions">
+                            <button class="btn-pod btn-pod-primary" onclick="viewPOD('${pod.id}', '${(pod.podUrl || '').replace(/'/g, "\\'")}', '${pod.podFileType || 'image/jpeg'}', '${(pod.podFileName || 'POD').replace(/'/g, "\\'")}')">
+                                <i class="fas fa-eye"></i>
+                                View POD
+                            </button>
+                            <button class="btn-pod btn-pod-outline" onclick="downloadPOD('${pod.id}', '${(pod.podUrl || '').replace(/'/g, "\\'")}', '${(pod.podFileName || 'POD').replace(/'/g, "\\'")}')">
+                                <i class="fas fa-download"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = podsHtml;
+        }
+
+        // View POD
+        function viewPOD(podId, podUrl, fileType, fileName) {
+            currentPODData = { podId, podUrl, fileType, fileName };
+            const modalBody = document.getElementById('podModalBody');
+            const downloadBtn = document.getElementById('downloadPODBtn');
+
+            if (fileType && fileType.includes('pdf')) {
+                modalBody.innerHTML = `
+                    <div class="pod-preview pdf-preview">
+                        <iframe src="${podUrl}" class="pod-modal-pdf"></iframe>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = `
+                    <div class="pod-preview">
+                        <img src="${podUrl}" alt="POD Document" class="pod-modal-image" onclick="window.open('${podUrl}', '_blank')">
+                    </div>
+                `;
+            }
+
+            downloadBtn.onclick = () => downloadPOD(podId, podUrl, fileName);
+            const modal = new bootstrap.Modal(document.getElementById('podViewModal'));
+            modal.show();
+        }
+
+        // Download POD
+        function downloadPOD(podId, podUrl, fileName) {
+            try {
+                const link = document.createElement('a');
+                link.href = podUrl;
+                link.download = fileName || 'POD_Document';
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Download error:', error);
+                // Fallback: open in new tab
+                window.open(podUrl, '_blank');
+            }
+        }
+    </script>
+
+    <!-- Confirm Logout Modal -->
+    <div id="confirmLogoutOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmLogoutTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h6 id="confirmLogoutTitle" class="confirm-title">Confirm Logout</h6>
+            </div>
+            <div id="confirmLogoutMessage" class="confirm-message">Are you sure you want to logout?</div>
+            <div class="confirm-actions">
+                <button id="confirmLogoutCancelBtn" class="confirm-btn cancel" type="button">Cancel</button>
+                <button id="confirmLogoutOkBtn" class="confirm-btn danger" type="button">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

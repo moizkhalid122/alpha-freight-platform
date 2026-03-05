@@ -1,0 +1,781 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resubmissions - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .stat-card {
+            border-left: 4px solid #17a2b8;
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .resubmission-card {
+            border-left: 4px solid #ffc107;
+            transition: all 0.2s ease;
+        }
+        .resubmission-card.awaiting-review {
+            border-left-color: #28a745;
+        }
+        .resubmission-card.waiting-applicant {
+            border-left-color: #dc3545;
+        }
+        .resubmission-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        .document-item {
+            border: 1px dashed #ced4da;
+            border-radius: 8px;
+            padding: 0.75rem;
+            background: #fff;
+        }
+        .badge-awaiting {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+        .badge-waiting {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        .badge-final {
+            background-color: rgba(108,117,125,0.15);
+            color: #495057;
+        }
+        .filter-chip {
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white active" href="resubmissions.html">
+                            <i class="fas fa-repeat"></i> Resubmissions
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="../../index.html">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Resubmission Requests</h5>
+                            <small class="text-muted">Review carrier & supplier resubmits, notes, and updated documents</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" id="refreshButton">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4">
+                    <!-- Stats -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card stat-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-1">Total Pending Reviews</h6>
+                                            <h3 class="mb-0 fw-bold" id="totalResubCount">0</h3>
+                                        </div>
+                                        <span class="text-info"><i class="fas fa-clipboard-check fa-2x"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-1">Carrier Resubmissions</h6>
+                                            <h3 class="mb-0 fw-bold" id="carrierResubCount">0</h3>
+                                        </div>
+                                        <span class="text-warning"><i class="fas fa-truck fa-2x"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-1">Supplier Resubmissions</h6>
+                                            <h3 class="mb-0 fw-bold" id="supplierResubCount">0</h3>
+                                        </div>
+                                        <span class="text-danger"><i class="fas fa-warehouse fa-2x"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label for="searchInput" class="form-label">Search</label>
+                                    <input type="search" id="searchInput" class="form-control" placeholder="Search by company, email, notes...">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="statusFilter" class="form-label">Status</label>
+                                    <select id="statusFilter" class="form-select">
+                                        <option value="">All</option>
+                                        <option value="awaiting_review">Awaiting Review</option>
+                                        <option value="waiting_applicant">Waiting on Applicant</option>
+                                        <option value="final_rejection">Final Rejection</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Type</label>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-primary filter-chip active" data-resub-tab="carrier">
+                                            <i class="fas fa-truck"></i> Carriers
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary filter-chip" data-resub-tab="supplier">
+                                            <i class="fas fa-people-carry"></i> Suppliers
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm" id="clearFiltersBtn">
+                                            <i class="fas fa-times"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="resultsContainer">
+                        <div class="text-center py-5" id="loadingState">
+                            <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Loading resubmissions...</p>
+                        </div>
+                        <div id="emptyState" class="text-center py-5" style="display: none;">
+                            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No resubmissions found</h5>
+                            <p class="text-muted">When carriers or suppliers resubmit their details, they will appear here.</p>
+                        </div>
+                        <div id="resubmissionList" class="row g-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal fade" id="resubmissionDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-clipboard-list"></i> Resubmission Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="resubmissionModalBody">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Loading details...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a id="openProfileButton" href="#" target="_blank" class="btn btn-outline-primary d-none">
+                        <i class="fas fa-external-link-alt"></i> Open Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        if (typeof firebase !== 'undefined' && (!firebase.apps || firebase.apps.length === 0)) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const state = {
+            carriers: [],
+            suppliers: [],
+            filtered: [],
+            currentType: 'carrier'
+        };
+
+        const dom = {
+            loadingState: document.getElementById('loadingState'),
+            emptyState: document.getElementById('emptyState'),
+            list: document.getElementById('resubmissionList'),
+            totalCount: document.getElementById('totalResubCount'),
+            carrierCount: document.getElementById('carrierResubCount'),
+            supplierCount: document.getElementById('supplierResubCount'),
+            searchInput: document.getElementById('searchInput'),
+            statusFilter: document.getElementById('statusFilter'),
+            clearFiltersBtn: document.getElementById('clearFiltersBtn'),
+            refreshButton: document.getElementById('refreshButton')
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            attachEventListeners();
+            fetchResubmissions();
+        });
+
+        function attachEventListeners() {
+            dom.searchInput.addEventListener('input', applyFilters);
+            dom.statusFilter.addEventListener('change', applyFilters);
+            dom.clearFiltersBtn.addEventListener('click', clearFilters);
+            dom.refreshButton.addEventListener('click', () => {
+                fetchResubmissions();
+            });
+
+            document.querySelectorAll('[data-resub-tab]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-resub-tab]').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    state.currentType = this.dataset.resubTab;
+                    applyFilters();
+                });
+            });
+        }
+
+        function fetchResubmissions() {
+            if (dom.loadingState) dom.loadingState.style.display = 'block';
+            if (dom.emptyState) dom.emptyState.style.display = 'none';
+            if (dom.list) dom.list.innerHTML = '';
+
+            state.carriers = [];
+            state.suppliers = [];
+
+            if (typeof firebase === 'undefined' || !firebase.database) {
+                console.error('Firebase not available');
+                if (dom.loadingState) dom.loadingState.innerHTML = '<p class="text-danger">Firebase not available. Please refresh.</p>';
+                return;
+            }
+
+            const db = firebase.database();
+
+            const carrierPromise = db.ref('carriers').once('value').then(snapshot => {
+                snapshot.forEach(child => {
+                    const carrier = child.val() || {};
+                    carrier.id = child.key;
+                    const record = mapCarrierResubmission(carrier);
+                    if (record) state.carriers.push(record);
+                });
+            }).catch(err => console.error('Error fetching carriers:', err));
+
+            const supplierPromise = db.ref('suppliers').once('value').then(snapshot => {
+                snapshot.forEach(child => {
+                    const supplier = child.val() || {};
+                    supplier.id = child.key;
+                    const record = mapSupplierResubmission(supplier);
+                    if (record) state.suppliers.push(record);
+                });
+            }).catch(err => console.error('Error fetching suppliers:', err));
+
+            Promise.all([carrierPromise, supplierPromise]).then(() => {
+                if (dom.loadingState) dom.loadingState.style.display = 'none';
+                renderStats();
+                applyFilters();
+            });
+        }
+
+        function mapCarrierResubmission(carrier) {
+            const status = String(carrier.status || '').toLowerCase();
+            const hasResubmitted = !!carrier.resubmittedAt || !!carrier.resubmissionNotes || (carrier.resubmissionDocuments && Object.keys(carrier.resubmissionDocuments).length > 0);
+            const waitingForAdmin = hasResubmitted && (status === 'pending_verification' || status === 'pending_review' || status === 'pending');
+            const waitingForApplicant = carrier.requiresResubmission && !hasResubmitted && status === 'rejected';
+            const finalRejection = carrier.permanentlyRejected === true;
+
+            if (!waitingForAdmin && !waitingForApplicant && !finalRejection) {
+                return null;
+            }
+
+            return {
+                id: carrier.id,
+                type: 'carrier',
+                companyName: carrier.companyName || 'N/A',
+                email: carrier.email || 'N/A',
+                phone: carrier.phone || 'N/A',
+                status,
+                waitingForAdmin,
+                waitingForApplicant,
+                finalRejection,
+                rejectionReason: carrier.rejectionReason || '',
+                rejectionCount: carrier.rejectionCount || 0,
+                resubmissionNotes: carrier.resubmissionNotes || '',
+                resubmittedAt: carrier.resubmittedAt || null,
+                rejectedAt: carrier.rejectedAt || null,
+                requiresResubmission: !!carrier.requiresResubmission,
+                documents: carrier.resubmissionDocuments || {},
+                original: carrier
+            };
+        }
+
+        function mapSupplierResubmission(supplier) {
+            const status = String(supplier.status || '').toLowerCase();
+            const hasResubmitted = !!supplier.resubmittedAt || !!supplier.resubmissionNotes || (supplier.resubmissionDocuments && Object.keys(supplier.resubmissionDocuments).length > 0);
+            const waitingForAdmin = hasResubmitted && (status === 'pending' || status === 'pending_review');
+            const waitingForApplicant = supplier.requiresResubmission && !hasResubmitted && status === 'rejected';
+            const finalRejection = supplier.permanentlyRejected === true;
+
+            if (!waitingForAdmin && !waitingForApplicant && !finalRejection) {
+                return null;
+            }
+
+            return {
+                id: supplier.id,
+                type: 'supplier',
+                companyName: supplier.companyName || 'N/A',
+                email: supplier.email || 'N/A',
+                phone: supplier.phone || 'N/A',
+                status,
+                waitingForAdmin,
+                waitingForApplicant,
+                finalRejection,
+                rejectionReason: supplier.rejectionReason || '',
+                rejectionCount: supplier.rejectionCount || 0,
+                resubmissionNotes: supplier.resubmissionNotes || '',
+                resubmittedAt: supplier.resubmittedAt || null,
+                rejectedAt: supplier.rejectedAt || null,
+                requiresResubmission: !!supplier.requiresResubmission,
+                documents: supplier.resubmissionDocuments || {},
+                original: supplier
+            };
+        }
+
+        function renderStats() {
+            const carrierCount = state.carriers.length;
+            const supplierCount = state.suppliers.length;
+            const total = carrierCount + supplierCount;
+
+            dom.totalCount.textContent = total;
+            dom.carrierCount.textContent = carrierCount;
+            dom.supplierCount.textContent = supplierCount;
+        }
+
+        function applyFilters() {
+            const searchTerm = dom.searchInput.value.trim().toLowerCase();
+            const statusFilter = dom.statusFilter.value;
+            const sourceArray = state.currentType === 'carrier' ? state.carriers : state.suppliers;
+
+            state.filtered = sourceArray.filter(item => {
+                let matchesSearch = true;
+                if (searchTerm) {
+                    const haystack = [
+                        item.companyName,
+                        item.email,
+                        item.phone,
+                        item.rejectionReason,
+                        item.resubmissionNotes
+                    ].join(' ').toLowerCase();
+                    matchesSearch = haystack.includes(searchTerm);
+                }
+
+                let matchesStatus = true;
+                if (statusFilter === 'awaiting_review') {
+                    matchesStatus = item.waitingForAdmin && !item.finalRejection;
+                } else if (statusFilter === 'waiting_applicant') {
+                    matchesStatus = item.waitingForApplicant;
+                } else if (statusFilter === 'final_rejection') {
+                    matchesStatus = item.finalRejection;
+                }
+
+                return matchesSearch && matchesStatus;
+            });
+
+            renderList();
+        }
+
+        function clearFilters() {
+            dom.searchInput.value = '';
+            dom.statusFilter.value = '';
+            applyFilters();
+        }
+
+        function renderList() {
+            if (state.filtered.length === 0) {
+                if (dom.list) dom.list.innerHTML = '';
+                if (dom.emptyState) dom.emptyState.style.display = 'block';
+                return;
+            }
+
+            if (dom.emptyState) dom.emptyState.style.display = 'none';
+
+            const fragments = state.filtered.map(item => createResubmissionCard(item));
+            dom.list.innerHTML = fragments.join('');
+        }
+
+        function createResubmissionCard(item) {
+            const badge = getStatusBadge(item);
+            const docCount = item.documents ? Object.keys(item.documents).length : 0;
+            const resubmittedAt = item.resubmittedAt ? formatDate(item.resubmittedAt) : '—';
+            const rejectedAt = item.rejectedAt ? formatDate(item.rejectedAt) : '—';
+            const notesPreview = item.resubmissionNotes ? truncateText(item.resubmissionNotes, 160) : '<span class="text-muted">No notes provided</span>';
+
+            const wrapperClass = item.waitingForAdmin ? 'awaiting-review' : item.waitingForApplicant ? 'waiting-applicant' : 'final-state';
+
+            return `
+                <div class="col-12">
+                    <div class="card resubmission-card ${wrapperClass}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                        <h6 class="fw-bold mb-0">
+                                            <i class="fas ${item.type === 'carrier' ? 'fa-truck' : 'fa-warehouse'} text-${item.type === 'carrier' ? 'warning' : 'danger'}"></i>
+                                            ${item.companyName}
+                                        </h6>
+                                        ${badge}
+                                    </div>
+                                    <div class="text-muted small mb-2">
+                                        <i class="fas fa-envelope"></i> ${item.email} &nbsp;•&nbsp; <i class="fas fa-phone"></i> ${item.phone}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Notes:</strong> ${notesPreview}
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-clock"></i> Resubmitted: ${resubmittedAt} &nbsp;|&nbsp;
+                                        <i class="fas fa-undo"></i> Last Rejection: ${rejectedAt} &nbsp;|&nbsp;
+                                        <i class="fas fa-file"></i> Documents: ${docCount}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="openResubmissionDetails('${item.type}', '${item.id}')">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getStatusBadge(item) {
+            if (item.finalRejection) {
+                return '<span class="badge badge-final px-3 py-1"><i class="fas fa-ban"></i> Final Rejection</span>';
+            }
+            if (item.waitingForAdmin) {
+                return '<span class="badge badge-awaiting px-3 py-1"><i class="fas fa-hourglass-half"></i> Awaiting Review</span>';
+            }
+            if (item.waitingForApplicant) {
+                return '<span class="badge badge-waiting px-3 py-1"><i class="fas fa-user-clock"></i> Waiting on Applicant</span>';
+            }
+            return '<span class="badge text-bg-secondary px-3 py-1">In Progress</span>';
+        }
+
+        function openResubmissionDetails(type, id) {
+            const modal = new bootstrap.Modal(document.getElementById('resubmissionDetailsModal'));
+            const modalBody = document.getElementById('resubmissionModalBody');
+            const profileButton = document.getElementById('openProfileButton');
+
+            if (modalBody) {
+                modalBody.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Loading details...</p>
+                    </div>
+                `;
+            }
+            if (profileButton) {
+                profileButton.classList.add('d-none');
+                profileButton.href = '#';
+            }
+
+            const sourceArray = type === 'carrier' ? state.carriers : state.suppliers;
+            const record = sourceArray.find(item => item.id === id);
+            if (!record) {
+                modalBody.innerHTML = '<p class="text-danger">Unable to load resubmission details.</p>';
+                modal.show();
+                return;
+            }
+
+            const original = record.original || {};
+            const docHtml = renderDocuments(record.documents);
+
+            const statusText = record.finalRejection ? 'Final Rejection' : record.waitingForAdmin ? 'Awaiting Review' : record.waitingForApplicant ? 'Waiting on Applicant' : 'In Progress';
+            const statusBadge = getStatusBadge(record);
+
+            const resubmittedAt = record.resubmittedAt ? formatDateTime(record.resubmittedAt) : '—';
+            const rejectedAt = record.rejectedAt ? formatDateTime(record.rejectedAt) : '—';
+
+            const profileUrl = type === 'carrier' ? `../carrier/profile.html?id=${encodeURIComponent(id)}` : `../supplier/profile.html?id=${encodeURIComponent(id)}`;
+            if (profileButton) {
+                profileButton.href = profileUrl;
+                profileButton.classList.remove('d-none');
+            }
+
+            const rejectionReason = record.rejectionReason ? record.rejectionReason : '<span class="text-muted">Not specified</span>';
+            const notes = record.resubmissionNotes ? record.resubmissionNotes : '<span class="text-muted">Not provided</span>';
+
+            modalBody.innerHTML = `
+                <div class="mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <h5 class="mb-0">${record.companyName}</h5>
+                        ${statusBadge}
+                    </div>
+                    <div class="text-muted small">
+                        <i class="fas fa-envelope"></i> ${record.email} &nbsp;|&nbsp; <i class="fas fa-phone"></i> ${record.phone}
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-muted mb-2"><i class="fas fa-info-circle"></i> Status</h6>
+                                <p class="mb-1"><strong>Current:</strong> ${statusText}</p>
+                                <p class="mb-1"><strong>Rejections:</strong> ${record.rejectionCount || 0}</p>
+                                <p class="mb-1"><strong>Last Rejection:</strong> ${rejectedAt}</p>
+                                <p class="mb-0"><strong>Resubmitted:</strong> ${resubmittedAt}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-muted mb-2"><i class="fas fa-comment-dots"></i> Notes From Applicant</h6>
+                                <p class="mb-0">${notes}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-muted mb-2"><i class="fas fa-exclamation-triangle"></i> Rejection Reason</h6>
+                        <p class="mb-0">${rejectionReason}</p>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-muted mb-3"><i class="fas fa-address-card"></i> Business Details</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <strong>Contact Name</strong>
+                                <p class="mb-0">${(original.firstName || '') + ' ' + (original.lastName || '')}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>City</strong>
+                                <p class="mb-0">${original.city || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Company Registration</strong>
+                                <p class="mb-0">${original.companyReg || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Status</strong>
+                                <p class="mb-0 text-capitalize">${record.status || 'unknown'}</p>
+                            </div>
+                            <div class="col-12">
+                                <strong>Address</strong>
+                                <p class="mb-0">${original.address || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-muted mb-3"><i class="fas fa-file-upload"></i> Uploaded Documents (${docHtml.count})</h6>
+                        ${docHtml.html}
+                    </div>
+                </div>
+            `;
+
+            modal.show();
+        }
+
+        function renderDocuments(documents) {
+            if (!documents || Object.keys(documents).length === 0) {
+                return { count: 0, html: '<p class="text-muted mb-0">No resubmission documents uploaded.</p>' };
+            }
+
+            const entries = Object.keys(documents).map(key => {
+                const doc = documents[key];
+                if (!doc) return null;
+                const fileName = doc.fileName || key;
+                const fileSize = doc.fileSize ? formatFileSize(doc.fileSize) : 'Unknown size';
+                const updatedAt = doc.updatedAt ? formatDateTime(doc.updatedAt) : '—';
+                const safeData = doc.data || '';
+                const viewAttr = safeData ? `onclick="viewDocument('${encodeURIComponent(safeData)}')"` : 'disabled';
+                const downloadAttr = safeData ? `href="${safeData}" download="${fileName}"` : 'href="#" onclick="return false;"';
+
+                return `
+                    <div class="col-md-6">
+                        <div class="document-item mb-3 h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>${formatDocumentKey(key)}</strong>
+                                    <div class="text-muted small">${fileName}</div>
+                                </div>
+                                <span class="badge text-bg-light">${fileSize}</span>
+                            </div>
+                            <div class="text-muted small mb-3">
+                                <i class="fas fa-clock"></i> Updated: ${updatedAt}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" ${viewAttr}>
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <a class="btn btn-sm btn-outline-success" ${downloadAttr}>
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).filter(Boolean);
+
+            return {
+                count: entries.length,
+                html: `<div class="row">${entries.join('')}</div>`
+            };
+        }
+
+        function viewDocument(encodedData) {
+            try {
+                const data = decodeURIComponent(encodedData);
+                const newWindow = window.open();
+                if (!newWindow) {
+                    alert('Unable to open document window. Please allow pop-ups and try again.');
+                    return;
+                }
+                newWindow.document.write('<iframe src="' + data + '" style="border:0;width:100%;height:100vh"></iframe>');
+            } catch (error) {
+                console.error('Failed to open document:', error);
+                alert('Unable to open this document.');
+            }
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text || text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '…';
+        }
+
+        function formatDocumentKey(key) {
+            if (!key) return 'Document';
+            return key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()).trim();
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '—';
+            return date.toLocaleDateString();
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '—';
+            return date.toLocaleString();
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes || isNaN(bytes)) return 'Unknown size';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let index = 0;
+            let value = bytes;
+            while (value >= 1024 && index < units.length - 1) {
+                value /= 1024;
+                index++;
+            }
+            return value.toFixed(2) + ' ' + units[index];
+        }
+    </script>
+</body>
+</html>
+

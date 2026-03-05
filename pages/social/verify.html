@@ -1,0 +1,717 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Verified Badge - Alpha Freight Social Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <link href="../../assets/css/social-hub.css" rel="stylesheet">
+    <style>
+        .verify-hero {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.12), rgba(76, 175, 80, 0.12));
+            border-radius: 1.5rem;
+        }
+        .verify-checkmark {
+            width: 64px;
+            height: 64px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .verify-checkmark img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
+        .benefit-pill {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            padding: 0.35rem 0.85rem;
+        }
+        .plan-card.active {
+            border-color: #0d6efd;
+            box-shadow: 0 1rem 3rem rgba(13, 110, 253, 0.18);
+        }
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .plan-price span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6c757d;
+        }
+        .verification-form label {
+            font-weight: 600;
+            color: #1f2933;
+        }
+        .verification-form .form-control,
+        .verification-form .form-select {
+            border-radius: 0.75rem;
+            border-color: #e5e7eb;
+        }
+        .verification-form .form-control:focus,
+        .verification-form .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+            border-color: #0d6efd;
+        }
+        .verification-badge-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+        }
+        .faq-item {
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .faq-item:hover {
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.08);
+        }
+        .verified-preview-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 1050;
+        }
+        .verified-preview-card {
+            background: #fff;
+            border-radius: 1.25rem;
+            box-shadow: 0 1.25rem 2.5rem rgba(15, 23, 42, 0.2);
+            max-width: 420px;
+            width: 100%;
+            padding: 2rem;
+            position: relative;
+            text-align: center;
+        }
+        .verified-preview-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(13, 110, 253, 0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.75rem;
+            color: #0d6efd;
+            overflow: hidden;
+            position: relative;
+        }
+        .verified-preview-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .verified-preview-avatar.has-image {
+            background: transparent;
+            color: transparent;
+        }
+        .verified-preview-badge {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="social-layout">
+    <header class="social-nav py-3 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <a href="feed.html" class="d-flex align-items-center text-white text-decoration-none">
+                <img src="../../image-removebg-preview - 2025-10-29T055946.105.png" alt="Alpha Freight" style="height:42px;" class="me-3">
+                <span class="fw-bold fs-5"></span>
+            </a>
+            <nav class="d-flex align-items-center gap-3 flex-wrap justify-content-end ms-auto">
+                <a href="feed.html" class="nav-link">Feed</a>
+                <a href="post.html" class="nav-link">Post</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <a href="verify.html" class="nav-link active">Buy Verified</a>
+                <a href="ads.html" class="nav-link">Ads</a>
+                <a href="notifications.html" class="nav-link">Notifications</a>
+                <button class="btn btn-light position-relative" data-notification-bell>
+                    <i class="fas fa-bell"></i>
+                    <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle d-none" data-notification-badge>0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="py-5">
+        <div class="container">
+            <section class="verify-hero p-4 p-lg-5 mb-5 shadow-sm">
+                <div class="row align-items-center gy-4">
+                    <div class="col-lg-6">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <h1 class="fw-bold mb-0">Get Your Verified Badge</h1>
+                            <div class="verify-checkmark">
+                                <img src="../../verified_7641727.png" alt="Verified badge icon" id="verifyBadgeIcon">
+                            </div>
+                        </div>
+                        <p class="text-muted mb-4 mt-2">
+                            A verified badge instantly increases your company's credibility, builds trust across the freight network,
+                            helps you close deals faster, and boosts your position in search results.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="benefit-pill"><i class="fas fa-rocket me-1"></i> Priority Feed Placement</span>
+                            <span class="benefit-pill"><i class="fas fa-handshake me-1"></i> Trusted Partner Seal</span>
+                            <span class="benefit-pill"><i class="fas fa-headset me-1"></i> Premium Support</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-lg h-100">
+                            <div class="card-body p-4">
+                                <h5 class="fw-semibold mb-3">Select Your Plan</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="plan-card card border plan-card-option" data-plan="monthly">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="badge bg-primary-subtle text-primary">Most flexible</span>
+                                                    <i class="fas fa-calendar-day text-muted"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mb-1">Monthly</h6>
+                                                <div class="plan-price mb-2">£10<span>/mo</span></div>
+                                                <ul class="list-unstyled text-muted small mb-0">
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Cancel anytime</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Profile verification</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Priority moderation</li>
+                                                </ul>
+                                                <button type="button" class="btn btn-outline-primary w-100 mt-3" data-plan-select="monthly">
+                                                    Select Monthly
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="plan-card card border plan-card-option active" data-plan="annual">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="badge bg-success-subtle text-success">Best value</span>
+                                                    <i class="fas fa-calendar-alt text-muted"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mb-1">Annual</h6>
+                                                <div class="plan-price mb-2">£120<span>/yr</span></div>
+                                                <ul class="list-unstyled text-muted small mb-0">
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>2 months free</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Dedicated success rep</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Verified badge kit delivered</li>
+                                                </ul>
+                                                <button type="button" class="btn btn-primary w-100 mt-3" data-plan-select="annual">
+                                                    Select Annual
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-light border rounded p-3 mt-3 d-flex align-items-center justify-content-between">
+                                    <span class="fw-semibold">Selected plan:</span>
+                                    <span class="fs-5 fw-bold text-primary" data-selected-plan>Annual - £120/yr</span>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary w-100 mt-3" data-preview-badge-btn>
+                                    <i class="fas fa-eye me-2"></i>Preview Verified Badge
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="mb-5">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="fw-bold mb-0">Verification Request</h5>
+                                    <div class="verification-badge-preview">
+                                        <i class="fas fa-circle-check"></i>
+                                        Verified badge preview
+                                    </div>
+                                </div>
+                                <form class="verification-form needs-validation" novalidate data-verification-form>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Company Name *</label>
+                                            <input type="text" class="form-control" name="companyName" required>
+                                            <div class="invalid-feedback">Company name is required.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Registered Email *</label>
+                                            <input type="email" class="form-control" name="email" required>
+                                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Phone Number *</label>
+                                            <input type="tel" class="form-control" name="phone" required>
+                                            <div class="invalid-feedback">Enter a valid phone number.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Company Registration *</label>
+                                            <input type="text" class="form-control" name="registration" required>
+                                            <div class="invalid-feedback">Company registration number is required.</div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">Official Website <span class="text-muted small">(Optional)</span></label>
+                                            <input type="url" class="form-control" name="website" placeholder="https://">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">Reason for Verification *</label>
+                                            <textarea class="form-control" rows="3" name="reason" placeholder="Briefly explain how the badge will help your business." required></textarea>
+                                            <div class="invalid-feedback">Please provide a reason for verification.</div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">Supporting Documents <span class="text-muted small">(Optional)</span></label>
+                                            <input type="file" class="form-control" name="documents" accept=".pdf,.jpg,.png">
+                                            <div class="form-text">Attach your company licence, insurance, or other trust certificates (max 10MB).</div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-3">Billing Details</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Card Holder *</label>
+                                            <input type="text" class="form-control" name="cardName" required>
+                                            <div class="invalid-feedback">Enter the card holder's name.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Card Number *</label>
+                                            <input type="text" class="form-control" name="cardNumber" inputmode="numeric" maxlength="19" placeholder="xxxx xxxx xxxx xxxx" required>
+                                            <div class="invalid-feedback">Enter a valid card number.</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Expiry *</label>
+                                            <input type="text" class="form-control" name="expiry" placeholder="MM/YY" required>
+                                            <div class="invalid-feedback">Use the correct expiry format.</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">CVC *</label>
+                                            <input type="password" class="form-control" name="cvc" maxlength="4" required>
+                                            <div class="invalid-feedback">CVC is required.</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Billing Country *</label>
+                                            <select class="form-select" name="country" required>
+                                                <option value="">Select</option>
+                                                <option value="UK">United Kingdom</option>
+                                                <option value="EU">European Union</option>
+                                                <option value="USA">United States</option>
+                                                <option value="CAN">Canada</option>
+                                                <option value="OTHER">Other</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select a country.</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="terms" required>
+                                        <label class="form-check-label" for="terms">
+                                            I confirm that my company documents are genuine and I accept Alpha Freight's verification policy.
+                                        </label>
+                                        <div class="invalid-feedback">Accepting the verification policy is required.</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true" data-submit-spinner></span>
+                                        Purchase & Submit Review
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">Why teams choose verification?</h6>
+                                <ul class="list-unstyled text-muted small">
+                                    <li class="mb-3">
+                                        <i class="fas fa-arrow-trend-up text-success me-2"></i>
+                                        3x more profile views and lead conversions in the first 30 days.
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fas fa-user-shield text-primary me-2"></i>
+                                        Fraud protection layer—customers trust verified badges immediately.
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fas fa-comments text-info me-2"></i>
+                                        Priority moderation support whenever you need help with content or disputes.
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-award text-warning me-2"></i>
+                                        Downloadable toolkit plus marketing assets for your website and proposals.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">How verification works</h6>
+                                <ol class="list-group list-group-numbered">
+                                    <li class="list-group-item border-0 ps-0">
+                                        Submit your documents and choose the plan you want.
+                                    </li>
+                                    <li class="list-group-item border-0 ps-0">
+                                        Our compliance team reviews everything within 24 business hours.
+                                    </li>
+                                    <li class="list-group-item border-0 ps-0">
+                                        Once approved, your badge is activated and the welcome kit is emailed.
+                                    </li>
+                                </ol>
+                                <div class="alert alert-info mt-3 mb-0">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Most reviews complete within 12 working hours for annual plans.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h4 class="fw-bold mb-3">Frequently asked questions</h4>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="faq-item p-4 h-100">
+                            <h6 class="fw-semibold mb-2">How long does verification stay active?</h6>
+                            <p class="text-muted small mb-0">
+                                Your badge and trusted status remain live while your subscription is active. We send a renewal reminder 14 days before expiry.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="faq-item p-4 h-100">
+                            <h6 class="fw-semibold mb-2">Can I change my plan?</h6>
+                            <p class="text-muted small mb-0">
+                                Yes. You can upgrade from monthly to annual at any time. The difference is prorated and your badge stays active without interruption.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="faq-item p-4 h-100">
+                            <h6 class="fw-semibold mb-2">What is the refund policy?</h6>
+                            <p class="text-muted small mb-0">
+                                If the compliance team declines your verification, we automatically process a full refund. Otherwise the subscription follows the standard renewal cycle.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="faq-item p-4 h-100">
+                            <h6 class="fw-semibold mb-2">Are my documents secure?</h6>
+                            <p class="text-muted small mb-0">
+                                Yes. All files are stored in encrypted storage and only a limited compliance team can access them. Everything is deleted after 30 days except the audit trail.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pb-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="row align-items-center gy-4">
+                            <div class="col-lg-8">
+                                <h5 class="fw-bold mb-2">Still have questions?</h5>
+                                <p class="text-muted mb-0">
+                                    Talk to a compliance specialist—available Monday to Friday, 9am to 6pm UK time.
+                                </p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <a href="mailto:verification@alphabrokrage.com" class="btn btn-outline-primary me-lg-2 mb-2 mb-lg-0">
+                                    <i class="fas fa-envelope me-2"></i>Email Compliance
+                                </a>
+                                <a href="tel:+442080640123" class="btn btn-primary">
+                                    <i class="fas fa-phone me-2"></i>Call Support
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="verified-preview-overlay d-none" data-verified-preview>
+        <div class="verified-preview-card">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-preview-close aria-label="Close"></button>
+            <div class="verified-preview-avatar mb-3" data-preview-avatar>
+                <img data-preview-avatar-img alt="Profile preview">
+                <span data-preview-avatar-initials>AB</span>
+            </div>
+            <h5 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                <span data-preview-name>Alpha Logistics Ltd</span>
+                <span class="verified-preview-badge">
+                    <img src="../../verified_7641727.png" alt="Verified badge" style="width:100%;height:100%;object-fit:contain;">
+                </span>
+            </h5>
+            <p class="text-muted mb-0" data-preview-note>Preview: This is how the verified badge will appear on your profile and account listings.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/script.js"></script>
+    <script src="../../assets/js/social-hub.js"></script>
+    <script>
+        (function() {
+            const planCards = document.querySelectorAll('.plan-card-option');
+            const planButtons = document.querySelectorAll('[data-plan-select]');
+            const selectedPlanLabel = document.querySelector('[data-selected-plan]');
+            const form = document.querySelector('[data-verification-form]');
+            const submitSpinner = document.querySelector('[data-submit-spinner]');
+            const previewBtn = document.querySelector('[data-preview-badge-btn]');
+            const previewCard = document.querySelector('[data-verified-preview]');
+            const previewClose = document.querySelector('[data-preview-close]');
+            const previewSurface = previewCard?.querySelector('.verified-preview-card');
+            const previewName = document.querySelector('[data-preview-name]');
+            const previewAvatar = document.querySelector('[data-preview-avatar]');
+            const previewAvatarImg = document.querySelector('[data-preview-avatar-img]');
+            const previewAvatarInitials = document.querySelector('[data-preview-avatar-initials]');
+            const previewNote = document.querySelector('[data-preview-note]');
+
+            function safeParseLocal(key) {
+                if (typeof localStorage === 'undefined') return null;
+                try {
+                    const raw = localStorage.getItem(key);
+                    return raw ? JSON.parse(raw) : null;
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            function getInitials(text) {
+                return (text || '')
+                    .toString()
+                    .trim()
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map(part => part.charAt(0).toUpperCase())
+                    .join('') || 'AB';
+            }
+
+            function resolvePortalProfile() {
+                const socialUser = window.AlphaBrokrage?.socialHub?.getSessionUser?.();
+                if (socialUser) {
+                    return {
+                        displayName: socialUser.company || socialUser.name || 'Your Account',
+                        avatar: socialUser.avatar || '',
+                        tagline: socialUser.tagline || ''
+                    };
+                }
+
+                const supplierAuth = safeParseLocal('supplierAuth');
+                const supplierPhoto = typeof localStorage !== 'undefined' ? localStorage.getItem('supplierProfilePhoto') : null;
+                if (supplierAuth) {
+                    const displayName = supplierAuth.companyName || `${supplierAuth.firstName || ''} ${supplierAuth.lastName || ''}`.trim() || supplierAuth.email || 'Your Account';
+                    return {
+                        displayName,
+                        avatar: supplierAuth.profilePhoto || supplierAuth.photoUrl || supplierPhoto || '',
+                        tagline: supplierAuth.city || supplierAuth.address || ''
+                    };
+                }
+
+                const carrierAuth = safeParseLocal('carrierAuth');
+                const carriers = safeParseLocal('carriers') || [];
+                if (carrierAuth) {
+                    const carrierRecord = carriers.find(c =>
+                        (carrierAuth.email && c.email === carrierAuth.email) ||
+                        (carrierAuth.id && c.id === carrierAuth.id) ||
+                        (carrierAuth.carrierId && c.id === carrierAuth.carrierId)
+                    ) || {};
+                    const displayName = carrierRecord.companyName || carrierAuth.companyName || `${carrierRecord.firstName || carrierAuth.firstName || ''} ${carrierRecord.lastName || carrierAuth.lastName || ''}`.trim() || carrierAuth.email || 'Your Account';
+                    return {
+                        displayName,
+                        avatar: carrierRecord.profilePhoto || carrierAuth.profilePhoto || '',
+                        tagline: carrierRecord.city || carrierAuth.city || carrierAuth.address || ''
+                    };
+                }
+
+                const adminAuth = safeParseLocal('adminAuth');
+                if (adminAuth) {
+                    return {
+                        displayName: adminAuth.name || adminAuth.email || 'Admin',
+                        avatar: '',
+                        tagline: 'Alpha Freight Admin'
+                    };
+                }
+
+                return {
+                    displayName: 'Your Account',
+                    avatar: '',
+                    tagline: ''
+                };
+            }
+
+            function updatePreviewContent() {
+                const profile = resolvePortalProfile();
+                const displayName = profile.displayName || 'Your Account';
+                if (previewName) {
+                    previewName.textContent = displayName;
+                }
+                if (previewNote) {
+                    previewNote.textContent = 'Preview: This is how the badge will appear for ' + displayName + ' across profile and account listings.';
+                }
+
+                const initials = getInitials(displayName);
+                if (previewAvatarInitials) {
+                    previewAvatarInitials.textContent = initials;
+                    previewAvatarInitials.style.display = profile.avatar ? 'none' : 'inline';
+                }
+                if (previewAvatarImg) {
+                    if (profile.avatar) {
+                        previewAvatarImg.src = profile.avatar;
+                        previewAvatarImg.alt = displayName;
+                        previewAvatarImg.style.display = 'block';
+                    } else {
+                        previewAvatarImg.removeAttribute('src');
+                        previewAvatarImg.alt = 'Profile preview';
+                        previewAvatarImg.style.display = 'none';
+                    }
+                }
+                if (previewAvatar) {
+                    previewAvatar.classList.toggle('has-image', Boolean(profile.avatar));
+                }
+            }
+
+            function updatePlanSelection(plan) {
+                planCards.forEach(card => {
+                    const isActive = card.dataset.plan === plan;
+                    card.classList.toggle('active', isActive);
+                    const button = card.querySelector('[data-plan-select]');
+                    if (button) {
+                        if (isActive) {
+                            button.classList.remove('btn-outline-primary');
+                            button.classList.add('btn-primary');
+                        } else {
+                            button.classList.add('btn-outline-primary');
+                            button.classList.remove('btn-primary');
+                        }
+                    }
+                });
+                if (selectedPlanLabel) {
+                    selectedPlanLabel.textContent = plan === 'monthly' ? 'Monthly - £10/mo' : 'Annual - £120/yr';
+                }
+            }
+
+            planCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    updatePlanSelection(this.dataset.plan);
+                });
+            });
+
+            planButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    updatePlanSelection(this.dataset.planSelect);
+                });
+            });
+
+            const initialPlan = document.querySelector('.plan-card-option.active')?.dataset.plan || 'annual';
+            updatePlanSelection(initialPlan);
+
+            form?.addEventListener('submit', function(event) {
+                event.preventDefault();
+                if (!form.checkValidity()) {
+                    event.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+                submitSpinner?.classList.remove('d-none');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+
+                setTimeout(() => {
+                    submitSpinner?.classList.add('d-none');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    const activePlan = document.querySelector('.plan-card-option.active')?.dataset.plan || 'annual';
+                    updatePlanSelection(activePlan);
+                    hidePreview();
+                    window.AlphaBrokrage?.showAlert?.('success', 'Verification request received! Our team will review it within 12 working hours.');
+                }, 1800);
+            });
+
+            function showPreview() {
+                if (!previewCard) return;
+                updatePreviewContent();
+                previewCard.classList.remove('d-none');
+                document.body.style.overflow = 'hidden';
+                if (previewSurface) {
+                    previewSurface.style.opacity = '0';
+                    previewSurface.style.transform = 'translateY(16px)';
+                    previewSurface.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+                    requestAnimationFrame(() => {
+                        previewSurface.style.opacity = '1';
+                        previewSurface.style.transform = 'translateY(0)';
+                    });
+                }
+                if (previewBtn) {
+                    previewBtn.classList.remove('btn-outline-secondary');
+                    previewBtn.classList.add('btn-secondary');
+                    previewBtn.innerHTML = '<i class="fas fa-eye-slash me-2"></i>Hide Preview';
+                }
+            }
+
+            function hidePreview() {
+                if (!previewCard) return;
+                previewCard.classList.add('d-none');
+                document.body.style.overflow = '';
+                if (previewSurface) {
+                    previewSurface.style.opacity = '';
+                    previewSurface.style.transform = '';
+                    previewSurface.style.transition = '';
+                }
+                if (previewBtn) {
+                    previewBtn.classList.add('btn-outline-secondary');
+                    previewBtn.classList.remove('btn-secondary');
+                    previewBtn.innerHTML = '<i class="fas fa-eye me-2"></i>Preview Verified Badge';
+                }
+            }
+
+            previewBtn?.addEventListener('click', function() {
+                if (!previewCard) return;
+                if (previewCard.classList.contains('d-none')) {
+                    showPreview();
+                } else {
+                    hidePreview();
+                }
+            });
+
+            previewClose?.addEventListener('click', hidePreview);
+
+            previewCard?.addEventListener('click', function(event) {
+                if (event.target === previewCard) {
+                    hidePreview();
+                }
+            });
+
+            updatePreviewContent();
+        })();
+    </script>
+</body>
+</html>
+
+

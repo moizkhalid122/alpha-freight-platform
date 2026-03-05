@@ -1,0 +1,1913 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            min-height: 400px;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-card.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        .metric-card.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+        .metric-card.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        }
+        .metric-card.info {
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+        }
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            border: 2px dashed #dee2e6;
+        }
+        .analytics-filter {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .trend-indicator {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .trend-up {
+            color: #28a745;
+        }
+        .trend-down {
+            color: #dc3545;
+        }
+        .trend-neutral {
+            color: #6c757d;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white active" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Analytics Dashboard</h5>
+                            <small class="text-muted">Comprehensive insights and performance metrics</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshAnalytics()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="exportAnalytics()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Content -->
+                <div class="p-4">
+                    <!-- Date Range Filter -->
+                    <div class="analytics-filter">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="dateRange" class="form-label">Date Range</label>
+                                <select class="form-select" id="dateRange">
+                                    <option value="7">Last 7 days</option>
+                                    <option value="30" selected>Last 30 days</option>
+                                    <option value="90">Last 90 days</option>
+                                    <option value="365">Last year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="metricType" class="form-label">Metric Type</label>
+                                <select class="form-select" id="metricType">
+                                    <option value="all">All Metrics</option>
+                                    <option value="revenue">Revenue</option>
+                                    <option value="users">Users</option>
+                                    <option value="loads">Loads</option>
+                                    <option value="commission">Commission</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="userType" class="form-label">User Type</label>
+                                <select class="form-select" id="userType">
+                                    <option value="all">All Users</option>
+                                    <option value="suppliers">Suppliers</option>
+                                    <option value="carriers">Carriers</option>
+                                    <option value="brokers">Brokers</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-primary" onclick="applyAnalyticsFilters()">
+                                        <i class="fas fa-filter"></i> Apply Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="metric-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Total Revenue</h6>
+                                        <h3 class="fw-bold mb-1">£0</h3>
+                                        <span class="trend-indicator trend-neutral">
+                                            <i class="fas fa-minus"></i> 0%
+                                        </span>
+                                    </div>
+                                    <i class="fas fa-pound-sign fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="metric-card success">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Active Users</h6>
+                                        <h3 class="fw-bold mb-1">0</h3>
+                                        <span class="trend-indicator trend-neutral">
+                                            <i class="fas fa-users"></i> Active
+                                        </span>
+                                    </div>
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="metric-card warning">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Loads Completed</h6>
+                                        <h3 class="fw-bold mb-1">0</h3>
+                                        <span class="trend-indicator trend-neutral">
+                                            <i class="fas fa-check-circle"></i> Completed
+                                        </span>
+                                    </div>
+                                    <i class="fas fa-boxes fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="metric-card danger">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Commission Earned</h6>
+                                        <h3 class="fw-bold mb-1">£0</h3>
+                                        <span class="trend-indicator trend-neutral">
+                                            <i class="fas fa-percentage"></i> Earned
+                                        </span>
+                                    </div>
+                                    <i class="fas fa-percentage fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 1 -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-chart-line"></i> Revenue Trend
+                                </h5>
+                                <div style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-pie-chart"></i> User Distribution
+                                </h5>
+                                <div style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="userDistChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 2 -->
+                    <div class="row mb-4">
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-chart-bar"></i> Load Status Distribution
+                                </h5>
+                                <div style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="loadStatusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-chart-area"></i> Commission Analytics
+                                </h5>
+                                <div style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="commissionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-lg-12">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-tachometer-alt"></i> Performance Metrics
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="metric-card info" id="avgLoadTimeCard">
+                                            <div class="text-center">
+                                                <h6 class="mb-1">Average Load Time</h6>
+                                                <h3 class="fw-bold mb-1" id="avgLoadTime">0 days</h3>
+                                                <span class="trend-indicator trend-neutral">
+                                                    <i class="fas fa-minus"></i> N/A
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="metric-card success" id="customerSatisfactionCard">
+                                            <div class="text-center">
+                                                <h6 class="mb-1">Customer Satisfaction</h6>
+                                                <h3 class="fw-bold mb-1" id="customerSatisfaction">0★</h3>
+                                                <span class="trend-indicator trend-neutral">
+                                                    <i class="fas fa-star"></i> N/A
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="metric-card warning" id="loadSuccessRateCard">
+                                            <div class="text-center">
+                                                <h6 class="mb-1">Load Success Rate</h6>
+                                                <h3 class="fw-bold mb-1" id="loadSuccessRate">0%</h3>
+                                                <span class="trend-indicator trend-neutral">
+                                                    <i class="fas fa-percentage"></i> N/A
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="metric-card danger" id="paymentSuccessRateCard">
+                                            <div class="text-center">
+                                                <h6 class="mb-1">Payment Success Rate</h6>
+                                                <h3 class="fw-bold mb-1" id="paymentSuccessRate">0%</h3>
+                                                <span class="trend-indicator trend-neutral">
+                                                    <i class="fas fa-credit-card"></i> N/A
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Performers -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-trophy"></i> Top Suppliers
+                                </h5>
+                                <div class="top-performers" id="topSuppliers">
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                        <p class="mb-0">No supplier data available yet</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-truck"></i> Top Carriers
+                                </h5>
+                                <div class="top-performers" id="topCarriers">
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                        <p class="mb-0">No carrier data available yet</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps || firebase.apps.length === 0) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        }
+
+        // Analytics data storage
+        let analyticsData = {
+            loads: [],
+            users: [],
+            revenue: 0,
+            commission: 0,
+            dateRange: 30
+        };
+
+        // Chart instances
+        let revenueChart = null;
+        let userDistChart = null;
+        let loadStatusChart = null;
+        let commissionChart = null;
+
+        // Initialize analytics dashboard
+        function initAnalytics() {
+            loadAnalyticsData();
+            setupCharts();
+            setupRealtimeListeners();
+        }
+
+        // Load analytics data from Firebase and localStorage
+        function loadAnalyticsData() {
+            const db = firebase.database();
+            
+            // Fetch loads from Firebase
+            db.ref('loads').once('value', function(snapshot) {
+                analyticsData.loads = [];
+                snapshot.forEach(function(child) {
+                    const load = child.val();
+                    load.id = child.key;
+                    analyticsData.loads.push(load);
+                });
+                
+                // Also check localStorage as fallback
+                const localLoads = JSON.parse(localStorage.getItem('globalLoads') || '[]');
+                if (analyticsData.loads.length === 0 && localLoads.length > 0) {
+                    analyticsData.loads = localLoads;
+                }
+                
+                calculateMetrics();
+                updateCharts();
+            });
+
+            // Fetch users from localStorage (suppliers, carriers)
+            loadUsersData();
+        }
+
+        // Load users data
+        function loadUsersData() {
+            const db = firebase.database();
+            
+            // Try to get from Firebase first
+            Promise.all([
+                db.ref('suppliers').once('value'),
+                db.ref('carriers').once('value')
+            ]).then(function(results) {
+                const suppliers = [];
+                const carriers = [];
+                
+                // Process suppliers
+                if (results[0] && results[0].exists()) {
+                    results[0].forEach(function(child) {
+                        const supplier = child.val();
+                        supplier.id = child.key;
+                        supplier.userType = 'supplier';
+                        suppliers.push(supplier);
+                    });
+                    console.log('Suppliers loaded from Firebase:', suppliers.length);
+                }
+                
+                // Process carriers
+                if (results[1] && results[1].exists()) {
+                    results[1].forEach(function(child) {
+                        const carrier = child.val();
+                        carrier.id = child.key;
+                        carrier.userType = 'carrier';
+                        carriers.push(carrier);
+                    });
+                    console.log('Carriers loaded from Firebase:', carriers.length);
+                }
+                
+                // Update localStorage
+                if (suppliers.length > 0) {
+                    localStorage.setItem('supplierProfile', JSON.stringify(suppliers));
+                }
+                if (carriers.length > 0) {
+                    localStorage.setItem('carrierProfile', JSON.stringify(carriers));
+                }
+                
+                // Combine all users
+                analyticsData.users = [...suppliers, ...carriers];
+                console.log('Total users loaded:', analyticsData.users.length);
+                
+                // Also check localStorage as fallback if Firebase returns empty
+                if (analyticsData.users.length === 0) {
+                    const localSuppliers = JSON.parse(localStorage.getItem('supplierProfile') || '[]');
+                    const localCarriers = JSON.parse(localStorage.getItem('carrierProfile') || '[]');
+                    
+                    // If profiles are objects, convert to arrays
+                    let supplierArray = [];
+                    if (typeof localSuppliers === 'object' && !Array.isArray(localSuppliers)) {
+                        supplierArray = [localSuppliers];
+                    } else if (Array.isArray(localSuppliers)) {
+                        supplierArray = localSuppliers;
+                    }
+                    
+                    analyticsData.users = [...supplierArray, ...(Array.isArray(localCarriers) ? localCarriers : [])];
+                    console.log('Users loaded from localStorage fallback:', analyticsData.users.length);
+                }
+                
+                // Update metrics immediately after loading users
+                updateUserMetrics();
+                calculateMetrics();
+            }).catch(function(error) {
+                console.log('Error loading users from Firebase:', error);
+                
+                // Fallback to localStorage
+                const suppliers = JSON.parse(localStorage.getItem('supplierProfile') || '[]');
+                const carriers = JSON.parse(localStorage.getItem('carrierProfile') || '[]');
+                
+                // If profiles are objects, convert to arrays
+                let supplierArray = [];
+                if (typeof suppliers === 'object' && !Array.isArray(suppliers)) {
+                    supplierArray = [suppliers];
+                } else if (Array.isArray(suppliers)) {
+                    supplierArray = suppliers;
+                }
+                
+                analyticsData.users = [...supplierArray, ...(Array.isArray(carriers) ? carriers : [])];
+                console.log('Users loaded from localStorage:', analyticsData.users.length);
+                
+                updateUserMetrics();
+                calculateMetrics();
+            });
+        }
+
+        // Calculate all metrics
+        function calculateMetrics() {
+            const dateRange = analyticsData.dateRange;
+            const now = new Date();
+            const startDate = new Date(now.getTime() - (dateRange * 24 * 60 * 60 * 1000));
+            
+            // Filter loads by date range
+            const filteredLoads = analyticsData.loads.filter(load => {
+                const loadDate = new Date(load.createdAt || load.updatedAt || now);
+                return loadDate >= startDate;
+            });
+
+            // Calculate revenue (total cost of all loads)
+            analyticsData.revenue = filteredLoads.reduce((sum, load) => {
+                const cost = parseFloat(load.totalCost) || 
+                            parseFloat(load.commissionBaseAmount) || 
+                            parseFloat(load.amount) || 
+                            0;
+                return sum + cost;
+            }, 0);
+            
+            console.log('Total Revenue calculated:', analyticsData.revenue, 'from', filteredLoads.length, 'loads');
+
+            // Calculate commission earned
+            analyticsData.commission = filteredLoads.reduce((sum, load) => {
+                const baseAmount = parseFloat(load.totalCost) || 
+                                 parseFloat(load.commissionBaseAmount) || 
+                                 parseFloat(load.amount) || 
+                                 0;
+                if (baseAmount > 0) {
+                    try {
+                        const commission = window.AlphaBrokrage.calculateCommission(baseAmount);
+                        return sum + (commission.amount || 0);
+                    } catch (error) {
+                        console.log('Error calculating commission for load:', load.id, error);
+                        // Fallback to default commission calculation (5%)
+                        return sum + (baseAmount * 0.05);
+                    }
+                }
+                return sum;
+            }, 0);
+            
+            console.log('Total Commission calculated:', analyticsData.commission, 'from', filteredLoads.length, 'loads');
+
+            // Count completed loads - check multiple status formats
+            const completedLoads = filteredLoads.filter(load => {
+                const status = (load.status || '').toLowerCase().trim();
+                return status === 'completed' || 
+                       status === 'delivered' || 
+                       status === 'done' ||
+                       status === 'finished';
+            }).length;
+            
+            console.log('Completed loads:', completedLoads, 'from', filteredLoads.length, 'total loads');
+            
+            // Calculate active users - total registered users from Firebase
+            // Show total count of all registered users (suppliers + carriers)
+            const totalUsers = analyticsData.users.length || 0;
+            
+            // Also calculate users with activity in the date range
+            const activeUsersSet = new Set();
+            filteredLoads.forEach(load => {
+                if (load.userId) activeUsersSet.add(load.userId);
+                if (load.supplierId) activeUsersSet.add(load.supplierId);
+                if (load.carrierId) activeUsersSet.add(load.carrierId);
+            });
+            
+            // Use total registered users, or active users if total is 0
+            const activeUsersCount = totalUsers > 0 ? totalUsers : activeUsersSet.size;
+
+            // Calculate performance metrics
+            const performanceMetrics = calculatePerformanceMetrics(filteredLoads);
+
+            // Update metric cards
+            updateMetricCards({
+                revenue: analyticsData.revenue,
+                commission: analyticsData.commission,
+                completedLoads: completedLoads,
+                activeUsers: activeUsersCount
+            });
+
+            // Update performance metrics
+            updatePerformanceMetrics(performanceMetrics);
+
+            // Update top performers
+            updateTopPerformers(filteredLoads);
+
+            return {
+                revenue: analyticsData.revenue,
+                commission: analyticsData.commission,
+                completedLoads: completedLoads,
+                activeUsers: analyticsData.users.length || activeUsers.size || 0,
+                filteredLoads: filteredLoads
+            };
+        }
+
+        // Calculate performance metrics
+        function calculatePerformanceMetrics(loads) {
+            const completedLoads = loads.filter(l => l.status === 'completed');
+            const allLoads = loads.filter(l => l.status);
+            const totalLoads = allLoads.length || 1;
+
+            // Average load time (days)
+            let avgLoadTime = 0;
+            if (completedLoads.length > 0) {
+                const totalDays = completedLoads.reduce((sum, load) => {
+                    const pickupDate = load.pickupDate ? new Date(load.pickupDate) : null;
+                    const deliveryDate = load.deliveryDate ? new Date(load.deliveryDate) : null;
+                    if (pickupDate && deliveryDate) {
+                        const days = (deliveryDate - pickupDate) / (1000 * 60 * 60 * 24);
+                        return sum + (days > 0 ? days : 0);
+                    }
+                    return sum;
+                }, 0);
+                avgLoadTime = totalDays / completedLoads.length;
+            }
+
+            // Load success rate
+            const successRate = (completedLoads.length / totalLoads) * 100;
+
+            // Payment success rate (assume completed loads have successful payments)
+            const paymentSuccessRate = (completedLoads.length / totalLoads) * 100;
+
+            // Customer satisfaction (placeholder - would need rating data)
+            const customerSatisfaction = completedLoads.length > 0 ? 4.5 : 0;
+
+            return {
+                avgLoadTime: avgLoadTime.toFixed(1),
+                customerSatisfaction: customerSatisfaction.toFixed(1),
+                loadSuccessRate: successRate.toFixed(1),
+                paymentSuccessRate: paymentSuccessRate.toFixed(1)
+            };
+        }
+
+        // Update performance metrics UI
+        function updatePerformanceMetrics(metrics) {
+            const avgLoadTimeEl = document.getElementById('avgLoadTime');
+            if (avgLoadTimeEl) {
+                avgLoadTimeEl.textContent = `${metrics.avgLoadTime} days`;
+            }
+
+            const customerSatisfactionEl = document.getElementById('customerSatisfaction');
+            if (customerSatisfactionEl) {
+                customerSatisfactionEl.textContent = `${metrics.customerSatisfaction}★`;
+            }
+
+            const loadSuccessRateEl = document.getElementById('loadSuccessRate');
+            if (loadSuccessRateEl) {
+                loadSuccessRateEl.textContent = `${metrics.loadSuccessRate}%`;
+            }
+
+            const paymentSuccessRateEl = document.getElementById('paymentSuccessRate');
+            if (paymentSuccessRateEl) {
+                paymentSuccessRateEl.textContent = `${metrics.paymentSuccessRate}%`;
+            }
+        }
+
+        // Update top performers
+        function updateTopPerformers(loads) {
+            // Top Suppliers
+            const supplierStats = {};
+            loads.forEach(load => {
+                const supplierId = load.supplierId || load.userId;
+                const supplierName = load.supplierName || load.companyName || `Supplier ${supplierId}`;
+                if (supplierId) {
+                    if (!supplierStats[supplierId]) {
+                        supplierStats[supplierId] = {
+                            name: supplierName,
+                            loads: 0,
+                            totalSpent: 0,
+                            rating: 4.5
+                        };
+                    }
+                    supplierStats[supplierId].loads++;
+                    const cost = parseFloat(load.totalCost) || parseFloat(load.commissionBaseAmount) || 0;
+                    supplierStats[supplierId].totalSpent += cost;
+                }
+            });
+
+            const topSuppliers = Object.values(supplierStats)
+                .sort((a, b) => b.loads - a.loads || b.totalSpent - a.totalSpent)
+                .slice(0, 3);
+
+            updateTopSuppliersUI(topSuppliers);
+
+            // Top Carriers
+            const carrierStats = {};
+            loads.forEach(load => {
+                const carrierId = load.carrierId;
+                const carrierName = load.carrierName || load.companyName || `Carrier ${carrierId}`;
+                if (carrierId) {
+                    if (!carrierStats[carrierId]) {
+                        carrierStats[carrierId] = {
+                            name: carrierName,
+                            deliveries: 0,
+                            totalEarned: 0,
+                            rating: 4.5
+                        };
+                    }
+                    carrierStats[carrierId].deliveries++;
+                    const cost = parseFloat(load.totalCost) || parseFloat(load.commissionBaseAmount) || 0;
+                    if (cost > 0) {
+                        const commission = window.AlphaBrokrage.calculateCommission(cost);
+                        carrierStats[carrierId].totalEarned += (cost - commission.amount);
+                    }
+                }
+            });
+
+            const topCarriers = Object.values(carrierStats)
+                .sort((a, b) => b.deliveries - a.deliveries || b.totalEarned - a.totalEarned)
+                .slice(0, 3);
+
+            updateTopCarriersUI(topCarriers);
+        }
+
+        // Update top suppliers UI
+        function updateTopSuppliersUI(suppliers) {
+            const container = document.getElementById('topSuppliers');
+            if (!container) return;
+
+            if (suppliers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p class="mb-0">No supplier data available yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const medals = ['primary', 'secondary', 'warning'];
+            container.innerHTML = suppliers.map((supplier, index) => `
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-${medals[index]} text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">${index + 1}</div>
+                        <div>
+                            <h6 class="mb-0">${supplier.name}</h6>
+                            <small class="text-muted">${supplier.loads} loads • £${supplier.totalSpent >= 1000 ? (supplier.totalSpent / 1000).toFixed(1) + 'K' : supplier.totalSpent.toFixed(0)} spent</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-success mb-0">${supplier.rating}★</h6>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update top carriers UI
+        function updateTopCarriersUI(carriers) {
+            const container = document.getElementById('topCarriers');
+            if (!container) return;
+
+            if (carriers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p class="mb-0">No carrier data available yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const medals = ['primary', 'secondary', 'warning'];
+            container.innerHTML = carriers.map((carrier, index) => `
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-${medals[index]} text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">${index + 1}</div>
+                        <div>
+                            <h6 class="mb-0">${carrier.name}</h6>
+                            <small class="text-muted">${carrier.deliveries} deliveries • £${carrier.totalEarned >= 1000 ? (carrier.totalEarned / 1000).toFixed(1) + 'K' : carrier.totalEarned.toFixed(0)} earned</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-success mb-0">${carrier.rating}★</h6>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update metric cards with live data
+        function updateMetricCards(metrics) {
+            // Total Revenue
+            const revenueCard = document.querySelector('.metric-card:first-of-type h3');
+            if (revenueCard) {
+                // Parse previous revenue value properly
+                const prevRevenueText = revenueCard.textContent;
+                let prevRevenue = 0;
+                if (prevRevenueText.includes('K')) {
+                    prevRevenue = parseFloat(prevRevenueText.replace(/[£,K]/g, '')) * 1000;
+                } else {
+                    prevRevenue = parseFloat(prevRevenueText.replace(/[£,]/g, '')) || 0;
+                }
+                
+                const newRevenue = metrics.revenue || 0;
+                
+                // Format revenue text with proper formatting
+                let revenueText;
+                if (newRevenue >= 1000000) {
+                    revenueText = '£' + (newRevenue / 1000000).toFixed(2) + 'M';
+                } else if (newRevenue >= 1000) {
+                    revenueText = '£' + (newRevenue / 1000).toFixed(1) + 'K';
+                } else {
+                    revenueText = '£' + newRevenue.toFixed(2);
+                }
+                
+                revenueCard.textContent = revenueText;
+                
+                // Update trend indicator with percentage change
+                const trendEl = revenueCard.parentElement.querySelector('.trend-indicator');
+                if (trendEl) {
+                    if (prevRevenue > 0 && newRevenue !== prevRevenue) {
+                        const change = ((newRevenue - prevRevenue) / prevRevenue * 100).toFixed(1);
+                        const changeAmount = newRevenue - prevRevenue;
+                        const changeText = changeAmount >= 0 ? `+£${changeAmount >= 1000 ? (changeAmount / 1000).toFixed(1) + 'K' : changeAmount.toFixed(0)}` : `£${changeAmount >= -1000 ? changeAmount.toFixed(0) : (changeAmount / 1000).toFixed(1) + 'K'}`;
+                        trendEl.innerHTML = `<i class="fas fa-arrow-${change >= 0 ? 'up' : 'down'}"></i> ${change >= 0 ? '+' : ''}${change}% (${changeText})`;
+                        trendEl.className = `trend-indicator ${change >= 0 ? 'trend-up' : 'trend-down'}`;
+                    } else if (newRevenue > 0) {
+                        trendEl.innerHTML = `<i class="fas fa-arrow-up"></i> Revenue`;
+                        trendEl.className = 'trend-indicator trend-up';
+                    } else {
+                        trendEl.innerHTML = `<i class="fas fa-minus"></i> £0`;
+                        trendEl.className = 'trend-indicator trend-neutral';
+                    }
+                }
+                
+                // Add animation effect when revenue updates
+                if (prevRevenue !== newRevenue && newRevenue > 0) {
+                    revenueCard.style.animation = 'pulse 0.5s ease-in-out';
+                    setTimeout(() => {
+                        revenueCard.style.animation = '';
+                    }, 500);
+                }
+            }
+
+            // Active Users
+            const usersCard = document.querySelector('.metric-card.success h3');
+            if (usersCard) {
+                usersCard.textContent = metrics.activeUsers.toLocaleString();
+                const trendEl = usersCard.parentElement.querySelector('.trend-indicator');
+                if (trendEl) {
+                    trendEl.innerHTML = `<i class="fas fa-arrow-up"></i> Active`;
+                    trendEl.className = 'trend-indicator trend-up';
+                }
+            }
+
+            // Loads Completed
+            const loadsCard = document.querySelector('.metric-card.warning h3');
+            if (loadsCard) {
+                const prevCompleted = parseInt(loadsCard.textContent) || 0;
+                const newCompleted = metrics.completedLoads || 0;
+                loadsCard.textContent = newCompleted.toLocaleString();
+                
+                const trendEl = loadsCard.parentElement.querySelector('.trend-indicator');
+                if (trendEl) {
+                    // Show change if there's a previous value
+                    if (prevCompleted > 0 && newCompleted !== prevCompleted) {
+                        const change = newCompleted - prevCompleted;
+                        const changeText = change > 0 ? `+${change}` : `${change}`;
+                        trendEl.innerHTML = `<i class="fas fa-check-circle"></i> ${changeText}`;
+                        trendEl.className = change > 0 ? 'trend-indicator trend-up' : 'trend-indicator trend-down';
+                    } else {
+                        trendEl.innerHTML = `<i class="fas fa-check-circle"></i> Completed`;
+                        trendEl.className = 'trend-indicator trend-up';
+                    }
+                }
+                
+                // Add animation effect when count updates
+                if (prevCompleted !== newCompleted && newCompleted > 0) {
+                    loadsCard.style.animation = 'pulse 0.5s ease-in-out';
+                    setTimeout(() => {
+                        loadsCard.style.animation = '';
+                    }, 500);
+                }
+            }
+
+            // Commission Earned
+            const commissionCard = document.querySelector('.metric-card.danger h3');
+            if (commissionCard) {
+                // Parse previous commission value properly
+                const prevCommissionText = commissionCard.textContent;
+                let prevCommission = 0;
+                if (prevCommissionText.includes('K')) {
+                    prevCommission = parseFloat(prevCommissionText.replace(/[£,K]/g, '')) * 1000;
+                } else if (prevCommissionText.includes('M')) {
+                    prevCommission = parseFloat(prevCommissionText.replace(/[£,M]/g, '')) * 1000000;
+                } else {
+                    prevCommission = parseFloat(prevCommissionText.replace(/[£,]/g, '')) || 0;
+                }
+                
+                const newCommission = metrics.commission || 0;
+                
+                // Format commission text with proper formatting
+                let commissionText;
+                if (newCommission >= 1000000) {
+                    commissionText = '£' + (newCommission / 1000000).toFixed(2) + 'M';
+                } else if (newCommission >= 1000) {
+                    commissionText = '£' + (newCommission / 1000).toFixed(1) + 'K';
+                } else {
+                    commissionText = '£' + newCommission.toFixed(2);
+                }
+                
+                commissionCard.textContent = commissionText;
+                
+                // Update trend indicator with percentage change
+                const trendEl = commissionCard.parentElement.querySelector('.trend-indicator');
+                if (trendEl) {
+                    if (prevCommission > 0 && newCommission !== prevCommission) {
+                        const change = ((newCommission - prevCommission) / prevCommission * 100).toFixed(1);
+                        const changeAmount = newCommission - prevCommission;
+                        const changeText = changeAmount >= 0 ? `+£${changeAmount >= 1000 ? (changeAmount / 1000).toFixed(1) + 'K' : changeAmount.toFixed(2)}` : `£${changeAmount >= -1000 ? changeAmount.toFixed(2) : (changeAmount / 1000).toFixed(1) + 'K'}`;
+                        trendEl.innerHTML = `<i class="fas fa-percentage"></i> ${change >= 0 ? '+' : ''}${change}% (${changeText})`;
+                        trendEl.className = `trend-indicator ${change >= 0 ? 'trend-up' : 'trend-down'}`;
+                    } else if (newCommission > 0) {
+                        trendEl.innerHTML = `<i class="fas fa-percentage"></i> Earned`;
+                        trendEl.className = 'trend-indicator trend-up';
+                    } else {
+                        trendEl.innerHTML = `<i class="fas fa-percentage"></i> £0`;
+                        trendEl.className = 'trend-indicator trend-neutral';
+                    }
+                }
+                
+                // Add animation effect when commission updates
+                if (prevCommission !== newCommission && newCommission > 0) {
+                    commissionCard.style.animation = 'pulse 0.5s ease-in-out';
+                    setTimeout(() => {
+                        commissionCard.style.animation = '';
+                    }, 500);
+                }
+            }
+        }
+
+        // Update user metrics
+        function updateUserMetrics() {
+            const supplierCount = analyticsData.users.filter(u => u.userType === 'supplier' || !u.userType).length;
+            const carrierCount = analyticsData.users.filter(u => u.userType === 'carrier').length;
+            const brokerCount = analyticsData.users.filter(u => u.userType === 'broker').length;
+            
+            const totalUsers = analyticsData.users.length || (supplierCount + carrierCount + brokerCount);
+            
+            // Update User Distribution Chart
+            if (userDistChart) {
+                userDistChart.data.datasets[0].data = [supplierCount, carrierCount, brokerCount];
+                userDistChart.update('active');
+            } else {
+                // Reinitialize chart if it doesn't exist
+                setupUserDistributionChart();
+                setTimeout(() => {
+                    if (userDistChart) {
+                        userDistChart.data.datasets[0].data = [supplierCount, carrierCount, brokerCount];
+                        userDistChart.update();
+                    }
+                }, 100);
+            }
+        }
+
+        // Setup charts
+        function setupCharts() {
+            setupRevenueChart();
+            setupUserDistributionChart();
+            setupLoadStatusChart();
+            setupCommissionChart();
+        }
+
+        // Revenue Chart
+        function setupRevenueChart() {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+
+            revenueChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [],
+                        borderColor: 'rgb(111, 66, 193)',
+                        backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgb(111, 66, 193)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                title: function(context) {
+                                    // Show full date in tooltip
+                                    const index = context[0].dataIndex;
+                                    const dateRange = analyticsData.dateRange;
+                                    const now = new Date();
+                                    now.setHours(0, 0, 0, 0);
+                                    const date = new Date(now);
+                                    date.setDate(date.getDate() - (dateRange - 1 - index));
+                                    date.setHours(0, 0, 0, 0);
+                                    
+                                    return date.toLocaleDateString('en-GB', { 
+                                        weekday: 'long', 
+                                        day: 'numeric', 
+                                        month: 'long', 
+                                        year: 'numeric' 
+                                    });
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    let formattedValue;
+                                    if (value >= 1000000) {
+                                        formattedValue = '£' + (value / 1000000).toFixed(2) + 'M';
+                                    } else if (value >= 1000) {
+                                        formattedValue = '£' + (value / 1000).toFixed(1) + 'K';
+                                    } else {
+                                        formattedValue = '£' + value.toLocaleString('en-GB', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        });
+                                    }
+                                    return 'Revenue: ' + formattedValue;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgb(111, 66, 193)',
+                            borderWidth: 2,
+                            padding: 12,
+                            titleFont: {
+                                size: 13,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 12
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                },
+                                padding: { top: 10, bottom: 10 }
+                            },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 10
+                                },
+                                callback: function(value, index) {
+                                    // Only show labels that are not empty
+                                    const label = this.getLabelForValue(value);
+                                    return label || '';
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue (£)',
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                },
+                                padding: { top: 10, bottom: 10 }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) return '£' + (value / 1000000).toFixed(2) + 'M';
+                                    if (value >= 1000) return '£' + (value / 1000).toFixed(1) + 'K';
+                                    return '£' + value.toFixed(0);
+                                },
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // User Distribution Chart
+        function setupUserDistributionChart() {
+            const ctx = document.getElementById('userDistChart');
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (userDistChart) {
+                userDistChart.destroy();
+            }
+
+            userDistChart = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Suppliers', 'Carriers', 'Brokers'],
+                    datasets: [{
+                        label: 'Users',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(111, 66, 193, 0.9)',
+                            'rgba(40, 167, 69, 0.9)',
+                            'rgba(255, 193, 7, 0.9)'
+                        ],
+                        borderColor: [
+                            'rgb(111, 66, 193)',
+                            'rgb(40, 167, 69)',
+                            'rgb(255, 193, 7)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { 
+                            display: true, 
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} users (${percentage}%)`;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(111, 66, 193, 0.5)',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load Status Chart
+        function setupLoadStatusChart() {
+            const ctx = document.getElementById('loadStatusChart');
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (loadStatusChart) {
+                loadStatusChart.destroy();
+            }
+
+            loadStatusChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Completed', 'In Transit', 'Pending', 'Cancelled'],
+                    datasets: [{
+                        label: 'Loads',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.9)',
+                            'rgba(23, 162, 184, 0.9)',
+                            'rgba(255, 193, 7, 0.9)',
+                            'rgba(220, 53, 69, 0.9)'
+                        ],
+                        borderColor: [
+                            'rgb(40, 167, 69)',
+                            'rgb(23, 162, 184)',
+                            'rgb(255, 193, 7)',
+                            'rgb(220, 53, 69)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { 
+                            display: false 
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} loads (${percentage}%)`;
+                                },
+                                title: function(context) {
+                                    return context[0].label;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(40, 167, 69, 0.5)',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Load Status'
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Loads'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (Number.isInteger(value)) {
+                                        return value;
+                                    }
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Commission Chart
+        function setupCommissionChart() {
+            const ctx = document.getElementById('commissionChart');
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (commissionChart) {
+                commissionChart.destroy();
+            }
+
+            commissionChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Commission',
+                        data: [],
+                        borderColor: 'rgb(220, 53, 69)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgb(220, 53, 69)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Commission: £' + context.parsed.y.toLocaleString('en-GB', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgb(220, 53, 69)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Commission (£)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000) return '£' + (value / 1000).toFixed(1) + 'K';
+                                    return '£' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update all charts with live data
+        function updateCharts() {
+            const metrics = calculateMetrics();
+            const filteredLoads = metrics.filteredLoads;
+            
+            // Update Revenue Chart
+            if (revenueChart) {
+                const revenueData = getRevenueTimeSeries(filteredLoads);
+                
+                // Check if data has changed
+                const dataChanged = JSON.stringify(revenueChart.data.datasets[0].data) !== JSON.stringify(revenueData.data);
+                
+                if (dataChanged) {
+                    revenueChart.data.labels = revenueData.labels;
+                    revenueChart.data.datasets[0].data = revenueData.data;
+                    
+                    console.log('Revenue Trend chart updating with new data');
+                    
+                    // Update chart with smooth animation
+                    revenueChart.update('active');
+                } else {
+                    // Still update to refresh chart
+                    revenueChart.update('none');
+                }
+            } else {
+                // Reinitialize chart if it doesn't exist
+                console.log('Revenue chart not found, initializing...');
+                setupRevenueChart();
+                setTimeout(() => {
+                    if (revenueChart) {
+                        const revenueData = getRevenueTimeSeries(filteredLoads);
+                        revenueChart.data.labels = revenueData.labels;
+                        revenueChart.data.datasets[0].data = revenueData.data;
+                        revenueChart.update();
+                    }
+                }, 100);
+            }
+
+            // Update Load Status Chart
+            if (loadStatusChart) {
+                const completed = filteredLoads.filter(l => {
+                    const status = (l.status || '').toLowerCase().trim();
+                    return status === 'completed' || 
+                           status === 'delivered' || 
+                           status === 'done' ||
+                           status === 'finished';
+                }).length;
+                const inTransit = filteredLoads.filter(l => l.status === 'in-transit' || l.status === 'in_transit').length;
+                const pending = filteredLoads.filter(l => l.status === 'pending' || l.status === 'active').length;
+                const cancelled = filteredLoads.filter(l => l.status === 'cancelled').length;
+                
+                loadStatusChart.data.datasets[0].data = [completed, inTransit, pending, cancelled];
+                loadStatusChart.update('active');
+            } else {
+                // Reinitialize chart if it doesn't exist
+                setupLoadStatusChart();
+                setTimeout(() => {
+                    if (loadStatusChart) {
+                        const completed = filteredLoads.filter(l => {
+                    const status = (l.status || '').toLowerCase().trim();
+                    return status === 'completed' || 
+                           status === 'delivered' || 
+                           status === 'done' ||
+                           status === 'finished';
+                }).length;
+                        const inTransit = filteredLoads.filter(l => l.status === 'in-transit' || l.status === 'in_transit').length;
+                        const pending = filteredLoads.filter(l => l.status === 'pending' || l.status === 'active').length;
+                        const cancelled = filteredLoads.filter(l => l.status === 'cancelled').length;
+                        
+                        loadStatusChart.data.datasets[0].data = [completed, inTransit, pending, cancelled];
+                        loadStatusChart.update();
+                    }
+                }, 100);
+            }
+
+            // Update Commission Chart
+            if (commissionChart) {
+                const commissionData = getCommissionTimeSeries(filteredLoads);
+                commissionChart.data.labels = commissionData.labels;
+                commissionChart.data.datasets[0].data = commissionData.data;
+                
+                // Update chart with animation
+                commissionChart.update('active');
+            } else {
+                // Reinitialize chart if it doesn't exist
+                setupCommissionChart();
+                setTimeout(() => {
+                    if (commissionChart) {
+                        const commissionData = getCommissionTimeSeries(filteredLoads);
+                        commissionChart.data.labels = commissionData.labels;
+                        commissionChart.data.datasets[0].data = commissionData.data;
+                        commissionChart.update();
+                    }
+                }, 100);
+            }
+        }
+
+        // Get revenue time series data
+        function getRevenueTimeSeries(loads) {
+            const dateRange = analyticsData.dateRange;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Normalize to start of current day
+            const startDate = new Date(now);
+            startDate.setDate(startDate.getDate() - dateRange);
+            
+            const labels = [];
+            const data = [];
+            const revenueByDate = {};
+
+            // Process all loads and group by date
+            loads.forEach(load => {
+                // Try multiple date fields
+                let loadDate;
+                if (load.createdAt) {
+                    loadDate = new Date(load.createdAt);
+                } else if (load.updatedAt) {
+                    loadDate = new Date(load.updatedAt);
+                } else if (load.date) {
+                    loadDate = new Date(load.date);
+                } else if (load.pickupDate) {
+                    loadDate = new Date(load.pickupDate);
+                } else {
+                    loadDate = new Date(); // Use current date as fallback
+                }
+                
+                // Normalize date to start of day
+                loadDate.setHours(0, 0, 0, 0);
+                
+                // Only include dates within the selected range
+                if (loadDate >= startDate && loadDate <= now) {
+                    const dateKey = loadDate.toISOString().split('T')[0];
+                    
+                    // Calculate revenue from multiple possible fields
+                    const cost = parseFloat(load.totalCost) || 
+                                parseFloat(load.commissionBaseAmount) || 
+                                parseFloat(load.amount) || 
+                                parseFloat(load.price) || 
+                                0;
+                    
+                    if (!revenueByDate[dateKey]) {
+                        revenueByDate[dateKey] = 0;
+                    }
+                    revenueByDate[dateKey] += cost;
+                }
+            });
+
+            // Generate date range with proper labels
+            for (let i = dateRange - 1; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                date.setHours(0, 0, 0, 0);
+                const dateKey = date.toISOString().split('T')[0];
+                
+                // Format label based on date range
+                let label;
+                if (dateRange <= 7) {
+                    // For 7 days or less, show day name and date
+                    label = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+                } else if (dateRange <= 30) {
+                    // For 30 days or less, show day and month
+                    label = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                } else if (dateRange <= 90) {
+                    // For 90 days or less, show day and month, but skip some for clarity
+                    if (i % 7 === 0 || i === dateRange - 1 || i === 0) {
+                        label = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                    } else {
+                        label = '';
+                    }
+                } else {
+                    // For longer ranges, show month and year
+                    if (i % 30 === 0 || i === dateRange - 1 || i === 0) {
+                        label = date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+                    } else {
+                        label = '';
+                    }
+                }
+                
+                labels.push(label);
+                data.push(revenueByDate[dateKey] || 0);
+            }
+
+            console.log('Revenue Trend data generated:', {
+                totalDays: labels.length,
+                totalRevenue: data.reduce((sum, val) => sum + val, 0),
+                maxDailyRevenue: Math.max(...data, 0),
+                dateRange: dateRange,
+                startDate: startDate.toISOString().split('T')[0],
+                endDate: now.toISOString().split('T')[0]
+            });
+
+            return { labels, data };
+        }
+
+        // Get commission time series data
+        function getCommissionTimeSeries(loads) {
+            const dateRange = analyticsData.dateRange;
+            const now = new Date();
+            const labels = [];
+            const data = [];
+            const commissionByDate = {};
+
+            loads.forEach(load => {
+                const loadDate = new Date(load.createdAt || load.updatedAt || now);
+                const dateKey = loadDate.toISOString().split('T')[0];
+                const baseAmount = parseFloat(load.totalCost) || parseFloat(load.commissionBaseAmount) || 0;
+                
+                if (baseAmount > 0) {
+                    const commission = window.AlphaBrokrage.calculateCommission(baseAmount);
+                    
+                    if (!commissionByDate[dateKey]) {
+                        commissionByDate[dateKey] = 0;
+                    }
+                    commissionByDate[dateKey] += commission.amount;
+                }
+            });
+
+            // Generate date range
+            for (let i = dateRange - 1; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                const dateKey = date.toISOString().split('T')[0];
+                const label = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                
+                labels.push(label);
+                data.push(commissionByDate[dateKey] || 0);
+            }
+
+            return { labels, data };
+        }
+
+        // Setup real-time listeners
+        function setupRealtimeListeners() {
+            const db = firebase.database();
+            
+            // Listen for load changes
+            db.ref('loads').on('value', function(snapshot) {
+                analyticsData.loads = [];
+                snapshot.forEach(function(child) {
+                    const load = child.val();
+                    load.id = child.key;
+                    analyticsData.loads.push(load);
+                });
+                
+                console.log('Loads updated in real-time:', analyticsData.loads.length);
+                
+                // Count completed loads for immediate feedback
+                const completedCount = analyticsData.loads.filter(load => {
+                    const status = (load.status || '').toLowerCase().trim();
+                    return status === 'completed' || 
+                           status === 'delivered' || 
+                           status === 'done' ||
+                           status === 'finished';
+                }).length;
+                console.log('Completed loads count:', completedCount);
+                
+                // Calculate total revenue for immediate feedback
+                const totalRevenue = analyticsData.loads.reduce((sum, load) => {
+                    const cost = parseFloat(load.totalCost) || 
+                                parseFloat(load.commissionBaseAmount) || 
+                                parseFloat(load.amount) || 
+                                0;
+                    return sum + cost;
+                }, 0);
+                console.log('Total Revenue from all loads:', totalRevenue);
+                
+                // Calculate total commission for immediate feedback
+                const totalCommission = analyticsData.loads.reduce((sum, load) => {
+                    const baseAmount = parseFloat(load.totalCost) || 
+                                     parseFloat(load.commissionBaseAmount) || 
+                                     parseFloat(load.amount) || 
+                                     0;
+                    if (baseAmount > 0) {
+                        try {
+                            const commission = window.AlphaBrokrage.calculateCommission(baseAmount);
+                            return sum + (commission.amount || 0);
+                        } catch (error) {
+                            // Fallback to default commission calculation (5%)
+                            return sum + (baseAmount * 0.05);
+                        }
+                    }
+                    return sum;
+                }, 0);
+                console.log('Total Commission from all loads:', totalCommission);
+                
+                // Reload users data to ensure we have latest user count
+                loadUsersData();
+                
+                // Recalculate metrics with updated data
+                calculateMetrics();
+                updateCharts();
+            });
+            
+            // Also listen for individual load changes for faster updates
+            db.ref('loads').on('child_changed', function(snapshot) {
+                const load = snapshot.val();
+                load.id = snapshot.key;
+                
+                // Update the load in analyticsData.loads array
+                const index = analyticsData.loads.findIndex(l => l.id === load.id);
+                if (index !== -1) {
+                    analyticsData.loads[index] = load;
+                } else {
+                    analyticsData.loads.push(load);
+                }
+                
+                console.log('Load updated:', load.id, 'Status:', load.status);
+                
+                // Immediately recalculate metrics
+                calculateMetrics();
+                updateCharts();
+            });
+            
+            // Listen for new loads
+            db.ref('loads').on('child_added', function(snapshot) {
+                const load = snapshot.val();
+                load.id = snapshot.key;
+                
+                // Check if load already exists
+                const exists = analyticsData.loads.some(l => l.id === load.id);
+                if (!exists) {
+                    analyticsData.loads.push(load);
+                    console.log('New load added:', load.id, 'Status:', load.status);
+                    
+                    // Immediately recalculate metrics
+                    calculateMetrics();
+                    updateCharts();
+                }
+            });
+            
+            // Listen for supplier profile changes
+            db.ref('suppliers').on('value', function(snapshot) {
+                const suppliers = [];
+                snapshot.forEach(function(child) {
+                    const supplier = child.val();
+                    supplier.id = child.key;
+                    supplier.userType = 'supplier';
+                    suppliers.push(supplier);
+                });
+                
+                console.log('Suppliers updated in real-time:', suppliers.length);
+                
+                // Update localStorage
+                if (suppliers.length > 0) {
+                    localStorage.setItem('supplierProfile', JSON.stringify(suppliers));
+                }
+                
+                // Update analyticsData.users directly
+                const carriers = analyticsData.users.filter(u => u.userType === 'carrier');
+                analyticsData.users = [...suppliers, ...carriers];
+                
+                // Recalculate metrics immediately
+                updateUserMetrics();
+                calculateMetrics();
+            });
+            
+            // Listen for carrier profile changes
+            db.ref('carriers').on('value', function(snapshot) {
+                const carriers = [];
+                snapshot.forEach(function(child) {
+                    const carrier = child.val();
+                    carrier.id = child.key;
+                    carrier.userType = 'carrier';
+                    carriers.push(carrier);
+                });
+                
+                console.log('Carriers updated in real-time:', carriers.length);
+                
+                // Update localStorage
+                if (carriers.length > 0) {
+                    localStorage.setItem('carrierProfile', JSON.stringify(carriers));
+                }
+                
+                // Update analyticsData.users directly
+                const suppliers = analyticsData.users.filter(u => u.userType === 'supplier' || !u.userType);
+                analyticsData.users = [...suppliers, ...carriers];
+                
+                // Recalculate metrics immediately
+                updateUserMetrics();
+                calculateMetrics();
+            });
+            
+            // Also listen to localStorage changes for users (fallback)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'supplierProfile' || e.key === 'carrierProfile') {
+                    loadUsersData();
+                    calculateMetrics();
+                }
+            });
+        }
+
+        // Apply filters
+        function applyAnalyticsFilters() {
+            const dateRange = parseInt(document.getElementById('dateRange').value) || 30;
+            analyticsData.dateRange = dateRange;
+            
+            calculateMetrics();
+            updateCharts();
+            
+            AlphaBrokrage.showAlert('success', 'Filters applied successfully!');
+        }
+
+        // Refresh analytics
+        function refreshAnalytics() {
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
+            btn.disabled = true;
+            
+            loadAnalyticsData();
+            
+            setTimeout(() => {
+                AlphaBrokrage.showAlert('success', 'Analytics refreshed successfully!');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        // Export analytics
+        function exportAnalytics() {
+            const data = {
+                metrics: calculateMetrics(),
+                dateRange: analyticsData.dateRange,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `analytics-export-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            AlphaBrokrage.showAlert('success', 'Analytics export started!');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initAnalytics();
+        });
+
+        // Auto-refresh analytics every 5 minutes
+        setInterval(() => {
+            loadAnalyticsData();
+        }, 300000);
+    </script>
+</body>
+</html>
+

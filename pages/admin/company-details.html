@@ -1,0 +1,476 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrier Company Details - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .carrier-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #28a745;
+        }
+        .carrier-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .section-title {
+            color: #6f42c1;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .detail-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #28a745;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .detail-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        .detail-value {
+            font-size: 1.1rem;
+            color: #212529;
+            font-weight: 600;
+        }
+        .company-name-header {
+            font-size: 1.5rem;
+            color: #28a745;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .bank-details-icon {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        .no-details {
+            color: #6c757d;
+            font-style: italic;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .search-filter {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="contracts.html">
+                            <i class="fas fa-file-contract"></i> Contracts
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white active" href="company-details.html">
+                            <i class="fas fa-building"></i> Carrier Details
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-0 fw-bold">Carrier Company Details</h2>
+                        <small class="text-muted">View company names and bank details for all carriers</small>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="loadCarrierDetails()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+
+                <!-- Search Filter -->
+                <div class="search-filter">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="searchCarrier" class="form-label">Search Carrier</label>
+                            <input type="text" class="form-control" id="searchCarrier" placeholder="Search by company name or email..." onkeyup="filterCarriers()">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary" onclick="clearSearch()">
+                                <i class="fas fa-times me-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carriers List -->
+                <div id="carriersContainer">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Loading carrier details...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        let allCarriers = [];
+        let displayedCarriers = [];
+
+        function getCarrierBankDetails(carrierId) {
+            try {
+                const allBankDetails = JSON.parse(localStorage.getItem('carrierBankDetails') || '{}');
+                // Try multiple possible keys
+                return allBankDetails[carrierId] || 
+                       allBankDetails[carrierId.toString()] ||
+                       Object.values(allBankDetails).find(bank => bank && bank.carrierId === carrierId) ||
+                       null;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        function loadCarrierDetails() {
+            const container = document.getElementById('carriersContainer');
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Loading carrier details from Firebase...</p>
+                </div>
+            `;
+
+            var db = firebase.database();
+            db.ref('carriers').once('value', function(snapshot) {
+                console.log('Firebase snapshot received:', snapshot.val());
+                allCarriers = [];
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach(function(child) {
+                        var carrier = child.val();
+                        carrier.id = child.key;
+                        carrier.carrierId = carrier.carrierId || carrier.id || child.key;
+                        
+                        // Make sure we have essential data
+                        if (carrier.email || carrier.companyName) {
+                            allCarriers.push({
+                                id: carrier.id,
+                                carrierId: carrier.carrierId || carrier.id,
+                                email: carrier.email || '',
+                                firstName: carrier.firstName || '',
+                                lastName: carrier.lastName || '',
+                                companyName: carrier.companyName || '',
+                                phone: carrier.phone || '',
+                                address: carrier.address || '',
+                                city: carrier.city || '',
+                                postcode: carrier.postcode || '',
+                                createdAt: carrier.createdAt || '',
+                                status: carrier.status || ''
+                            });
+                        }
+                    });
+                }
+                
+                console.log('Total carriers fetched from Firebase:', allCarriers.length);
+                displayedCarriers = [...allCarriers];
+                renderCarriers();
+            }, function(error) {
+                console.error('Error fetching carriers from Firebase:', error);
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                        <h5 class="text-danger">Error loading carriers</h5>
+                        <p class="text-muted">${error.message || 'Failed to load carrier details'}</p>
+                        <button class="btn btn-primary mt-3" onclick="loadCarrierDetails()">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function filterCarriers() {
+            const searchTerm = document.getElementById('searchCarrier').value.toLowerCase();
+            if (!searchTerm) {
+                displayedCarriers = [...allCarriers];
+            } else {
+                displayedCarriers = allCarriers.filter(carrier => {
+                    const companyName = (carrier.companyName || '').toLowerCase();
+                    const email = (carrier.email || '').toLowerCase();
+                    const name = ((carrier.firstName || '') + ' ' + (carrier.lastName || '')).toLowerCase();
+                    return companyName.includes(searchTerm) || email.includes(searchTerm) || name.includes(searchTerm);
+                });
+            }
+            renderCarriers();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchCarrier').value = '';
+            displayedCarriers = [...allCarriers];
+            renderCarriers();
+        }
+
+        function renderCarriers() {
+            const container = document.getElementById('carriersContainer');
+            
+            if (displayedCarriers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No carriers found</h5>
+                        <p class="text-muted">No carrier details available at this time</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = displayedCarriers.map(carrier => {
+                // Try multiple ways to get bank details
+                const bankDetails = getCarrierBankDetails(carrier.carrierId) || 
+                                   getCarrierBankDetails(carrier.id) ||
+                                   getCarrierBankDetails(carrier.email);
+                
+                const companyName = carrier.companyName || 
+                                  `${carrier.firstName} ${carrier.lastName}`.trim() || 
+                                  'Not Provided';
+                const fullName = `${carrier.firstName || ''} ${carrier.lastName || ''}`.trim() || 'Not Provided';
+                const address = carrier.address ? 
+                               `${carrier.address}${carrier.city ? ', ' + carrier.city : ''}${carrier.postcode ? ', ' + carrier.postcode : ''}`.trim() : 
+                               'Not Provided';
+
+                return `
+                    <div class="carrier-card">
+                        <div class="company-name-header">
+                            <i class="fas fa-building me-2"></i>${companyName}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <div class="detail-label">Owner Name</div>
+                                    <div class="detail-value">${fullName}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <div class="detail-label">Email</div>
+                                    <div class="detail-value">${carrier.email || 'Not Provided'}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <div class="detail-label">Phone</div>
+                                    <div class="detail-value">${carrier.phone || 'Not Provided'}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <div class="detail-label">Address</div>
+                                    <div class="detail-value"><small>${address}</small></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <div class="detail-label">Carrier ID</div>
+                                    <div class="detail-value"><small>${carrier.carrierId || carrier.id || 'N/A'}</small></div>
+                                </div>
+                            </div>
+                            ${carrier.createdAt ? `
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <div class="detail-label">Registered Date</div>
+                                    <div class="detail-value"><small>${new Date(carrier.createdAt).toLocaleDateString()}</small></div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-center mb-3">
+                            <i class="fas fa-university bank-details-icon"></i>
+                            <h5 class="section-title text-center">Bank Details</h5>
+                        </div>
+
+                        ${bankDetails ? `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Bank Name</div>
+                                        <div class="detail-value">${bankDetails.bankName || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Account Holder Name</div>
+                                        <div class="detail-value">${bankDetails.accountName || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Account Number</div>
+                                        <div class="detail-value">${bankDetails.accountNumber || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Sort Code</div>
+                                        <div class="detail-value">${bankDetails.sortCode || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">IBAN</div>
+                                        <div class="detail-value">${bankDetails.iban || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <div class="detail-label">SWIFT/BIC Code</div>
+                                        <div class="detail-value">${bankDetails.swift || '-'}</div>
+                                    </div>
+                                </div>
+                                ${bankDetails.updatedAt ? `
+                                <div class="col-md-12">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Last Updated: ${new Date(bankDetails.updatedAt).toLocaleString()}
+                                    </small>
+                                </div>
+                                ` : ''}
+                            </div>
+                        ` : `
+                            <div class="no-details">
+                                <i class="fas fa-exclamation-circle me-2"></i>No bank details provided yet
+                            </div>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('adminAuth');
+            window.location.href = 'login.html';
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCarrierDetails();
+        });
+
+        // Also listen for Firebase data changes in real-time
+        function setupRealtimeListener() {
+            var db = firebase.database();
+            db.ref('carriers').on('value', function(snapshot) {
+                console.log('Real-time update received from Firebase');
+                loadCarrierDetails();
+            });
+        }
+
+        // Setup real-time listener after initial load
+        setTimeout(setupRealtimeListener, 2000);
+    </script>
+</body>
+</html>

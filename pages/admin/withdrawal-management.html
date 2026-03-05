@@ -1,0 +1,730 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Management - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .withdrawal-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 1.5rem;
+        }
+        .withdrawal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .withdrawal-card.completed {
+            border-left-color: #28a745;
+        }
+        .withdrawal-card.pending {
+            border-left-color: #ffc107;
+        }
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            color: #92400E;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        .status-completed {
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            color: #065F46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .bank-details-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        .bank-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .bank-detail-item:last-child {
+            border-bottom: none;
+        }
+        .bank-detail-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        .bank-detail-value {
+            font-weight: 700;
+            color: #212529;
+        }
+        .withdrawal-amount-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2563EB;
+            margin: 0.5rem 0;
+        }
+        .btn-complete-payment {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+        .btn-complete-payment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+            color: white;
+        }
+        .btn-complete-payment:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+        .stats-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        .stats-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6c757d;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .user-info-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white active" href="withdrawal-management.html">
+                            <i class="fas fa-money-bill-wave"></i> Withdrawals
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-money-bill-wave me-2"></i>Withdrawal Management</h5>
+                            <small class="text-muted">Manage and process carrier withdrawal requests</small>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="refreshWithdrawals()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4">
+                    <!-- Statistics Overview -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card">
+                                <div class="stats-label">Total Withdrawals</div>
+                                <div class="stats-value text-primary" id="totalWithdrawals">0</div>
+                                <small class="text-muted">All time</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card">
+                                <div class="stats-label">Pending</div>
+                                <div class="stats-value text-warning" id="pendingWithdrawals">0</div>
+                                <small class="text-muted">Awaiting processing</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card">
+                                <div class="stats-label">Completed</div>
+                                <div class="stats-value text-success" id="completedWithdrawals">0</div>
+                                <small class="text-muted">Processed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card">
+                                <div class="stats-label">Total Amount</div>
+                                <div class="stats-value text-info" id="totalAmount">£0.00</div>
+                                <small class="text-muted">All withdrawals</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Withdrawals List -->
+                    <div id="withdrawalsList">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+    <script>
+        // Get all carrier withdrawals from localStorage
+        function getAllWithdrawals() {
+            const allWithdrawals = [];
+            const keys = Object.keys(localStorage);
+            
+            keys.forEach(key => {
+                if (key.startsWith('carrierWithdrawals_')) {
+                    const carrierId = key.replace('carrierWithdrawals_', '');
+                    const withdrawals = JSON.parse(localStorage.getItem(key) || '[]');
+                    
+                    withdrawals.forEach(withdrawal => {
+                        allWithdrawals.push({
+                            ...withdrawal,
+                            carrierId: carrierId
+                        });
+                    });
+                }
+            });
+            
+            return allWithdrawals;
+        }
+
+        // Get carrier bank details
+        function getCarrierBankDetails(carrierId) {
+            const allBankDetails = JSON.parse(localStorage.getItem('carrierBankDetails') || '{}');
+            return allBankDetails[carrierId] || null;
+        }
+        
+        // Get user info from bank details (accountName may contain user name)
+        function getUserInfoFromBankDetails(bankDetails) {
+            if (!bankDetails) return null;
+            
+            // Try to extract name from accountName
+            if (bankDetails.accountName) {
+                const nameParts = bankDetails.accountName.split(' ');
+                return {
+                    firstName: nameParts[0] || 'Unknown',
+                    lastName: nameParts.slice(1).join(' ') || 'User',
+                    name: bankDetails.accountName,
+                    email: 'N/A'
+                };
+            }
+            return null;
+        }
+
+        // Get carrier info - Multiple sources check
+        function getCarrierInfo(carrierId) {
+            let userInfo = null;
+            
+            // Try users list from localStorage first
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.id === carrierId || u.carrierId === carrierId || u.email === carrierId);
+            if (user) {
+                userInfo = user;
+            }
+            
+            // Try carrierProfile from localStorage
+            if (!userInfo) {
+                const carrierProfile = JSON.parse(localStorage.getItem('carrierProfile') || '{}');
+                if (carrierProfile.id === carrierId || carrierProfile.carrierId === carrierId) {
+                    userInfo = carrierProfile;
+                }
+            }
+            
+            // Try all localStorage keys for carrierProfile with carrierId
+            if (!userInfo) {
+                const keys = Object.keys(localStorage);
+                for (const key of keys) {
+                    if (key.includes('carrierProfile') || key.includes('carrierAuth')) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key) || '{}');
+                            // If data is an object with id/carrierId matching
+                            if (data && (data.id === carrierId || data.carrierId === carrierId)) {
+                                userInfo = data;
+                                break;
+                            }
+                            // If data is an object with carrierId as key
+                            if (typeof data === 'object' && data[carrierId]) {
+                                userInfo = data[carrierId];
+                                break;
+                            }
+                        } catch (e) {
+                            // Skip invalid JSON
+                        }
+                    }
+                }
+            }
+            
+            // Try to get from withdrawal data itself
+            if (!userInfo) {
+                const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
+                const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
+                if (withdrawals.length > 0) {
+                    const firstWithdrawal = withdrawals[0];
+                    if (firstWithdrawal.userName || firstWithdrawal.userEmail) {
+                        userInfo = {
+                            firstName: firstWithdrawal.userName ? firstWithdrawal.userName.split(' ')[0] : 'Unknown',
+                            lastName: firstWithdrawal.userName ? firstWithdrawal.userName.split(' ').slice(1).join(' ') : 'User',
+                            email: firstWithdrawal.userEmail || 'N/A',
+                            name: firstWithdrawal.userName || 'Unknown User'
+                        };
+                    }
+                }
+            }
+            
+            // Default fallback
+            if (!userInfo) {
+                userInfo = { firstName: 'Unknown', lastName: 'User', email: 'N/A', name: 'Unknown User' };
+            }
+            
+            return userInfo;
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return '£' + parseFloat(amount || 0).toLocaleString('en-GB', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Render withdrawals
+        function renderWithdrawals() {
+            const withdrawals = getAllWithdrawals();
+            
+            // Sort by date (newest first)
+            withdrawals.sort((a, b) => {
+                const dateA = new Date(a.requestedAt || a.timestamp || 0);
+                const dateB = new Date(b.requestedAt || b.timestamp || 0);
+                return dateB - dateA;
+            });
+
+            // Calculate stats
+            const total = withdrawals.length;
+            const pending = withdrawals.filter(w => w.status === 'pending').length;
+            const completed = withdrawals.filter(w => w.status === 'completed' || w.status === 'approved').length;
+            const totalAmount = withdrawals.reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
+
+            // Update stats
+            document.getElementById('totalWithdrawals').textContent = total;
+            document.getElementById('pendingWithdrawals').textContent = pending;
+            document.getElementById('completedWithdrawals').textContent = completed;
+            document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
+
+            // Render list
+            const listEl = document.getElementById('withdrawalsList');
+            
+            if (withdrawals.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h5>No Withdrawal Requests</h5>
+                        <p>No withdrawal requests found in the system.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = withdrawals.map((withdrawal, index) => {
+                const carrierInfo = getCarrierInfoWithFirebase(withdrawal.carrierId);
+                const bankDetails = getCarrierBankDetails(withdrawal.carrierId);
+                const status = withdrawal.status || 'pending';
+                const isCompleted = status === 'completed' || status === 'approved';
+                const statusClass = isCompleted ? 'completed' : 'pending';
+                const statusText = isCompleted ? 'Completed' : 'Pending';
+                const statusIcon = isCompleted ? 'fa-check-circle' : 'fa-clock';
+                
+                // Get user name - try multiple sources (including bank details)
+                let userName = 'Unknown User';
+                let userEmail = 'N/A';
+                
+                // Try carrierInfo first
+                if (carrierInfo.firstName && carrierInfo.lastName) {
+                    userName = `${carrierInfo.firstName} ${carrierInfo.lastName}`;
+                    userEmail = carrierInfo.email || carrierInfo.userEmail || 'N/A';
+                } else if (carrierInfo.name) {
+                    userName = carrierInfo.name;
+                    userEmail = carrierInfo.email || carrierInfo.userEmail || 'N/A';
+                } else if (carrierInfo.firstName) {
+                    userName = carrierInfo.firstName;
+                    userEmail = carrierInfo.email || carrierInfo.userEmail || 'N/A';
+                }
+                
+                // If still not found, try bank details accountName
+                if (userName === 'Unknown User' && bankDetails && bankDetails.accountName) {
+                    userName = bankDetails.accountName;
+                }
+                
+                // Try withdrawal data for email
+                if ((userEmail === 'N/A' || !userEmail) && withdrawal.userEmail) {
+                    userEmail = withdrawal.userEmail;
+                }
+                
+                // Try Firebase users collection (async - for future use)
+                // For now, use localStorage data
+                
+                const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+
+                return `
+                    <div class="card withdrawal-card ${statusClass}">
+                        <div class="card-body">
+                            <div class="user-info-header">
+                                <div class="user-avatar">${userInitials}</div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1 fw-bold" style="color: #212529; font-size: 1.125rem;">${userName}</h5>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="text-muted" style="font-size: 0.9375rem;">
+                                            <i class="fas fa-envelope me-1"></i><strong>Email:</strong> ${userEmail}
+                                        </span>
+                                        <span class="text-muted" style="font-size: 0.875rem;">
+                                            <i class="fas fa-id-card me-1"></i><strong>ID:</strong> ${withdrawal.carrierId || 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="status-badge status-${statusClass}">
+                                        <i class="fas ${statusIcon} me-1"></i>${statusText}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="withdrawal-amount-display">
+                                        ${formatCurrency(withdrawal.amount)}
+                                    </div>
+                                    <div class="text-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        Requested: ${formatDate(withdrawal.requestedAt || withdrawal.timestamp)}
+                                    </div>
+                                    ${withdrawal.verifiedAt ? `
+                                        <div class="text-muted mt-1">
+                                            <i class="fas fa-shield-alt me-1"></i>
+                                            Verified: ${formatDate(withdrawal.verifiedAt)}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    ${!isCompleted ? `
+                                        <button class="btn btn-complete-payment" onclick="completePayment('${withdrawal.carrierId}', '${withdrawal.id}')">
+                                            <i class="fas fa-check-circle me-2"></i>Complete Payment
+                                        </button>
+                                    ` : `
+                                        <div class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i>Payment Completed
+                                        </div>
+                                        ${withdrawal.completedAt ? `
+                                            <small class="text-muted d-block mt-1">
+                                                Completed: ${formatDate(withdrawal.completedAt)}
+                                            </small>
+                                        ` : ''}
+                                    `}
+                                </div>
+                            </div>
+
+                            <div class="bank-details-section mt-3">
+                                <h6 class="mb-3 fw-bold">
+                                    <i class="fas fa-university me-2"></i>Bank Details
+                                </h6>
+                                ${bankDetails ? `
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Bank Name</span>
+                                        <span class="bank-detail-value">${bankDetails.bankName || 'N/A'}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Account Holder</span>
+                                        <span class="bank-detail-value">${bankDetails.accountName || withdrawal.accountName || 'N/A'}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Account Number</span>
+                                        <span class="bank-detail-value">${bankDetails.accountNumber ? bankDetails.accountNumber : (withdrawal.accountNumber || 'N/A')}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Sort Code</span>
+                                        <span class="bank-detail-value">${bankDetails.sortCode || 'N/A'}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">IBAN</span>
+                                        <span class="bank-detail-value">${bankDetails.iban || 'N/A'}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">SWIFT/BIC</span>
+                                        <span class="bank-detail-value">${bankDetails.swift || 'N/A'}</span>
+                                    </div>
+                                ` : `
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Bank Name</span>
+                                        <span class="bank-detail-value">${withdrawal.bankName || 'N/A'}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Account Holder</span>
+                                        <span class="bank-detail-value">${withdrawal.accountName || 'N/A'}</span>
+                                    </div>
+                                    <div class="bank-detail-item">
+                                        <span class="bank-detail-label">Account Number</span>
+                                        <span class="bank-detail-value">${withdrawal.accountNumber || 'N/A'}</span>
+                                    </div>
+                                    <div class="alert alert-warning mt-2 mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Complete bank details not found in system. Showing available information from withdrawal request.
+                                    </div>
+                                `}
+                            </div>
+
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Processing Time: ${withdrawal.estimatedProcessing || '3-5 business days'}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Complete payment
+        function completePayment(carrierId, withdrawalId) {
+            if (!confirm('Are you sure you want to mark this payment as completed?')) {
+                return;
+            }
+
+            const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
+            const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
+            
+            const withdrawalIndex = withdrawals.findIndex(w => w.id === withdrawalId);
+            if (withdrawalIndex === -1) {
+                alert('Withdrawal not found!');
+                return;
+            }
+
+            // Update withdrawal status
+            withdrawals[withdrawalIndex].status = 'completed';
+            withdrawals[withdrawalIndex].completedAt = new Date().toISOString();
+            withdrawals[withdrawalIndex].processedBy = 'Admin';
+
+            // Save back to localStorage
+            localStorage.setItem(withdrawalsKey, JSON.stringify(withdrawals));
+
+            // Show success message
+            alert('Payment marked as completed successfully!');
+
+            // Refresh the list
+            renderWithdrawals();
+        }
+
+        // Refresh withdrawals
+        function refreshWithdrawals() {
+            renderWithdrawals();
+        }
+
+        // Cache for Firebase users
+        let firebaseUsersCache = {};
+        
+        // Fetch users from Firebase (async)
+        function fetchUsersFromFirebase() {
+            if (typeof firebase === 'undefined' || !firebase.database) {
+                return Promise.resolve({});
+            }
+            
+            return new Promise((resolve) => {
+                const db = firebase.database();
+                const usersData = {};
+                
+                // Fetch carriers
+                db.ref('carriers').once('value', function(snapshot) {
+                    snapshot.forEach(function(child) {
+                        const data = child.val();
+                        const carrierId = child.key;
+                        usersData[carrierId] = {
+                            firstName: data.firstName || data.name?.split(' ')[0] || '',
+                            lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
+                            name: data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+                            email: data.email || ''
+                        };
+                    });
+                    
+                    // Update cache
+                    Object.assign(firebaseUsersCache, usersData);
+                    resolve(usersData);
+                }, function(error) {
+                    console.error('Firebase error:', error);
+                    resolve({});
+                });
+            });
+        }
+        
+        // Enhanced getCarrierInfo with Firebase support
+        function getCarrierInfoWithFirebase(carrierId) {
+            // Try Firebase cache first
+            if (firebaseUsersCache[carrierId]) {
+                return firebaseUsersCache[carrierId];
+            }
+            
+            // Try localStorage sources
+            const localInfo = getCarrierInfo(carrierId);
+            if (localInfo && localInfo.firstName !== 'Unknown') {
+                return localInfo;
+            }
+            
+            // Return Firebase cached data or local fallback
+            return firebaseUsersCache[carrierId] || localInfo;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch Firebase users first, then render
+            fetchUsersFromFirebase().then(() => {
+                renderWithdrawals();
+            }).catch(() => {
+                renderWithdrawals();
+            });
+        });
+    </script>
+</body>
+</html>
+

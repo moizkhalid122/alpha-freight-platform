@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Loads - Broker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 240px;
+            z-index: 1000;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dashboard-sidebar.collapsed {
+            width: 70px;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            display: block;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content img {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content hr {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .broker-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px solid #6f42c1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #6f42c1;
+            font-size: 0.85rem;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: #6f42c1;
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(111, 66, 193, 0.35);
+        }
+
+        .sidebar-toggle-btn:active {
+            transform: scale(1.05);
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-toggle-btn i {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-content {
+            transition: opacity 0.3s ease;
+            width: 100%;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .dashboard-sidebar img {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-sidebar img:hover {
+            transform: scale(1.05);
+        }
+
+        .broker-nav .nav-link {
+            padding: 0.65rem 0.75rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .broker-nav .nav-link span {
+            transition: opacity 0.2s ease, display 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .broker-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+            color: white !important;
+        }
+
+        .broker-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            font-weight: 600;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .broker-nav .nav-link i {
+            width: 18px;
+            margin-right: 0.65rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .broker-nav hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+
+        .dashboard-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            margin-left: 240px;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: calc(100% - 240px);
+        }
+
+        .dashboard-sidebar.collapsed ~ .dashboard-content {
+            margin-left: 70px;
+            width: calc(100% - 70px);
+        }
+
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-menu-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: #1e293b;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn:hover {
+            color: #6f42c1;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1049;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .header-section {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            padding: 0.75rem 2rem;
+            border-radius: 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .topbar-search {
+            flex: 1;
+            max-width: 520px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: #f4f6fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            padding: 0.45rem 1rem;
+        }
+
+        .topbar-search i {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .topbar-search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .topbar-icon,
+        .topbar-avatar-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .topbar-icon:hover,
+        .topbar-avatar-btn:hover,
+        .topbar-avatar-btn.active {
+            color: #6f42c1;
+            border-color: #c084fc;
+            background: rgba(111, 66, 193, 0.08);
+        }
+
+        .topbar-avatar-btn {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .topbar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .quick-links-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 48px;
+            width: 260px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            padding: 0.9rem;
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: top right;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .quick-links-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .quick-links-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .quick-links-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.6rem;
+        }
+
+        .quick-link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .quick-link-item:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+        }
+
+        .quick-link-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 280px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: top right;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .profile-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .profile-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .profile-menu-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .profile-menu-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .profile-menu-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .profile-menu-email {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.15rem;
+        }
+
+        .profile-menu-links {
+            padding: 0.5rem;
+        }
+
+        .profile-menu-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.75rem;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .profile-menu-links a:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+        }
+
+        .profile-menu-links a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-menu-footer {
+            padding: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .profile-menu-signout {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .dashboard-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                z-index: 1050;
+                width: 240px;
+                transition: transform 0.3s ease;
+            }
+
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .dashboard-content {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+
+            .dashboard-sidebar.collapsed {
+                width: 240px;
+            }
+
+            .sidebar-toggle-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" class="img-fluid" style="max-height: 36px; object-fit: contain;">
+        <div></div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="dashboard-sidebar" id="dashboardSidebar">
+            <button class="sidebar-toggle-btn" onclick="toggleSidebarDesktop()" title="Toggle Sidebar">
+                <i class="fas fa-chevron-left" id="toggleIcon"></i>
+            </button>
+            <div class="sidebar-content p-3">
+                <div class="mb-4 text-center">
+                    <img src="../../image-removebg-preview - 2026-02-10T062943.516.png" alt="Alpha Freight Logo" class="img-fluid" style="max-width: 100%; max-height: 60px; object-fit: contain;">
+                </div>
+                    <nav class="nav flex-column broker-nav">
+                    <a class="nav-link text-white" href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+                    </a>
+                    <a class="nav-link text-white active" href="loads.html">
+                        <i class="fas fa-boxes"></i> <span>All Loads</span>
+                    </a>
+                    <a class="nav-link text-white" href="my-loads.html">
+                        <i class="fas fa-clipboard-check"></i> <span>My Loads</span>
+                    </a>
+                    <a class="nav-link text-white" href="post-load.html">
+                        <i class="fas fa-plus-circle"></i> <span>Post Load</span>
+                    </a>
+                    <a class="nav-link text-white" href="matching.html">
+                        <i class="fas fa-random"></i> <span>Matching</span>
+                    </a>
+                    <a class="nav-link text-white" href="carriers.html">
+                        <i class="fas fa-truck"></i> <span>Carriers</span>
+                    </a>
+                    <a class="nav-link text-white" href="suppliers.html">
+                        <i class="fas fa-warehouse"></i> <span>Suppliers</span>
+                    </a>
+                    <a class="nav-link text-white" href="payments.html">
+                        <i class="fas fa-credit-card"></i> <span>Payments</span>
+                    </a>
+                    <a class="nav-link text-white" href="invoices.html">
+                        <i class="fas fa-file-invoice"></i> <span>Invoices</span>
+                    </a>
+                    <a class="nav-link text-white" href="commission.html">
+                        <i class="fas fa-chart-line"></i> <span>Commission</span>
+                    </a>
+                    <a class="nav-link text-white" href="payouts.html">
+                        <i class="fas fa-hand-holding-dollar"></i> <span>Payouts</span>
+                    </a>
+                    <a class="nav-link text-white" href="messages.html">
+                        <i class="fas fa-comments"></i> <span>Messages</span>
+                    </a>
+                    <a class="nav-link text-white" href="disputes.html">
+                        <i class="fas fa-scale-balanced"></i> <span>Disputes</span>
+                    </a>
+                    <a class="nav-link text-white" href="support-tickets.html">
+                        <i class="fas fa-life-ring"></i> <span>Support</span>
+                    </a>
+                    <a class="nav-link text-white" href="analytics.html">
+                        <i class="fas fa-chart-bar"></i> <span>Analytics</span>
+                    </a>
+                    <a class="nav-link text-white" href="reports.html">
+                        <i class="fas fa-file-alt"></i> <span>Reports</span>
+                    </a>
+                    <a class="nav-link text-white" href="profile.html">
+                        <i class="fas fa-user"></i> <span>Profile</span>
+                    </a>
+                    <a class="nav-link text-white" href="complete-profile.html">
+                        <i class="fas fa-id-card"></i> <span>Complete Profile</span>
+                    </a>
+                    <a class="nav-link text-white" href="settings.html">
+                        <i class="fas fa-cog"></i> <span>Settings</span>
+                    </a>
+                        <hr class="text-white">
+                    <a class="nav-link text-white" href="login.html">
+                        <i class="fas fa-right-from-bracket"></i> <span>Logout</span>
+                    </a>
+                    </nav>
+            </div>
+        </div>
+
+        <div class="dashboard-content p-0">
+            <!-- Desktop Header -->
+            <div class="header-section d-none d-md-block">
+                <div class="topbar">
+                    <div class="topbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search..." aria-label="Search">
+                    </div>
+                    <div class="topbar-actions position-relative">
+                        <button class="topbar-icon" type="button" title="Theme">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <button class="topbar-icon" type="button" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="topbar-icon" type="button" id="quickLinksToggle" title="Quick Links">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <div class="quick-links-menu" id="quickLinksMenu">
+                            <div class="quick-links-title">Quick Links</div>
+                            <div class="quick-links-grid">
+                                <a class="quick-link-item" href="loads.html">
+                                    <i class="fas fa-boxes"></i> Loads
+                                </a>
+                                <a class="quick-link-item" href="carriers.html">
+                                    <i class="fas fa-truck"></i> Carriers
+                                </a>
+                                <a class="quick-link-item" href="suppliers.html">
+                                    <i class="fas fa-warehouse"></i> Suppliers
+                                </a>
+                                <a class="quick-link-item" href="payments.html">
+                                    <i class="fas fa-money-bill-wave"></i> Payments
+                                </a>
+                                <a class="quick-link-item" href="messages.html">
+                                    <i class="fas fa-comments"></i> Messages
+                                </a>
+                                <a class="quick-link-item" href="profile.html">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                            </div>
+                        </div>
+                        <button class="topbar-avatar-btn" type="button" id="profileMenuToggle" title="Profile">
+                            <div class="topbar-avatar" id="avatarInitials">B</div>
+                        </button>
+
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-menu-header">
+                                <div class="profile-menu-avatar" id="menuAvatarInitials">B</div>
+                                <div>
+                                    <div class="profile-menu-name" id="menuUserName">Broker</div>
+                                    <div class="profile-menu-email" id="menuUserEmail">broker@alphabrokrage.com</div>
+                                </div>
+                            </div>
+                            <div class="profile-menu-links">
+                                <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                                <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                                <a href="messages.html"><i class="fas fa-comments"></i> Messages</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> Settings & Privacy</a>
+                            </div>
+                            <div class="profile-menu-footer">
+                                <button class="btn btn-outline-primary profile-menu-signout" type="button" onclick="logout()">
+                                    <i class="fas fa-right-from-bracket me-2"></i> Sign out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="mb-0 fw-bold">All Loads</h5>
+                            <small class="text-muted">Monitor active, matched, and completed loads</small>
+                        </div>
+                        <a class="btn btn-primary btn-sm" href="post-load.html">
+                            <i class="fas fa-plus"></i> Post Load
+                        </a>
+                </div>
+
+                    <div class="input-group mb-3" style="max-width: 360px;">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="searchLoadsInput" placeholder="Search loads" onkeyup="filterLoads()">
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Load ID</th>
+                                            <th>Route</th>
+                                            <th>Status</th>
+                                            <th>Rate (GBP)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="loadsTableBody">
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="mt-2 text-muted">Loading loads...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    
+    <script>
+        // Firebase Real-time Database Variables
+        let allLoads = [];
+        let filteredLoads = [];
+        
+        // Initialize Firebase Real-time Database Listener
+        function initializeFirebaseLoads() {
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (!auth || !auth.isLoggedIn) {
+                document.getElementById('loadsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-danger">
+                            <i class="fas fa-exclamation-triangle"></i> Please log in to view loads
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                console.error('Firebase database not available');
+                document.getElementById('loadsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-danger">
+                            <i class="fas fa-exclamation-triangle"></i> Firebase database not available
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Listen to Loads in Real-time
+            db.ref('loads').on('value', function(snapshot) {
+                try {
+                    const loads = [];
+                    if (snapshot && snapshot.exists && snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            const load = child.val();
+                            if (load) {
+                                load.id = child.key;
+                                loads.push(load);
+                            }
+                        });
+                    }
+                    
+                    // Sort by creation date (newest first)
+                    loads.sort((a, b) => {
+                        const dateA = a.createdAt || a.created_at || 0;
+                        const dateB = b.createdAt || b.created_at || 0;
+                        return dateB - dateA;
+                    });
+                    
+                    allLoads = loads;
+                    filteredLoads = loads;
+                    renderLoadsTable(loads);
+                } catch (error) {
+                    console.error('Error loading loads:', error);
+                    document.getElementById('loadsTableBody').innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-danger">
+                                <i class="fas fa-exclamation-triangle"></i> Error loading loads: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                }
+            }, function(error) {
+                console.error('Error listening to loads:', error);
+                document.getElementById('loadsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-danger">
+                            <i class="fas fa-exclamation-triangle"></i> Error connecting to database
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Render Loads Table
+        function renderLoadsTable(loads) {
+            const tbody = document.getElementById('loadsTableBody');
+            
+            if (!loads || loads.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="fas fa-box-open"></i> No loads found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            loads.forEach(load => {
+                const loadId = load.id || load.loadId || 'N/A';
+                const pickupLocation = load.pickupLocation || load.pickup_location || 'N/A';
+                const deliveryLocation = load.deliveryLocation || load.delivery_location || 'N/A';
+                const route = `${pickupLocation} to ${deliveryLocation}`;
+                const status = load.status || 'pending';
+                const rate = load.rate || load.totalCost || load.total_cost || 0;
+                
+                // Status badge colors
+                let statusBadge = '';
+                if (status === 'active' || status === 'pending') {
+                    statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                } else if (status === 'matched' || status === 'accepted' || status === 'assigned') {
+                    statusBadge = '<span class="badge bg-info">Matched</span>';
+                } else if (status === 'in_transit' || status === 'in-transit') {
+                    statusBadge = '<span class="badge bg-primary">In Transit</span>';
+                } else if (status === 'completed' || status === 'delivered') {
+                    statusBadge = '<span class="badge bg-success">Completed</span>';
+                } else if (status === 'cancelled' || status === 'canceled') {
+                    statusBadge = '<span class="badge bg-danger">Cancelled</span>';
+                } else {
+                    statusBadge = `<span class="badge bg-secondary">${status}</span>`;
+                }
+
+                html += `
+                    <tr>
+                        <td>${loadId}</td>
+                        <td>${route}</td>
+                        <td>${statusBadge}</td>
+                        <td>£${rate}</td>
+                        <td>
+                            <a href="load-details.html?id=${loadId}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> Details
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Filter Loads by Search
+        function filterLoads() {
+            const searchInput = document.getElementById('searchLoadsInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                filteredLoads = allLoads;
+            } else {
+                filteredLoads = allLoads.filter(load => {
+                    const loadId = (load.id || load.loadId || '').toLowerCase();
+                    const pickupLocation = (load.pickupLocation || load.pickup_location || '').toLowerCase();
+                    const deliveryLocation = (load.deliveryLocation || load.delivery_location || '').toLowerCase();
+                    const status = (load.status || '').toLowerCase();
+                    const route = `${pickupLocation} ${deliveryLocation}`;
+                    
+                    return loadId.includes(searchTerm) || 
+                           route.includes(searchTerm) || 
+                           status.includes(searchTerm);
+                });
+            }
+            
+            renderLoadsTable(filteredLoads);
+        }
+    </script>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        function toggleSidebarDesktop() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+                
+                if (toggleIcon) {
+                    if (sidebar.classList.contains('collapsed')) {
+                        toggleIcon.classList.remove('fa-chevron-left');
+                        toggleIcon.classList.add('fa-chevron-right');
+                    } else {
+                        toggleIcon.classList.remove('fa-chevron-right');
+                        toggleIcon.classList.add('fa-chevron-left');
+                    }
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('brokerAuth');
+            window.location.href = 'login.html';
+        }
+
+        // Close sidebar when clicking on a nav link on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.broker-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            // Quick Links Toggle
+            const quickLinksToggle = document.getElementById('quickLinksToggle');
+            const quickLinksMenu = document.getElementById('quickLinksMenu');
+            
+            if (quickLinksToggle && quickLinksMenu) {
+                quickLinksToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    quickLinksMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!quickLinksMenu.contains(e.target) && !quickLinksToggle.contains(e.target)) {
+                        quickLinksMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Profile Menu Toggle
+            const profileMenuToggle = document.getElementById('profileMenuToggle');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (profileMenuToggle && profileMenu) {
+                profileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('show');
+                    if (profileMenu.classList.contains('show')) {
+                        quickLinksMenu.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileMenu.contains(e.target) && !profileMenuToggle.contains(e.target)) {
+                        profileMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Update avatar initials
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (auth) {
+                const firstName = auth.firstName || '';
+                const lastName = auth.lastName || '';
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || 'B';
+                
+                const avatarElements = document.querySelectorAll('#avatarInitials, #menuAvatarInitials');
+                avatarElements.forEach(el => {
+                    if (el) el.textContent = initials;
+                });
+
+                const nameEl = document.getElementById('menuUserName');
+                if (nameEl) {
+                    nameEl.textContent = `${firstName} ${lastName}`.trim() || 'Broker';
+                }
+
+                const emailEl = document.getElementById('menuUserEmail');
+                if (emailEl && auth.email) {
+                    emailEl.textContent = auth.email;
+                }
+            }
+            
+            // Initialize Firebase Real-time Database
+            initializeFirebaseLoads();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Social Hub - Alpha Freight</title>
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --ab-primary: #6f42c1;
+            --ab-primary-dark: #51309a;
+            --ab-accent: #e83e8c;
+            --ab-surface: rgba(255, 255, 255, 0.9);
+            --ab-muted: rgba(15, 38, 71, 0.55);
+            --ab-border: rgba(255, 255, 255, 0.18);
+            --ab-backdrop: blur(16px);
+        }
+        body {
+            background: linear-gradient(155deg, #f7f4ff 0%, #f1f7ff 50%, #fdf5ff 100%);
+            min-height: 100vh;
+            color: #0f2647;
+        }
+        .admin-shell {
+            min-height: 100vh;
+        }
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(160deg, rgba(81, 48, 154, 0.95) 0%, rgba(232, 62, 140, 0.9) 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 24px rgba(15, 38, 71, 0.18);
+            backdrop-filter: blur(12px);
+        }
+        .admin-sidebar .nav-link {
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 12px;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.25s ease;
+            font-weight: 500;
+        }
+        .admin-sidebar .nav-link i {
+            width: 1.25rem;
+            text-align: center;
+        }
+        .admin-sidebar .nav-link:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.18);
+            transform: translateX(6px);
+        }
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.28);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+        }
+        .admin-content {
+            min-height: 100vh;
+        }
+        .content-section {
+            padding: 0 1rem 2rem 1rem;
+        }
+        .glass-card {
+            background: var(--ab-surface);
+            border-radius: 22px;
+            border: 1px solid var(--ab-border);
+            box-shadow: 0 25px 60px rgba(15, 38, 71, 0.12);
+            backdrop-filter: var(--ab-backdrop);
+        }
+        .profile-banner {
+            position: relative;
+            padding: 2.5rem;
+            overflow: hidden;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(111,66,193,0.85), rgba(232,62,140,0.85));
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .profile-banner::before {
+            content: "";
+            position: absolute;
+            top: -45%;
+            left: -20%;
+            width: 60%;
+            height: 160%;
+            background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 65%);
+            transform: rotate(12deg);
+        }
+        .profile-banner::after {
+            content: "";
+            position: absolute;
+            bottom: -30%;
+            right: -15%;
+            width: 50%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 70%);
+        }
+        .profile-banner .row {
+            position: relative;
+            z-index: 2;
+        }
+        .profile-banner .avatar-ring {
+            width: 108px;
+            height: 108px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.85);
+            padding: 6px;
+            box-shadow: 0 18px 45px rgba(15,38,71,0.35);
+        }
+        .profile-banner .avatar-ring img {
+            border-radius: 50%;
+        }
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.22);
+            color: #fff;
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .profile-metric {
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            padding: 1.1rem 1.6rem;
+            box-shadow: 0 20px 45px rgba(15, 38, 71, 0.1);
+            min-width: 160px;
+        }
+        .profile-metric small {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ab-muted);
+        }
+        .profile-metric h4,
+        .profile-metric h5,
+        .profile-metric h6 {
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        .filter-card {
+            padding: 1.5rem;
+            border-radius: 22px;
+            display: grid;
+            gap: 1.2rem;
+            background: var(--ab-surface);
+            border: 1px solid var(--ab-border);
+            box-shadow: 0 18px 40px rgba(15, 38, 71, 0.08);
+        }
+        .filter-card label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--ab-muted);
+            letter-spacing: 0.08em;
+        }
+        .insight-card {
+            padding: 1.75rem;
+            border-radius: 20px;
+            background: var(--ab-surface);
+            border: 1px solid var(--ab-border);
+            box-shadow: 0 22px 45px rgba(15, 38, 71, 0.1);
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            height: 100%;
+        }
+        .insight-card i {
+            font-size: 1.6rem;
+            color: var(--ab-primary);
+            background: rgba(111,66,193,0.12);
+            border-radius: 16px;
+            padding: 0.7rem;
+        }
+        .insight-card h6 {
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+        .insight-card p {
+            color: var(--ab-muted);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        .admin-feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .post-card {
+            background: #fff;
+            border-radius: 22px;
+            border: 1px solid rgba(111, 66, 193, 0.08);
+            box-shadow: 0 18px 45px rgba(15,38,71,0.08);
+            padding: 1.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .post-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 55px rgba(15,38,71,0.14);
+        }
+        .post-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 10px 25px rgba(15,38,71,0.16);
+        }
+        .badge-meta {
+            border-radius: 999px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: rgba(111, 66, 193, 0.12);
+            color: var(--ab-primary);
+            letter-spacing: 0.02em;
+        }
+        .post-stats span {
+            background: rgba(15,38,71,0.05);
+            border-radius: 999px;
+            padding: 0.32rem 0.9rem;
+            font-size: 0.78rem;
+            margin-right: 0.4rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .post-stats i {
+            color: var(--ab-primary);
+        }
+        .empty-state {
+            background: var(--ab-surface);
+            border-radius: 22px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 12px 36px rgba(15,38,71,0.08);
+            color: var(--ab-muted);
+            border: 1px solid var(--ab-border);
+        }
+        .skeleton-line {
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(240,242,247,0.85), rgba(222,224,232,0.9), rgba(240,242,247,0.85));
+            animation: shimmer 1.6s infinite;
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.show { opacity: 1; }
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--ab-primary), var(--ab-accent));
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 15px 35px rgba(111,66,193,0.38);
+        }
+        .admin-topbar {
+            background: rgba(255,255,255,0.85);
+            border-bottom: 1px solid rgba(15,38,71,0.08);
+            backdrop-filter: blur(12px);
+        }
+        .admin-topbar h5 {
+            color: var(--ab-primary-dark);
+        }
+        .admin-topbar small {
+            color: var(--ab-muted);
+        }
+        .admin-topbar .btn-outline-primary {
+            border-color: rgba(111,66,193,0.35);
+            color: var(--ab-primary);
+        }
+        .admin-topbar .btn-outline-primary:hover {
+            background: var(--ab-primary);
+            color: #fff;
+        }
+        .card-body h6 {
+            color: var(--ab-primary-dark);
+        }
+        .post-card p {
+            color: rgba(15, 38, 71, 0.78);
+        }
+        @media (max-width: 1199px) {
+            .profile-metric {
+                width: 100%;
+            }
+        }
+        @media (max-width: 991px) {
+            .admin-sidebar { position: fixed; left: -100%; top: 0; width: 280px; max-width: 85%; z-index: 1000; transition: left 0.3s ease; }
+            .admin-sidebar.show { left: 0; }
+            .sidebar-overlay { display: block; }
+            .mobile-menu-btn { display: inline-flex !important; }
+            .profile-banner {
+                padding: 2rem 1.5rem;
+            }
+            .profile-banner .avatar-ring {
+                margin-bottom: 1rem;
+            }
+            .filter-card {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            }
+        }
+        @media (max-width: 767px) {
+            .profile-banner {
+                text-align: center;
+            }
+            .profile-banner .verified-badge {
+                justify-content: center;
+            }
+            .profile-banner .profile-metric {
+                margin: 0 auto;
+            }
+            .profile-banner .row > div {
+                text-align: center;
+            }
+            .profile-banner .row .d-flex {
+                justify-content: center;
+            }
+            .admin-feed-grid {
+                grid-template-columns: 1fr;
+            }
+            .post-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid admin-shell">
+        <div class="row g-0">
+            <div class="col-lg-2 col-md-3 admin-sidebar p-0">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem; text-decoration: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
+                        <a class="nav-link text-white" href="users.html"><i class="fas fa-users me-2"></i> Users</a>
+                        <a class="nav-link text-white" href="loads.html"><i class="fas fa-boxes me-2"></i> Loads</a>
+                        <a class="nav-link text-white" href="post-load.html"><i class="fas fa-plus-circle me-2"></i> Post Load</a>
+                        <a class="nav-link text-white" href="contracts.html"><i class="fas fa-file-contract me-2"></i> Contracts</a>
+                        <a class="nav-link text-white" href="analytics.html"><i class="fas fa-chart-line me-2"></i> Analytics</a>
+                        <a class="nav-link text-white active" href="social-feed.html"><i class="fas fa-share-alt me-2"></i> Social Hub</a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+            <div class="col-lg-10 col-md-9 admin-content p-0">
+                <div class="admin-topbar shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="mobile-menu-btn" onclick="toggleSidebar()" id="mobileMenuBtn">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Social Hub Overview</h5>
+                                <small class="text-muted d-none d-md-block">Monitor every post across the community in real-time.</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-primary btn-sm" href="social-post.html">
+                                <i class="fas fa-pen-nib"></i> Create Post
+                            </a>
+                            <button class="btn btn-outline-primary btn-sm" onclick="forceReloadSocial()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-section">
+                    <div class="profile-banner text-white mb-4 glass-card">
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 mb-3 mb-lg-0 text-center text-lg-start">
+                                <div class="d-inline-flex avatar-ring">
+                                    <img src="https://i.pravatar.cc/200?img=68" alt="Admin" class="w-100 h-100 rounded-circle object-fit-cover" data-admin-avatar>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="d-flex justify-content-between align-items-start gap-3 mb-2 flex-wrap">
+                                    <div>
+                                        <h2 class="fw-bold mb-1 d-flex align-items-center gap-2 flex-wrap" data-admin-name>
+                                            <span>Alpha Freight Admin</span>
+                                            <span class="verified-badge">
+                                                <i class="fas fa-circle-check me-1"></i>Verified
+                                            </span>
+                                        </h2>
+                                        <p class="mb-2 opacity-75" data-admin-tagline>Managing community insights, engagement & compliance.</p>
+                                    </div>
+                                    <button class="btn btn-light btn-sm" data-admin-edit-profile>
+                                        <i class="fas fa-pen me-1"></i> Edit Profile
+                                    </button>
+                                </div>
+                                <p class="mb-3 text-white-50 d-none" data-admin-bio></p>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div class="profile-metric text-dark">
+                                        <small class="text-uppercase text-muted">Network Followers</small>
+                                        <h4 class="mb-0" data-admin-followers>—</h4>
+                                    </div>
+                                    <div class="profile-metric text-dark">
+                                        <small class="text-uppercase text-muted">Tracked Posts</small>
+                                        <h4 class="mb-0" data-stats-total-posts>0</h4>
+                                    </div>
+                                    <div class="profile-metric text-dark">
+                                        <small class="text-uppercase text-muted">Unique Authors</small>
+                                        <h4 class="mb-0" data-stats-total-authors>0</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 text-lg-end">
+                                <div class="profile-metric text-dark mb-3">
+                                    <small class="text-uppercase text-muted">Total Likes</small>
+                                    <h5 class="mb-0" data-stats-total-likes>0</h5>
+                                </div>
+                                <div class="profile-metric text-dark mb-3">
+                                    <small class="text-uppercase text-muted">Total Comments</small>
+                                    <h5 class="mb-0" data-stats-total-comments>0</h5>
+                                </div>
+                                <div class="profile-metric text-dark">
+                                    <small class="text-uppercase text-muted">Last Updated</small>
+                                    <h6 class="mb-0" data-stats-last-updated>—</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="adminProfileModal" tabindex="-1" aria-labelledby="adminProfileModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <form data-admin-profile-form>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold" id="adminProfileModalLabel"><i class="fas fa-id-card me-2 text-primary"></i>Edit Admin Profile</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Display Name</label>
+                                                <input type="text" class="form-control" name="company" placeholder="Alpha Freight Admin" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Role Label</label>
+                                                <input type="text" class="form-control" name="role" placeholder="Community Admin">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Location</label>
+                                                <input type="text" class="form-control" name="location" placeholder="City, Country">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Profile Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img src="https://i.pravatar.cc/200?img=68" alt="Preview" class="rounded-circle border object-fit-cover" style="width:72px; height:72px;" data-admin-avatar-preview>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="url" class="form-control mb-2" name="avatar" placeholder="https://example.com/image.jpg">
+                                                        <input type="file" class="form-control" accept="image/*" data-admin-avatar-file>
+                                                        <div class="form-text">Paste image URL or upload JPG/PNG (max 2MB).</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold">Tagline</label>
+                                                <input type="text" class="form-control" name="tagline" placeholder="Short one-line summary">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold">Description / Bio</label>
+                                                <textarea class="form-control" rows="4" name="bio" placeholder="Share a brief description about Alpha Freight's mission and focus."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" data-admin-profile-submit>
+                                            <span class="me-2"><i class="fas fa-save"></i></span>Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="insight-card">
+                                <i class="fas fa-star"></i>
+                                <div>
+                                    <h6>Community Health</h6>
+                                    <p class="mb-1">Track engagement strength across verified network touchpoints.</p>
+                                    <span class="badge bg-primary-subtle text-primary fw-semibold">Prime</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="insight-card">
+                                <i class="fas fa-headset"></i>
+                                <div>
+                                    <h6>Moderation Response</h6>
+                                    <p class="mb-1">Keep moderation response time under 10 minutes for premium care.</p>
+                                    <span class="text-success fw-semibold"><i class="fas fa-arrow-trend-up me-1"></i>On target</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12">
+                            <div class="insight-card">
+                                <i class="fas fa-bell"></i>
+                                <div>
+                                    <h6>Live Alerts</h6>
+                                    <p class="mb-1">Review flagged posts and spotlight updates in the alert center.</p>
+                                    <a href="social-post.html" class="small fw-semibold text-decoration-none text-primary">Create spotlight post <i class="fas fa-arrow-right ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-card mb-4 glass-card">
+                        <div class="row g-3">
+                            <div class="col-lg-4">
+                                <label class="form-label fw-semibold">Filter by author</label>
+                                <select class="form-select" data-user-filter>
+                                    <option value="all">All authors</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label fw-semibold">Search posts</label>
+                                <input type="text" class="form-control" placeholder="Search by keyword, company or location" data-post-search>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label fw-semibold">Sort by</label>
+                                <select class="form-select" data-sort-mode>
+                                    <option value="latest">Latest first</option>
+                                    <option value="likes">Most liked</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4" data-loading-state>
+                        <div class="post-card mb-3">
+                            <div class="d-flex gap-3 mb-3">
+                                <div class="post-avatar skeleton-line" style="height:56px;"></div>
+                                <div class="flex-grow-1">
+                                    <div class="skeleton-line mb-2" style="width:160px;"></div>
+                                    <div class="skeleton-line" style="width:220px;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-line mb-2"></div>
+                            <div class="skeleton-line mb-2" style="width:90%;"></div>
+                            <div class="skeleton-line" style="width:75%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3 d-none" data-posts-header>
+                        <h5 class="fw-bold mb-0">Community Posts</h5>
+                        <span class="badge bg-light text-secondary" data-posts-count>0 posts</span>
+                    </div>
+
+                    <div class="admin-feed-grid" data-posts-list></div>
+
+                    <div class="empty-state d-none" data-empty-state>
+                        <i class="fas fa-comments mb-3" style="font-size: 2.2rem;"></i>
+                        <h5 class="fw-bold mb-2">No posts yet</h5>
+                        <p class="mb-0">Once community members share updates, they will appear here instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/admin-auth.js"></script>
+    <script src="../../assets/js/admin-social.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+        }
+        function forceReloadSocial() {
+            if (window.AlphaBrokrage?.adminSocial) {
+                window.AlphaBrokrage.adminSocial.refresh();
+            }
+        }
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 991) {
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

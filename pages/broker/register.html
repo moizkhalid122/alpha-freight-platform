@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Register - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --broker-primary: #6f42c1;
+            --broker-secondary: #e83e8c;
+        }
+
+        body {
+            background: radial-gradient(circle at top, rgba(111, 66, 193, 0.08), transparent 55%),
+                radial-gradient(circle at 80% 20%, rgba(232, 62, 140, 0.08), transparent 45%),
+                #f5f6fb;
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+            overflow: hidden;
+            max-width: 560px;
+            width: 100%;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            text-align: center;
+            padding: 2rem 2rem 1.5rem;
+            position: relative;
+        }
+
+        .auth-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 60%);
+            pointer-events: none;
+        }
+
+        .auth-header::before {
+            content: "";
+            position: absolute;
+            inset: -50% -50%;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), transparent 60%);
+            animation: headerShine 6s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes headerShine {
+            0% { transform: translateX(-30%); }
+            100% { transform: translateX(30%); }
+        }
+
+        .auth-logo {
+            width: 140px;
+            height: auto;
+            margin: 0 auto 0.75rem;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-body {
+            padding: 2rem;
+        }
+
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(111, 66, 193, 0.12);
+            color: #5b34a6;
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--broker-primary);
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            border: none;
+            border-radius: 999px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 12px 25px rgba(111, 66, 193, 0.25);
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .auth-card {
+                border-radius: 18px;
+            }
+
+            .auth-header {
+                padding: 1.5rem 1.25rem 1.25rem;
+            }
+
+            .auth-logo {
+                width: 120px;
+            }
+
+            .auth-body {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .auth-card {
+                max-width: 620px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div>
+            <div class="auth-card">
+                <div class="auth-header">
+                    <img class="auth-logo" src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo">
+                    <h4 class="fw-bold mb-1">Broker Registration</h4>
+                    <p class="mb-0">Create your broker account.</p>
+                </div>
+                <div class="auth-body">
+                    <form id="brokerRegisterForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="phone" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Company</label>
+                                    <input type="text" class="form-control" id="company" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirmPassword" required>
+                                </div>
+                            </div>
+                        <button class="btn btn-primary w-100 mt-3" type="submit">Create Account</button>
+                    </form>
+                    <div id="registerError" class="alert alert-danger mt-3 d-none">
+                        Passwords do not match.
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <a class="btn btn-outline-secondary" href="login.html">
+                            Already have an account?
+                        </a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="pricing.html" class="text-decoration-none" style="color: var(--broker-primary);">
+                            <i class="fas fa-tags me-1"></i> View Pricing Plans
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a class="btn btn-outline-dark" href="../../index.html">Back to website</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        const registerForm = document.getElementById('brokerRegisterForm');
+        const registerError = document.getElementById('registerError');
+
+        registerForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            registerError.classList.add('d-none');
+            registerError.textContent = 'Passwords do not match.';
+
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            if (password !== confirm) {
+                registerError.classList.remove('d-none');
+                return;
+            }
+
+            const profile = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim().toLowerCase(),
+                phone: document.getElementById('phone').value.trim(),
+                company: document.getElementById('company').value.trim(),
+                password: password,
+                userType: 'broker',
+                status: 'active',
+                profileComplete: false,
+                createdAt: new Date().toISOString()
+            };
+
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                registerError.textContent = 'Registration service unavailable. Please refresh and try again.';
+                registerError.classList.remove('d-none');
+                return;
+            }
+
+            // Check if email already exists
+            db.ref('brokers').orderByChild('email').equalTo(profile.email).once('value').then(function(snapshot) {
+                // Properly check if email exists
+                let emailExists = false;
+                if (snapshot && snapshot.exists()) {
+                    snapshot.forEach(function(child) {
+                        const brokerData = child.val();
+                        if (brokerData && brokerData.email && brokerData.email.toLowerCase() === profile.email.toLowerCase()) {
+                            emailExists = true;
+                        }
+                    });
+                }
+
+                if (emailExists) {
+                    registerError.textContent = 'This email is already registered. Please use a different email or sign in.';
+                    registerError.classList.remove('d-none');
+                    return;
+                }
+
+                const newBrokerRef = db.ref('brokers').push();
+                const brokerId = newBrokerRef.key;
+                newBrokerRef.set({
+                    ...profile,
+                    brokerId: brokerId
+                }).then(function() {
+                    localStorage.setItem('brokerAuth', JSON.stringify({
+                        brokerId: brokerId,
+                        email: profile.email,
+                        firstName: profile.firstName,
+                        lastName: profile.lastName,
+                        company: profile.company,
+                        phone: profile.phone,
+                        profileComplete: false,
+                        isLoggedIn: true,
+                        loginTime: new Date().toISOString()
+                    }));
+                    window.location.href = 'dashboard.html';
+                }).catch(function(error) {
+                    console.error('Broker registration error:', error);
+                    registerError.textContent = 'Registration failed. Please try again.';
+                    registerError.classList.remove('d-none');
+                });
+            }).catch(function(error) {
+                console.error('Broker registration lookup error:', error);
+                registerError.textContent = 'Registration failed. Please try again.';
+                registerError.classList.remove('d-none');
+            });
+        });
+    </script>
+</body>
+</html>

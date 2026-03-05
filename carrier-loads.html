@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Alpha Freight – Loads Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --bg: #020617;
+            --surface: rgba(10, 15, 30, 0.85);
+            --surface-alt: rgba(8,11,25,0.9);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-2: #facc15;
+            --success: #34d399;
+            --danger: #f87171;
+            --border: rgba(148, 163, 184, 0.18);
+            color-scheme: dark;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.2), transparent 45%),
+                        radial-gradient(circle at 75% 0%, rgba(250,204,21,0.2), transparent 55%),
+                        radial-gradient(circle at 0% 90%, rgba(14,165,233,0.18), transparent 35%),
+                        var(--bg);
+            color: var(--text);
+            padding: 32px 20px 48px;
+            display: flex;
+            justify-content: center;
+        }
+        .device {
+            width: min(440px, 100%);
+        }
+        .shell {
+            background: rgba(5, 8, 20, 0.92);
+            border-radius: 36px;
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 34px 24px 34px;
+            box-shadow: 0 30px 90px rgba(1,5,15,0.95);
+            backdrop-filter: blur(24px);
+            position: relative;
+            overflow: hidden;
+        }
+        .notch {
+            width: 120px;
+            height: 26px;
+            border-radius: 14px;
+            background: #030712;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
+        }
+        header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .filters {
+            border-radius: 24px;
+            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin-bottom: 22px;
+        }
+        .pill-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            border-radius: 999px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            color: var(--text);
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pill.active {
+            border-color: rgba(56,189,248,0.6);
+            background: rgba(56,189,248,0.15);
+            color: var(--accent);
+        }
+        .search-field {
+            margin-top: 12px;
+            position: relative;
+        }
+        .search-field input {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(2,6,23,0.8);
+            padding: 12px 14px 12px 44px;
+            color: var(--text);
+            font-size: 0.92rem;
+        }
+        .search-field i {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-radius: 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .tabs button {
+            border: none;
+            border-radius: 14px;
+            background: transparent;
+            color: var(--muted);
+            padding: 10px 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .tabs button.active {
+            background: rgba(56,189,248,0.15);
+            color: var(--text);
+            box-shadow: inset 0 0 0 1px rgba(56,189,248,0.4);
+        }
+        .load-card {
+            border-radius: 26px;
+            padding: 20px;
+            background: var(--surface-alt);
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 20px 40px rgba(2,6,23,0.45);
+            margin-bottom: 18px;
+        }
+        .load-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+        .load-header h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+        .rate {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--accent-2);
+        }
+        .meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0 16px;
+        }
+        .meta-item {
+            border-radius: 18px;
+            padding: 12px;
+            border: 1px dashed rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.02);
+        }
+        .meta-item span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        .meta-item strong {
+            display: block;
+            margin-top: 6px;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .lo-tag {
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .actions .chip {
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            background: rgba(56,189,248,0.1);
+            border: 1px solid rgba(56,189,248,0.4);
+            color: var(--accent);
+        }
+        .actions button {
+            border: none;
+            border-radius: 14px;
+            padding: 10px 18px;
+            font-weight: 600;
+            background: rgba(56,189,248,0.18);
+            color: var(--text);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 32px 18px;
+            color: var(--muted);
+        }
+        .bottom-nav {
+            margin-top: 20px;
+            border-radius: 18px;
+            background: rgba(2,6,23,0.85);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-around;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .bottom-nav button {
+            background: none;
+            border: none;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75rem;
+            gap: 4px;
+        }
+        .bottom-nav button.active {
+            color: var(--accent);
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 24px 12px 32px;
+            }
+            .shell {
+                border-radius: 28px;
+                padding: 30px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="device">
+        <div class="shell">
+            <span class="notch" aria-hidden="true"></span>
+            <div class="status-bar">
+                <span>09:41</span>
+                <span>Hull, UK</span>
+                <span><i class="fa-solid fa-battery-three-quarters"></i></span>
+            </div>
+
+            <header>
+                <div>
+                    <h1>Available Loads</h1>
+                    <p>17 matches based on your fleet</p>
+                </div>
+                <button class="pill active" style="border:none;cursor:pointer;">
+                    <i class="fa-solid fa-bolt"></i> Instant book
+                </button>
+            </header>
+
+            <section class="filters">
+                <div class="pill-group" aria-label="Quick filters">
+                    <button class="pill active" type="button"><i class="fa-solid fa-location-dot"></i> 250 mi radius</button>
+                    <button class="pill" type="button"><i class="fa-solid fa-weight-hanging"></i> 18t dry van</button>
+                    <button class="pill" type="button"><i class="fa-solid fa-sterling-sign"></i> £3+/mi</button>
+                </div>
+                <div class="search-field">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="search" placeholder="Search by city, ref ID, commodity">
+                </div>
+            </section>
+
+            <nav class="tabs" aria-label="Load categories">
+                <button class="active" type="button">Recommended</button>
+                <button type="button">Instant</button>
+                <button type="button">Saved</button>
+            </nav>
+
+            <article class="load-card">
+                <div class="load-header">
+                    <h3>Manchester ➝ Glasgow</h3>
+                    <span class="rate">£2,980</span>
+                </div>
+                <div class="meta">
+                    <div class="meta-item">
+                        <span>Pickup</span>
+                        <strong>21 Nov • 06:30</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Delivery</span>
+                        <strong>21 Nov • 16:00</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Mileage</span>
+                        <strong>226 mi</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Equipment</span>
+                        <strong>Reefer • 17t</strong>
+                    </div>
+                </div>
+                <div class="tag-row">
+                    <span class="lo-tag">Pharma goods</span>
+                    <span class="lo-tag">Temp control</span>
+                    <span class="lo-tag">Border clearance ready</span>
+                </div>
+                <div class="actions">
+                    <span class="chip"><i class="fa-solid fa-bolt"></i> Instant book</span>
+                    <button type="button">View details</button>
+                </div>
+            </article>
+
+            <article class="load-card">
+                <div class="load-header">
+                    <h3>Leeds ➝ Birmingham</h3>
+                    <span class="rate">£2,420</span>
+                </div>
+                <div class="meta">
+                    <div class="meta-item">
+                        <span>Pickup</span>
+                        <strong>21 Nov • 10:00</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Delivery</span>
+                        <strong>21 Nov • 18:40</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Mileage</span>
+                        <strong>118 mi</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Equipment</span>
+                        <strong>Dry van • 15t</strong>
+                    </div>
+                </div>
+                <div class="tag-row">
+                    <span class="lo-tag">Consumer goods</span>
+                    <span class="lo-tag">Driver assist</span>
+                </div>
+                <div class="actions">
+                    <span class="chip" style="background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.4);color:var(--success);">
+                        <i class="fa-solid fa-certificate"></i> Preferred
+                    </span>
+                    <button type="button">Hold load</button>
+                </div>
+            </article>
+
+            <article class="load-card">
+                <div class="load-header">
+                    <h3>York ➝ Bristol</h3>
+                    <span class="rate">£3,120</span>
+                </div>
+                <div class="meta">
+                    <div class="meta-item">
+                        <span>Pickup</span>
+                        <strong>22 Nov • 05:30</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Delivery</span>
+                        <strong>22 Nov • 23:00</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Mileage</span>
+                        <strong>249 mi</strong>
+                    </div>
+                    <div class="meta-item">
+                        <span>Equipment</span>
+                        <strong>Flatbed • 20t</strong>
+                    </div>
+                </div>
+                <div class="tag-row">
+                    <span class="lo-tag">Steel coils</span>
+                    <span class="lo-tag">Straps only</span>
+                    <span class="lo-tag">Insurance proof</span>
+                </div>
+                <div class="actions">
+                    <span class="chip" style="background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.4);color:var(--danger);">
+                        <i class="fa-solid fa-file"></i> Docs pending
+                    </span>
+                    <button type="button">Upload docs</button>
+                </div>
+            </article>
+
+            <div class="empty-state">
+                <i class="fa-solid fa-ellipsis text-muted"></i>
+                More loads refresh automatically based on your radius.
+            </div>
+
+            <nav class="bottom-nav" aria-label="Primary navigation">
+                <button type="button">
+                    <i class="fa-solid fa-gauge"></i>
+                    Dashboard
+                </button>
+                <button class="active" type="button">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Loads
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-comments"></i>
+                    Chat
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </button>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>
+

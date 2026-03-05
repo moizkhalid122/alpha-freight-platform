@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Information - Alpha Freight Solutions Limited</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Premium Color Scheme */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --info-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6a88 0%, #ff8a80 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --light-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Premium Box Styling */
+        .info-card, .contact-card, .team-card, .cert-card {
+            background: white;
+            border: none !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px !important;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .info-card::before, .contact-card::before, .team-card::before, .cert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .info-card:hover, .contact-card:hover, .team-card:hover, .cert-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .address-card {
+            background: var(--primary-gradient) !important;
+            border: none;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            border-radius: 15px !important;
+            transition: all 0.4s ease;
+        }
+
+        .address-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 45px rgba(102, 126, 234, 0.5);
+        }
+
+        .compliance-card {
+            border: none !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 15px !important;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .compliance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .compliance-card:hover::before {
+            opacity: 1;
+        }
+
+        .compliance-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .compliance-card.bg-success {
+            background: var(--success-gradient) !important;
+        }
+
+        .compliance-card.bg-warning {
+            background: var(--warning-gradient) !important;
+        }
+
+        .compliance-card.bg-info {
+            background: var(--info-gradient) !important;
+        }
+
+        .compliance-card.bg-danger {
+            background: var(--danger-gradient) !important;
+        }
+
+        .financial-info {
+            background: var(--light-gradient) !important;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px !important;
+        }
+
+        /* Scroll Animation Classes */
+        .scroll-animate {
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .scroll-animate-left {
+            transform: translateX(-100px);
+        }
+
+        .scroll-animate-right {
+            transform: translateX(100px);
+        }
+
+        .scroll-animate-up {
+            transform: translateY(50px);
+        }
+
+        .scroll-animate.animated {
+            opacity: 1;
+            transform: translateX(0) translateY(0);
+        }
+
+        /* Premium Table Styling */
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table thead {
+            background: var(--primary-gradient) !important;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+            transform: scale(1.01);
+        }
+
+        /* Section Headings */
+        section h2, section h3 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Premium Navbar */
+        .transparent-navbar {
+            background: rgba(255, 255, 255, 0.75) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .transparent-navbar .nav-link {
+            color: #1f2a44 !important;
+            font-weight: 500;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .transparent-navbar .nav-link:hover {
+            color: #764ba2 !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-brand {
+            padding: 0;
+        }
+
+        .brand-logo {
+            height: 52px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.15));
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg transparent-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">
+                <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Solutions Limited Logo" class="brand-logo">
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="../../index.html">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold text-primary mb-4 scroll-animate scroll-animate-up">Company Information</h1>
+                <p class="lead text-muted mb-5 scroll-animate scroll-animate-up">Transparency and trust in freight brokerage</p>
+
+                <div class="company-content">
+                    <section class="mb-5">
+                        <h2 class="h3 fw-bold mb-3 scroll-animate scroll-animate-up">About Alpha Freight Solutions Limited</h2>
+                        <div class="scroll-animate scroll-animate-left">
+                            <p>Alpha Freight Solutions Limited is a leading freight brokerage company operating across the United Kingdom. We specialize in connecting suppliers with reliable carriers to ensure efficient and cost-effective transportation solutions.</p>
+                        </div>
+                        <div class="scroll-animate scroll-animate-right">
+                            <p>Founded with the vision of revolutionizing the logistics industry, we provide transparent, reliable, and professional freight brokerage services that benefit both suppliers and carriers.</p>
+                        </div>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h3 fw-bold mb-3 scroll-animate scroll-animate-up">Company Details</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-card bg-light p-4 rounded mb-3 scroll-animate scroll-animate-left">
+                                    <h5 class="fw-bold text-primary">Company Name</h5>
+                                    <p class="mb-0">ALPHA FREIGHT SOLUTIONS LIMITED </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card bg-light p-4 rounded mb-3 scroll-animate scroll-animate-right">
+                                    <h5 class="fw-bold text-primary">Company Number</h5>
+                                    <p class="mb-0">16860760</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card bg-light p-4 rounded mb-3 scroll-animate scroll-animate-right">
+                                    <h5 class="fw-bold text-primary">Incorporation Date</h5>
+                                    <p class="mb-0">November 17th, 2026</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h3 fw-bold mb-3 scroll-animate scroll-animate-up">Registered Office</h2>
+                        <div class="address-card bg-primary text-white p-4 rounded scroll-animate scroll-animate-left">
+                            <h5 class="fw-bold mb-3">
+                                <i class="fas fa-map-marker-alt"></i> Head Office
+                            </h5>
+                            <p class="mb-1">Alpha Freight Solutions Limited</p>
+                            <p class="mb-1">124 City Road,</p>
+                            <p class="mb-1">London EC1V 2NX</p>
+                            <p class="mb-0">United Kingdom</p>
+                        </div>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h3 fw-bold mb-3 scroll-animate scroll-animate-up">Contact Information</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="contact-card p-4 border rounded mb-3 scroll-animate scroll-animate-left">
+                                    <h5 class="fw-bold text-primary">
+                                        <i class="fas fa-phone"></i> Phone
+                                    </h5>
+                                    <p class="mb-0">+44 7782 294718</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="contact-card p-4 border rounded mb-3 scroll-animate scroll-animate-right">
+                                    <h5 class="fw-bold text-primary">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </h5>
+                                    <p class="mb-0">support@alphafreightuk.com</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="contact-card p-4 border rounded mb-3 scroll-animate scroll-animate-left">
+                                    <h5 class="fw-bold text-primary">
+                                        <i class="fas fa-globe"></i> Website
+                                    </h5>
+                                    <p class="mb-0">www.alphafreightuk.com</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="contact-card p-4 border rounded mb-3 scroll-animate scroll-animate-right">
+                                    <h5 class="fw-bold text-primary">
+                                        <i class="fas fa-clock"></i> Business Hours
+                                    </h5>
+                                    <p class="mb-0">Mon-Fri: 8:00 AM - 6:00 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2026 Alpha Freight Solutions Limited. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">UK Company Registration: 16860760</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scroll Animation Script -->
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                    // Optional: Unobserve after animation to improve performance
+                    // observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all elements with scroll-animate class
+        document.addEventListener('DOMContentLoaded', () => {
+            const animateElements = document.querySelectorAll('.scroll-animate');
+            animateElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
+

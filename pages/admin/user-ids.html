@@ -1,0 +1,462 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User IDs - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .id-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #28a745;
+            cursor: pointer;
+        }
+        .id-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        .id-card.carrier {
+            border-left-color: #28a745;
+        }
+        .id-card.supplier {
+            border-left-color: #007bff;
+        }
+        .id-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #6f42c1;
+            font-family: 'Courier New', monospace;
+        }
+        .user-type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-carrier {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-supplier {
+            background: #cfe2ff;
+            color: #084298;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .copy-btn {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111, 66, 193, 0.4);
+        }
+        .search-filter {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="contracts.html">
+                            <i class="fas fa-file-contract"></i> Contracts
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white" href="company-details.html">
+                            <i class="fas fa-building"></i> Carrier Details
+                        </a>
+                        <a class="nav-link text-white active" href="user-ids.html">
+                            <i class="fas fa-id-card"></i> User IDs
+                        </a>
+                        <a class="nav-link text-white" href="user-details.html">
+                            <i class="fas fa-search"></i> Search User
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-0 fw-bold">All User IDs</h2>
+                        <small class="text-muted">Complete list of all registered carrier and supplier IDs</small>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="loadUserIDs()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h6 class="text-muted mb-2">Total Users</h6>
+                            <h3 class="mb-0 fw-bold" id="totalUsers">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h6 class="text-muted mb-2">Carriers</h6>
+                            <h3 class="mb-0 fw-bold text-success" id="totalCarriers">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h6 class="text-muted mb-2">Suppliers</h6>
+                            <h3 class="mb-0 fw-bold text-primary" id="totalSuppliers">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Filter -->
+                <div class="search-filter">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="typeFilter" class="form-label">Filter by Type</label>
+                            <select class="form-select" id="typeFilter" onchange="filterUsers()">
+                                <option value="">All Users</option>
+                                <option value="carrier">Carriers Only</option>
+                                <option value="supplier">Suppliers Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="searchInput" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, email, or company name..." onkeyup="filterUsers()">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                <i class="fas fa-times me-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User IDs List -->
+                <div id="userIdsContainer">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Loading user IDs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        let allUsers = [];
+        let displayedUsers = [];
+
+        function loadUserIDs() {
+            const container = document.getElementById('userIdsContainer');
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Loading user IDs from Firebase...</p>
+                </div>
+            `;
+
+            var db = firebase.database();
+            allUsers = [];
+
+            // Load Carriers
+            db.ref('carriers').once('value', function(carrierSnapshot) {
+                if (carrierSnapshot.exists()) {
+                    carrierSnapshot.forEach(function(child) {
+                        var carrier = child.val();
+                        allUsers.push({
+                            id: child.key,
+                            userId: carrier.carrierId || carrier.id || child.key,
+                            email: carrier.email || '',
+                            companyName: carrier.companyName || '',
+                            firstName: carrier.firstName || '',
+                            lastName: carrier.lastName || '',
+                            type: 'carrier',
+                            createdAt: carrier.createdAt || ''
+                        });
+                    });
+                }
+
+                // Load Suppliers
+                db.ref('suppliers').once('value', function(supplierSnapshot) {
+                    if (supplierSnapshot.exists()) {
+                        supplierSnapshot.forEach(function(child) {
+                            var supplier = child.val();
+                            allUsers.push({
+                                id: child.key,
+                                userId: supplier.supplierId || supplier.id || child.key,
+                                email: supplier.email || '',
+                                companyName: supplier.companyName || '',
+                                firstName: supplier.firstName || '',
+                                lastName: supplier.lastName || '',
+                                type: 'supplier',
+                                createdAt: supplier.createdAt || ''
+                            });
+                        });
+                    }
+
+                    console.log('Total users loaded:', allUsers.length);
+                    displayedUsers = [...allUsers];
+                    updateStats();
+                    renderUsers();
+                }, function(error) {
+                    console.error('Error loading suppliers:', error);
+                });
+            }, function(error) {
+                console.error('Error loading carriers:', error);
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                        <h5 class="text-danger">Error loading user IDs</h5>
+                        <p class="text-muted">${error.message || 'Failed to load data'}</p>
+                        <button class="btn btn-primary mt-3" onclick="loadUserIDs()">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalUsers').textContent = allUsers.length;
+            document.getElementById('totalCarriers').textContent = allUsers.filter(u => u.type === 'carrier').length;
+            document.getElementById('totalSuppliers').textContent = allUsers.filter(u => u.type === 'supplier').length;
+        }
+
+        function filterUsers() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            displayedUsers = allUsers.filter(user => {
+                const typeMatch = !typeFilter || user.type === typeFilter;
+                const searchMatch = !searchTerm || 
+                    (user.userId && user.userId.toLowerCase().includes(searchTerm)) ||
+                    (user.id && user.id.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.companyName && user.companyName.toLowerCase().includes(searchTerm)) ||
+                    ((user.firstName + ' ' + user.lastName).toLowerCase().includes(searchTerm));
+                
+                return typeMatch && searchMatch;
+            });
+
+            renderUsers();
+        }
+
+        function clearFilters() {
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            displayedUsers = [...allUsers];
+            renderUsers();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('ID copied to clipboard: ' + text);
+            }, function(err) {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy ID');
+            });
+        }
+
+        function viewUserDetails(userId) {
+            window.location.href = 'user-details.html?userId=' + encodeURIComponent(userId);
+        }
+
+        function renderUsers() {
+            const container = document.getElementById('userIdsContainer');
+            
+            if (displayedUsers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No users found</h5>
+                        <p class="text-muted">No user IDs match your search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = displayedUsers.map(user => {
+                const companyName = user.companyName || `${user.firstName} ${user.lastName}`.trim() || 'Not Provided';
+                const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Not Provided';
+                const createdAt = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+
+                return `
+                    <div class="id-card ${user.type}" onclick="viewUserDetails('${user.userId}')">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="user-type-badge badge-${user.type} me-2">
+                                        <i class="fas fa-${user.type === 'carrier' ? 'truck' : 'shipping-fast'} me-1"></i>
+                                        ${user.type === 'carrier' ? 'Carrier' : 'Supplier'}
+                                    </span>
+                                    <span class="id-number">ID: ${user.userId}</span>
+                                </div>
+                                <div class="mb-1">
+                                    <strong><i class="fas fa-building me-2"></i>${companyName}</strong>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-user me-2"></i>${fullName}
+                                    <span class="ms-3"><i class="fas fa-envelope me-2"></i>${user.email || 'N/A'}</span>
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-calendar me-2"></i>Registered: ${createdAt}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="copy-btn btn-sm" onclick="event.stopPropagation(); copyToClipboard('${user.userId}')">
+                                    <i class="fas fa-copy me-1"></i>Copy ID
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); sendMessageToUserId('${user.userId}', '${user.type}', '${companyName}')">
+                                    <i class="fas fa-paper-plane me-1"></i>Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sendMessageToUserId(userId, userType, userName) {
+            // Open send message modal directly on dashboard
+            window.location.href = 'dashboard.html?sendMessage=' + encodeURIComponent(userId);
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('adminAuth');
+            window.location.href = 'login.html';
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserIDs();
+            
+            // Check if redirected from dashboard with message request
+            const urlParams = new URLSearchParams(window.location.search);
+            const sendMessage = urlParams.get('sendMessage');
+            if (sendMessage) {
+                // Auto-open send message modal with pre-filled User ID
+                setTimeout(function() {
+                    const modal = new bootstrap.Modal(document.getElementById('sendMessageModal'));
+                    document.getElementById('messageUserId').value = sendMessage;
+                    modal.show();
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
+

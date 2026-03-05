@@ -1,0 +1,711 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Registrations - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .registration-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #007bff;
+        }
+        .registration-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        /* View Details Modal Styling */
+        #viewDetailsModal .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        #viewDetailsModal .modal-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+        #viewDetailsModal .modal-header .modal-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #viewDetailsModal .modal-header .btn-close {
+            filter: invert(1);
+            opacity: 0.9;
+        }
+        #viewDetailsModal .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+        #viewDetailsModal .modal-body {
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+        #viewDetailsModal .modal-body .detail-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        #viewDetailsModal .modal-body .detail-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        #viewDetailsModal .modal-body strong {
+            color: #495057;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        #viewDetailsModal .modal-body strong i {
+            color: #007bff;
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+        #viewDetailsModal .modal-body p {
+            color: #212529;
+            font-size: 1rem;
+            margin: 0;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        #viewDetailsModal .modal-body .row:last-child p,
+        #viewDetailsModal .modal-body p:last-child {
+            border-bottom: none;
+        }
+        #viewDetailsModal .modal-footer {
+            background: white;
+            border-top: 1px solid #e9ecef;
+            padding: 1.25rem 2rem;
+        }
+        #viewDetailsModal .modal-footer .btn {
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        #viewDetailsModal .modal-footer .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        #viewDetailsModal .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 1.25rem;
+        }
+        #viewDetailsModal hr {
+            margin: 2rem 0;
+            border-top: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white active" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="resubmissions.html">
+                            <i class="fas fa-repeat"></i> Resubmissions
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="../../index.html">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Supplier Registrations</h5>
+                            <small class="text-muted">Review and manage supplier applications</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshRegistrations()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registrations Content -->
+                <div class="p-4">
+                    <!-- Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-1">Total Registrations</h6>
+                                            <h3 class="mb-0 fw-bold" id="totalCount">0</h3>
+                                        </div>
+                                        <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-1">Active</h6>
+                                            <h3 class="mb-0 fw-bold" id="activeCount">0</h3>
+                                        </div>
+                                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-1">Pending</h6>
+                                            <h3 class="mb-0 fw-bold" id="pendingCount">0</h3>
+                                        </div>
+                                        <i class="fas fa-clock fa-2x text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="statusFilter" class="form-label">Status</label>
+                                    <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                                        <option value="">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="searchInput" class="form-label">Search</label>
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, email, company..." onkeyup="applyFilters()">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                        <i class="fas fa-times"></i> Clear Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registrations List -->
+                    <div id="registrationsContainer">
+                        <div class="text-center py-5">
+                            <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Loading registrations...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal fade" id="viewDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Supplier Registration Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="activateRegistration()">
+                        <i class="fas fa-check"></i> Activate
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="rejectRegistration()">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../../assets/js/admin-auth.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Document Verification System -->
+    <script src="../../assets/js/document-verification.js"></script>
+    
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        let allRegistrations = [];
+        let currentViewId = null;
+
+        // Fetch registrations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchRegistrations();
+        });
+
+        function fetchRegistrations() {
+            var db = firebase.database();
+            db.ref('suppliers').once('value', function(snapshot) {
+                allRegistrations = [];
+                snapshot.forEach(function(child) {
+                    var supplier = child.val();
+                    supplier.id = child.key;
+                    allRegistrations.push(supplier);
+                });
+                applyFilters();
+            });
+        }
+
+        function applyFilters() {
+            var statusFilter = document.getElementById('statusFilter').value;
+            var search = document.getElementById('searchInput').value.toLowerCase();
+            
+            var filtered = allRegistrations.filter(function(reg) {
+                var statusMatch = !statusFilter || reg.status === statusFilter;
+                var searchMatch = !search || 
+                    (reg.companyName && reg.companyName.toLowerCase().includes(search)) ||
+                    (reg.email && reg.email.toLowerCase().includes(search)) ||
+                    (reg.firstName && reg.firstName.toLowerCase().includes(search)) ||
+                    (reg.lastName && reg.lastName.toLowerCase().includes(search));
+                
+                return statusMatch && searchMatch;
+            });
+
+            renderRegistrations(filtered);
+            updateStats(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+
+        function updateStats(registrations) {
+            document.getElementById('totalCount').textContent = allRegistrations.length;
+            document.getElementById('activeCount').textContent = allRegistrations.filter(r => r.status === 'active').length;
+            document.getElementById('pendingCount').textContent = allRegistrations.filter(r => !r.status || r.status === 'pending').length;
+        }
+
+        function getContactNumber(registration) {
+            return registration.phone || registration.phoneNumber || registration.contactPhone || registration.contactNumber || '';
+        }
+
+        function renderRegistrations(registrations) {
+            var container = document.getElementById('registrationsContainer');
+            
+            if (registrations.length === 0) {
+                container.innerHTML = '<div class="text-center py-5"><i class="fas fa-inbox fa-4x text-muted mb-3"></i><h5 class="text-muted">No registrations found</h5></div>';
+                return;
+            }
+
+            container.innerHTML = registrations.map(function(reg) {
+                var statusBadge = getStatusBadge(reg.status, reg.permanentlyRejected);
+                var createdDate = reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : 'N/A';
+                var companyName = reg.companyName || 'Not provided';
+                var email = reg.email || 'N/A';
+                var phone = getContactNumber(reg) || 'N/A';
+
+                return `
+                    <div class="card registration-card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-2">
+                                        <i class="fas fa-building text-primary"></i> ${companyName}
+                                    </h6>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-user"></i> ${reg.firstName || ''} ${reg.lastName || ''}
+                                    </p>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-envelope"></i> ${email}
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-phone"></i> ${phone}
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Registered: ${createdDate}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    ${statusBadge}
+                                    <br><br>
+                                    <button class="btn btn-sm btn-primary" onclick='viewDetails("${reg.id}")'>
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusBadge(status, isFinalRejection) {
+            if (status === 'active') {
+                return '<span class="status-badge status-active">Active</span>';
+            } else if (status === 'rejected') {
+                return `<span class="status-badge status-rejected">${isFinalRejection ? 'Rejected (Final)' : 'Rejected'}</span>`;
+            } else {
+                return '<span class="status-badge status-pending">Pending</span>';
+            }
+        }
+
+        function viewDetails(id) {
+            currentViewId = id;
+            var supplier = allRegistrations.find(r => r.id === id);
+            if (!supplier) return;
+
+            var modalBody = document.getElementById('modalBody');
+            var createdDate = supplier.createdAt ? new Date(supplier.createdAt).toLocaleDateString() : 'N/A';
+            var phone = getContactNumber(supplier) || 'Not provided';
+
+            modalBody.innerHTML = `
+                <div class="detail-section">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-building"></i> Company Name:</strong>
+                            <p>${supplier.companyName || 'Not provided'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-id-card"></i> Company Registration:</strong>
+                            <p>${supplier.companyReg || 'Not provided'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-user"></i> First Name:</strong>
+                            <p>${supplier.firstName || 'Not provided'}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-user"></i> Last Name:</strong>
+                            <p>${supplier.lastName || 'Not provided'}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-envelope"></i> Email:</strong>
+                            <p>${supplier.email || 'Not provided'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-phone"></i> Phone:</strong>
+                            <p>${phone}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-map-marker-alt"></i> City:</strong>
+                            <p>${supplier.city || 'Not provided'}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-globe"></i> Country:</strong>
+                            <p>${supplier.country || 'Not provided'}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-address-card"></i> Address:</strong>
+                        <p>${supplier.address || 'Not provided'}</p>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-industry"></i> Business Type:</strong>
+                            <p>${supplier.businessType || 'Not provided'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-chart-line"></i> Annual Volume:</strong>
+                            <p>${supplier.annualVolume || 'Not provided'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-calendar"></i> Registration Date:</strong>
+                            <p>${createdDate}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-info-circle"></i> Status:</strong>
+                            <p>${getStatusBadge(supplier.status || 'pending', supplier.permanentlyRejected)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                ${supplier.rejectionReason ? `
+                <div class="alert alert-warning">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Last Rejection Reason:</strong>
+                    <p class="mb-1">${supplier.rejectionReason}</p>
+                    <small class="text-muted">Total Rejections: ${supplier.rejectionCount || 1}</small>
+                </div>
+                ` : ''}
+
+                <div class="detail-section">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-envelope-open"></i> Marketing Consent:</strong>
+                            <p>${supplier.marketingConsent ? '<span class="text-success fw-bold">Yes</span>' : '<span class="text-muted">No</span>'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            var modal = new bootstrap.Modal(document.getElementById('viewDetailsModal'));
+            modal.show();
+        }
+
+        async function activateRegistration() {
+            if (!currentViewId) return;
+            
+            const supplier = allRegistrations.find(r => r.id === currentViewId);
+            if (!supplier) {
+                alert('Unable to find supplier record.');
+                return;
+            }
+
+            // Get admin info
+            const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+            const adminId = adminAuth.adminId || 'admin';
+            const adminName = adminAuth.name || adminAuth.email || 'Admin';
+
+            // Check document completeness
+            const documents = supplier.uploadedDocuments || supplier.documents || {};
+            const completeness = window.DocumentVerification.checkDocumentCompleteness(documents, 'supplier');
+            
+            if (!completeness.complete) {
+                if (!confirm(`Warning: Some required documents are missing (${completeness.percentage}% complete). Do you still want to verify this supplier?`)) {
+                    return;
+                }
+            }
+
+            if (!confirm('Are you sure you want to verify this supplier registration?')) return;
+
+            // Use DocumentVerification system (verified status for suppliers)
+            const result = await window.DocumentVerification.verifySupplier(
+                currentViewId,
+                'verified',
+                null,
+                adminId,
+                adminName
+            );
+
+            if (result.success) {
+                // Update status to 'active' for suppliers
+                const db = firebase.database();
+                await db.ref('suppliers/' + currentViewId).update({
+                    status: 'active',
+                    activatedAt: new Date().toISOString(),
+                    requiresResubmission: false,
+                    permanentlyRejected: false,
+                    supportRequired: false
+                });
+
+                alert('✅ Supplier verified successfully! Notification sent to supplier.');
+                bootstrap.Modal.getInstance(document.getElementById('viewDetailsModal')).hide();
+                fetchRegistrations();
+            } else {
+                alert('❌ Error verifying registration: ' + (result.error || 'Unknown error'));
+            }
+        }
+
+        async function rejectRegistration() {
+            if (!currentViewId) return;
+            
+            const supplier = allRegistrations.find(r => r.id === currentViewId);
+            if (!supplier) {
+                alert('Unable to find supplier record.');
+                return;
+            }
+
+            // Get admin info
+            const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+            const adminId = adminAuth.adminId || 'admin';
+            const adminName = adminAuth.name || adminAuth.email || 'Admin';
+
+            // Get rejection reason
+            const reason = prompt('Please enter the rejection reason that will be shown to the supplier:');
+            if (reason === null) {
+                return;
+            }
+
+            const trimmedReason = reason.trim();
+            if (!trimmedReason) {
+                alert('Rejection reason is required.');
+                return;
+            }
+
+            // Check rejection count
+            const existingCount = parseInt(supplier.rejectionCount || 0, 10);
+            const newCount = existingCount + 1;
+            const isFinal = newCount >= 2;
+
+            if (isFinal) {
+                if (!confirm(`⚠️ WARNING: This will be the ${newCount}nd rejection (FINAL). The supplier will not be able to resubmit. Are you absolutely sure?`)) {
+                    return;
+                }
+            } else {
+                if (!confirm(`Are you sure you want to reject this registration? (Rejection #${newCount})`)) {
+                    return;
+                }
+            }
+
+            // Use DocumentVerification system
+            const result = await window.DocumentVerification.verifySupplier(
+                currentViewId,
+                'rejected',
+                trimmedReason,
+                adminId,
+                adminName
+            );
+
+            if (result.success) {
+                // Update additional fields for rejection tracking
+                const db = firebase.database();
+                await db.ref('suppliers/' + currentViewId).update({
+                    rejectionCount: newCount,
+                    requiresResubmission: !isFinal,
+                    permanentlyRejected: isFinal,
+                    supportRequired: isFinal
+                });
+
+                alert(`✅ Registration rejected successfully! ${isFinal ? '(Final Rejection)' : 'Supplier can resubmit.'} Notification sent to supplier.`);
+                bootstrap.Modal.getInstance(document.getElementById('viewDetailsModal')).hide();
+                fetchRegistrations();
+            } else {
+                alert('❌ Error rejecting registration: ' + (result.error || 'Unknown error'));
+            }
+        }
+
+        function refreshRegistrations() {
+            fetchRegistrations();
+        }
+    </script>
+</body>
+</html>
+
+

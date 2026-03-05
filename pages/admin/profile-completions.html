@@ -1,0 +1,1061 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Completion Forms - Admin Panel</title>
+    <!-- Early Authentication Check -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            transform: translateX(5px);
+        }
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+            font-weight: 600;
+        }
+        .admin-content {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .stat-card {
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(15,15,40,0.08);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            color: #0f172a;
+        }
+        .stat-card small {
+            color: rgba(15,23,42,0.8);
+            letter-spacing: 0.8px;
+        }
+        .stat-card h3 {
+            color: #0b1324;
+        }
+        .stat-card .trend {
+            color: rgba(15,23,42,0.65);
+        }
+        .stat-card .icon-badge {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .stat-card .trend {
+            font-size: 0.9rem;
+        }
+        .filter-pill {
+            border-radius: 999px;
+            border: 1px solid #dee2e6;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .filter-pill.active {
+            background: #6f42c1;
+            border-color: #6f42c1;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(111,66,193,0.3);
+        }
+        .table thead th {
+            background: #f1f3f5;
+            border-bottom: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-app {
+            background: rgba(25,135,84,0.15);
+            color: #198754;
+        }
+        .badge-web {
+            background: rgba(13,110,253,0.15);
+            color: #0d6efd;
+        }
+        .badge-unknown {
+            background: rgba(108,117,125,0.15);
+            color: #6c757d;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .detail-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid #6f42c1;
+        }
+        .document-pill {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px dashed #ced4da;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            background: #fff;
+        }
+        .document-pill.verified {
+            border-color: #198754;
+            background: rgba(25,135,84,0.08);
+        }
+        .document-pill.pending {
+            border-color: #ffc107;
+            background: rgba(255,193,7,0.08);
+        }
+        .document-pill .status {
+            font-weight: 600;
+        }
+        .raw-section {
+            background: #fdfcff;
+            border: 1px solid rgba(111,66,193,0.15);
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 6px 16px rgba(15,15,40,0.05);
+        }
+        .raw-section h6 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #5b247a;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .raw-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.85rem 1.25rem;
+        }
+        .raw-field {
+            background: #fff;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(226,232,240,0.8);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .raw-field label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+        .raw-field-value {
+            font-size: 0.95rem;
+            color: #111827;
+            font-weight: 600;
+            word-break: break-word;
+        }
+        .search-chip {
+            background: rgba(111,66,193,0.08);
+            border: 1px solid rgba(111,66,193,0.25);
+            color: #6f42c1;
+            font-size: 0.9rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .search-chip button {
+            border: none;
+            background: transparent;
+            padding: 0;
+            line-height: 1;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
+        .mobile-menu-btn {
+            display: none;
+        }
+        @media (max-width: 991px) {
+            .admin-sidebar {
+                position: fixed;
+                left: -100%;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                width: 280px;
+                max-width: 80%;
+            }
+            .admin-sidebar.show {
+                left: 0;
+            }
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                border: none;
+                background: linear-gradient(135deg, #6f42c1, #e83e8c);
+                color: #fff;
+            }
+        }
+        pre.raw-json {
+            max-height: 240px;
+            overflow: auto;
+            background: #0f172a;
+            color: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0" id="sidebar">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users me-2"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes me-2"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck me-2"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-people-carry me-2"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white active" href="profile-completions.html">
+                            <i class="fas fa-clipboard-check me-2"></i> Profile Forms
+                        </a>
+                        <a class="nav-link text-white" href="resubmissions.html">
+                            <i class="fas fa-repeat me-2"></i> Resubmissions
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card me-2"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line me-2"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt me-2"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog me-2"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel me-2"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Profile Completion Forms</h5>
+                                <small class="text-muted">Monitor carrier & supplier verified forms from app and web</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="resetFilters()">
+                                <i class="fas fa-undo"></i> Reset Filters
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="refreshForms()">
+                                <i class="fas fa-sync-alt"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <div class="card stat-card" style="background: linear-gradient(135deg, #1d976c, #93f9b9);">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <small class="text-uppercase">Carrier • App</small>
+                                            <h3 class="fw-bold mb-1" id="carrierAppCount">0</h3>
+                                            <div class="text-white-50 trend" id="carrierAppTrend">Loading...</div>
+                                        </div>
+                                        <div class="icon-badge">
+                                            <i class="fas fa-mobile-screen-button"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card" style="background: linear-gradient(135deg, #5b247a, #1bcedf);">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <small class="text-uppercase">Carrier • Web</small>
+                                            <h3 class="fw-bold mb-1" id="carrierWebCount">0</h3>
+                                            <div class="text-white-50 trend" id="carrierWebTrend">Loading...</div>
+                                        </div>
+                                        <div class="icon-badge">
+                                            <i class="fas fa-desktop"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card" style="background: linear-gradient(135deg, #00b4db, #0083b0);">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <small class="text-uppercase">Supplier • App</small>
+                                            <h3 class="fw-bold mb-1" id="supplierAppCount">0</h3>
+                                            <div class="text-white-50 trend" id="supplierAppTrend">Loading...</div>
+                                        </div>
+                                        <div class="icon-badge">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card" style="background: linear-gradient(135deg, #f46b45, #eea849);">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <small class="text-uppercase">Supplier • Web</small>
+                                            <h3 class="fw-bold mb-1" id="supplierWebCount">0</h3>
+                                            <div class="text-white-50 trend" id="supplierWebTrend">Loading...</div>
+                                        </div>
+                                        <div class="icon-badge">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-pills mb-3" id="entityTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-entity="carrier" onclick="switchEntity('carrier')">
+                                <i class="fas fa-truck-front me-2"></i>Carriers
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-entity="supplier" onclick="switchEntity('supplier')">
+                                <i class="fas fa-warehouse me-2"></i>Suppliers
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="sourceFilter" class="form-label text-muted fw-semibold">Form Source</label>
+                                    <select id="sourceFilter" class="form-select" onchange="renderTable()">
+                                        <option value="">All Sources</option>
+                                        <option value="app">Mobile App</option>
+                                        <option value="web">Web Portal</option>
+                                        <option value="unknown">Unspecified</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="statusFilter" class="form-label text-muted fw-semibold">Status</label>
+                                    <select id="statusFilter" class="form-select" onchange="renderTable()">
+                                        <option value="">All Status</option>
+                                        <option value="verified">Verified</option>
+                                        <option value="pending_profile">Pending Profile</option>
+                                        <option value="pending_verification">Pending Verification</option>
+                                        <option value="active">Active</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="searchInput" class="form-label text-muted fw-semibold">Search</label>
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search name, email, company..." oninput="renderTable()">
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 mt-3" id="searchChips"></div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                <div>
+                                    <strong id="tableStatusText">Loading forms...</strong>
+                                    <div class="text-muted small" id="tableSubText">Please wait</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="exportForms()">
+                                        <i class="fas fa-download"></i> Export CSV
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="renderTable(true)">
+                                        <i class="fas fa-list"></i> Refresh View
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Company</th>
+                                            <th>Email</th>
+                                            <th>Country</th>
+                                            <th>Source</th>
+                                            <th>Status</th>
+                                            <th>Completed</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="formsTable">
+                                        <tr>
+                                            <td colspan="8" class="text-center py-5">
+                                                <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                                                <p class="text-muted mb-0">Loading profile forms...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="formDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="modalTitle">Form Details</h5>
+                        <small class="text-white-50 d-block" id="modalSubtitle"></small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-grid mb-4" id="detailsGrid"></div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Documents & Attachments</h6>
+                        <div id="documentsList"></div>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Structured Form View</h6>
+                        <div id="rawFormSection"></div>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-3">Raw Payload</h6>
+                        <pre class="raw-json" id="rawJson"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-success" id="modalApproveBtn">Approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/admin-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        let carrierForms = [];
+        let supplierForms = [];
+        let activeEntity = 'carrier';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchForms();
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        function switchEntity(entity) {
+            activeEntity = entity;
+            document.querySelectorAll('#entityTabs .nav-link').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.entity === entity);
+            });
+            renderTable();
+        }
+
+        function refreshForms() {
+            showLoadingRow();
+            fetchForms();
+        }
+
+        function fetchForms() {
+            Promise.all([fetchCarrierForms(), fetchSupplierForms()])
+                .then(() => {
+                    updateStats();
+                    renderTable();
+                })
+                .catch((error) => {
+                    console.error('Error loading forms:', error);
+                    setStatusText('Unable to load forms', 'Check your connection and try again.');
+                    showErrorRow('Could not load profile forms.');
+                });
+        }
+
+        function fetchCarrierForms() {
+            return db.ref('carriers').once('value').then(snapshot => {
+                carrierForms = [];
+                snapshot.forEach(child => {
+                    const record = normalizeRecord(child.key, child.val(), 'carrier');
+                    if (record.profileComplete) {
+                        carrierForms.push(record);
+                    }
+                });
+                carrierForms.sort((a, b) => (b.completedAtRaw || 0) - (a.completedAtRaw || 0));
+            });
+        }
+
+        function fetchSupplierForms() {
+            return db.ref('suppliers').once('value').then(snapshot => {
+                supplierForms = [];
+                snapshot.forEach(child => {
+                    const record = normalizeRecord(child.key, child.val(), 'supplier');
+                    if (record.profileComplete) {
+                        supplierForms.push(record);
+                    }
+                });
+                supplierForms.sort((a, b) => (b.completedAtRaw || 0) - (a.completedAtRaw || 0));
+            });
+        }
+
+        function normalizeRecord(id, data = {}, entityType) {
+            const profileComplete = data.profileComplete === true || data.profileComplete === 'true';
+            const completedAt = data.profileCompletedAt || data.updatedAt || data.completedAt || data.lastUpdated || data.registrationDate || null;
+            const completionDate = completedAt ? new Date(completedAt) : null;
+            const source = detectSource(data);
+            const companyName = data.companyName || data.businessName || data.transportCompany || data.transportCompanyName || '—';
+            const status = (data.status || 'active').toString().toLowerCase();
+
+            return {
+                id,
+                entityType,
+                profileComplete,
+                status,
+                name: [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || data.contactName || 'Unknown',
+                company: companyName,
+                email: (data.email || 'N/A').toLowerCase(),
+                phone: data.phone || data.contactPhone || 'N/A',
+                country: data.country || data.baseCountry || 'N/A',
+                source,
+                sourceLabel: formatSourceLabel(source),
+                sourceBadgeClass: sourceBadgeClass(source),
+                completedAtRaw: completionDate ? completionDate.getTime() : null,
+                completedAtLabel: completionDate ? formatDateTime(completionDate) : 'Not captured',
+                raw: data
+            };
+        }
+
+        function detectSource(data) {
+            const explicit = (data.profileSource || data.formSource || data.registrationSource || data.signupSource || '').toString().toLowerCase();
+            if (explicit.includes('app')) return 'app';
+            if (explicit.includes('web')) return 'web';
+            if (data.status && data.status.includes('profile')) return 'app';
+            if (typeof data.marketingConsent !== 'undefined' || (data.phone && data.phone.startsWith('+'))) return 'web';
+            return 'app';
+        }
+
+        function formatSourceLabel(source) {
+            if (source === 'app') return 'Mobile App';
+            if (source === 'web') return 'Web Portal';
+            return 'Unspecified';
+        }
+
+        function sourceBadgeClass(source) {
+            if (source === 'app') return 'badge-app';
+            if (source === 'web') return 'badge-web';
+            return 'badge-unknown';
+        }
+
+        function formatFieldValue(value) {
+            if (value === null || value === undefined || value === '') return '—';
+            if (Array.isArray(value)) {
+                return value.length ? value.join(', ') : '—';
+            }
+            if (typeof value === 'object') {
+                const keys = Object.keys(value || {});
+                if (!keys.length) return '—';
+                return keys.map(key => `${key}: ${value[key] ?? '—'}`).join(', ');
+            }
+            return value;
+        }
+
+        function buildField(label, value) {
+            return `
+                <div class="raw-field">
+                    <label>${label}</label>
+                    <div class="raw-field-value">${formatFieldValue(value)}</div>
+                </div>
+            `;
+        }
+
+        function renderSection(title, icon, fields) {
+            if (!fields.length) return '';
+            return `
+                <div class="raw-section">
+                    <h6><i class="${icon}"></i> ${title}</h6>
+                    <div class="raw-form-grid">
+                        ${fields.join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRawForm(data = {}) {
+            const sections = [];
+
+            const accountFields = [
+                buildField('First Name', data.firstName),
+                buildField('Last Name', data.lastName),
+                buildField('Email', data.email),
+                buildField('Phone', data.phone),
+                buildField('Country', data.country),
+                buildField('Status', data.status),
+            ].filter(Boolean);
+            sections.push(renderSection('Account Details', 'fas fa-id-badge', accountFields));
+
+            const businessFields = [
+                buildField('Company Name', data.companyName || data.businessName),
+                buildField('Business Type', data.businessType),
+                buildField('Fleet Size', data.fleetSize),
+                buildField('Operating Regions', data.operatingRegions),
+            ].filter(Boolean);
+            sections.push(renderSection('Business Profile', 'fas fa-building', businessFields));
+
+            const addressFields = [
+                buildField('Address', data.address),
+                buildField('City', data.city),
+                buildField('State', data.state),
+                buildField('Postal Code', data.postalCode || data.zip),
+            ].filter(Boolean);
+            sections.push(renderSection('Address Details', 'fas fa-map-marker-alt', addressFields));
+
+            const bank = data.bankDetails || {};
+            const bankFields = [
+                buildField('Account Holder', bank.accountHolderName),
+                buildField('Bank Name', bank.bankName),
+                buildField('Account Number', bank.accountNumber),
+                buildField('IBAN', bank.iban),
+                buildField('SWIFT', bank.swiftCode),
+                buildField('Sort Code', bank.sortCode),
+                buildField('Updated At', bank.updatedAt),
+            ].filter(Boolean);
+            if (bankFields.length) {
+                sections.push(renderSection('Bank Details', 'fas fa-university', bankFields));
+            }
+
+            const identity = data.identityVerification || {};
+            const identityFields = [
+                buildField('Full Legal Name', identity.fullLegalName),
+                buildField('ID Document Type', identity.idDocumentType === 'passport' ? 'Passport' : identity.idDocumentType === 'idcard' ? 'ID Card' : identity.idDocumentType),
+            ].filter(Boolean);
+            if (identityFields.length) {
+                sections.push(renderSection('Identity Verification', 'fas fa-id-card', identityFields));
+            }
+
+            const systemFields = [
+                buildField('Created At', data.createdAt),
+                buildField('Profile Completed At', data.profileCompletedAt),
+                buildField('Last Updated', data.updatedAt),
+                buildField('Source', data.profileSource || data.registrationSource || data.signupSource),
+            ].filter(Boolean);
+            sections.push(renderSection('System Metadata', 'fas fa-microchip', systemFields));
+
+            const rendered = sections.filter(Boolean).join('');
+            return rendered || '<p class="text-muted mb-0">No structured data available for this profile.</p>';
+        }
+
+        function formatDateTime(date) {
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            }) + ' · ' + date.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function updateStats() {
+            const carrierApp = carrierForms.filter(f => f.source === 'app').length;
+            const carrierWeb = carrierForms.filter(f => f.source === 'web').length;
+            const supplierApp = supplierForms.filter(f => f.source === 'app').length;
+            const supplierWeb = supplierForms.filter(f => f.source === 'web').length;
+
+            document.getElementById('carrierAppCount').textContent = carrierApp;
+            document.getElementById('carrierWebCount').textContent = carrierWeb;
+            document.getElementById('supplierAppCount').textContent = supplierApp;
+            document.getElementById('supplierWebCount').textContent = supplierWeb;
+
+            document.getElementById('carrierAppTrend').textContent = carrierApp ? 'Ready to verify' : 'No completed forms yet';
+            document.getElementById('carrierWebTrend').textContent = carrierWeb ? 'Ready to verify' : 'No completed forms yet';
+            document.getElementById('supplierAppTrend').textContent = supplierApp ? 'Ready to verify' : 'No completed forms yet';
+            document.getElementById('supplierWebTrend').textContent = supplierWeb ? 'Ready to verify' : 'No completed forms yet';
+        }
+
+        function renderTable(forceUpdate = false) {
+            const list = activeEntity === 'carrier' ? carrierForms : supplierForms;
+            const sourceFilter = document.getElementById('sourceFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchValue = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            const filtered = list.filter(item => {
+                const sourceMatch = !sourceFilter || item.source === sourceFilter;
+                const statusMatch = !statusFilter || item.status === statusFilter;
+                const searchMatch = !searchValue || [
+                    item.name,
+                    item.company,
+                    item.email,
+                    item.phone
+                ].some(field => field && field.toLowerCase().includes(searchValue));
+                return sourceMatch && statusMatch && searchMatch;
+            });
+
+            setStatusText(
+                `${filtered.length} ${activeEntity === 'carrier' ? 'carrier' : 'supplier'} forms`,
+                `${sourceFilter ? formatSourceLabel(sourceFilter) + ' • ' : ''}${statusFilter ? statusFilter.replace(/_/g, ' ') + ' • ' : ''}Updated ${(new Date()).toLocaleTimeString()}`
+            );
+
+            const tbody = document.getElementById('formsTable');
+            tbody.innerHTML = '';
+
+            if (!filtered.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-clipboard-check fa-2x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">No completed forms found for the selected filters.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.slice(0, 100).forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="fw-semibold">${item.name}</div>
+                        <div class="text-muted small">${item.phone}</div>
+                    </td>
+                    <td>${item.company}</td>
+                    <td>
+                        <div>${item.email}</div>
+                    </td>
+                    <td>${item.country}</td>
+                    <td>
+                        <span class="badge ${item.sourceBadgeClass}">${item.sourceLabel}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark text-uppercase">${item.status.replace(/_/g, ' ')}</span>
+                    </td>
+                    <td>
+                        <div>${item.completedAtLabel}</div>
+                    </td>
+                    <td class="text-end">
+                        ${item.status === 'verified' || item.status === 'active' ? '' : `
+                            <button class="btn btn-sm btn-success me-2" onclick="approveProfile('${item.id}','${item.entityType}')">
+                                Approve
+                            </button>
+                        `}
+                        <button class="btn btn-sm btn-outline-primary" onclick="openDetails('${item.id}', '${item.entityType}')">
+                            View
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function setStatusText(title, subtitle) {
+            document.getElementById('tableStatusText').textContent = title;
+            document.getElementById('tableSubText').textContent = subtitle;
+        }
+
+        function showLoadingRow() {
+            const tbody = document.getElementById('formsTable');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">Refreshing data...</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function showErrorRow(message) {
+            const tbody = document.getElementById('formsTable');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <p class="mb-0">${message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function approveProfile(recordId, entityType) {
+            if (!recordId) return;
+            const path = entityType === 'carrier' ? 'carriers' : 'suppliers';
+            const statusValue = entityType === 'carrier' ? 'verified' : 'active';
+            const timestampField = entityType === 'carrier' ? { verifiedAt: new Date().toISOString() } : { activatedAt: new Date().toISOString(), verifiedAt: new Date().toISOString() };
+
+            const updates = Object.assign({
+                status: statusValue,
+                rejectionReason: null,
+                requiresResubmission: false,
+                permanentlyRejected: false,
+                supportRequired: false
+            }, timestampField);
+
+            db.ref(`${path}/${recordId}`).update(updates).then(() => {
+                alert(`${entityType === 'carrier' ? 'Carrier' : 'Supplier'} approved successfully.`);
+                fetchForms();
+            }).catch((error) => {
+                alert('Unable to approve profile: ' + error.message);
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('sourceFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            renderTable();
+        }
+
+        function openDetails(id, entityType) {
+            const list = entityType === 'carrier' ? carrierForms : supplierForms;
+            const record = list.find(item => item.id === id);
+            if (!record) return;
+
+            document.getElementById('modalTitle').textContent = `${record.name}`;
+            document.getElementById('modalSubtitle').textContent = `${record.company} • ${record.sourceLabel} • ${record.status.replace(/_/g, ' ')}`;
+
+            const detailHtml = `
+                <div class="detail-card">
+                    <small class="text-muted text-uppercase">Contact</small>
+                    <div class="fw-semibold">${record.email}</div>
+                    <div>${record.phone}</div>
+                </div>
+                <div class="detail-card">
+                    <small class="text-muted text-uppercase">Company</small>
+                    <div class="fw-semibold">${record.company}</div>
+                    <div>${record.country}</div>
+                </div>
+                <div class="detail-card">
+                    <small class="text-muted text-uppercase">Form Source</small>
+                    <div class="fw-semibold">${record.sourceLabel}</div>
+                    <div>${record.completedAtLabel}</div>
+                </div>
+                <div class="detail-card">
+                    <small class="text-muted text-uppercase">Status</small>
+                    <div class="fw-semibold">${record.status.replace(/_/g, ' ')}</div>
+                    <div>ID: ${record.id}</div>
+                </div>
+            `;
+            document.getElementById('detailsGrid').innerHTML = detailHtml;
+
+            const docs = record.raw.documents || record.raw.profileDocuments;
+            const docContainer = document.getElementById('documentsList');
+            if (!docs) {
+                docContainer.innerHTML = '<p class="text-muted mb-0">No documents uploaded in this form.</p>';
+            } else {
+                let docHtml = Object.keys(docs).map(key => {
+                    const doc = docs[key];
+                    const status = (doc && doc.status) || 'pending';
+                    const pillClass = status === 'verified' ? 'verified' : 'pending';
+                    const viewBtn = doc.data ? `<a href="${doc.data}" target="_blank" class="btn btn-sm btn-outline-primary ms-2"><i class="fas fa-eye"></i></a>` : '';
+                    return `
+                        <div class="document-pill ${pillClass}">
+                            <div>
+                                <strong class="d-block text-capitalize">${key.replace(/_/g, ' ')}</strong>
+                                <small class="text-muted">${doc.fileName || 'Uploaded file'}</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="status text-uppercase small">${status}</span>
+                                ${viewBtn}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Add identity verification section if exists
+                const identity = record.raw.identityVerification;
+                if (identity) {
+                    docHtml += `
+                        <div class="mt-4">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-id-card me-2"></i>Identity Verification</h6>
+                            <div class="detail-card">
+                                <small class="text-muted text-uppercase">Full Legal Name</small>
+                                <div class="fw-semibold">${identity.fullLegalName || 'Not Provided'}</div>
+                            </div>
+                            <div class="detail-card mt-2">
+                                <small class="text-muted text-uppercase">Document Type</small>
+                                <div class="fw-semibold">${identity.idDocumentType === 'passport' ? 'Passport' : identity.idDocumentType === 'idcard' ? 'ID Card' : identity.idDocumentType || 'Not Provided'}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                docContainer.innerHTML = docHtml;
+            }
+
+            document.getElementById('rawFormSection').innerHTML = renderRawForm(record.raw);
+            document.getElementById('rawJson').textContent = JSON.stringify(record.raw, null, 2);
+
+            const approveBtn = document.getElementById('modalApproveBtn');
+            if (approveBtn) {
+                const approvedStatus = record.entityType === 'carrier' ? 'verified' : 'active';
+                const isApproved = (record.status || '').toLowerCase() === approvedStatus;
+                approveBtn.style.display = isApproved ? 'none' : 'inline-flex';
+                approveBtn.onclick = () => approveProfile(record.id, record.entityType);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('formDetailsModal'));
+            modal.show();
+        }
+
+        function exportForms() {
+            const list = activeEntity === 'carrier' ? carrierForms : supplierForms;
+            if (!list.length) {
+                alert('No forms available to export for the selected tab.');
+                return;
+            }
+            const rows = [
+                ['Type', 'Name', 'Company', 'Email', 'Phone', 'Country', 'Source', 'Status', 'Completed At', 'Record ID']
+            ];
+            list.forEach(item => {
+                rows.push([
+                    item.entityType,
+                    item.name,
+                    item.company,
+                    item.email,
+                    item.phone,
+                    item.country,
+                    item.sourceLabel,
+                    item.status,
+                    item.completedAtLabel,
+                    item.id
+                ]);
+            });
+            const csvContent = rows.map(r => r.map(value => `"${(value || '').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `profile-forms-${activeEntity}-${Date.now()}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
+
+

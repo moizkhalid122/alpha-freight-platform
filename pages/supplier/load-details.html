@@ -1,0 +1,1601 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Details - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            width: 260px;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                margin-left: 0;
+            }
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.5s ease 0.1s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.6) 100%);
+            color: var(--primary) !important;
+            transform: translateX(4px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, var(--sidebar-active) 0%, rgba(235, 244, 255, 0.8) 100%);
+            color: var(--primary) !important;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-group {
+            margin-bottom: 0.4rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .header-section {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-icon-btn:hover {
+            background: #F3F4F6;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .header-profile {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-profile:hover {
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .details-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .details-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.available {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .status-badge.active {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .details-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .pay-now-section {
+            background: linear-gradient(135deg, #F8FAFC 0%, #EDF2F7 100%);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .pay-now-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .pay-now-section p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .pay-now-btn, .pay-letter-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 10px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pay-letter-btn {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .pay-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        }
+
+        .pay-letter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        }
+
+        @media (max-width: 576px) {
+            .payment-buttons {
+                flex-direction: column;
+            }
+            .pay-now-btn, .pay-letter-btn {
+                width: 100%;
+            }
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            color: var(--danger);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .header-section {
+                padding: 0.75rem 1rem;
+            }
+
+            .header-section h5 {
+                font-size: 1rem;
+            }
+
+            .header-actions {
+                gap: 0.5rem;
+            }
+
+            .header-icon-btn {
+                width: 38px;
+                height: 38px;
+            }
+
+            .header-profile {
+                width: 38px;
+                height: 38px;
+            }
+
+            .details-card {
+                padding: 1.5rem;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .details-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .section-card {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.125rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .details-card {
+                padding: 1rem;
+            }
+
+            .header-section {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .header-section h5 {
+                font-size: 0.9rem;
+            }
+
+            .section-card {
+                padding: 0.875rem;
+            }
+        }
+
+        /* Custom Alert Styles */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            min-width: 320px;
+            max-width: 400px;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-alert.hide {
+            animation: slideOutRight 0.4s ease-out forwards;
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .custom-alert i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .custom-alert-content {
+            flex: 1;
+        }
+
+        .custom-alert-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-alert-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .custom-alert-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .custom-alert-success i {
+            color: #d1fae5;
+        }
+
+        .custom-alert-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .custom-alert-error i {
+            color: #fee2e2;
+        }
+
+        .custom-alert-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .custom-alert-warning i {
+            color: #fef3c7;
+        }
+
+        .custom-alert-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .custom-alert-info i {
+            color: #e9d5ff;
+        }
+
+        @media (max-width: 576px) {
+            .custom-alert {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <img src="image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="post-load.html" class="nav-link">
+                <i class="fas fa-plus-circle"></i>
+                Post Load
+            </a>
+            <a href="my-loads.html" class="nav-link">
+                <i class="fas fa-boxes"></i>
+                My Loads
+            </a>
+            <a href="pod.html" class="nav-link">
+                <i class="fas fa-file-invoice"></i>
+                Proof of Delivery
+            </a>
+            <a href="track.html" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                Track Carrier
+            </a>
+            <a href="payments.html" class="nav-link">
+                <i class="fas fa-credit-card"></i>
+                Payments
+            </a>
+            <a href="pay-letter-pending.html" class="nav-link">
+                <i class="fas fa-file-invoice"></i>
+                Pay Letter Pending
+            </a>
+            <div class="nav-group">
+                <div class="nav-link nav-group-toggle">
+                    <i class="fas fa-comments"></i>
+                    Chat
+                </div>
+                <div class="nav-group-items">
+                    <a href="messages.html" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        Messages
+                        <span class="badge bg-danger ms-auto" id="messagesBadge" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+            <a href="profile.html" class="nav-link">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <a href="settings.html" class="nav-link">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+            <a href="../admin/dashboard.html" class="nav-link" id="adminPanelLink" style="display: none;">
+                <i class="fas fa-shield-alt"></i>
+                Admin Panel
+            </a>
+            <hr class="my-3">
+            <a href="../index.html" class="nav-link">
+                <i class="fas fa-globe"></i>
+                Website
+            </a>
+            <a href="#" class="nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold">Load Details</h5>
+                </div>
+                <div class="header-actions">
+                    <button class="header-icon-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <img src="https://ui-avatars.com/api/?name=Supplier+User&background=2563EB&color=fff&size=128" 
+                         alt="Profile" 
+                         class="header-profile" 
+                         id="profileImage">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                <h4>Error Loading Load Details</h4>
+                <p id="errorText"></p>
+            </div>
+
+            <!-- Load Details Card -->
+            <div class="details-card" id="loadDetailsCard" style="display: none;">
+                <div class="details-header">
+                    <div>
+                        <h2 class="details-title" id="loadTitle">Loading...</h2>
+                        <p class="text-muted mb-0" id="loadId">Load ID: -</p>
+                    </div>
+                    <span class="status-badge" id="loadStatus">Available</span>
+                </div>
+
+                <!-- Location Details -->
+                <div class="details-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location Details
+                    </h5>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Pickup Location</span>
+                            <span class="detail-value" id="pickupLocation">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Delivery Location</span>
+                            <span class="detail-value" id="deliveryLocation">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Pickup Date</span>
+                            <span class="detail-value" id="pickupDate">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Delivery Date</span>
+                            <span class="detail-value" id="deliveryDate">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Pickup Time</span>
+                            <span class="detail-value" id="pickupTime">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Delivery Time</span>
+                            <span class="detail-value" id="deliveryTime">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cargo Details -->
+                <div class="details-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-box"></i>
+                        Cargo Details
+                    </h5>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Cargo Type</span>
+                            <span class="detail-value" id="cargoType">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Weight</span>
+                            <span class="detail-value" id="cargoWeight">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Volume</span>
+                            <span class="detail-value" id="cargoVolume">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Value</span>
+                            <span class="detail-value" id="cargoValue">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Vehicle Type</span>
+                            <span class="detail-value" id="vehicleType">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Urgency</span>
+                            <span class="detail-value" id="urgency">-</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="detail-label">Description</span>
+                        <p class="detail-value mt-2" id="cargoDescription">-</p>
+                    </div>
+                </div>
+
+                <!-- Requirements -->
+                <div class="details-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-check-circle"></i>
+                        Requirements
+                    </h5>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-value">
+                                <i class="fas" id="tailLiftIcon"></i>
+                                <span id="tailLiftText">Tail Lift: -</span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">
+                                <i class="fas" id="refrigeratedIcon"></i>
+                                <span id="refrigeratedText">Refrigerated: -</span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">
+                                <i class="fas" id="adrIcon"></i>
+                                <span id="adrText">ADR: -</span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">
+                                <i class="fas" id="whiteGloveIcon"></i>
+                                <span id="whiteGloveText">White Glove: -</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="details-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-pound-sign"></i>
+                        Payment Details
+                    </h5>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Budget</span>
+                            <span class="detail-value" id="budget">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Min Budget</span>
+                            <span class="detail-value" id="minBudget">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Max Budget</span>
+                            <span class="detail-value" id="maxBudget">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Payment Method</span>
+                            <span class="detail-value" id="paymentMethod">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="details-section" id="additionalNotesSection" style="display: none;">
+                    <h5 class="section-title">
+                        <i class="fas fa-sticky-note"></i>
+                        Additional Notes
+                    </h5>
+                    <p class="detail-value" id="additionalNotes">-</p>
+                </div>
+
+                <!-- Special Instructions -->
+                <div class="details-section" id="specialInstructionsSection" style="display: none;">
+                    <h5 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Special Instructions
+                    </h5>
+                    <p class="detail-value" id="specialInstructions">-</p>
+                </div>
+
+                <!-- Pay Now Section -->
+                <div class="pay-now-section">
+                    <h3>Ready to Make Payment?</h3>
+                    <p>Complete your payment to activate this load and make it visible to carriers</p>
+                    <div class="payment-buttons">
+                        <button class="pay-now-btn" onclick="goToPayment()">
+                            <i class="fas fa-credit-card"></i>
+                            Pay Now
+                        </button>
+                        <button class="pay-letter-btn" onclick="goToPayLetter()">
+                            <i class="fas fa-file-invoice"></i>
+                            Pay Letter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Check Authentication
+        const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+        if (!auth.isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('loadId');
+
+        if (!loadId) {
+            showError('Load ID is missing from URL');
+        }
+
+        // Format Currency
+        function formatCurrency(value) {
+            const currency = auth.country === 'US' ? '$' : '£';
+            return `${currency}${parseFloat(value || 0).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+        }
+
+        // Format Date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Format Time
+        function formatTime(timeString) {
+            if (!timeString) return 'N/A';
+            return timeString;
+        }
+
+        // Custom Alert Function
+        function showCustomAlert(type, message, duration = 4000) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Create alert element
+            const alert = document.createElement('div');
+            alert.className = `custom-alert custom-alert-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            let title = 'Info';
+            if (type === 'success') {
+                icon = 'fa-check-circle';
+                title = 'Success';
+            } else if (type === 'error') {
+                icon = 'fa-exclamation-circle';
+                title = 'Error';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+                title = 'Warning';
+            }
+            
+            alert.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div class="custom-alert-content">
+                    <div class="custom-alert-title">${title}</div>
+                    <div class="custom-alert-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                alert.classList.add('hide');
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 400);
+            }, duration);
+        }
+
+        // Load Details
+        function loadDetails() {
+            if (!loadId) return;
+
+            db.ref('loads').child(loadId).once('value', (snapshot) => {
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const errorMessage = document.getElementById('errorMessage');
+                const loadDetailsCard = document.getElementById('loadDetailsCard');
+
+                if (!snapshot.exists()) {
+                    loadingSpinner.style.display = 'none';
+                    showError('Load not found');
+                    return;
+                }
+
+                const load = snapshot.val();
+
+                // Hide loading spinner
+                loadingSpinner.style.display = 'none';
+
+                // Show load details card
+                loadDetailsCard.style.display = 'block';
+
+                // Populate details
+                document.getElementById('loadTitle').textContent = load.loadTitle || 'Untitled Load';
+                document.getElementById('loadId').textContent = `Load ID: ${loadId}`;
+                
+                // Status badge
+                const status = load.status || 'available';
+                const statusBadge = document.getElementById('loadStatus');
+                statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                statusBadge.className = `status-badge ${status}`;
+
+                // Location details
+                document.getElementById('pickupLocation').textContent = load.pickupLocation || '-';
+                document.getElementById('deliveryLocation').textContent = load.deliveryLocation || '-';
+                document.getElementById('pickupDate').textContent = formatDate(load.pickupDate);
+                document.getElementById('deliveryDate').textContent = formatDate(load.deliveryDate);
+                document.getElementById('pickupTime').textContent = formatTime(load.pickupTime);
+                document.getElementById('deliveryTime').textContent = formatTime(load.deliveryTime);
+
+                // Cargo details
+                document.getElementById('cargoType').textContent = load.cargoType || '-';
+                document.getElementById('cargoWeight').textContent = load.cargoWeight ? `${load.cargoWeight} kg` : '-';
+                document.getElementById('cargoVolume').textContent = load.cargoVolume ? `${load.cargoVolume} m³` : '-';
+                document.getElementById('cargoValue').textContent = load.cargoValue ? formatCurrency(load.cargoValue) : '-';
+                document.getElementById('vehicleType').textContent = load.vehicleType || '-';
+                document.getElementById('urgency').textContent = load.urgency ? load.urgency.charAt(0).toUpperCase() + load.urgency.slice(1) : '-';
+                document.getElementById('cargoDescription').textContent = load.cargoDescription || 'No description provided';
+
+                // Requirements
+                const tailLiftIcon = document.getElementById('tailLiftIcon');
+                const tailLiftText = document.getElementById('tailLiftText');
+                if (load.tailLift) {
+                    tailLiftIcon.className = 'fas fa-check-circle text-success';
+                    tailLiftText.textContent = 'Tail Lift: Required';
+                } else {
+                    tailLiftIcon.className = 'fas fa-times-circle text-muted';
+                    tailLiftText.textContent = 'Tail Lift: Not Required';
+                }
+
+                const refrigeratedIcon = document.getElementById('refrigeratedIcon');
+                const refrigeratedText = document.getElementById('refrigeratedText');
+                if (load.refrigerated) {
+                    refrigeratedIcon.className = 'fas fa-check-circle text-success';
+                    refrigeratedText.textContent = 'Refrigerated: Required';
+                } else {
+                    refrigeratedIcon.className = 'fas fa-times-circle text-muted';
+                    refrigeratedText.textContent = 'Refrigerated: Not Required';
+                }
+
+                const adrIcon = document.getElementById('adrIcon');
+                const adrText = document.getElementById('adrText');
+                if (load.adr) {
+                    adrIcon.className = 'fas fa-check-circle text-success';
+                    adrText.textContent = 'ADR: Required';
+                } else {
+                    adrIcon.className = 'fas fa-times-circle text-muted';
+                    adrText.textContent = 'ADR: Not Required';
+                }
+
+                const whiteGloveIcon = document.getElementById('whiteGloveIcon');
+                const whiteGloveText = document.getElementById('whiteGloveText');
+                if (load.whiteGlove) {
+                    whiteGloveIcon.className = 'fas fa-check-circle text-success';
+                    whiteGloveText.textContent = 'White Glove: Required';
+                } else {
+                    whiteGloveIcon.className = 'fas fa-times-circle text-muted';
+                    whiteGloveText.textContent = 'White Glove: Not Required';
+                }
+
+                // Payment details
+                const budget = load.budget || load.price || load.maxBudget || load.minBudget || 0;
+                document.getElementById('budget').textContent = formatCurrency(budget);
+                document.getElementById('minBudget').textContent = load.minBudget ? formatCurrency(load.minBudget) : '-';
+                document.getElementById('maxBudget').textContent = load.maxBudget ? formatCurrency(load.maxBudget) : '-';
+                document.getElementById('paymentMethod').textContent = load.paymentMethod ? load.paymentMethod.charAt(0).toUpperCase() + load.paymentMethod.slice(1) : '-';
+
+                // Store budget for payment
+                window.loadBudget = budget;
+                window.loadTitle = load.loadTitle || 'Load Payment';
+
+                // Additional notes
+                if (load.additionalNotes) {
+                    document.getElementById('additionalNotesSection').style.display = 'block';
+                    document.getElementById('additionalNotes').textContent = load.additionalNotes;
+                }
+
+                // Special instructions
+                if (load.specialInstructions) {
+                    document.getElementById('specialInstructionsSection').style.display = 'block';
+                    document.getElementById('specialInstructions').textContent = load.specialInstructions;
+                }
+            }, (error) => {
+                console.error('Error loading load details:', error);
+                showError('Error loading load details. Please try again.');
+            });
+        }
+
+        // Show Error
+        function showError(message) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            loadingSpinner.style.display = 'none';
+            errorMessage.style.display = 'block';
+            errorText.textContent = message;
+        }
+
+        // Go to Payment
+        function goToPayment() {
+            const amount = window.loadBudget || 0;
+            const paymentFor = window.loadTitle || 'Load Payment';
+            
+            if (amount <= 0) {
+                showCustomAlert('error', 'Invalid payment amount. Please check the load details.');
+                return;
+            }
+
+            // Redirect to paynow.html with parameters
+            window.location.href = `paynow.html?loadId=${encodeURIComponent(loadId)}&amount=${encodeURIComponent(amount)}&paymentFor=${encodeURIComponent(paymentFor)}&paymentType=Load%20Posting`;
+        }
+
+        function getLocalPayLetterPending(supplierId) {
+            const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+            return localOrders.filter(order => order.supplierId === supplierId && !['cancelled', 'paid'].includes((order.status || '').toString().toLowerCase()));
+        }
+
+        function saveLocalPayLetterPending(order) {
+            const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+            const exists = localOrders.some(existing => existing.loadId === order.loadId && existing.supplierId === order.supplierId && !['cancelled', 'paid'].includes((existing.status || '').toString().toLowerCase()));
+            if (exists) {
+                return false;
+            }
+            localOrders.push(order);
+            localStorage.setItem('payLetterPendingLocal', JSON.stringify(localOrders));
+            return true;
+        }
+
+        function buildLocalPendingOrderFromPage(supplierId) {
+            const amount = window.loadBudget || 0;
+            const titleEl = document.getElementById('loadTitle');
+            const pickupEl = document.getElementById('pickupLocation');
+            const deliveryEl = document.getElementById('deliveryLocation');
+            return {
+                loadId: loadId,
+                loadTitle: titleEl ? titleEl.textContent.trim() : (window.loadTitle || 'Untitled Load'),
+                pickupLocation: pickupEl ? pickupEl.textContent.trim() : '',
+                deliveryLocation: deliveryEl ? deliveryEl.textContent.trim() : '',
+                amount: amount,
+                paymentFor: window.loadTitle || 'Load Payment',
+                status: 'pending',
+                paymentType: 'pay_letter',
+                createdAt: new Date().toISOString(),
+                supplierId: supplierId,
+                supplierName: auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier'
+            };
+        }
+
+        // Go to Pay Letter (Save as pending order)
+        function goToPayLetter() {
+            if (!loadId) {
+                showCustomAlert('error', 'Load ID is missing. Please try again.');
+                return;
+            }
+
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId) {
+                showCustomAlert('error', 'Supplier ID is missing. Please login again.');
+                return;
+            }
+
+            const localPendingOrders = getLocalPayLetterPending(supplierId);
+            const alreadyInLocal = localPendingOrders.some(order => order.loadId === loadId);
+            if (alreadyInLocal) {
+                showCustomAlert('warning', 'This load is already added to Pay Letter pending orders!');
+                setTimeout(() => {
+                    window.location.href = 'pay-letter-pending.html';
+                }, 2000);
+                return;
+            }
+
+            // First check pending orders for this supplier
+            db.ref('payLetterPending').orderByChild('supplierId').equalTo(supplierId).once('value', (existingSnapshot) => {
+                let pendingCount = 0;
+                let alreadyExists = false;
+
+                if (existingSnapshot.exists()) {
+                    existingSnapshot.forEach((child) => {
+                        const existingOrder = child.val();
+                        const status = (existingOrder.status || '').toString().trim().toLowerCase();
+                        if (status === 'cancelled' || status === 'paid') {
+                            return;
+                        }
+                        pendingCount += 1;
+                        if (existingOrder.loadId === loadId) {
+                            alreadyExists = true;
+                            return true;
+                        }
+                    });
+                }
+
+                if (alreadyExists) {
+                    showCustomAlert('warning', 'This load is already added to Pay Letter pending orders!');
+                    setTimeout(() => {
+                        window.location.href = 'pay-letter-pending.html';
+                    }, 2000);
+                    return;
+                }
+
+                if (pendingCount + localPendingOrders.length >= 3) {
+                    showCustomAlert('warning', 'Maximum 3 pending orders allowed. Please complete or cancel an order first.');
+                    return;
+                }
+
+                // Get load data from Firebase
+                db.ref('loads').child(loadId).once('value', (snapshot) => {
+                    if (!snapshot.exists()) {
+                        showCustomAlert('error', 'Load not found. Please try again.');
+                        return;
+                    }
+
+                    const loadData = snapshot.val();
+                    const amount = loadData.budget || loadData.price || loadData.maxBudget || loadData.minBudget || 0;
+                    const paymentFor = loadData.loadTitle || 'Load Payment';
+
+                    // Create pending pay letter order
+                    const pendingOrder = {
+                        loadId: loadId,
+                        loadTitle: loadData.loadTitle || 'Untitled Load',
+                        pickupLocation: loadData.pickupLocation || '',
+                        deliveryLocation: loadData.deliveryLocation || '',
+                        amount: amount,
+                        paymentFor: paymentFor,
+                        status: 'pending',
+                        paymentType: 'pay_letter',
+                        createdAt: new Date().toISOString(),
+                        supplierId: supplierId,
+                        supplierName: auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier'
+                    };
+
+                    // Save to Firebase
+                    db.ref('payLetterPending').push(pendingOrder).then(() => {
+                        // Show success message
+                        showCustomAlert('success', 'Load added to Pay Letter pending orders successfully!');
+                        // Redirect to pending orders page after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = 'pay-letter-pending.html';
+                        }, 2000);
+                    }).catch((error) => {
+                        console.error('Error saving pay letter order:', error);
+                        const saved = saveLocalPayLetterPending(pendingOrder);
+                        if (saved) {
+                            showCustomAlert('warning', 'Saved locally. Redirecting to Pay Letter pending orders...');
+                            setTimeout(() => {
+                                window.location.href = 'pay-letter-pending.html';
+                            }, 1500);
+                        } else {
+                            showCustomAlert('warning', 'This load is already added to Pay Letter pending orders!');
+                            setTimeout(() => {
+                                window.location.href = 'pay-letter-pending.html';
+                            }, 1500);
+                        }
+                    });
+                }, (error) => {
+                    console.error('Error loading load:', error);
+                    showCustomAlert('error', 'Error loading load data. Please try again.');
+                });
+            }, (error) => {
+                console.error('Error checking existing orders:', error);
+                const pendingOrder = buildLocalPendingOrderFromPage(supplierId);
+                const saved = saveLocalPayLetterPending(pendingOrder);
+                if (saved) {
+                    showCustomAlert('warning', 'Saved locally. Redirecting to Pay Letter pending orders...');
+                    setTimeout(() => {
+                        window.location.href = 'pay-letter-pending.html';
+                    }, 1500);
+                } else {
+                    showCustomAlert('warning', 'This load is already added to Pay Letter pending orders!');
+                    setTimeout(() => {
+                        window.location.href = 'pay-letter-pending.html';
+                    }, 1500);
+                }
+            });
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+        }
+
+        // Notifications Toggle
+        function toggleNotifications() {
+            console.log('Notifications clicked');
+        }
+
+        // Logout
+        // Custom Confirm Dialog
+        function showConfirmLogout() {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmLogoutOverlay');
+                const messageEl = document.getElementById('confirmLogoutMessage');
+                const okBtn = document.getElementById('confirmLogoutOkBtn');
+                const cancelBtn = document.getElementById('confirmLogoutCancelBtn');
+
+                messageEl.textContent = 'Are you sure you want to logout?';
+                okBtn.textContent = 'Yes, Logout';
+                cancelBtn.textContent = 'Cancel';
+
+                const cleanup = () => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    overlay.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                };
+
+                const onOk = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (e) => {
+                    if (e.target === overlay) {
+                        onCancel();
+                    }
+                };
+
+                const onKeydown = (e) => {
+                    if (e.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                overlay.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        // Logout
+        async function logout() {
+            const confirmed = await showConfirmLogout();
+            if (confirmed) {
+                localStorage.removeItem('supplierAuth');
+                window.location.href = '../../index.html';
+            }
+        }
+
+        // Load User Data
+        function loadUserData() {
+            const userName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier User';
+            const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=2563EB&color=fff&size=128`;
+            document.getElementById('profileImage').src = profileImageUrl;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            loadDetails();
+
+            // Close sidebar on mobile when clicking outside
+            document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
+
+            // Close sidebar on navigation click (mobile)
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Confirm Logout Modal -->
+    <div id="confirmLogoutOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmLogoutTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h6 id="confirmLogoutTitle" class="confirm-title">Confirm Logout</h6>
+            </div>
+            <div id="confirmLogoutMessage" class="confirm-message">Are you sure you want to logout?</div>
+            <div class="confirm-actions">
+                <button id="confirmLogoutCancelBtn" class="confirm-btn cancel" type="button">Cancel</button>
+                <button id="confirmLogoutOkBtn" class="confirm-btn danger" type="button">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

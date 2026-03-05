@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Verified - Carrier Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --secondary: #6366F1;
+            --success: #10B981;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            width: 220px;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 2rem;
+            margin-left: 220px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                position: fixed;
+                left: -220px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                left: 0;
+            }
+            .dashboard-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            object-fit: contain;
+        }
+
+        .sidebar-nav {
+            position: relative;
+            z-index: 2;
+            padding: 1rem 0.75rem;
+        }
+
+        .nav-link {
+            padding: 0.65rem 0.875rem;
+            margin-bottom: 0.35rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--text-main) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateX(3px);
+            color: var(--primary) !important;
+        }
+
+        .nav-link.active {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary) !important;
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .nav-group {
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.55rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1051;
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 1.125rem;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        .verification-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .verification-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+
+        .verification-header p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            border: 2px solid var(--border);
+            height: 100%;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary);
+            border-width: 3px;
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured::before {
+            content: 'POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pricing-tier {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-period {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-features li i {
+            color: var(--success);
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        .pricing-features li span {
+            flex: 1;
+            color: var(--text-main);
+        }
+
+        .btn-subscribe {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+
+        .btn-subscribe:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-subscribe.featured {
+            background: var(--primary);
+        }
+
+        .verification-badge-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .verification-badge-preview.basic {
+            background: #E0E7FF;
+            color: #4338CA;
+        }
+
+        .verification-badge-preview.pro {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .verification-badge-preview.enterprise {
+            background: #2563EB;
+            color: white;
+        }
+
+        .verification-badge-preview i {
+            font-size: 1rem;
+        }
+
+        .benefits-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-top: 3rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .benefits-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .benefit-item i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-right: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .benefit-item-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .benefit-item-content p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .current-plan-badge {
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+            
+            .verification-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="row g-0" style="display: flex; flex-wrap: nowrap;">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar p-0" style="flex: 0 0 220px; max-width: 220px; min-width: 220px;">
+                <div class="sidebar-brand">
+                    <img src="../supplier/image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Brokerage Logo" class="img-fluid">
+                </div>
+                <div class="sidebar-nav">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <div class="nav-group">
+                            <div class="nav-link nav-group-toggle">
+                                <i class="fas fa-search"></i> Loads
+                            </div>
+                            <div class="nav-group-items">
+                                <a class="nav-link" href="available-loads.html">
+                                    <i class="fas fa-truck-loading"></i> Available Loads
+                                </a>
+                            </div>
+                        </div>
+                        <a class="nav-link" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link" href="../driver/driver-share-location.html">
+                            <i class="fas fa-location-dot"></i> Share Location
+                        </a>
+                        <a class="nav-link" href="vehicles.html">
+                            <i class="fas fa-truck"></i> Vehicles
+                        </a>
+                        <a class="nav-link" href="payment-received.html">
+                            <i class="fas fa-money-bill-wave"></i> Payment Received
+                        </a>
+                        <div class="nav-group">
+                            <div class="nav-link nav-group-toggle">
+                                <i class="fas fa-comments"></i> Chat
+                            </div>
+                            <div class="nav-group-items">
+                                <a class="nav-link" href="messages.html">
+                                    <i class="fas fa-envelope"></i> Messages
+                                </a>
+                            </div>
+                        </div>
+                        <a class="nav-link" href="profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a class="nav-link active" href="verification.html">
+                            <i class="fas fa-shield-check"></i> Get Verified
+                        </a>
+                        <a class="nav-link" href="analytics-verified.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <hr class="my-3" style="border-color: var(--border);">
+                        <a class="nav-link text-danger" href="javascript:void(0)" onclick="logout()" id="logoutLink">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="dashboard-content p-0" style="flex: 1; min-width: 0;">
+                <div class="container">
+        <div id="renewalAlert" style="display: none; margin-top: 1rem;"></div>
+        <div id="insuranceAlert" style="display: none; margin-top: 1rem;"></div>
+        <div class="verification-header">
+            <h1><i class="fas fa-shield-check"></i> Get Verified</h1>
+            <p>Boost your credibility and get priority access to premium loads with our verification badges</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- Basic Plan -->
+            <div class="col-md-4">
+                <div class="pricing-card">
+                    <div class="pricing-tier">Basic</div>
+                    <div class="pricing-price">£19<span style="font-size: 1.5rem;">/mo</span></div>
+                    <div class="pricing-period">Perfect for getting started</div>
+                    <div class="verification-badge-preview basic">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Verified Basic</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Blue verification badge</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Basic profile verification</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Standard load matching</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Email support</span>
+                        </li>
+                    </ul>
+                    <button class="btn-subscribe" onclick="subscribeToPlan('basic', 19)">
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="col-md-4">
+                <div class="pricing-card featured">
+                    <div class="pricing-tier">Pro</div>
+                    <div class="pricing-price">£49<span style="font-size: 1.5rem;">/mo</span></div>
+                    <div class="pricing-period">Most popular choice</div>
+                    <div class="verification-badge-preview pro">
+                        <i class="fas fa-shield-check"></i>
+                        <span>Verified Pro</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Premium blue badge</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Priority load matching</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Insurance verification</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Enhanced profile visibility</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Priority support</span>
+                        </li>
+                    </ul>
+                    <button class="btn-subscribe featured" onclick="subscribeToPlan('pro', 49)">
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="col-md-4">
+                <div class="pricing-card">
+                    <div class="pricing-tier">Enterprise</div>
+                    <div class="pricing-price">£99<span style="font-size: 1.5rem;">/mo</span></div>
+                    <div class="pricing-period">For established carriers</div>
+                    <div class="verification-badge-preview enterprise">
+                        <i class="fas fa-crown"></i>
+                        <span>Verified Enterprise</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Premium gold badge</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Highest priority matching</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Full insurance & compliance check</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Top profile placement</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>Dedicated account manager</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <span>24/7 priority support</span>
+                        </li>
+                    </ul>
+                    <button class="btn-subscribe" onclick="subscribeToPlan('enterprise', 99)">
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benefits Section -->
+        <div class="benefits-section">
+            <h3><i class="fas fa-star"></i> Why Get Verified?</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <i class="fas fa-bolt"></i>
+                        <div class="benefit-item-content">
+                            <h4>Priority Matching</h4>
+                            <p>Get matched with premium loads before non-verified carriers. Higher chances of securing the best opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div class="benefit-item-content">
+                            <h4>Insurance Verification</h4>
+                            <p>Automated insurance checks give brokers confidence in your reliability and compliance.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <i class="fas fa-eye"></i>
+                        <div class="benefit-item-content">
+                            <h4>Enhanced Visibility</h4>
+                            <p>Your verified badge makes you stand out to brokers and suppliers looking for trusted carriers.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="benefit-item-content">
+                            <h4>More Opportunities</h4>
+                            <p>Verified carriers receive 3x more load offers and have higher acceptance rates from brokers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Complete Subscription</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="paymentFormContainer">
+                        <p>Processing your subscription...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="../../assets/js/insurance-verification.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Snef8JwsGcenL627huErNXtqNGF92AGxEgXTWOa5WSDNmCS0r7VfdLv9XihRl7xZ0cJVEzRxRQaQUsaHkd3La9g00LKykDcYb';
+        const CLOUD_BACKEND_URL = 'https://alpha-freight-server.onrender.com';
+        const STRIPE_BACKEND_ENDPOINT = `${CLOUD_BACKEND_URL}/api/create-payment-intent`;
+
+        let stripe = null;
+        if (typeof Stripe !== 'undefined' && STRIPE_PUBLISHABLE_KEY) {
+            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        }
+
+        function getCarrierAuth() {
+            try {
+                const auth = localStorage.getItem('carrierAuth');
+                return auth ? JSON.parse(auth) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function checkAuth() {
+            const auth = getCarrierAuth();
+            // Authentication redirect disabled - allow access without login
+            // if (!auth || !auth.carrierId) {
+            //     window.location.href = 'login.html';
+            //     return false;
+            // }
+            return true;
+        }
+
+        // Check current subscription status
+        function loadCurrentSubscription() {
+            const auth = getCarrierAuth();
+            if (!auth || !auth.carrierId) return;
+
+            const db = firebase.database();
+            db.ref('carriers/' + auth.carrierId + '/verification').once('value').then(snapshot => {
+                const verification = snapshot.val();
+                if (verification && verification.status === 'active') {
+                    const plan = verification.plan || 'basic';
+                    const planNames = { basic: 'Basic', pro: 'Pro', enterprise: 'Enterprise' };
+                    const cards = document.querySelectorAll('.pricing-card');
+                    cards.forEach(card => {
+                        const tier = card.querySelector('.pricing-tier').textContent.trim().toLowerCase();
+                        if (tier === plan) {
+                            const button = card.querySelector('.btn-subscribe');
+                            button.innerHTML = '<span class="current-plan-badge">Current Plan</span>';
+                            button.disabled = true;
+                            button.style.background = '#10B981';
+                        }
+                    });
+                }
+            });
+        }
+
+        async function subscribeToPlan(plan, amount) {
+            if (!checkAuth()) return;
+
+            const auth = getCarrierAuth();
+            if (!stripe) {
+                alert('Payment system is not available. Please try again later.');
+                return;
+            }
+
+            try {
+                // Create payment intent
+                const response = await fetch(STRIPE_BACKEND_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: amount * 100, // Convert to pence
+                        currency: 'gbp',
+                        paymentFor: 'verification_subscription',
+                        paymentType: plan,
+                        carrierId: auth.carrierId
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                // Show payment modal
+                const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                modal.show();
+
+                // Create payment form
+                const elements = stripe.elements();
+                const cardElement = elements.create('card', {
+                    style: {
+                        base: {
+                            fontSize: '16px',
+                            color: '#424770',
+                            '::placeholder': { color: '#aab7c4' }
+                        }
+                    }
+                });
+
+                const container = document.getElementById('paymentFormContainer');
+                container.innerHTML = `
+                    <form id="paymentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Card Details</label>
+                            <div id="card-element"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" id="cardholder-name" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="submit-payment">
+                            <span class="spinner-border spinner-border-sm d-none" id="payment-spinner"></span>
+                            Pay £${amount}/month
+                        </button>
+                    </form>
+                `;
+
+                cardElement.mount('#card-element');
+
+                // Handle form submission
+                document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = document.getElementById('submit-payment');
+                    const spinner = document.getElementById('payment-spinner');
+                    submitBtn.disabled = true;
+                    spinner.classList.remove('d-none');
+
+                    try {
+                        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+                            data.clientSecret,
+                            {
+                                payment_method: {
+                                    card: cardElement,
+                                    billing_details: {
+                                        name: document.getElementById('cardholder-name').value
+                                    }
+                                }
+                            }
+                        );
+
+                        if (stripeError) {
+                            throw new Error(stripeError.message);
+                        }
+
+                        if (paymentIntent.status === 'succeeded') {
+                            // Save subscription to Firebase
+                            await saveSubscription(plan, amount, paymentIntent.id);
+                            modal.hide();
+                            alert('Subscription activated successfully!');
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        alert('Payment failed: ' + error.message);
+                        submitBtn.disabled = false;
+                        spinner.classList.add('d-none');
+                    }
+                });
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function saveSubscription(plan, amount, paymentIntentId) {
+            const auth = getCarrierAuth();
+            const db = firebase.database();
+            const now = new Date();
+            const nextBillingDate = new Date(now);
+            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+
+            const verificationData = {
+                plan: plan,
+                status: 'active',
+                amount: amount,
+                currency: 'GBP',
+                billingCycle: 'monthly',
+                startDate: now.toISOString(),
+                nextBillingDate: nextBillingDate.toISOString(),
+                paymentIntentId: paymentIntentId,
+                createdAt: now.toISOString(),
+                renewalRemindersSent: [],
+                lastReminderSent: null
+            };
+
+            await db.ref('carriers/' + auth.carrierId + '/verification').set(verificationData);
+
+            // Send activation email
+            try {
+                await fetch('https://alpha-freight-server.onrender.com/api/send-notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: auth.email,
+                        type: 'subscription_activated',
+                        data: {
+                            plan: plan,
+                            nextBillingDate: nextBillingDate.toISOString()
+                        }
+                    })
+                });
+            } catch (error) {
+                console.error('Error sending activation email:', error);
+            }
+
+            // Schedule renewal reminders
+            scheduleRenewalReminders(auth.carrierId, nextBillingDate, plan);
+        }
+
+        // Schedule renewal reminders
+        function scheduleRenewalReminders(carrierId, nextBillingDate, plan) {
+            const db = firebase.database();
+            const now = new Date();
+            const renewalDate = new Date(nextBillingDate);
+            const daysUntilRenewal = Math.ceil((renewalDate - now) / (1000 * 60 * 60 * 24));
+
+            // Check if renewal is within 7 days
+            if (daysUntilRenewal <= 7 && daysUntilRenewal > 0) {
+                // Check if reminder already sent
+                db.ref('carriers/' + carrierId + '/verification').once('value').then(snapshot => {
+                    const verification = snapshot.val();
+                    const lastReminder = verification?.lastReminderSent ? new Date(verification.lastReminderSent) : null;
+                    const daysSinceLastReminder = lastReminder ? Math.ceil((now - lastReminder) / (1000 * 60 * 60 * 24)) : 999;
+
+                    // Send reminder if not sent in last 24 hours
+                    if (daysSinceLastReminder >= 1) {
+                        sendRenewalReminder(carrierId, daysUntilRenewal, plan, renewalDate);
+                    }
+                });
+            }
+        }
+
+        // Send renewal reminder
+        async function sendRenewalReminder(carrierId, daysLeft, plan, renewalDate) {
+            const db = firebase.database();
+            const carrierSnapshot = await db.ref('carriers/' + carrierId).once('value');
+            const carrier = carrierSnapshot.val();
+
+            if (!carrier || !carrier.email) return;
+
+            try {
+                await fetch('https://alpha-freight-server.onrender.com/api/send-notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: carrier.email,
+                        type: 'subscription_renewal_reminder',
+                        data: {
+                            plan: plan,
+                            daysLeft: daysLeft,
+                            renewalDate: renewalDate.toISOString(),
+                            renewalUrl: window.location.href
+                        }
+                    })
+                });
+
+                // Update reminder sent status
+                const verification = carrier.verification || {};
+                const remindersSent = verification.renewalRemindersSent || [];
+                remindersSent.push({
+                    sentAt: new Date().toISOString(),
+                    daysLeft: daysLeft
+                });
+
+                await db.ref('carriers/' + carrierId + '/verification/renewalRemindersSent').set(remindersSent);
+                await db.ref('carriers/' + carrierId + '/verification/lastReminderSent').set(new Date().toISOString());
+            } catch (error) {
+                console.error('Error sending renewal reminder:', error);
+            }
+        }
+
+        // Check renewal status on page load
+        function checkRenewalStatus() {
+            const auth = getCarrierAuth();
+            if (!auth || !auth.carrierId) return;
+
+            const db = firebase.database();
+            db.ref('carriers/' + auth.carrierId + '/verification').once('value').then(snapshot => {
+                const verification = snapshot.val();
+                if (verification && verification.status === 'active' && verification.nextBillingDate) {
+                    const renewalDate = new Date(verification.nextBillingDate);
+                    const now = new Date();
+                    const daysUntilRenewal = Math.ceil((renewalDate - now) / (1000 * 60 * 60 * 24));
+
+                    if (daysUntilRenewal <= 0) {
+                        // Subscription expired
+                        showRenewalAlert('expired', verification.plan);
+                    } else if (daysUntilRenewal <= 7) {
+                        // Renewal soon
+                        showRenewalAlert('soon', verification.plan, daysUntilRenewal);
+                    }
+
+                    // Schedule reminders
+                    scheduleRenewalReminders(auth.carrierId, renewalDate, verification.plan);
+                }
+            });
+        }
+
+        // Show renewal alert
+        function showRenewalAlert(type, plan, daysLeft) {
+            const alertContainer = document.getElementById('renewalAlert');
+            if (!alertContainer) return;
+
+            if (type === 'expired') {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Subscription Expired!</strong> Your ${plan} subscription has expired. 
+                        <a href="verification.html" class="alert-link">Renew now</a> to continue enjoying verified benefits.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            } else if (type === 'soon') {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <strong>Renewal Reminder:</strong> Your ${plan} subscription expires in ${daysLeft} days. 
+                        <a href="verification.html" class="alert-link">Renew now</a>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            }
+            alertContainer.style.display = 'block';
+        }
+
+        // Initialize
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                checkAuth();
+                loadCurrentSubscription();
+                checkRenewalStatus();
+            });
+        } else {
+            checkAuth();
+            loadCurrentSubscription();
+            checkRenewalStatus();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+            }
+        }
+
+        // Custom Confirm Dialog
+        function showConfirmLogout() {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmLogoutOverlay');
+                const messageEl = document.getElementById('confirmLogoutMessage');
+                const okBtn = document.getElementById('confirmLogoutOkBtn');
+                const cancelBtn = document.getElementById('confirmLogoutCancelBtn');
+
+                messageEl.textContent = 'Are you sure you want to logout?';
+                okBtn.textContent = 'Yes, Logout';
+                cancelBtn.textContent = 'Cancel';
+
+                const cleanup = () => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    overlay.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                };
+
+                const onOk = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (e) => {
+                    if (e.target === overlay) {
+                        onCancel();
+                    }
+                };
+
+                const onKeydown = (e) => {
+                    if (e.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                overlay.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        // Logout
+        async function logout() {
+            const confirmed = await showConfirmLogout();
+            if (confirmed) {
+                localStorage.removeItem('carrierAuth');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Logout Modal -->
+    <div id="confirmLogoutOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmLogoutTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h6 id="confirmLogoutTitle" class="confirm-title">Confirm Logout</h6>
+            </div>
+            <div id="confirmLogoutMessage" class="confirm-message">Are you sure you want to logout?</div>
+            <div class="confirm-actions">
+                <button id="confirmLogoutCancelBtn" class="confirm-btn cancel" type="button">Cancel</button>
+                <button id="confirmLogoutOkBtn" class="confirm-btn danger" type="button">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

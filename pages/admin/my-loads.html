@@ -1,0 +1,671 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Loads - Admin Portal</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        // Immediate auth check before page loads
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            --sidebar-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .admin-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-gradient);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 0;
+        }
+        .header-section {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 1.5rem 2rem;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 1rem;
+        }
+        .content-section {
+            padding: 0 2rem 2rem;
+        }
+        .load-card {
+            border-left: 4px solid #6f42c1;
+            transition: all 0.3s ease;
+        }
+        .load-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .load-card.active {
+            border-left-color: #6f42c1;
+        }
+        .load-card.accepted {
+            border-left-color: #ffc107;
+        }
+        .load-card.picked-up {
+            border-left-color: #ff9800;
+        }
+        .load-card.in-transit {
+            border-left-color: #007bff;
+        }
+        .load-card.completed {
+            border-left-color: #28a745;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active {
+            background-color: #e7d4ff;
+            color: #6f42c1;
+        }
+        .status-accepted {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-transit {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+            .admin-sidebar.show {
+                left: 0;
+            }
+            .admin-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1040;
+            }
+            .mobile-menu-btn {
+                background: var(--primary-gradient);
+                border: none;
+                color: white;
+                padding: 0.5rem;
+                border-radius: 8px;
+                font-size: 1.2rem;
+            }
+            .header-section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            .content-section {
+                padding: 1rem;
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            display: none;
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h5 class="mb-0 fw-bold" style="color: #6f42c1;">Admin Portal</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshLoads()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white active" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Desktop Header -->
+                <div class="header-section d-none d-md-block">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">My Loads</h5>
+                            <small class="text-muted">Track and manage your posted loads</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="picked-up">Picked Up</option>
+                                <option value="in-transit">In Transit</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshLoads()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loads Content -->
+                <div class="content-section" id="loadsContent">
+                    <div id="noLoadsMessage" class="text-center py-5" style="display:none;">
+                        <i class="fas fa-boxes fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted">No loads posted yet</h4>
+                        <p class="text-muted mb-4">Post a load to see it here.</p>
+                        <a href="post-load.html" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                    </div>
+                    <!-- Real loads will be rendered here by JS -->
+                </div>
+                
+                <!-- Load Details Modal -->
+                <div class="modal fade" id="loadDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-eye"></i> Load Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">Pickup</small>
+                                            <div class="fw-bold" id="d_pickupLocation">-</div>
+                                            <div class="small" id="d_pickupDateTime">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">Delivery</small>
+                                            <div class="fw-bold" id="d_deliveryLocation">-</div>
+                                            <div class="small" id="d_deliveryDateTime">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <small class="text-muted">Cargo</small>
+                                            <div id="d_cargo">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <small class="text-muted">Budget</small>
+                                            <div id="d_budget">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="p-3 border rounded">
+                                            <small class="text-muted">Special Requirements</small>
+                                            <div id="d_special">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    <!-- Firebase v8.10.1 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+      authDomain: "alpha-brokerage.firebaseapp.com",
+      databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+      projectId: "alpha-brokerage",
+      storageBucket: "alpha-brokerage.firebasestorage.app",
+      messagingSenderId: "834712514965",
+      appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+    };
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    var currentLoads = [];
+    window.currentLoads = currentLoads;
+
+    function listenAdminLoads() {
+      var adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+      if (!adminAuth.isLoggedIn && !adminAuth.email) {
+        if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+            window.AlphaBrokrage.showAlert('error', 'Please log in as admin');
+        } else {
+            alert('Please log in as admin');
+        }
+        return;
+      }
+      var db = firebase.database();
+      db.ref('loads').on('value', function(snapshot){
+        var myLoads = [];
+        snapshot.forEach(function(child){
+          var load = child.val();
+          load.id = child.key;
+          // Filter loads posted by admin
+          if ((load.postedBy === 'admin') || 
+              (load.adminId && load.adminId === adminAuth.email) ||
+              (load.adminId && load.adminId === adminAuth.adminId)) {
+            myLoads.push(load);
+          }
+        });
+        currentLoads = myLoads;
+        window.currentLoads = currentLoads;
+        renderAdminLoads(myLoads);
+      });
+    }
+
+    function renderAdminLoads(loads) {
+      var container = document.getElementById('loadsContent');
+      var noMsg = document.getElementById('noLoadsMessage');
+      if (!container) return;
+      var groups = {
+        active: loads.filter(function(l){return l.status === 'active';}),
+        accepted: loads.filter(function(l){return l.status === 'accepted';}),
+        'picked-up': loads.filter(function(l){return l.status === 'picked-up';}),
+        ['in-transit']: loads.filter(function(l){return l.status === 'in-transit';}),
+        completed: loads.filter(function(l){return l.status === 'completed';})
+      };
+      var html = '';
+      if (groups.active.length) {
+        html += sectionHtml('Active Loads', 'text-primary', 'fa-clock', 'active', groups.active);
+      }
+      if (groups.accepted.length) {
+        html += sectionHtml('Accepted Loads', 'text-warning', 'fa-check', 'accepted', groups.accepted);
+      }
+      if (groups['picked-up'].length) {
+        html += sectionHtml('Picked Up', 'text-warning', 'fa-box-open', 'accepted', groups['picked-up']);
+      }
+      if (groups['in-transit'].length) {
+        html += sectionHtml('In Transit', 'text-info', 'fa-truck', 'in-transit', groups['in-transit']);
+      }
+      if (groups.completed.length) {
+        html += sectionHtml('Completed', 'text-success', 'fa-check-circle', 'completed', groups.completed);
+      }
+      if (!loads.length) {
+        if (noMsg) noMsg.style.display = 'block';
+        container.innerHTML = '';
+      } else {
+        if (noMsg) noMsg.style.display = 'none';
+        container.innerHTML = html;
+      }
+    }
+    
+    function sectionHtml(title, colorClass, icon, statusClass, items) {
+      return `<div class="mb-4"><h6 class="fw-bold ${colorClass} mb-3"><i class="fas ${icon}"></i> ${title} (${items.length})</h6><div class="row">${items.map(function(load){return loadCard(load, statusClass);}).join('')}</div></div>`;
+    }
+    
+    function loadCard(load, statusClass) {
+      var created = load.createdAt ? new Date(load.createdAt).toLocaleDateString() : '';
+      var delivery = load.deliveryDate ? new Date(load.deliveryDate).toLocaleDateString() : '';
+      var budget = (load.budget || load.maxBudget || load.minBudget || 0);
+      var statusBadgeClass = 'status-active';
+      var statusText = 'Active';
+      
+      if (load.status === 'accepted') {
+        statusBadgeClass = 'status-accepted';
+        statusText = 'Accepted';
+      } else if (load.status === 'picked-up') {
+        statusBadgeClass = 'status-accepted';
+        statusText = 'Picked Up';
+      } else if (load.status === 'in-transit') {
+        statusBadgeClass = 'status-transit';
+        statusText = 'In Transit';
+      } else if (load.status === 'completed') {
+        statusBadgeClass = 'status-completed';
+        statusText = 'Completed';
+      } else if (load.status === 'active') {
+        statusBadgeClass = 'status-active';
+        statusText = 'Active';
+      }
+      
+      var pickupDt = (load.pickupDate || load.pickupTime) ? `${load.pickupDate || ''} ${load.pickupTime || ''}`.trim() : '';
+      var deliveryDt = (load.deliveryDate || load.deliveryTime) ? `${load.deliveryDate || ''} ${load.deliveryTime || ''}`.trim() : '';
+      var actions = `<button class="btn btn-sm btn-outline-primary" onclick="viewDetails('${load.id}')"><i class="fas fa-eye"></i> Details</button>`;
+      
+      // Show carrier info if load is accepted
+      var carrierInfo = '';
+      if (load.status !== 'active' && load.acceptedBy) {
+        carrierInfo = `<small class="text-muted d-block mt-1">Carrier: ${load.acceptedBy}</small>`;
+      }
+      
+      return `<div class="col-lg-6 mb-3"><div class="load-card card ${load.status || statusClass}"><div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-2"><div><h6 class="fw-bold mb-1">${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}</h6><p class="text-muted mb-1">${load.cargoType || ''} • ${load.cargoWeight || ''} tonnes</p><span class="status-badge ${statusBadgeClass}">${statusText}</span>${carrierInfo}</div><div class="text-end"><div class="fw-bold text-primary">£${budget}</div><small class="text-muted">Delivery: ${delivery || '-'}</small></div></div>
+      <div class="row g-2 mb-2"><div class="col-6"><small class="text-muted">Pickup</small><div class="small">${pickupDt || '-'} </div></div><div class="col-6"><small class="text-muted">Delivery</small><div class="small">${deliveryDt || '-'} </div></div></div>
+      <div class="d-flex justify-content-end gap-2 flex-wrap">${actions}</div>
+      </div></div></div>`;
+    }
+    
+    function refreshLoads() {
+      var btn = event && event.target;
+      if (!btn) return;
+      var original = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
+      btn.disabled = true;
+      setTimeout(function(){
+        btn.innerHTML = original;
+        btn.disabled = false;
+      }, 800);
+    }
+    
+    window.addEventListener('DOMContentLoaded', listenAdminLoads);
+    </script>
+    
+    <script>
+        function viewDetails(loadId) {
+            var load = (window.currentLoads || []).find(function(l){ return l.id === loadId; });
+            if (!load) {
+                if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                    window.AlphaBrokrage.showAlert('error', 'Load not found. Try refreshing.');
+                } else {
+                    alert('Load not found. Try refreshing.');
+                }
+                return;
+            }
+            document.getElementById('d_pickupLocation').textContent = load.pickupLocation || '-';
+            document.getElementById('d_deliveryLocation').textContent = load.deliveryLocation || '-';
+            var pdt = [(load.pickupDate||''),(load.pickupTime||'')].filter(Boolean).join(' ');
+            var ddt = [(load.deliveryDate||''),(load.deliveryTime||'')].filter(Boolean).join(' ');
+            document.getElementById('d_pickupDateTime').textContent = pdt || '-';
+            document.getElementById('d_deliveryDateTime').textContent = ddt || '-';
+            document.getElementById('d_cargo').textContent = [(load.cargoType||''),(load.cargoDescription||''),(load.cargoWeight? (load.cargoWeight+' tonnes') : '')].filter(Boolean).join(' • ') || '-';
+            var budget = (load.budget || load.maxBudget || load.minBudget || 0);
+            document.getElementById('d_budget').textContent = '£' + budget;
+            document.getElementById('d_special').textContent = load.specialRequirements || load.specialInstructions || '-';
+            var modal = new bootstrap.Modal(document.getElementById('loadDetailsModal'));
+            modal.show();
+        }
+
+        function updateLoadStatus(loadId, newStatus, ev) {
+            var btn = ev && ev.currentTarget ? ev.currentTarget : null;
+            var originalText = btn ? btn.innerHTML : '';
+            
+            if (btn) {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+                btn.disabled = true;
+            }
+
+            var db = firebase.database();
+            var loadRef = db.ref('loads/' + loadId);
+            var adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+            
+            // Map status values
+            var firebaseStatus = newStatus === 'picked-up' ? 'picked-up' : 
+                                 newStatus === 'on-route' ? 'in-transit' : 
+                                 newStatus === 'delivered' ? 'completed' : newStatus;
+            
+            // Get current load to send notification
+            loadRef.once('value', function(snapshot) {
+                var currentLoad = snapshot.val();
+                if (!currentLoad) {
+                    if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                        window.AlphaBrokrage.showAlert('error', 'Load not found');
+                    } else {
+                        alert('Load not found');
+                    }
+                    if (btn) {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                    return;
+                }
+
+                // Update status in Firebase
+                loadRef.transaction(function(current) {
+                    if (!current) return current;
+                    
+                    current.status = firebaseStatus;
+                    if (firebaseStatus === 'picked-up') {
+                        current.pickedUpAt = new Date().toISOString();
+                    } else if (firebaseStatus === 'in-transit') {
+                        current.inTransitAt = new Date().toISOString();
+                    } else if (firebaseStatus === 'completed') {
+                        current.completedAt = new Date().toISOString();
+                    }
+                    
+                    return current;
+                }, function(error, committed, snapshot) {
+                    if (error) {
+                        if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                            window.AlphaBrokrage.showAlert('error', 'Error updating status: ' + error.message);
+                        } else {
+                            alert('Error updating status: ' + error.message);
+                        }
+                        if (btn) {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    } else if (!committed) {
+                        if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                            window.AlphaBrokrage.showAlert('warning', 'Could not update status. Try again.');
+                        } else {
+                            alert('Could not update status. Try again.');
+                        }
+                        if (btn) {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    } else {
+                        // Send notification to carrier if load is assigned
+                        try {
+                            var statusMessage = newStatus === 'picked-up' ? 'picked up' : 
+                                               newStatus === 'on-route' ? 'on route' : 
+                                               newStatus === 'delivered' ? 'delivered' : newStatus;
+                            
+                            var notif = {
+                                type: 'load_status_update',
+                                loadId: loadId,
+                                status: firebaseStatus,
+                                message: `Load has been ${statusMessage}: ${currentLoad.pickupLocation} → ${currentLoad.deliveryLocation}`,
+                                pickup: currentLoad.pickupLocation,
+                                delivery: currentLoad.deliveryLocation,
+                                admin: adminAuth.email || 'Admin',
+                                timestamp: new Date().toISOString()
+                            };
+                            
+                            // Notify carrier if load is assigned to one
+                            if (currentLoad.carrierId) {
+                                db.ref('notifications/carriers/' + currentLoad.carrierId).push(notif);
+                            }
+                            
+                            if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                                window.AlphaBrokrage.showAlert('success', 'Status updated to ' + statusMessage + '!');
+                            } else {
+                                alert('Status updated to ' + statusMessage + '!');
+                            }
+                        } catch(e) {
+                            console.error('Notification error:', e);
+                            if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                                window.AlphaBrokrage.showAlert('success', 'Status updated successfully!');
+                            } else {
+                                alert('Status updated successfully!');
+                            }
+                        }
+                        
+                        if (btn) {
+                            btn.innerHTML = '<i class="fas fa-check"></i> Updated';
+                            btn.classList.remove('btn-sm');
+                            setTimeout(function() {
+                                btn.innerHTML = originalText;
+                                btn.disabled = false;
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Status filter functionality
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const status = this.value;
+            const loadCards = document.querySelectorAll('.load-card');
+            
+            loadCards.forEach(card => {
+                if (status === '' || card.classList.contains(status)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    
+    <script>
+        // Mobile Navigation
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.nav-link').forEach(function(link){
+                link.addEventListener('click', function(){
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+            window.addEventListener('resize', function(){
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (sidebar && overlay && window.innerWidth > 768) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+

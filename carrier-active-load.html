@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Alpha Freight – Active Load</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --bg: #01050f;
+            --card: rgba(9, 14, 30, 0.92);
+            --card-soft: rgba(13, 19, 42, 0.88);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-2: #facc15;
+            --danger: #f87171;
+            --success: #34d399;
+            --border: rgba(148, 163, 184, 0.18);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.25), transparent 55%),
+                        radial-gradient(circle at 80% 0%, rgba(250,204,21,0.22), transparent 45%),
+                        radial-gradient(circle at 0% 85%, rgba(14,165,233,0.18), transparent 40%),
+                        var(--bg);
+            color: var(--text);
+            padding: 34px 20px 50px;
+            display: flex;
+            justify-content: center;
+        }
+        .device {
+            width: min(440px, 100%);
+        }
+        .frame {
+            background: rgba(4, 7, 20, 0.95);
+            border-radius: 38px;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 36px 24px;
+            box-shadow: 0 35px 100px rgba(1,5,15,0.95);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+        .notch {
+            width: 120px;
+            height: 26px;
+            border-radius: 14px;
+            background: #030712;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+        header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+        .status-chip {
+            border-radius: 999px;
+            padding: 8px 16px;
+            border: 1px solid rgba(56,189,248,0.45);
+            background: rgba(56,189,248,0.12);
+            color: var(--accent);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .route-card {
+            border-radius: 28px;
+            padding: 24px;
+            background: linear-gradient(145deg, rgba(56,189,248,0.22), rgba(15,23,42,0.92));
+            border: 1px solid rgba(56,189,248,0.3);
+            margin-bottom: 24px;
+            box-shadow: 0 25px 45px rgba(15,118,255,0.18);
+        }
+        .route-point {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .route-point span {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        .progress {
+            margin-top: 18px;
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            width: 72%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #38bdf8, #2563eb);
+        }
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        .section {
+            border-radius: 28px;
+            padding: 22px;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            margin: 0 0 14px;
+            font-size: 1rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .info-card {
+            border-radius: 20px;
+            padding: 14px;
+            border: 1px dashed rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.02);
+        }
+        .info-card span {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+        .info-card strong {
+            display: block;
+            margin-top: 6px;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            margin: 0;
+            list-style: none;
+        }
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 9px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: rgba(56,189,248,0.3);
+        }
+        .timeline li {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .timeline li::before {
+            content: "";
+            position: absolute;
+            left: -20px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+        .timeline small {
+            color: var(--muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pill-row span {
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .actions button {
+            border-radius: 18px;
+            border: 1px solid rgba(56,189,248,0.4);
+            background: rgba(56,189,248,0.12);
+            color: var(--text);
+            padding: 14px;
+            font-weight: 600;
+        }
+        .actions button.secondary {
+            border-color: rgba(250,204,21,0.4);
+            background: rgba(250,204,21,0.16);
+            color: var(--accent-2);
+        }
+        .bottom-nav {
+            margin-top: 22px;
+            border-radius: 20px;
+            padding: 14px 22px;
+            background: rgba(2,6,23,0.85);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-around;
+        }
+        .bottom-nav button {
+            background: none;
+            border: none;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+        }
+        .bottom-nav button.active {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="device">
+        <div class="frame">
+            <span class="notch" aria-hidden="true"></span>
+            <div class="status-bar">
+                <span>09:41</span>
+                <span>Network good</span>
+                <span><i class="fa-solid fa-battery-three-quarters"></i></span>
+            </div>
+
+            <header>
+                <div>
+                    <h1>Your Active Load</h1>
+                    <p>Manchester ➝ Glasgow • Ref AL-7821</p>
+                </div>
+                <span class="status-chip"><i class="fa-solid fa-truck"></i> In transit</span>
+            </header>
+
+            <section class="route-card">
+                <div class="route-point">
+                    <div>
+                        <strong>Manchester Depot</strong>
+                        <span>Pickup • 09:10</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <strong>Glasgow West Hub</strong>
+                        <span>ETA • 18:45</span>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;color:var(--muted);">
+                    <span>226 mi</span>
+                    <i class="fa-solid fa-angles-right"></i>
+                    <span>Temp controlled • Pharma</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar"><span></span></div>
+                    <div class="progress-meta">
+                        <span>68% complete</span>
+                        <span>Next check-in • 45 min</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-label="Load stats">
+                <h3>Load stats</h3>
+                <div class="grid">
+                    <div class="info-card">
+                        <span>Trailer temp</span>
+                        <strong>2.8°C stable</strong>
+                    </div>
+                    <div class="info-card">
+                        <span>Payload</span>
+                        <strong>17.4t</strong>
+                    </div>
+                    <div class="info-card">
+                        <span>Fuel range</span>
+                        <strong>214 mi</strong>
+                    </div>
+                    <div class="info-card">
+                        <span>Driver HOS</span>
+                        <strong>4h 10m left</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-label="Timeline">
+                <h3>Timeline</h3>
+                <ul class="timeline">
+                    <li>
+                        <small>09:05</small>
+                        Departed supplier dock • paperwork signed
+                    </li>
+                    <li>
+                        <small>12:42</small>
+                        Check-in submitted • A1 service area
+                    </li>
+                    <li>
+                        <small>14:50</small>
+                        Temp audit passed • Pharma monitor
+                    </li>
+                    <li>
+                        <small>ETA 18:45</small>
+                        Delivery slot confirmed • Gate 4B
+                    </li>
+                </ul>
+            </section>
+
+            <section class="section" aria-label="Compliance">
+                <h3>Compliance & docs</h3>
+                <div class="pill-row">
+                    <span><i class="fa-solid fa-file"></i> POD pending</span>
+                    <span><i class="fa-solid fa-shield"></i> Cargo insured</span>
+                    <span><i class="fa-solid fa-temperature-three-quarters"></i> Temp logs synced</span>
+                </div>
+                <div class="actions" style="margin-top:18px;">
+                    <button type="button"><i class="fa-solid fa-camera"></i> Upload POD</button>
+                    <button class="secondary" type="button"><i class="fa-solid fa-phone"></i> Contact support</button>
+                </div>
+            </section>
+
+            <section class="section" aria-label="Next steps">
+                <h3>Next steps</h3>
+                <div class="actions">
+                    <button type="button"><i class="fa-solid fa-location-dot"></i> Share live tracking</button>
+                    <button class="secondary" type="button"><i class="fa-solid fa-note-sticky"></i> Add delivery notes</button>
+                </div>
+            </section>
+
+            <nav class="bottom-nav" aria-label="Primary navigation">
+                <button type="button">
+                    <i class="fa-solid fa-gauge"></i>
+                    Dashboard
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Loads
+                </button>
+                <button class="active" type="button">
+                    <i class="fa-solid fa-route"></i>
+                    Active
+                </button>
+                <button type="button">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </button>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>
+

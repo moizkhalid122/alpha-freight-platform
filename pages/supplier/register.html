@@ -1,0 +1,2583 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Registration - Alpha Freight</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link rel="shortcut icon" type="image/jpeg" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link rel="apple-touch-icon" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --primary-rgb: 102, 126, 234;
+            --secondary-rgb: 118, 75, 162;
+        }
+
+        body {
+            background: white;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: cardFadeIn 0.6s ease-out;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            background: #212529;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-logo {
+            width: 140px;
+            height: auto;
+            margin: 0 auto 0.75rem;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes shimmer {
+            0%, 100% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            50% {
+                transform: translate(-50%, -50%) rotate(180deg);
+            }
+        }
+
+        .auth-header h2 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-header p {
+            opacity: 0.95;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+        }
+
+        .auth-body {
+            padding: 2rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1rem;
+            background: #ffffff;
+            font-size: 0.95rem;
+        }
+
+        .form-control:hover {
+            border-color: #d0d7de;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .form-control:focus {
+            border-color: #212529;
+            box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.15), 0 4px 12px rgba(33, 37, 41, 0.1);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        /* Select Elements Styling */
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            padding-right: 2.5rem;
+        }
+
+        select.form-control:focus {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23212529' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        }
+
+        /* Textarea Styling */
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Form Validation States */
+        .form-control.is-valid {
+            border-color: #28a745;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+
+        .form-control.is-valid:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.15);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4m0 4.8-.4-.4-.4.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15);
+        }
+
+        select.form-control.is-valid,
+        select.form-control.is-invalid {
+            padding-right: calc(1.5em + 2.5rem);
+            background-position: right calc(0.375em + 2.125rem) center, right 0.75rem center;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label .required {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .text-primary:hover {
+            color: var(--secondary-color) !important;
+            text-decoration: underline;
+        }
+
+        /* From Uiverse.io by doniaskima */
+        .btn-17,
+        .btn-17 *,
+        .btn-17 :after,
+        .btn-17 :before,
+        .btn-17:after,
+        .btn-17:before {
+            border: 0 solid;
+            box-sizing: border-box;
+        }
+
+        .btn-17 {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-appearance: button;
+            appearance: button;
+            background-color: #000;
+            background-image: none;
+            color: #fff;
+            cursor: pointer;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+                Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+            font-size: 100%;
+            font-weight: 900;
+            line-height: 1.5;
+            margin: 0;
+            -webkit-mask-image: -webkit-radial-gradient(#000, #fff);
+            mask-image: radial-gradient(#000, #fff);
+            padding: 0;
+            text-transform: uppercase;
+        }
+
+        .btn-17:disabled {
+            cursor: default;
+        }
+
+        .btn-17:-moz-focusring {
+            outline: auto;
+        }
+
+        .btn-17 svg {
+            display: block;
+        }
+
+        .btn-17 [hidden] {
+            display: none;
+        }
+
+        .btn-17 {
+            border-radius: 99rem;
+            border-width: 2px;
+            padding: 0.8rem 3rem;
+            z-index: 0;
+            width: 100%;
+        }
+
+        .btn-17,
+        .btn-17 .text-container {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .btn-17 .text-container {
+            display: block;
+            mix-blend-mode: difference;
+        }
+
+        .btn-17 .text {
+            display: block;
+            position: relative;
+        }
+
+        .btn-17:hover .text {
+            -webkit-animation: move-up-alternate 0.3s forwards;
+            animation: move-up-alternate 0.3s forwards;
+        }
+
+        @-webkit-keyframes move-up-alternate {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(80%);
+            }
+            51% {
+                transform: translateY(-80%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes move-up-alternate {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(80%);
+            }
+            51% {
+                transform: translateY(-80%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .btn-17:after,
+        .btn-17:before {
+            --skew: 0.2;
+            background: #fff;
+            content: "";
+            display: block;
+            height: 102%;
+            left: calc(-50% - 50% * var(--skew));
+            pointer-events: none;
+            position: absolute;
+            top: -104%;
+            transform: skew(calc(150deg * var(--skew))) translateY(var(--progress, 0));
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-17:after {
+            --progress: 0%;
+            left: calc(50% + 50% * var(--skew));
+            top: 102%;
+            z-index: -1;
+        }
+
+        .btn-17:hover:before {
+            --progress: 100%;
+        }
+
+        .btn-17:hover:after {
+            --progress: -102%;
+        }
+
+        .btn-outline-success {
+            border: 2px solid #212529;
+            color: #212529;
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-outline-success::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: #212529;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+            z-index: -1;
+        }
+
+        .btn-outline-success:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-outline-success:hover {
+            background: #212529;
+            border-color: #212529;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(33, 37, 41, 0.25);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .login-link a {
+            color: #212529;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.5rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: inherit;
+            transform: scale(0);
+            transition: transform 0.3s;
+        }
+
+        .step:hover {
+            transform: scale(1.1);
+        }
+
+        .step.active {
+            background: #212529;
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 37, 41, 0.4);
+        }
+
+        .step.active::before {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+
+        .step.completed {
+            background: #495057;
+            color: white;
+            box-shadow: 0 4px 15px rgba(73, 80, 87, 0.4);
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .step-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .step-buttons .btn {
+            flex: 1;
+        }
+
+        .verification-badge {
+            background: #212529;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload {
+            border: 2px dashed #e9ecef;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            background: #fafbfc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(33, 37, 41, 0.05), transparent);
+            transition: left 0.5s;
+        }
+
+        .file-upload:hover {
+            border-color: #212529;
+            background: rgba(33, 37, 41, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33, 37, 41, 0.15);
+        }
+
+        .file-upload:hover::before {
+            left: 100%;
+        }
+
+        .file-upload.dragover {
+            border-color: #212529;
+            background: rgba(33, 37, 41, 0.1);
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(33, 37, 41, 0.2);
+        }
+
+        /* From Uiverse.io by abrahamcalsin */
+        .dot-spinner {
+            --uib-size: 2.8rem;
+            --uib-speed: .9s;
+            --uib-color: #183153;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            height: var(--uib-size);
+            width: var(--uib-size);
+        }
+
+        .dot-spinner__dot {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            width: 100%;
+        }
+
+        .dot-spinner__dot::before {
+            content: '';
+            height: 20%;
+            width: 20%;
+            border-radius: 50%;
+            background-color: var(--uib-color);
+            transform: scale(0);
+            opacity: 0.5;
+            animation: pulse0112 calc(var(--uib-speed) * 1.111) ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(18, 31, 53, 0.3);
+        }
+
+        .dot-spinner__dot:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .dot-spinner__dot:nth-child(2)::before {
+            animation-delay: calc(var(--uib-speed) * -0.875);
+        }
+
+        .dot-spinner__dot:nth-child(3) {
+            transform: rotate(90deg);
+        }
+
+        .dot-spinner__dot:nth-child(3)::before {
+            animation-delay: calc(var(--uib-speed) * -0.75);
+        }
+
+        .dot-spinner__dot:nth-child(4) {
+            transform: rotate(135deg);
+        }
+
+        .dot-spinner__dot:nth-child(4)::before {
+            animation-delay: calc(var(--uib-speed) * -0.625);
+        }
+
+        .dot-spinner__dot:nth-child(5) {
+            transform: rotate(180deg);
+        }
+
+        .dot-spinner__dot:nth-child(5)::before {
+            animation-delay: calc(var(--uib-speed) * -0.5);
+        }
+
+        .dot-spinner__dot:nth-child(6) {
+            transform: rotate(225deg);
+        }
+
+        .dot-spinner__dot:nth-child(6)::before {
+            animation-delay: calc(var(--uib-speed) * -0.375);
+        }
+
+        .dot-spinner__dot:nth-child(7) {
+            transform: rotate(270deg);
+        }
+
+        .dot-spinner__dot:nth-child(7)::before {
+            animation-delay: calc(var(--uib-speed) * -0.25);
+        }
+
+        .dot-spinner__dot:nth-child(8) {
+            transform: rotate(315deg);
+        }
+
+        .dot-spinner__dot:nth-child(8)::before {
+            animation-delay: calc(var(--uib-speed) * -0.125);
+        }
+
+        @keyframes pulse0112 {
+            0%,
+            100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Page Loader Overlay */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* PC View Premium Enhancements */
+        @media (min-width: 992px) {
+            .auth-card {
+                max-width: 600px;
+                box-shadow: 0 30px 80px rgba(0,0,0,0.15);
+            }
+
+            .auth-card:hover {
+                box-shadow: 0 35px 100px rgba(0,0,0,0.2);
+                transform: translateY(-5px);
+            }
+
+            .auth-header {
+                padding: 3rem 2.5rem;
+            }
+
+            .auth-header h2 {
+                font-size: 2.25rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .auth-header p {
+                font-size: 1.1rem;
+            }
+
+            .auth-body {
+                padding: 3rem 2.5rem;
+            }
+
+            .form-step h5 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                color: #212529;
+                letter-spacing: -0.3px;
+            }
+
+            .form-label {
+                font-size: 0.95rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .form-control {
+                padding: 0.875rem 1.25rem;
+                font-size: 1rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .step {
+                width: 50px;
+                height: 50px;
+                font-size: 1.15rem;
+                margin: 0 0.75rem;
+            }
+
+            .step-indicator {
+                margin-bottom: 3rem;
+            }
+
+            .btn-17, .btn-outline-success {
+                padding: 1rem 2.5rem;
+                font-size: 1.05rem;
+            }
+
+            .file-upload {
+                padding: 2.5rem;
+            }
+
+            .verification-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .login-link {
+                margin-top: 2rem;
+                padding-top: 2rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .auth-card {
+                max-width: 700px;
+            }
+
+            .auth-header {
+                padding: 3.5rem 3rem;
+            }
+
+            .auth-header h2 {
+                font-size: 2.5rem;
+            }
+
+            .auth-body {
+                padding: 3.5rem 3rem;
+            }
+
+            .form-control {
+                padding: 1rem 1.5rem;
+            }
+
+            .btn-17, .btn-outline-success {
+                padding: 1.125rem 3rem;
+            }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection color */
+        ::selection {
+            background: rgba(var(--primary-rgb), 0.2);
+        }
+
+        /* Country Select with Flags */
+        .country-select-wrapper {
+            position: relative;
+        }
+
+        #country {
+            padding-left: 3rem;
+            background-image: none !important;
+        }
+
+        .country-flag-display {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .country-flag-display .fi {
+            width: 28px;
+            height: 21px;
+            border-radius: 3px;
+            display: inline-block;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Show flag when country is selected */
+        #country:not([value=""]) ~ .country-flag-display {
+            display: flex;
+        }
+
+        #country[value=""] ~ .country-flag-display {
+            display: none;
+        }
+
+        /* Phone Country Code Styling */
+        .input-group {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .phone-country-code {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            font-size: 0.85rem;
+            padding: 0.75rem 0.5rem;
+            min-width: 90px;
+            max-width: 100px;
+            flex: 0 0 auto;
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .phone-country-code:hover {
+            background-color: #e9ecef;
+            border-color: #d0d7de;
+        }
+
+        .phone-country-code:focus {
+            background-color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.15);
+            outline: none;
+        }
+
+        .input-group #phone {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            flex: 1;
+            padding: 0.75rem 1rem;
+        }
+
+        .input-group #phone:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.15);
+        }
+
+        .input-group #phone.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .input-group #phone.is-invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15);
+        }
+
+        .input-group #phone.is-valid {
+            border-color: #28a745;
+        }
+
+        .input-group #phone.is-valid:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.15);
+        }
+
+        /* Form Group Spacing */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form Check Label */
+        .form-check-label {
+            color: #495057;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .form-check-input {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .form-check-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.15);
+        }
+
+        /* Disabled Form Controls */
+        .form-control:disabled,
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Form Help Text */
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        /* Input Group Addon */
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-right: none;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .input-group:focus-within .input-group-text {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+        }
+
+        .phone-country-code option {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #dc3545;
+        }
+
+        /* Social login + top-logo styles removed */
+
+        /* OTP Verification Modal */
+        .otp-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .otp-modal-backdrop.show {
+            display: flex;
+        }
+
+        .otp-modal {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            padding: 0;
+            overflow: hidden;
+            animation: otpModalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes otpModalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .otp-modal-header {
+            background: #212529;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .otp-modal-header h4 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .otp-modal-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .otp-modal-body {
+            padding: 2rem;
+        }
+
+        .otp-input-container {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #212529;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .otp-input:focus {
+            border-color: #212529;
+            box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.15), 0 4px 12px rgba(33, 37, 41, 0.1);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        .otp-input.filled {
+            border-color: #212529;
+            background: #f8f9fa;
+        }
+
+        .otp-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-verify-otp {
+            background: #212529;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .btn-verify-otp:hover:not(:disabled) {
+            background: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33, 37, 41, 0.3);
+        }
+
+        .btn-verify-otp:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-resend-otp {
+            background: transparent;
+            color: #212529;
+            border: 2px solid #212529;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .btn-resend-otp:hover:not(:disabled) {
+            background: #212529;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-resend-otp:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .otp-timer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .otp-error {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .otp-error.show {
+            display: block;
+        }
+
+        .otp-success {
+            background: #d1e7dd;
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .otp-success.show {
+            display: block;
+        }
+
+        @media (max-width: 576px) {
+            .otp-input {
+                width: 45px;
+                height: 55px;
+                font-size: 1.25rem;
+            }
+
+            .otp-input-container {
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Loader -->
+    <!-- From Uiverse.io by abrahamcalsin -->
+    <div class="page-loader" id="pageLoader">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <img class="auth-logo" src="../../image-removebg-preview - 2025-10-29T072620.142.png" alt="Alpha Freight Logo">
+                <h2><i class="fas fa-warehouse"></i> Supplier Registration</h2>
+                <p>Join Alpha Freight as a verified supplier</p>
+            </div>
+            
+            <div class="auth-body">
+                <form id="supplierRegistrationForm">
+                    <!-- Basic Information -->
+                    <div class="form-step active" id="formStep1">
+                        <h5 class="mb-3">Personal Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <div class="input-group">
+                                    <select class="form-control phone-country-code" id="phoneCountryCode">
+                                        <!-- Europe -->
+                                        <optgroup label="Europe">
+                                            <option value="+44" data-flag="gb">🇬🇧 +44</option>
+                                            <option value="+49" data-flag="de">🇩🇪 +49</option>
+                                            <option value="+33" data-flag="fr">🇫🇷 +33</option>
+                                            <option value="+39" data-flag="it">🇮🇹 +39</option>
+                                            <option value="+34" data-flag="es">🇪🇸 +34</option>
+                                            <option value="+31" data-flag="nl">🇳🇱 +31</option>
+                                            <option value="+32" data-flag="be">🇧🇪 +32</option>
+                                            <option value="+43" data-flag="at">🇦🇹 +43</option>
+                                            <option value="+351" data-flag="pt">🇵🇹 +351</option>
+                                            <option value="+353" data-flag="ie">🇮🇪 +353</option>
+                                            <option value="+48" data-flag="pl">🇵🇱 +48</option>
+                                            <option value="+46" data-flag="se">🇸🇪 +46</option>
+                                            <option value="+47" data-flag="no">🇳🇴 +47</option>
+                                            <option value="+45" data-flag="dk">🇩🇰 +45</option>
+                                            <option value="+41" data-flag="ch">🇨🇭 +41</option>
+                                        </optgroup>
+                                        <!-- North America -->
+                                        <optgroup label="North America">
+                                            <option value="+1" data-flag="us">🇺🇸 +1</option>
+                                            <option value="+52" data-flag="mx">🇲🇽 +52</option>
+                                        </optgroup>
+                                        <!-- Middle East -->
+                                        <optgroup label="Middle East">
+                                            <option value="+971" data-flag="ae">🇦🇪 +971</option>
+                                            <option value="+966" data-flag="sa">🇸🇦 +966</option>
+                                            <option value="+974" data-flag="qa">🇶🇦 +974</option>
+                                            <option value="+965" data-flag="kw">🇰🇼 +965</option>
+                                            <option value="+973" data-flag="bh">🇧🇭 +973</option>
+                                            <option value="+968" data-flag="om">🇴🇲 +968</option>
+                                            <option value="+962" data-flag="jo">🇯🇴 +962</option>
+                                            <option value="+961" data-flag="lb">🇱🇧 +961</option>
+                                            <option value="+20" data-flag="eg">🇪🇬 +20</option>
+                                            <option value="+972" data-flag="il">🇮🇱 +972</option>
+                                            <option value="+90" data-flag="tr">🇹🇷 +90</option>
+                                        </optgroup>
+                                        <!-- Asia -->
+                                        <optgroup label="Asia">
+                                            <option value="+91" data-flag="in">🇮🇳 +91</option>
+                                            <option value="+92" data-flag="pk">🇵🇰 +92</option>
+                                            <option value="+880" data-flag="bd">🇧🇩 +880</option>
+                                            <option value="+86" data-flag="cn">🇨🇳 +86</option>
+                                            <option value="+81" data-flag="jp">🇯🇵 +81</option>
+                                            <option value="+82" data-flag="kr">🇰🇷 +82</option>
+                                            <option value="+65" data-flag="sg">🇸🇬 +65</option>
+                                            <option value="+60" data-flag="my">🇲🇾 +60</option>
+                                            <option value="+66" data-flag="th">🇹🇭 +66</option>
+                                            <option value="+62" data-flag="id">🇮🇩 +62</option>
+                                            <option value="+63" data-flag="ph">🇵🇭 +63</option>
+                                            <option value="+84" data-flag="vn">🇻🇳 +84</option>
+                                            <option value="+852" data-flag="hk">🇭🇰 +852</option>
+                                            <option value="+886" data-flag="tw">🇹🇼 +886</option>
+                                        </optgroup>
+                                        <!-- Oceania -->
+                                        <optgroup label="Oceania">
+                                            <option value="+61" data-flag="au">🇦🇺 +61</option>
+                                            <option value="+64" data-flag="nz">🇳🇿 +64</option>
+                                        </optgroup>
+                                        <!-- Africa -->
+                                        <optgroup label="Africa">
+                                            <option value="+27" data-flag="za">🇿🇦 +27</option>
+                                            <option value="+234" data-flag="ng">🇳🇬 +234</option>
+                                            <option value="+254" data-flag="ke">🇰🇪 +254</option>
+                                            <option value="+233" data-flag="gh">🇬🇭 +233</option>
+                                        </optgroup>
+                                        <!-- South America -->
+                                        <optgroup label="South America">
+                                            <option value="+55" data-flag="br">🇧🇷 +55</option>
+                                            <option value="+54" data-flag="ar">🇦🇷 +54</option>
+                                            <option value="+56" data-flag="cl">🇨🇱 +56</option>
+                                            <option value="+57" data-flag="co">🇨🇴 +57</option>
+                                            <option value="+51" data-flag="pe">🇵🇪 +51</option>
+                                        </optgroup>
+                                    </select>
+                                    <input type="tel" class="form-control" id="phone" placeholder="Enter phone number" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="country" class="form-label">Country *</label>
+                                <div class="country-select-wrapper" style="position: relative;">
+                                    <select class="form-control" id="country" required>
+                                        <option value="">Select country</option>
+                                        <!-- Europe -->
+                                        <optgroup label="Europe">
+                                            <option value="UK" data-flag="gb" selected>United Kingdom</option>
+                                            <option value="DE" data-flag="de">Germany</option>
+                                            <option value="FR" data-flag="fr">France</option>
+                                            <option value="IT" data-flag="it">Italy</option>
+                                            <option value="ES" data-flag="es">Spain</option>
+                                            <option value="NL" data-flag="nl">Netherlands</option>
+                                            <option value="BE" data-flag="be">Belgium</option>
+                                            <option value="AT" data-flag="at">Austria</option>
+                                            <option value="PT" data-flag="pt">Portugal</option>
+                                            <option value="IE" data-flag="ie">Ireland</option>
+                                            <option value="PL" data-flag="pl">Poland</option>
+                                            <option value="SE" data-flag="se">Sweden</option>
+                                            <option value="NO" data-flag="no">Norway</option>
+                                            <option value="DK" data-flag="dk">Denmark</option>
+                                            <option value="CH" data-flag="ch">Switzerland</option>
+                                        </optgroup>
+                                        <!-- North America -->
+                                        <optgroup label="North America">
+                                            <option value="US" data-flag="us">United States</option>
+                                            <option value="CA" data-flag="ca">Canada</option>
+                                            <option value="MX" data-flag="mx">Mexico</option>
+                                        </optgroup>
+                                        <!-- Middle East -->
+                                        <optgroup label="Middle East">
+                                            <option value="AE" data-flag="ae">United Arab Emirates</option>
+                                            <option value="SA" data-flag="sa">Saudi Arabia</option>
+                                            <option value="QA" data-flag="qa">Qatar</option>
+                                            <option value="KW" data-flag="kw">Kuwait</option>
+                                            <option value="BH" data-flag="bh">Bahrain</option>
+                                            <option value="OM" data-flag="om">Oman</option>
+                                            <option value="JO" data-flag="jo">Jordan</option>
+                                            <option value="LB" data-flag="lb">Lebanon</option>
+                                            <option value="EG" data-flag="eg">Egypt</option>
+                                            <option value="IL" data-flag="il">Israel</option>
+                                            <option value="TR" data-flag="tr">Turkey</option>
+                                        </optgroup>
+                                        <!-- Asia -->
+                                        <optgroup label="Asia">
+                                            <option value="IN" data-flag="in">India</option>
+                                            <option value="PK" data-flag="pk">Pakistan</option>
+                                            <option value="BD" data-flag="bd">Bangladesh</option>
+                                            <option value="CN" data-flag="cn">China</option>
+                                            <option value="JP" data-flag="jp">Japan</option>
+                                            <option value="KR" data-flag="kr">South Korea</option>
+                                            <option value="SG" data-flag="sg">Singapore</option>
+                                            <option value="MY" data-flag="my">Malaysia</option>
+                                            <option value="TH" data-flag="th">Thailand</option>
+                                            <option value="ID" data-flag="id">Indonesia</option>
+                                            <option value="PH" data-flag="ph">Philippines</option>
+                                            <option value="VN" data-flag="vn">Vietnam</option>
+                                            <option value="HK" data-flag="hk">Hong Kong</option>
+                                            <option value="TW" data-flag="tw">Taiwan</option>
+                                        </optgroup>
+                                        <!-- Oceania -->
+                                        <optgroup label="Oceania">
+                                            <option value="AU" data-flag="au">Australia</option>
+                                            <option value="NZ" data-flag="nz">New Zealand</option>
+                                        </optgroup>
+                                        <!-- Africa -->
+                                        <optgroup label="Africa">
+                                            <option value="ZA" data-flag="za">South Africa</option>
+                                            <option value="NG" data-flag="ng">Nigeria</option>
+                                            <option value="KE" data-flag="ke">Kenya</option>
+                                            <option value="GH" data-flag="gh">Ghana</option>
+                                        </optgroup>
+                                        <!-- South America -->
+                                        <optgroup label="South America">
+                                            <option value="BR" data-flag="br">Brazil</option>
+                                            <option value="AR" data-flag="ar">Argentina</option>
+                                            <option value="CL" data-flag="cl">Chile</option>
+                                            <option value="CO" data-flag="co">Colombia</option>
+                                            <option value="PE" data-flag="pe">Peru</option>
+                                        </optgroup>
+                                    </select>
+                                    <span class="country-flag-display" id="countryFlag"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">Password *</label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirmPassword" class="form-label">Confirm Password *</label>
+                                <input type="password" class="form-control" id="confirmPassword" required>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="termsAccepted" required>
+                            <label class="form-check-label" for="termsAccepted">
+                                I agree to the <a href="../legal/terms.html" class="text-primary" target="_blank">Terms & Conditions</a> and <a href="../legal/privacy.html" class="text-primary" target="_blank">Privacy Policy</a> *
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="marketingConsent">
+                            <label class="form-check-label" for="marketingConsent">
+                                I consent to receive marketing communications from Alpha Freight
+                            </label>
+                        </div>
+
+                        <div class="step-buttons">
+                            <button type="submit" class="btn-17">
+                                <span class="text-container">
+                                    <span class="text">
+                                        <i class="fas fa-user-plus me-2"></i>Create Account
+                                    </span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="login-link">
+                    <p>Already have an account? <a href="login.html">Sign in here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div class="otp-modal-backdrop" id="otpModal">
+        <div class="otp-modal">
+            <div class="otp-modal-header">
+                <h4><i class="fas fa-shield-alt me-2"></i>Verify Your Email</h4>
+                <p>Enter the 6-digit code sent to <strong id="otpEmailDisplay"></strong></p>
+            </div>
+            <div class="otp-modal-body">
+                <div class="otp-error" id="otpError"></div>
+                <div class="otp-success" id="otpSuccess"></div>
+                
+                <div class="otp-input-container">
+                    <input type="text" class="otp-input" id="otp1" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" id="otp2" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" id="otp3" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" id="otp4" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" id="otp5" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" id="otp6" maxlength="1" autocomplete="off">
+                </div>
+
+                <div class="otp-actions">
+                    <button type="button" class="btn btn-verify-otp" id="btnVerifyOTP">
+                        <i class="fas fa-check-circle me-2"></i>Verify OTP
+                    </button>
+                    <button type="button" class="btn btn-resend-otp" id="btnResendOTP">
+                        <i class="fas fa-redo me-2"></i>Resend Code
+                    </button>
+                    <div class="otp-timer" id="otpTimer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Currency Handler for Global Support -->
+    <script src="../../assets/js/currency-handler.js"></script>
+    <!-- Phone Handler for Global Support -->
+    <script src="../../assets/js/phone-handler.js"></script>
+    <!-- Postal Code Handler for Global Support -->
+    <script src="../../assets/js/postal-code-handler.js"></script>
+    <!-- Custom JS -->
+    <script src="../../assets/js/script.js"></script>
+    <!-- Firebase v8.10.1 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Page Loader Control - 4 seconds minimum display
+        window.addEventListener('load', function() {
+            const pageLoader = document.getElementById('pageLoader');
+            setTimeout(function() {
+                pageLoader.classList.add('hidden');
+                setTimeout(function() {
+                    pageLoader.style.display = 'none';
+                }, 500);
+            }, 4000); // 4 seconds (4000ms)
+        });
+
+        // Show loader if page is still loading
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.readyState === 'loading') {
+                document.getElementById('pageLoader').style.display = 'flex';
+            }
+        });
+
+    </script>
+    
+    <script>
+        // Safe alert shim if AlphaBrokrage isn't present
+        window.AlphaBrokrage = window.AlphaBrokrage || {
+            showAlert: function(type, message){
+                try { console.log('[', type, ']', message); } catch(e){}
+                if (type === 'error') { alert(message); } else { /* no-op */ }
+            }
+        };
+
+        // Initialize Firebase
+        (function initFirebase(){
+            var firebaseConfig = {
+              apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+              authDomain: "alpha-brokerage.firebaseapp.com",
+              databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+              projectId: "alpha-brokerage",
+              storageBucket: "alpha-brokerage.firebasestorage.app",
+              messagingSenderId: "834712514965",
+              appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            if (!window.firebase || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        })();
+
+        function validateForm() {
+            const requiredFields = document.querySelectorAll('#formStep1 input[required], #formStep1 select[required]');
+            
+            for (let field of requiredFields) {
+                if (field.type !== 'file' && !field.value.trim()) {
+                    field.focus();
+                    if (typeof AlphaBrokrage !== 'undefined') {
+                        AlphaBrokrage.showAlert('error', `Please fill in the required field`);
+                    } else {
+                        alert(`Please fill in the required field`);
+                    }
+                    return false;
+                }
+            }
+
+            // Password validation
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                if (typeof AlphaBrokrage !== 'undefined') {
+                    AlphaBrokrage.showAlert('error', 'Passwords do not match!');
+                } else {
+                    alert('Passwords do not match!');
+                }
+                return false;
+            }
+            
+            if (password.length < 6) {
+                if (typeof AlphaBrokrage !== 'undefined') {
+                    AlphaBrokrage.showAlert('error', 'Password must be at least 6 characters long!');
+                } else {
+                    alert('Password must be at least 6 characters long!');
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        (function enforcePhoneDigits() {
+            const phoneInput = document.getElementById('phone');
+            const countryCodeSelect = document.getElementById('phoneCountryCode');
+            if (!phoneInput) return;
+            
+            // Phone number validation rules by country code
+            const phoneValidationRules = {
+                '+44': { // UK
+                    minLength: 10,
+                    maxLength: 10,
+                    pattern: /^[0-9]{10}$/,
+                    errorMessage: 'UK phone number must be 10 digits (e.g., 7123456789)'
+                },
+                '+1': { // USA/Canada
+                    minLength: 10,
+                    maxLength: 10,
+                    pattern: /^[0-9]{10}$/,
+                    errorMessage: 'US/Canada phone number must be 10 digits (e.g., 2125551234)'
+                },
+                '+49': { // Germany
+                    minLength: 10,
+                    maxLength: 11,
+                    pattern: /^[0-9]{10,11}$/,
+                    errorMessage: 'German phone number must be 10-11 digits'
+                },
+                '+61': { // Australia
+                    minLength: 9,
+                    maxLength: 9,
+                    pattern: /^[0-9]{9}$/,
+                    errorMessage: 'Australian phone number must be 9 digits (e.g., 412345678)'
+                },
+                '+971': { // UAE
+                    minLength: 9,
+                    maxLength: 9,
+                    pattern: /^[0-9]{9}$/,
+                    errorMessage: 'UAE phone number must be 9 digits (e.g., 501234567)'
+                }
+            };
+
+            function validatePhoneNumber() {
+                const countryCode = countryCodeSelect ? countryCodeSelect.value : '';
+                const phoneNumber = phoneInput.value.replace(/\D+/g, '');
+                
+                if (!phoneNumber) {
+                    phoneInput.classList.remove('is-invalid');
+                    phoneInput.classList.remove('is-valid');
+                    return true;
+                }
+
+                const rule = phoneValidationRules[countryCode];
+                if (!rule) {
+                    phoneInput.classList.remove('is-invalid');
+                    phoneInput.classList.remove('is-valid');
+                    return true;
+                }
+
+                if (phoneNumber.length < rule.minLength || phoneNumber.length > rule.maxLength) {
+                    phoneInput.classList.add('is-invalid');
+                    phoneInput.classList.remove('is-valid');
+                    phoneInput.setCustomValidity(rule.errorMessage);
+                    return false;
+                }
+
+                if (!rule.pattern.test(phoneNumber)) {
+                    phoneInput.classList.add('is-invalid');
+                    phoneInput.classList.remove('is-valid');
+                    phoneInput.setCustomValidity(rule.errorMessage);
+                    return false;
+                }
+
+                phoneInput.classList.remove('is-invalid');
+                phoneInput.classList.add('is-valid');
+                phoneInput.setCustomValidity('');
+                return true;
+            }
+
+            phoneInput.addEventListener('input', function() {
+                // Remove all non-numeric characters
+                let value = this.value;
+                const numeric = value.replace(/\D+/g, '');
+                if (numeric !== this.value) {
+                    this.value = numeric;
+                }
+                // Validate on input
+                validatePhoneNumber();
+            });
+
+            phoneInput.addEventListener('blur', function() {
+                validatePhoneNumber();
+            });
+
+            if (countryCodeSelect) {
+                countryCodeSelect.addEventListener('change', function() {
+                    validatePhoneNumber();
+                });
+            }
+
+            // Sync country code with country selection
+            const countrySelect = document.getElementById('country');
+            if (countrySelect && countryCodeSelect) {
+                const countryToCodeMap = {
+                    // Europe
+                    'UK': '+44', 'DE': '+49', 'FR': '+33', 'IT': '+39', 'ES': '+34',
+                    'NL': '+31', 'BE': '+32', 'AT': '+43', 'PT': '+351', 'IE': '+353',
+                    'PL': '+48', 'SE': '+46', 'NO': '+47', 'DK': '+45', 'CH': '+41',
+                    // North America
+                    'US': '+1', 'CA': '+1', 'MX': '+52',
+                    // Middle East
+                    'AE': '+971', 'SA': '+966', 'QA': '+974', 'KW': '+965', 'BH': '+973',
+                    'OM': '+968', 'JO': '+962', 'LB': '+961', 'EG': '+20', 'IL': '+972', 'TR': '+90',
+                    // Asia
+                    'IN': '+91', 'PK': '+92', 'BD': '+880', 'CN': '+86', 'JP': '+81', 'KR': '+82',
+                    'SG': '+65', 'MY': '+60', 'TH': '+66', 'ID': '+62', 'PH': '+63', 'VN': '+84',
+                    'HK': '+852', 'TW': '+886',
+                    // Oceania
+                    'AU': '+61', 'NZ': '+64',
+                    // Africa
+                    'ZA': '+27', 'NG': '+234', 'KE': '+254', 'GH': '+233',
+                    // South America
+                    'BR': '+55', 'AR': '+54', 'CL': '+56', 'CO': '+57', 'PE': '+51'
+                };
+
+                countrySelect.addEventListener('change', function() {
+                    const selectedCountry = this.value;
+                    const code = countryToCodeMap[selectedCountry];
+                    if (code) {
+                        countryCodeSelect.value = code;
+                        validatePhoneNumber();
+                    }
+                    
+                    // Auto-set currency based on country
+                    if (window.CurrencyHandler) {
+                        const currency = window.CurrencyHandler.getCurrencyByCountry(selectedCountry);
+                        // Store currency in a hidden field or data attribute
+                        if (!document.getElementById('currency')) {
+                            const currencyInput = document.createElement('input');
+                            currencyInput.type = 'hidden';
+                            currencyInput.id = 'currency';
+                            currencyInput.name = 'currency';
+                            countrySelect.parentElement.appendChild(currencyInput);
+                        }
+                        document.getElementById('currency').value = currency.code;
+                        console.log('✅ Currency set to:', currency.code, 'for country:', selectedCountry);
+                    }
+                });
+            }
+        })();
+
+        // Country Flag Display
+        (function setupCountryFlag() {
+            const countrySelect = document.getElementById('country');
+            const countryFlag = document.getElementById('countryFlag');
+            if (!countrySelect || !countryFlag) return;
+
+            function updateFlag() {
+                const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+                const flagCode = selectedOption ? selectedOption.getAttribute('data-flag') : null;
+                const selectedValue = countrySelect.value;
+                
+                if (flagCode && selectedValue) {
+                    countryFlag.innerHTML = '<span class="fi fi-' + flagCode + '"></span>';
+                    countryFlag.style.display = 'flex';
+                } else {
+                    countryFlag.innerHTML = '';
+                    countryFlag.style.display = 'none';
+                }
+            }
+
+            countrySelect.addEventListener('change', updateFlag);
+            // Initial update on page load
+            setTimeout(updateFlag, 100);
+        })();
+
+        // Form submission
+        document.getElementById('supplierRegistrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form before submitting
+            if (!validateForm()) {
+                return;
+            }
+            
+            console.log('Form submission proceeding...');
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="text-container"><span class="text"><span class="spinner-border spinner-border-sm me-2"></span>Creating Account...</span></span>';
+            submitBtn.disabled = true;
+            
+            // Show progress message
+            if (typeof AlphaBrokrage !== 'undefined') {
+                AlphaBrokrage.showAlert('info', 'Creating your account, please wait...');
+            } else {
+                alert('Creating your account, please wait...');
+            }
+
+            // Collect form data
+            const phoneCountryCode = document.getElementById('phoneCountryCode') ? document.getElementById('phoneCountryCode').value : '';
+            const phoneNumber = document.getElementById('phone').value;
+            const fullPhoneNumber = phoneCountryCode && phoneNumber ? phoneCountryCode + phoneNumber : phoneNumber;
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: fullPhoneNumber,
+                country: document.getElementById('country').value,
+                currency: document.getElementById('currency') ? document.getElementById('currency').value : (window.CurrencyHandler ? window.CurrencyHandler.getCurrencyCode(document.getElementById('country').value) : 'GBP'),
+                password: document.getElementById('password').value,
+                termsAccepted: document.getElementById('termsAccepted').checked,
+                marketingConsent: document.getElementById('marketingConsent').checked,
+                registrationDate: new Date().toISOString(),
+                status: 'pending_verification',
+                profileComplete: false  // Profile not complete yet
+            };
+
+            function resetSubmitStateWithMessage(message) {
+                if (typeof AlphaBrokrage !== 'undefined') {
+                    AlphaBrokrage.showAlert('error', message);
+                } else {
+                    alert(message);
+                }
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+
+            const requiredFieldChecks = [
+                { value: formData.firstName, label: 'First name' },
+                { value: formData.lastName, label: 'Last name' },
+                { value: formData.email, label: 'Email' },
+                { value: formData.phone, label: 'Phone' },
+                { value: formData.country, label: 'Country' },
+                { value: formData.password, label: 'Password' }
+            ];
+
+            for (const field of requiredFieldChecks) {
+                if (!field.value || !field.value.toString().trim()) {
+                    resetSubmitStateWithMessage('Please fill all required things.');
+                    return;
+                }
+            }
+
+            if (!formData.termsAccepted) {
+                resetSubmitStateWithMessage('Please fill all required things.');
+                return;
+            }
+
+            // Phone validation - should start with + and have 10-15 digits after country code
+            const phonePattern = /^\+[0-9]{10,15}$/;
+            const cleanPhone = formData.phone.replace(/\s+/g, '');
+            if (!phonePattern.test(cleanPhone)) {
+                resetSubmitStateWithMessage('Please enter a valid phone number with country code.');
+                return;
+            }
+
+            // No documents required at registration - will be collected in profile completion
+
+            // OTP Verification - Check if email is verified
+            if (!isOTPVerified || otpEmail !== formData.email) {
+                // Send OTP and show modal
+                submitBtn.innerHTML = '<span class="text-container"><span class="text"><span class="spinner-border spinner-border-sm me-2"></span>Sending OTP...</span></span>';
+                sendOTP(formData.email, formData.firstName, formData.lastName).then(result => {
+                    if (result.success) {
+                        showOTPModal(formData.email);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    } else {
+                        resetSubmitStateWithMessage('Failed to send OTP. Please try again.');
+                    }
+                });
+                return;
+            }
+
+            // Check if email already exists before proceeding
+            try {
+                var db = firebase.database();
+                db.ref('suppliers').orderByChild('email').equalTo(formData.email).once('value', function(snapshot) {
+                    if (snapshot && snapshot.exists && snapshot.exists()) {
+                        if (typeof AlphaBrokrage !== 'undefined') {
+                            AlphaBrokrage.showAlert('error', 'This email is already in use. Please sign in.');
+                        } else {
+                            alert('This email is already in use. Please sign in.');
+                        }
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+
+                    // Set a maximum timeout to ensure redirect happens even if files take too long
+                    var maxTimeout = setTimeout(function() {
+                        console.warn('Registration timeout - forcing redirect');
+                        try {
+                            const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+                            if (auth && auth.supplierId) {
+                                // Registration was successful, redirect
+                                window.location.href = 'dashboard.html';
+                            }
+                        } catch (e) {
+                            console.error('Timeout redirect error:', e);
+                        }
+                    }, 30000); // 30 seconds max
+
+                    // Simulate registration with progress updates after uniqueness passes
+                    setTimeout(() => {
+                        // Update progress
+                        submitBtn.innerHTML = '<span class="text-container"><span class="text"><span class="spinner-border spinner-border-sm me-2"></span>Saving Profile...</span></span>';
+                        if (typeof AlphaBrokrage !== 'undefined') {
+                            AlphaBrokrage.showAlert('info', 'Saving your profile information...');
+                        } else {
+                            console.log('Saving your profile information...');
+                        }
+                    }, 500);
+
+                    setTimeout(() => {
+                        // Update progress
+                        submitBtn.innerHTML = '<span class="text-container"><span class="text"><span class="spinner-border spinner-border-sm me-2"></span>Setting up Account...</span></span>';
+                        if (typeof AlphaBrokrage !== 'undefined') {
+                            AlphaBrokrage.showAlert('info', 'Setting up your account...');
+                        } else {
+                            console.log('Setting up your account...');
+                        }
+                    }, 1000);
+
+                    setTimeout(() => {
+                        try {
+                            var db = firebase.database();
+                            
+                            function saveData() {
+                                try {
+                                    // Clear the max timeout since we're saving now
+                                    if (typeof maxTimeout !== 'undefined') {
+                                        clearTimeout(maxTimeout);
+                                    }
+                                    
+                                    // Save to Firebase - basic info only
+                                    var supplierData = {
+                                        firstName: formData.firstName,
+                                        lastName: formData.lastName,
+                                        email: formData.email,
+                                        phone: formData.phone,
+                                        password: formData.password,
+                                        country: formData.country,
+                                        currency: formData.currency || (window.CurrencyHandler ? window.CurrencyHandler.getCurrencyCode(formData.country) : 'GBP'),
+                                        termsAccepted: formData.termsAccepted,
+                                        marketingConsent: formData.marketingConsent,
+                                        registrationDate: formData.registrationDate,
+                                        status: formData.status,
+                                        profileComplete: formData.profileComplete,
+                                        userType: 'supplier',
+                                        createdAt: new Date().toISOString()
+                                    };
+                                    
+                                    console.log('Attempting to save supplier data:', supplierData);
+                                    
+                                    if (!db) {
+                                        console.error('Firebase database not initialized');
+                                        AlphaBrokrage.showAlert('error', 'Database error. Please refresh and try again.');
+                                        submitBtn.innerHTML = originalText;
+                                        submitBtn.disabled = false;
+                                        return;
+                                    }
+                                    
+                                    console.log('Firebase database is available, creating supplier record...');
+                                    var newSupplierRef = db.ref('suppliers').push();
+                                    var supplierId = newSupplierRef.key;
+                                    console.log('Generated supplier ID:', supplierId);
+                                    
+                                    newSupplierRef.set(supplierData, function(error) {
+                                        console.log('Firebase set callback executed, error:', error);
+                                    if (error) {
+                                        console.error('Firebase save error:', error);
+                                        AlphaBrokrage.showAlert('error', 'Registration failed: ' + error.message);
+                                        submitBtn.innerHTML = originalText;
+                                        submitBtn.disabled = false;
+                                        return;
+                                    }
+                                    console.log('Supplier saved to Firebase with ID:', supplierId);
+                                    
+                                    // Store auth session for current user
+                                    localStorage.setItem('supplierAuth', JSON.stringify({
+                                        supplierId: supplierId,
+                                        email: formData.email,
+                                        firstName: formData.firstName,
+                                        lastName: formData.lastName,
+                                        phone: formData.phone,
+                                        country: formData.country,
+                                        currency: formData.currency || (window.CurrencyHandler ? window.CurrencyHandler.getCurrencyCode(formData.country) : 'GBP'),
+                                        profileComplete: false,
+                                        isLoggedIn: true,
+                                        loginTime: new Date().toISOString()
+                                    }));
+                                    try {
+                                        localStorage.setItem('ab.portal.lastRole', 'supplier');
+                                    } catch (err) {}
+                                    
+                                    console.log('Registration successful! Data saved to Firebase.');
+                                    
+                                    // Send "Complete Your Profile" email
+                                    sendCompleteProfileEmail(formData.email, formData.firstName + ' ' + formData.lastName, supplierId, 'supplier').catch(err => {
+                                        console.warn('Email could not be sent:', err);
+                                        // Don't block registration if email fails
+                                    });
+                                    
+                                    // Send admin notification email
+                                    sendAdminNewUserNotification(formData, supplierId, 'supplier').catch(err => {
+                                        console.warn('Admin notification email could not be sent:', err);
+                                        // Don't block registration if email fails
+                                    });
+                                    
+                                    // Final success message
+                                    if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                                        AlphaBrokrage.showAlert('success', 'Account created successfully! Redirecting to dashboard...');
+                                    } else {
+                                        alert('Account created successfully! Redirecting to dashboard...');
+                                    }
+                                    
+                                    // Reset button state
+                                    submitBtn.innerHTML = originalText;
+                                    submitBtn.disabled = false;
+                                    
+                                    // Clear the max timeout since we're redirecting successfully
+                                    if (typeof maxTimeout !== 'undefined') {
+                                        clearTimeout(maxTimeout);
+                                    }
+                                    
+                                    // Redirect to dashboard after showing message
+                                    setTimeout(() => {
+                                        try {
+                                            console.log('Redirecting to dashboard...');
+                                            window.location.href = 'dashboard.html';
+                                        } catch (redirectError) {
+                                            console.error('Redirect error:', redirectError);
+                                            // Fallback: try using window.location.replace
+                                            try {
+                                                window.location.replace('dashboard.html');
+                                            } catch (e) {
+                                                // Last resort: try assigning to location
+                                                window.location = 'dashboard.html';
+                                            }
+                                        }
+                                    }, 1500);
+                                });
+                                } catch (saveError) {
+                                    console.error('Error in saveData function:', saveError);
+                                    AlphaBrokrage.showAlert('error', 'Error saving data: ' + saveError.message);
+                                    submitBtn.innerHTML = originalText;
+                                    submitBtn.disabled = false;
+                                }
+                            }
+                            
+                            // Save data immediately (no files to process)
+                            saveData();
+                            
+                        } catch (error) {
+                            console.error('Registration error:', error);
+                            alert('Error creating account. Please try again.');
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }, 2000);
+                });
+            } catch (err) {
+                console.error('Email uniqueness check failed:', err);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+        });
+    </script>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <script>
+        // EmailJS Configuration
+        const EMAILJS_REGISTRATION_CONFIG = {
+            serviceId: 'service_mvxwoue',       // Hostinger SMTP Service ID
+            templateId: 'template_z5k8r3d',    // Complete Profile Template ID
+            adminTemplateId: 'template_r5ptt44', // Admin New User Notification Template ID
+            otpTemplateId: 'template_ta8howf', // OTP Template ID
+            publicKey: 'f5bWSTVw5Z8mVVwTu'     // Public Key
+        };
+
+        // OTP System Variables
+        let currentOTP = '';
+        let otpEmail = '';
+        let otpTimer = null;
+        let otpTimerSeconds = 60;
+        let isOTPVerified = false;
+
+        // Generate 6-digit OTP
+        function generateOTP() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Send OTP via EmailJS
+        async function sendOTP(email, firstName = '', lastName = '') {
+            try {
+                // Wait for EmailJS to be available
+                let retries = 0;
+                while (typeof emailjs === 'undefined' && retries < 5) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    retries++;
+                }
+
+                if (typeof emailjs === 'undefined') {
+                    throw new Error('EmailJS library not loaded');
+                }
+
+                // Initialize EmailJS if needed
+                try {
+                    if (typeof emailjs.init === 'function') {
+                        emailjs.init(EMAILJS_REGISTRATION_CONFIG.publicKey);
+                    }
+                } catch (initError) {
+                    console.warn('EmailJS already initialized or init failed:', initError);
+                }
+
+                // Generate new OTP
+                currentOTP = generateOTP();
+                otpEmail = email;
+
+                // Prepare user name
+                let userName = '';
+                if (firstName && lastName) {
+                    userName = firstName + ' ' + lastName;
+                } else if (firstName) {
+                    userName = firstName;
+                } else {
+                    userName = email.split('@')[0]; // Fallback to email username
+                }
+
+                // Prepare email parameters - matching template variables (same as carrier register)
+                const emailParams = {
+                    to_email: email,
+                    email: email,
+                    otp_code: currentOTP.toString(),
+                    passcode: currentOTP.toString(),
+                    user_name: userName,
+                    name: userName, // Also send as name
+                    app_name: 'Alpha Freight'
+                };
+
+                console.log('📧 Sending OTP email with params:', emailParams);
+                console.log('🔑 OTP Code:', currentOTP);
+
+                // Send OTP email
+                const response = await emailjs.send(
+                    EMAILJS_REGISTRATION_CONFIG.serviceId,
+                    EMAILJS_REGISTRATION_CONFIG.otpTemplateId,
+                    emailParams
+                );
+
+                console.log('✅ OTP sent successfully!', response);
+                return { success: true, otp: currentOTP };
+            } catch (error) {
+                console.error('❌ Error sending OTP:', error);
+                return { success: false, error: error.message || 'Failed to send OTP' };
+            }
+        }
+
+        // Show OTP Modal
+        function showOTPModal(email) {
+            document.getElementById('otpEmailDisplay').textContent = email;
+            document.getElementById('otpModal').classList.add('show');
+            clearOTPInputs();
+            resetOTPTimer();
+            document.getElementById('otp1').focus();
+        }
+
+        // Hide OTP Modal
+        function hideOTPModal() {
+            document.getElementById('otpModal').classList.remove('show');
+            clearOTPTimer();
+            clearOTPInputs();
+        }
+
+        // Clear OTP Inputs
+        function clearOTPInputs() {
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById('otp' + i).value = '';
+                document.getElementById('otp' + i).classList.remove('filled');
+            }
+            hideOTPMessages();
+        }
+
+        // Get OTP from inputs
+        function getOTPFromInputs() {
+            let otp = '';
+            for (let i = 1; i <= 6; i++) {
+                otp += document.getElementById('otp' + i).value;
+            }
+            return otp;
+        }
+
+        // Verify OTP
+        function verifyOTP(inputOTP) {
+            if (inputOTP === currentOTP) {
+                isOTPVerified = true;
+                showOTPSuccess('Email verified successfully!');
+                setTimeout(() => {
+                    hideOTPModal();
+                    // Automatically submit the form after OTP verification
+                    setTimeout(() => {
+                        const form = document.getElementById('supplierRegistrationForm');
+                        const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+                        if (submitBtn) {
+                            // Enable button and click to trigger form submission
+                            submitBtn.disabled = false;
+                            submitBtn.click();
+                        }
+                    }, 300); // Small delay to ensure modal is fully hidden
+                }, 1500);
+                return true;
+            } else {
+                showOTPError('Invalid OTP code. Please try again.');
+                clearOTPInputs();
+                document.getElementById('otp1').focus();
+                return false;
+            }
+        }
+
+        // Show OTP Error
+        function showOTPError(message) {
+            const errorEl = document.getElementById('otpError');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            document.getElementById('otpSuccess').classList.remove('show');
+        }
+
+        // Show OTP Success
+        function showOTPSuccess(message) {
+            const successEl = document.getElementById('otpSuccess');
+            successEl.textContent = message;
+            successEl.classList.add('show');
+            document.getElementById('otpError').classList.remove('show');
+        }
+
+        // Hide OTP Messages
+        function hideOTPMessages() {
+            document.getElementById('otpError').classList.remove('show');
+            document.getElementById('otpSuccess').classList.remove('show');
+        }
+
+        // Reset OTP Timer
+        function resetOTPTimer() {
+            clearOTPTimer();
+            otpTimerSeconds = 60;
+            updateOTPTimer();
+            otpTimer = setInterval(() => {
+                otpTimerSeconds--;
+                updateOTPTimer();
+                if (otpTimerSeconds <= 0) {
+                    clearOTPTimer();
+                }
+            }, 1000);
+        }
+
+        // Update OTP Timer Display
+        function updateOTPTimer() {
+            const timerEl = document.getElementById('otpTimer');
+            const resendBtn = document.getElementById('btnResendOTP');
+            if (otpTimerSeconds > 0) {
+                timerEl.textContent = `Resend code in ${otpTimerSeconds} seconds`;
+                resendBtn.disabled = true;
+            } else {
+                timerEl.textContent = '';
+                resendBtn.disabled = false;
+            }
+        }
+
+        // Clear OTP Timer
+        function clearOTPTimer() {
+            if (otpTimer) {
+                clearInterval(otpTimer);
+                otpTimer = null;
+            }
+        }
+
+        // OTP Input Event Handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup OTP input handlers
+            for (let i = 1; i <= 6; i++) {
+                const otpInput = document.getElementById('otp' + i);
+                if (!otpInput) continue;
+
+                // Handle input
+                otpInput.addEventListener('input', function(e) {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    e.target.value = value;
+                    
+                    if (value) {
+                        e.target.classList.add('filled');
+                        // Move to next input
+                        if (i < 6) {
+                            document.getElementById('otp' + (i + 1)).focus();
+                        }
+                    } else {
+                        e.target.classList.remove('filled');
+                    }
+                });
+
+                // Handle backspace
+                otpInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !e.target.value && i > 1) {
+                        document.getElementById('otp' + (i - 1)).focus();
+                    }
+                });
+
+                // Handle paste
+                otpInput.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData('text');
+                    const digits = paste.replace(/[^0-9]/g, '').slice(0, 6);
+                    
+                    for (let j = 0; j < digits.length && (i + j) <= 6; j++) {
+                        const input = document.getElementById('otp' + (i + j));
+                        if (input) {
+                            input.value = digits[j];
+                            input.classList.add('filled');
+                        }
+                    }
+                    
+                    // Focus last filled input or verify button
+                    const lastFilled = Math.min(i + digits.length - 1, 6);
+                    if (lastFilled < 6) {
+                        document.getElementById('otp' + (lastFilled + 1)).focus();
+                    } else {
+                        document.getElementById('btnVerifyOTP').focus();
+                    }
+                });
+            }
+
+            // Verify OTP Button
+            const btnVerifyOTP = document.getElementById('btnVerifyOTP');
+            if (btnVerifyOTP) {
+                btnVerifyOTP.addEventListener('click', function() {
+                    const inputOTP = getOTPFromInputs();
+                    if (inputOTP.length !== 6) {
+                        showOTPError('Please enter all 6 digits.');
+                        return;
+                    }
+                    verifyOTP(inputOTP);
+                });
+            }
+
+            // Resend OTP Button
+            const btnResendOTP = document.getElementById('btnResendOTP');
+            if (btnResendOTP) {
+                btnResendOTP.addEventListener('click', function() {
+                    if (!otpEmail) return;
+                    
+                    // Get firstName and lastName from form
+                    const firstName = document.getElementById('firstName') ? document.getElementById('firstName').value : '';
+                    const lastName = document.getElementById('lastName') ? document.getElementById('lastName').value : '';
+                    
+                    btnResendOTP.disabled = true;
+                    btnResendOTP.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+                    sendOTP(otpEmail, firstName, lastName).then(result => {
+                        btnResendOTP.innerHTML = '<i class="fas fa-redo me-2"></i>Resend Code';
+                        if (result.success) {
+                            showOTPSuccess('OTP code resent successfully!');
+                            resetOTPTimer();
+                        } else {
+                            showOTPError('Failed to resend OTP. Please try again.');
+                            btnResendOTP.disabled = false;
+                        }
+                    });
+                });
+            }
+
+            // Close modal on backdrop click
+            const otpModal = document.getElementById('otpModal');
+            if (otpModal) {
+                otpModal.addEventListener('click', function(e) {
+                    if (e.target === otpModal) {
+                        hideOTPModal();
+                    }
+                });
+            }
+        });
+
+        // Initialize EmailJS
+        function initializeRegistrationEmailJS() {
+            if (typeof emailjs !== 'undefined') {
+                try {
+                    emailjs.init(EMAILJS_REGISTRATION_CONFIG.publicKey);
+                    console.log('✅ EmailJS initialized for Registration');
+                    return true;
+                } catch (error) {
+                    console.error('❌ EmailJS initialization error:', error);
+                    return false;
+                }
+            } else {
+                console.warn('⚠️ EmailJS library not loaded yet');
+                return false;
+            }
+        }
+
+        // Wait for EmailJS to load
+        if (typeof emailjs === 'undefined') {
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    if (typeof emailjs !== 'undefined') {
+                        initializeRegistrationEmailJS();
+                    } else {
+                        console.error('❌ EmailJS library failed to load');
+                    }
+                }, 1000);
+            });
+        } else {
+            initializeRegistrationEmailJS();
+        }
+
+        // Send "Complete Your Profile" email
+        async function sendCompleteProfileEmail(userEmail, userName, userId, userType = 'carrier') {
+            // Skip if template ID is not set
+            if (!EMAILJS_REGISTRATION_CONFIG.templateId || EMAILJS_REGISTRATION_CONFIG.templateId === '') {
+                console.warn('⚠️ Complete Profile template ID not configured. Skipping email.');
+                return { success: false, error: 'Template not configured' };
+            }
+
+            try {
+                // Wait for EmailJS to be available
+                let retries = 0;
+                while (typeof emailjs === 'undefined' && retries < 5) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    retries++;
+                }
+
+                // Ensure EmailJS is initialized
+                if (typeof emailjs === 'undefined') {
+                    console.error('❌ EmailJS library not loaded after waiting');
+                    return { success: false, error: 'Email service not available' };
+                }
+
+                // Initialize EmailJS if not already initialized
+                try {
+                    if (typeof emailjs.init === 'function') {
+                        emailjs.init(EMAILJS_REGISTRATION_CONFIG.publicKey);
+                    }
+                } catch (initError) {
+                    console.warn('⚠️ EmailJS already initialized or init failed:', initError);
+                }
+
+                // Validate required fields
+                if (!userEmail || !userName) {
+                    return { success: false, error: 'Missing user email or name' };
+                }
+
+                // Prepare email parameters
+                // Both profile_link and dashboard_link point to dashboard (button will redirect to dashboard)
+                const dashboardLink = userType === 'supplier'
+                    ? window.location.origin + '/pages/supplier/dashboard.html'
+                    : window.location.origin + '/pages/carrier/dashboard.html';
+
+                const emailParams = {
+                    // Recipient email
+                    to_email: userEmail,
+                    email: userEmail,
+                    
+                    // User information
+                    user_name: userName,
+                    name: userName,
+                    first_name: userName.split(' ')[0] || userName,
+                    user_type: userType === 'supplier' ? 'Supplier' : 'Carrier',
+                    
+                    // Profile completion links (both redirect to dashboard)
+                    profile_link: dashboardLink, // Changed to dashboard
+                    dashboard_link: dashboardLink,
+                    user_id: userId || 'N/A'
+                };
+
+                console.log('📧 Sending Complete Profile email...', emailParams);
+
+                // Send email
+                const response = await emailjs.send(
+                    EMAILJS_REGISTRATION_CONFIG.serviceId,
+                    EMAILJS_REGISTRATION_CONFIG.templateId,
+                    emailParams
+                );
+
+                console.log('✅ Complete Profile email sent successfully!', response);
+                return { success: true, response: response };
+            } catch (emailError) {
+                console.error('❌ Error sending Complete Profile email:', emailError);
+                
+                // Log full error details for debugging
+                const errorDetails = {
+                    text: emailError.text,
+                    message: emailError.message,
+                    status: emailError.status,
+                    statusText: emailError.statusText,
+                    response: emailError.response
+                };
+                console.error('❌ Email error details:', errorDetails);
+                
+                // Don't block registration if email fails
+                return {
+                    success: false,
+                    error: emailError.text || emailError.message || 'Unknown error',
+                    status: emailError.status,
+                    details: errorDetails
+                };
+            }
+        }
+
+        // Send admin notification for new user registration
+        async function sendAdminNewUserNotification(userData, userId, userType = 'carrier') {
+            // Skip if admin template ID is not set
+            if (!EMAILJS_REGISTRATION_CONFIG.adminTemplateId || EMAILJS_REGISTRATION_CONFIG.adminTemplateId === '') {
+                console.warn('⚠️ Admin notification template ID not configured. Skipping admin email.');
+                return { success: false, error: 'Admin template not configured' };
+            }
+
+            try {
+                // Wait for EmailJS to be available
+                let retries = 0;
+                while (typeof emailjs === 'undefined' && retries < 5) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    retries++;
+                }
+
+                // Ensure EmailJS is initialized
+                if (typeof emailjs === 'undefined') {
+                    console.error('❌ EmailJS library not loaded after waiting');
+                    return { success: false, error: 'Email service not available' };
+                }
+
+                // Initialize EmailJS if not already initialized
+                try {
+                    if (typeof emailjs.init === 'function') {
+                        emailjs.init(EMAILJS_REGISTRATION_CONFIG.publicKey);
+                    }
+                } catch (initError) {
+                    console.warn('⚠️ EmailJS already initialized or init failed:', initError);
+                }
+
+                // Prepare admin email parameters
+                const adminEmailParams = {
+                    // Recipient email (admin)
+                    to_email: 'support@alphafreightuk.com',
+                    email: 'support@alphafreightuk.com',
+                    
+                    // User information
+                    user_name: (userData.firstName || '') + ' ' + (userData.lastName || ''),
+                    user_email: userData.email || 'N/A',
+                    user_phone: userData.phone || 'N/A',
+                    user_country: userData.country || 'N/A',
+                    user_type: userType === 'supplier' ? 'Supplier' : 'Carrier',
+                    
+                    // Registration information
+                    user_id: userId || 'N/A',
+                    registration_date: new Date().toLocaleString('en-GB', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    created_at: new Date().toLocaleString('en-GB', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    })
+                };
+
+                console.log('📧 Sending admin new user notification...', adminEmailParams);
+
+                // Send email to admin
+                const response = await emailjs.send(
+                    EMAILJS_REGISTRATION_CONFIG.serviceId,
+                    EMAILJS_REGISTRATION_CONFIG.adminTemplateId,
+                    adminEmailParams
+                );
+
+                console.log('✅ Admin new user notification sent successfully!', response);
+                return { success: true, response: response };
+            } catch (emailError) {
+                console.error('❌ Error sending admin new user notification:', emailError);
+                
+                // Don't block registration if admin email fails
+                return {
+                    success: false,
+                    error: emailError.text || emailError.message || 'Unknown error',
+                    status: emailError.status
+                };
+            }
+        }
+    </script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+    
+    <!-- Beautiful Alerts System -->
+    <script src="../../assets/js/alerts.js"></script>
+    
+    <!-- Firebase Storage Helper -->
+    <script src="../../assets/js/firebase-storage.js"></script>
+    
+    <!-- Firebase Complete Integration -->
+    <script src="../../assets/js/firebase-complete.js"></script>
+</body>
+</html>
+

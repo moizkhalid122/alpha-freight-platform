@@ -1,0 +1,1603 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        body {
+            background: #F8FAFC;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 2rem 0;
+        }
+
+        .profile-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            max-width: 950px;
+            width: 100%;
+            margin: 0 auto;
+            border: 1px solid #E5E7EB;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 2rem 2rem 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #E5E7EB;
+            position: relative;
+        }
+
+        .header-logo {
+            max-width: 200px;
+            max-height: 90px;
+            margin: 0 auto 1rem;
+            display: block;
+            object-fit: contain;
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .profile-header p {
+            margin: 0.5rem 0 0 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        .profile-body {
+            padding: 2.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        .form-help-text {
+            font-size: 0.75rem;
+            color: #64748B;
+            margin-top: 0.25rem;
+            display: block;
+            font-style: italic;
+        }
+
+        .review-section {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #4F46E5;
+        }
+
+        .review-section h6 {
+            color: #4F46E5;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .review-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-label {
+            font-weight: 600;
+            color: #0F172A;
+            font-size: 0.9rem;
+        }
+
+        .review-value {
+            color: #64748B;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4F46E5;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 20%;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 0 0 auto;
+            min-width: 100px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #E5E7EB;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-title {
+            font-size: 0.75rem;
+            color: #64748B;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 0.25rem;
+        }
+
+        .step-item.active .step-number {
+            background: #4F46E5;
+            color: white;
+            border-color: #4F46E5;
+        }
+
+        .step-item.active .step-title {
+            color: #4F46E5;
+            font-weight: 600;
+        }
+
+        .step-item.completed .step-number {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .step-item.completed .step-title {
+            color: #28a745;
+        }
+
+        .step-connector {
+            width: 60px;
+            height: 2px;
+            background: #E5E7EB;
+            margin: 0 0.5rem;
+            margin-top: 19px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .step-item.completed + .step-item .step-connector {
+            background: #28a745;
+        }
+
+        .step-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .btn-next, .btn-prev {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-next {
+            background: #4F46E5;
+            color: white;
+            border: none;
+        }
+
+        .btn-next:hover {
+            background: #4338CA;
+            color: white;
+        }
+
+        .btn-prev {
+            background: transparent;
+            color: #64748B;
+            border: 1.5px solid #E5E7EB;
+        }
+
+        .btn-prev:hover {
+            background: #F8FAFC;
+            border-color: #E5E7EB;
+            color: #0F172A;
+        }
+
+        .btn-save-later {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1.5px solid #d1d5db;
+            background: #ffffff;
+            color: #6b7280;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-save-later:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+            color: #374151;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-save-later:active {
+            transform: translateY(0);
+        }
+
+        .btn-save-later:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .section-title {
+            color: #0F172A;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .file-upload {
+            border: 2px dashed #E5E7EB;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #F8FAFC;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: #4F46E5;
+            background: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        .file-upload.has-file {
+            border-color: #4F46E5;
+            background: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+        }
+
+        .file-upload i {
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .file-upload p {
+            margin: 0;
+            font-weight: 500;
+            color: #0F172A;
+        }
+
+        .file-upload small {
+            display: block;
+            margin-top: 0.5rem;
+            color: #64748B;
+        }
+
+        .file-upload.has-file p {
+            color: #4F46E5;
+            font-weight: 600;
+        }
+
+        .file-upload.has-file i {
+            color: #4F46E5;
+        }
+
+        .btn-register {
+            background: #4F46E5;
+            border: none;
+            color: white;
+            padding: 0.875rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-register:hover {
+            background: #4338CA;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            color: white;
+        }
+
+        .success-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-modal-overlay.show {
+            display: flex;
+        }
+
+        .success-modal {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .success-modal h3 {
+            color: #0F172A;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-modal p {
+            color: #64748B;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-modal .company-name {
+            color: #4F46E5;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-body {
+                padding: 1.5rem;
+            }
+            
+            .profile-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .success-modal {
+                padding: 2rem 1.5rem;
+            }
+
+            .step-indicator {
+                gap: 0.25rem;
+                padding: 1rem 0;
+                border-bottom: 1px solid #E5E7EB;
+            }
+
+            .step-item {
+                min-width: 70px;
+            }
+
+            .step-number {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .step-title {
+                font-size: 0.65rem;
+            }
+
+            .step-connector {
+                width: 30px;
+                margin: 0 0.25rem;
+                margin-top: 17px;
+            }
+
+            .progress-text {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        /* From Uiverse.io by BlackisPlay */ 
+        .cls-1 {
+            fill: #f15a24;
+            animation: cls1 4s ease infinite both;
+        }
+
+        @keyframes cls1 {
+            0% {
+                fill: #f15a24;
+            }
+
+            34% {
+                fill: #ed1c24;
+            }
+
+            66% {
+                fill: #f7931e;
+            }
+
+            100% {
+                fill: #f15a24;
+            }
+        }
+
+        .cls-1,
+        .cls-2,
+        .cls-3 {
+            stroke-width: 0px;
+        }
+
+        .cls-2 {
+            fill: #f7931e;
+            animation: cls2 4s ease infinite both;
+        }
+
+        @keyframes cls2 {
+            0% {
+                fill: #f7931e;
+            }
+
+            34% {
+                fill: #f15a24;
+            }
+
+            66% {
+                fill: #ed1c24;
+            }
+
+            100% {
+                fill: #f7931e;
+            }
+        }
+
+        .cls-3 {
+            fill: #ed1c24;
+            animation: cls3 4s ease infinite both;
+        }
+
+        @keyframes cls3 {
+            0% {
+                fill: #ed1c24;
+            }
+
+            34% {
+                fill: #f7931e;
+            }
+
+            66% {
+                fill: #f15a24;
+            }
+
+            100% {
+                fill: #ed1c24;
+            }
+        }
+
+        .cls-4 {
+            display: none;
+        }
+
+        #triangle {
+            height: 400px;
+            width: 400px;
+            padding-top: 30px;
+            animation: triangle 4s both infinite;
+        }
+
+        @keyframes triangle {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="image-removebg-preview - 2026-03-04T191722.582.png" alt="Alpha Freight Logo" class="header-logo">
+                <h2><i class="fas fa-warehouse"></i> Complete Your Profile</h2>
+                <p>Please provide additional information to complete your registration</p>
+            </div>
+            
+            <div class="profile-body">
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-text" id="progressText">25% Completed</div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="progressBar"></div>
+                    </div>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-item active" id="step1Item">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Company Info</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step2Item">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Documents</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step3Item">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Identity</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step4Item">
+                        <div class="step-number">4</div>
+                        <div class="step-title">Review</div>
+                    </div>
+                </div>
+
+                <form id="completeProfileForm">
+                    <!-- Step 1: Company Information -->
+                    <div class="form-step active" id="step1">
+                        <h5 class="section-title">Company Information</h5>
+                    
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="companyName" class="form-label">Company Name *</label>
+                                <input type="text" class="form-control" id="companyName" required>
+                                <small class="form-help-text">This will appear on your invoices</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="companyReg" class="form-label">Company Registration Number</label>
+                                <input type="text" class="form-control" id="companyReg">
+                                <small class="form-help-text">Your official business registration number</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Business Address *</label>
+                                <textarea class="form-control" id="address" rows="3" required></textarea>
+                                <small class="form-help-text">We use this to calculate accurate shipping rates</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="postcode" class="form-label">Postcode *</label>
+                                <input type="text" class="form-control" id="postcode" required>
+                                <small class="form-help-text">We use this to calculate accurate shipping rates</small>
+                                <label for="city" class="form-label mt-2">City *</label>
+                                <input type="text" class="form-control" id="city" required>
+                                <small class="form-help-text">We use this to calculate accurate shipping rates</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="businessType" class="form-label">Business Type *</label>
+                                <select class="form-control" id="businessType" required>
+                                    <option value="">Select business type</option>
+                                    <option value="manufacturing">Manufacturing</option>
+                                    <option value="retail">Retail</option>
+                                    <option value="wholesale">Wholesale</option>
+                                    <option value="ecommerce">E-commerce</option>
+                                    <option value="logistics">Logistics</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <small class="form-help-text">Helps us understand your business needs</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="annualVolume" class="form-label">Annual Shipping Volume *</label>
+                                <select class="form-control" id="annualVolume" required>
+                                    <option value="">Select volume</option>
+                                    <option value="0-100">0-100 shipments</option>
+                                    <option value="100-500">100-500 shipments</option>
+                                    <option value="500-1000">500-1000 shipments</option>
+                                    <option value="1000+">1000+ shipments</option>
+                                </select>
+                                <small class="form-help-text">We use this to calculate accurate shipping rates</small>
+                            </div>
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-save-later" onclick="saveForLater()">
+                                <i class="fas fa-save"></i>
+                                Save for Later
+                            </button>
+                            <button type="button" class="btn btn-next" onclick="nextStep()">
+                                Next <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Documents -->
+                    <div class="form-step" id="step2">
+                        <h5 class="section-title">Documents</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Business License *</label>
+                                <div class="file-upload" onclick="document.getElementById('businessLicense').click()">
+                                    <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                    <p class="mb-0">Click to upload business license</p>
+                                    <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                    <input type="file" id="businessLicense" accept=".pdf,.jpg,.png" style="display: none;">
+                                </div>
+                                <small class="form-help-text">Required for account verification</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tax Certificate *</label>
+                                <div class="file-upload" onclick="document.getElementById('taxCertificate').click()">
+                                    <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                    <p class="mb-0">Click to upload tax certificate</p>
+                                    <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                    <input type="file" id="taxCertificate" accept=".pdf,.jpg,.png" style="display: none;">
+                                </div>
+                                <small class="form-help-text">Required for account verification</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Insurance Certificate</label>
+                                <div class="file-upload" onclick="document.getElementById('insurance').click()">
+                                    <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                    <p class="mb-0">Click to upload insurance</p>
+                                    <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                    <input type="file" id="insurance" accept=".pdf,.jpg,.png" style="display: none;">
+                                </div>
+                                <small class="form-help-text">Optional - helps us provide better services</small>
+                            </div>
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-save-later" onclick="saveForLater()">
+                                <i class="fas fa-save"></i>
+                                Save for Later
+                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-1"></i> Previous
+                                </button>
+                                <button type="button" class="btn btn-next" onclick="nextStep()">
+                                    Next <i class="fas fa-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Identity Verification -->
+                    <div class="form-step" id="step3">
+                        <h5 class="section-title">Identity Verification</h5>
+                        <p class="text-muted mb-4">Please provide your full legal name and identity document</p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="fullLegalName" class="form-label">Full Legal Name (Citizen Name) *</label>
+                                <input type="text" class="form-control" id="fullLegalName" placeholder="Enter your full legal name as per identity document" required>
+                                <small class="form-help-text">Must match your identity document exactly</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label">Identity Document Type *</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="idDocumentType" id="passportRadio" value="passport" required>
+                                        <label class="form-check-label" for="passportRadio">
+                                            <i class="fas fa-passport me-1"></i> Passport
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="idDocumentType" id="idCardRadio" value="idcard" required>
+                                        <label class="form-check-label" for="idCardRadio">
+                                            <i class="fas fa-id-card me-1"></i> ID Card
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passport Upload -->
+                        <div id="passportUpload" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">Passport Document *</label>
+                                    <div class="file-upload" onclick="document.getElementById('passportFile').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload passport</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="passportFile" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                    <small class="form-help-text">Required for identity verification</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ID Card Upload (Front and Back) -->
+                        <div id="idCardUpload" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">ID Card Front *</label>
+                                    <div class="file-upload" onclick="document.getElementById('idCardFront').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload ID card front</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="idCardFront" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                    <small class="form-help-text">Required for identity verification</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ID Card Back *</label>
+                                    <div class="file-upload" onclick="document.getElementById('idCardBack').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload ID card back</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="idCardBack" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                    <small class="form-help-text">Required for identity verification</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Your identity documents will be securely stored and used only for verification purposes. Make sure the documents are clear and readable.
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-save-later" onclick="saveForLater()">
+                                <i class="fas fa-save"></i>
+                                Save for Later
+                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-1"></i> Previous
+                                </button>
+                                <button type="button" class="btn btn-next" onclick="nextStep()">
+                                    Next <i class="fas fa-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Review -->
+                    <div class="form-step" id="step4">
+                        <h5 class="section-title">Review Your Information</h5>
+                        <p class="text-muted mb-4">Please review all the information before submitting</p>
+                        
+                        <!-- Company Information Review -->
+                        <div class="review-section">
+                            <h6><i class="fas fa-building me-2"></i>Company Information</h6>
+                            <div class="review-item">
+                                <span class="review-label">Company Name:</span>
+                                <span class="review-value" id="reviewCompanyName">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Registration Number:</span>
+                                <span class="review-value" id="reviewCompanyReg">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Business Address:</span>
+                                <span class="review-value" id="reviewAddress">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">City:</span>
+                                <span class="review-value" id="reviewCity">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Postcode:</span>
+                                <span class="review-value" id="reviewPostcode">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Business Type:</span>
+                                <span class="review-value" id="reviewBusinessType">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Annual Volume:</span>
+                                <span class="review-value" id="reviewAnnualVolume">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Identity Review -->
+                        <div class="review-section">
+                            <h6><i class="fas fa-id-card me-2"></i>Identity Verification</h6>
+                            <div class="review-item">
+                                <span class="review-label">Full Legal Name:</span>
+                                <span class="review-value" id="reviewLegalName">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Document Type:</span>
+                                <span class="review-value" id="reviewDocType">-</span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Please ensure all information is correct. You can go back to edit any section before submitting.
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-save-later" onclick="saveForLater()">
+                                <i class="fas fa-save"></i>
+                                Save for Later
+                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-1"></i> Previous
+                                </button>
+                                <button type="submit" class="btn btn-register">
+                                    <i class="fas fa-check me-2"></i>Complete Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <!-- From Uiverse.io by BlackisPlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div id="triangle">
+            <svg id="Layer_1" data-name="Layer 1" version="1.1" viewBox="0 0 2000 2000" xmlns="http://www.w3.org/2000/svg">
+                <polygon
+                    class="cls-1"
+                    points="928 781 1021 951 784.5 1371.97 1618 1371.97 1530.32 1544 509 1539 928 781"
+                ></polygon>
+                <polygon
+                    class="cls-3"
+                    points="1618 1371.97 784.5 1371.97 874.93 1211 1346 1211 923.1 456 1110.06 456 1618 1371.97"
+                ></polygon>
+                <g id="Layer_2" data-name="Layer 2">
+                    <polygon
+                        class="cls-2"
+                        points="418 1372.74 509 1539 928 781 1162.32 1211 1346 1211 923.1 456 418 1372.74"
+                    ></polygon>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-modal-overlay" id="successModal">
+        <div class="success-modal">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Profile Completed!</h3>
+            <p>Your profile has been completed and will be active within 1 to 24 hours.</p>
+            <p class="company-name">Thanks for using Alpha Freight</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/script.js"></script>
+    
+    <script>
+        // Ensure styled alerts are available
+        if (!window.AlphaBrokrage) {
+            window.AlphaBrokrage = {
+                showAlert: function(type, message){
+                    var map = { error: 'danger', success: 'success', info: 'info', warning: 'warning' };
+                    var bs = map[type] || 'info';
+                    var el = document.createElement('div');
+                    el.className = 'ab-alert alert alert-' + bs + ' alert-dismissible fade show position-fixed';
+                    el.style.cssText = 'top: 100px; right: 20px; z-index: 10010; min-width: 320px;';
+                    el.innerHTML = '<div class="d-flex align-items-start"><div class="me-2 alert-icon"></div><div class="flex-grow-1">' + message + '</div><button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button></div>';
+                    document.body.appendChild(el);
+                    setTimeout(function(){ if (el && el.parentNode) { try { new bootstrap.Alert(el).close(); } catch(e){ el.remove(); } } }, 4000);
+                }
+            };
+        }
+    </script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        (function() {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+                authDomain: "alpha-brokerage.firebaseapp.com",
+                databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+                projectId: "alpha-brokerage",
+                storageBucket: "alpha-brokerage.firebasestorage.app",
+                messagingSenderId: "834712514965",
+                appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            if (!window.firebase || !firebase.apps.length) { 
+                firebase.initializeApp(firebaseConfig);
+            }
+        })();
+
+        // Check if user is logged in
+        const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+        if (!auth.isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        let selectedIdType = '';
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Function to update progress bar
+        function updateProgressBar() {
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressBar) {
+                progressBar.style.width = progressPercentage + '%';
+            }
+            
+            if (progressText) {
+                progressText.textContent = Math.round(progressPercentage) + '% Completed';
+            }
+        }
+
+        // Function to populate review data
+        function populateReviewData() {
+            // Company Information
+            const companyName = document.getElementById('companyName').value;
+            const companyReg = document.getElementById('companyReg').value || 'Not provided';
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const postcode = document.getElementById('postcode').value;
+            const businessType = document.getElementById('businessType').value;
+            const annualVolume = document.getElementById('annualVolume').value;
+
+            document.getElementById('reviewCompanyName').textContent = companyName || '-';
+            document.getElementById('reviewCompanyReg').textContent = companyReg;
+            document.getElementById('reviewAddress').textContent = address || '-';
+            document.getElementById('reviewCity').textContent = city || '-';
+            document.getElementById('reviewPostcode').textContent = postcode || '-';
+            document.getElementById('reviewBusinessType').textContent = businessType ? businessType.charAt(0).toUpperCase() + businessType.slice(1) : '-';
+            document.getElementById('reviewAnnualVolume').textContent = annualVolume ? annualVolume.replace(/-/g, ' - ') + ' shipments' : '-';
+
+            // Identity
+            const fullLegalName = document.getElementById('fullLegalName').value;
+            const idDocType = document.querySelector('input[name="idDocumentType"]:checked');
+            const docType = idDocType ? (idDocType.value === 'passport' ? 'Passport' : 'ID Card') : '-';
+
+            document.getElementById('reviewLegalName').textContent = fullLegalName || '-';
+            document.getElementById('reviewDocType').textContent = docType;
+        }
+
+        // Handle ID document type selection
+        document.querySelectorAll('input[name="idDocumentType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                selectedIdType = this.value;
+                if (this.value === 'passport') {
+                    document.getElementById('passportUpload').style.display = 'block';
+                    document.getElementById('idCardUpload').style.display = 'none';
+                } else if (this.value === 'idcard') {
+                    document.getElementById('passportUpload').style.display = 'none';
+                    document.getElementById('idCardUpload').style.display = 'block';
+                }
+            });
+        });
+
+        function nextStep() {
+            if (currentStep === 1) {
+                // Validate step 1
+                const required = ['companyName', 'address', 'postcode', 'city', 'businessType', 'annualVolume'];
+                for (let field of required) {
+                    const element = document.getElementById(field);
+                    if (!element || !element.value.trim()) {
+                        AlphaBrokrage.showAlert('error', `Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                        element?.focus();
+                        return;
+                    }
+                }
+            } else if (currentStep === 2) {
+                // Validate step 2 - documents are optional but can check if needed
+                const businessLicense = document.getElementById('businessLicense');
+                const taxCertificate = document.getElementById('taxCertificate');
+                if (!businessLicense.files[0] || !taxCertificate.files[0]) {
+                    AlphaBrokrage.showAlert('error', 'Please upload Business License and Tax Certificate');
+                    return;
+                }
+            } else if (currentStep === 3) {
+                // Validate step 3
+                const fullLegalName = document.getElementById('fullLegalName');
+                if (!fullLegalName || !fullLegalName.value.trim()) {
+                    AlphaBrokrage.showAlert('error', 'Please enter your full legal name');
+                    return;
+                }
+
+                const idDocType = document.querySelector('input[name="idDocumentType"]:checked');
+                if (!idDocType) {
+                    AlphaBrokrage.showAlert('error', 'Please select identity document type');
+                    return;
+                }
+
+                selectedIdType = idDocType.value;
+                if (selectedIdType === 'passport') {
+                    const passportFile = document.getElementById('passportFile');
+                    if (!passportFile.files[0]) {
+                        AlphaBrokrage.showAlert('error', 'Please upload passport document');
+                        return;
+                    }
+                } else if (selectedIdType === 'idcard') {
+                    const idCardFront = document.getElementById('idCardFront');
+                    const idCardBack = document.getElementById('idCardBack');
+                    if (!idCardFront.files[0] || !idCardBack.files[0]) {
+                        AlphaBrokrage.showAlert('error', 'Please upload both ID card front and back');
+                        return;
+                    }
+                }
+            }
+            
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+            
+            // After 3 seconds, hide loading and proceed to next step
+            setTimeout(() => {
+                loadingOverlay.classList.remove('show');
+                
+                if (currentStep < totalSteps) {
+                    // Hide current step
+                    document.getElementById(`step${currentStep}`).classList.remove('active');
+                    document.getElementById(`step${currentStep}Item`).classList.remove('active');
+                    document.getElementById(`step${currentStep}Item`).classList.add('completed');
+                    
+                    // Show next step
+                    currentStep++;
+                    document.getElementById(`step${currentStep}`).classList.add('active');
+                    document.getElementById(`step${currentStep}Item`).classList.add('active');
+                    
+                    // If moving to step 4 (review), populate review data
+                    if (currentStep === 4) {
+                        populateReviewData();
+                    }
+                    
+                    // Update progress bar
+                    updateProgressBar();
+                }
+            }, 3000);
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                // Hide current step
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}Item`).classList.remove('active');
+                
+                // Show previous step
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}Item`).classList.add('active');
+                document.getElementById(`step${currentStep}Item`).classList.remove('completed');
+                
+                // Update progress bar
+                updateProgressBar();
+            }
+        }
+
+        // Initialize progress bar on page load
+        updateProgressBar();
+
+        // File upload handling
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const fileUpload = this.parentElement;
+                if (this.files && this.files[0]) {
+                    fileUpload.classList.add('has-file');
+                    const nameP = fileUpload.querySelector('p');
+                    if (nameP) {
+                        nameP.textContent = this.files[0].name;
+                        nameP.classList.remove('text-muted');
+                    }
+                    const icon = fileUpload.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('text-muted', 'fa-upload');
+                        icon.classList.add('fa-check-circle');
+                    }
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('completeProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate all steps
+            const fullLegalName = document.getElementById('fullLegalName');
+            if (!fullLegalName || !fullLegalName.value.trim()) {
+                AlphaBrokrage.showAlert('error', 'Please enter your full legal name');
+                return;
+            }
+
+            const idDocType = document.querySelector('input[name="idDocumentType"]:checked');
+            if (!idDocType) {
+                AlphaBrokrage.showAlert('error', 'Please select identity document type');
+                return;
+            }
+
+            selectedIdType = idDocType.value;
+            if (selectedIdType === 'passport') {
+                const passportFile = document.getElementById('passportFile');
+                if (!passportFile.files[0]) {
+                    AlphaBrokrage.showAlert('error', 'Please upload passport document');
+                    return;
+                }
+            } else if (selectedIdType === 'idcard') {
+                const idCardFront = document.getElementById('idCardFront');
+                const idCardBack = document.getElementById('idCardBack');
+                if (!idCardFront.files[0] || !idCardBack.files[0]) {
+                    AlphaBrokrage.showAlert('error', 'Please upload both ID card front and back');
+                    return;
+                }
+            }
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            submitBtn.disabled = true;
+
+            const db = firebase.database();
+            const supplierId = auth.supplierId;
+            
+            if (!supplierId) {
+                AlphaBrokrage.showAlert('error', 'Supplier ID not found. Please login again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            // Collect form data
+            const profileData = {
+                companyName: document.getElementById('companyName').value,
+                companyReg: document.getElementById('companyReg').value,
+                address: document.getElementById('address').value,
+                postcode: document.getElementById('postcode').value,
+                city: document.getElementById('city').value,
+                businessType: document.getElementById('businessType').value,
+                annualVolume: document.getElementById('annualVolume').value,
+                profileComplete: true,
+                updatedAt: new Date().toISOString(),
+                identityVerification: {
+                    fullLegalName: document.getElementById('fullLegalName').value,
+                    idDocumentType: selectedIdType
+                }
+            };
+
+            // Process files
+            function getFileAsBase64(file, callback) {
+                if (!file) {
+                    callback(null);
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    callback(reader.result);
+                };
+                reader.onerror = function() {
+                    callback(null);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            const documents = {};
+            const filesToProcess = [];
+            
+            const businessLicense = document.getElementById('businessLicense');
+            const taxCertificate = document.getElementById('taxCertificate');
+            const insurance = document.getElementById('insurance');
+            if (businessLicense.files[0]) filesToProcess.push({input: businessLicense, key: 'businessLicense'});
+            if (taxCertificate.files[0]) filesToProcess.push({input: taxCertificate, key: 'taxCertificate'});
+            if (insurance.files[0]) filesToProcess.push({input: insurance, key: 'insurance'});
+
+            // Process identity documents
+            if (selectedIdType === 'passport') {
+                const passportFile = document.getElementById('passportFile');
+                if (passportFile.files[0]) filesToProcess.push({input: passportFile, key: 'passport'});
+            } else if (selectedIdType === 'idcard') {
+                const idCardFront = document.getElementById('idCardFront');
+                const idCardBack = document.getElementById('idCardBack');
+                if (idCardFront.files[0]) filesToProcess.push({input: idCardFront, key: 'idCardFront'});
+                if (idCardBack.files[0]) filesToProcess.push({input: idCardBack, key: 'idCardBack'});
+            }
+
+            let filesProcessed = 0;
+            const totalFiles = filesToProcess.length;
+
+            if (totalFiles === 0) {
+                saveProfile();
+            } else {
+                filesToProcess.forEach(({input, key}) => {
+                    getFileAsBase64(input.files[0], function(base64) {
+                        if (base64) {
+                            documents[key] = {
+                                fileName: input.files[0].name,
+                                fileSize: input.files[0].size,
+                                fileType: input.files[0].type,
+                                data: base64
+                            };
+                        }
+                        filesProcessed++;
+                        if (filesProcessed === totalFiles) {
+                            profileData.documents = documents;
+                            saveProfile();
+                        }
+                    });
+                });
+            }
+
+            function saveProfile() {
+                const supplierRef = db.ref('suppliers/' + supplierId);
+                supplierRef.once('value').then(snapshot => {
+                    const existingStatus = snapshot && snapshot.val() && snapshot.val().status;
+                    const shouldForcePending = !existingStatus || ['pending_profile', 'pending_verification', 'rejected', 'suspended'].includes(existingStatus);
+                    if (shouldForcePending) {
+                        profileData.status = 'pending_verification';
+                    }
+
+                    supplierRef.update(profileData, function(error) {
+                    if (error) {
+                        AlphaBrokrage.showAlert('error', 'Error saving profile: ' + error.message);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+
+                    // Update local auth
+                    const updatedAuth = Object.assign({}, auth, {
+                        profileComplete: true,
+                        companyName: profileData.companyName,
+                        status: profileData.status || existingStatus || auth.status
+                    });
+                    localStorage.setItem('supplierAuth', JSON.stringify(updatedAuth));
+
+                    // Show success modal
+                    const successModal = document.getElementById('successModal');
+                    successModal.classList.add('show');
+                    
+                    // Redirect after 4 seconds
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 4000);
+                });
+                }).catch((error) => {
+                    AlphaBrokrage.showAlert('error', 'Unable to check current status: ' + error.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+            }
+        });
+
+        // Save for Later Functionality
+        function saveForLater() {
+            const saveBtn = event.target.closest('.btn-save-later');
+            const originalText = saveBtn.innerHTML;
+            
+            // Show loading
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            
+            const db = firebase.database();
+            const supplierId = auth.supplierId || auth.id;
+            
+            if (!supplierId) {
+                AlphaBrokrage.showAlert('error', 'Supplier ID not found. Please login again.');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+                return;
+            }
+
+            // Collect all form data
+            const profileData = {
+                // Step 1: Company Information
+                companyName: document.getElementById('companyName')?.value || '',
+                companyReg: document.getElementById('companyReg')?.value || '',
+                address: document.getElementById('address')?.value || '',
+                postcode: document.getElementById('postcode')?.value || '',
+                city: document.getElementById('city')?.value || '',
+                businessType: document.getElementById('businessType')?.value || '',
+                annualVolume: document.getElementById('annualVolume')?.value || '',
+                
+                // Step 3: Identity
+                fullLegalName: document.getElementById('fullLegalName')?.value || '',
+                idDocumentType: document.querySelector('input[name="idDocumentType"]:checked')?.value || '',
+                
+                // Metadata
+                currentStep: currentStep,
+                savedForLater: true,
+                profileComplete: false,
+                lastSaved: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            // Save file names (not full data to save space)
+            const fileInputs = {
+                businessLicense: document.getElementById('businessLicense'),
+                taxCertificate: document.getElementById('taxCertificate'),
+                insurance: document.getElementById('insurance'),
+                passportFile: document.getElementById('passportFile'),
+                idCardFront: document.getElementById('idCardFront'),
+                idCardBack: document.getElementById('idCardBack')
+            };
+
+            const fileInfo = {};
+            Object.keys(fileInputs).forEach(key => {
+                const input = fileInputs[key];
+                if (input && input.files && input.files[0]) {
+                    fileInfo[key] = {
+                        fileName: input.files[0].name,
+                        fileSize: input.files[0].size,
+                        fileType: input.files[0].type,
+                        uploaded: false // Will be uploaded when profile is completed
+                    };
+                }
+            });
+
+            if (Object.keys(fileInfo).length > 0) {
+                profileData.fileInfo = fileInfo;
+            }
+
+            // Save to Firebase
+            const supplierRef = db.ref('suppliers/' + supplierId);
+            supplierRef.once('value').then(snapshot => {
+                const existingData = snapshot.val() || {};
+                
+                // Merge with existing data
+                const updateData = {
+                    ...existingData,
+                    ...profileData,
+                    draftData: profileData
+                };
+
+                supplierRef.update(updateData, function(error) {
+                    if (error) {
+                        console.error('Error saving draft:', error);
+                        AlphaBrokrage.showAlert('error', 'Error saving progress. Please try again.');
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalText;
+                        return;
+                    }
+
+                    // Update local auth
+                    const updatedAuth = Object.assign({}, auth, {
+                        hasDraftData: true,
+                        lastSaved: new Date().toISOString()
+                    });
+                    localStorage.setItem('supplierAuth', JSON.stringify(updatedAuth));
+
+                    // Show success message
+                    saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                    saveBtn.style.background = '#10b981';
+                    saveBtn.style.color = '#ffffff';
+                    saveBtn.style.borderColor = '#10b981';
+                    
+                    AlphaBrokrage.showAlert('success', 'Your progress has been saved. You can continue later.');
+                    
+                    // Redirect to dashboard after 1 second
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                });
+            }).catch((error) => {
+                console.error('Error saving draft:', error);
+                AlphaBrokrage.showAlert('error', 'Error saving progress. Please try again.');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            });
+        }
+
+        // Load saved data on page load
+        function loadSavedData() {
+            if (!auth.supplierId && !auth.id) return;
+            
+            const db = firebase.database();
+            const supplierId = auth.supplierId || auth.id;
+            
+            db.ref('suppliers/' + supplierId).once('value', function(snapshot) {
+                if (snapshot && snapshot.exists()) {
+                    const supplier = snapshot.val();
+                    const draftData = supplier.draftData || supplier;
+                    
+                    // Load Step 1 data
+                    if (draftData.companyName) document.getElementById('companyName').value = draftData.companyName;
+                    if (draftData.companyReg) document.getElementById('companyReg').value = draftData.companyReg;
+                    if (draftData.address) document.getElementById('address').value = draftData.address;
+                    if (draftData.postcode) document.getElementById('postcode').value = draftData.postcode;
+                    if (draftData.city) document.getElementById('city').value = draftData.city;
+                    if (draftData.businessType) document.getElementById('businessType').value = draftData.businessType;
+                    if (draftData.annualVolume) document.getElementById('annualVolume').value = draftData.annualVolume;
+                    
+                    // Load Step 3 data
+                    if (draftData.fullLegalName) document.getElementById('fullLegalName').value = draftData.fullLegalName;
+                    if (draftData.idDocumentType) {
+                        const radio = document.querySelector(`input[name="idDocumentType"][value="${draftData.idDocumentType}"]`);
+                        if (radio) {
+                            radio.checked = true;
+                            radio.dispatchEvent(new Event('change'));
+                        }
+                    }
+                    
+                    // Restore to saved step if available
+                    if (draftData.currentStep && draftData.currentStep > 1) {
+                        // Go to saved step
+                        for (let i = 1; i < draftData.currentStep; i++) {
+                            document.getElementById(`step${i}`).classList.remove('active');
+                            document.getElementById(`step${i}Item`).classList.remove('active');
+                            document.getElementById(`step${i}Item`).classList.add('completed');
+                        }
+                        currentStep = draftData.currentStep;
+                        document.getElementById(`step${currentStep}`).classList.add('active');
+                        document.getElementById(`step${currentStep}Item`).classList.add('active');
+                        updateProgressBar();
+                    }
+                    
+                    if (draftData.savedForLater) {
+                        AlphaBrokrage.showAlert('info', 'Your saved progress has been loaded. You can continue from where you left off.');
+                    }
+                }
+            });
+        }
+
+        // Load saved data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadSavedData, 500);
+        });
+    </script>
+</body>
+</html>
+

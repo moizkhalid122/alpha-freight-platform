@@ -1,0 +1,2156 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Alpha Freight</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        // Immediate auth check before page loads
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link rel="shortcut icon" type="image/jpeg" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link rel="apple-touch-icon" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Sidebar Styling */
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .admin-sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff !important;
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff !important;
+            font-weight: 600;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        /* Content Area */
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        /* Stat Cards Styling */
+        .stat-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6f42c1;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: inherit;
+            transition: width 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card:hover::before {
+            width: 100%;
+            opacity: 0.05;
+        }
+        
+        .stat-card .card-body {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-card.users {
+            border-left-color: #007bff;
+        }
+        
+        .stat-card.users::before {
+            background: #007bff;
+        }
+        
+        .stat-card.loads {
+            border-left-color: #28a745;
+        }
+        
+        .stat-card.loads::before {
+            background: #28a745;
+        }
+        
+        .stat-card.revenue {
+            border-left-color: #ffc107;
+        }
+        
+        .stat-card.revenue::before {
+            background: #ffc107;
+        }
+        
+        .stat-card.commission {
+            border-left-color: #dc3545;
+        }
+        
+        .stat-card.commission::before {
+            background: #dc3545;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-card h6 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card i {
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover i {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        /* Activity Items */
+        .activity-item {
+            border-left: 3px solid #6f42c1;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .activity-item:hover {
+            padding-left: 1.5rem;
+            background: rgba(111, 66, 193, 0.05);
+            border-radius: 5px;
+        }
+        
+        .activity-item.success {
+            border-left-color: #28a745;
+        }
+        
+        .activity-item.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .activity-item.danger {
+            border-left-color: #dc3545;
+        }
+        
+        /* Quick Action Buttons */
+        .quick-action-btn {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111, 66, 193, 0.4);
+            color: white;
+            background: linear-gradient(45deg, #7d52d1, #f04ea0);
+        }
+        
+        /* Mobile Menu Toggle Button */
+        .mobile-menu-btn {
+            display: none;
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+        
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .admin-sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                width: 280px;
+                max-width: 80%;
+            }
+            
+            .admin-sidebar.show {
+                left: 0;
+            }
+            
+            .admin-content {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .header-content .d-flex {
+                flex-wrap: wrap;
+            }
+            
+            .header-content .btn {
+                font-size: 0.875rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .header-content .btn i {
+                margin-right: 0.25rem;
+            }
+            
+            .header-content .btn span.d-none {
+                display: none !important;
+            }
+            
+            .stat-card h3 {
+                font-size: 1.5rem;
+            }
+            
+            .chart-container {
+                padding: 1.5rem;
+            }
+            
+            .admin-content .p-4 {
+                padding: 1rem !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stat-card h3 {
+                font-size: 1.25rem;
+            }
+            
+            .stat-card h6 {
+                font-size: 0.75rem;
+            }
+            
+            .header-content h5 {
+                font-size: 1rem;
+            }
+            
+            .header-content small {
+                font-size: 0.75rem;
+            }
+            
+            .chart-container {
+                padding: 1rem;
+            }
+        }
+        
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .stat-card .text-muted i {
+            animation: pulse 2s infinite;
+        }
+
+        /* TailAdmin-inspired polish overrides */
+        :root {
+            --admin-bg: #f4f6fb;
+            --admin-sidebar-bg: #ffffff;
+            --admin-border: #e5e7eb;
+            --admin-text: #101828;
+            --admin-muted: #667085;
+            --admin-primary: #3b82f6;
+            --admin-primary-soft: #eff6ff;
+            --admin-card-radius: 16px;
+            --admin-card-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+            --admin-card-shadow-hover: 0 12px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        body {
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .admin-sidebar {
+            background: var(--admin-sidebar-bg);
+            box-shadow: 1px 0 10px rgba(16, 24, 40, 0.06);
+            border-right: 1px solid var(--admin-border);
+        }
+
+        .admin-sidebar .text-white {
+            color: var(--admin-text) !important;
+        }
+
+        .admin-sidebar .nav-link {
+            color: var(--admin-muted) !important;
+            font-weight: 500;
+        }
+
+        .admin-sidebar .nav-link i {
+            color: #98a2b3;
+        }
+
+        .admin-sidebar .nav-link:hover {
+            background: #f3f4f6;
+            color: var(--admin-text) !important;
+            transform: translateX(0);
+        }
+
+        .admin-sidebar .nav-link.active {
+            background: var(--admin-primary-soft);
+            color: var(--admin-primary) !important;
+        }
+
+        .admin-sidebar .nav-link.active i {
+            color: var(--admin-primary);
+        }
+
+        .admin-sidebar hr {
+            border-color: var(--admin-border);
+            opacity: 1;
+        }
+
+        .admin-content {
+            background: var(--admin-bg);
+        }
+
+        .admin-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--admin-border);
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .admin-header .btn {
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .admin-header .btn-outline-secondary,
+        .admin-header .btn-outline-primary {
+            border-color: var(--admin-border);
+            color: var(--admin-text);
+        }
+
+        .admin-header .btn-outline-primary:hover,
+        .admin-header .btn-outline-secondary:hover {
+            background: #f3f4f6;
+            color: var(--admin-text);
+        }
+
+        .admin-content .p-4 {
+            padding: 1.5rem !important;
+        }
+
+        .stat-card {
+            border: 1px solid var(--admin-border);
+            border-left: 0;
+            border-top: 3px solid var(--admin-primary);
+            border-radius: var(--admin-card-radius);
+            box-shadow: var(--admin-card-shadow);
+        }
+
+        .stat-card::before {
+            display: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--admin-card-shadow-hover);
+        }
+
+        .stat-card.users {
+            border-top-color: #3b82f6;
+        }
+
+        .stat-card.loads {
+            border-top-color: #22c55e;
+        }
+
+        .stat-card.revenue {
+            border-top-color: #f59e0b;
+        }
+
+        .stat-card.commission {
+            border-top-color: #ef4444;
+        }
+
+        .chart-container {
+            border: 1px solid var(--admin-border);
+            border-radius: var(--admin-card-radius);
+            box-shadow: var(--admin-card-shadow);
+            background: #ffffff;
+        }
+
+        .activity-item {
+            border-left: 2px solid var(--admin-border);
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+        }
+
+        .activity-item:hover {
+            background: #f8fafc;
+        }
+
+        .quick-action-btn {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border-radius: 10px;
+        }
+
+        .quick-action-btn:hover {
+            background: linear-gradient(135deg, #4f8ef7, #6c6af9);
+        }
+
+        .mobile-menu-btn {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+
+        .dropdown-menu {
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 24, 40, 0.12);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem; text-decoration: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white active" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="all-posted-loads.html">
+                            <i class="fas fa-list"></i> All Posted Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="profile-completions.html">
+                            <i class="fas fa-clipboard-check"></i> Profile Forms
+                        </a>
+                        <a class="nav-link text-white" href="profile-verifications.html">
+                            <i class="fas fa-user-check"></i> Profile Verifications
+                        </a>
+                        <a class="nav-link text-white" href="resubmissions.html">
+                            <i class="fas fa-repeat"></i> Resubmissions
+                        </a>
+                        <a class="nav-link text-white" href="contracts.html">
+                            <i class="fas fa-file-contract"></i> Contracts
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="messages.html">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <a class="nav-link text-white" href="withdrawal-management.html">
+                            <i class="fas fa-money-bill-wave"></i> Withdrawals
+                        </a>
+                        <a class="nav-link text-white" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white" href="company-details.html">
+                            <i class="fas fa-building"></i> Carrier Details
+                        </a>
+                        <a class="nav-link text-white" href="user-ids.html">
+                            <i class="fas fa-id-card"></i> User IDs
+                        </a>
+                        <a class="nav-link text-white" href="user-details.html">
+                            <i class="fas fa-search"></i> Search User
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="social-feed.html">
+                            <i class="fas fa-share-alt"></i> Social Hub
+                        </a>
+                        <a class="nav-link text-white" href="social-post.html">
+                            <i class="fas fa-pen-nib"></i> Create Social Post
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="admin-header">
+                    <div class="d-flex justify-content-between align-items-center header-content">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="mobile-menu-btn" onclick="toggleSidebar()" id="mobileMenuBtn">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
+                                <small class="text-muted d-none d-md-block">Welcome back, Admin! Here's what's happening today.</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
+                                <i class="fas fa-paper-plane"></i> <span class="d-none d-md-inline">Send Message</span>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshData(this)">
+                                <i class="fas fa-sync-alt"></i> <span class="d-none d-md-inline">Refresh</span>
+                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown" id="notificationsBtn">
+                                    <i class="fas fa-bell"></i> <span class="d-none d-md-inline">Notifications</span>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge" style="display: none;">
+                                        0
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" style="min-width: 300px; max-height: 400px; overflow-y: auto;" id="notificationsDropdown">
+                                    <li class="dropdown-header">Notifications</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li id="noNotifications">
+                                        <a class="dropdown-item text-center text-muted py-3">
+                                            <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                                            <div>No notifications</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="p-4">
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card users">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Total Users</h6>
+                                            <h3 class="fw-bold text-primary">0</h3>
+                                            <small class="text-muted">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-users text-primary fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card loads">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Active Loads</h6>
+                                            <h3 class="fw-bold text-success">0</h3>
+                                            <small class="text-muted">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-boxes text-success fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card revenue">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Total Revenue</h6>
+                                            <h3 class="fw-bold text-warning">£0</h3>
+                                            <small class="text-muted">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-pound-sign text-warning fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card commission">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Commission</h6>
+                                            <h3 class="fw-bold text-danger">£0</h3>
+                                            <small class="text-muted">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-percentage text-danger fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts and Analytics -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="chart-container">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0">
+                                        <i class="fas fa-chart-line"></i> Revenue Analytics
+                                    </h5>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary active revenue-period-btn" onclick="setRevenuePeriod('week', event)">Week</button>
+                                        <button type="button" class="btn btn-outline-primary revenue-period-btn" onclick="setRevenuePeriod('month', event)">Month</button>
+                                        <button type="button" class="btn btn-outline-primary revenue-period-btn" onclick="setRevenuePeriod('year', event)">Year</button>
+                                    </div>
+                                </div>
+                                <canvas id="revenueChart" style="max-height: 350px;"></canvas>
+                                <div class="row mt-3 text-center">
+                                    <div class="col-4">
+                                        <h6 class="text-muted mb-1">Total Revenue</h6>
+                                        <h5 class="fw-bold text-primary" id="totalRevenueDisplay">£0</h5>
+                                    </div>
+                                    <div class="col-4">
+                                        <h6 class="text-muted mb-1">Average</h6>
+                                        <h5 class="fw-bold text-success" id="avgRevenueDisplay">£0</h5>
+                                    </div>
+                                    <div class="col-4">
+                                        <h6 class="text-muted mb-1">Growth</h6>
+                                        <h5 class="fw-bold text-warning" id="growthDisplay">0%</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-pie-chart"></i> User Distribution
+                                </h5>
+                                <div class="text-center py-4">
+                                    <i class="fas fa-chart-pie text-info fa-3x mb-3"></i>
+                                    <div class="user-stats">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Suppliers</span>
+                                            <strong class="text-primary">-</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Carriers</span>
+                                            <strong class="text-success">-</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Brokers</span>
+                                            <strong class="text-warning">-</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity and Quick Actions -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-history"></i> Recent Activity
+                                </h5>
+                                <div class="activity-feed">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+                                        <p>Loading activities...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-bolt"></i> Quick Actions
+                                </h5>
+                                <div class="d-grid gap-2">
+                                    <button class="btn quick-action-btn" onclick="addUser()">
+                                        <i class="fas fa-user-plus"></i> Add New User
+                                    </button>
+                                    <button class="btn quick-action-btn" onclick="createLoad()">
+                                        <i class="fas fa-plus-circle"></i> Create Load
+                                    </button>
+                                    <button class="btn quick-action-btn" onclick="processPayment()">
+                                        <i class="fas fa-credit-card"></i> Process Payment
+                                    </button>
+                                    <button class="btn quick-action-btn" onclick="generateReport()">
+                                        <i class="fas fa-file-alt"></i> Generate Report
+                                    </button>
+                                    <button class="btn quick-action-btn" onclick="sendNotification()">
+                                        <i class="fas fa-bell"></i> Send Notification
+                                    </button>
+                                    <button class="btn quick-action-btn" onclick="viewAnalytics()">
+                                        <i class="fas fa-chart-bar"></i> View Analytics
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- System Status -->
+                            <div class="chart-container mt-3">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-server"></i> System Status
+                                </h5>
+                                <div class="system-status">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Server Status</span>
+                                        <span class="badge bg-success">Online</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Database</span>
+                                        <span class="badge bg-success">Connected</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Payment Gateway</span>
+                                        <span class="badge bg-success">Active</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Email Service</span>
+                                        <span class="badge bg-warning">Delayed</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>API Status</span>
+                                        <span class="badge bg-success">Healthy</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../../assets/js/script.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Revenue Analytics Variables
+        let revenueChart = null;
+        let currentRevenuePeriod = 'week';
+        let cachedLoads = [];
+        let isFetchingDashboard = false;
+        let lastFetchAt = 0;
+        const DASHBOARD_FETCH_COOLDOWN = 5000;
+
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                
+                // Prevent body scroll when sidebar is open
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        // Close sidebar on mobile when nav link is clicked
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 991) {
+                toggleSidebar();
+            }
+        }
+        
+        // Auto-close sidebar when nav links are clicked on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.admin-sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        setTimeout(() => {
+                            closeSidebarOnMobile();
+                        }, 100);
+                    }
+                });
+            });
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (window.innerWidth <= 991 && sidebar && overlay) {
+                // Check if click is outside sidebar and not on menu button
+                if (sidebar.classList.contains('show') && 
+                    !sidebar.contains(event.target) && 
+                    event.target !== menuBtn && 
+                    !menuBtn.contains(event.target)) {
+                    toggleSidebar();
+                }
+            }
+        });
+        
+        // Close sidebar on window resize if it becomes desktop view
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991) {
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+        
+        // Initialize dashboard with live data
+        function initDashboard() {
+            initRevenueChart();
+            setRevenuePeriod(currentRevenuePeriod);
+            
+            // OPTIMIZED: Load critical data first, then load heavy operations
+            fetchDashboardData();
+            
+            // Load notifications in background (non-blocking)
+            setTimeout(() => {
+                listenAdminNotifications();
+            }, 100);
+        }
+        
+        // Listen to admin notifications
+        function listenAdminNotifications() {
+            const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || '{}');
+            if (!adminAuth.isLoggedIn && !adminAuth.email) {
+                return;
+            }
+            
+            const db = firebase.database();
+            const adminId = adminAuth.email || adminAuth.adminId || 'admin';
+            const notificationsRef = db.ref('notifications/admins/' + adminId);
+            
+            notificationsRef.orderByChild('timestamp').limitToLast(10).on('value', function(snapshot) {
+                const notifications = [];
+                snapshot.forEach(function(child) {
+                    const notif = child.val();
+                    notif.id = child.key;
+                    notifications.unshift(notif); // Reverse to show newest first
+                });
+                
+                updateNotificationsUI(notifications);
+            });
+        }
+        
+        // Update notifications UI
+        function updateNotificationsUI(notifications) {
+            const dropdown = document.getElementById('notificationsDropdown');
+            const badge = document.getElementById('notificationBadge');
+            const noNotifs = document.getElementById('noNotifications');
+            
+            if (!dropdown || !badge) return;
+            
+            // Clear existing notifications (except header and no notifications message)
+            const existingItems = dropdown.querySelectorAll('.notification-item');
+            existingItems.forEach(item => item.remove());
+            
+            // Update badge
+            if (notifications.length > 0) {
+                badge.textContent = notifications.length;
+                badge.style.display = 'block';
+                if (noNotifs) noNotifs.style.display = 'none';
+                
+                // Add notifications
+                notifications.forEach(function(notif) {
+                    const li = document.createElement('li');
+                    li.className = 'notification-item';
+                    
+                    let icon = 'fas fa-bell';
+                    let colorClass = 'text-primary';
+                    if (notif.type === 'load_status_update') {
+                        icon = 'fas fa-truck';
+                        colorClass = 'text-info';
+                    } else if (notif.status === 'completed') {
+                        icon = 'fas fa-check-circle';
+                        colorClass = 'text-success';
+                    }
+                    
+                    const timeAgo = getTimeAgo(notif.timestamp);
+                    
+                    li.innerHTML = `
+                        <a class="dropdown-item py-2 px-3" href="#" onclick="handleNotificationClick('${notif.id}', '${notif.loadId || ''}'); return false;">
+                            <div class="d-flex">
+                                <div class="me-2">
+                                    <i class="${icon} ${colorClass}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small">${notif.message || 'New notification'}</div>
+                                    <small class="text-muted">${timeAgo}</small>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    
+                    // Insert before "no notifications" message
+                    if (noNotifs && noNotifs.parentNode) {
+                        noNotifs.parentNode.insertBefore(li, noNotifs);
+                    } else {
+                        dropdown.appendChild(li);
+                    }
+                });
+            } else {
+                badge.style.display = 'none';
+                if (noNotifs) noNotifs.style.display = 'block';
+            }
+        }
+        
+        // Handle notification click
+        function handleNotificationClick(notifId, loadId) {
+            // Mark as read (optional - remove from database)
+            // For now, just close dropdown
+            const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('notificationsBtn'));
+            if (dropdown) {
+                dropdown.hide();
+            }
+            
+            // If it's a load status update, redirect to my-loads page
+            if (loadId) {
+                window.location.href = 'my-loads.html';
+            }
+        }
+
+        // Initialize Revenue Chart
+        function initRevenueChart() {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [],
+                        borderColor: 'rgb(111, 66, 193)',
+                        backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: '#6f42c1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Revenue: £' + context.parsed.y.toLocaleString('en-GB', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000) {
+                                        return '£' + (value / 1000).toFixed(1) + 'K';
+                                    }
+                                    return '£' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // Set Revenue Period
+        function setRevenuePeriod(period, event) {
+            const previousPeriod = currentRevenuePeriod;
+            currentRevenuePeriod = period;
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.revenue-period-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Activate clicked button
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Find and activate button with matching period
+                buttons.forEach(btn => {
+                    if (btn.textContent.toLowerCase() === period) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            
+            // Refresh revenue data
+            if (previousPeriod !== period || !cachedLoads.length) {
+                fetchRevenueData();
+            } else {
+                updateRevenueChart(cachedLoads);
+            }
+        }
+
+        // Helper function to get revenue from load
+        function getLoadRevenue(load) {
+            // Try different field names that might contain the revenue amount
+            return parseFloat(load.commissionBaseAmount) || 
+                   parseFloat(load.totalCost) || 
+                   parseFloat(load.budget) || 
+                   parseFloat(load.maxBudget) || 
+                   parseFloat(load.price) || 
+                   0;
+        }
+
+        // Helper function to calculate commission based on revenue amount
+        function calculateCommission(revenue) {
+            if (revenue <= 0) return 0;
+            
+            let commissionRate = 0.10; // Default small (10%)
+            if (revenue > 5000) {
+                commissionRate = 0.20; // Large (>5000): 20%
+            } else if (revenue > 1000) {
+                commissionRate = 0.15; // Medium (1000-5000): 15%
+            }
+            
+            return revenue * commissionRate;
+        }
+
+        // Fetch and Update Revenue Data
+        function fetchRevenueData() {
+            if (!firebase || !firebase.database) return;
+
+            if (cachedLoads.length) {
+                updateRevenueChart(cachedLoads);
+            }
+
+            const db = firebase.database();
+            
+            // OPTIMIZED: Use cached loads if available, otherwise fetch
+            if (cachedLoads && cachedLoads.length > 0) {
+                // Use cached data immediately (non-blocking)
+                requestAnimationFrame(() => {
+                    updateRevenueChart(cachedLoads);
+                });
+                return;
+            }
+            
+            // Fetch if not cached (non-blocking)
+            db.ref('loads').once('value', function(snapshot) {
+                const allLoads = [];
+                snapshot.forEach(function(child) {
+                    const load = child.val();
+                    load.id = child.key;
+                    allLoads.push(load);
+                });
+                
+                cachedLoads = allLoads;
+                
+                // Update chart in separate frame (non-blocking)
+                requestAnimationFrame(() => {
+                    updateRevenueChart(allLoads);
+                });
+            });
+        }
+
+        // Update Revenue Chart with Data
+        function updateRevenueChart(loads) {
+            if (!revenueChart || !Array.isArray(loads)) return;
+
+            const periodRange = getPeriodRange(currentRevenuePeriod);
+            const periodLabel = currentRevenuePeriod === 'year' ? 'Monthly' : 'Daily';
+            const revenueByPeriod = {};
+
+            loads.forEach(load => {
+                const revenue = getLoadRevenue(load);
+                if (revenue <= 0) return;
+
+                const loadDate = getLoadDate(load);
+                if (!loadDate) return;
+                if (loadDate < periodRange.start || loadDate > periodRange.end) return;
+
+                const periodKey = currentRevenuePeriod === 'year'
+                    ? `${loadDate.getFullYear()}-${String(loadDate.getMonth() + 1).padStart(2, '0')}`
+                    : loadDate.toISOString().split('T')[0];
+
+                if (!revenueByPeriod[periodKey]) {
+                    revenueByPeriod[periodKey] = 0;
+                }
+                revenueByPeriod[periodKey] += revenue;
+            });
+
+            const dateRange = buildDateRange(periodRange, currentRevenuePeriod);
+            const labels = dateRange.map(item => item.label);
+            const data = dateRange.map(item => revenueByPeriod[item.key] || 0);
+
+            revenueChart.data.labels = labels;
+            revenueChart.data.datasets[0].data = data;
+            revenueChart.data.datasets[0].label = `Revenue (${periodLabel})`;
+            revenueChart.update();
+
+            const totalRevenue = data.reduce((sum, val) => sum + val, 0);
+            const avgRevenue = totalRevenue / (data.length > 0 ? data.length : 1);
+
+            let growth = 0;
+            if (data.length >= 2) {
+                const midpoint = Math.floor(data.length / 2) || 1;
+                const recentPeriod = data.slice(-midpoint);
+                const previousPeriod = data.slice(0, midpoint);
+                const recentAvg = recentPeriod.reduce((sum, val) => sum + val, 0) / recentPeriod.length;
+                const previousAvg = previousPeriod.reduce((sum, val) => sum + val, 0) / previousPeriod.length;
+                if (previousAvg > 0) {
+                    growth = ((recentAvg - previousAvg) / previousAvg) * 100;
+                } else if (recentAvg > 0) {
+                    growth = 100;
+                }
+            }
+
+            const formatMoney = (v) => {
+                const val = Math.round(v * 100) / 100;
+                if (val >= 1000000) return `£${(val/1000000).toFixed(2)}M`;
+                if (val >= 1000) return `£${(val/1000).toFixed(1)}K`;
+                return `£${val.toFixed(2)}`;
+            };
+
+            document.getElementById('totalRevenueDisplay').textContent = formatMoney(totalRevenue);
+            document.getElementById('avgRevenueDisplay').textContent = formatMoney(avgRevenue);
+
+            const growthEl = document.getElementById('growthDisplay');
+            growthEl.textContent = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
+            growthEl.className = `fw-bold ${growth >= 0 ? 'text-success' : 'text-danger'}`;
+        }
+
+        function buildDateRange(range, period) {
+            const items = [];
+            const endDate = new Date(range.end);
+            endDate.setHours(0, 0, 0, 0);
+
+            if (period === 'year') {
+                const startMonth = range.start.getMonth();
+                const endMonth = endDate.getMonth();
+                const year = endDate.getFullYear();
+                for (let month = startMonth; month <= endMonth; month++) {
+                    const date = new Date(year, month, 1);
+                    const key = `${date.getFullYear()}-${String(month + 1).padStart(2, '0')}`;
+                    const label = date.toLocaleDateString('en-GB', { month: 'short' });
+                    items.push({ key, date, label });
+                }
+            } else {
+                const cursor = new Date(range.start);
+                cursor.setHours(0, 0, 0, 0);
+                while (cursor <= endDate) {
+                    const key = cursor.toISOString().split('T')[0];
+                    const label = cursor.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                    items.push({ key, date: new Date(cursor), label });
+                    cursor.setDate(cursor.getDate() + 1);
+                }
+            }
+
+            return items;
+        }
+
+        function getPeriodRange(period) {
+            const end = new Date();
+            end.setHours(23, 59, 59, 999);
+            let start;
+
+            if (period === 'week') {
+                start = new Date(end);
+                start.setDate(start.getDate() - 6);
+            } else if (period === 'month') {
+                start = new Date(end.getFullYear(), end.getMonth(), 1);
+            } else {
+                start = new Date(end.getFullYear(), 0, 1);
+            }
+
+            start.setHours(0, 0, 0, 0);
+            return { start, end };
+        }
+
+        function getLoadDate(load) {
+            if (!load || typeof load !== 'object') return null;
+
+            const candidateFields = [
+                'completedAt', 'completed_at',
+                'deliveryDate', 'delivery_date',
+                'updatedAt', 'updated_at',
+                'createdAt', 'created_at',
+                'pickupDate', 'pickup_date',
+                'postedAt', 'posted_at',
+                'timestamp', 'time',
+                'date'
+            ];
+
+            for (const field of candidateFields) {
+                if (load[field]) {
+                    const parsed = parseDateValue(load[field]);
+                    if (parsed) {
+                        return parsed;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function parseDateValue(value) {
+            if (!value) return null;
+
+            if (typeof value === 'number') {
+                const date = new Date(value);
+                return isNaN(date.getTime()) ? null : date;
+            }
+
+            if (typeof value === 'object') {
+                if (value.seconds) {
+                    const date = new Date(value.seconds * 1000);
+                    return isNaN(date.getTime()) ? null : date;
+                }
+                if (value._seconds) {
+                    const date = new Date(value._seconds * 1000);
+                    return isNaN(date.getTime()) ? null : date;
+                }
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return null;
+
+                const direct = new Date(trimmed);
+                if (!isNaN(direct.getTime())) {
+                    return direct;
+                }
+
+                const simpleMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+                if (simpleMatch) {
+                    let [ , p1, p2, p3 ] = simpleMatch;
+                    let year = parseInt(p3, 10);
+                    if (year < 100) {
+                        year += 2000;
+                    }
+
+                    // Try DD/MM/YYYY
+                    let day = parseInt(p1, 10);
+                    let month = parseInt(p2, 10) - 1;
+                    let candidate = new Date(year, month, day);
+                    if (!isNaN(candidate.getTime())) {
+                        return candidate;
+                    }
+
+                    // Try MM/DD/YYYY
+                    day = parseInt(p2, 10);
+                    month = parseInt(p1, 10) - 1;
+                    candidate = new Date(year, month, day);
+                    if (!isNaN(candidate.getTime())) {
+                        return candidate;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        // Fetch real-time data from Firebase and localStorage (OPTIMIZED)
+        function fetchDashboardData(force = false) {
+            if (typeof firebase === 'undefined' || !firebase.database) {
+                return Promise.resolve(false);
+            }
+
+            const now = Date.now();
+            if (!force && (isFetchingDashboard || (now - lastFetchAt) < DASHBOARD_FETCH_COOLDOWN)) {
+                return Promise.resolve(false);
+            }
+
+            isFetchingDashboard = true;
+            lastFetchAt = now;
+
+            const db = firebase.database();
+            
+            // ULTRA-OPTIMIZED: Load only counts first (super fast)
+            const suppliersCountPromise = db.ref('suppliers').once('value').then(snap => snap.numChildren());
+            const carriersCountPromise = db.ref('carriers').once('value').then(snap => snap.numChildren());
+            
+            // Show counts immediately (instant UI update)
+            Promise.all([suppliersCountPromise, carriersCountPromise])
+                .then(([suppliersCount, carriersCount]) => {
+                    const totalUsers = suppliersCount + carriersCount;
+                    
+                    // Update stats immediately with counts only (critical UI)
+                    requestAnimationFrame(() => {
+                        const userCountElement = document.querySelector('.stat-card.users h3');
+                        if (userCountElement) {
+                            userCountElement.textContent = totalUsers.toLocaleString();
+                        }
+                        
+                        // Update distribution
+                        const userStatsHTML = document.querySelector('.user-stats');
+                        if (userStatsHTML && totalUsers > 0) {
+                            userStatsHTML.innerHTML = `
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Suppliers:</span>
+                                    <strong>${suppliersCount}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Carriers:</span>
+                                    <strong>${carriersCount}</strong>
+                                </div>
+                            `;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error('Failed to fetch user counts:', error);
+                });
+
+            // Load full user data in background (for detailed stats later)
+            setTimeout(() => {
+                const suppliersPromise = db.ref('suppliers').once('value');
+                const carriersPromise = db.ref('carriers').once('value');
+                
+                Promise.all([suppliersPromise, carriersPromise])
+                    .then(([suppliersSnap, carriersSnap]) => {
+                        const suppliers = [];
+                        suppliersSnap.forEach(function(child) {
+                            const user = child.val();
+                            user.id = child.key;
+                            user.userType = 'supplier';
+                            suppliers.push(user);
+                        });
+
+                        const carriers = [];
+                        carriersSnap.forEach(function(child) {
+                            const user = child.val();
+                            user.id = child.key;
+                            user.userType = 'carrier';
+                            carriers.push(user);
+                        });
+
+                        const allUsers = [...suppliers, ...carriers];
+                        updateUserStats(allUsers);
+                    });
+            }, 500);
+
+            // ULTRA-OPTIMIZED: Load loads directly (orderByChild might be slow if not indexed)
+            // Load all loads but process in chunks for faster initial display
+            const loadsPromise = db.ref('loads').once('value');
+            
+            return loadsPromise
+                .then((loadsSnap) => {
+                    const allLoads = [];
+                    loadsSnap.forEach(function(child) {
+                        const load = child.val();
+                        load.id = child.key;
+                        allLoads.push(load);
+                    });
+
+                    cachedLoads = allLoads;
+                    
+                    // Update load stats immediately (non-blocking)
+                    requestAnimationFrame(() => {
+                        updateLoadStats(allLoads);
+                    });
+                    
+                    // Update charts in background (heavy operation - delay it)
+                    setTimeout(() => {
+                        if (revenueChart) {
+                            requestAnimationFrame(() => {
+                                updateRevenueChart(allLoads);
+                            });
+                        }
+                    }, 500); // Delay charts by 500ms
+
+                    // Update recent activities (limit to last 20 for speed)
+                    setTimeout(() => {
+                        const recentActivities = allLoads
+                            .filter(load => load.status && load.status !== 'active')
+                            .slice(0, 20) // Limit to 20 most recent
+                            .map(load => {
+                                const pickup = load.pickupLocation || load.pickup_location || '';
+                                const delivery = load.deliveryLocation || load.delivery_location || '';
+                                const description = (pickup || delivery) ? `${pickup} → ${delivery}` : 'Load update';
+                                const loadDate = getLoadDate(load);
+
+                                return {
+                                    title: load.status === 'completed' ? 'Load Completed' :
+                                           load.status === 'cancelled' ? 'Load Cancelled' : 'Load Update',
+                                    description,
+                                    timestamp: loadDate ? loadDate.getTime() : (load.updatedAt || load.createdAt),
+                                    status: load.status,
+                                    type: load.status
+                                };
+                            })
+                            .sort((a, b) => b.timestamp - a.timestamp); // Sort by timestamp
+
+                        updateRecentActivity(recentActivities);
+                    }, 100);
+                })
+                .catch((error) => {
+                    console.error('Failed to fetch loads data:', error);
+                })
+                .finally(() => {
+                    isFetchingDashboard = false;
+                });
+        }
+
+        // Update user statistics
+        function updateUserStats(users) {
+            const totalUsers = users.length;
+            const suppliers = users.filter(u => u.userType === 'supplier').length;
+            const carriers = users.filter(u => u.userType === 'carrier').length;
+            const brokers = users.filter(u => u.userType === 'broker').length;
+            
+            // Update total users
+            const userCountElement = document.querySelector('.stat-card.users h3');
+            if (userCountElement) {
+                userCountElement.textContent = totalUsers.toLocaleString();
+            }
+            
+            // Update user distribution if element exists
+            const userStatsHTML = document.querySelector('.user-stats');
+            if (userStatsHTML) {
+                if (totalUsers > 0) {
+                    userStatsHTML.innerHTML = `
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Suppliers</span>
+                            <strong class="text-primary">${Math.round((suppliers/totalUsers)*100)}%</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Carriers</span>
+                            <strong class="text-success">${Math.round((carriers/totalUsers)*100)}%</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Brokers</span>
+                            <strong class="text-warning">${Math.round((brokers/totalUsers)*100)}%</strong>
+                        </div>
+                    `;
+                } else {
+                    userStatsHTML.innerHTML = `
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Suppliers</span>
+                            <strong class="text-primary">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Carriers</span>
+                            <strong class="text-success">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Brokers</span>
+                            <strong class="text-warning">-</strong>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Update load statistics
+        function updateLoadStats(loads) {
+            const activeLoads = loads.filter(l => l.status === 'active').length;
+            document.querySelector('.stat-card.loads h3').textContent = activeLoads;
+
+            // Calculate revenue and commission from loads
+            const totals = loads.reduce((acc, l) => {
+                const revenue = getLoadRevenue(l);
+                const commission = calculateCommission(revenue);
+                acc.revenue += revenue;
+                acc.commission += commission;
+                return acc;
+            }, { revenue: 0, commission: 0 });
+
+            const formatMoney = (v) => {
+                const val = Math.round(v * 100) / 100;
+                if (val >= 1000000) return `£${(val/1000000).toFixed(2)}M`;
+                if (val >= 1000) return `£${(val/1000).toFixed(1)}K`;
+                return `£${val.toFixed(2)}`;
+            };
+
+            document.querySelector('.stat-card.revenue h3').textContent = formatMoney(totals.revenue);
+            document.querySelector('.stat-card.commission h3').textContent = formatMoney(totals.commission);
+        }
+
+        // Update recent activity
+        function updateRecentActivity(activities) {
+            const activityFeed = document.querySelector('.activity-feed');
+            if (!activityFeed) return;
+            
+            // Sort by timestamp (newest first)
+            const sortedActivities = activities
+                .sort((a, b) => new Date(b.timestamp || b.createdAt) - new Date(a.timestamp || a.createdAt))
+                .slice(0, 5); // Show latest 5
+            
+            if (sortedActivities.length === 0) {
+                activityFeed.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-clock fa-3x mb-3"></i><p>No recent activity</p></div>';
+                return;
+            }
+            
+            activityFeed.innerHTML = sortedActivities.map(activity => {
+                const timeAgo = getTimeAgo(activity.timestamp || activity.createdAt);
+                const typeClass = getActivityClass(activity.type || activity.activityType);
+                const icon = getActivityIcon(activity.type || activity.activityType);
+                
+                return `
+                    <div class="activity-item ${typeClass}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong><i class="${icon}"></i> ${activity.title || activity.type || 'Activity'}</strong>
+                                <p class="text-muted mb-1">${activity.description || activity.message || ''}</p>
+                                <small class="text-muted">${timeAgo}</small>
+                            </div>
+                            <span class="badge bg-${getBadgeColor(activity.status || 'completed')}">${activity.status || 'Completed'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper functions
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Recently';
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = now - time;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+            if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            return 'Just now';
+        }
+
+        function getActivityClass(type) {
+            const classMap = {
+                'completed': 'success',
+                'load_completed': 'success',
+                'payment': 'success',
+                'new_user': 'warning',
+                'registration': 'warning',
+                'cancelled': 'danger',
+                'load_cancelled': 'danger',
+                'verified': '',
+                'default': ''
+            };
+            return classMap[type] || classMap.default;
+        }
+
+        function getActivityIcon(type) {
+            const iconMap = {
+                'completed': 'fas fa-check-circle',
+                'load_completed': 'fas fa-check-circle',
+                'payment': 'fas fa-credit-card',
+                'new_user': 'fas fa-user-plus',
+                'registration': 'fas fa-user-plus',
+                'cancelled': 'fas fa-times-circle',
+                'load_cancelled': 'fas fa-times-circle',
+                'verified': 'fas fa-check',
+                'default': 'fas fa-bell'
+            };
+            return iconMap[type] || iconMap.default;
+        }
+
+        function getBadgeColor(status) {
+            const colorMap = {
+                'completed': 'success',
+                'active': 'primary',
+                'pending': 'warning',
+                'cancelled': 'danger',
+                'paid': 'success',
+                'verified': 'success'
+            };
+            return colorMap[status] || 'primary';
+        }
+
+        function refreshData(btn) {
+            const button = btn || (typeof event !== 'undefined' ? event.currentTarget : null);
+            const originalText = button ? button.innerHTML : '';
+
+            if (button) {
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
+                button.disabled = true;
+            }
+
+            fetchDashboardData(true).finally(() => {
+                AlphaBrokrage.showAlert('success', 'Data refreshed successfully!');
+                if (button) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            });
+        }
+
+        function addUser() {
+            AlphaBrokrage.showAlert('info', 'Add user modal would open here.');
+        }
+
+        function createLoad() {
+            AlphaBrokrage.showAlert('info', 'Create load modal would open here.');
+        }
+
+        function processPayment() {
+            AlphaBrokrage.showAlert('info', 'Process payment modal would open here.');
+        }
+
+        function generateReport() {
+            AlphaBrokrage.showAlert('info', 'Generate report modal would open here.');
+        }
+
+        function sendNotification() {
+            AlphaBrokrage.showAlert('info', 'Send notification modal would open here.');
+        }
+
+        function viewAnalytics() {
+            AlphaBrokrage.showAlert('info', 'Analytics page would open here.');
+        }
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboard();
+            
+            // Check if URL has sendMessage parameter (from User IDs page)
+            const urlParams = new URLSearchParams(window.location.search);
+            const sendMessageUserId = urlParams.get('sendMessage');
+            if (sendMessageUserId) {
+                // Auto-open send message modal with pre-filled User ID
+                setTimeout(function() {
+                    const modalElement = document.getElementById('sendMessageModal');
+                    if (modalElement) {
+                        const modal = new bootstrap.Modal(modalElement);
+                        const userIdInput = document.getElementById('messageUserId');
+                        if (userIdInput) {
+                            userIdInput.value = sendMessageUserId;
+                        }
+                        modal.show();
+                        
+                        // Clean URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }, 1000);
+            }
+            
+            // Listen for messages from User IDs page (if opened in popup)
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.action === 'sendMessage') {
+                    const userId = event.data.userId;
+                    const modalElement = document.getElementById('sendMessageModal');
+                    if (modalElement && userId) {
+                        const modal = new bootstrap.Modal(modalElement);
+                        const userIdInput = document.getElementById('messageUserId');
+                        if (userIdInput) {
+                            userIdInput.value = userId;
+                        }
+                        modal.show();
+                    }
+                }
+            });
+        });
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            fetchDashboardData();
+        }, 30000);
+
+        // Send message to user
+        function sendMessageToUser() {
+            try {
+                const userId = document.getElementById('messageUserId').value.trim();
+                const messageTitle = document.getElementById('messageTitle').value.trim();
+                const messageText = document.getElementById('messageText').value.trim();
+                
+                console.log('Sending message to:', userId);
+                
+                if (!userId) {
+                    alert('Please enter User ID');
+                    return;
+                }
+                
+                if (!messageText) {
+                    alert('Please enter message');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = document.querySelector('#sendMessageModal .btn-primary');
+                if (!submitBtn) {
+                    alert('Submit button not found');
+                    return;
+                }
+                
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+                submitBtn.disabled = true;
+                
+                // Check if Firebase is available
+                if (typeof firebase === 'undefined' || !firebase.database) {
+                    alert('Firebase not loaded. Please refresh the page.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                const db = firebase.database();
+                
+                // Check if input is an email (contains @)
+                if (userId.includes('@')) {
+                    // Search by email - find user ID first
+                    console.log('Input is email, searching by email:', userId);
+                    searchUserByEmail(db, userId, messageTitle, messageText, submitBtn, originalText);
+                } else {
+                    // Try direct User ID lookup (Firebase key format like -Nxxxxx)
+                    console.log('Input is User ID, searching directly:', userId);
+                    db.ref('carriers/' + userId).once('value', function(carrierSnapshot) {
+                        if (carrierSnapshot.exists()) {
+                            console.log('User found in carriers with ID:', userId);
+                            saveMessage(db, userId, messageTitle, messageText, 'carrier', submitBtn, originalText);
+                        } else {
+                            // Check suppliers
+                            db.ref('suppliers/' + userId).once('value', function(supplierSnapshot) {
+                                if (supplierSnapshot.exists()) {
+                                    console.log('User found in suppliers with ID:', userId);
+                                    saveMessage(db, userId, messageTitle, messageText, 'supplier', submitBtn, originalText);
+                                } else {
+                                    console.log('User not found with ID:', userId);
+                                    alert('User ID not found. Please check the User ID. Make sure you are using the Firebase key (e.g., -Nxxxxx) from the User IDs page, or use the user\'s email address.');
+                                    submitBtn.innerHTML = originalText;
+                                    submitBtn.disabled = false;
+                                }
+                            }).catch(function(error) {
+                                console.error('Error checking suppliers:', error);
+                                alert('Error checking user: ' + error.message);
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                            });
+                        }
+                    }).catch(function(error) {
+                        console.error('Error checking carriers:', error);
+                        alert('Error checking user: ' + error.message);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+                }
+            } catch (error) {
+                console.error('Error in sendMessageToUser:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Search user by email if ID lookup fails
+        function searchUserByEmail(db, email, messageTitle, messageText, submitBtn, originalText) {
+            // Search in carriers
+            db.ref('carriers').orderByChild('email').equalTo(email.toLowerCase()).once('value', function(carrierSnapshot) {
+                let found = false;
+                carrierSnapshot.forEach(function(child) {
+                    const userId = child.key;
+                    console.log('Found carrier user:', userId);
+                    saveMessage(db, userId, messageTitle, messageText, 'carrier', submitBtn, originalText);
+                    found = true;
+                });
+                
+                if (!found) {
+                    // Search in suppliers
+                    db.ref('suppliers').orderByChild('email').equalTo(email.toLowerCase()).once('value', function(supplierSnapshot) {
+                        let supplierFound = false;
+                        supplierSnapshot.forEach(function(child) {
+                            const userId = child.key;
+                            console.log('Found supplier user:', userId);
+                            saveMessage(db, userId, messageTitle, messageText, 'supplier', submitBtn, originalText);
+                            supplierFound = true;
+                        });
+                        
+                        if (!supplierFound) {
+                            alert('User not found with email: ' + email);
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }).catch(function(error) {
+                        console.error('Error searching suppliers by email:', error);
+                        alert('Error searching user: ' + error.message);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+                }
+            }).catch(function(error) {
+                console.error('Error searching carriers by email:', error);
+                alert('Error searching user: ' + error.message);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function saveMessage(db, userId, messageTitle, messageText, userType, submitBtn, originalText) {
+            try {
+                // Validate userId is not empty and doesn't contain invalid characters
+                if (!userId || userId.trim() === '') {
+                    alert('Invalid User ID');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // Clean userId - remove any whitespace
+                userId = userId.trim();
+                
+                // Message data - messages are PERMANENTLY saved in Firebase and NEVER deleted
+                const messageData = {
+                    title: messageTitle || 'Message from Admin',
+                    message: messageText,
+                    from: 'admin',
+                    read: false,
+                    createdAt: new Date().toISOString(),
+                    userType: userType,
+                    permanent: true // Mark as permanent - never delete
+                };
+                
+                console.log('Saving message to userId:', userId);
+                console.log('Message data:', messageData);
+                console.log('Path: messages/' + userId);
+                
+                // Add timeout to prevent infinite loading
+                const timeoutId = setTimeout(function() {
+                    console.error('Timeout: Message save taking too long');
+                    alert('Message sending is taking too long. Please check your internet connection and try again.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 10000); // 10 second timeout
+                
+                // Validate Firebase reference
+                if (!db || !db.ref) {
+                    clearTimeout(timeoutId);
+                    alert('Firebase database not available');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // Save message to Firebase - PERMANENTLY saved, never deleted
+                const messageRef = db.ref('messages/' + userId);
+                
+                // Use push() to generate unique message ID, then set() the data
+                // Messages are permanently stored in Firebase and will never be removed
+                const newMessageRef = messageRef.push();
+                
+                console.log('Generated message ref key:', newMessageRef.key);
+                console.log('Attempting to save permanently...');
+                
+                // Set the data - message is permanently saved
+                newMessageRef.set(messageData, function(error) {
+                    clearTimeout(timeoutId);
+                    
+                    if (error) {
+                        console.error('Error saving message:', error);
+                        console.error('Error code:', error.code);
+                        console.error('Error message:', error.message);
+                        
+                        let errorMsg = 'Error sending message: ';
+                        if (error.code === 'PERMISSION_DENIED') {
+                            errorMsg += 'Permission denied. Check Firebase database rules.';
+                        } else if (error.code === 'NETWORK_ERROR') {
+                            errorMsg += 'Network error. Check your internet connection.';
+                        } else if (error.message) {
+                            errorMsg += error.message;
+                        } else {
+                            errorMsg += 'Unknown error occurred.';
+                        }
+                        
+                        alert(errorMsg);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    } else {
+                        console.log('Message saved successfully!');
+                        alert('Message sent successfully to user!');
+                        
+                        // Close modal and reset form
+                        setTimeout(function() {
+                            const modalElement = document.getElementById('sendMessageModal');
+                            if (modalElement) {
+                                const modal = bootstrap.Modal.getInstance(modalElement);
+                                if (modal) {
+                                    modal.hide();
+                                }
+                            }
+                            
+                            const userIdInput = document.getElementById('messageUserId');
+                            const titleInput = document.getElementById('messageTitle');
+                            const textInput = document.getElementById('messageText');
+                            
+                            if (userIdInput) userIdInput.value = '';
+                            if (titleInput) titleInput.value = '';
+                            if (textInput) textInput.value = '';
+                            
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }, 500);
+                    }
+                });
+            } catch (error) {
+                console.error('Error in saveMessage:', error);
+                alert('Error: ' + (error.message || 'Unknown error'));
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+
+    <!-- Send Message Modal -->
+    <div class="modal fade" id="sendMessageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-paper-plane"></i> Send Message to User
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendMessageForm" onsubmit="event.preventDefault(); sendMessageToUser(); return false;">
+                        <div class="mb-3">
+                            <label for="messageUserId" class="form-label">User ID or Email <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="messageUserId" placeholder="Enter User ID (e.g., -Nxxxxx) or Email" required>
+                            <small class="text-muted">Enter Firebase User ID (from User IDs page) or user's email address.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="messageTitle" class="form-label">Message Title</label>
+                            <input type="text" class="form-control" id="messageTitle" placeholder="Enter message title (optional)">
+                        </div>
+                        <div class="mb-3">
+                            <label for="messageText" class="form-label">Message <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="messageText" rows="5" placeholder="Enter your message here..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendMessageToUser()">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

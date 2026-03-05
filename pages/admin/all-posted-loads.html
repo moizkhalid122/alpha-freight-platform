@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Posted Loads - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link rel="shortcut icon" type="image/jpeg" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link rel="apple-touch-icon" href="../../WhatsApp Image 2026-02-16 at 12.21.39 PM.jpeg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .admin-sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff !important;
+        }
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff !important;
+            font-weight: 600;
+        }
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-available { background: #e7f1ff; color: #1d4ed8; }
+        .status-active { background: #e7f1ff; color: #1d4ed8; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-matched { background: #d4edda; color: #155724; }
+        .status-in-transit { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #e2e3e5; color: #41464b; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .table thead th {
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .table-responsive {
+            max-height: 70vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white active" href="all-posted-loads.html">
+                            <i class="fas fa-list"></i> All Posted Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="messages.html">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+                    <div>
+                        <h3 class="fw-bold mb-1">All Posted Loads</h3>
+                        <p class="text-muted mb-0">Real-time list of supplier posted loads and status changes.</p>
+                    </div>
+                    <div class="text-md-end mt-3 mt-md-0">
+                        <div class="fw-semibold">Total Loads: <span id="loadsCount">0</span></div>
+                        <small class="text-muted">Last updated: <span id="lastUpdated">-</span></small>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Load ID</th>
+                                        <th>Title</th>
+                                        <th>Supplier</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Updated</th>
+                                        <th>Cancelled At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="loadsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                            Loading loads...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        if (!firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const loadsTableBody = document.getElementById('loadsTableBody');
+        const loadsCount = document.getElementById('loadsCount');
+        const lastUpdated = document.getElementById('lastUpdated');
+        const supplierLookup = {};
+        let latestLoads = [];
+        let displayedLoads = [];
+        let currentPage = 1;
+        const LOADS_PER_PAGE = 50; // Show 50 loads at a time
+        let isRendering = false;
+
+        function formatDate(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString();
+        }
+
+        function normalizeStatus(status) {
+            if (!status) return 'pending';
+            return status.toString().trim().toLowerCase().replace(/\s+/g, '-');
+        }
+
+        function resolveSupplier(load) {
+            const supplierId = load.supplierId || load.supplier_id || load.supplier;
+            if (supplierId && supplierLookup[supplierId]) {
+                return supplierLookup[supplierId];
+            }
+            return load.companyName || load.supplierName || supplierId || 'Unknown';
+        }
+
+        // ULTRA-FAST: Progressive rendering with pagination
+        function renderLoads() {
+            if (!loadsTableBody) return;
+            if (isRendering) return; // Prevent multiple renders
+            isRendering = true;
+            
+            if (!latestLoads.length) {
+                loadsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No loads posted yet.
+                        </td>
+                    </tr>
+                `;
+                if (loadsCount) loadsCount.textContent = '0';
+                isRendering = false;
+                return;
+            }
+
+            // Show first 50 loads immediately (fast initial display)
+            const startIndex = 0;
+            const endIndex = Math.min(LOADS_PER_PAGE, latestLoads.length);
+            displayedLoads = latestLoads.slice(startIndex, endIndex);
+            
+            // Render first batch immediately
+            const rows = displayedLoads.map((load) => {
+                const status = normalizeStatus(load.status);
+                const cancelledAt = load.cancelledAt || load.canceledAt || load.cancelled_at || load.canceled_at;
+                return `
+                    <tr>
+                        <td>${load.id}</td>
+                        <td>${load.loadTitle || load.title || 'Untitled'}</td>
+                        <td>${resolveSupplier(load)}</td>
+                        <td><span class="status-badge status-${status}">${status.replace('-', ' ')}</span></td>
+                        <td>${formatDate(load.createdAt || load.created_at)}</td>
+                        <td>${formatDate(load.updatedAt || load.updated_at)}</td>
+                        <td>${formatDate(cancelledAt)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            loadsTableBody.innerHTML = rows;
+            if (loadsCount) loadsCount.textContent = latestLoads.length.toString();
+            if (lastUpdated) lastUpdated.textContent = new Date().toLocaleString();
+            
+            isRendering = false;
+            
+            // Render remaining loads in background (if more than 50)
+            if (latestLoads.length > LOADS_PER_PAGE) {
+                setTimeout(() => {
+                    renderAllLoads();
+                }, 100);
+            }
+        }
+        
+        // Render all loads (background process)
+        function renderAllLoads() {
+            if (!loadsTableBody || isRendering) return;
+            isRendering = true;
+            
+            const rows = latestLoads.map((load) => {
+                const status = normalizeStatus(load.status);
+                const cancelledAt = load.cancelledAt || load.canceledAt || load.cancelled_at || load.canceled_at;
+                return `
+                    <tr>
+                        <td>${load.id}</td>
+                        <td>${load.loadTitle || load.title || 'Untitled'}</td>
+                        <td>${resolveSupplier(load)}</td>
+                        <td><span class="status-badge status-${status}">${status.replace('-', ' ')}</span></td>
+                        <td>${formatDate(load.createdAt || load.created_at)}</td>
+                        <td>${formatDate(load.updatedAt || load.updated_at)}</td>
+                        <td>${formatDate(cancelledAt)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            loadsTableBody.innerHTML = rows;
+            isRendering = false;
+        }
+
+        function hydrateSuppliers(snapshot) {
+            for (const key in supplierLookup) {
+                delete supplierLookup[key];
+            }
+            snapshot.forEach((child) => {
+                const supplier = child.val() || {};
+                const name = supplier.companyName
+                    || (supplier.firstName ? `${supplier.firstName} ${supplier.lastName || ''}`.trim() : '')
+                    || supplier.email
+                    || 'Supplier';
+                supplierLookup[child.key] = name;
+            });
+        }
+
+        // OPTIMIZED: Fast sorting with caching
+        function sortLoads(loads) {
+            if (!loads || loads.length === 0) return loads;
+            if (loads.length === 1) return loads;
+            
+            // Fast sort - only sort if needed
+            return loads.sort((a, b) => {
+                // Use cached timestamps if available
+                const aTime = a._sortTime || (a._sortTime = new Date(a.createdAt || a.created_at || 0).getTime());
+                const bTime = b._sortTime || (b._sortTime = new Date(b.createdAt || b.created_at || 0).getTime());
+                return bTime - aTime;
+            });
+        }
+
+        const db = firebase.database();
+
+        // ULTRA-OPTIMIZED: Load only recent loads first (last 200), then load full data
+        // ULTRA-FAST: Load suppliers first, then loads with progressive rendering
+        db.ref('suppliers').once('value', (snapshot) => {
+            hydrateSuppliers(snapshot);
+            
+            // ULTRA-FAST: Load loads and process immediately
+            db.ref('loads').once('value', (loadsSnapshot) => {
+                // Fast processing - convert snapshot to array immediately
+                const loads = [];
+                if (loadsSnapshot.exists()) {
+                    const snapshotVal = loadsSnapshot.val();
+                    for (const key in snapshotVal) {
+                        if (snapshotVal.hasOwnProperty(key)) {
+                            const data = snapshotVal[key];
+                            if (data) {
+                                data.id = key;
+                                loads.push(data);
+                            }
+                        }
+                    }
+                }
+                
+                // Sort loads (fast)
+                latestLoads = sortLoads(loads);
+                
+                // Render first 50 loads IMMEDIATELY (no delay)
+                if (loadsTableBody) {
+                    renderLoads();
+                }
+                
+                // Render all loads in background (if more than 50)
+                if (loads.length > LOADS_PER_PAGE) {
+                    setTimeout(() => {
+                        renderAllLoads();
+                    }, 100);
+                }
+                
+                // Set up real-time listener for updates (debounced and optimized)
+                let updateTimeout;
+                db.ref('loads').on('value', (updateSnapshot) => {
+                    clearTimeout(updateTimeout);
+                    updateTimeout = setTimeout(() => {
+                        // Fast processing - same method as initial load
+                        const updatedLoads = [];
+                        if (updateSnapshot.exists()) {
+                            const snapshotVal = updateSnapshot.val();
+                            for (const key in snapshotVal) {
+                                if (snapshotVal.hasOwnProperty(key)) {
+                                    const data = snapshotVal[key];
+                                    if (data) {
+                                        data.id = key;
+                                        updatedLoads.push(data);
+                                    }
+                                }
+                            }
+                        }
+                        latestLoads = sortLoads(updatedLoads);
+                        
+                        // Update UI (non-blocking)
+                        requestAnimationFrame(() => {
+                            renderLoads();
+                        });
+                    }, 500); // Debounce updates (500ms)
+                });
+            });
+        });
+
+        // Set up real-time listener for suppliers (after initial load)
+        db.ref('suppliers').on('value', (snapshot) => {
+            hydrateSuppliers(snapshot);
+            // Only re-render if loads are already loaded
+            if (latestLoads.length > 0) {
+                requestAnimationFrame(() => {
+                    renderLoads();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

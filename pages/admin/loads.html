@@ -1,0 +1,1288 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loads Management - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Sidebar Styling */
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .admin-sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff !important;
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff !important;
+            font-weight: 600;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        /* Content Area */
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        /* Mobile Menu Toggle Button */
+        .mobile-menu-btn {
+            display: none;
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+        
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .admin-sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                width: 280px;
+                max-width: 80%;
+            }
+            
+            .admin-sidebar.show {
+                left: 0;
+            }
+            
+            .admin-content {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .header-content .d-flex {
+                flex-wrap: wrap;
+            }
+            
+            .header-content .btn {
+                font-size: 0.875rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .header-content .btn i {
+                margin-right: 0.25rem;
+            }
+            
+            .header-content .btn span.d-none {
+                display: none !important;
+            }
+        }
+        
+        .load-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6f42c1;
+        }
+        .load-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .load-card.pending {
+            border-left-color: #ffc107;
+        }
+        .load-card.matched {
+            border-left-color: #28a745;
+        }
+        .load-card.in-transit {
+            border-left-color: #17a2b8;
+        }
+        .load-card.completed {
+            border-left-color: #6c757d;
+        }
+        .load-card.cancelled {
+            border-left-color: #dc3545;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-matched {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-transit {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-completed {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .priority-high {
+            border-left-color: #dc3545 !important;
+        }
+        .priority-medium {
+            border-left-color: #ffc107 !important;
+        }
+        .priority-low {
+            border-left-color: #28a745 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem; text-decoration: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white active" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="contracts.html">
+                            <i class="fas fa-file-contract"></i> Contracts
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white" href="company-details.html">
+                            <i class="fas fa-building"></i> Carrier Details
+                        </a>
+                        <a class="nav-link text-white" href="user-ids.html">
+                            <i class="fas fa-id-card"></i> User IDs
+                        </a>
+                        <a class="nav-link text-white" href="user-details.html">
+                            <i class="fas fa-search"></i> Search User
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center header-content">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="mobile-menu-btn" onclick="toggleSidebar()" id="mobileMenuBtn">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Loads Management</h5>
+                                <small class="text-muted d-none d-md-block">Monitor and manage all freight loads</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createLoadModal">
+                                <i class="fas fa-plus"></i> <span class="d-none d-md-inline">Create Load</span>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportLoads()">
+                                <i class="fas fa-download"></i> <span class="d-none d-md-inline">Export</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loads Content -->
+                <div class="p-4">
+                    <!-- Filters -->
+                    <div class="filter-section">
+                        <div class="row">
+                            <div class="col-md-2 mb-3">
+                                <label for="statusFilter" class="form-label">Status</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="matched">Matched</option>
+                                    <option value="in-transit">In Transit</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="priorityFilter" class="form-label">Priority</label>
+                                <select class="form-select" id="priorityFilter">
+                                    <option value="">All Priority</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="supplierFilter" class="form-label">Supplier</label>
+                                <select class="form-select" id="supplierFilter">
+                                    <option value="">All Suppliers</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="carrierFilter" class="form-label">Carrier</label>
+                                <select class="form-select" id="carrierFilter">
+                                    <option value="">All Carriers</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="searchInput" class="form-label">Search</label>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search loads...">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-primary" onclick="applyFilters()">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loads List -->
+                    <div id="loadsContainer" class="row">
+                        <div class="col-12 text-center py-5" id="loadingMessage">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted">Loading loads...</p>
+                        </div>
+                        <div class="col-12 text-center py-5" id="noLoadsMessage" style="display: none;">
+                            <i class="fas fa-boxes fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted mb-3">No loads found</h4>
+                            <p class="text-muted">Loads will appear here when suppliers post them.</p>
+                            <button class="btn btn-primary btn-lg" onclick="fetchLoads()">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh Loads
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-4" id="paginationContainer" style="display: none;">
+                        <div>
+                            <small class="text-muted" id="loadsCount">No loads</small>
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm" id="paginationNav">
+                                <!-- Pagination will be generated dynamically -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Load Modal -->
+    <div class="modal fade" id="createLoadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus"></i> Create New Load
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createLoadForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="supplier" class="form-label">Supplier</label>
+                                <select class="form-select" id="supplier" required>
+                                    <option value="">Select supplier</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="pickupLocation" class="form-label">Pickup Location</label>
+                                <input type="text" class="form-control" id="pickupLocation" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deliveryLocation" class="form-label">Delivery Location</label>
+                                <input type="text" class="form-control" id="deliveryLocation" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cargoType" class="form-label">Cargo Type</label>
+                                <input type="text" class="form-control" id="cargoType" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cargoWeight" class="form-label">Weight (tonnes)</label>
+                                <input type="number" class="form-control" id="cargoWeight" step="0.1" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="budget" class="form-label">Budget (£)</label>
+                                <input type="number" class="form-control" id="budget" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deliveryDate" class="form-label">Delivery Date</label>
+                                <input type="date" class="form-control" id="deliveryDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createNewLoad()">
+                        <i class="fas fa-plus"></i> Create Load
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Global variables
+        let allLoads = [];
+        let filteredLoads = [];
+        let currentPage = 1;
+        const loadsPerPage = 10;
+        let suppliers = [];
+        let carriers = [];
+
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                
+                // Prevent body scroll when sidebar is open
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        // Close sidebar on mobile when nav link is clicked
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 991) {
+                toggleSidebar();
+            }
+        }
+        
+        // Auto-close sidebar when nav links are clicked on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.admin-sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        setTimeout(() => {
+                            closeSidebarOnMobile();
+                        }, 100);
+                    }
+                });
+            });
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (window.innerWidth <= 991 && sidebar && overlay) {
+                // Check if click is outside sidebar and not on menu button
+                if (sidebar.classList.contains('show') && 
+                    !sidebar.contains(event.target) && 
+                    event.target !== menuBtn && 
+                    !menuBtn.contains(event.target)) {
+                    toggleSidebar();
+                }
+            }
+        });
+        
+        // Close sidebar on window resize if it becomes desktop view
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991) {
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // Fetch loads on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchLoads();
+            fetchSuppliers();
+            fetchCarriers();
+        });
+
+        // Fetch loads from Firebase
+        function fetchLoads() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            const noLoadsMessage = document.getElementById('noLoadsMessage');
+            const container = document.getElementById('loadsContainer');
+            
+            // Show loading
+            if (loadingMessage) loadingMessage.style.display = 'block';
+            if (noLoadsMessage) noLoadsMessage.style.display = 'none';
+            
+            // Add timeout fallback (10 seconds)
+            const loadingTimeout = setTimeout(function() {
+                if (loadingMessage && loadingMessage.style.display !== 'none') {
+                    loadingMessage.style.display = 'none';
+                    if (container && allLoads.length === 0) {
+                        container.innerHTML = `
+                            <div class="col-12 text-center py-5">
+                                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                                <h4 class="text-muted mb-3">Timeout loading loads</h4>
+                                <p class="text-muted mb-3">Please check your internet connection and try again.</p>
+                                <button class="btn btn-primary btn-lg" onclick="fetchLoads()">
+                                    <i class="fas fa-sync-alt me-2"></i>Retry
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            }, 10000);
+            
+            const db = firebase.database();
+            db.ref('loads').once('value', function(snapshot) {
+                clearTimeout(loadingTimeout);
+                
+                allLoads = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(function(child) {
+                        const load = child.val();
+                        if (load) {
+                            load.id = child.key;
+                            allLoads.push(load);
+                        }
+                    });
+                }
+                
+                filteredLoads = [...allLoads];
+                
+                // Hide loading
+                if (loadingMessage) loadingMessage.style.display = 'none';
+                
+                renderLoads();
+                updatePagination();
+                updateLoadsCount();
+            }, function(error) {
+                clearTimeout(loadingTimeout);
+                console.error('Error fetching loads:', error);
+                
+                // Hide loading on error
+                if (loadingMessage) loadingMessage.style.display = 'none';
+                
+                // Show error or empty state
+                if (container) {
+                    const errorHtml = `
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h4 class="text-muted mb-3">Error loading loads</h4>
+                            <p class="text-muted mb-3">${error && error.message ? error.message : 'Unable to fetch loads. Please check your connection.'}</p>
+                            <button class="btn btn-primary btn-lg" onclick="fetchLoads()">
+                                <i class="fas fa-sync-alt me-2"></i>Retry
+                            </button>
+                        </div>
+                    `;
+                    // Clear existing content but keep loading/no loads message structure
+                    const existingCards = container.querySelectorAll('.col-lg-6');
+                    existingCards.forEach(card => card.remove());
+                    container.insertAdjacentHTML('beforeend', errorHtml);
+                }
+                
+                if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                    AlphaBrokrage.showAlert('error', 'Error fetching loads: ' + (error && error.message ? error.message : 'Unknown error'));
+                }
+            });
+        }
+
+        // Fetch suppliers for filter dropdown
+        function fetchSuppliers() {
+            const db = firebase.database();
+            db.ref('suppliers').once('value', function(snapshot) {
+                suppliers = [];
+                snapshot.forEach(function(child) {
+                    const supplier = child.val();
+                    supplier.id = child.key;
+                    suppliers.push(supplier);
+                });
+                updateSupplierFilter();
+                updateSupplierModal();
+            });
+        }
+
+        // Fetch carriers for filter dropdown
+        function fetchCarriers() {
+            const db = firebase.database();
+            db.ref('carriers').once('value', function(snapshot) {
+                carriers = [];
+                snapshot.forEach(function(child) {
+                    const carrier = child.val();
+                    carrier.id = child.key;
+                    carriers.push(carrier);
+                });
+                updateCarrierFilter();
+            });
+        }
+
+        // Update supplier filter dropdown
+        function updateSupplierFilter() {
+            const supplierFilter = document.getElementById('supplierFilter');
+            if (!supplierFilter) return;
+            
+            const currentValue = supplierFilter.value;
+            supplierFilter.innerHTML = '<option value="">All Suppliers</option>';
+            
+            suppliers.forEach(function(supplier) {
+                const name = supplier.companyName || supplier.firstName + ' ' + (supplier.lastName || '') || supplier.email || 'Unknown';
+                const option = document.createElement('option');
+                option.value = supplier.id;
+                option.textContent = name;
+                if (supplier.id === currentValue) {
+                    option.selected = true;
+                }
+                supplierFilter.appendChild(option);
+            });
+        }
+
+        // Update supplier dropdown in create modal
+        function updateSupplierModal() {
+            const supplierSelect = document.getElementById('supplier');
+            if (!supplierSelect) return;
+            
+            const currentValue = supplierSelect.value;
+            supplierSelect.innerHTML = '<option value="">Select supplier</option>';
+            
+            suppliers.forEach(function(supplier) {
+                const name = supplier.companyName || supplier.firstName + ' ' + (supplier.lastName || '') || supplier.email || 'Unknown';
+                const option = document.createElement('option');
+                option.value = supplier.id;
+                option.textContent = name;
+                if (supplier.id === currentValue) {
+                    option.selected = true;
+                }
+                supplierSelect.appendChild(option);
+            });
+        }
+
+        // Update carrier filter dropdown
+        function updateCarrierFilter() {
+            const carrierFilter = document.getElementById('carrierFilter');
+            if (!carrierFilter) return;
+            
+            const currentValue = carrierFilter.value;
+            carrierFilter.innerHTML = '<option value="">All Carriers</option>';
+            
+            carriers.forEach(function(carrier) {
+                const name = carrier.companyName || carrier.firstName + ' ' + (carrier.lastName || '') || carrier.email || 'Unknown';
+                const option = document.createElement('option');
+                option.value = carrier.id;
+                option.textContent = name;
+                if (carrier.id === currentValue) {
+                    option.selected = true;
+                }
+                carrierFilter.appendChild(option);
+            });
+        }
+
+        // Render loads
+        function renderLoads() {
+            const container = document.getElementById('loadsContainer');
+            const noLoadsMessage = document.getElementById('noLoadsMessage');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            if (!container) return;
+
+            // Hide loading if still showing
+            if (loadingMessage) loadingMessage.style.display = 'none';
+
+            const startIndex = (currentPage - 1) * loadsPerPage;
+            const endIndex = startIndex + loadsPerPage;
+            const loadsToShow = filteredLoads.slice(startIndex, endIndex);
+
+            if (loadsToShow.length === 0) {
+                if (noLoadsMessage) noLoadsMessage.style.display = 'block';
+                // Clear container but keep the no loads message structure
+                const existingCards = container.querySelectorAll('.col-lg-6');
+                existingCards.forEach(card => card.remove());
+                return;
+            }
+
+            if (noLoadsMessage) noLoadsMessage.style.display = 'none';
+            container.innerHTML = loadsToShow.map(createLoadCard).join('');
+        }
+
+        // Create load card HTML
+        function createLoadCard(load) {
+            const status = load.status || 'pending';
+            const statusClass = getStatusClass(status);
+            const statusBadge = getStatusBadge(status);
+            
+            const priority = load.priority || 'medium';
+            const priorityClass = `priority-${priority}`;
+            const priorityBadge = getPriorityBadge(priority);
+
+            const pickupLocation = load.pickupLocation || 'Unknown';
+            const deliveryLocation = load.deliveryLocation || 'Unknown';
+            const cargoType = load.cargoType || 'N/A';
+            const cargoWeight = load.cargoWeight || load.weight || 'N/A';
+            const budget = load.budget || load.totalCost || load.maxBudget || 'TBD';
+            
+            const createdDate = load.createdAt ? new Date(load.createdAt).toLocaleDateString() : 'N/A';
+            const deliveryDate = load.deliveryDate ? new Date(load.deliveryDate).toLocaleDateString() : 'N/A';
+            
+            // Get supplier name
+            const supplierId = load.supplierId || load.supplier;
+            let supplierName = 'Unknown';
+            if (supplierId) {
+                const supplier = suppliers.find(s => s.id === supplierId);
+                if (supplier) {
+                    supplierName = supplier.companyName || supplier.firstName + ' ' + (supplier.lastName || '') || supplier.email || 'Unknown';
+                }
+            }
+
+            // Get carrier name
+            const carrierId = load.carrierId || load.carrier;
+            let carrierName = null;
+            if (carrierId) {
+                const carrier = carriers.find(c => c.id === carrierId);
+                if (carrier) {
+                    carrierName = carrier.companyName || carrier.firstName + ' ' + (carrier.lastName || '') || carrier.email || 'Unknown';
+                }
+            }
+
+            const loadId = load.id || 'N/A';
+            
+            let actionButtons = '';
+            if (status === 'active' || status === 'pending') {
+                actionButtons = `
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewLoad('${loadId}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="cancelLoad('${loadId}')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                `;
+            } else if (status === 'matched' || status === 'in-transit' || status === 'in_transit') {
+                actionButtons = `
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewLoad('${loadId}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="trackLoad('${loadId}')">
+                        <i class="fas fa-map-marker-alt"></i> Track
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="completeLoad('${loadId}')">
+                        <i class="fas fa-check"></i> Complete
+                    </button>
+                `;
+            } else if (status === 'completed') {
+                actionButtons = `
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewLoad('${loadId}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                `;
+            } else if (status === 'cancelled') {
+                actionButtons = `
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewLoad('${loadId}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="reactivateLoad('${loadId}')">
+                        <i class="fas fa-redo"></i> Reactivate
+                    </button>
+                `;
+            } else {
+                actionButtons = `
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewLoad('${loadId}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                `;
+            }
+
+            return `
+                <div class="col-lg-6 mb-3">
+                    <div class="load-card card ${statusClass} ${priorityClass}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1">${pickupLocation} → ${deliveryLocation}</h6>
+                                    <p class="text-muted mb-1">${cargoType} • ${cargoWeight} tonnes • £${budget}</p>
+                                    <div class="d-flex gap-2">
+                                        ${statusBadge}
+                                        ${priorityBadge}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">Posted: ${createdDate}</small><br>
+                                    ${carrierName ? `<small class="text-success">${carrierName}</small>` : '<small class="text-warning">No carrier assigned</small>'}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Supplier:</small><br>
+                                    <strong>${supplierName}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Delivery:</small><br>
+                                    <strong>${deliveryDate}</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">Load ID: #${loadId.substring(0, 8)}</small>
+                                </div>
+                                <div class="btn-group">
+                                    ${actionButtons}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get status class for card
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'pending',
+                'active': 'pending',
+                'matched': 'matched',
+                'in-transit': 'in-transit',
+                'in_transit': 'in-transit',
+                'completed': 'completed',
+                'cancelled': 'cancelled'
+            };
+            return statusMap[status] || 'pending';
+        }
+
+        // Get status badge HTML
+        function getStatusBadge(status) {
+            const statusMap = {
+                'pending': '<span class="status-badge status-pending">Pending</span>',
+                'active': '<span class="status-badge status-pending">Active</span>',
+                'matched': '<span class="status-badge status-matched">Matched</span>',
+                'in-transit': '<span class="status-badge status-transit">In Transit</span>',
+                'in_transit': '<span class="status-badge status-transit">In Transit</span>',
+                'completed': '<span class="status-badge status-completed">Completed</span>',
+                'cancelled': '<span class="status-badge status-cancelled">Cancelled</span>'
+            };
+            return statusMap[status] || '<span class="status-badge status-pending">Pending</span>';
+        }
+
+        // Get priority badge HTML
+        function getPriorityBadge(priority) {
+            const priorityMap = {
+                'high': '<span class="badge bg-danger">High Priority</span>',
+                'medium': '<span class="badge bg-warning">Medium Priority</span>',
+                'low': '<span class="badge bg-success">Low Priority</span>'
+            };
+            return priorityMap[priority] || '<span class="badge bg-secondary">Standard</span>';
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const status = document.getElementById('statusFilter').value;
+            const priority = document.getElementById('priorityFilter').value;
+            const supplier = document.getElementById('supplierFilter').value;
+            const carrier = document.getElementById('carrierFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredLoads = allLoads.filter(function(load) {
+                let matches = true;
+
+                if (status) {
+                    const loadStatus = load.status || 'pending';
+                    if (status === 'pending' && loadStatus !== 'pending' && loadStatus !== 'active') {
+                        matches = false;
+                    } else if (status !== 'pending' && loadStatus !== status) {
+                        matches = false;
+                    }
+                }
+
+                if (matches && priority) {
+                    const loadPriority = load.priority || 'medium';
+                    if (loadPriority !== priority) {
+                        matches = false;
+                    }
+                }
+
+                if (matches && supplier) {
+                    const supplierId = load.supplierId || load.supplier;
+                    if (supplierId !== supplier) {
+                        matches = false;
+                    }
+                }
+
+                if (matches && carrier) {
+                    const carrierId = load.carrierId || load.carrier;
+                    if (carrierId !== carrier) {
+                        matches = false;
+                    }
+                }
+
+                if (matches && search) {
+                    const pickup = (load.pickupLocation || '').toLowerCase();
+                    const delivery = (load.deliveryLocation || '').toLowerCase();
+                    const cargo = (load.cargoType || '').toLowerCase();
+                    const searchText = pickup + ' ' + delivery + ' ' + cargo;
+                    if (!searchText.includes(search)) {
+                        matches = false;
+                    }
+                }
+
+                return matches;
+            });
+
+            currentPage = 1;
+            renderLoads();
+            updatePagination();
+            updateLoadsCount();
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredLoads.length / loadsPerPage);
+            const paginationNav = document.getElementById('paginationNav');
+            
+            if (!paginationNav) return;
+
+            if (totalPages <= 1) {
+                paginationNav.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            if (currentPage > 1) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${currentPage - 1}); return false;">Previous</a></li>`;
+            } else {
+                paginationHTML += `<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>`;
+            }
+
+            // Page numbers
+            const maxPages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+            let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+            if (endPage - startPage < maxPages - 1) {
+                startPage = Math.max(1, endPage - maxPages + 1);
+            }
+
+            if (startPage > 1) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1); return false;">1</a></li>`;
+                if (startPage > 2) {
+                    paginationHTML += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<li class="page-item active"><a class="page-link" href="#">${i}</a></li>`;
+                } else {
+                    paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a></li>`;
+                }
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
+                }
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${totalPages}); return false;">${totalPages}</a></li>`;
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${currentPage + 1}); return false;">Next</a></li>`;
+            } else {
+                paginationHTML += `<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Next</a></li>`;
+            }
+
+            paginationNav.innerHTML = paginationHTML;
+        }
+
+        // Go to specific page
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredLoads.length / loadsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderLoads();
+            updatePagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Update loads count
+        function updateLoadsCount() {
+            const loadsCount = document.getElementById('loadsCount');
+            const paginationContainer = document.getElementById('paginationContainer');
+            
+            if (!loadsCount) return;
+            
+            const startIndex = (currentPage - 1) * loadsPerPage;
+            const endIndex = Math.min(startIndex + loadsPerPage, filteredLoads.length);
+            
+            if (filteredLoads.length === 0) {
+                loadsCount.textContent = 'No loads found';
+                if (paginationContainer) paginationContainer.style.display = 'none';
+            } else {
+                loadsCount.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredLoads.length} loads`;
+                if (paginationContainer) paginationContainer.style.display = 'flex';
+            }
+        }
+
+        function viewLoad(loadId) {
+            const load = allLoads.find(l => l.id === loadId);
+            if (!load) {
+                if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                    AlphaBrokrage.showAlert('error', 'Load not found');
+                }
+                return;
+            }
+            
+            // Show load details in a modal or alert
+            const details = `
+                Load ID: ${loadId}
+                Route: ${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}
+                Cargo: ${load.cargoType || 'N/A'} (${load.cargoWeight || load.weight || 'N/A'} tonnes)
+                Budget: £${load.budget || load.totalCost || load.maxBudget || 'TBD'}
+                Status: ${load.status || 'pending'}
+                Priority: ${load.priority || 'medium'}
+            `;
+            
+            if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                AlphaBrokrage.showAlert('info', 'Load details: ' + details.replace(/\n/g, ', '));
+            } else {
+                alert('Load Details:\n' + details);
+            }
+        }
+
+        function cancelLoad(loadId) {
+            if (confirm('Are you sure you want to cancel this load?')) {
+                const db = firebase.database();
+                db.ref('loads/' + loadId).update({
+                    status: 'cancelled',
+                    updatedAt: new Date().toISOString()
+                }).then(function() {
+                    if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                        AlphaBrokrage.showAlert('success', `Load ${loadId} cancelled successfully`);
+                    }
+                    fetchLoads();
+                }).catch(function(error) {
+                    console.error('Error cancelling load:', error);
+                    if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                        AlphaBrokrage.showAlert('error', 'Error cancelling load: ' + error.message);
+                    }
+                });
+            }
+        }
+
+        function trackLoad(loadId) {
+            if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                AlphaBrokrage.showAlert('info', `Tracking load ${loadId} - Redirecting to tracking page...`);
+            }
+            // Could redirect to tracking page here
+            // window.location.href = `track.html?loadId=${loadId}`;
+        }
+
+        function completeLoad(loadId) {
+            if (confirm('Mark this load as completed?')) {
+                const db = firebase.database();
+                db.ref('loads/' + loadId).update({
+                    status: 'completed',
+                    updatedAt: new Date().toISOString(),
+                    completedAt: new Date().toISOString()
+                }).then(function() {
+                    if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                        AlphaBrokrage.showAlert('success', `Load ${loadId} marked as completed`);
+                    }
+                    fetchLoads();
+                }).catch(function(error) {
+                    console.error('Error completing load:', error);
+                    if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                        AlphaBrokrage.showAlert('error', 'Error completing load: ' + error.message);
+                    }
+                });
+            }
+        }
+
+        function reactivateLoad(loadId) {
+            if (confirm('Reactivate this cancelled load?')) {
+                const db = firebase.database();
+                db.ref('loads/' + loadId).update({
+                    status: 'active',
+                    updatedAt: new Date().toISOString()
+                }).then(function() {
+                    if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                        AlphaBrokrage.showAlert('success', `Load ${loadId} reactivated successfully`);
+                    }
+                    fetchLoads();
+                }).catch(function(error) {
+                    console.error('Error reactivating load:', error);
+                    if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                        AlphaBrokrage.showAlert('error', 'Error reactivating load: ' + error.message);
+                    }
+                });
+            }
+        }
+
+        function createNewLoad() {
+            const form = document.getElementById('createLoadForm');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const supplierId = document.getElementById('supplier').value;
+            const priority = document.getElementById('priority').value;
+            const pickupLocation = document.getElementById('pickupLocation').value;
+            const deliveryLocation = document.getElementById('deliveryLocation').value;
+            const cargoType = document.getElementById('cargoType').value;
+            const cargoWeight = parseFloat(document.getElementById('cargoWeight').value);
+            const budget = parseFloat(document.getElementById('budget').value);
+            const deliveryDate = document.getElementById('deliveryDate').value;
+            const description = document.getElementById('description').value;
+
+            const newLoad = {
+                supplierId: supplierId,
+                priority: priority,
+                pickupLocation: pickupLocation,
+                deliveryLocation: deliveryLocation,
+                cargoType: cargoType,
+                cargoWeight: cargoWeight,
+                budget: budget,
+                deliveryDate: deliveryDate,
+                description: description,
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            const db = firebase.database();
+            db.ref('loads').push(newLoad).then(function() {
+                if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                    AlphaBrokrage.showAlert('success', 'New load created successfully!');
+                }
+                bootstrap.Modal.getInstance(document.getElementById('createLoadModal')).hide();
+                form.reset();
+                fetchLoads();
+            }).catch(function(error) {
+                console.error('Error creating load:', error);
+                if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                    AlphaBrokrage.showAlert('error', 'Error creating load: ' + error.message);
+                }
+            });
+        }
+
+        function exportLoads() {
+            AlphaBrokrage.showAlert('success', 'Loads export started!');
+        }
+
+        // Search functionality - trigger filter on input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            applyFilters();
+        });
+
+        // Auto-update supplier and carrier filters when they're fetched
+        setTimeout(function() {
+            updateSupplierFilter();
+            updateSupplierModal();
+            updateCarrierFilter();
+        }, 1000);
+    </script>
+</body>
+</html>
+

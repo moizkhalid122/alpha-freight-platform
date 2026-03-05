@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles - Carrier Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --secondary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --info-gradient: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            width: 220px;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+            animation: brandFadeIn 0.6s ease 0.1s both;
+        }
+
+        @keyframes brandFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sidebar-brand:hover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+        }
+
+        .sidebar-brand h4 {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            object-fit: contain;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-brand:hover img {
+            transform: scale(1.05);
+        }
+
+        .sidebar-brand h4 i {
+            color: var(--primary);
+        }
+
+        .sidebar-nav {
+            position: relative;
+            z-index: 2;
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.6s ease 0.2s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.65rem 0.875rem;
+            margin-bottom: 0.35rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-active);
+            transform: translateX(3px);
+            color: var(--primary) !important;
+        }
+
+        .nav-link.active {
+            background: var(--sidebar-active);
+            color: var(--primary) !important;
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.1);
+        }
+
+        .nav-group {
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.55rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem 2rem;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content-section {
+            padding: 2rem;
+        }
+
+        .page-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h5 {
+            font-size: 1.2rem;
+        }
+
+        .page-header .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .page-actions .btn {
+            border-radius: 10px;
+            padding: 0.5rem 0.9rem;
+        }
+
+        /* From Uiverse.io by adeladel522 */
+        .add-vehicle-btn {
+            position: relative;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+            padding-block: 0.5rem;
+            padding-inline: 1.25rem;
+            background-color: rgb(0 107 179);
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #ffffff;
+            gap: 10px;
+            font-weight: bold;
+            border: 3px solid #ffffff4d;
+            outline: none;
+            overflow: hidden;
+            font-size: 15px;
+        }
+
+        .add-vehicle-btn .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            font-size: 0.9rem;
+            line-height: 1;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .add-vehicle-btn:hover {
+            transform: scale(1.05);
+            border-color: #fff9;
+            color: #ffffff;
+        }
+
+        .add-vehicle-btn:hover .icon {
+            transform: translate(4px);
+        }
+
+        .add-vehicle-btn:hover::before {
+            animation: shine 1.5s ease-out infinite;
+        }
+
+        .add-vehicle-btn::before {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100%;
+            background-image: linear-gradient(
+                120deg,
+                rgba(255, 255, 255, 0) 30%,
+                rgba(255, 255, 255, 0.8),
+                rgba(255, 255, 255, 0) 70%
+            );
+            top: 0;
+            left: -100px;
+            opacity: 0.6;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100px;
+            }
+            60% {
+                left: 100%;
+            }
+            to {
+                left: 100%;
+            }
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .overview-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 1.1rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .overview-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 1rem;
+        }
+
+        .overview-label {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .overview-value {
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .stat-card--success .stat-icon { background: var(--success-gradient); }
+        .stat-card--warning .stat-icon { background: var(--warning-gradient); color: #1f2937; }
+        .stat-card--danger .stat-icon { background: #ef4444; }
+        .stat-card--info .stat-icon { background: var(--info-gradient); }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+        }
+
+        .section-card .card-body {
+            padding: 1.25rem;
+        }
+
+        .service-areas-card .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .service-areas-layout {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.25rem;
+        }
+
+        .service-panel {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            background: #fbfcff;
+        }
+
+        .service-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-panel-title {
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .service-panel-badge {
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .route-form,
+        .coverage-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .route-form .form-control,
+        .coverage-form .form-control {
+            min-width: 0;
+        }
+
+        .route-form .btn,
+        .coverage-form .btn {
+            width: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vehicle-card {
+            transition: all 0.3s ease;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+        }
+
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .vehicle-card.verified {
+            border-color: #10B981;
+        }
+
+        .vehicle-card.pending {
+            border-color: #F59E0B;
+        }
+
+        .vehicle-card.rejected {
+            border-color: #EF4444;
+        }
+
+        .verified-badge {
+            background: var(--success-gradient);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pending-badge {
+            background: var(--warning-gradient);
+            color: #000;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .rejected-badge {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .vehicle-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .vehicle-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .van-icon { background: var(--primary-gradient); color: white; }
+        .truck-icon { background: var(--primary-gradient); color: white; }
+        .artic-icon { background: var(--warning-gradient); color: #000; }
+        .refrigerated-icon { background: var(--info-gradient); color: white; }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(37, 99, 235, 0.4);
+            color: white;
+        }
+
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                left: 0;
+            }
+            .dashboard-content {
+                margin-left: 0;
+                width: 100%;
+                flex: 1 !important;
+            }
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.875rem 1rem;
+                background: white;
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+                z-index: 1040;
+            }
+            .mobile-header img {
+                max-height: 35px;
+                width: auto;
+                object-fit: contain;
+            }
+            .sidebar-brand {
+                padding: 1rem 0.875rem !important;
+            }
+            .sidebar-brand img {
+                max-height: 40px !important;
+            }
+            .sidebar-nav {
+                padding: 0.875rem 0.5rem !important;
+            }
+            .nav-link {
+                padding: 0.6rem 0.75rem !important;
+                font-size: 0.85rem !important;
+            }
+            .nav-link i {
+                width: 16px !important;
+                height: 16px !important;
+                font-size: 0.9rem !important;
+                margin-right: 0.5rem !important;
+            }
+            .mobile-menu-btn {
+                background: var(--primary);
+                border: none;
+                color: white;
+                padding: 0.5rem 0.75rem;
+                border-radius: 8px;
+                font-size: 1.125rem;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .mobile-header .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            .header-section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            .content-section {
+                padding: 1rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            .service-areas-layout {
+                grid-template-columns: 1fr;
+            }
+            .route-form,
+            .coverage-form {
+                flex-wrap: wrap;
+            }
+            .route-form .form-control,
+            .coverage-form .form-control {
+                flex: 1 1 100%;
+            }
+            .route-form .btn,
+            .coverage-form .btn {
+                width: 100%;
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <img src="../supplier/image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo" class="img-fluid">
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary btn-sm" href="dashboard.html"><i class="fas fa-home"></i></a>
+        </div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="row g-0" style="display: flex; flex-wrap: nowrap;">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar p-0" style="flex: 0 0 220px; max-width: 220px; min-width: 220px;">
+                <div class="sidebar-brand">
+                    <img src="../supplier/image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo" class="img-fluid">
+                </div>
+                <div class="sidebar-nav">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <div class="nav-group">
+                            <div class="nav-link nav-group-toggle">
+                                <i class="fas fa-search"></i> Loads
+                            </div>
+                            <div class="nav-group-items">
+                                <a class="nav-link" href="available-loads.html">
+                                    <i class="fas fa-truck-loading"></i> Available Loads
+                                </a>
+                            </div>
+                        </div>
+                        <a class="nav-link" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link" href="../driver/driver-share-location.html">
+                            <i class="fas fa-location-dot"></i> Share Location
+                        </a>
+                        <a class="nav-link active" href="vehicles.html">
+                            <i class="fas fa-truck"></i> Vehicles
+                        </a>
+                        <a class="nav-link" href="payment-received.html">
+                            <i class="fas fa-money-bill-wave"></i> Payment Received
+                        </a>
+                        <div class="nav-group">
+                            <div class="nav-link nav-group-toggle">
+                                <i class="fas fa-comments"></i> Chat
+                            </div>
+                            <div class="nav-group-items">
+                                <a class="nav-link" href="messages.html">
+                                    <i class="fas fa-envelope"></i> Messages
+                                </a>
+                            </div>
+                        </div>
+                        <a class="nav-link" href="profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a class="nav-link" href="verification.html">
+                            <i class="fas fa-shield-check"></i> Get Verified
+                        </a>
+                        <a class="nav-link" href="analytics-verified.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <hr class="my-3" style="border-color: var(--border);">
+                        <a class="nav-link text-danger" href="javascript:void(0)" onclick="logout()" id="logoutLink">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="dashboard-content p-0" style="flex: 1; min-width: 0;">
+                <!-- Desktop Header -->
+                <div class="page-header d-none d-md-block">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h5 class="mb-1 fw-bold"><i class="fas fa-truck me-2"></i>My Vehicles</h5>
+                            <div class="subtitle">Manage your fleet and vehicle information</div>
+                        </div>
+                        <div class="page-actions d-flex gap-2">
+                            <button class="add-vehicle-btn" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                                <i class="fas fa-plus icon"></i> Add Vehicle
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshVehicles(this)">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vehicles Content -->
+                <div class="content-section">
+                    <!-- Overview -->
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <div class="overview-icon"><i class="fas fa-truck-moving"></i></div>
+                            <div>
+                                <div class="overview-value">Active Fleet</div>
+                                <div class="overview-label">Vehicle status overview</div>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon"><i class="fas fa-shield-check"></i></div>
+                            <div>
+                                <div class="overview-value">Compliance Ready</div>
+                                <div class="overview-label">Docs & verification</div>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon"><i class="fas fa-location-dot"></i></div>
+                            <div>
+                                <div class="overview-value">Service Coverage</div>
+                                <div class="overview-label">Routes & areas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Vehicle Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card stat-card--success">
+                            <div class="stat-icon"><i class="fas fa-check"></i></div>
+                            <div>
+                                <div class="stat-value" id="verifiedCount">0</div>
+                                <div class="stat-label">Verified Vehicles</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card--warning">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <div class="stat-value" id="pendingCount">0</div>
+                                <div class="stat-label">Pending Verification</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card--danger">
+                            <div class="stat-icon"><i class="fas fa-times"></i></div>
+                            <div>
+                                <div class="stat-value" id="rejectedCount">0</div>
+                                <div class="stat-label">Rejected</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card--info">
+                            <div class="stat-icon"><i class="fas fa-truck"></i></div>
+                            <div>
+                                <div class="stat-value" id="totalCount">0</div>
+                                <div class="stat-label">Total Vehicles</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicles Grid -->
+                    <div class="section-card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <h6 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i>Fleet List</h6>
+                                <div class="text-muted small">Live vehicles from your account</div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap align-items-center">
+                                <div class="input-group input-group-sm" style="min-width: 220px;">
+                                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="vehicleSearch" placeholder="Search vehicle...">
+                                </div>
+                                <select class="form-select form-select-sm" id="vehicleStatusFilter" style="min-width: 160px;">
+                                    <option value="all" selected>Status: All</option>
+                                    <option value="verified">Verified</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                                <select class="form-select form-select-sm" id="vehicleTypeFilter" style="min-width: 160px;">
+                                    <option value="all" selected>Type: All</option>
+                                    <option value="van">Van</option>
+                                    <option value="7.5t">7.5 Tonne</option>
+                                    <option value="18t">18 Tonne</option>
+                                    <option value="artic">Articulated</option>
+                                    <option value="refrigerated">Refrigerated</option>
+                                    <option value="flatbed">Flatbed</option>
+                                    <option value="curtainside">Curtainside</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="vehiclesGrid">
+                            <!-- JS: Live rendered vehicles will show here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Areas -->
+                    <div class="section-card service-areas-card">
+                        <div class="card-header">
+                            <div>
+                                <h6 class="mb-1 fw-bold"><i class="fas fa-map-marker-alt me-2"></i>Service Areas</h6>
+                                <div class="text-muted small">Define routes and coverage so suppliers can find you.</div>
+                            </div>
+                            <span class="badge bg-light text-dark border">Manage</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="service-areas-layout">
+                                <div class="service-panel">
+                                    <div class="service-panel-header">
+                                        <div class="service-panel-title"><i class="fas fa-route"></i>Primary Routes</div>
+                                        <span class="service-panel-badge">Routes</span>
+                                    </div>
+                                    <div id="routesList">
+                                        <div class="text-muted">No routes added yet</div>
+                                    </div>
+                                    <div class="route-form">
+                                        <input type="text" id="routeFrom" class="form-control form-control-sm" placeholder="From (e.g., London)">
+                                        <input type="text" id="routeTo" class="form-control form-control-sm" placeholder="To (e.g., Manchester)">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="addRoute()"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="service-panel">
+                                    <div class="service-panel-header">
+                                        <div class="service-panel-title"><i class="fas fa-location-dot"></i>Coverage Areas</div>
+                                        <span class="service-panel-badge">Areas</span>
+                                    </div>
+                                    <div id="coverageList" class="mb-2">
+                                        <div class="text-muted">No areas added yet</div>
+                                    </div>
+                                    <div class="coverage-form">
+                                        <input type="text" id="coverageInput" class="form-control form-control-sm" placeholder="Add area (e.g., Leeds)">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="addCoverageArea()"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <div class="modal fade" id="addVehicleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-truck"></i> Add New Vehicle
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addVehicleForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="vehicleType" class="form-label">Vehicle Type</label>
+                                <select class="form-select" id="vehicleType" required>
+                                    <option value="">Select vehicle type</option>
+                                    <option value="van">Van (up to 3.5t)</option>
+                                    <option value="7.5t">7.5 Tonne</option>
+                                    <option value="18t">18 Tonne</option>
+                                    <option value="artic">Articulated Lorry</option>
+                                    <option value="refrigerated">Refrigerated</option>
+                                    <option value="flatbed">Flatbed</option>
+                                    <option value="curtainside">Curtainside</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="makeModel" class="form-label">Make & Model</label>
+                                <input type="text" class="form-control" id="makeModel" placeholder="e.g., Mercedes Sprinter" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="registration" class="form-label">Registration Number</label>
+                                <input type="text" class="form-control" id="registration" placeholder="e.g., AB12 CDE" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="capacity" class="form-label">Load Capacity</label>
+                                <input type="text" class="form-control" id="capacity" placeholder="e.g., 3.5 tonnes" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="year" class="form-label">Year</label>
+                                <input type="number" class="form-control" id="year" min="2000" max="2026" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="mileage" class="form-label">Mileage</label>
+                                <input type="number" class="form-control" id="mileage" placeholder="Current mileage">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="specialFeatures" class="form-label">Special Features</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="tailLift">
+                                        <label class="form-check-label" for="tailLift">Tail Lift</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="refrigerated">
+                                        <label class="form-check-label" for="refrigerated">Refrigerated</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="curtainside">
+                                        <label class="form-check-label" for="curtainside">Curtainside</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="adr">
+                                        <label class="form-check-label" for="adr">ADR Certified</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="insurance" class="form-label">Insurance Documents</label>
+                            <input type="file" class="form-control" id="insurance" accept=".pdf,.jpg,.png" required>
+                            <div class="form-text">Upload insurance certificate</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="license" class="form-label">License Documents</label>
+                            <input type="file" class="form-control" id="license" accept=".pdf,.jpg,.png" required>
+                            <div class="form-text">Upload operator license</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addVehicle()">
+                        <i class="fas fa-plus"></i> Add Vehicle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../assets/js/script.js"></script>
+    <!-- Firebase v8.10.1 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+    // Firebase config
+    var firebaseConfig = {
+      apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+      authDomain: "alpha-brokerage.firebaseapp.com",
+      databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+      projectId: "alpha-brokerage",
+      storageBucket: "alpha-brokerage.firebasestorage.app",
+      messagingSenderId: "834712514965",
+      appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+    };
+    if (!window.firebase || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+
+    function addVehicle() {
+        const form = document.getElementById('addVehicleForm');
+        if (!form.checkValidity()) { form.classList.add('was-validated'); return; }
+        const submitBtn = document.querySelector('#addVehicleModal .btn-primary');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+        submitBtn.disabled = true;
+
+        const auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        const vehicleData = {
+            vehicleType: document.getElementById('vehicleType').value,
+            makeModel: document.getElementById('makeModel').value,
+            registration: document.getElementById('registration').value,
+            capacity: document.getElementById('capacity').value,
+            year: document.getElementById('year').value,
+            mileage: document.getElementById('mileage').value || null,
+            tailLift: document.getElementById('tailLift').checked,
+            refrigerated: document.getElementById('refrigerated').checked,
+            curtainside: document.getElementById('curtainside').checked,
+            adr: document.getElementById('adr').checked,
+            status: 'pending',
+            carrierId: auth.carrierId || auth.id || 'unknown',
+            carrierName: (auth.firstName && auth.lastName) ? (auth.firstName + ' ' + auth.lastName) : (auth.companyName || 'Carrier'),
+            createdAt: new Date().toISOString()
+        };
+
+        var db = firebase.database();
+        db.ref('vehicles').push(vehicleData, function(error){
+            if (error) {
+                AlphaBrokrage.showAlert('error', 'Error adding vehicle: ' + error.message);
+                submitBtn.innerHTML = originalText; submitBtn.disabled = false; return;
+            }
+            AlphaBrokrage.showAlert('success', 'Vehicle added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addVehicleModal')).hide();
+            form.reset();
+            submitBtn.innerHTML = originalText; submitBtn.disabled = false;
+        });
+    }
+
+    let vehiclesCache = [];
+    const filterState = { query: '', status: 'all', type: 'all' };
+
+    function listenVehicles() {
+        var db = firebase.database();
+        var auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var grid = document.getElementById('vehiclesGrid');
+        db.ref('vehicles').on('value', function(snapshot){
+            var myVehicles = [];
+            snapshot.forEach(function(child){
+                var v = child.val(); v.id = child.key;
+                if (v.carrierId && (v.carrierId === (auth.carrierId || auth.id))) { myVehicles.push(v); }
+            });
+            // Update stats
+            var verified = myVehicles.filter(function(v){return v.status === 'verified';}).length;
+            var pending = myVehicles.filter(function(v){return v.status === 'pending';}).length;
+            var rejected = myVehicles.filter(function(v){return v.status === 'rejected';}).length;
+            document.getElementById('verifiedCount').textContent = verified;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('rejectedCount').textContent = rejected;
+            document.getElementById('totalCount').textContent = myVehicles.length;
+
+            vehiclesCache = myVehicles;
+            renderVehiclesGrid();
+        });
+
+        // Service areas live
+        listenServiceAreas();
+    }
+
+    function renderVehicleCard(v) {
+        var iconClass = v.vehicleType === 'van' ? 'van-icon' : (v.vehicleType === 'artic' ? 'artic-icon' : 'truck-icon');
+        var statusBadge = v.status === 'verified' ? '<div class="verified-badge mb-3"><i class="fas fa-check"></i> Verified</div>' : (v.status === 'pending' ? '<div class="pending-badge mb-3"><i class="fas fa-clock"></i> Pending</div>' : '<div class="rejected-badge mb-3"><i class="fas fa-times"></i> Rejected</div>');
+        var features = [];
+        if (v.tailLift) features.push('<span class="badge bg-primary me-1">Tail Lift</span>');
+        if (v.refrigerated) features.push('<span class="badge bg-success me-1">Refrigerated</span>');
+        if (v.curtainside) features.push('<span class="badge bg-secondary me-1">Curtainside</span>');
+        if (v.adr) features.push('<span class="badge bg-danger me-1">ADR</span>');
+        return `<div class="col-lg-4 col-md-6 mb-4"><div class="vehicle-card card h-100 ${v.status}"><div class="card-body text-center">
+            <div class="vehicle-icon ${iconClass}"><i class="fas fa-truck"></i></div>
+            <h5 class="fw-bold mb-2">${v.makeModel || v.vehicleType}</h5>
+            <p class="text-muted mb-2">${(v.vehicleType||'').toUpperCase()} - ${v.capacity || ''}</p>
+            ${statusBadge}
+            <div class="vehicle-details mb-3"><small class="text-muted d-block">Registration: ${v.registration || '-'}</small><small class="text-muted d-block">Year: ${v.year || '-'}</small><small class="text-muted d-block">Mileage: ${v.mileage || '-'}</small></div>
+            <div class="special-features mb-2">${features.join(' ')}</div>
+        </div></div></div>`;
+    }
+
+    function renderVehiclesGrid() {
+        var grid = document.getElementById('vehiclesGrid');
+        var filtered = vehiclesCache.filter(function(v) {
+            var statusMatch = filterState.status === 'all' || v.status === filterState.status;
+            var typeMatch = filterState.type === 'all' || v.vehicleType === filterState.type;
+            var query = filterState.query.trim().toLowerCase();
+            if (!query) return statusMatch && typeMatch;
+            var haystack = [
+                v.makeModel,
+                v.registration,
+                v.vehicleType,
+                v.capacity,
+                v.year
+            ].filter(Boolean).join(' ').toLowerCase();
+            return statusMatch && typeMatch && haystack.includes(query);
+        });
+
+        if (!vehiclesCache.length) {
+            grid.innerHTML = '<div class="col-12"><div class="text-center py-5"><i class="fas fa-truck fa-3x text-muted mb-3"></i><h6 class="text-muted">No vehicles added yet</h6><p class="text-muted small">Use Add Vehicle to publish your fleet. Suppliers will see them instantly.</p></div></div>';
+            return;
+        }
+        if (!filtered.length) {
+            grid.innerHTML = '<div class="col-12"><div class="text-center py-4"><i class="fas fa-filter text-muted mb-2"></i><h6 class="text-muted">No vehicles match your filters</h6><p class="text-muted small">Try clearing the search or filters.</p></div></div>';
+            return;
+        }
+        grid.innerHTML = filtered.map(renderVehicleCard).join('');
+    }
+
+    function refreshVehicles(buttonEl) {
+        const btn = buttonEl || event && event.target;
+        if (!btn) return;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
+        btn.disabled = true;
+        setTimeout(function(){
+            AlphaBrokrage.showAlert('info', 'Vehicles refreshed successfully!');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 800);
+    }
+
+    window.addEventListener('DOMContentLoaded', listenVehicles);
+
+    function listenServiceAreas() {
+        var db = firebase.database();
+        var auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var routesList = document.getElementById('routesList');
+        var coverageList = document.getElementById('coverageList');
+        var carrierKey = auth.carrierId || auth.id || 'unknown';
+        db.ref('service_areas/' + carrierKey).on('value', function(snap){
+            var data = snap.val() || { routes: [], coverage: [] };
+            // Routes
+            if (!data.routes || data.routes.length === 0) {
+                routesList.innerHTML = '<div class="text-muted">No routes added yet</div>';
+            } else {
+                routesList.innerHTML = data.routes.map(function(r, idx){
+                    var from = (r.from || '').trim(); var to = (r.to || '').trim();
+                    return `<div class="d-flex justify-content-between align-items-center mb-2"><span><i class="fas fa-route text-primary"></i> ${from} - ${to}</span><button class="btn btn-sm btn-outline-danger" onclick="removeRoute(${idx})"><i class="fas fa-times"></i></button></div>`;
+                }).join('');
+            }
+            // Coverage
+            if (!data.coverage || data.coverage.length === 0) {
+                coverageList.innerHTML = '<div class="text-muted">No areas added yet</div>';
+            } else {
+                coverageList.innerHTML = data.coverage.map(function(area, idx){
+                    return `<span class="badge bg-light text-dark me-2 mb-2">${area} <a href="javascript:void(0)" onclick="removeCoverageArea(${idx})" class="text-danger text-decoration-none ms-1">&times;</a></span>`;
+                }).join('');
+            }
+        });
+    }
+
+    function addRoute() {
+        var from = document.getElementById('routeFrom').value.trim();
+        var to = document.getElementById('routeTo').value.trim();
+        if (!from || !to) { AlphaBrokrage.showAlert('warning', 'Please enter both From and To'); return; }
+        var db = firebase.database();
+        var auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var carrierKey = auth.carrierId || auth.id || 'unknown';
+        var ref = db.ref('service_areas/' + carrierKey + '/routes');
+        ref.once('value', function(s){
+            var routes = s.val() || [];
+            routes.push({ from: from, to: to, addedAt: new Date().toISOString() });
+            db.ref('service_areas/' + carrierKey).update({ routes: routes });
+            document.getElementById('routeFrom').value = '';
+            document.getElementById('routeTo').value = '';
+            AlphaBrokrage.showAlert('success', 'Route added');
+        });
+    }
+
+    function removeRoute(index) {
+        var db = firebase.database();
+        var auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var carrierKey = auth.carrierId || auth.id || 'unknown';
+        db.ref('service_areas/' + carrierKey + '/routes').once('value', function(s){
+            var routes = s.val() || [];
+            if (routes[index]) { routes.splice(index, 1); }
+            db.ref('service_areas/' + carrierKey).update({ routes: routes });
+        });
+    }
+
+    function addCoverageArea() {
+        var area = document.getElementById('coverageInput').value.trim();
+        if (!area) { return; }
+        var db = firebase.database();
+        var auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var carrierKey = auth.carrierId || auth.id || 'unknown';
+        var ref = db.ref('service_areas/' + carrierKey + '/coverage');
+        ref.once('value', function(s){
+            var coverage = s.val() || [];
+            if (!coverage.includes(area)) { coverage.push(area); }
+            db.ref('service_areas/' + carrierKey).update({ coverage: coverage });
+            document.getElementById('coverageInput').value = '';
+        });
+    }
+
+    function removeCoverageArea(index) {
+        var db = firebase.database();
+        var auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var carrierKey = auth.carrierId || auth.id || 'unknown';
+        db.ref('service_areas/' + carrierKey + '/coverage').once('value', function(s){
+            var coverage = s.val() || [];
+            if (coverage[index]) { coverage.splice(index, 1); }
+            db.ref('service_areas/' + carrierKey).update({ coverage: coverage });
+        });
+    }
+
+        function viewVehicle(vehicleId) {
+            AlphaBrokrage.showAlert('info', 'Vehicle details modal would open here.');
+        }
+
+        function editVehicle(vehicleId) {
+            AlphaBrokrage.showAlert('info', 'Edit vehicle modal would open here.');
+        }
+
+        const searchInput = document.getElementById('vehicleSearch');
+        const statusFilter = document.getElementById('vehicleStatusFilter');
+        const typeFilter = document.getElementById('vehicleTypeFilter');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                filterState.query = e.target.value || '';
+                renderVehiclesGrid();
+            });
+        }
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function(e) {
+                filterState.status = e.target.value || 'all';
+                renderVehiclesGrid();
+            });
+        }
+        if (typeFilter) {
+            typeFilter.addEventListener('change', function(e) {
+                filterState.type = e.target.value || 'all';
+                renderVehiclesGrid();
+            });
+        }
+    </script>
+    <script>
+    // Mobile Navigation
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.dashboard-sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+        }
+    }
+
+    // Custom Confirm Dialog
+    function showConfirmLogout() {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('confirmLogoutOverlay');
+            const messageEl = document.getElementById('confirmLogoutMessage');
+            const okBtn = document.getElementById('confirmLogoutOkBtn');
+            const cancelBtn = document.getElementById('confirmLogoutCancelBtn');
+
+            messageEl.textContent = 'Are you sure you want to logout?';
+            okBtn.textContent = 'Yes, Logout';
+            cancelBtn.textContent = 'Cancel';
+
+            const cleanup = () => {
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+                okBtn.removeEventListener('click', onOk);
+                cancelBtn.removeEventListener('click', onCancel);
+                overlay.removeEventListener('click', onBackdrop);
+                document.removeEventListener('keydown', onKeydown);
+            };
+
+            const onOk = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const onCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const onBackdrop = (e) => {
+                if (e.target === overlay) {
+                    onCancel();
+                }
+            };
+
+            const onKeydown = (e) => {
+                if (e.key === 'Escape') {
+                    onCancel();
+                }
+            };
+
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            overlay.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onKeydown);
+
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    // Logout function
+    async function logout() {
+        const confirmed = await showConfirmLogout();
+        if (confirmed) {
+            try {
+                localStorage.removeItem('carrierAuth');
+                localStorage.removeItem('carrierProfile');
+                window.location.href = '../../index.html';
+            } catch (e) {
+                console.error('Logout error:', e);
+                window.location.href = '../../index.html';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.nav-link').forEach(function(link){
+            link.addEventListener('click', function(){
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+        window.addEventListener('resize', function(){
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (window.innerWidth > 768) {
+                if (sidebar) sidebar.classList.remove('show');
+                if (overlay) overlay.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    });
+    </script>
+    <!-- Confirm Logout Modal -->
+    <div id="confirmLogoutOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmLogoutTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h6 id="confirmLogoutTitle" class="confirm-title">Confirm Logout</h6>
+            </div>
+            <div id="confirmLogoutMessage" class="confirm-message">Are you sure you want to logout?</div>
+            <div class="confirm-actions">
+                <button id="confirmLogoutCancelBtn" class="confirm-btn cancel" type="button">Cancel</button>
+                <button id="confirmLogoutOkBtn" class="confirm-btn danger" type="button">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

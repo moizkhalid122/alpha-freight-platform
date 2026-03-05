@@ -1,0 +1,2218 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Letter Pending - Alpha Freight</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="shortcut icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            width: 260px;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                margin-left: 0;
+            }
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.5s ease 0.1s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, #EBF4FF 0%, rgba(235, 244, 255, 0.6) 100%);
+            color: var(--primary) !important;
+            transform: translateX(4px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, var(--sidebar-active) 0%, rgba(235, 244, 255, 0.8) 100%);
+            color: var(--primary) !important;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-group {
+            margin-bottom: 0.4rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .header-section {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .header-icon-btn:hover {
+            background: #F3F4F6;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: min(92vw, 380px);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+            z-index: 1050;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        .notification-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+        }
+
+        .notification-header h6 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .notification-header button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .notification-header button:hover {
+            background: #EBF4FF;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .notification-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            background: #F9FAFB;
+        }
+
+        .notification-item.unread {
+            background: #EBF4FF;
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .notification-icon.info {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .notification-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .notification-icon.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .notification-icon.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .notification-message {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .notification-empty {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .notification-empty i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .notification-empty p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .header-profile {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-profile:hover {
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--warning);
+        }
+
+        .pending-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .pending-table th {
+            background: #F9FAFB;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .pending-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 0.875rem;
+        }
+
+        .pending-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .pending-table tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        .pending-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .route-info {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+
+        .status-badge.success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .status-badge.danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+        }
+
+        .status-badge.warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn.primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-btn.success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .action-btn.success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .action-btn.warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+
+        .action-btn.warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .action-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        .action-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .header-section {
+                padding: 0.75rem 1rem;
+            }
+
+            .header-section h5 {
+                font-size: 1rem;
+            }
+
+            .header-actions {
+                gap: 0.5rem;
+            }
+
+            .header-icon-btn {
+                width: 38px;
+                height: 38px;
+            }
+
+            .header-profile {
+                width: 38px;
+                height: 38px;
+            }
+
+            .section-card {
+                padding: 1rem;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            .section-title {
+                font-size: 1.125rem;
+            }
+
+            .table-responsive {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            .pending-table {
+                font-size: 0.8125rem;
+            }
+
+            .pending-table th,
+            .pending-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .table-responsive {
+                width: 100%;
+                overflow-x: visible;
+                border-radius: 12px;
+            }
+
+            .pending-table {
+                width: 100%;
+                display: block;
+            }
+
+            .pending-table thead {
+                display: none;
+            }
+
+            .pending-table tbody {
+                display: block;
+                width: 100%;
+            }
+
+            .pending-table tbody tr {
+                display: block;
+                width: 100%;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 0.75rem;
+                background: white;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .pending-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                padding: 0.5rem 0;
+                border: none;
+                text-align: right;
+            }
+
+            .pending-table tbody td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--text-main);
+                text-align: left;
+                margin-right: 1rem;
+                flex-shrink: 0;
+            }
+
+            .pending-table tbody td .action-btn {
+                margin-left: 0.5rem;
+            }
+
+            .pending-table tbody td[data-label="Actions"] {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+
+            .pending-table tbody td[data-label="Actions"] .action-btn {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .notification-dropdown {
+                width: calc(100vw - 2rem);
+                right: 1rem;
+                max-height: 70vh;
+            }
+
+            .notification-header {
+                padding: 1rem;
+            }
+
+            .notification-item {
+                padding: 0.875rem 1rem;
+            }
+
+            .btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .btn-sm {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8125rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .section-card {
+                padding: 0.875rem;
+            }
+
+            .pending-table {
+                font-size: 0.75rem;
+            }
+
+            .pending-table tbody td {
+                padding: 0.375rem 0;
+                font-size: 0.8125rem;
+            }
+
+            .header-section {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .header-section h5 {
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 0.5rem 0.875rem;
+                font-size: 0.8125rem;
+            }
+
+            .btn-sm {
+                padding: 0.375rem 0.625rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* PC View - Ensure proper layout */
+        @media (min-width: 1025px) {
+            .main-content {
+                padding: 2rem;
+            }
+
+            .section-card {
+                padding: 1.5rem;
+                width: auto;
+                max-width: none;
+            }
+
+            .table-responsive {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .pending-table {
+                display: table !important;
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .pending-table thead {
+                display: table-header-group !important;
+            }
+
+            .pending-table tbody {
+                display: table-row-group !important;
+                width: auto;
+            }
+
+            .pending-table tbody tr {
+                display: table-row !important;
+                width: auto;
+                margin-bottom: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+
+            .pending-table tbody td {
+                display: table-cell !important;
+                width: auto;
+                padding: 1rem !important;
+                border-bottom: 1px solid var(--border) !important;
+                text-align: left !important;
+                flex-direction: row !important;
+                justify-content: flex-start !important;
+                align-items: center !important;
+            }
+
+            .pending-table tbody td:before {
+                display: none !important;
+                content: none !important;
+            }
+
+            .pending-table tbody td[data-label="Actions"] {
+                flex-direction: row !important;
+                gap: 0.5rem !important;
+                align-items: center !important;
+            }
+
+            .pending-table tbody td[data-label="Actions"] .action-btn {
+                width: auto !important;
+                margin-left: 0.5rem !important;
+            }
+
+            .pending-table tbody tr:hover {
+                background: #F9FAFB !important;
+            }
+
+            .pending-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+        }
+            .pending-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        
+
+        /* Custom Alert Styles */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            min-width: 320px;
+            max-width: 400px;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-alert.hide {
+            animation: slideOutRight 0.4s ease-out forwards;
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .custom-alert i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .custom-alert-content {
+            flex: 1;
+        }
+
+        .custom-alert-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-alert-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .custom-alert-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .custom-alert-success i {
+            color: #d1fae5;
+        }
+
+        .custom-alert-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .custom-alert-error i {
+            color: #fee2e2;
+        }
+
+        .custom-alert-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .custom-alert-warning i {
+            color: #fef3c7;
+        }
+
+        .custom-alert-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .custom-alert-info i {
+            color: #e9d5ff;
+        }
+
+        @media (max-width: 576px) {
+            .custom-alert {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <img src="image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="post-load.html" class="nav-link">
+                <i class="fas fa-plus-circle"></i>
+                Post Load
+            </a>
+            <a href="my-loads.html" class="nav-link">
+                <i class="fas fa-boxes"></i>
+                My Loads
+            </a>
+            <a href="pod.html" class="nav-link">
+                <i class="fas fa-file-invoice"></i>
+                Proof of Delivery
+            </a>
+            <a href="track.html" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                Track Carrier
+            </a>
+            <a href="payments.html" class="nav-link">
+                <i class="fas fa-credit-card"></i>
+                Payments
+            </a>
+            <a href="pay-letter-pending.html" class="nav-link active">
+                <i class="fas fa-file-invoice"></i>
+                Pay Letter Pending
+            </a>
+            <div class="nav-group">
+                <div class="nav-link nav-group-toggle">
+                    <i class="fas fa-comments"></i>
+                    Chat
+                </div>
+                <div class="nav-group-items">
+                    <a href="messages.html" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        Messages
+                        <span class="badge bg-danger ms-auto" id="messagesBadge" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+            <a href="profile.html" class="nav-link">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <a href="settings.html" class="nav-link">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+            <a href="../admin/dashboard.html" class="nav-link" id="adminPanelLink" style="display: none;">
+                <i class="fas fa-shield-alt"></i>
+                Admin Panel
+            </a>
+            <hr class="my-3">
+            <a href="#" class="nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold">Pay Letter Pending Orders</h5>
+                </div>
+                <div class="header-actions">
+                    <div style="position: relative;">
+                        <button class="header-icon-btn" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                        </button>
+                        <!-- Notification Dropdown -->
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="notification-header">
+                                <h6>Notifications</h6>
+                                <button onclick="markAllAsRead()">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <div class="notification-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No notifications yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Supplier+User&background=2563EB&color=fff&size=128" 
+                         alt="Profile" 
+                         class="header-profile" 
+                         id="profileImage">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Pending Orders Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        <i class="fas fa-file-invoice"></i>
+                        Pending Pay Letter Orders
+                    </h5>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h5 class="empty-state-text">No Pending Orders</h5>
+                    <p class="text-muted">You don't have any pending pay letter orders at the moment.</p>
+                    <a href="post-load.html" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus-circle"></i> Post a New Load
+                    </a>
+                </div>
+
+                <!-- Pending Orders Table -->
+                <div id="pendingOrdersTable" style="display: none;">
+                    <table class="pending-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Load Title</th>
+                                <th>Route</th>
+                                <th>Amount</th>
+                                <th>Created Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingOrdersBody">
+                            <!-- Orders will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <h6 id="confirmTitle" class="confirm-title">Confirm Action</h6>
+            </div>
+            <div id="confirmMessage" class="confirm-message">Are you sure?</div>
+            <div class="confirm-actions">
+                <button id="confirmCancelBtn" class="confirm-btn cancel" type="button">No, Keep</button>
+                <button id="confirmOkBtn" class="confirm-btn danger" type="button">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Check Authentication
+        const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+        if (!auth.isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        // Format Currency
+        function formatCurrency(value) {
+            const currency = auth.country === 'US' ? '$' : '£';
+            return `${currency}${parseFloat(value || 0).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+        }
+
+        // Format Date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Custom Alert Function
+        function showCustomAlert(type, message, duration = 4000) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Create alert element
+            const alert = document.createElement('div');
+            alert.className = `custom-alert custom-alert-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            let title = 'Info';
+            if (type === 'success') {
+                icon = 'fa-check-circle';
+                title = 'Success';
+            } else if (type === 'error') {
+                icon = 'fa-exclamation-circle';
+                title = 'Error';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+                title = 'Warning';
+            }
+            
+            alert.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div class="custom-alert-content">
+                    <div class="custom-alert-title">${title}</div>
+                    <div class="custom-alert-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                alert.classList.add('hide');
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 400);
+            }, duration);
+        }
+
+        // Custom Confirm Dialog
+        function showConfirm(message, { title = 'Confirm Action', okText = 'Yes', cancelText = 'No' } = {}) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmOverlay');
+                const titleEl = document.getElementById('confirmTitle');
+                const messageEl = document.getElementById('confirmMessage');
+                const okBtn = document.getElementById('confirmOkBtn');
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                okBtn.textContent = okText;
+                cancelBtn.textContent = cancelText;
+
+                const cleanup = () => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    overlay.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                };
+
+                const onOk = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (e) => {
+                    if (e.target === overlay) {
+                        onCancel();
+                    }
+                };
+
+                const onKeydown = (e) => {
+                    if (e.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                overlay.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        // Normalize status string
+        function normalizeStatus(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        function getLocalPendingOrders(supplierId) {
+            const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+            return localOrders.filter(order => order.supplierId === supplierId && normalizeStatus(order.status) !== 'paid');
+        }
+
+        function renderOrders(orders) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const emptyState = document.getElementById('emptyState');
+            const pendingOrdersTable = document.getElementById('pendingOrdersTable');
+            const pendingOrdersBody = document.getElementById('pendingOrdersBody');
+
+            if (!orders || orders.length === 0) {
+                loadingSpinner.style.display = 'none';
+                showEmptyState();
+                return;
+            }
+
+            loadingSpinner.style.display = 'none';
+            emptyState.style.display = 'none';
+            pendingOrdersTable.style.display = 'block';
+
+            pendingOrdersBody.innerHTML = '';
+            orders.forEach((order) => {
+                const orderKey = order.id || '';
+                const localLoadId = order.loadId || '';
+                const isLocal = !order.id && !!order.loadId;
+                
+                // Check order status
+                const orderStatus = normalizeStatus(order.status || '');
+                
+                // Payment is sent if:
+                // 1. paymentSentAt timestamp exists, OR
+                // 2. paymentSource exists (bank-transfer, etc.), OR
+                // 3. status is 'payment-sent', OR
+                // 4. status is 'pending' AND paymentSentAt exists (to distinguish from new orders)
+                const hasPaymentSent = !!(order.paymentSentAt || order.paymentSource || 
+                                         orderStatus === 'payment-sent' || 
+                                         (orderStatus === 'pending' && order.paymentSentAt));
+                
+                // Payment is sent and waiting for admin confirmation
+                const isPaymentSent = hasPaymentSent && orderStatus !== 'paid' && orderStatus !== 'rejected' && orderStatus !== 'cancelled';
+                
+                // Check admin action status
+                const adminStatus = normalizeStatus(order.adminStatus || '');
+                const isConfirmed = orderStatus === 'paid' || adminStatus === 'confirmed' || adminStatus === 'paid';
+                const isRejected = adminStatus === 'rejected' || orderStatus === 'rejected';
+                
+                // Determine buttons based on status
+                let actionButtons = '';
+                const viewButtonOnClick = isLocal ? `viewLocalLoad('${localLoadId}')` : `viewOrder('${orderKey}')`;
+                
+                if (isPaymentSent) {
+                    // Payment sent - show "Check" (disabled) and "View Details" buttons
+                    actionButtons = `
+                        <button class="action-btn warning disabled" disabled style="opacity: 0.5; cursor: not-allowed; margin-right: 0.5rem;">
+                            <i class="fas fa-search"></i> Check
+                        </button>
+                        <button class="action-btn primary" onclick="${viewButtonOnClick}">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    `;
+                } else if (isConfirmed) {
+                    // Admin confirmed - show "Confirm" and "View Details" buttons
+                    actionButtons = `
+                        <button class="action-btn success" onclick="confirmPayment('${orderKey}', '${localLoadId}', ${isLocal})" style="margin-right: 0.5rem;">
+                            <i class="fas fa-check-circle"></i> Confirm
+                        </button>
+                        <button class="action-btn primary" onclick="${viewButtonOnClick}">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    `;
+                } else if (isRejected) {
+                    // Admin rejected - show "Reject" and "View Details" buttons
+                    actionButtons = `
+                        <button class="action-btn danger" onclick="rejectPayment('${orderKey}', '${localLoadId}', ${isLocal})" style="margin-right: 0.5rem;">
+                            <i class="fas fa-times-circle"></i> Reject
+                        </button>
+                        <button class="action-btn primary" onclick="${viewButtonOnClick}">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    `;
+                } else {
+                    // New order - show "Pay" and "View Details" buttons
+                    const payButtonOnClick = isLocal ? `payForLoad('${localLoadId}')` : `payForOrder('${orderKey}')`;
+                    actionButtons = `
+                        <button class="action-btn primary" onclick="${payButtonOnClick}" style="margin-right: 0.5rem;">
+                            <i class="fas fa-credit-card"></i> Pay
+                        </button>
+                        <button class="action-btn primary" onclick="${viewButtonOnClick}">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    `;
+                }
+                
+                // Status badge
+                let statusBadge = '';
+                if (isConfirmed) {
+                    statusBadge = '<span class="status-badge success">Confirmed</span>';
+                } else if (isRejected) {
+                    statusBadge = '<span class="status-badge danger">Rejected</span>';
+                } else if (isPaymentSent) {
+                    statusBadge = '<span class="status-badge warning">Payment Sent</span>';
+                } else {
+                    statusBadge = '<span class="status-badge pending">Pending</span>';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="order-id" data-label="Order ID">#${orderKey ? orderKey.substring(0, 8) : (localLoadId || '').substring(0, 8)}</td>
+                    <td data-label="Load Title">
+                        <strong>${order.loadTitle || 'Untitled Load'}</strong>
+                    </td>
+                    <td data-label="Route">
+                        <div>${order.pickupLocation || '-'}</div>
+                        <div class="route-info">→ ${order.deliveryLocation || '-'}</div>
+                    </td>
+                    <td class="amount" data-label="Amount">${formatCurrency(order.amount || 0)}</td>
+                    <td data-label="Created Date">${formatDate(order.createdAt)}</td>
+                    <td data-label="Status">
+                        ${statusBadge}
+                    </td>
+                    <td data-label="Actions">
+                        ${actionButtons}
+                    </td>
+                `;
+                pendingOrdersBody.appendChild(row);
+            });
+        }
+
+        // Check if an order is paid (directly or via load status/payment status)
+        async function isOrderPaid(order) {
+            const orderStatus = normalizeStatus(order.status);
+            if (['paid', 'completed', 'success'].includes(orderStatus)) {
+                return true;
+            }
+
+            const orderPaymentStatus = order.paymentStatus || order.payment_status || {};
+            if (orderPaymentStatus.completed || orderPaymentStatus.paid || normalizeStatus(orderPaymentStatus.status) === 'completed') {
+                return true;
+            }
+
+            if (!order.loadId) {
+                return false;
+            }
+
+            try {
+                const loadSnapshot = await db.ref('loads').child(order.loadId).once('value');
+                if (!loadSnapshot.exists()) {
+                    return false;
+                }
+
+                const load = loadSnapshot.val();
+                const loadStatus = normalizeStatus(load.status);
+                const loadPaymentStatus = load.paymentStatus || load.payment_status || {};
+
+                if (loadPaymentStatus.completed || loadPaymentStatus.paid || normalizeStatus(loadPaymentStatus.status) === 'completed') {
+                    return true;
+                }
+
+                return ['completed', 'delivered', 'paid'].includes(loadStatus);
+            } catch (error) {
+                console.error('Error checking load payment status:', error);
+                return false;
+            }
+        }
+
+        // Load Pending Orders
+        function loadPendingOrders() {
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId) {
+                showEmptyState();
+                return;
+            }
+
+            db.ref('payLetterPending').orderByChild('supplierId').equalTo(supplierId).on('value', async (snapshot) => {
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const emptyState = document.getElementById('emptyState');
+                const pendingOrdersTable = document.getElementById('pendingOrdersTable');
+                const pendingOrdersBody = document.getElementById('pendingOrdersBody');
+
+                if (!snapshot.exists()) {
+                    const localOrders = getLocalPendingOrders(supplierId);
+                    if (localOrders.length) {
+                        renderOrders(localOrders);
+                        return;
+                    }
+
+                    loadingSpinner.style.display = 'none';
+                    showEmptyState();
+                    return;
+                }
+
+                const orders = [];
+                snapshot.forEach((child) => {
+                    const order = child.val();
+                    order.id = child.key;
+                    orders.push(order);
+                });
+
+                // Sort by creation date (newest first)
+                orders.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || 0);
+                    const dateB = new Date(b.createdAt || 0);
+                    return dateB - dateA;
+                });
+
+                if (orders.length === 0) {
+                    loadingSpinner.style.display = 'none';
+                    showEmptyState();
+                    return;
+                }
+
+                const pendingOrders = await Promise.all(orders.map(async (order) => {
+                    const status = normalizeStatus(order.status);
+                    // Remove cancelled orders
+                    if (status === 'cancelled') {
+                        return null;
+                    }
+                    // Remove paid orders immediately
+                    if (status === 'paid') {
+                        return null;
+                    }
+
+                    const paid = await isOrderPaid(order);
+                    if (paid) {
+                        // Update status to paid if not already
+                        if (status !== 'paid') {
+                            db.ref('payLetterPending').child(order.id).update({
+                                status: 'paid',
+                                paidAt: new Date().toISOString()
+                            }).catch((error) => {
+                                console.error('Error updating pay letter status:', error);
+                            });
+                        }
+                        return null; // Remove paid orders from list
+                    }
+                    return order; // Keep unpaid orders
+                }));
+
+                const visibleOrders = pendingOrders.filter(Boolean);
+
+                if (visibleOrders.length === 0) {
+                    const localOrders = getLocalPendingOrders(supplierId);
+                    if (localOrders.length) {
+                        renderOrders(localOrders);
+                        return;
+                    }
+
+                    loadingSpinner.style.display = 'none';
+                    showEmptyState();
+                    return;
+                }
+
+                renderOrders(visibleOrders);
+            }, (error) => {
+                console.error('Error loading pending orders:', error);
+                const localOrders = getLocalPendingOrders(supplierId);
+                if (localOrders.length) {
+                    renderOrders(localOrders);
+                } else {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    showCustomAlert('error', 'Error loading pending orders. Please try again.');
+                }
+            });
+        }
+
+        // Show Empty State
+        function showEmptyState() {
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('pendingOrdersTable').style.display = 'none';
+        }
+
+        // View Order
+        function viewOrder(orderId) {
+            // Redirect to load details page
+            db.ref('payLetterPending').child(orderId).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const order = snapshot.val();
+                    if (order.loadId) {
+                        window.location.href = `load-details.html?loadId=${order.loadId}`;
+                    } else {
+                        showCustomAlert('error', 'Load ID not found for this order.');
+                    }
+                } else {
+                    showCustomAlert('error', 'Order not found.');
+                }
+            });
+        }
+
+        function viewLocalLoad(loadId) {
+            if (!loadId) {
+                showCustomAlert('error', 'Load ID not found for this order.');
+                return;
+            }
+            window.location.href = `load-details.html?loadId=${loadId}`;
+        }
+
+        // Pay for Order
+        function payForOrder(orderId) {
+            db.ref('payLetterPending').child(orderId).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const order = snapshot.val();
+                    if (order.loadId) {
+                        // Redirect to payment page with loadId and amount
+                        const params = new URLSearchParams({
+                            loadId: order.loadId,
+                            amount: order.amount || '',
+                            paymentFor: order.loadTitle || 'Pay Letter Payment'
+                        });
+                        window.location.href = `paynow.html?${params.toString()}`;
+                    } else {
+                        showCustomAlert('error', 'Load ID not found for this order.');
+                    }
+                } else {
+                    showCustomAlert('error', 'Order not found.');
+                }
+            });
+        }
+
+        // Pay for Local Load
+        function payForLoad(loadId) {
+            if (!loadId) {
+                showCustomAlert('error', 'Load ID not found for this order.');
+                return;
+            }
+            // Get order details from localStorage
+            const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+            const order = localOrders.find(o => o.loadId === loadId);
+            if (order) {
+                const params = new URLSearchParams({
+                    loadId: loadId,
+                    amount: order.amount || '',
+                    paymentFor: order.loadTitle || 'Pay Letter Payment'
+                });
+                window.location.href = `paynow.html?${params.toString()}`;
+            } else {
+                // If not found in local, try to redirect with just loadId
+                window.location.href = `paynow.html?loadId=${loadId}`;
+            }
+        }
+
+        // Confirm Payment
+        async function confirmPayment(orderId, loadId, isLocal) {
+            const confirmed = await showConfirm('Are you sure you want to confirm this payment?', {
+                title: 'Confirm Payment',
+                okText: 'Yes, Confirm',
+                cancelText: 'No, Cancel'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            if (isLocal) {
+                // Update local order
+                const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                const updated = localOrders.map(order => {
+                    if (order.loadId === loadId) {
+                        return {
+                            ...order,
+                            status: 'paid',
+                            confirmedAt: new Date().toISOString()
+                        };
+                    }
+                    return order;
+                });
+                localStorage.setItem('payLetterPendingLocal', JSON.stringify(updated));
+                showCustomAlert('success', 'Payment confirmed successfully!');
+                loadPendingOrders();
+            } else {
+                // Update Firebase order
+                db.ref('payLetterPending').child(orderId).update({
+                    status: 'paid',
+                    confirmedAt: new Date().toISOString(),
+                    adminStatus: 'confirmed'
+                }).then(() => {
+                    showCustomAlert('success', 'Payment confirmed successfully!');
+                    loadPendingOrders();
+                }).catch((error) => {
+                    console.error('Error confirming payment:', error);
+                    showCustomAlert('error', 'Error confirming payment. Please try again.');
+                });
+            }
+        }
+
+        // Reject Payment
+        async function rejectPayment(orderId, loadId, isLocal) {
+            const confirmed = await showConfirm('Are you sure you want to reject this payment?', {
+                title: 'Reject Payment',
+                okText: 'Yes, Reject',
+                cancelText: 'No, Cancel'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            if (isLocal) {
+                // Update local order
+                const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                const updated = localOrders.map(order => {
+                    if (order.loadId === loadId) {
+                        return {
+                            ...order,
+                            status: 'rejected',
+                            rejectedAt: new Date().toISOString()
+                        };
+                    }
+                    return order;
+                });
+                localStorage.setItem('payLetterPendingLocal', JSON.stringify(updated));
+                showCustomAlert('success', 'Payment rejected.');
+                loadPendingOrders();
+            } else {
+                // Update Firebase order
+                db.ref('payLetterPending').child(orderId).update({
+                    status: 'rejected',
+                    rejectedAt: new Date().toISOString(),
+                    adminStatus: 'rejected'
+                }).then(() => {
+                    showCustomAlert('success', 'Payment rejected.');
+                    loadPendingOrders();
+                }).catch((error) => {
+                    console.error('Error rejecting payment:', error);
+                    showCustomAlert('error', 'Error rejecting payment. Please try again.');
+                });
+            }
+        }
+
+        // Cancel Order
+        async function cancelOrder(orderId) {
+            const confirmed = await showConfirm('Are you sure you want to cancel this order?', {
+                title: 'Cancel Order',
+                okText: 'Yes, Cancel',
+                cancelText: 'No, Keep'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            db.ref('payLetterPending').child(orderId).update({
+                status: 'cancelled',
+                cancelledAt: new Date().toISOString()
+            }).then(() => {
+                showCustomAlert('success', 'Order cancelled successfully!');
+                loadPendingOrders();
+            }).catch((error) => {
+                console.error('Error cancelling order:', error);
+                showCustomAlert('error', 'Error cancelling order. Please try again.');
+            });
+        }
+
+        async function cancelLocalOrder(loadId) {
+            const confirmed = await showConfirm('Are you sure you want to cancel this order?', {
+                title: 'Cancel Order',
+                okText: 'Yes, Cancel',
+                cancelText: 'No, Keep'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+            const updated = localOrders.filter(order => order.loadId !== loadId);
+            localStorage.setItem('payLetterPendingLocal', JSON.stringify(updated));
+            showCustomAlert('success', 'Order cancelled successfully!');
+            loadPendingOrders();
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+        }
+
+        // Notifications
+        let notificationDropdown = null;
+        let notificationsListener = null;
+
+        function toggleNotifications() {
+            if (!notificationDropdown) {
+                notificationDropdown = document.getElementById('notificationDropdown');
+            }
+            if (!notificationDropdown) return;
+
+            const isOpen = notificationDropdown.classList.contains('show');
+            if (isOpen) {
+                notificationDropdown.classList.remove('show');
+            } else {
+                notificationDropdown.classList.add('show');
+                loadNotifications();
+            }
+        }
+
+        function loadNotifications() {
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId) return;
+
+            const notificationList = document.getElementById('notificationList');
+            if (!notificationList) return;
+
+            if (notificationsListener) {
+                db.ref('notifications').off('value', notificationsListener);
+            }
+
+            notificationsListener = db.ref('notifications')
+                .orderByChild('supplierId')
+                .equalTo(supplierId)
+                .limitToLast(20)
+                .on('value', (snapshot) => {
+                    const notifications = [];
+                    let unreadCount = 0;
+
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => {
+                            const notification = child.val();
+                            notification.id = child.key;
+                            notifications.push(notification);
+                            if (!notification.read) {
+                                unreadCount++;
+                            }
+                        });
+                    }
+
+                    notifications.sort((a, b) => {
+                        const dateA = new Date(a.createdAt || a.timestamp || 0);
+                        const dateB = new Date(b.createdAt || b.timestamp || 0);
+                        return dateB - dateA;
+                    });
+
+                    updateNotificationBadge(unreadCount);
+                    renderNotifications(notifications);
+                });
+        }
+
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function renderNotifications(notifications) {
+            const notificationList = document.getElementById('notificationList');
+            if (!notificationList) return;
+
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>No notifications yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notificationList.innerHTML = notifications.map(notif => {
+                const isUnread = !notif.read;
+                const iconClass = notif.type || 'info';
+                const timeAgo = getTimeAgo(notif.createdAt || notif.timestamp);
+                return `
+                    <div class="notification-item ${isUnread ? 'unread' : ''}" onclick="openNotification('${notif.id}', '${notif.loadId || ''}')">
+                        <div class="notification-icon ${iconClass}">
+                            <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h6 class="notification-title">${notif.title || 'Notification'}</h6>
+                            <p class="notification-message">${notif.message || notif.body || ''}</p>
+                            <p class="notification-time">${timeAgo}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'fa-check-circle';
+                case 'warning': return 'fa-exclamation-triangle';
+                case 'danger': return 'fa-times-circle';
+                default: return 'fa-info-circle';
+            }
+        }
+
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Just now';
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+                if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            } catch (e) {
+                return 'Recently';
+            }
+        }
+
+        function openNotification(notificationId, loadId) {
+            db.ref('notifications').child(notificationId).update({
+                read: true,
+                readAt: new Date().toISOString()
+            }).catch(err => console.error('Error marking notification as read:', err));
+            if (notificationDropdown) {
+                notificationDropdown.classList.remove('show');
+            }
+            if (loadId) {
+                window.location.href = `load-details.html?loadId=${loadId}`;
+            }
+        }
+
+        function markAllAsRead() {
+            const supplierId = auth.supplierId || auth.id;
+            if (!supplierId) return;
+            db.ref('notifications')
+                .orderByChild('supplierId')
+                .equalTo(supplierId)
+                .once('value', (snapshot) => {
+                    const updates = {};
+                    snapshot.forEach((child) => {
+                        const notif = child.val();
+                        if (!notif.read) {
+                            updates[`${child.key}/read`] = true;
+                            updates[`${child.key}/readAt`] = new Date().toISOString();
+                        }
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        db.ref('notifications').update(updates).catch(err => {
+                            console.error('Error marking all as read:', err);
+                        });
+                    }
+                });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (notificationDropdown && !notificationDropdown.contains(e.target) && 
+                !e.target.closest('.header-icon-btn')) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('supplierAuth');
+                window.location.href = '../../index.html';
+            }
+        }
+
+        // Load User Data
+        function loadUserData() {
+            const userName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier User';
+            const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=2563EB&color=fff&size=128`;
+            document.getElementById('profileImage').src = profileImageUrl;
+        }
+
+        // Check URL parameters for payment sent status
+        function checkPaymentSentStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentSent = urlParams.get('paymentSent');
+            const loadId = urlParams.get('loadId');
+            
+            if (paymentSent === 'true' && loadId) {
+                // Update order status to payment-sent
+                const supplierId = auth.supplierId || auth.id;
+                if (supplierId) {
+                    // Check Firebase first
+                    db.ref('payLetterPending').orderByChild('loadId').equalTo(loadId).once('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            snapshot.forEach((child) => {
+                                const order = child.val();
+                                if (order.supplierId === supplierId) {
+                                    db.ref('payLetterPending').child(child.key).update({
+                                        status: 'payment-sent',
+                                        paymentSentAt: new Date().toISOString()
+                                    });
+                                }
+                            });
+                        } else {
+                            // Check local storage
+                            const localOrders = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                            const updated = localOrders.map(order => {
+                                if (order.loadId === loadId && order.supplierId === supplierId) {
+                                    return {
+                                        ...order,
+                                        status: 'payment-sent',
+                                        paymentSentAt: new Date().toISOString()
+                                    };
+                                }
+                                return order;
+                            });
+                            localStorage.setItem('payLetterPendingLocal', JSON.stringify(updated));
+                        }
+                    });
+                }
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            checkPaymentSentStatus(); // Check if payment was sent
+            loadPendingOrders();
+            loadNotifications(); // Load notifications on page load
+
+            // Close sidebar on mobile when clicking outside
+            document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
+
+            // Close sidebar on navigation click (mobile)
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

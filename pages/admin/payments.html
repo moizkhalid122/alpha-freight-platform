@@ -1,0 +1,1845 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments Management - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .payment-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6f42c1;
+        }
+        .payment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .payment-card.pending {
+            border-left-color: #ffc107;
+        }
+        .payment-card.completed {
+            border-left-color: #28a745;
+        }
+        .payment-card.failed {
+            border-left-color: #dc3545;
+        }
+        .payment-card.refunded {
+            border-left-color: #17a2b8;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-failed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-refunded {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .revenue-chart {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 10px;
+            padding: 2rem;
+            color: white;
+        }
+        .commission-chart {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border-radius: 10px;
+            padding: 2rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <h4 class="text-white fw-bold mb-4">
+                        <i class="fas fa-crown"></i> Admin Panel
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white active" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Payments Management</h5>
+                            <small class="text-muted">Monitor and manage all financial transactions</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#processPaymentModal">
+                                <i class="fas fa-plus"></i> Process Payment
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportPayments()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Content -->
+                <div class="p-4">
+                    <!-- Revenue Overview -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Total Revenue</h6>
+                                            <h3 class="fw-bold text-success" id="totalRevenueValue">£0</h3>
+                                            <small class="text-muted" id="totalRevenueMeta">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-pound-sign text-success fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Commission</h6>
+                                            <h3 class="fw-bold text-danger" id="totalCommissionValue">£0</h3>
+                                            <small class="text-muted" id="totalCommissionMeta">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-percentage text-danger fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Pending</h6>
+                                            <h3 class="fw-bold text-warning" id="pendingAmountValue">£0</h3>
+                                            <small class="text-muted" id="pendingAmountMeta">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-hourglass-half text-warning fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-muted">Failed</h6>
+                                            <h3 class="fw-bold text-danger" id="failedAmountValue">£0</h3>
+                                            <small class="text-muted" id="failedAmountMeta">
+                                                <i class="fas fa-sync-alt"></i> Loading...
+                                            </small>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-times-circle text-danger fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="row mb-4">
+                        <div class="col-lg-6">
+                            <div class="revenue-chart">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-chart-line"></i> Revenue Analytics
+                                </h5>
+                                <p class="mb-3">Live summary of total funds moving through the platform.</p>
+                                <div class="row text-center" id="revenueStatusBreakdown">
+                                    <div class="col-4 mb-3">
+                                        <h6 id="completedAmountValue">£0</h6>
+                                        <small>Completed</small>
+                                        </div>
+                                    <div class="col-4 mb-3">
+                                        <h6 id="inProgressAmountValue">£0</h6>
+                                        <small>In Progress</small>
+                                        </div>
+                                    <div class="col-4 mb-3">
+                                        <h6 id="refundedAmountValue">£0</h6>
+                                        <small>Refunded</small>
+                                        </div>
+                                    <div class="col-6 mb-3">
+                                        <h6 id="paymentsThisWeekValue">0</h6>
+                                        <small>This Week</small>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h6 id="paymentsThisMonthValue">0</h6>
+                                        <small>This Month</small>
+                                </div>
+                                </div>
+                                <p class="mb-0 small text-white-50" id="revenueLastUpdated">
+                                    <i class="fas fa-sync-alt me-1"></i> Waiting for data...
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="commission-chart">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-percentage"></i> Commission Analytics
+                                </h5>
+                                <p class="mb-3">Track fee performance and payout coverage in real time.</p>
+                                <div class="row text-center text-white" id="commissionBreakdown">
+                                    <div class="col-4 mb-3">
+                                        <h6 id="avgCommissionRateValue">0%</h6>
+                                        <small>Avg Rate</small>
+                                        </div>
+                                    <div class="col-4 mb-3">
+                                        <h6 id="completedPaymentsCountValue">0</h6>
+                                        <small>Completed</small>
+                                        </div>
+                                    <div class="col-4 mb-3">
+                                        <h6 id="distinctUsersValue">0</h6>
+                                        <small>Active Users</small>
+                                        </div>
+                                    <div class="col-6 mb-3">
+                                        <h6 id="topPaymentTypeValue">—</h6>
+                                        <small>Top Type</small>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h6 id="topMethodValue">—</h6>
+                                        <small>Top Method</small>
+                                </div>
+                                </div>
+                                <p class="mb-0 small text-white-50" id="commissionInsight">
+                                    <i class="fas fa-sync-alt me-1"></i> Waiting for data...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filter-section">
+                        <div class="row">
+                            <div class="col-md-2 mb-3">
+                                <label for="statusFilter" class="form-label">Status</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="failed">Failed</option>
+                                    <option value="refunded">Refunded</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="typeFilter" class="form-label">Type</label>
+                                <select class="form-select" id="typeFilter">
+                                    <option value="">All Types</option>
+                                    <option value="freight">Freight Payment</option>
+                                    <option value="commission">Commission</option>
+                                    <option value="refund">Refund</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="userFilter" class="form-label">User</label>
+                                <select class="form-select" id="userFilter">
+                                    <option value="">All Users</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="dateFrom" class="form-label">From Date</label>
+                                <input type="date" class="form-control" id="dateFrom">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="dateTo" class="form-label">To Date</label>
+                                <input type="date" class="form-control" id="dateTo">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-primary" onclick="applyFilters()">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payments List -->
+                    <div id="paymentsLoading" class="text-center text-muted py-5">
+                        <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+                        <p class="mb-0">Loading payments...</p>
+                                        </div>
+                    <div id="noPaymentsMessage" class="text-center text-muted py-5" style="display: none;">
+                        <i class="fas fa-receipt fa-3x mb-3"></i>
+                        <h5 class="fw-bold">No payments found</h5>
+                        <p class="mb-0">Adjust your filters or try again later.</p>
+                                        </div>
+                    <div class="row" id="paymentsContainer"></div>
+                                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Payment Modal -->
+    <div class="modal fade" id="processPaymentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus"></i> Process Payment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="processPaymentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="paymentType" class="form-label">Payment Type</label>
+                                <select class="form-select" id="paymentType" required>
+                                    <option value="">Select type</option>
+                                    <option value="freight">Freight Payment</option>
+                                    <option value="commission">Commission</option>
+                                    <option value="refund">Refund</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="amount" class="form-label">Amount (£)</label>
+                                <input type="number" class="form-control" id="amount" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fromUser" class="form-label">From User</label>
+                                <select class="form-select" id="fromUser" required>
+                                    <option value="">Select user</option>
+                                    <option value="techcorp">TechCorp Ltd</option>
+                                    <option value="manufacturing">Manufacturing Plus</option>
+                                    <option value="fasttrack">FastTrack Logistics</option>
+                                    <option value="premier">Premier Transport</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="toUser" class="form-label">To User</label>
+                                <select class="form-select" id="toUser" required>
+                                    <option value="">Select user</option>
+                                    <option value="techcorp">TechCorp Ltd</option>
+                                    <option value="manufacturing">Manufacturing Plus</option>
+                                    <option value="fasttrack">FastTrack Logistics</option>
+                                    <option value="premier">Premier Transport</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="loadId" class="form-label">Load ID</label>
+                                <input type="text" class="form-control" id="loadId" placeholder="Optional">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="paymentMethod" class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethod" required>
+                                    <option value="bank">Bank Transfer</option>
+                                    <option value="card">Credit Card</option>
+                                    <option value="paypal">PayPal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="processNewPayment()">
+                        <i class="fas fa-plus"></i> Process Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        let loadsRef = null;
+        let allLoads = [];
+        let allPayments = [];
+        let filteredPayments = [];
+        const paymentLookup = {};
+        let lastPaymentsUpdatedAt = null;
+        let suppliersMap = {};
+        let carriersMap = {};
+
+        document.addEventListener('DOMContentLoaded', initPaymentsPage);
+        window.addEventListener('beforeunload', cleanupPaymentsListener);
+
+        function initPaymentsPage() {
+            initializeFirebase();
+            setupFilterListeners();
+            fetchPayments();
+        }
+
+        function initializeFirebase() {
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase SDK not available');
+                return;
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        }
+
+        function cleanupPaymentsListener() {
+            if (loadsRef) {
+                loadsRef.off();
+                loadsRef = null;
+            }
+        }
+
+        function setupFilterListeners() {
+            ['statusFilter', 'typeFilter', 'userFilter', 'dateFrom', 'dateTo'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', applyFilters);
+                }
+            });
+        }
+
+        function fetchPayments() {
+            if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                console.warn('Firebase not ready. Skipping payments fetch.');
+                return;
+            }
+
+            setLoadingState(true);
+
+            const db = firebase.database();
+
+            Promise.all([
+                db.ref('suppliers').once('value'),
+                db.ref('carriers').once('value')
+            ]).then(function([suppliersSnap, carriersSnap]) {
+                suppliersMap = {};
+                carriersMap = {};
+
+                suppliersSnap.forEach(function(child) {
+                    const supplier = child.val() || {};
+                    supplier.id = child.key;
+                    const name = supplier.companyName || supplier.businessName || `${supplier.firstName || ''} ${supplier.lastName || ''}`.trim() || supplier.email || supplier.id;
+                    suppliersMap[supplier.id] = {
+                        id: supplier.id,
+                        name,
+                        email: supplier.email || ''
+                    };
+                });
+
+                carriersSnap.forEach(function(child) {
+                    const carrier = child.val() || {};
+                    carrier.id = child.key;
+                    const name = carrier.companyName || `${carrier.firstName || ''} ${carrier.lastName || ''}`.trim() || carrier.email || carrier.id;
+                    carriersMap[carrier.id] = {
+                        id: carrier.id,
+                        name,
+                        email: carrier.email || ''
+                    };
+                });
+
+                if (loadsRef) {
+                    loadsRef.off();
+                }
+
+                loadsRef = db.ref('loads');
+
+                loadsRef.on('value', function(snapshot) {
+                    const loads = [];
+                    snapshot.forEach(function(child) {
+                        const load = child.val() || {};
+                        load.id = child.key;
+                        loads.push(load);
+                    });
+
+                    allLoads = loads;
+                    allPayments = preparePaymentsFromLoads(loads);
+                    rebuildPaymentLookup();
+                    lastPaymentsUpdatedAt = new Date();
+
+                    updateUserFilterOptions();
+                    applyFilters();
+                    setLoadingState(false);
+                }, function(error) {
+                    console.error('Error fetching payments:', error);
+                    setLoadingState(false);
+                    showAlert('error', 'Error fetching payments: ' + (error && error.message ? error.message : 'Unknown error'));
+                });
+            }).catch(function(error) {
+                console.error('Error loading reference data:', error);
+                setLoadingState(false);
+                showAlert('error', 'Unable to fetch suppliers/carriers: ' + (error && error.message ? error.message : 'Unknown error'));
+            });
+        }
+
+        function preparePaymentsFromLoads(loads) {
+            const entries = [];
+
+            loads.forEach(function(load) {
+                const derived = derivePaymentsFromLoad(load);
+                derived.forEach(function(entry) {
+                    entries.push(entry);
+                });
+            });
+
+            entries.sort(function(a, b) {
+                const dateA = getPaymentDate(a);
+                const dateB = getPaymentDate(b);
+                if (dateA && dateB) {
+                    return dateB.getTime() - dateA.getTime();
+                }
+                if (dateA) return -1;
+                if (dateB) return 1;
+                return String(b.id || '').localeCompare(String(a.id || ''));
+            });
+
+            return entries;
+        }
+
+        function derivePaymentsFromLoad(load) {
+            if (!load) return [];
+
+            const entries = [];
+            const paymentMethod = (load.paymentMethod || '').toLowerCase();
+            const paymentStatus = load.paymentStatus || {};
+            const bankTransfer = paymentStatus.bankTransfer || {};
+            const budget = toNumber(load.totalCost) || toNumber(load.budget) || toNumber(load.price) || toNumber(load.maxBudget) || 0;
+            const supplierInfo = resolveSupplierInfo(load);
+            const carrierInfo = resolveCarrierInfo(load);
+            const route = `${load.pickupLocation || 'Unknown'} → ${load.deliveryLocation || 'Unknown'}`;
+            const loadRef = load.reference || load.loadNumber || load.loadId || load.id;
+
+            if (paymentMethod === '50-50') {
+                entries.push(buildPaymentEntry(load, {
+                    stage: 'upfront',
+                    amount: toNumber(paymentStatus.upfrontAmount) || (budget > 0 ? budget * 0.5 : 0),
+                    paid: Boolean(paymentStatus.upfrontPaid),
+                    paidDate: paymentStatus.upfrontPaidDate,
+                    bankTransfer: bankTransfer && (bankTransfer.paymentType || 'upfront') === 'upfront' ? bankTransfer : null,
+                    budget,
+                    supplierInfo,
+                    carrierInfo,
+                    route,
+                    loadRef
+                }));
+
+                const shouldIncludeDelivery = paymentStatus.upfrontPaid || paymentStatus.deliveryPaid ||
+                    (bankTransfer && (bankTransfer.paymentType === 'delivery' || bankTransfer.paymentType === 'balance')) ||
+                    (load.status && load.status.toLowerCase() === 'completed') ||
+                    (load.status && load.status.toLowerCase() === 'cancelled');
+
+                if (shouldIncludeDelivery) {
+                    entries.push(buildPaymentEntry(load, {
+                        stage: 'delivery',
+                        amount: toNumber(paymentStatus.deliveryAmount) || (budget > 0 ? budget * 0.5 : 0),
+                        paid: Boolean(paymentStatus.deliveryPaid),
+                        paidDate: paymentStatus.deliveryPaidDate,
+                        bankTransfer: bankTransfer && (bankTransfer.paymentType === 'delivery' || bankTransfer.paymentType === 'balance') ? bankTransfer : null,
+                        budget,
+                        supplierInfo,
+                        carrierInfo,
+                        route,
+                        loadRef
+                    }));
+                }
+            } else if (paymentMethod === 'full-upfront') {
+                entries.push(buildPaymentEntry(load, {
+                    stage: 'full',
+                    amount: toNumber(paymentStatus.upfrontAmount) || budget,
+                    paid: Boolean(paymentStatus.upfrontPaid),
+                    paidDate: paymentStatus.upfrontPaidDate,
+                    bankTransfer: bankTransfer && (bankTransfer.paymentType || 'upfront') === 'upfront' ? bankTransfer : null,
+                    budget,
+                    supplierInfo,
+                    carrierInfo,
+                    route,
+                    loadRef
+                }));
+            } else {
+                entries.push(buildPaymentEntry(load, {
+                    stage: 'legacy',
+                    amount: budget,
+                    paid: ['completed', 'paid', 'delivered'].includes((load.status || '').toLowerCase()),
+                    paidDate: load.paymentDate || load.completedAt || load.updatedAt,
+                    bankTransfer: bankTransfer || null,
+                    budget,
+                    supplierInfo,
+                    carrierInfo,
+                    route,
+                    loadRef
+                }));
+            }
+
+            return entries.filter(Boolean);
+        }
+
+        function buildPaymentEntry(load, options) {
+            if (!options) return null;
+
+            const {
+                stage,
+                amount,
+                paid,
+                paidDate,
+                bankTransfer,
+                budget,
+                supplierInfo,
+                carrierInfo,
+                route,
+                loadRef
+            } = options;
+
+            const normalizedStage = stage || 'legacy';
+            const loadStatus = (load.status || '').toLowerCase();
+            const paymentStatus = load.paymentStatus || {};
+            let status = 'pending';
+            let notes = '';
+            let reason = '';
+            let timestamp = paidDate || (bankTransfer && (bankTransfer.verifiedDate || bankTransfer.updatedAt)) || load.updatedAt || load.createdAt;
+            let method = paymentStatus.method || load.paymentMethod || 'manual';
+            let reference = paymentStatus.transactionId || paymentStatus.reference || (bankTransfer && bankTransfer.reference) || load.transactionId || loadRef || load.id;
+
+            if (bankTransfer && bankTransfer.status) {
+                method = 'bank';
+                if (bankTransfer.status === 'pending') {
+                    status = 'pending';
+                    notes = 'Awaiting bank transfer verification';
+                    timestamp = bankTransfer.transferDate || timestamp;
+                } else if (bankTransfer.status === 'verified') {
+                    status = 'completed';
+                    timestamp = bankTransfer.verifiedDate || timestamp;
+                    notes = 'Bank transfer verified';
+                } else if (bankTransfer.status === 'rejected') {
+                    status = 'failed';
+                    timestamp = bankTransfer.rejectedDate || timestamp;
+                    reason = bankTransfer.rejectionReason || 'Bank transfer rejected';
+                }
+            }
+
+            if (paid) {
+                status = 'completed';
+                notes = notes || 'Payment received';
+            }
+
+            if (normalizedStage === 'delivery' && !paymentStatus.upfrontPaid && status !== 'completed') {
+                status = 'pending';
+                notes = 'Awaiting upfront payment';
+            }
+
+            if (load.paymentTimer && load.paymentTimer.expired && normalizedStage === 'upfront' && status !== 'completed') {
+                status = 'failed';
+                reason = reason || 'Payment window expired';
+                notes = notes || 'Payment timer expired';
+            }
+
+            if (loadStatus === 'cancelled' && status !== 'completed') {
+                status = 'failed';
+                reason = reason || load.cancellationReason || 'Load cancelled';
+            }
+
+            const stageLabelMap = {
+                'upfront': 'Upfront Payment',
+                'delivery': 'Delivery Payment',
+                'full': 'Full Payment',
+                'legacy': 'Freight Payment'
+            };
+
+            const stageLabel = stageLabelMap[normalizedStage] || 'Payment';
+            const amountValue = Number.isFinite(amount) ? amount : 0;
+            const commission = estimateCommission(amountValue);
+            const supplierName = supplierInfo.name || load.supplierName || load.supplierCompanyName || 'Supplier';
+            const carrierName = carrierInfo.name || load.carrierName || load.carrierCompanyName || 'Carrier';
+
+            return {
+                id: `${load.id || loadRef || Date.now()}_${normalizedStage}`,
+                loadId: load.id,
+                title: `${stageLabel}`,
+                description: `${route}${loadRef ? ` • Load #${loadRef}` : ''}`,
+                type: 'freight',
+                stage: normalizedStage,
+                stageLabel,
+                amount: amountValue,
+                commission,
+                method,
+                status,
+                reason,
+                notes,
+                reference,
+                fromName: supplierName,
+                toName: carrierName,
+                supplierId: supplierInfo.id || '',
+                carrierId: carrierInfo.id || '',
+                createdAt: load.createdAt || load.postedAt || load.timestamp || new Date().toISOString(),
+                updatedAt: load.updatedAt || load.completedAt || load.paymentDate || load.cancelledAt || load.createdAt,
+                paidAt: timestamp,
+                dueDate: normalizedStage === 'delivery' ? (load.deliveryDate || load.requiredDate || load.dropoffDate || '') : (load.paymentTimer && load.paymentTimer.deadline ? load.paymentTimer.deadline : ''),
+                paymentMethod: load.paymentMethod || '',
+                bankTransferStatus: bankTransfer ? bankTransfer.status : '',
+                paymentStageAmount: amountValue,
+                deliveryStatus: load.deliveryStatus || '',
+                deliveryPaid: Boolean(paymentStatus.deliveryPaid),
+                upfrontPaid: Boolean(paymentStatus.upfrontPaid),
+                loadStatus: loadStatus,
+                loadRoute: route,
+                cargoType: load.cargoType || '',
+                cargoWeight: load.cargoWeight || '',
+                transactionId: reference,
+                paymentNotes: notes,
+                totalBudget: budget
+            };
+        }
+
+        function resolveSupplierInfo(load) {
+            const candidateIds = [
+                load.supplierId,
+                load.supplierID,
+                load.supplier,
+                load.postedBy
+            ];
+
+            for (let i = 0; i < candidateIds.length; i++) {
+                const id = candidateIds[i];
+                if (id && suppliersMap[id]) {
+                    return suppliersMap[id];
+                }
+            }
+
+            const name = load.supplierCompanyName || load.supplierName || load.companyName || load.postedByName || load.supplierEmail || '';
+            const email = load.supplierEmail || '';
+            const id = candidateIds.find(Boolean) || (name || email ? name || email : '');
+
+            return {
+                id,
+                name: name || email || 'Supplier',
+                email
+            };
+        }
+
+        function resolveCarrierInfo(load) {
+            const candidateIds = [
+                load.carrierId,
+                load.carrierID,
+                load.acceptedBy,
+                load.driverId
+            ];
+
+            for (let i = 0; i < candidateIds.length; i++) {
+                const id = candidateIds[i];
+                if (id && carriersMap[id]) {
+                    return carriersMap[id];
+                }
+            }
+
+            const name = load.carrierCompanyName || load.carrierName || load.carrierEmail || load.assignedCarrier || '';
+            const email = load.carrierEmail || '';
+            const id = candidateIds.find(Boolean) || (name || email ? name || email : '');
+
+            return {
+                id,
+                name: name || email || 'Carrier',
+                email
+            };
+        }
+
+        function estimateCommission(amount) {
+            if (!Number.isFinite(amount) || amount <= 0) return 0;
+            let rate = 0.1;
+            if (amount > 5000) {
+                rate = 0.2;
+            } else if (amount > 1000) {
+                rate = 0.15;
+            }
+            return amount * rate;
+        }
+
+        function rebuildPaymentLookup() {
+            Object.keys(paymentLookup).forEach(function(key) {
+                delete paymentLookup[key];
+            });
+            allPayments.forEach(function(payment) {
+                if (payment && payment.id) {
+                    paymentLookup[payment.id] = payment;
+                }
+            });
+        }
+
+        function setLoadingState(isLoading) {
+            const loadingEl = document.getElementById('paymentsLoading');
+            const container = document.getElementById('paymentsContainer');
+            const emptyEl = document.getElementById('noPaymentsMessage');
+
+            if (loadingEl) {
+                loadingEl.style.display = isLoading ? 'block' : 'none';
+            }
+
+            if (container && isLoading) {
+                container.innerHTML = '';
+            }
+
+            if (emptyEl && isLoading) {
+                emptyEl.style.display = 'none';
+            }
+        }
+
+        function applyFilters(event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+
+            const statusFilter = (getSelectValue('statusFilter') || '').toLowerCase();
+            const typeFilter = (getSelectValue('typeFilter') || '').toLowerCase();
+            const userFilter = getSelectValue('userFilter') || '';
+            const dateFromValue = getSelectValue('dateFrom');
+            const dateToValue = getSelectValue('dateTo');
+
+            const fromDate = dateFromValue ? new Date(dateFromValue) : null;
+            const toDate = dateToValue ? new Date(dateToValue) : null;
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(23, 59, 59, 999);
+
+            filteredPayments = allPayments.filter(function(payment) {
+                const status = normalizeStatus(getPaymentStatus(payment));
+                if (statusFilter && status !== statusFilter) {
+                    return false;
+                }
+
+                const type = normalizeType(getPaymentType(payment));
+                if (typeFilter && type !== typeFilter) {
+                    return false;
+                }
+
+                if (userFilter) {
+                    const fromName = getUserName(payment, 'from');
+                    const toName = getUserName(payment, 'to');
+                    if (fromName !== userFilter && toName !== userFilter) {
+                        return false;
+                    }
+                }
+
+                const paymentDate = getPaymentDate(payment);
+                if (fromDate && (!paymentDate || paymentDate < fromDate)) {
+                    return false;
+                }
+                if (toDate && (!paymentDate || paymentDate > toDate)) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            renderPayments();
+            updateSummaryCards();
+            updateRevenueAnalytics();
+            updateCommissionAnalytics();
+        }
+
+        function getSelectValue(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
+        function renderPayments() {
+            const container = document.getElementById('paymentsContainer');
+            const emptyEl = document.getElementById('noPaymentsMessage');
+            if (!container) return;
+
+            if (!filteredPayments.length) {
+                container.innerHTML = '';
+                if (emptyEl) emptyEl.style.display = 'block';
+                return;
+            }
+
+            if (emptyEl) emptyEl.style.display = 'none';
+            container.innerHTML = filteredPayments.map(createPaymentCard).join('');
+        }
+
+        function createPaymentCard(payment) {
+            const status = normalizeStatus(getPaymentStatus(payment));
+            const statusClass = getStatusClass(status);
+            const statusBadgeClass = getStatusBadgeClass(status);
+            const statusLabel = getStatusLabel(status);
+
+            const amount = getPaymentAmount(payment);
+            const commission = getCommissionAmount(payment);
+            const commissionRate = getCommissionRate(payment, commission, amount);
+            const paymentDate = getPaymentDate(payment);
+            const dateText = paymentDate ? formatDate(paymentDate) : 'Date not available';
+
+            const paymentType = normalizeType(getPaymentType(payment));
+            const title = getPaymentTitle(paymentType, payment);
+            const subtitle = getPaymentDescription(payment);
+
+            const fromName = getUserName(payment, 'from');
+            const toName = getUserName(payment, 'to');
+
+            const reference = getPaymentReference(payment);
+            const loadId = getPaymentLoadId(payment);
+            const methodLabel = getPaymentMethodLabel(getPaymentMethod(payment));
+            const notes = getPaymentNotes(payment);
+            const reason = getPaymentReason(payment, status);
+
+            const amountClass = getAmountClass(status);
+            const paymentIdAttr = escapeAttr(payment.id || '');
+
+            const partiesRow = (fromName || toName) ? `
+                <div class="row mb-3">
+                    ${fromName ? `<div class="col-6"><small class="text-muted">From:</small><br><strong>${escapeHtml(fromName)}</strong></div>` : ''}
+                    ${toName ? `<div class="col-6"><small class="text-muted">To:</small><br><strong>${escapeHtml(toName)}</strong></div>` : ''}
+                </div>
+            ` : '';
+
+            const amountsRow = `
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small class="text-muted">Amount:</small><br>
+                        <strong class="${amountClass}">${formatCurrency(amount)}</strong>
+                    </div>
+                    ${commission > 0 ? `
+                    <div class="col-6">
+                        <small class="text-muted">Commission:</small><br>
+                        <strong class="text-info">${formatCurrency(commission)}${commissionRate ? ` (${formatPercent(commissionRate)})` : ''}</strong>
+                    </div>` : ''}
+                </div>
+            `;
+
+            const loadRow = loadId ? `
+                <div class="mb-2">
+                    <small class="text-muted">Load:</small>
+                    <span class="fw-semibold">${escapeHtml(loadId)}</span>
+                </div>
+            ` : '';
+
+            const methodRow = methodLabel ? `
+                <div class="mb-2">
+                    <small class="text-muted">Method:</small>
+                    <span class="fw-semibold">${escapeHtml(methodLabel)}</span>
+                </div>
+            ` : '';
+
+            const referenceRow = reference ? `
+                <div class="mb-2">
+                    <small class="text-muted">Transaction ID:</small>
+                    <span class="fw-semibold">${escapeHtml(reference)}</span>
+                </div>
+            ` : '';
+
+            const reasonRow = reason ? `
+                <div class="mb-2">
+                    <small class="text-muted">Reason:</small>
+                    <span class="text-${status === 'failed' ? 'danger' : 'info'}">${escapeHtml(reason)}</span>
+                </div>
+            ` : '';
+
+            const notesRow = notes ? `
+                <div class="mb-2">
+                    <small class="text-muted">Notes:</small>
+                    <span>${escapeHtml(notes)}</span>
+                </div>
+            ` : '';
+
+            const actionButtons = createPaymentActions(paymentIdAttr, status);
+
+            return `
+                <div class="col-lg-6 mb-3">
+                    <div class="payment-card card ${statusClass}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1">${escapeHtml(title)}</h6>
+                                    ${subtitle ? `<p class="text-muted mb-1">${escapeHtml(subtitle)}</p>` : ''}
+                                    <span class="status-badge ${statusBadgeClass}">${escapeHtml(statusLabel)}</span>
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="fw-bold ${amountClass} mb-0">${formatCurrency(amount)}</h5>
+                                    <small class="text-muted">${escapeHtml(dateText)}</small>
+                                </div>
+                            </div>
+                            ${partiesRow}
+                            ${amountsRow}
+                            ${loadRow}
+                            ${methodRow}
+                            ${referenceRow}
+                            ${reasonRow}
+                            ${notesRow}
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <small class="text-muted">Payment ID:</small>
+                                    <span class="fw-semibold">${escapeHtml(payment.id || 'N/A')}</span>
+                                </div>
+                                <div class="btn-group">
+                                    ${actionButtons}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createPaymentActions(paymentId, status) {
+            const actions = [];
+            actions.push(`<button class="btn btn-sm btn-outline-primary" data-payment-id="${paymentId}" onclick="viewPayment(this.dataset.paymentId)"><i class="fas fa-eye"></i> View</button>`);
+
+            if (status === 'pending') {
+                actions.push(`<button class="btn btn-sm btn-outline-success" data-payment-id="${paymentId}" onclick="approvePayment(this.dataset.paymentId)"><i class="fas fa-check"></i> Approve</button>`);
+            }
+
+            if (status === 'failed') {
+                actions.push(`<button class="btn btn-sm btn-outline-warning" data-payment-id="${paymentId}" onclick="retryPayment(this.dataset.paymentId)"><i class="fas fa-redo"></i> Retry</button>`);
+            }
+
+            actions.push(`<button class="btn btn-sm btn-outline-secondary" data-payment-id="${paymentId}" onclick="downloadReceipt(this.dataset.paymentId)"><i class="fas fa-download"></i> Receipt</button>`);
+
+            return actions.join('');
+        }
+
+        function updateSummaryCards() {
+            const totalRevenue = filteredPayments.reduce(function(sum, payment) {
+                return sum + Math.max(getPaymentAmount(payment), 0);
+            }, 0);
+            const totalCommission = filteredPayments.reduce(function(sum, payment) {
+                return sum + Math.max(getCommissionAmount(payment), 0);
+            }, 0);
+
+            const pendingPayments = filteredPayments.filter(function(payment) {
+                return normalizeStatus(getPaymentStatus(payment)) === 'pending';
+            });
+            const pendingAmount = pendingPayments.reduce(function(sum, payment) {
+                return sum + Math.max(getPaymentAmount(payment), 0);
+            }, 0);
+
+            const failedPayments = filteredPayments.filter(function(payment) {
+                return normalizeStatus(getPaymentStatus(payment)) === 'failed';
+            });
+            const failedAmount = failedPayments.reduce(function(sum, payment) {
+                return sum + Math.max(getPaymentAmount(payment), 0);
+            }, 0);
+
+            setText('totalRevenueValue', formatCurrency(totalRevenue));
+            setMetaText('totalRevenueMeta', 'fas fa-wallet', filteredPayments.length ? `${filteredPayments.length} payment${filteredPayments.length === 1 ? '' : 's'}` : 'Awaiting first payment');
+
+            setText('totalCommissionValue', formatCurrency(totalCommission));
+            setMetaText('totalCommissionMeta', 'fas fa-coins', totalCommission > 0 ? 'Commission captured' : 'No commission yet');
+
+            setText('pendingAmountValue', formatCurrency(pendingAmount));
+            setMetaText('pendingAmountMeta', 'fas fa-hourglass-half', pendingPayments.length ? `${pendingPayments.length} in queue` : 'No pending payments');
+
+            setText('failedAmountValue', formatCurrency(failedAmount));
+            setMetaText('failedAmountMeta', 'fas fa-triangle-exclamation', failedPayments.length ? `${failedPayments.length} attention needed` : 'No failed payments');
+        }
+
+        function updateRevenueAnalytics() {
+            const completedAmount = filteredPayments
+                .filter(function(payment) { return normalizeStatus(getPaymentStatus(payment)) === 'completed'; })
+                .reduce(function(sum, payment) { return sum + Math.max(getPaymentAmount(payment), 0); }, 0);
+
+            const inProgressAmount = filteredPayments
+                .filter(function(payment) {
+                    const status = normalizeStatus(getPaymentStatus(payment));
+                    return status === 'pending';
+                })
+                .reduce(function(sum, payment) { return sum + Math.max(getPaymentAmount(payment), 0); }, 0);
+
+            const refundedAmount = filteredPayments
+                .filter(function(payment) { return normalizeStatus(getPaymentStatus(payment)) === 'refunded'; })
+                .reduce(function(sum, payment) { return sum + Math.max(getPaymentAmount(payment), 0); }, 0);
+
+            const now = new Date();
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - 6);
+            weekStart.setHours(0, 0, 0, 0);
+
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            monthStart.setHours(0, 0, 0, 0);
+
+            const paymentsThisWeek = filteredPayments.filter(function(payment) {
+                const date = getPaymentDate(payment);
+                return date && date >= weekStart;
+            }).length;
+
+            const paymentsThisMonth = filteredPayments.filter(function(payment) {
+                const date = getPaymentDate(payment);
+                return date && date >= monthStart;
+            }).length;
+
+            setText('completedAmountValue', formatCurrency(completedAmount));
+            setText('inProgressAmountValue', formatCurrency(inProgressAmount));
+            setText('refundedAmountValue', formatCurrency(refundedAmount));
+            setText('paymentsThisWeekValue', paymentsThisWeek.toString());
+            setText('paymentsThisMonthValue', paymentsThisMonth.toString());
+
+            const updatedLabel = lastPaymentsUpdatedAt ? `Updated ${formatDateTime(lastPaymentsUpdatedAt)}` : 'Waiting for data...';
+            setMetaText('revenueLastUpdated', 'fas fa-clock', updatedLabel);
+        }
+
+        function updateCommissionAnalytics() {
+            const completedPayments = filteredPayments.filter(function(payment) {
+                return normalizeStatus(getPaymentStatus(payment)) === 'completed';
+            });
+
+            const completedAmount = completedPayments.reduce(function(sum, payment) {
+                return sum + Math.max(getPaymentAmount(payment), 0);
+            }, 0);
+
+            const totalCommission = completedPayments.reduce(function(sum, payment) {
+                return sum + Math.max(getCommissionAmount(payment), 0);
+            }, 0);
+
+            const avgRate = completedAmount > 0 ? (totalCommission / completedAmount) * 100 : 0;
+
+            const distinctUsers = new Set();
+            filteredPayments.forEach(function(payment) {
+                const fromKey = getUserKey(payment, 'from');
+                const toKey = getUserKey(payment, 'to');
+                if (fromKey) distinctUsers.add(fromKey);
+                if (toKey) distinctUsers.add(toKey);
+            });
+
+            const typeCounts = {};
+            filteredPayments.forEach(function(payment) {
+                const type = normalizeType(getPaymentType(payment));
+                if (!type) return;
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+            });
+            const topTypeEntry = Object.entries(typeCounts).sort(function(a, b) { return b[1] - a[1]; })[0];
+
+            const methodCounts = {};
+            filteredPayments.forEach(function(payment) {
+                const method = normalizeMethod(getPaymentMethod(payment));
+                if (!method) return;
+                methodCounts[method] = (methodCounts[method] || 0) + 1;
+            });
+            const topMethodEntry = Object.entries(methodCounts).sort(function(a, b) { return b[1] - a[1]; })[0];
+
+            setText('avgCommissionRateValue', completedPayments.length && totalCommission > 0 ? formatPercent(avgRate) : '0%');
+            setText('completedPaymentsCountValue', completedPayments.length.toString());
+            setText('distinctUsersValue', distinctUsers.size.toString());
+            setText('topPaymentTypeValue', topTypeEntry ? `${getPaymentTypeLabel(topTypeEntry[0])} • ${topTypeEntry[1]}` : '—');
+            setText('topMethodValue', topMethodEntry ? `${getPaymentMethodLabel(topMethodEntry[0])} • ${topMethodEntry[1]}` : '—');
+
+            const coverage = completedAmount > 0 ? (totalCommission / completedAmount) * 100 : 0;
+            const insightText = completedPayments.length
+                ? `Commissions cover ${formatPercent(coverage)} of completed revenue.`
+                : 'Awaiting completed payments to calculate commission insights.';
+            setMetaText('commissionInsight', 'fas fa-lightbulb', insightText);
+        }
+
+        function updateUserFilterOptions() {
+            const select = document.getElementById('userFilter');
+            if (!select) return;
+
+            const currentValue = select.value;
+            const names = new Set();
+            allPayments.forEach(function(payment) {
+                const fromName = getUserName(payment, 'from');
+                const toName = getUserName(payment, 'to');
+                if (fromName) names.add(fromName);
+                if (toName) names.add(toName);
+            });
+
+            const sortedNames = Array.from(names).sort(function(a, b) {
+                return a.localeCompare(b);
+            });
+
+            select.innerHTML = '<option value="">All Users</option>';
+            sortedNames.forEach(function(name) {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                if (name === currentValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function viewPayment(paymentId) {
+            const payment = paymentLookup[paymentId];
+            if (!payment) {
+                showAlert('warning', 'Payment details not found.');
+                return;
+            }
+
+            const amount = formatCurrency(getPaymentAmount(payment));
+            const commission = getCommissionAmount(payment);
+            const status = getStatusLabel(normalizeStatus(getPaymentStatus(payment)));
+            const reference = getPaymentReference(payment) || paymentId;
+            const messageLines = [
+                `Transaction: ${reference}`,
+                `Status: ${status}`,
+                `Amount: ${amount}`,
+                commission > 0 ? `Commission: ${formatCurrency(commission)}` : '',
+                getPaymentDate(payment) ? `Date: ${formatDateTime(getPaymentDate(payment))}` : '',
+                getUserName(payment, 'from') ? `From: ${getUserName(payment, 'from')}` : '',
+                getUserName(payment, 'to') ? `To: ${getUserName(payment, 'to')}` : '',
+                getPaymentMethodLabel(getPaymentMethod(payment)) ? `Method: ${getPaymentMethodLabel(getPaymentMethod(payment))}` : '',
+                getPaymentNotes(payment) ? `Notes: ${getPaymentNotes(payment)}` : ''
+            ].filter(Boolean).join('\n');
+
+            showAlert('info', messageLines);
+            if (console && console.table) {
+                console.table(payment);
+            }
+        }
+
+        function downloadReceipt(paymentId) {
+            const payment = paymentLookup[paymentId];
+            if (!payment) {
+                showAlert('warning', 'Payment not found for receipt download.');
+                return;
+            }
+
+            const reference = getPaymentReference(payment) || paymentId || 'payment';
+            const lines = [
+                'Alpha Freight Solutions Limited - Payment Receipt',
+                '--------------------------------',
+                `Transaction ID: ${reference}`,
+                `Payment ID: ${paymentId}`,
+                `Status: ${getStatusLabel(normalizeStatus(getPaymentStatus(payment)))}`,
+                `Amount: ${formatCurrency(getPaymentAmount(payment))}`,
+                `Commission: ${formatCurrency(getCommissionAmount(payment))}`,
+                getPaymentDate(payment) ? `Date: ${formatDateTime(getPaymentDate(payment))}` : '',
+                getUserName(payment, 'from') ? `From: ${getUserName(payment, 'from')}` : '',
+                getUserName(payment, 'to') ? `To: ${getUserName(payment, 'to')}` : '',
+                getPaymentMethodLabel(getPaymentMethod(payment)) ? `Method: ${getPaymentMethodLabel(getPaymentMethod(payment))}` : '',
+                getPaymentNotes(payment) ? `Notes: ${getPaymentNotes(payment)}` : '',
+                '',
+                'This receipt was generated from the admin console.'
+            ].filter(Boolean).join('\n');
+
+            const blob = new Blob([lines], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `receipt-${reference.replace(/[^\w\-]+/g, '_')}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showAlert('success', 'Receipt download started.');
+        }
+
+        function approvePayment(paymentId) {
+            if (!confirm('Approve this payment?')) {
+                return;
+            }
+            const payment = paymentLookup[paymentId];
+            const reference = payment ? (getPaymentReference(payment) || paymentId) : paymentId;
+            showAlert('success', `Payment ${reference} marked as approved (client-side preview).`);
+        }
+
+        function retryPayment(paymentId) {
+            if (!confirm('Retry this payment?')) {
+                return;
+            }
+            const payment = paymentLookup[paymentId];
+            const reference = payment ? (getPaymentReference(payment) || paymentId) : paymentId;
+            showAlert('info', `Retry initiated for payment ${reference} (client-side preview).`);
+        }
+
+        function processNewPayment() {
+            const form = document.getElementById('processPaymentForm');
+            if (!form) return;
+
+            if (form.checkValidity()) {
+                showAlert('success', 'Payment processed successfully!');
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('processPaymentModal'));
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                form.reset();
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        function exportPayments() {
+            if (!filteredPayments.length) {
+                showAlert('warning', 'No payments to export.');
+                return;
+            }
+
+            const headers = ['Transaction ID', 'Payment ID', 'Status', 'Type', 'Amount', 'Commission', 'Commission Rate', 'From', 'To', 'Method', 'Date', 'Notes'];
+            const rows = filteredPayments.map(function(payment) {
+                const commission = getCommissionAmount(payment);
+                const amount = getPaymentAmount(payment);
+                const commissionRate = getCommissionRate(payment, commission, amount);
+
+                const data = [
+                    getPaymentReference(payment) || '',
+                    payment.id || '',
+                    getStatusLabel(normalizeStatus(getPaymentStatus(payment))),
+                    getPaymentTypeLabel(normalizeType(getPaymentType(payment))),
+                    formatCurrency(amount),
+                    formatCurrency(commission),
+                    commissionRate ? formatPercent(commissionRate) : '',
+                    getUserName(payment, 'from') || '',
+                    getUserName(payment, 'to') || '',
+                    getPaymentMethodLabel(getPaymentMethod(payment)) || '',
+                    getPaymentDate(payment) ? formatDateTime(getPaymentDate(payment)) : '',
+                    getPaymentNotes(payment) || ''
+                ];
+
+                return data.map(function(value) {
+                    const safeValue = value === null || value === undefined ? '' : String(value);
+                    return `"${safeValue.replace(/"/g, '""')}"`;
+                }).join(',');
+            });
+
+            const csvContent = [headers.join(','), ...rows].join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `payments-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showAlert('success', 'Payments export started.');
+        }
+
+        function getPaymentStatus(payment) {
+            return payment && (payment.status || payment.state || payment.paymentStatus || payment.currentStatus || payment.transactionStatus || '');
+        }
+
+        function normalizeStatus(status) {
+            if (!status) return '';
+            const value = String(status).toLowerCase().replace(/[\s_-]+/g, '');
+            const map = {
+                completed: 'completed',
+                complete: 'completed',
+                paid: 'completed',
+                success: 'completed',
+                successful: 'completed',
+                pending: 'pending',
+                processing: 'pending',
+                awaiting: 'pending',
+                inprogress: 'pending',
+                inprocess: 'pending',
+                hold: 'pending',
+                queued: 'pending',
+                failed: 'failed',
+                failure: 'failed',
+                declined: 'failed',
+                cancelled: 'failed',
+                canceled: 'failed',
+                error: 'failed',
+                refund: 'refunded',
+                refunded: 'refunded',
+                reversed: 'refunded',
+                chargeback: 'refunded'
+            };
+            return map[value] || value || '';
+        }
+
+        function getStatusClass(status) {
+            if (status === 'completed') return 'completed';
+            if (status === 'pending') return 'pending';
+            if (status === 'failed') return 'failed';
+            if (status === 'refunded') return 'refunded';
+            return 'pending';
+        }
+
+        function getStatusBadgeClass(status) {
+            if (status === 'completed') return 'status-completed';
+            if (status === 'pending') return 'status-pending';
+            if (status === 'failed') return 'status-failed';
+            if (status === 'refunded') return 'status-refunded';
+            return 'status-pending';
+        }
+
+        function getStatusLabel(status) {
+            if (!status) return 'Unknown';
+            return status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        function getAmountClass(status) {
+            if (status === 'failed') return 'text-danger';
+            if (status === 'pending') return 'text-warning';
+            if (status === 'refunded') return 'text-info';
+            return 'text-success';
+        }
+
+        function getPaymentType(payment) {
+            return payment && (payment.type || payment.paymentType || payment.category || payment.kind || '');
+        }
+
+        function normalizeType(type) {
+            if (!type) return '';
+            const value = String(type).toLowerCase();
+            if (value.includes('commission') || value.includes('fee')) return 'commission';
+            if (value.includes('refund') || value.includes('return') || value.includes('reverse')) return 'refund';
+            if (value.includes('freight') || value.includes('load') || value.includes('shipping') || value.includes('cargo') || value.includes('payment')) return 'freight';
+            return 'other';
+        }
+
+        function getPaymentTypeLabel(type) {
+            const map = {
+                freight: 'Freight Payment',
+                commission: 'Commission',
+                refund: 'Refund',
+                other: 'Other'
+            };
+            return map[type] || (type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Payment');
+        }
+
+        function getPaymentTitle(paymentType, payment) {
+            if (payment && payment.title) return payment.title;
+            if (payment && payment.name) return payment.name;
+            const label = getPaymentTypeLabel(paymentType);
+            return label.includes('Payment') ? label : `${label} Payment`;
+        }
+
+        function getPaymentDescription(payment) {
+            if (!payment) return '';
+            if (payment.description) return payment.description;
+            if (payment.summary) return payment.summary;
+            if (payment.notes && typeof payment.notes === 'string') return payment.notes;
+            if (payment.metadata && payment.metadata.description) return payment.metadata.description;
+            const route = getPaymentRoute(payment);
+            if (route) return route;
+            if (payment.loadId || payment.loadNumber) {
+                return `Load #${payment.loadId || payment.loadNumber}`;
+            }
+            return '';
+        }
+
+        function getPaymentRoute(payment) {
+            const pickup = payment.pickupLocation || payment.origin || payment.fromLocation || payment.pickup || payment.originCity || payment.pickupCity;
+            const delivery = payment.deliveryLocation || payment.destination || payment.toLocation || payment.dropoff || payment.destinationCity || payment.deliveryCity;
+            if (pickup && delivery) {
+                return `${pickup} → ${delivery}`;
+            }
+            return '';
+        }
+
+        function getPaymentReference(payment) {
+            if (!payment) return '';
+            return payment.transactionId || payment.reference || payment.refNumber || payment.paymentId || payment.transactionID || payment.txnId || payment.invoiceId || '';
+        }
+
+        function getPaymentLoadId(payment) {
+            if (!payment) return '';
+            return payment.loadId || payment.load || payment.loadNumber || payment.jobId || payment.shipmentId || '';
+        }
+
+        function getPaymentMethod(payment) {
+            if (!payment) return '';
+            return payment.method || payment.paymentMethod || payment.channel || payment.gateway || payment.provider || payment.route || '';
+        }
+
+        function normalizeMethod(method) {
+            if (!method) return '';
+            const value = String(method).toLowerCase();
+            if (value.includes('bank') || value.includes('wire') || value.includes('ach')) return 'bank';
+            if (value.includes('card') || value.includes('visa') || value.includes('mastercard') || value.includes('amex') || value.includes('debit')) return 'card';
+            if (value.includes('paypal')) return 'paypal';
+            if (value.includes('cash')) return 'cash';
+            if (value.includes('crypto') || value.includes('bitcoin')) return 'crypto';
+            if (value.includes('check') || value.includes('cheque')) return 'cheque';
+            if (value.includes('stripe')) return 'card';
+            return value.replace(/[\s_-]+/g, '');
+        }
+
+        function getPaymentMethodLabel(method) {
+            if (!method) return '';
+            const normalized = normalizeMethod(method);
+            const map = {
+                bank: 'Bank Transfer',
+                card: 'Card Payment',
+                paypal: 'PayPal',
+                cash: 'Cash',
+                crypto: 'Crypto',
+                cheque: 'Cheque'
+            };
+            if (map[normalized]) {
+                return map[normalized];
+            }
+            return capitalizeWords(method);
+        }
+
+        function getPaymentNotes(payment) {
+            if (!payment) return '';
+            return payment.adminNotes || payment.internalNotes || payment.memo || payment.comment || '';
+        }
+
+        function getPaymentReason(payment, status) {
+            if (!payment) return '';
+            const reason = payment.reason || payment.failureReason || payment.errorMessage || payment.error || payment.refundReason || payment.cancellationReason || payment.statusMessage;
+            if (reason) return reason;
+            if (status === 'refunded' && payment.refundNote) return payment.refundNote;
+            return '';
+        }
+
+        function getUserName(payment, direction) {
+            if (!payment) return '';
+            const fields = direction === 'from'
+                ? ['fromName', 'fromUser', 'fromCompany', 'fromCompanyName', 'payerName', 'payer', 'senderName', 'supplierName', 'brokerName', 'customerName', 'shipperName', 'billToName', 'from']
+                : ['toName', 'toUser', 'toCompany', 'toCompanyName', 'recipientName', 'receiverName', 'carrierName', 'payeeName', 'consigneeName', 'customerName', 'to'];
+            for (let i = 0; i < fields.length; i++) {
+                if (payment[fields[i]]) {
+                    return payment[fields[i]];
+                }
+            }
+            if (direction === 'from' && payment.payerEmail) return payment.payerEmail;
+            if (direction === 'to' && payment.receiverEmail) return payment.receiverEmail;
+            return '';
+        }
+
+        function getUserKey(payment, direction) {
+            if (!payment) return '';
+            const fields = direction === 'from'
+                ? ['fromId', 'fromUserId', 'payerId', 'senderId', 'supplierId', 'brokerId', 'customerId']
+                : ['toId', 'toUserId', 'receiverId', 'carrierId', 'payeeId', 'consigneeId', 'customerId'];
+            for (let i = 0; i < fields.length; i++) {
+                if (payment[fields[i]]) {
+                    return String(payment[fields[i]]);
+                }
+            }
+            const name = getUserName(payment, direction);
+            return name ? `${direction}:${name}` : '';
+        }
+
+        function getPaymentAmount(payment) {
+            if (!payment) return 0;
+            const candidates = [
+                payment.amount,
+                payment.totalAmount,
+                payment.total,
+                payment.paymentAmount,
+                payment.value,
+                payment.feeTotal,
+                payment.balance
+            ];
+            for (let i = 0; i < candidates.length; i++) {
+                const num = toNumber(candidates[i]);
+                if (Number.isFinite(num)) {
+                    return num;
+                }
+            }
+            return 0;
+        }
+
+        function getCommissionAmount(payment) {
+            if (!payment) return 0;
+            const candidates = [
+                payment.commission,
+                payment.commissionAmount,
+                payment.platformFee,
+                payment.fee,
+                payment.brokerFee,
+                payment.commission_value
+            ];
+            for (let i = 0; i < candidates.length; i++) {
+                const num = toNumber(candidates[i]);
+                if (Number.isFinite(num) && num !== 0) {
+                    return num;
+                }
+            }
+            return 0;
+        }
+
+        function getCommissionRate(payment, commission, amount) {
+            if (payment && payment.commissionRate !== undefined && payment.commissionRate !== null && payment.commissionRate !== '') {
+                const rateNumber = toNumber(payment.commissionRate);
+                if (Number.isFinite(rateNumber)) {
+                    return Math.abs(rateNumber) <= 1 ? rateNumber * 100 : rateNumber;
+                }
+            }
+            if (commission > 0 && amount > 0) {
+                return (commission / amount) * 100;
+            }
+            return null;
+        }
+
+        function getPaymentDate(payment) {
+            if (!payment) return null;
+            const fields = [
+                'paidAt', 'paid_at',
+                'completedAt', 'completed_at',
+                'processedAt', 'processed_at',
+                'timestamp',
+                'createdAt', 'created_at',
+                'updatedAt', 'updated_at',
+                'scheduledAt', 'scheduled_at',
+                'paymentDate', 'payment_date',
+                'date',
+                'time'
+            ];
+            for (let i = 0; i < fields.length; i++) {
+                if (payment[fields[i]]) {
+                    const parsed = parseDateValue(payment[fields[i]]);
+                    if (parsed) return parsed;
+                }
+            }
+            return null;
+        }
+
+        function parseDateValue(value) {
+            if (!value) return null;
+
+            if (typeof value === 'number') {
+                const date = new Date(value);
+                return isNaN(date.getTime()) ? null : date;
+            }
+
+            if (typeof value === 'object') {
+                if (value.seconds) {
+                    const date = new Date(value.seconds * 1000);
+                    return isNaN(date.getTime()) ? null : date;
+                }
+                if (value._seconds) {
+                    const date = new Date(value._seconds * 1000);
+                    return isNaN(date.getTime()) ? null : date;
+                }
+                if (value.toDate && typeof value.toDate === 'function') {
+                    const date = value.toDate();
+                    return isNaN(date.getTime()) ? null : date;
+                }
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return null;
+
+                const direct = new Date(trimmed);
+                if (!isNaN(direct.getTime())) {
+                    return direct;
+                }
+
+                const simpleMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+                if (simpleMatch) {
+                    let [ , p1, p2, p3 ] = simpleMatch;
+                    let year = parseInt(p3, 10);
+                    if (year < 100) {
+                        year += 2000;
+                    }
+
+                    let day = parseInt(p1, 10);
+                    let month = parseInt(p2, 10) - 1;
+                    let candidate = new Date(year, month, day);
+                    if (!isNaN(candidate.getTime())) {
+                        return candidate;
+                    }
+
+                    day = parseInt(p2, 10);
+                    month = parseInt(p1, 10) - 1;
+                    candidate = new Date(year, month, day);
+                    if (!isNaN(candidate.getTime())) {
+                        return candidate;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function formatCurrency(value) {
+            const number = Number.isFinite(value) ? value : toNumber(value);
+            if (!Number.isFinite(number)) {
+                return '£0.00';
+            }
+            return '£' + number.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatPercent(value) {
+            if (!Number.isFinite(value)) return '0%';
+            const digits = Math.abs(value) >= 100 ? 0 : 1;
+            return `${value.toFixed(digits)}%`;
+        }
+
+        function formatDate(date) {
+            if (!date) return '';
+            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function formatDateTime(date) {
+            if (!date) return '';
+            return date.toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function toNumber(value) {
+            if (value === null || value === undefined || value === '') return NaN;
+            if (typeof value === 'number') return value;
+            const numeric = parseFloat(String(value).replace(/[^0-9.-]/g, ''));
+            return Number.isNaN(numeric) ? NaN : numeric;
+        }
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value).replace(/[&<>"']/g, function(char) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return map[char] || char;
+            });
+        }
+
+        function escapeAttr(value) {
+            return escapeHtml(value);
+        }
+
+        function capitalizeWords(value) {
+            if (!value) return '';
+            return String(value).toLowerCase().replace(/\b\w/g, function(char) {
+                return char.toUpperCase();
+            });
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = text;
+            }
+        }
+
+        function setMetaText(id, iconClass, text) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const safeText = escapeHtml(text || '');
+            if (iconClass) {
+                el.innerHTML = `<i class="${iconClass} me-1"></i>${safeText}`;
+            } else {
+                el.textContent = text || '';
+            }
+        }
+
+        function showAlert(type, message) {
+            if (typeof AlphaBrokrage !== 'undefined' && AlphaBrokrage.showAlert) {
+                AlphaBrokrage.showAlert(type, message);
+            } else {
+                console.log(`[${type.toUpperCase()}]`, message);
+            }
+        }
+    </script>
+</body>
+</html>
+
+

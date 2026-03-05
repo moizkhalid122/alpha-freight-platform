@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branding Setup - White Label Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-gray);
+            padding: 2rem 0;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-logo {
+            padding: 0 2rem;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 2rem;
+            color: var(--text-medium);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-link:hover {
+            background: var(--bg-gray);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav-link.active {
+            background: rgba(99, 91, 255, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.1);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-medium);
+            font-size: 1.125rem;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: white;
+            border-radius: 16px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+            min-width: max-content;
+        }
+
+        .tab {
+            padding: 0.875rem 1.5rem;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--text-medium);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: rgba(99, 91, 255, 0.05);
+            color: var(--primary);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form Sections */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            font-size: 0.9375rem;
+        }
+
+        .form-label .required {
+            color: var(--danger);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
+        }
+
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-top: 0.5rem;
+        }
+
+        /* Upload Areas */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--border-gray);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 91, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(99, 91, 255, 0.2);
+        }
+
+        .upload-box.dragover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 91, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            transform: scale(1.02);
+        }
+
+        .upload-preview {
+            max-width: 100%;
+            max-height: 150px;
+            margin: 0 auto 1rem;
+            display: none;
+            border-radius: 8px;
+        }
+
+        .upload-preview.show {
+            display: block;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .upload-remove {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .upload-remove:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Color Picker Grid */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .color-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            border: 3px solid var(--border-gray);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .color-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="color"] {
+            width: 80px;
+            height: 80px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+        }
+
+        .color-hex {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(99, 91, 255, 0.15);
+            border: 1px solid rgba(99, 91, 255, 0.1);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .preview-container {
+            border: 2px solid var(--border-gray);
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .preview-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-logo {
+            max-height: 32px;
+            display: none;
+        }
+
+        .preview-logo.show {
+            display: block;
+        }
+
+        .preview-content {
+            padding: 2rem;
+        }
+
+        .preview-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .preview-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 91, 255, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 91, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 91, 255, 0.05);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .status-badge.failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Code Editor */
+        .code-editor {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            background: #1e293b;
+            color: #e2e8f0;
+            resize: vertical;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Success Message */
+        .success-message {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: var(--success);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            display: none;
+            border: 2px solid rgba(16, 185, 129, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message.show {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-section {
+                position: static;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .color-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .top-bar-actions {
+                width: 100%;
+            }
+
+            .top-bar-actions .btn {
+                flex: 1;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">Alpha Freight</div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="client-dashboard.html" class="sidebar-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-box"></i>
+                        <span>Loads</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-truck"></i>
+                        <span>Carriers</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-pound-sign"></i>
+                        <span>Payments</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="analytics.html" class="sidebar-nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="branding.html" class="sidebar-nav-link active">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="api-settings.html" class="sidebar-nav-link">
+                        <i class="fas fa-code"></i>
+                        <span>API</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="user-management.html" class="sidebar-nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Team</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="billing.html" class="sidebar-nav-link">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Billing</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="support.html" class="sidebar-nav-link">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Support</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Branding Setup</h1>
+            <p class="page-subtitle">Customize your platform's look and feel</p>
+        </div>
+
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div style="font-weight: 600; color: var(--text-medium);">
+                <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
+                Auto-saving...
+            </div>
+            <div class="top-bar-actions">
+                <button class="btn btn-secondary" onclick="previewChanges()">
+                    <i class="fas fa-eye"></i>
+                    Preview
+                </button>
+                <button class="btn btn-secondary" onclick="resetToDefault()">
+                    <i class="fas fa-undo"></i>
+                    Reset
+                </button>
+                <button class="btn btn-primary" onclick="saveAllChanges()">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <ul class="tabs">
+                <li class="tab active" onclick="switchTab('general')">
+                    <i class="fas fa-cog"></i> General
+                </li>
+                <li class="tab" onclick="switchTab('logo')">
+                    <i class="fas fa-image"></i> Logo & Images
+                </li>
+                <li class="tab" onclick="switchTab('colors')">
+                    <i class="fas fa-palette"></i> Colors
+                </li>
+                <li class="tab" onclick="switchTab('fonts')">
+                    <i class="fas fa-font"></i> Fonts
+                </li>
+                <li class="tab" onclick="switchTab('domain')">
+                    <i class="fas fa-globe"></i> Domain
+                </li>
+                <li class="tab" onclick="switchTab('email')">
+                    <i class="fas fa-envelope"></i> Email
+                </li>
+                <li class="tab" onclick="switchTab('advanced')">
+                    <i class="fas fa-code"></i> Advanced
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="content-grid">
+            <!-- Left Column: Forms -->
+            <div>
+                <!-- TAB 1: General -->
+                <div id="tab-general" class="tab-content active">
+                    <div class="form-section">
+                        <h2 class="section-title">General Settings</h2>
+                        <div class="form-group">
+                            <label class="form-label">Business Name <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="businessName" placeholder="Swift Logistics" value="Swift Logistics">
+                            <div class="form-hint">This name appears throughout your platform</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product Name</label>
+                            <input type="text" class="form-input" id="productName" placeholder="Swift Freight Platform" value="Swift Freight Platform">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Support Email <span class="required">*</span></label>
+                            <input type="email" class="form-input" id="supportEmail" placeholder="support@swiftlogistics.co.uk" value="support@swiftlogistics.co.uk">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Website URL</label>
+                            <input type="url" class="form-input" id="websiteUrl" placeholder="https://swiftlogistics.co.uk" value="https://swiftlogistics.co.uk">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tagline</label>
+                            <input type="text" class="form-input" id="tagline" placeholder="Your trusted freight partner" value="Your trusted freight partner">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Logo & Images -->
+                <div id="tab-logo" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">Logo & Images</h2>
+                        <div class="upload-grid">
+                            <div class="upload-box" onclick="document.getElementById('fullLogoInput').click()">
+                                <img id="fullLogoPreview" class="upload-preview" alt="Full logo">
+                                <div class="upload-icon"><i class="fas fa-image"></i></div>
+                                <div class="upload-text">Full Logo</div>
+                                <div class="upload-hint">500x300px, PNG with transparency</div>
+                                <input type="file" id="fullLogoInput" accept="image/*" style="display: none;">
+                                <button class="upload-remove" onclick="removeImage('fullLogo')" style="display: none;">Remove</button>
+                            </div>
+
+                            <div class="upload-box" onclick="document.getElementById('smallLogoInput').click()">
+                                <img id="smallLogoPreview" class="upload-preview" alt="Small logo">
+                                <div class="upload-icon"><i class="fas fa-image"></i></div>
+                                <div class="upload-text">Small Logo</div>
+                                <div class="upload-hint">100x50px, compact version</div>
+                                <input type="file" id="smallLogoInput" accept="image/*" style="display: none;">
+                                <button class="upload-remove" onclick="removeImage('smallLogo')" style="display: none;">Remove</button>
+                            </div>
+
+                            <div class="upload-box" onclick="document.getElementById('faviconInput').click()">
+                                <img id="faviconPreview" class="upload-preview" alt="Favicon" style="max-width: 64px; max-height: 64px;">
+                                <div class="upload-icon"><i class="fas fa-star"></i></div>
+                                <div class="upload-text">Favicon</div>
+                                <div class="upload-hint">32x32px, ICO format recommended</div>
+                                <input type="file" id="faviconInput" accept="image/*" style="display: none;">
+                                <button class="upload-remove" onclick="removeImage('favicon')" style="display: none;">Remove</button>
+                            </div>
+
+                            <div class="upload-box" onclick="document.getElementById('loginBgInput').click()">
+                                <img id="loginBgPreview" class="upload-preview" alt="Login background">
+                                <div class="upload-icon"><i class="fas fa-image"></i></div>
+                                <div class="upload-text">Login Background</div>
+                                <div class="upload-hint">1920x1080px recommended</div>
+                                <input type="file" id="loginBgInput" accept="image/*" style="display: none;">
+                                <button class="upload-remove" onclick="removeImage('loginBg')" style="display: none;">Remove</button>
+                            </div>
+
+                            <div class="upload-box" onclick="document.getElementById('emailLogoInput').click()">
+                                <img id="emailLogoPreview" class="upload-preview" alt="Email logo">
+                                <div class="upload-icon"><i class="fas fa-envelope"></i></div>
+                                <div class="upload-text">Email Logo</div>
+                                <div class="upload-hint">Used in email templates</div>
+                                <input type="file" id="emailLogoInput" accept="image/*" style="display: none;">
+                                <button class="upload-remove" onclick="removeImage('emailLogo')" style="display: none;">Remove</button>
+                            </div>
+
+                            <div class="upload-box" onclick="document.getElementById('pdfLogoInput').click()">
+                                <img id="pdfLogoPreview" class="upload-preview" alt="PDF logo">
+                                <div class="upload-icon"><i class="fas fa-file-pdf"></i></div>
+                                <div class="upload-text">PDF Report Logo</div>
+                                <div class="upload-hint">Used in invoices/reports</div>
+                                <input type="file" id="pdfLogoInput" accept="image/*" style="display: none;">
+                                <button class="upload-remove" onclick="removeImage('pdfLogo')" style="display: none;">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Colors -->
+                <div id="tab-colors" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">Color Scheme</h2>
+                        <div class="color-grid">
+                            <div class="color-item">
+                                <label class="form-label">Primary Color</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="primaryColorPreview" style="background: #635bff;"></div>
+                                    <input type="color" id="primaryColorPicker" value="#635bff">
+                                </div>
+                                <div class="color-hex" id="primaryColorHex">#635bff</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Secondary Color</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="secondaryColorPreview" style="background: #7c3aed;"></div>
+                                    <input type="color" id="secondaryColorPicker" value="#7c3aed">
+                                </div>
+                                <div class="color-hex" id="secondaryColorHex">#7c3aed</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Success Color</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="successColorPreview" style="background: #10b981;"></div>
+                                    <input type="color" id="successColorPicker" value="#10b981">
+                                </div>
+                                <div class="color-hex" id="successColorHex">#10b981</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Danger/Error Color</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="dangerColorPreview" style="background: #ef4444;"></div>
+                                    <input type="color" id="dangerColorPicker" value="#ef4444">
+                                </div>
+                                <div class="color-hex" id="dangerColorHex">#ef4444</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Background Color</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="bgColorPreview" style="background: #ffffff;"></div>
+                                    <input type="color" id="bgColorPicker" value="#ffffff">
+                                </div>
+                                <div class="color-hex" id="bgColorHex">#ffffff</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Card Background</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="cardBgColorPreview" style="background: #f9fafb;"></div>
+                                    <input type="color" id="cardBgColorPicker" value="#f9fafb">
+                                </div>
+                                <div class="color-hex" id="cardBgColorHex">#f9fafb</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Text Primary</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="textPrimaryColorPreview" style="background: #1f2937;"></div>
+                                    <input type="color" id="textPrimaryColorPicker" value="#1f2937">
+                                </div>
+                                <div class="color-hex" id="textPrimaryColorHex">#1f2937</div>
+                            </div>
+
+                            <div class="color-item">
+                                <label class="form-label">Text Secondary</label>
+                                <div class="color-picker-wrapper">
+                                    <div class="color-preview" id="textSecondaryColorPreview" style="background: #6b7280;"></div>
+                                    <input type="color" id="textSecondaryColorPicker" value="#6b7280">
+                                </div>
+                                <div class="color-hex" id="textSecondaryColorHex">#6b7280</div>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-gray); padding: 2rem; border-radius: 16px; margin-top: 2rem;">
+                            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Color Preview</h3>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <button class="preview-button" id="previewColorButton" style="width: fit-content;">Sample Button</button>
+                                <div class="status-badge success" id="previewSuccessBadge">Success Message</div>
+                                <div class="status-badge failed" id="previewDangerBadge">Error Message</div>
+                                <div style="background: var(--bg-white); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-gray);">
+                                    Sample Card Content
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 1.5rem;" onclick="applyColors()">
+                            <i class="fas fa-check"></i>
+                            Apply Colors
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 4: Fonts -->
+                <div id="tab-fonts" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">Typography</h2>
+                        <div class="form-group">
+                            <label class="form-label">Primary Font</label>
+                            <select class="form-input" id="primaryFont">
+                                <option value="Inter" selected>Inter (Default)</option>
+                                <option value="Poppins">Poppins</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Lato">Lato</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Google Fonts URL</label>
+                            <input type="url" class="form-input" id="googleFontsUrl" placeholder="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700">
+                            <div class="form-hint">Optional: Add custom Google Fonts link</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Custom TTF Upload</label>
+                            <div class="upload-box" onclick="document.getElementById('customFontInput').click()">
+                                <div class="upload-icon"><i class="fas fa-file"></i></div>
+                                <div class="upload-text">Upload Custom Font</div>
+                                <div class="upload-hint">TTF, OTF, WOFF formats</div>
+                                <input type="file" id="customFontInput" accept=".ttf,.otf,.woff,.woff2" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Font Preview</label>
+                            <div style="background: var(--bg-gray); padding: 2rem; border-radius: 16px;" id="fontPreview">
+                                <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">Heading 1</h1>
+                                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">Heading 2</h2>
+                                <p style="font-size: 1rem; margin-bottom: 1rem;">Body text - Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <p style="font-size: 0.875rem; color: var(--text-medium);">Small text - Additional information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Domain -->
+                <div id="tab-domain" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">Domain Settings</h2>
+                        <div class="form-group">
+                            <label class="form-label">Subdomain</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="text" class="form-input" id="subdomainInput" placeholder="clientname" value="swift" style="flex: 1;">
+                                <span style="font-weight: 600; color: var(--text-medium);">.alphafreightuk.com</span>
+                            </div>
+                            <div style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                                <span class="status-badge success" id="subdomainStatus">Available</span>
+                                <span style="font-size: 0.875rem; color: var(--text-medium);">swift.alphafreightuk.com</span>
+                            </div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="saveSubdomain()">
+                                <i class="fas fa-save"></i>
+                                Save Subdomain
+                            </button>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border-gray);">
+                            <label class="form-label">Custom Domain</label>
+                            <input type="text" class="form-input" id="customDomainInput" placeholder="yourdomain.com" value="">
+                            <div class="form-hint" style="margin-top: 1rem;">
+                                <strong>DNS Setup Instructions:</strong><br>
+                                1. Create a CNAME record pointing to alphafreightuk.com<br>
+                                2. Wait 24-48 hours for DNS propagation<br>
+                                3. Click "Verify Domain" once DNS is configured
+                            </div>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="verifyDomain()">
+                                <i class="fas fa-check-circle"></i>
+                                Verify Domain
+                            </button>
+                            <div style="margin-top: 1rem;">
+                                <span class="status-badge pending" id="domainStatus">Not Configured</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border-gray);">
+                            <label class="form-label">SSL Certificate</label>
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
+                                <span class="status-badge success">Active</span>
+                                <span style="font-size: 0.875rem; color: var(--text-medium);">Auto-provisioned by platform</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: Email -->
+                <div id="tab-email" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">Email Configuration</h2>
+                        <div class="form-group">
+                            <label class="form-label">SMTP Settings (Optional)</label>
+                            <input type="text" class="form-input" id="smtpHost" placeholder="smtp.example.com" style="margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <input type="number" class="form-input" id="smtpPort" placeholder="Port" value="587">
+                                <select class="form-input" id="smtpEncryption">
+                                    <option value="TLS" selected>TLS</option>
+                                    <option value="SSL">SSL</option>
+                                    <option value="None">None</option>
+                                </select>
+                            </div>
+                            <input type="text" class="form-input" id="smtpUsername" placeholder="Username" style="margin-bottom: 1rem;">
+                            <input type="password" class="form-input" id="smtpPassword" placeholder="Password">
+                            <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="testSMTP()">
+                                <i class="fas fa-plug"></i>
+                                Test Connection
+                            </button>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border-gray);">
+                            <label class="form-label">From Email & Name</label>
+                            <input type="email" class="form-input" id="fromEmail" placeholder="notifications@client.com" value="notifications@swiftlogistics.co.uk" style="margin-bottom: 1rem;">
+                            <input type="text" class="form-input" id="fromName" placeholder="Swift Logistics Support" value="Swift Logistics Support">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border-gray);">
+                            <label class="form-label">Email Footer</label>
+                            <textarea class="form-input" id="emailFooter" rows="6" placeholder="Custom footer text...&#10;&#10;[Unsubscribe link will be added automatically]">Thank you for using Swift Logistics.
+
+Best regards,
+Swift Logistics Team
+
+[Unsubscribe]</textarea>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem;">
+                            <label class="form-label">Send Test Email</label>
+                            <div style="display: flex; gap: 0.75rem;">
+                                <input type="email" class="form-input" id="testEmailInput" placeholder="test@example.com" style="flex: 1;">
+                                <button class="btn btn-primary" onclick="sendTestEmail()">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: Advanced -->
+                <div id="tab-advanced" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">Advanced Settings</h2>
+                        <div class="form-group">
+                            <label class="form-label">Custom CSS</label>
+                            <textarea class="code-editor" id="customCSS" placeholder="/* Add your custom CSS here */">/* Custom CSS */
+.example-class {
+    color: #635bff;
+}</textarea>
+                            <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                                <button class="btn btn-primary" onclick="applyCustomCSS()">
+                                    <i class="fas fa-check"></i>
+                                    Apply CSS
+                                </button>
+                                <button class="btn btn-secondary" onclick="resetCustomCSS()">
+                                    <i class="fas fa-undo"></i>
+                                    Reset to Default
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border-gray);">
+                            <label class="form-label">White-Label Settings</label>
+                            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                    <input type="checkbox" id="hideAlphaFreight" checked>
+                                    <span>Hide all Alpha Freight references</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                    <input type="checkbox" id="removePoweredBy" checked>
+                                    <span>Remove 'Powered by' footer</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                    <input type="checkbox" id="disableUpgradePrompts">
+                                    <span>Disable upgrade prompts</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border-gray);">
+                            <label class="form-label">API Access</label>
+                            <div style="background: var(--bg-gray); padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <span style="font-weight: 600;">API Key</span>
+                                    <button class="btn btn-secondary" onclick="copyApiKey()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                        <i class="fas fa-copy"></i>
+                                        Copy
+                                    </button>
+                                </div>
+                                <div style="font-family: 'Courier New', monospace; font-size: 0.875rem; color: var(--text-medium); background: white; padding: 0.75rem; border-radius: 8px; word-break: break-all;">
+                                    sk_live_51H8K9L2K3J4M5N6O7P8Q9R0S1T2U3V4W5X6Y7Z8A9B0C1D2E3F4
+                                </div>
+                                <button class="btn btn-danger" style="margin-top: 1rem;" onclick="regenerateApiKey()">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Regenerate Key
+                                </button>
+                            </div>
+                            <div class="form-group" style="margin-top: 1.5rem;">
+                                <label class="form-label">Webhook URL</label>
+                                <input type="url" class="form-input" id="webhookUrl" placeholder="https://yourdomain.com/webhook">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Changes saved successfully!</span>
+                </div>
+            </div>
+
+            <!-- Right Column: Preview -->
+            <div class="preview-section">
+                <h2 class="section-title">Live Preview</h2>
+                <div class="preview-container">
+                    <div class="preview-header" id="previewHeader">
+                        <img id="previewLogo" class="preview-logo" alt="Logo">
+                        <span class="preview-company-name" id="previewCompanyName">Swift Logistics</span>
+                        <span style="font-size: 0.875rem; opacity: 0.9;">Menu</span>
+                    </div>
+                    <div class="preview-content">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;" id="previewProductName">Swift Freight Platform</h3>
+                        <p style="color: var(--text-medium); margin-bottom: 0.5rem;" id="previewTagline">Your trusted freight partner</p>
+                        <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                            This is how your platform will look with your branding applied.
+                        </p>
+                        <button class="preview-button" id="previewButton">Get Started</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.closest('.tab').classList.add('active');
+        }
+
+        // Image Upload Handlers
+        const imageInputs = {
+            'fullLogo': { input: 'fullLogoInput', preview: 'fullLogoPreview', remove: 'fullLogo' },
+            'smallLogo': { input: 'smallLogoInput', preview: 'smallLogoPreview', remove: 'smallLogo' },
+            'favicon': { input: 'faviconInput', preview: 'faviconPreview', remove: 'favicon' },
+            'loginBg': { input: 'loginBgInput', preview: 'loginBgPreview', remove: 'loginBg' },
+            'emailLogo': { input: 'emailLogoInput', preview: 'emailLogoPreview', remove: 'emailLogo' },
+            'pdfLogo': { input: 'pdfLogoInput', preview: 'pdfLogoPreview', remove: 'pdfLogo' }
+        };
+
+        Object.keys(imageInputs).forEach(key => {
+            const config = imageInputs[key];
+            const input = document.getElementById(config.input);
+            const preview = document.getElementById(config.preview);
+            const uploadBox = input.closest('.upload-box');
+
+            input.addEventListener('change', (e) => {
+                handleImageUpload(e.target.files[0], preview, uploadBox);
+            });
+
+            // Drag and drop
+            uploadBox.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadBox.classList.add('dragover');
+            });
+
+            uploadBox.addEventListener('dragleave', () => {
+                uploadBox.classList.remove('dragover');
+            });
+
+            uploadBox.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadBox.classList.remove('dragover');
+                handleImageUpload(e.dataTransfer.files[0], preview, uploadBox);
+            });
+        });
+
+        function handleImageUpload(file, preview, uploadBox) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.classList.add('show');
+                uploadBox.querySelector('.upload-icon').style.display = 'none';
+                uploadBox.querySelector('.upload-text').style.display = 'none';
+                uploadBox.querySelector('.upload-hint').style.display = 'none';
+                uploadBox.querySelector('.upload-remove').style.display = 'block';
+
+                // Update preview logo if it's full logo
+                if (preview.id === 'fullLogoPreview') {
+                    document.getElementById('previewLogo').src = e.target.result;
+                    document.getElementById('previewLogo').classList.add('show');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(type) {
+            const config = imageInputs[type];
+            const preview = document.getElementById(config.preview);
+            const uploadBox = preview.closest('.upload-box');
+            
+            preview.src = '';
+            preview.classList.remove('show');
+            uploadBox.querySelector('.upload-icon').style.display = 'block';
+            uploadBox.querySelector('.upload-text').style.display = 'block';
+            uploadBox.querySelector('.upload-hint').style.display = 'block';
+            uploadBox.querySelector('.upload-remove').style.display = 'none';
+            document.getElementById(config.input).value = '';
+
+            if (type === 'fullLogo') {
+                document.getElementById('previewLogo').src = '';
+                document.getElementById('previewLogo').classList.remove('show');
+            }
+        }
+
+        // Color Pickers
+        const colorPickers = {
+            'primary': { picker: 'primaryColorPicker', preview: 'primaryColorPreview', hex: 'primaryColorHex' },
+            'secondary': { picker: 'secondaryColorPicker', preview: 'secondaryColorPreview', hex: 'secondaryColorHex' },
+            'success': { picker: 'successColorPicker', preview: 'successColorPreview', hex: 'successColorHex' },
+            'danger': { picker: 'dangerColorPicker', preview: 'dangerColorPreview', hex: 'dangerColorHex' },
+            'bg': { picker: 'bgColorPicker', preview: 'bgColorPreview', hex: 'bgColorHex' },
+            'cardBg': { picker: 'cardBgColorPicker', preview: 'cardBgColorPreview', hex: 'cardBgColorHex' },
+            'textPrimary': { picker: 'textPrimaryColorPicker', preview: 'textPrimaryColorPreview', hex: 'textPrimaryColorHex' },
+            'textSecondary': { picker: 'textSecondaryColorPicker', preview: 'textSecondaryColorPreview', hex: 'textSecondaryColorHex' }
+        };
+
+        Object.keys(colorPickers).forEach(key => {
+            const config = colorPickers[key];
+            const picker = document.getElementById(config.picker);
+            const preview = document.getElementById(config.preview);
+            const hex = document.getElementById(config.hex);
+
+            picker.addEventListener('input', (e) => {
+                const color = e.target.value;
+                preview.style.background = color;
+                hex.textContent = color.toUpperCase();
+
+                // Update preview if primary color
+                if (key === 'primary') {
+                    document.getElementById('previewHeader').style.background = color;
+                    document.getElementById('previewButton').style.background = color;
+                    document.getElementById('previewColorButton').style.background = color;
+                }
+            });
+        });
+
+        function applyColors() {
+            const primaryColor = document.getElementById('primaryColorPicker').value;
+            document.documentElement.style.setProperty('--primary', primaryColor);
+            showSuccess('Colors applied successfully!');
+        }
+
+        // Font Selection
+        document.getElementById('primaryFont').addEventListener('change', (e) => {
+            document.body.style.fontFamily = e.target.value;
+            document.getElementById('fontPreview').style.fontFamily = e.target.value;
+        });
+
+        // General Settings Updates
+        document.getElementById('businessName').addEventListener('input', (e) => {
+            document.getElementById('previewCompanyName').textContent = e.target.value || 'Your Company';
+        });
+
+        document.getElementById('productName').addEventListener('input', (e) => {
+            document.getElementById('previewProductName').textContent = e.target.value || 'Your Platform';
+        });
+
+        document.getElementById('tagline').addEventListener('input', (e) => {
+            document.getElementById('previewTagline').textContent = e.target.value || 'Your tagline';
+        });
+
+        // Domain Functions
+        function saveSubdomain() {
+            const subdomain = document.getElementById('subdomainInput').value;
+            if (!subdomain) {
+                alert('Please enter a subdomain');
+                return;
+            }
+            showSuccess(`Subdomain "${subdomain}.alphafreightuk.com" saved!`);
+        }
+
+        function verifyDomain() {
+            const domain = document.getElementById('customDomainInput').value;
+            if (!domain) {
+                alert('Please enter a domain');
+                return;
+            }
+            const status = document.getElementById('domainStatus');
+            status.textContent = 'Verifying...';
+            status.className = 'status-badge pending';
+            
+            setTimeout(() => {
+                status.textContent = 'Verified';
+                status.className = 'status-badge success';
+                showSuccess('Domain verified successfully!');
+            }, 2000);
+        }
+
+        // Email Functions
+        function testSMTP() {
+            showSuccess('SMTP connection test initiated. Check your email for results.');
+        }
+
+        function sendTestEmail() {
+            const email = document.getElementById('testEmailInput').value;
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            showSuccess(`Test email sent to ${email}!`);
+        }
+
+        // Advanced Functions
+        function applyCustomCSS() {
+            const css = document.getElementById('customCSS').value;
+            // In production, this would apply CSS to the platform
+            showSuccess('Custom CSS applied!');
+        }
+
+        function resetCustomCSS() {
+            if (confirm('Are you sure you want to reset custom CSS?')) {
+                document.getElementById('customCSS').value = '/* Custom CSS */\n.example-class {\n    color: #635bff;\n}';
+                showSuccess('Custom CSS reset to default');
+            }
+        }
+
+        function copyApiKey() {
+            const apiKey = 'sk_live_51H8K9L2K3J4M5N6O7P8Q9R0S1T2U3V4W5X6Y7Z8A9B0C1D2E3F4';
+            navigator.clipboard.writeText(apiKey);
+            showSuccess('API key copied to clipboard!');
+        }
+
+        async function regenerateApiKey() {
+            if (!confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
+                return;
+            }
+
+            const token = getAuthToken();
+            if (!token) {
+                showError('Please login to regenerate API key');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/key/regenerate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to regenerate API key');
+                }
+
+                // Show API key (only shown once)
+                alert(`New API Key: ${result.apiKey}\n\n${result.warning || 'Save this key securely. It will not be shown again.'}`);
+                showSuccess('API key regenerated successfully!');
+            } catch (error) {
+                console.error('Regenerate API key error:', error);
+                showError(error.message || 'Failed to regenerate API key');
+            }
+        }
+
+        // API Base URL
+        const API_BASE = window.location.origin.includes('localhost') 
+            ? 'http://localhost:3000/api/white-label'
+            : '/api/white-label';
+
+        // Get auth token
+        function getAuthToken() {
+            return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        }
+
+        // Save Functions
+        async function saveAllChanges() {
+            const brandingData = {
+                general: {
+                    businessName: document.getElementById('businessName')?.value || '',
+                    productName: document.getElementById('productName')?.value || '',
+                    supportEmail: document.getElementById('supportEmail')?.value || '',
+                    websiteUrl: document.getElementById('websiteUrl')?.value || '',
+                    tagline: document.getElementById('tagline')?.value || ''
+                },
+                colors: {
+                    primary: document.getElementById('primaryColorPicker')?.value || '#635bff',
+                    secondary: document.getElementById('secondaryColorPicker')?.value || '#7c3aed',
+                    success: document.getElementById('successColorPicker')?.value || '#10b981',
+                    danger: document.getElementById('dangerColorPicker')?.value || '#ef4444'
+                },
+                fonts: {
+                    primary: document.getElementById('fontFamily')?.value || 'Inter'
+                }
+            };
+
+            const token = getAuthToken();
+            if (!token) {
+                showError('Please login to save branding');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/branding`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(brandingData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to save branding');
+                }
+
+                localStorage.setItem('brandingData', JSON.stringify(brandingData));
+                showSuccess('All changes saved successfully!');
+            } catch (error) {
+                console.error('Save branding error:', error);
+                showError(error.message || 'Failed to save branding');
+            }
+        }
+
+        // Load branding from API
+        async function loadBranding() {
+            const token = getAuthToken();
+            if (!token) {
+                // Try to load from localStorage
+                const saved = localStorage.getItem('brandingData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.general) {
+                        Object.keys(data.general).forEach(key => {
+                            const input = document.getElementById(key);
+                            if (input) input.value = data.general[key];
+                        });
+                    }
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/branding`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.branding) {
+                    const branding = result.branding;
+                    
+                    // Set colors
+                    if (branding.colors) {
+                        if (document.getElementById('primaryColorPicker')) {
+                            document.getElementById('primaryColorPicker').value = branding.colors.primary;
+                        }
+                        if (document.getElementById('secondaryColorPicker')) {
+                            document.getElementById('secondaryColorPicker').value = branding.colors.secondary;
+                        }
+                        if (document.getElementById('successColorPicker')) {
+                            document.getElementById('successColorPicker').value = branding.colors.success;
+                        }
+                        if (document.getElementById('dangerColorPicker')) {
+                            document.getElementById('dangerColorPicker').value = branding.colors.danger;
+                        }
+                    }
+                    
+                    // Set general info
+                    if (branding.general) {
+                        Object.keys(branding.general).forEach(key => {
+                            const input = document.getElementById(key);
+                            if (input) input.value = branding.general[key];
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Load branding error:', error);
+            }
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMessage') || document.getElementById('successMessage');
+            if (errorMsg) {
+                errorMsg.querySelector('span').textContent = message;
+                errorMsg.classList.add('show');
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                }, 5000);
+            } else {
+                alert(message);
+            }
+        }
+
+        function previewChanges() {
+            window.open('about:blank', '_blank');
+            alert('Preview would open in new tab (implement with actual preview URL)');
+        }
+
+        function resetToDefault() {
+            if (confirm('Are you sure you want to reset all changes to default? This cannot be undone.')) {
+                location.reload();
+            }
+        }
+
+        function showSuccess(message) {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.querySelector('span').textContent = message;
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Auto-save simulation
+        setInterval(() => {
+            const autoSave = document.querySelector('.top-bar > div');
+            autoSave.innerHTML = '<i class="fas fa-save" style="margin-right: 0.5rem;"></i>Auto-saving...';
+            setTimeout(() => {
+                autoSave.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 0.5rem; color: var(--success);"></i>All changes saved';
+            }, 1000);
+        }, 30000);
+
+        // Load saved data
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBranding();
+        });
+    </script>
+</body>
+</html>

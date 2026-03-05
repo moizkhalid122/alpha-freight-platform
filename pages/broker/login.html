@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Login - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --broker-primary: #6f42c1;
+            --broker-secondary: #e83e8c;
+        }
+
+        body {
+            background: radial-gradient(circle at top, rgba(111, 66, 193, 0.08), transparent 55%),
+                radial-gradient(circle at 80% 20%, rgba(232, 62, 140, 0.08), transparent 45%),
+                #f5f6fb;
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+            overflow: hidden;
+            max-width: 520px;
+            width: 100%;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            text-align: center;
+            padding: 2rem 2rem 1.5rem;
+            position: relative;
+        }
+
+        .auth-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 60%);
+            pointer-events: none;
+        }
+
+        .auth-header::before {
+            content: "";
+            position: absolute;
+            inset: -50% -50%;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), transparent 60%);
+            animation: headerShine 6s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes headerShine {
+            0% { transform: translateX(-30%); }
+            100% { transform: translateX(30%); }
+        }
+
+        .auth-logo {
+            width: 140px;
+            height: auto;
+            margin: 0 auto 0.75rem;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-body {
+            padding: 2rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--broker-primary);
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            border: none;
+            border-radius: 999px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 12px 25px rgba(111, 66, 193, 0.25);
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .auth-card {
+                border-radius: 18px;
+            }
+
+            .auth-header {
+                padding: 1.5rem 1.25rem 1.25rem;
+            }
+
+            .auth-logo {
+                width: 120px;
+            }
+
+            .auth-body {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .auth-card {
+                max-width: 580px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div>
+            <div class="auth-card">
+                <div class="auth-header">
+                    <img class="auth-logo" src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo">
+                    <h4 class="fw-bold mb-1">Broker Login</h4>
+                    <p class="mb-0">Access the broker portal.</p>
+                </div>
+                <div class="auth-body">
+                    <form id="brokerLoginForm">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="loginEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                        <button class="btn btn-primary w-100" type="submit">Login</button>
+                    </form>
+                    <div id="loginError" class="alert alert-danger mt-3 d-none">
+                        Invalid login details.
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <a class="btn btn-outline-secondary" href="register.html">Create broker account</a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="pricing.html" class="text-decoration-none" style="color: var(--broker-primary);">
+                            <i class="fas fa-tags me-1"></i> View Pricing Plans
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a class="btn btn-outline-dark" href="../../index.html">Back to website</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        const loginForm = document.getElementById('brokerLoginForm');
+        const loginError = document.getElementById('loginError');
+
+        loginForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            loginError.classList.add('d-none');
+            loginError.textContent = 'Invalid login details.';
+
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                loginError.textContent = 'Login service unavailable. Please refresh and try again.';
+                loginError.classList.remove('d-none');
+                return;
+            }
+
+            db.ref('brokers').orderByChild('email').equalTo(email).once('value').then(function(snapshot) {
+                let matched = null;
+                if (snapshot && snapshot.exists && snapshot.exists()) {
+                    snapshot.forEach(function(child) {
+                        const brokerData = child.val() || {};
+                        if (brokerData.password === password) {
+                            matched = {
+                                brokerId: brokerData.brokerId || child.key,
+                                email: brokerData.email,
+                                firstName: brokerData.firstName,
+                                lastName: brokerData.lastName,
+                                company: brokerData.company,
+                                phone: brokerData.phone
+                            };
+                        }
+                    });
+                }
+
+                if (matched) {
+                    localStorage.setItem('brokerAuth', JSON.stringify({
+                        brokerId: matched.brokerId,
+                        email: matched.email,
+                        firstName: matched.firstName,
+                        lastName: matched.lastName,
+                        company: matched.company,
+                        phone: matched.phone,
+                        isLoggedIn: true,
+                        loginTime: new Date().toISOString()
+                    }));
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                loginError.classList.remove('d-none');
+            }).catch(function(error) {
+                console.error('Broker login error:', error);
+                loginError.textContent = 'Login failed. Please try again.';
+                loginError.classList.remove('d-none');
+            });
+        });
+    </script>
+</body>
+</html>

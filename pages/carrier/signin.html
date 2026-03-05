@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Alpha Freight Carrier Portal</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="shortcut icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        :root {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #eef2f6;
+            --primary: #635bff;
+            --primary-soft: rgba(99, 91, 255, 0.1);
+            --secondary: #00d4ff;
+            --success: #10b981;
+            --error: #ef4444;
+            --text-main: #1f2937;
+            --text-soft: #6b7280;
+            --border-subtle: #e5e7eb;
+            --card-bg: #ffffff;
+            --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition-fast: 0.18s ease-out;
+            --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-main);
+            background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .page-shell {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 1.5rem 1.25rem 3rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .top-left {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+            transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .back-link:hover {
+            background: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+        }
+
+        .top-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .top-link {
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            text-decoration: none;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.6);
+            transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .top-link:hover {
+            background: #ffffff;
+            border-color: rgba(148, 163, 184, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+        }
+
+        .top-link.primary {
+            background: linear-gradient(120deg, #4f46e5, #6366f1);
+            color: white;
+        }
+
+        .top-link.primary:hover {
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Layout */
+        .content-shell {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 1.75rem;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            padding: 2.25rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(99, 91, 255, 0.12), transparent 55%);
+            pointer-events: none;
+        }
+
+        .auth-card-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-heading {
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-heading h1 {
+            margin: 0 0 0.4rem;
+            font-size: 1.875rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #111827, #4f46e5);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .auth-heading p {
+            margin: 0;
+            font-size: 0.98rem;
+            color: var(--text-soft);
+        }
+
+        .welcome-back-note {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            display: none;
+        }
+
+        .welcome-back-note span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .welcome-back-note .switch-account {
+            margin-left: 0.4rem;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.8rem;
+            color: var(--primary);
+            background: rgba(99, 91, 255, 0.06);
+            border-radius: 999px;
+            border: 1px solid rgba(129, 140, 248, 0.4);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s ease-out, border-color 0.15s ease-out, transform 0.12s ease-out, box-shadow 0.15s ease-out;
+        }
+
+        .welcome-back-note .switch-account:hover {
+            background: rgba(99, 91, 255, 0.12);
+            border-color: rgba(129, 140, 248, 0.8);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .welcome-back-note .switch-account:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+        }
+
+        /* Form */
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .field {
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+            border-radius: var(--radius-md);
+            background: #eef2ff;
+            padding: 1px;
+            transition: box-shadow var(--transition-normal), background var(--transition-normal), transform 0.15s ease-out;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.85rem 0.95rem;
+            padding-right: 2.6rem;
+            border-radius: inherit;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: #f9fafb;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal), transform 0.15s ease-out;
+        }
+
+        .input-field::placeholder {
+            color: transparent;
+        }
+
+        .floating-label {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            background: transparent;
+            padding: 0 0.25rem;
+            transition: transform var(--transition-normal), color var(--transition-normal), font-size var(--transition-normal), top var(--transition-normal), background-color var(--transition-normal);
+        }
+
+        /* Password label always stays floated (to avoid overlap with bullets/autofill) */
+        .password-label {
+            top: 0.1rem;
+            transform: translateY(0);
+            font-size: 0.7rem;
+            color: var(--text-soft);
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 1px rgba(99, 91, 255, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .input-field:focus ~ .field-icon {
+            color: var(--primary);
+            opacity: 0.9;
+        }
+
+        .input-field:not(:placeholder-shown) + .floating-label,
+        .input-field.has-value + .floating-label,
+        .input-field:focus + .floating-label {
+            top: 0.1rem;
+            transform: translateY(0);
+            font-size: 0.7rem;
+            color: var(--primary);
+            background: #ffffff;
+            border-radius: 999px;
+            padding: 0.1rem 0.45rem;
+        }
+
+        .input-field.invalid {
+            border-color: var(--error);
+            box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.45);
+            animation: shake 0.16s ease-in-out 1;
+        }
+
+        .input-field.valid {
+            border-color: var(--success);
+            box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.5);
+        }
+
+        .field-icon {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            color: var(--text-soft);
+            opacity: 0.4;
+            pointer-events: none;
+            transition: color var(--transition-fast), opacity var(--transition-fast);
+        }
+
+        .field-icon.valid {
+            color: var(--success);
+            opacity: 1;
+        }
+
+        .field-icon.invalid {
+            color: var(--error);
+            opacity: 1;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            color: var(--text-soft);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: color var(--transition-fast), opacity var(--transition-fast);
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+            opacity: 1;
+        }
+
+        .error-text {
+            margin-top: 0.25rem;
+            font-size: 0.78rem;
+            color: var(--error);
+            min-height: 1rem;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+        }
+
+        .caps-warning {
+            display: none;
+            font-size: 0.78rem;
+            color: var(--text-soft);
+            margin-top: 0.15rem;
+        }
+
+        .caps-warning i {
+            color: var(--warning);
+            margin-right: 0.15rem;
+        }
+
+        .row-remember {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .remember-me {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+        }
+
+        .remember-me input {
+            display: none;
+        }
+
+        .checkbox-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1.5px solid #cbd5f5;
+            background: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            transition: all var(--transition-fast);
+        }
+
+        .remember-me input:checked + .checkbox-box {
+            background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+            border-color: transparent;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.35);
+        }
+
+        .remember-me input:checked + .checkbox-box i {
+            opacity: 1;
+        }
+
+        .checkbox-box i {
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .forgot-link {
+            font-size: 0.85rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            border: none;
+            border-radius: 999px;
+            padding: 0.9rem 1rem;
+            margin-top: 0.35rem;
+            background-image: linear-gradient(120deg, #4f46e5, #6366f1, #0ea5e9);
+            background-size: 200% 200%;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.98rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.4);
+            transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out, background-position 0.4s ease-out;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px) scale(1.01);
+            filter: brightness(1.03);
+            background-position: 100% 0;
+            box-shadow: 0 18px 40px rgba(30, 64, 175, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.3);
+        }
+
+        .btn-primary .spinner {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-primary.loading {
+            cursor: progress;
+            opacity: 0.9;
+        }
+
+        .btn-primary.loading span.label {
+            opacity: 0.8;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.25rem 0 1rem;
+            font-size: 0.78rem;
+            color: var(--text-soft);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(148, 163, 184, 0.7));
+        }
+
+        .divider::after {
+            background: linear-gradient(to left, transparent, rgba(148, 163, 184, 0.7));
+        }
+
+        /* Google Sign In Button (From Uiverse.io by Yaya12085, scoped) */
+        .google-signin-btn {
+            max-width: 320px;
+            width: 100%;
+            display: flex;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            vertical-align: middle;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid #dadce0;
+            gap: 0.75rem;
+            color: rgb(65, 63, 63);
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all .18s ease-out;
+            margin: 0.5rem auto 0;
+        }
+
+        .google-signin-btn svg {
+            height: 18px;
+        }
+
+        .google-signin-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+            background-color: #f8f9fa;
+        }
+
+        .google-signin-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+        }
+
+        .below-text {
+            margin-top: 1.1rem;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            text-align: center;
+        }
+
+        .below-text a {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .below-text a:hover {
+            text-decoration: underline;
+        }
+
+        .security-note {
+            margin-top: 1.25rem;
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .security-note i {
+            color: var(--primary);
+        }
+
+        .security-tags {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-left: 0.4rem;
+        }
+
+        .security-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.03);
+        }
+
+        .security-tag i {
+            font-size: 0.7rem;
+            color: var(--success);
+        }
+
+        /* Trust badges */
+        .trust-row {
+            margin-top: 1.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 0.78rem;
+            color: var(--text-soft);
+        }
+
+        .trust-badge {
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            border: 1px dashed rgba(148, 163, 184, 0.6);
+            background: rgba(248, 250, 252, 0.9);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .trust-badge i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        /* Notification toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            z-index: 9999;
+            animation: fadeInRight 0.25s ease-out;
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--error);
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--success);
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 1.25rem 1rem 2rem;
+            }
+
+            .auth-card {
+                padding: 1.75rem 1.5rem 1.75rem;
+                border-radius: 18px;
+            }
+
+            .auth-heading h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header class="top-bar" aria-label="Primary">
+            <div class="top-left">
+                <a href="../../index.html" class="back-link">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+            <div class="top-actions">
+                <a href="mailto:support@alphafreightuk.com" class="top-link">Help?</a>
+                <a href="register.html" class="top-link primary">Create Account</a>
+            </div>
+        </header>
+
+        <main class="content-shell">
+            <section class="auth-card" aria-label="Sign in to Alpha Freight">
+                <div class="auth-card-inner">
+                    <div class="auth-heading">
+                        <h1>Welcome back</h1>
+                        <p>Sign in to your Alpha Freight carrier account.</p>
+                        <div class="welcome-back-note" id="welcomeBackNote">
+                            Welcome back, <span id="welcomeBackName"></span>.
+                            <button type="button" class="switch-account" id="switchAccountBtn">Switch account</button>
+                        </div>
+                    </div>
+
+                    <form id="signinForm" novalidate>
+                        <div class="form-grid" aria-label="Sign in form">
+                            <div class="field">
+                                <div class="input-wrapper">
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        class="input-field"
+                                        placeholder=" "
+                                        autocomplete="email"
+                                        required
+                                        aria-label="Email address"
+                                    >
+                                    <label class="floating-label" for="email">Email address</label>
+                                    <i class="fas fa-check-circle field-icon" id="emailIcon" aria-hidden="true"></i>
+                                </div>
+                                <div class="error-text" id="emailError" aria-live="polite"></div>
+                            </div>
+
+                            <div class="field">
+                                <div class="input-wrapper">
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        class="input-field"
+                                        placeholder=" "
+                                        autocomplete="current-password"
+                                        required
+                                        aria-label="Password"
+                                    >
+                                    <label class="floating-label password-label" for="password">Password</label>
+                                    <i class="fas fa-eye toggle-password" id="passwordToggle" aria-hidden="true"></i>
+                                </div>
+                                <div class="caps-warning" id="capsWarning">
+                                    <i class="fas fa-arrow-up"></i> Caps Lock is on
+                                </div>
+                                <div class="error-text" id="passwordError" aria-live="polite"></div>
+                            </div>
+
+                            <div class="row-remember">
+                                <label class="remember-me" for="rememberMe">
+                                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                                    <span class="checkbox-box">
+                                        <i class="fas fa-check" aria-hidden="true"></i>
+                                    </span>
+                                    <span>Keep me signed in</span>
+                                </label>
+                                <a href="#" class="forgot-link">Forgot password?</a>
+                            </div>
+
+                            <button type="submit" class="btn-primary" id="signinBtn">
+                                <span class="spinner" id="signinSpinner" style="display: none;"></span>
+                                <span class="label">Sign in</span>
+                            </button>
+
+                            <div class="divider" aria-hidden="true">
+                                <span>or continue with</span>
+                            </div>
+
+                            <button type="button" class="google-signin-btn" id="googleSigninBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" aria-hidden="true">
+                                    <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
+                                    <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
+                                    <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
+                                    <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
+                                </svg>
+                                <span>Sign in with Google</span>
+                            </button>
+
+                            <div class="below-text">
+                                Don’t have an account?
+                                <a href="register.html">Create one</a>
+                            </div>
+
+                            <div class="security-note" aria-label="Security information">
+                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                <span>Secure login · 256-bit encryption</span>
+                                <span class="security-tags">
+                                    <span class="security-tag">
+                                        <i class="fas fa-lock"></i>
+                                        <span>2FA available</span>
+                                    </span>
+                                    <span class="security-tag" id="lastLoginTag" style="display:none;">
+                                        <i class="fas fa-bolt"></i>
+                                        <span id="lastLoginText"></span>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="trust-row" aria-label="Trust badges">
+                <div class="trust-badge">
+                    <i class="fas fa-certificate" aria-hidden="true"></i>
+                    <span>ISO 27001 Certified</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-user-shield" aria-hidden="true"></i>
+                    <span>GDPR Compliant</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-credit-card" aria-hidden="true"></i>
+                    <span>PCI DSS Level 1</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Firebase (placeholder / same config as other carrier pages) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // Firebase init (same project as dashboard/login)
+        (function initFirebase() {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+                authDomain: "alpha-brokerage.firebaseapp.com",
+                databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+                projectId: "alpha-brokerage",
+                storageBucket: "alpha-brokerage.firebasestorage.app",
+                messagingSenderId: "834712514965",
+                appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        })();
+
+        var db = (typeof firebase !== 'undefined' && firebase.database) ? firebase.database() : null;
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const emailIcon = document.getElementById('emailIcon');
+        const signinForm = document.getElementById('signinForm');
+        const signinBtn = document.getElementById('signinBtn');
+        const signinSpinner = document.getElementById('signinSpinner');
+        const capsWarning = document.getElementById('capsWarning');
+        const googleSigninBtn = document.getElementById('googleSigninBtn');
+        const welcomeBackNote = document.getElementById('welcomeBackNote');
+        const welcomeBackName = document.getElementById('welcomeBackName');
+        const switchAccountBtn = document.getElementById('switchAccountBtn');
+        const lastLoginTag = document.getElementById('lastLoginTag');
+        const lastLoginText = document.getElementById('lastLoginText');
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.innerHTML = '<i class="fas fa-info-circle"></i><span>' + message + '</span>';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(12px)';
+                setTimeout(() => toast.remove(), 200);
+            }, 2800);
+        }
+
+        function validateEmail() {
+            const value = emailInput.value.trim();
+            if (!value) {
+                emailInput.classList.remove('valid');
+                emailInput.classList.add('invalid');
+                emailError.textContent = 'Please enter your email address.';
+                emailIcon.classList.remove('valid', 'invalid');
+                return false;
+            }
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            if (!isValid) {
+                emailInput.classList.remove('valid');
+                emailInput.classList.add('invalid');
+                emailError.textContent = 'Please enter a valid email address.';
+                emailIcon.classList.remove('valid');
+                emailIcon.classList.add('invalid');
+            } else {
+                emailInput.classList.remove('invalid');
+                emailInput.classList.add('valid');
+                emailError.textContent = '';
+                emailIcon.classList.remove('invalid');
+                emailIcon.classList.add('valid');
+            }
+            return isValid;
+        }
+
+        function validatePassword() {
+            const value = passwordInput.value;
+            if (!value) {
+                passwordInput.classList.remove('valid');
+                passwordInput.classList.add('invalid');
+                passwordError.textContent = 'Please enter your password.';
+                return false;
+            }
+            passwordInput.classList.remove('invalid');
+            passwordInput.classList.add('valid');
+            passwordError.textContent = '';
+            return true;
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                signinBtn.classList.add('loading');
+                signinBtn.disabled = true;
+                signinSpinner.style.display = 'inline-block';
+            } else {
+                signinBtn.classList.remove('loading');
+                signinBtn.disabled = false;
+                signinSpinner.style.display = 'none';
+            }
+        }
+
+        function finishLogin(matched, rememberMe) {
+            const authData = {
+                email: matched.email,
+                firstName: matched.firstName || '',
+                lastName: matched.lastName || '',
+                companyName: matched.companyName || '',
+                phone: matched.phone || '',
+                carrierId: matched.carrierId || matched.id || '',
+                country: matched.country || '',
+                isLoggedIn: true,
+                loginTime: new Date().toISOString(),
+                rememberMe: rememberMe
+            };
+            localStorage.setItem('carrierAuth', JSON.stringify(authData));
+            try {
+                localStorage.setItem('ab.portal.lastRole', 'carrier');
+            } catch (err) {}
+
+            showToast('Welcome back! Redirecting to your dashboard…', 'success');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1200);
+        }
+
+        function syncFloatingLabel(input) {
+            if (!input) return;
+            if (input.value && input.value.trim() !== '') {
+                input.classList.add('has-value');
+            } else {
+                input.classList.remove('has-value');
+            }
+        }
+
+        // Session recovery / welcome back + handle autofill so labels don't overlap
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                const raw = localStorage.getItem('carrierAuth');
+                if (raw) {
+                    const auth = JSON.parse(raw);
+                    if (auth && auth.email) {
+                        welcomeBackName.textContent = auth.companyName || (auth.firstName || '') + ' ' + (auth.lastName || '');
+                        welcomeBackNote.style.display = 'block';
+
+                        if (auth.loginTime) {
+                            const last = new Date(auth.loginTime);
+                            const diffDays = Math.round((Date.now() - last.getTime()) / (1000 * 60 * 60 * 24));
+                            lastLoginText.textContent = diffDays <= 1 ? 'Last login: within 24 hours' : 'Last login: ' + diffDays + ' days ago';
+                            lastLoginTag.style.display = 'inline-flex';
+                        }
+
+                        // Prefill email field from session (optional)
+                        if (emailInput && !emailInput.value) {
+                            emailInput.value = (auth.email || '').trim();
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // Handle browser autofill after short delays so labels don't overlap
+            setTimeout(function () {
+                syncFloatingLabel(emailInput);
+                syncFloatingLabel(passwordInput);
+            }, 120);
+
+            setTimeout(function () {
+                syncFloatingLabel(emailInput);
+                syncFloatingLabel(passwordInput);
+            }, 600);
+        });
+
+        // Extra safety: on full window load (in case autofill runs late)
+        window.addEventListener('load', function () {
+            syncFloatingLabel(emailInput);
+            syncFloatingLabel(passwordInput);
+        });
+
+        if (switchAccountBtn) {
+            switchAccountBtn.addEventListener('click', function () {
+                localStorage.removeItem('carrierAuth');
+                showToast('You can now sign in with a different account.', 'info');
+                welcomeBackNote.style.display = 'none';
+            });
+        }
+
+        // Field events
+        emailInput.addEventListener('blur', function () {
+            syncFloatingLabel(emailInput);
+            validateEmail();
+        });
+        emailInput.addEventListener('input', function () {
+            syncFloatingLabel(emailInput);
+            if (emailInput.classList.contains('invalid')) {
+                validateEmail();
+            }
+        });
+
+        passwordInput.addEventListener('blur', function () {
+            syncFloatingLabel(passwordInput);
+            validatePassword();
+        });
+        passwordInput.addEventListener('input', function () {
+            syncFloatingLabel(passwordInput);
+            if (passwordInput.classList.contains('invalid')) {
+                validatePassword();
+            }
+        });
+
+        passwordInput.addEventListener('keyup', function (e) {
+            if (e.getModifierState && e.getModifierState('CapsLock')) {
+                capsWarning.style.display = 'block';
+            } else {
+                capsWarning.style.display = 'none';
+            }
+        });
+
+        // Toggle password visibility
+        const passwordToggle = document.getElementById('passwordToggle');
+        if (passwordToggle) {
+            passwordToggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordToggle.classList.remove('fa-eye');
+                    passwordToggle.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    passwordToggle.classList.remove('fa-eye-slash');
+                    passwordToggle.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Form submit
+        signinForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const isEmailValid = validateEmail();
+            const isPasswordValid = validatePassword();
+
+            if (!isEmailValid || !isPasswordValid) {
+                return;
+            }
+
+            if (!db) {
+                showToast('Login service unavailable. Please try again later.', 'error');
+                return;
+            }
+
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            setLoading(true);
+
+            const normalizedEmail = email.trim().toLowerCase();
+
+            db.ref('carriers').orderByChild('email').equalTo(normalizedEmail).once('value', function (snapshot) {
+                let matched = null;
+
+                if (snapshot && snapshot.exists()) {
+                    snapshot.forEach(function (child) {
+                        const carrier = child.val() || {};
+                        const carrierEmail = (carrier.email || '').trim().toLowerCase();
+
+                        if (!carrier.carrierId) {
+                            carrier.carrierId = child.key;
+                        }
+
+                        if (carrierEmail === normalizedEmail && carrier.password && carrier.password === password) {
+                            matched = carrier;
+                        }
+                    });
+                }
+
+                if (matched) {
+                    finishLogin(matched, rememberMe);
+                } else {
+                    showToast('Incorrect email or password.', 'error');
+                    passwordInput.classList.add('invalid');
+                    passwordError.textContent = 'Incorrect email or password.';
+                    setLoading(false);
+                }
+            }, function (error) {
+                console.error('Login error:', error);
+                showToast('Connection issue. Please try again.', 'error');
+                setLoading(false);
+            });
+        });
+
+        // Google Sign-In
+        googleSigninBtn.addEventListener('click', function () {
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                showToast('Google Sign-In is not available. Please try again later.', 'error');
+                return;
+            }
+
+            const CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
+
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: 'email profile openid',
+                callback: (response) => {
+                    if (response && response.access_token) {
+                        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                            headers: {
+                                'Authorization': `Bearer ${response.access_token}`
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(user => handleGoogleLoginUser(user))
+                        .catch(err => {
+                            console.error('Google userinfo error:', err);
+                            showToast('Google sign-in failed. Please try again.', 'error');
+                        });
+                    }
+                }
+            });
+
+            tokenClient.requestAccessToken();
+        });
+
+        function handleGoogleLoginUser(user) {
+            const emailRaw = (user && user.email) ? user.email : '';
+            const normalizedEmail = emailRaw.trim().toLowerCase();
+
+            if (!normalizedEmail) {
+                showToast('Google did not return an email address. Please try a different account.', 'error');
+                return;
+            }
+
+            if (!db) {
+                showToast('Login service unavailable. Please try again later.', 'error');
+                return;
+            }
+
+            setLoading(true);
+
+            db.ref('carriers').orderByChild('email').equalTo(normalizedEmail).once('value', function (snapshot) {
+                let matched = null;
+
+                if (snapshot && snapshot.exists()) {
+                    snapshot.forEach(function (child) {
+                        const carrier = child.val() || {};
+                        const carrierEmail = (carrier.email || '').trim().toLowerCase();
+                        if (!carrier.carrierId) {
+                            carrier.carrierId = child.key;
+                        }
+                        if (carrierEmail === normalizedEmail && !matched) {
+                            matched = carrier;
+                        }
+                    });
+                }
+
+                if (matched) {
+                    finishLogin(matched, true);
+                } else {
+                    // No existing carrier for this email -> redirect to registration with prefilled data
+                    try {
+                        localStorage.setItem('pendingGoogleUser', JSON.stringify({
+                            email: normalizedEmail,
+                            firstName: user.given_name || '',
+                            lastName: user.family_name || '',
+                            fullName: user.name || ''
+                        }));
+                    } catch (e) {}
+
+                    setLoading(false);
+                    showToast('No carrier account found for this Google email. Redirecting to create an account…', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'register.html';
+                    }, 1200);
+                }
+            }, function (error) {
+                console.error('Google login Firebase error:', error);
+                showToast('Login failed. Please try again.', 'error');
+                setLoading(false);
+            });
+        }
+    </script>
+</body>
+</html>
+

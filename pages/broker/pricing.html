@@ -1,0 +1,2363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing & Subscription Plans - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --broker-primary: #6f42c1;
+            --broker-secondary: #e83e8c;
+        }
+
+        body {
+            background: radial-gradient(circle at top, rgba(111, 66, 193, 0.08), transparent 55%),
+                radial-gradient(circle at 80% 20%, rgba(232, 62, 140, 0.08), transparent 45%),
+                #f5f6fb;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animation Classes */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .fade-in-up-delay-1 {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease 0.2s forwards;
+        }
+
+        .fade-in-up-delay-2 {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease 0.4s forwards;
+        }
+
+        .fade-in-up-delay-3 {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease 0.6s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .pricing-header {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            padding: 4rem 0 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.15), transparent 60%);
+            pointer-events: none;
+            animation: shimmer 3s linear infinite;
+        }
+
+        .pricing-header::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .pricing-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 1s ease;
+            line-height: 1.2;
+        }
+
+        .pricing-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 1s ease 0.2s backwards;
+            line-height: 1.5;
+        }
+
+        .free-notice {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 1.5rem 1.25rem;
+            border-radius: 18px;
+            margin: 2.5rem auto;
+            max-width: 900px;
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .free-notice::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 15s linear infinite;
+        }
+
+        .free-notice:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 50px rgba(16, 185, 129, 0.4);
+        }
+
+        .free-notice i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .free-notice h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            line-height: 1.3;
+        }
+
+        .free-notice p {
+            font-size: 0.95rem;
+            margin: 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            line-height: 1.5;
+        }
+
+        .pricing-container {
+            padding: 4rem 0;
+        }
+
+        .billing-toggle-wrapper {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .billing-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: #fff;
+            padding: 0.5rem;
+            border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(111, 66, 193, 0.1);
+        }
+
+        .billing-toggle label {
+            padding: 0.6rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #6b7280;
+            user-select: none;
+        }
+
+        .billing-toggle input[type="radio"] {
+            display: none;
+        }
+
+        .billing-toggle input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+
+        .annual-discount-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-left: 0.75rem;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .annual-savings {
+            color: #10b981;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .trial-btn {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 2px solid var(--broker-primary);
+            background: transparent;
+            color: var(--broker-primary);
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trial-btn:hover {
+            background: var(--broker-primary);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(111, 66, 193, 0.3);
+        }
+
+        .price-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            align-items: flex-start;
+        }
+
+        .price-amount-monthly {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--broker-primary);
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .price-amount-yearly {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--broker-primary);
+            line-height: 1.2;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .price-amount-yearly span {
+            font-size: 1rem;
+            color: #6b7280;
+            font-weight: 400;
+            margin-left: 0.25rem;
+        }
+
+        .billing-yearly .price-amount-monthly {
+            opacity: 0.5;
+            font-size: 1.5rem;
+        }
+
+        .billing-yearly .price-amount-yearly {
+            opacity: 1;
+            font-size: 3rem;
+        }
+
+        .billing-yearly .price-amount-yearly span {
+            font-size: 1.5rem;
+        }
+
+        .billing-yearly .annual-savings {
+            display: block !important;
+        }
+
+        .pricing-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+        }
+
+        .pricing-card.animate {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .pricing-card.fade-in-up-delay-1,
+        .pricing-card.fade-in-up-delay-2,
+        .pricing-card.fade-in-up-delay-3 {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .pricing-card.fade-in-up-delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .pricing-card.fade-in-up-delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        .pricing-card.fade-in-up-delay-3 {
+            animation-delay: 0.6s;
+        }
+
+        .pricing-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--broker-primary), var(--broker-secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 70px rgba(111, 66, 193, 0.25);
+            border-color: var(--broker-primary);
+        }
+
+        .pricing-card:hover::before {
+            opacity: 1;
+            height: 8px;
+        }
+
+        .pricing-card.featured {
+            border: 3px solid var(--broker-primary);
+            box-shadow: 0 20px 60px rgba(111, 66, 193, 0.3);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .pricing-card.featured::before {
+            opacity: 1;
+            height: 8px;
+        }
+
+        .pricing-card.featured:hover {
+            transform: translateY(-12px) scale(1.07);
+            animation: none;
+        }
+
+        .pricing-card.featured .plan-badge {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
+        }
+
+        .plan-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
+        }
+
+        .plan-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+            min-height: 42px;
+            line-height: 1.5;
+        }
+
+        .plan-price {
+            margin: 1.5rem 0;
+        }
+
+        .price-period {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .commission-rate {
+            background: rgba(111, 66, 193, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1.25rem 0;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .commission-rate::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(111, 66, 193, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .pricing-card:hover .commission-rate::before {
+            left: 100%;
+        }
+
+        .pricing-card:hover .commission-rate {
+            background: rgba(111, 66, 193, 0.15);
+            transform: scale(1.05);
+        }
+
+        .commission-rate .rate {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--broker-primary);
+            transition: transform 0.3s ease;
+            line-height: 1.2;
+        }
+
+        .commission-rate .label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            line-height: 1.4;
+        }
+
+        .pricing-card:hover .commission-rate .rate {
+            transform: scale(1.1);
+        }
+
+        .commission-rate .label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 1.75rem 0;
+            flex-grow: 1;
+        }
+
+        .plan-features li {
+            padding: 0.6rem 0;
+            color: #374151;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease forwards;
+            line-height: 1.5;
+        }
+
+        .plan-features li:nth-child(1) { animation-delay: 0.1s; }
+        .plan-features li:nth-child(2) { animation-delay: 0.2s; }
+        .plan-features li:nth-child(3) { animation-delay: 0.3s; }
+        .plan-features li:nth-child(4) { animation-delay: 0.4s; }
+        .plan-features li:nth-child(5) { animation-delay: 0.5s; }
+        .plan-features li:nth-child(6) { animation-delay: 0.6s; }
+        .plan-features li:nth-child(7) { animation-delay: 0.7s; }
+        .plan-features li:nth-child(8) { animation-delay: 0.8s; }
+        .plan-features li:nth-child(9) { animation-delay: 0.9s; }
+
+        .plan-features li:hover {
+            transform: translateX(5px);
+            color: var(--broker-primary);
+        }
+
+        .plan-features li i {
+            color: #10b981;
+            font-size: 1rem;
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .plan-features li:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .plan-features li.disabled {
+            color: #9ca3af;
+        }
+
+        .plan-features li.disabled i {
+            color: #d1d5db;
+        }
+
+        .subscribe-btn {
+            width: 100%;
+            padding: 0.95rem 1.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: auto;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .subscribe-btn::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .subscribe-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .subscribe-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(111, 66, 193, 0.5);
+            color: #fff;
+        }
+
+        .subscribe-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .pricing-card.featured .subscribe-btn {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            box-shadow: 0 8px 24px rgba(111, 66, 193, 0.4);
+        }
+
+        .comparison-section {
+            background: #fff;
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 4rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .comparison-section.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 2rem;
+        }
+
+        .comparison-table thead {
+            position: relative;
+        }
+
+        .comparison-table thead::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--broker-primary), var(--broker-secondary));
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .comparison-table th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        .comparison-table th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        .comparison-table td {
+            color: #374151;
+            vertical-align: middle;
+        }
+
+        .comparison-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table tbody tr {
+            border-left: 3px solid transparent;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(111, 66, 193, 0.05);
+            transform: translateX(5px);
+            border-left-color: var(--broker-primary);
+        }
+
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table .check {
+            color: #10b981;
+            font-size: 1.4rem;
+            margin-right: 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .comparison-table tbody tr:hover .check {
+            transform: scale(1.25);
+            color: #059669;
+        }
+
+        .comparison-table .cross {
+            color: #ef4444;
+            font-size: 1.4rem;
+            margin-right: 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .comparison-table tbody tr:hover .cross {
+            transform: scale(1.25) rotate(90deg);
+            color: #dc2626;
+        }
+
+        .comparison-table td {
+            line-height: 1.6;
+        }
+
+        .comparison-table td:not(:first-child) {
+            white-space: nowrap;
+        }
+
+        .commission-structure-section {
+            padding: 4rem 0;
+        }
+
+        .commission-info-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(111, 66, 193, 0.1);
+        }
+
+        .commission-explanation {
+            margin-top: 3rem;
+        }
+
+        .explanation-item {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.05), rgba(232, 62, 140, 0.05));
+            border-radius: 20px;
+            border: 1px solid rgba(111, 66, 193, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .explanation-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(111, 66, 193, 0.15);
+        }
+
+        .explanation-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .explanation-content h4 {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
+            line-height: 1.3;
+        }
+
+        .explanation-content p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .commission-example {
+            margin-top: 1.5rem;
+        }
+
+        .example-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid var(--broker-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .example-label {
+            font-weight: 700;
+            color: var(--broker-primary);
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .example-details {
+            color: #374151;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .commission-rates-table {
+            margin-top: 2.5rem;
+            padding: 1.75rem;
+            background: rgba(111, 66, 193, 0.03);
+            border-radius: 18px;
+        }
+
+        .commission-rates-table h4 {
+            font-size: 1.3rem;
+            line-height: 1.3;
+        }
+
+        .commission-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .commission-table thead {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+        }
+
+        .commission-table th {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .commission-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .commission-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .commission-table tbody tr:hover {
+            background: rgba(111, 66, 193, 0.05);
+        }
+
+        .commission-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .commission-note {
+            margin-top: 2.5rem;
+            padding: 1.75rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .note-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #059669;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .note-content h5 {
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            line-height: 1.3;
+        }
+
+        .note-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .note-content ul li {
+            padding: 0.4rem 0;
+            color: #374151;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .note-content ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #059669;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .commission-info-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .explanation-item {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+
+            .explanation-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .commission-rates-table {
+                padding: 1.5rem 1rem;
+            }
+
+            .commission-table {
+                font-size: 0.9rem;
+            }
+
+            .commission-table th,
+            .commission-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .commission-note {
+                flex-direction: column;
+                padding: 1.5rem;
+            }
+        }
+
+        .faq-section {
+            padding: 4rem 0;
+        }
+
+        .faq-item {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .faq-item.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .faq-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(111, 66, 193, 0.15);
+            border-left: 4px solid var(--broker-primary);
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            line-height: 1.4;
+        }
+
+        .faq-question i {
+            color: var(--broker-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item:hover .faq-question i {
+            transform: rotate(360deg);
+        }
+
+        .faq-answer {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Extra detail sections */
+        .details-section {
+            padding: 0 0 5rem;
+        }
+
+        .section-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 2.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .section-title {
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.02em;
+            font-size: 2rem;
+            line-height: 1.3;
+        }
+
+        .section-subtitle {
+            color: #6b7280;
+            margin: 0.75rem 0 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+            margin-top: 2rem;
+        }
+
+        .mini-feature {
+            grid-column: span 4;
+            background: radial-gradient(circle at top, rgba(111, 66, 193, 0.08), transparent 65%),
+                #ffffff;
+            border: 1px solid rgba(111, 66, 193, 0.12);
+            border-radius: 18px;
+            padding: 1.25rem 1.25rem;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .mini-feature i {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.15), rgba(232, 62, 140, 0.15));
+            color: var(--broker-primary);
+            flex-shrink: 0;
+            transition: transform 0.35s ease;
+        }
+
+        .mini-feature h5 {
+            margin: 0 0 0.25rem;
+            font-weight: 700;
+            color: #111827;
+            font-size: 1rem;
+            line-height: 1.3;
+        }
+
+        .mini-feature p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .mini-feature:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 50px rgba(111, 66, 193, 0.18);
+            border-color: rgba(111, 66, 193, 0.25);
+        }
+
+        .mini-feature:hover i {
+            transform: scale(1.08) rotate(3deg);
+        }
+
+        .calc-wrap {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+        }
+
+        .calc-card {
+            grid-column: span 7;
+            border-radius: 20px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: #ffffff;
+            padding: 1.75rem;
+        }
+
+        .calc-summary {
+            grid-column: span 5;
+            border-radius: 20px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.08), rgba(232, 62, 140, 0.06));
+            padding: 1.75rem;
+        }
+
+        .calc-label {
+            font-weight: 650;
+            color: #111827;
+            margin-bottom: 0.4rem;
+        }
+
+        .calc-help {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .plan-pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 0.5rem 0 1.25rem;
+        }
+
+        .plan-pill {
+            border: 1px solid rgba(111, 66, 193, 0.18);
+            background: #fff;
+            color: #111827;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            font-weight: 650;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .plan-pill input {
+            display: none;
+        }
+
+        .plan-pill.is-active {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 10px 26px rgba(111, 66, 193, 0.25);
+        }
+
+        .summary-metric {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+        }
+
+        .summary-metric:last-child {
+            border-bottom: none;
+        }
+
+        .summary-metric .k {
+            color: #374151;
+            font-weight: 650;
+        }
+
+        .summary-metric .v {
+            color: #111827;
+            font-weight: 800;
+        }
+
+        .summary-total {
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(111, 66, 193, 0.16);
+        }
+
+        .summary-total .v {
+            font-size: 1.35rem;
+        }
+
+        .addons-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+            margin-top: 2rem;
+        }
+
+        .addon-card {
+            grid-column: span 4;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 1.5rem;
+            transition: all 0.35s ease;
+        }
+
+        .addon-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 50px rgba(2, 6, 23, 0.12);
+            border-color: rgba(111, 66, 193, 0.22);
+        }
+
+        .addon-card h5 {
+            font-weight: 800;
+            margin: 0.85rem 0 0.35rem;
+            color: #111827;
+        }
+
+        .addon-card p {
+            margin: 0;
+            color: #6b7280;
+            line-height: 1.55;
+        }
+
+        .addon-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(111, 66, 193, 0.12);
+            color: var(--broker-primary);
+        }
+
+        .cta-banner {
+            margin-top: 3rem;
+            border-radius: 24px;
+            padding: 2.25rem;
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.14), rgba(232, 62, 140, 0.10));
+            border: 1px solid rgba(111, 66, 193, 0.18);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .cta-banner h4 {
+            margin: 0 0 0.4rem;
+            font-weight: 900;
+            color: #111827;
+        }
+
+        .cta-banner p {
+            margin: 0;
+            color: #4b5563;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn-cta-secondary {
+            border-radius: 999px;
+            padding: 0.8rem 1.25rem;
+            border: 2px solid rgba(111, 66, 193, 0.35);
+            color: var(--broker-primary);
+            background: rgba(255, 255, 255, 0.8);
+            font-weight: 750;
+            transition: all 0.25s ease;
+        }
+
+        .btn-cta-secondary:hover {
+            transform: translateY(-2px);
+            border-color: rgba(111, 66, 193, 0.55);
+            box-shadow: 0 14px 28px rgba(111, 66, 193, 0.15);
+            color: var(--broker-primary);
+        }
+
+        .btn-cta-primary {
+            border-radius: 999px;
+            padding: 0.8rem 1.25rem;
+            border: none;
+            color: #fff;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            box-shadow: 0 14px 30px rgba(111, 66, 193, 0.28);
+            transition: all 0.25s ease;
+        }
+
+        .btn-cta-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-header {
+                padding: 4rem 0 3rem;
+            }
+
+            .pricing-header h1 {
+                font-size: 2rem;
+            }
+
+            .pricing-header p {
+                font-size: 1rem;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+                animation: none;
+            }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-8px) scale(1);
+            }
+
+            .price-amount {
+                font-size: 2.5rem;
+            }
+
+            .comparison-section {
+                padding: 2rem 1rem;
+            }
+
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .free-notice {
+                padding: 1.5rem 1rem;
+                margin: 2rem auto;
+            }
+
+            .free-notice h3 {
+                font-size: 1.5rem;
+            }
+
+            .free-notice p {
+                font-size: 1rem;
+            }
+
+            .section-card {
+                padding: 1.75rem;
+            }
+
+            .feature-grid .mini-feature {
+                grid-column: span 12;
+            }
+
+            .calc-card,
+            .calc-summary {
+                grid-column: span 12;
+            }
+
+            .addon-card {
+                grid-column: span 12;
+            }
+
+            .cta-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cta-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">
+                <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" style="height: 40px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.html">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Pricing Header -->
+    <section class="pricing-header" style="margin-top: 76px;">
+        <div class="container">
+            <h1>Subscription Plans</h1>
+            <p>Choose the perfect plan for your brokerage business</p>
+        </div>
+    </section>
+
+    <!-- What's Included + Pricing Explained -->
+    <section class="details-section">
+        <div class="container">
+            <div class="section-card animate-on-scroll">
+                <h2 class="section-title">What’s included in every plan</h2>
+                <p class="section-subtitle">Everything you need to run your brokerage day-to-day—plans mainly differ by commission rate and advanced features.</p>
+
+                <div class="feature-grid">
+                    <div class="mini-feature">
+                        <i class="fas fa-boxes-stacked"></i>
+                        <div>
+                            <h5>Load & workflow management</h5>
+                            <p>Post loads, track progress, and manage assignments from one place.</p>
+                        </div>
+                    </div>
+                    <div class="mini-feature">
+                        <i class="fas fa-comments"></i>
+                        <div>
+                            <h5>Messaging & coordination</h5>
+                            <p>Keep conversations organized with suppliers and carriers for each load.</p>
+                        </div>
+                    </div>
+                    <div class="mini-feature">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <div>
+                            <h5>Invoices & payments</h5>
+                            <p>Track charges, commissions, and payment status across your loads.</p>
+                        </div>
+                    </div>
+                    <div class="mini-feature">
+                        <i class="fas fa-chart-line"></i>
+                        <div>
+                            <h5>Performance insights</h5>
+                            <p>See trends and performance metrics to improve decision-making.</p>
+                        </div>
+                    </div>
+                    <div class="mini-feature">
+                        <i class="fas fa-shield"></i>
+                        <div>
+                            <h5>Security & account controls</h5>
+                            <p>Account protection, audit-friendly records, and role-based workflows.</p>
+                        </div>
+                    </div>
+                    <div class="mini-feature">
+                        <i class="fas fa-headset"></i>
+                        <div>
+                            <h5>Support</h5>
+                            <p>Email support on Basic, priority support on Pro, and dedicated support on Enterprise.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-wrap">
+                    <div class="calc-card">
+                        <h3 class="section-title" style="font-size: 1.6rem;">Pricing explained</h3>
+                        <p class="calc-help mb-3">Your monthly cost = <strong>Monthly subscription fee</strong> + <strong>commission</strong> on successful transactions.</p>
+
+                        <div class="calc-label">Select a plan</div>
+                        <div class="plan-pill-group" id="planPills">
+                            <label class="plan-pill is-active" data-plan="pro">
+                                <input type="radio" name="calcPlan" value="pro" checked>
+                                Pro
+                            </label>
+                            <label class="plan-pill" data-plan="basic">
+                                <input type="radio" name="calcPlan" value="basic">
+                                Basic
+                            </label>
+                            <label class="plan-pill" data-plan="enterprise">
+                                <input type="radio" name="calcPlan" value="enterprise">
+                                Enterprise
+                            </label>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="calc-label">Average load value (£)</div>
+                                <input id="avgLoadValue" type="number" class="form-control" value="2000" min="0" step="1">
+                                <div class="calc-help mt-2">Example: £2,000 per load</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="calc-label">Loads per month</div>
+                                <input id="loadsPerMonth" type="number" class="form-control" value="50" min="0" step="1">
+                                <div class="calc-help mt-2">Example: 50 loads per month</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 calc-help">
+                            <strong>Note:</strong> Commission applies only to successful transactions.
+                        </div>
+                    </div>
+
+                    <div class="calc-summary">
+                        <h3 class="section-title" style="font-size: 1.6rem;">Estimated monthly total</h3>
+                        <p class="calc-help mb-3">This is a simple estimate to help you choose a plan.</p>
+
+                        <div class="summary-metric">
+                            <div class="k">Selected plan</div>
+                            <div class="v" id="sumPlan">Pro</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="k">Subscription fee</div>
+                            <div class="v" id="sumSubFee">£149</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="k">Commission rate</div>
+                            <div class="v" id="sumRate">1%</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="k">Estimated commission</div>
+                            <div class="v" id="sumCommission">£1,000</div>
+                        </div>
+
+                        <div class="summary-total">
+                            <div class="summary-metric" style="padding: 0; border-bottom: none;">
+                                <div class="k">Total</div>
+                                <div class="v" id="sumTotal">£1,149</div>
+                            </div>
+                            <div class="calc-help mt-2">Based on your inputs above.</div>
+                        </div>
+
+                        <div class="mt-3 d-grid gap-2">
+                            <button class="btn-cta-primary" onclick="selectPlan(window.__calcPlan || 'pro')">
+                                Continue with this plan
+                            </button>
+                            <a class="btn-cta-secondary text-center text-decoration-none" href="../../pages/contact.html">
+                                Contact sales
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="addons-grid">
+                    <div class="addon-card">
+                        <div class="addon-icon"><i class="fas fa-bolt"></i></div>
+                        <h5>Priority onboarding</h5>
+                        <p>Fast setup help to get your team live quickly with best-practice workflows.</p>
+                    </div>
+                    <div class="addon-card">
+                        <div class="addon-icon"><i class="fas fa-file-contract"></i></div>
+                        <h5>Custom reports</h5>
+                        <p>Tailored dashboards and reporting for your lanes, margins, and performance.</p>
+                    </div>
+                    <div class="addon-card">
+                        <div class="addon-icon"><i class="fas fa-code"></i></div>
+                        <h5>API & integrations</h5>
+                        <p>Connect with your existing tools. Available on Enterprise or by request.</p>
+                    </div>
+                </div>
+
+                <div class="cta-banner">
+                    <div>
+                        <h4>Not sure which plan is right?</h4>
+                        <p>Tell us your monthly volume and workflow—we’ll recommend the best plan.</p>
+                    </div>
+                    <div class="cta-actions">
+                        <a class="btn-cta-secondary text-decoration-none" href="../../pages/contact.html">
+                            Talk to sales
+                        </a>
+                        <a class="btn-cta-primary text-decoration-none" href="register.html">
+                            Create broker account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Free Notice for Suppliers & Carriers -->
+    <div class="container">
+        <div class="free-notice fade-in-up-delay-1">
+            <i class="fas fa-gift"></i>
+            <h3>Free for Suppliers & Carriers</h3>
+            <p>No monthly fees for Suppliers and Carriers! Use the platform completely free.</p>
+        </div>
+    </div>
+
+    <!-- Commission Structure Section -->
+    <section class="commission-structure-section" style="padding: 4rem 0; background: #f8f9fa;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="commission-info-card">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-percent" style="font-size: 3rem; color: var(--broker-primary); margin-bottom: 1rem;"></i>
+                            <h2 style="font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">How We Earn Commission</h2>
+                            <p style="color: #6b7280; font-size: 1.1rem;">Our revenue model explained</p>
+                        </div>
+
+                        <div class="commission-explanation">
+                            <div class="explanation-item">
+                                <div class="explanation-icon">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div class="explanation-content">
+                                    <h4>From Carriers</h4>
+                                    <p>We charge a <strong>small commission</strong> from carriers on each successful load delivery. This commission is automatically deducted from the payment when the load is completed.</p>
+                                    <div class="commission-example">
+                                        <div class="example-box">
+                                            <div class="example-label">Example:</div>
+                                            <div class="example-details">
+                                                If a carrier completes a load worth <strong>£1,000</strong>, we charge <strong>2-5% commission</strong> (£20-£50) depending on the load value and carrier tier.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="explanation-item">
+                                <div class="explanation-icon">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <div class="explanation-content">
+                                    <h4>From Suppliers</h4>
+                                    <p>We charge a <strong>transaction fee</strong> from suppliers on each load posted and successfully matched. This fee covers platform usage and matching services.</p>
+                                    <div class="commission-example">
+                                        <div class="example-box">
+                                            <div class="example-label">Example:</div>
+                                            <div class="example-details">
+                                                If a supplier posts a load worth <strong>£2,000</strong>, we charge <strong>1-3% transaction fee</strong> (£20-£60) when the load is successfully matched with a carrier.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="commission-rates-table">
+                                <h4 style="font-weight: 700; color: #1f2937; margin-bottom: 1.5rem; text-align: center;">Commission Rates Breakdown</h4>
+                                <div class="table-responsive">
+                                    <table class="commission-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Load Value</th>
+                                                <th>Carrier Commission</th>
+                                                <th>Supplier Transaction Fee</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>£0 - £500</strong></td>
+                                                <td>5%</td>
+                                                <td>3%</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>£500 - £1,500</strong></td>
+                                                <td>4%</td>
+                                                <td>2.5%</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>£1,500 - £3,000</strong></td>
+                                                <td>3%</td>
+                                                <td>2%</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>£3,000 - £5,000</strong></td>
+                                                <td>2.5%</td>
+                                                <td>1.5%</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>£5,000+</strong></td>
+                                                <td>2%</td>
+                                                <td>1%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="commission-note">
+                                <div class="note-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div class="note-content">
+                                    <h5>Important Notes:</h5>
+                                    <ul>
+                                        <li>Commission is only charged on <strong>successful transactions</strong> (completed deliveries)</li>
+                                        <li>No hidden fees - all charges are transparent and shown upfront</li>
+                                        <li>Carriers and suppliers pay <strong>no monthly subscription fees</strong></li>
+                                        <li>Commission rates may vary based on volume discounts and partnership agreements</li>
+                                        <li>Payment processing fees are separate and clearly displayed</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Cards -->
+    <section class="pricing-container">
+        <div class="container">
+            <!-- Billing Toggle -->
+            <div class="billing-toggle-wrapper">
+                <div class="billing-toggle" id="billingToggle">
+                    <input type="radio" id="monthly" name="billing" value="monthly" checked>
+                    <label for="monthly">Monthly</label>
+                    <input type="radio" id="yearly" name="billing" value="yearly">
+                    <label for="yearly">Yearly<span class="annual-discount-badge">Save 2 months</span></label>
+                </div>
+            </div>
+
+            <div class="row g-4" id="pricingCards">
+                <!-- Basic Plan -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="pricing-card fade-in-up-delay-1">
+                        <h3 class="plan-name">Basic</h3>
+                        <p class="plan-description">Perfect for small brokerages getting started</p>
+                        
+                        <div class="plan-price">
+                            <div class="price-wrapper">
+                                <div class="price-amount-monthly">£49</div>
+                                <div class="price-amount-yearly">£490<span>/year</span></div>
+                            </div>
+                            <div class="price-period">per month</div>
+                            <div class="annual-savings" style="display: none;">Save £98/year</div>
+                        </div>
+
+                        <div class="commission-rate">
+                            <div class="rate">2%</div>
+                            <div class="label">Commission per transaction</div>
+                        </div>
+
+                        <ul class="plan-features">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Up to 50 loads per month</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Basic load matching</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Payment processing</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Email support</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Basic analytics</span>
+                            </li>
+                            <li class="disabled">
+                                <i class="fas fa-times-circle"></i>
+                                <span>Priority matching</span>
+                            </li>
+                            <li class="disabled">
+                                <i class="fas fa-times-circle"></i>
+                                <span>Advanced analytics</span>
+                            </li>
+                            <li class="disabled">
+                                <i class="fas fa-times-circle"></i>
+                                <span>API access</span>
+                            </li>
+                        </ul>
+
+                        <button class="trial-btn" onclick="startTrial('basic')">
+                            <i class="fas fa-play-circle me-2"></i>Start 14-Day Free Trial
+                        </button>
+                        <button class="subscribe-btn" onclick="selectPlan('basic')">
+                            Choose Basic
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pro Plan (Featured) -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="pricing-card featured fade-in-up-delay-2">
+                        <div class="plan-badge">MOST POPULAR</div>
+                        <h3 class="plan-name">Pro</h3>
+                        <p class="plan-description">Best for growing brokerages with high volume</p>
+                        
+                        <div class="plan-price">
+                            <div class="price-wrapper">
+                                <div class="price-amount-monthly">£149</div>
+                                <div class="price-amount-yearly">£1,490<span>/year</span></div>
+                            </div>
+                            <div class="price-period">per month</div>
+                            <div class="annual-savings" style="display: none;">Save £298/year</div>
+                        </div>
+
+                        <div class="commission-rate">
+                            <div class="rate">1%</div>
+                            <div class="label">Commission per transaction</div>
+                        </div>
+
+                        <ul class="plan-features">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Unlimited loads</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Advanced load matching</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Priority matching</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Payment processing</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Advanced analytics</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Priority support</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Custom reports</span>
+                            </li>
+                            <li class="disabled">
+                                <i class="fas fa-times-circle"></i>
+                                <span>API access</span>
+                            </li>
+                        </ul>
+
+                        <button class="trial-btn" onclick="startTrial('pro')">
+                            <i class="fas fa-play-circle me-2"></i>Start 14-Day Free Trial
+                        </button>
+                        <button class="subscribe-btn" onclick="selectPlan('pro')">
+                            Choose Pro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="pricing-card fade-in-up-delay-3">
+                        <h3 class="plan-name">Enterprise</h3>
+                        <p class="plan-description">For large brokerages with custom needs</p>
+                        
+                        <div class="plan-price">
+                            <div class="price-wrapper">
+                                <div class="price-amount-monthly">£299</div>
+                                <div class="price-amount-yearly">£2,990<span>/year</span></div>
+                            </div>
+                            <div class="price-period">per month</div>
+                            <div class="annual-savings" style="display: none;">Save £598/year</div>
+                        </div>
+
+                        <div class="commission-rate">
+                            <div class="rate">0.5%</div>
+                            <div class="label">Commission per transaction</div>
+                        </div>
+
+                        <ul class="plan-features">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Unlimited loads</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>AI-powered matching</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Highest priority matching</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Payment processing</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Enterprise analytics</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>24/7 dedicated support</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Custom reports & insights</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Full API access</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>White-label options</span>
+                            </li>
+                        </ul>
+
+                        <button class="trial-btn" onclick="startTrial('enterprise')">
+                            <i class="fas fa-play-circle me-2"></i>Start 14-Day Free Trial
+                        </button>
+                        <button class="subscribe-btn" onclick="selectPlan('enterprise')">
+                            Choose Enterprise
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="comparison-section animate-on-scroll">
+        <div class="container">
+            <h2 class="text-center mb-4" style="font-weight: 700; color: #1f2937;">Plan Comparison</h2>
+            <div class="table-responsive">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Features</th>
+                            <th>Basic</th>
+                            <th>Pro</th>
+                            <th>Enterprise</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Monthly Fee</strong></td>
+                            <td>£49</td>
+                            <td>£149</td>
+                            <td>£299</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Commission Rate</strong></td>
+                            <td>2%</td>
+                            <td>1%</td>
+                            <td>0.5%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Loads per Month</strong></td>
+                            <td>Up to 50</td>
+                            <td>Unlimited</td>
+                            <td>Unlimited</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Load Matching</strong></td>
+                            <td><i class="fas fa-check check"></i> Basic</td>
+                            <td><i class="fas fa-check check"></i> Advanced</td>
+                            <td><i class="fas fa-check check"></i> AI-Powered</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Priority Matching</strong></td>
+                            <td><i class="fas fa-times cross"></i></td>
+                            <td><i class="fas fa-check check"></i></td>
+                            <td><i class="fas fa-check check"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics</strong></td>
+                            <td><i class="fas fa-check check"></i> Basic</td>
+                            <td><i class="fas fa-check check"></i> Advanced</td>
+                            <td><i class="fas fa-check check"></i> Enterprise</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Support</strong></td>
+                            <td>Email</td>
+                            <td>Priority</td>
+                            <td>24/7 Dedicated</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Access</strong></td>
+                            <td><i class="fas fa-times cross"></i></td>
+                            <td><i class="fas fa-times cross"></i></td>
+                            <td><i class="fas fa-check check"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custom Reports</strong></td>
+                            <td><i class="fas fa-times cross"></i></td>
+                            <td><i class="fas fa-check check"></i></td>
+                            <td><i class="fas fa-check check"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>White-label Options</strong></td>
+                            <td><i class="fas fa-times cross"></i></td>
+                            <td><i class="fas fa-times cross"></i></td>
+                            <td><i class="fas fa-check check"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="text-center mb-4" style="font-weight: 700; color: #1f2937; font-size: 2rem; line-height: 1.3;">Frequently Asked Questions</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Do suppliers and carriers need to subscribe?
+                        </div>
+                        <div class="faq-answer">
+                            No! The platform is completely free for Suppliers and Carriers. They don't need to pay any monthly fees. Subscription is only for brokers.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            How is commission calculated?
+                        </div>
+                        <div class="faq-answer">
+                            Commission is automatically calculated on every successful transaction. If you're on the Basic plan, it's 2%, on the Pro plan it's 1%, and on the Enterprise plan it's 0.5% commission.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Can I change my plan?
+                        </div>
+                        <div class="faq-answer">
+                            Yes, you can upgrade or downgrade your plan at any time. Changes will apply from the next billing cycle.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Is there a trial period?
+                        </div>
+                        <div class="faq-answer">
+                            Yes, you can take a 14-day free trial of any plan. You won't be charged during the trial period.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            How do I make payment?
+                        </div>
+                        <div class="faq-answer">
+                            You can pay using credit card, debit card, or bank transfer. Monthly subscription will automatically renew.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            When is commission charged?
+                        </div>
+                        <div class="faq-answer">
+                            Commission is charged only on successful transactions. The commission rate depends on your selected subscription plan.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Can I cancel anytime?
+                        </div>
+                        <div class="faq-answer">
+                            Yes. You can cancel your subscription anytime. Your plan will remain active until the end of your current billing period.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Do you offer onboarding help?
+                        </div>
+                        <div class="faq-answer">
+                            Yes. We can provide onboarding and workflow guidance—especially for Pro and Enterprise customers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2026 Alpha Freight Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animate pricing cards on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const pricingCards = document.querySelectorAll('.pricing-card');
+            pricingCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('animate');
+                }, index * 200);
+            });
+        });
+
+        // Pricing calculator
+        const __pricingConfig = {
+            basic: { name: 'Basic', fee: 49, rate: 0.02 },
+            pro: { name: 'Pro', fee: 149, rate: 0.01 },
+            enterprise: { name: 'Enterprise', fee: 299, rate: 0.005 }
+        };
+
+        function __formatGBP(amount) {
+            const num = Number(amount || 0);
+            const safe = Number.isFinite(num) ? num : 0;
+            return `£${safe.toLocaleString('en-GB', { maximumFractionDigits: 0 })}`;
+        }
+
+        function __formatRate(rate) {
+            const pct = (Number(rate || 0) * 100);
+            if (pct % 1 === 0) return `${pct.toFixed(0)}%`;
+            return `${pct.toFixed(1)}%`;
+        }
+
+        function __setActivePlanPill(plan) {
+            const pills = document.querySelectorAll('#planPills .plan-pill');
+            pills.forEach(p => p.classList.toggle('is-active', p.getAttribute('data-plan') === plan));
+        }
+
+        function __recalc() {
+            const plan = window.__calcPlan || 'pro';
+            const cfg = __pricingConfig[plan] || __pricingConfig.pro;
+
+            const avg = Number(document.getElementById('avgLoadValue')?.value || 0);
+            const loads = Number(document.getElementById('loadsPerMonth')?.value || 0);
+            const gross = Math.max(0, avg) * Math.max(0, loads);
+            const commission = gross * cfg.rate;
+            const total = cfg.fee + commission;
+
+            const sumPlan = document.getElementById('sumPlan');
+            const sumSubFee = document.getElementById('sumSubFee');
+            const sumRate = document.getElementById('sumRate');
+            const sumCommission = document.getElementById('sumCommission');
+            const sumTotal = document.getElementById('sumTotal');
+
+            if (sumPlan) sumPlan.textContent = cfg.name;
+            if (sumSubFee) sumSubFee.textContent = __formatGBP(cfg.fee);
+            if (sumRate) sumRate.textContent = __formatRate(cfg.rate);
+            if (sumCommission) sumCommission.textContent = __formatGBP(commission);
+            if (sumTotal) sumTotal.textContent = __formatGBP(total);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Default plan for calculator
+            window.__calcPlan = 'pro';
+            __setActivePlanPill(window.__calcPlan);
+            __recalc();
+
+            // Plan pill clicks
+            const planPills = document.getElementById('planPills');
+            if (planPills) {
+                planPills.addEventListener('click', function(e) {
+                    const pill = e.target && e.target.closest ? e.target.closest('.plan-pill') : null;
+                    if (!pill) return;
+                    const plan = pill.getAttribute('data-plan');
+                    if (!plan) return;
+                    window.__calcPlan = plan;
+                    __setActivePlanPill(plan);
+                    __recalc();
+                });
+            }
+
+            // Input listeners
+            const avgInput = document.getElementById('avgLoadValue');
+            const loadsInput = document.getElementById('loadsPerMonth');
+            if (avgInput) avgInput.addEventListener('input', __recalc);
+            if (loadsInput) loadsInput.addEventListener('input', __recalc);
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for scroll animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateElements = document.querySelectorAll('.animate-on-scroll, .faq-item');
+            animateElements.forEach((el, index) => {
+                setTimeout(() => {
+                    observer.observe(el);
+                }, index * 100);
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add parallax effect to header
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const header = document.querySelector('.pricing-header');
+            if (header) {
+                header.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        function selectPlan(plan) {
+            // Check if user is logged in
+            const user = JSON.parse(localStorage.getItem('brokerUser') || 'null');
+            
+            if (!user) {
+                // Redirect to login/register
+                if (confirm('Please login first to subscribe. Go to login page?')) {
+                    window.location.href = 'login.html?redirect=pricing&plan=' + plan;
+                }
+                return;
+            }
+
+            // Store selected plan
+            localStorage.setItem('selectedPlan', plan);
+            
+            // Redirect to checkout/payment page
+            // You can create a checkout page or integrate payment gateway here
+            alert(`You have selected the ${plan.toUpperCase()} plan. Redirecting to payment page...`);
+            
+            // For now, redirect to dashboard with plan info
+            // In future, integrate Stripe or other payment gateway
+            window.location.href = `dashboard.html?plan=${plan}`;
+        }
+
+        // Billing Toggle Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const billingToggle = document.getElementById('billingToggle');
+            const pricingCards = document.getElementById('pricingCards');
+            
+            if (billingToggle) {
+                billingToggle.addEventListener('change', function(e) {
+                    const isYearly = e.target.value === 'yearly';
+                    pricingCards.classList.toggle('billing-yearly', isYearly);
+                    
+                    // Show/hide annual savings
+                    document.querySelectorAll('.annual-savings').forEach(el => {
+                        el.style.display = isYearly ? 'block' : 'none';
+                    });
+                    
+                    // Update price period text
+                    document.querySelectorAll('.price-period').forEach(el => {
+                        el.textContent = isYearly ? 'per year (billed annually)' : 'per month';
+                    });
+                });
+            }
+        });
+
+        // Free Trial Function
+        function startTrial(plan) {
+            const user = JSON.parse(localStorage.getItem('brokerUser') || 'null');
+            
+            if (!user) {
+                if (confirm('Start your 14-day free trial? You\'ll need to create an account first.')) {
+                    localStorage.setItem('trialPlan', plan);
+                    localStorage.setItem('trialStart', new Date().toISOString());
+                    window.location.href = 'register.html?trial=' + plan;
+                }
+                return;
+            }
+
+            // User is logged in, start trial
+            localStorage.setItem('trialPlan', plan);
+            localStorage.setItem('trialStart', new Date().toISOString());
+            localStorage.setItem('trialActive', 'true');
+            
+            alert(`14-day free trial started for ${plan.toUpperCase()} plan! Redirecting to dashboard...`);
+            window.location.href = 'dashboard.html?trial=' + plan;
+        }
+
+        // Check if redirected from login
+        const urlParams = new URLSearchParams(window.location.search);
+        const plan = urlParams.get('plan');
+        if (plan) {
+            setTimeout(() => {
+                selectPlan(plan);
+            }, 500);
+        }
+
+        // Check for trial parameter
+        const trialPlan = urlParams.get('trial');
+        if (trialPlan) {
+            localStorage.setItem('trialPlan', trialPlan);
+            localStorage.setItem('trialStart', new Date().toISOString());
+            localStorage.setItem('trialActive', 'true');
+        }
+    </script>
+</body>
+</html>

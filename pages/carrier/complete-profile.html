@@ -1,0 +1,2342 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        body {
+            background: #F8FAFC;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 2rem 0;
+        }
+
+        .profile-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            max-width: 950px;
+            width: 100%;
+            margin: 0 auto;
+            border: 1px solid #E5E7EB;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 25%, #A855F7 50%, #C084FC 75%, #7C3AED 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+            padding: 3.5rem 2rem 2.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #E5E7EB;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .profile-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-logo {
+            max-width: 220px;
+            max-height: 100px;
+            margin: 0 auto 1.5rem;
+            display: block;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+            transition: transform 0.3s ease;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.75rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-header h2 i {
+            margin-right: 0.75rem;
+            font-size: 1.8rem;
+            vertical-align: middle;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .profile-header p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 0.5rem 1.25rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .premium-badge:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .premium-badge i {
+            font-size: 1rem;
+        }
+
+        .header-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .decoration-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: decorationFloat 10s ease-in-out infinite;
+        }
+
+        .decoration-circle:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 10%;
+            right: 15%;
+            animation-delay: 0s;
+        }
+
+        .decoration-circle:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            bottom: 15%;
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .decoration-circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 50%;
+            right: 25%;
+            animation-delay: 4s;
+        }
+
+        @keyframes decorationFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.3; }
+            33% { transform: translate(20px, -20px) rotate(120deg); opacity: 0.5; }
+            66% { transform: translate(-15px, 15px) rotate(240deg); opacity: 0.4; }
+        }
+
+        .profile-body {
+            padding: 2.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        .form-help-text {
+            font-size: 0.75rem;
+            color: #64748B;
+            margin-top: 0.25rem;
+            display: block;
+            font-style: italic;
+        }
+
+        .business-type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .business-type-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .business-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #4F46E5;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .business-type-card:hover {
+            border-color: #4F46E5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .business-type-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .business-type-card.selected {
+            border-color: #4F46E5;
+            background: #F8FAFC;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+        }
+
+        .business-type-card.selected::before {
+            transform: scaleX(1);
+        }
+
+        .business-type-card i {
+            font-size: 3rem;
+            color: #4F46E5;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .business-type-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .business-type-card h5 {
+            margin: 0.5rem 0;
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .business-type-card p {
+            margin: 0;
+            color: #64748B;
+            font-size: 0.85rem;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4F46E5;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 20%;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 0 0 auto;
+            min-width: 100px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #E5E7EB;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-title {
+            font-size: 0.75rem;
+            color: #64748B;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 0.25rem;
+        }
+
+        .step-item.active .step-number {
+            background: #4F46E5;
+            color: white;
+            border-color: #4F46E5;
+        }
+
+        .step-item.active .step-title {
+            color: #4F46E5;
+            font-weight: 600;
+        }
+
+        .step-item.completed .step-number {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .step-item.completed .step-title {
+            color: #28a745;
+        }
+
+        .step-connector {
+            width: 60px;
+            height: 2px;
+            background: #E5E7EB;
+            margin: 0 0.5rem;
+            margin-top: 19px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .step-item.completed + .step-item .step-connector {
+            background: #28a745;
+        }
+
+        .step-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .btn-next, .btn-prev {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-next {
+            background: #4F46E5;
+            color: white;
+            border: none;
+        }
+
+        .btn-next:hover {
+            background: #4338CA;
+            color: white;
+        }
+
+        .btn-next:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .btn-prev {
+            background: transparent;
+            color: #64748B;
+            border: 1.5px solid #E5E7EB;
+        }
+
+        .btn-prev:hover {
+            background: #F8FAFC;
+            border-color: #E5E7EB;
+            color: #0F172A;
+        }
+
+        .section-title {
+            color: #0F172A;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .file-upload {
+            border: 2px dashed #E5E7EB;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #F8FAFC;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: #4F46E5;
+            background: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        .file-upload.has-file {
+            border-color: #4F46E5;
+            background: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+        }
+
+        .file-upload i {
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .file-upload p {
+            margin: 0;
+            font-weight: 500;
+            color: #0F172A;
+        }
+
+        .file-upload small {
+            display: block;
+            margin-top: 0.5rem;
+            color: #64748B;
+        }
+
+        .file-upload.has-file p {
+            color: #4F46E5;
+            font-weight: 600;
+        }
+
+        .file-upload.has-file i {
+            color: #4F46E5;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 2rem 0;
+        }
+
+        .btn-register {
+            background: #4F46E5;
+            border: none;
+            color: white;
+            padding: 0.875rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-register:hover {
+            background: #4338CA;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            color: white;
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+        .btn-outline-secondary {
+            border: 1.5px solid #d1d5db;
+            color: #6b7280;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #374151;
+        }
+
+        .success-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-modal-overlay.show {
+            display: flex;
+        }
+
+        .success-modal {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .success-modal h3 {
+            color: #0F172A;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-modal p {
+            color: #64748B;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-modal .company-name {
+            color: #4F46E5;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .chatbot-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chatbot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+        }
+
+        .chatbot-button .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        .chatbot-window.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: #4F46E5;
+            color: white;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .chatbot-header button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .chatbot-header button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            background: #f8f9fa;
+        }
+
+        .chatbot-message {
+            margin-bottom: 1rem;
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chatbot-message.user {
+            justify-content: flex-end;
+        }
+
+        .chatbot-message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .chatbot-message.user .message-bubble {
+            background: #4F46E5;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chatbot-message.bot .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chatbot-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            border: 1.5px solid #d1d5db;
+            border-radius: 20px;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chatbot-input:focus {
+            border-color: #4F46E5;
+        }
+
+        .chatbot-send {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .chatbot-send:hover {
+            background: #4338CA;
+            transform: scale(1.05);
+        }
+
+        .chatbot-send:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .quick-action-btn {
+            padding: 0.4rem 0.8rem;
+            background: #f0f0f0;
+            border: 1px solid #d1d5db;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+            background: #4F46E5;
+            color: white;
+            border-color: #4F46E5;
+        }
+
+        @media (max-width: 768px) {
+            .business-type-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-body {
+                padding: 1.5rem;
+            }
+            
+            .profile-header {
+                padding: 2.5rem 1.5rem 2rem 1.5rem;
+            }
+
+            .header-logo {
+                max-width: 180px;
+                max-height: 80px;
+                margin-bottom: 1rem;
+            }
+
+            .profile-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .profile-header h2 i {
+                font-size: 1.3rem;
+                margin-right: 0.5rem;
+            }
+
+            .profile-header p {
+                font-size: 0.9rem;
+                padding: 0 1rem;
+            }
+
+            .premium-badge {
+                font-size: 0.75rem;
+                padding: 0.4rem 1rem;
+                margin-top: 0.75rem;
+            }
+
+            .decoration-circle {
+                display: none;
+            }
+
+            .profile-header::before,
+            .profile-header::after {
+                display: none;
+            }
+
+            .success-modal {
+                padding: 2rem 1.5rem;
+            }
+
+            .success-modal h3 {
+                font-size: 1.25rem;
+            }
+
+            .chatbot-window {
+                width: calc(100vw - 40px);
+                height: calc(100vh - 120px);
+                right: 20px;
+                left: 20px;
+            }
+
+            .chatbot-container {
+                right: 20px;
+                bottom: 20px;
+            }
+
+            .step-indicator {
+                gap: 0.25rem;
+                padding: 1rem 0;
+                border-bottom: 1px solid #E5E7EB;
+            }
+
+            .step-item {
+                min-width: 70px;
+            }
+
+            .step-number {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .step-title {
+                font-size: 0.65rem;
+            }
+
+            .step-connector {
+                width: 30px;
+                margin: 0 0.25rem;
+                margin-top: 17px;
+            }
+
+            .progress-text {
+                font-size: 0.85rem;
+            }
+        }
+
+        .explanation-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #E5E7EB;
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .explanation-section h5 {
+            color: #4F46E5;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .explanation-section p {
+            color: #64748B;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .explanation-section ul {
+            color: #64748B;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            padding-left: 1.5rem;
+        }
+
+        .explanation-section ul li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="header-decoration">
+                    <div class="decoration-circle"></div>
+                    <div class="decoration-circle"></div>
+                    <div class="decoration-circle"></div>
+                </div>
+                <div class="header-content">
+                    <img src="../supplier/image-removebg-preview - 2026-03-04T191722.582.png" alt="Alpha Freight Logo" class="header-logo">
+                    <h2><i class="fas fa-user-circle"></i> Complete Your Profile</h2>
+                    <p>Please provide additional information to complete your registration and unlock full platform access</p>
+                    <div class="premium-badge">
+                        <i class="fas fa-shield-check"></i>
+                        <span>Secure & Verified Platform</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-body">
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-text" id="progressText">20% Completed</div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="progressBar"></div>
+                    </div>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-item active" id="step1Item">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Business Type</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step2Item">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Information</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step3Item">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Documents</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step4Item">
+                        <div class="step-number">4</div>
+                        <div class="step-title">Bank Details</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" id="step5Item">
+                        <div class="step-number">5</div>
+                        <div class="step-title">Identity</div>
+                    </div>
+                </div>
+
+                <form id="completeProfileForm">
+                    <!-- Step 1: Business Type Selection -->
+                    <div class="form-step active" id="step1">
+                        <label class="form-label fw-bold mb-3">Select Your Business Type *</label>
+                        <div class="business-type-selector">
+                            <div class="business-type-card" data-type="business" onclick="selectBusinessType('business')">
+                                <i class="fas fa-building"></i>
+                                <h5>Business</h5>
+                                <p class="text-muted small mb-0">Company/Fleet Owner</p>
+                            </div>
+                            <div class="business-type-card" data-type="local" onclick="selectBusinessType('local')">
+                                <i class="fas fa-truck"></i>
+                                <h5>Local Truck</h5>
+                                <p class="text-muted small mb-0">Individual/Owner-Operator</p>
+                            </div>
+                        </div>
+                        <input type="hidden" id="businessType" required>
+                        
+                        <div class="step-buttons">
+                            <div></div>
+                            <button type="button" class="btn btn-next" id="nextStep1" onclick="nextStep()" disabled>
+                                Next <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Business Fields -->
+                    <div class="form-step" id="step2">
+                        <div id="businessFields">
+                            <h5 class="section-title">Company Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="companyName" class="form-label">Company Name *</label>
+                                <input type="text" class="form-control" id="companyName">
+                                <small class="form-help-text">This will appear on your profile and load bookings</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="companyReg" class="form-label">Company Registration Number</label>
+                                <input type="text" class="form-control" id="companyReg">
+                                <small class="form-help-text">Your official business registration number</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Business Address *</label>
+                                <textarea class="form-control" id="address" rows="3"></textarea>
+                                <small class="form-help-text">We use this to match you with nearby loads</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="postcode" class="form-label">Postcode *</label>
+                                <input type="text" class="form-control" id="postcode">
+                                <small class="form-help-text">We use this to match you with nearby loads</small>
+                                <label for="city" class="form-label mt-2">City *</label>
+                                <input type="text" class="form-control" id="city">
+                                <small class="form-help-text">We use this to match you with nearby loads</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="yearsExperience" class="form-label">Years of Experience *</label>
+                                <select class="form-control" id="yearsExperience">
+                                    <option value="">Select experience</option>
+                                    <option value="0-1">0-1 years</option>
+                                    <option value="1-3">1-3 years</option>
+                                    <option value="3-5">3-5 years</option>
+                                    <option value="5-10">5-10 years</option>
+                                    <option value="10+">10+ years</option>
+                                </select>
+                                <small class="form-help-text">Helps us understand your expertise level</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fleetSize" class="form-label">Fleet Size *</label>
+                                <select class="form-control" id="fleetSize">
+                                    <option value="">Select fleet size</option>
+                                    <option value="1">1 vehicle</option>
+                                    <option value="2-5">2-5 vehicles</option>
+                                    <option value="5-10">5-10 vehicles</option>
+                                    <option value="10+">10+ vehicles</option>
+                                </select>
+                                <small class="form-help-text">Number of vehicles in your fleet</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="employeeSize" class="form-label">Employee Size *</label>
+                                <select class="form-control" id="employeeSize">
+                                    <option value="">Select employee size</option>
+                                    <option value="1-5">1-5 employees</option>
+                                    <option value="6-10">6-10 employees</option>
+                                    <option value="11-25">11-25 employees</option>
+                                    <option value="26-50">26-50 employees</option>
+                                    <option value="51-100">51-100 employees</option>
+                                    <option value="100+">100+ employees</option>
+                                </select>
+                                <small class="form-help-text">Number of employees in your company</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="companyPhone" class="form-label">Company Phone Number *</label>
+                                <input type="tel" class="form-control" id="companyPhone" placeholder="Enter company phone number" required>
+                                <small class="form-help-text">Used for important notifications and communication</small>
+                            </div>
+                        </div>
+
+                        </div>
+                        
+                        <div id="localFields" style="display: none;">
+                            <h5 class="section-title">Truck Information</h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="truckType" class="form-label">Truck Type *</label>
+                                    <select class="form-control" id="truckType">
+                                        <option value="">Select truck type</option>
+                                        <option value="7.5t">7.5t</option>
+                                        <option value="18t">18t</option>
+                                        <option value="26t">26t</option>
+                                        <option value="32t">32t</option>
+                                        <option value="44t">44t</option>
+                                        <option value="Van">Van</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <small class="form-help-text">Select the type of truck you operate</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="truckSize" class="form-label">Truck Size/Capacity *</label>
+                                    <input type="text" class="form-control" id="truckSize" placeholder="e.g., 7.5 tonnes">
+                                    <small class="form-help-text">Enter your truck's weight capacity</small>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="yearsExperienceLocal" class="form-label">Years of Experience *</label>
+                                    <select class="form-control" id="yearsExperienceLocal">
+                                        <option value="">Select experience</option>
+                                        <option value="0-1">0-1 years</option>
+                                        <option value="1-3">1-3 years</option>
+                                        <option value="3-5">3-5 years</option>
+                                        <option value="5-10">5-10 years</option>
+                                        <option value="10+">10+ years</option>
+                                    </select>
+                                    <small class="form-help-text">Helps us understand your expertise level</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="localAddress" class="form-label">Address *</label>
+                                    <textarea class="form-control" id="localAddress" rows="2"></textarea>
+                                    <small class="form-help-text">We use this to match you with nearby loads</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-1"></i> Previous
+                            </button>
+                            <button type="button" class="btn btn-next" onclick="nextStep()">
+                                Next <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Documents -->
+                    <div class="form-step" id="step3">
+                        <h5 class="section-title">Documents</h5>
+                        
+                        <div id="businessDocuments">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Operator License</label>
+                                    <div class="file-upload" onclick="document.getElementById('operatorLicense').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload operator license</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="operatorLicense" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Company Registration Certificate</label>
+                                    <div class="file-upload" onclick="document.getElementById('companyCert').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload certificate</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="companyCert" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="localDocuments" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Driving License</label>
+                                    <div class="file-upload" onclick="document.getElementById('drivingLicense').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload driving license</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="drivingLicense" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Vehicle Registration</label>
+                                    <div class="file-upload" onclick="document.getElementById('vehicleReg').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload vehicle docs</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="vehicleReg" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        <h5 class="section-title">Additional Documents</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Insurance Certificate</label>
+                                <div class="file-upload" onclick="document.getElementById('insurance').click()">
+                                    <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                    <p class="mb-0">Click to upload insurance</p>
+                                    <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                    <input type="file" id="insurance" accept=".pdf,.jpg,.png" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-1"></i> Previous
+                            </button>
+                            <button type="button" class="btn btn-next" onclick="nextStep()">
+                                Next <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Bank Details -->
+                    <div class="form-step" id="step4">
+                        <h5 class="section-title">Bank Details for Withdrawals</h5>
+                        <p class="text-muted mb-4">Provide your bank account details to receive payments</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="accountHolderName" class="form-label">Account Holder Name *</label>
+                                <input type="text" class="form-control" id="accountHolderName" placeholder="Enter account holder name" required>
+                                <small class="form-help-text">Name as it appears on your bank account</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankName" class="form-label">Bank Name *</label>
+                                <input type="text" class="form-control" id="bankName" placeholder="Enter bank name" required>
+                                <small class="form-help-text">Your bank's official name</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="accountNumber" class="form-label">Account Number *</label>
+                                <input type="text" class="form-control" id="accountNumber" placeholder="Enter account number" required>
+                                <small class="form-help-text">Used for payment processing</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sortCode" class="form-label">Sort Code / Routing Number *</label>
+                                <input type="text" class="form-control" id="sortCode" placeholder="Enter sort code or routing number" required>
+                                <small class="form-help-text">Used for payment processing</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="iban" class="form-label">IBAN (if applicable)</label>
+                                <input type="text" class="form-control" id="iban" placeholder="Enter IBAN">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="swiftCode" class="form-label">SWIFT/BIC Code (if applicable)</label>
+                                <input type="text" class="form-control" id="swiftCode" placeholder="Enter SWIFT/BIC code">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="bankAddress" class="form-label">Bank Address</label>
+                                <textarea class="form-control" id="bankAddress" rows="2" placeholder="Enter bank address (optional)"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Your bank details will be securely stored and used only for processing withdrawals. Make sure all information is accurate.
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-1"></i> Previous
+                            </button>
+                            <button type="button" class="btn btn-next" onclick="nextStep()">
+                                Next <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Identity Verification -->
+                    <div class="form-step" id="step5">
+                        <h5 class="section-title">Identity Verification</h5>
+                        <p class="text-muted mb-4">Please provide your full legal name and identity document</p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="fullLegalName" class="form-label">Full Legal Name (Citizen Name)</label>
+                                <input type="text" class="form-control" id="fullLegalName" placeholder="Enter your full legal name as per identity document">
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label">Identity Document Type</label>
+                                <div class="business-type-selector" style="grid-template-columns: 1fr 1fr;">
+                                    <div class="business-type-card" data-id-type="passport" onclick="selectIdType('passport')">
+                                        <i class="fas fa-passport"></i>
+                                        <h5>Passport</h5>
+                                        <p class="text-muted small mb-0">Passport Document</p>
+                                    </div>
+                                    <div class="business-type-card" data-id-type="idcard" onclick="selectIdType('idcard')">
+                                        <i class="fas fa-id-card"></i>
+                                        <h5>ID Card</h5>
+                                        <p class="text-muted small mb-0">National ID Card</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="idDocumentType">
+                            </div>
+                        </div>
+
+                        <!-- Passport Upload -->
+                        <div id="passportUpload" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">Passport Document</label>
+                                    <div class="file-upload" onclick="document.getElementById('passportFile').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload passport</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="passportFile" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ID Card Upload (Front and Back) -->
+                        <div id="idCardUpload" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">ID Card Front</label>
+                                    <div class="file-upload" onclick="document.getElementById('idCardFront').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload ID card front</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="idCardFront" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ID Card Back</label>
+                                    <div class="file-upload" onclick="document.getElementById('idCardBack').click()">
+                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Click to upload ID card back</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <input type="file" id="idCardBack" accept=".pdf,.jpg,.png" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Your identity documents will be securely stored and used only for verification purposes. Make sure the documents are clear and readable.
+                        </div>
+                        
+                        <div class="step-buttons">
+                            <button type="button" class="btn btn-prev" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-1"></i> Previous
+                            </button>
+                            <button type="submit" class="btn btn-register">
+                                <i class="fas fa-check me-2"></i>Complete Profile
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Explanation Section -->
+                <div class="explanation-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Profile Completion Guide</h5>
+                    <p>
+                        Welcome to Alpha Freight! Completing your profile is essential to start receiving and managing load bookings. 
+                        This process helps us verify your business and ensure secure transactions for all parties involved.
+                    </p>
+                    <p><strong>Why Complete Your Profile?</strong></p>
+                    <ul>
+                        <li><strong>Verification:</strong> Your profile information is reviewed to ensure compliance with transportation regulations and safety standards.</li>
+                        <li><strong>Secure Payments:</strong> Bank details are required for secure payment processing and withdrawals. All financial information is encrypted and stored securely.</li>
+                        <li><strong>Better Matching:</strong> Complete profiles help us match you with the most suitable loads based on your fleet size, experience, and location.</li>
+                        <li><strong>Account Activation:</strong> Your profile will be activated within 1-24 hours after successful verification by our admin team.</li>
+                    </ul>
+                    <p><strong>What to Expect:</strong></p>
+                    <ul>
+                        <li>Step 1: Select your business type (Business/Fleet Owner or Local Truck/Owner-Operator)</li>
+                        <li>Step 2: Provide company or truck information including address, experience, and fleet details</li>
+                        <li>Step 3: Upload documents (optional) (Operator License/Driving License, Vehicle Registration, Insurance)</li>
+                        <li>Step 4: Enter bank details for receiving payments securely</li>
+                        <li>Step 5: Complete identity verification with passport or ID card</li>
+                    </ul>
+                    <p>
+                        <strong>Privacy & Security:</strong> All your information is protected using industry-standard encryption. 
+                        Documents are stored securely and only accessed by authorized personnel for verification purposes. 
+                        Bank details are used exclusively for payment processing.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Need Help?</strong> Use the chatbot icon in the bottom right corner for assistance at any time during the process.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-modal-overlay" id="successModal">
+        <div class="success-modal">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Profile Completed!</h3>
+            <p>Your profile has been completed and profile active 1 to 24 hours.</p>
+            <p class="company-name">Thanks for using Alpha Freight Solutions Limited</p>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container">
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h6><i class="fas fa-robot me-2"></i>Form Assistant</h6>
+                <button onclick="toggleChatbot()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="chatbot-message bot">
+                    <div class="message-bubble">
+                        <strong>Hello! 👋</strong><br>
+                        I'm here to help you fill out the form. Feel free to ask me anything!
+                        <div class="quick-actions mt-2">
+                            <button class="quick-action-btn" onclick="sendQuickMessage('What is required?')">What is required?</button>
+                            <button class="quick-action-btn" onclick="sendQuickMessage('What is step 1?')">What is step 1?</button>
+                            <button class="quick-action-btn" onclick="sendQuickMessage('What documents are needed?')">What documents?</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Type your question..." onkeypress="handleChatbotKeyPress(event)">
+                <button class="chatbot-send" onclick="sendChatbotMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        <button class="chatbot-button" onclick="toggleChatbot()" id="chatbotButton">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/script.js"></script>
+    
+    <script>
+        // Ensure styled alerts are available
+        if (!window.AlphaBrokrage) {
+            window.AlphaBrokrage = {
+                showAlert: function(type, message){
+                    var map = { error: 'danger', success: 'success', info: 'info', warning: 'warning' };
+                    var bs = map[type] || 'info';
+                    var el = document.createElement('div');
+                    el.className = 'ab-alert alert alert-' + bs + ' alert-dismissible fade show position-fixed';
+                    el.style.cssText = 'top: 100px; right: 20px; z-index: 10010; min-width: 320px;';
+                    el.innerHTML = '<div class="d-flex align-items-start"><div class="me-2 alert-icon"></div><div class="flex-grow-1">' + message + '</div><button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button></div>';
+                    document.body.appendChild(el);
+                    setTimeout(function(){ if (el && el.parentNode) { try { new bootstrap.Alert(el).close(); } catch(e){ el.remove(); } } }, 4000);
+                }
+            };
+        }
+    </script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        (function() {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+                authDomain: "alpha-brokerage.firebaseapp.com",
+                databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+                projectId: "alpha-brokerage",
+                storageBucket: "alpha-brokerage.firebasestorage.app",
+                messagingSenderId: "834712514965",
+                appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            if (!window.firebase || !firebase.apps.length) { 
+                firebase.initializeApp(firebaseConfig);
+            }
+        })();
+
+        // Check if user is logged in or has valid carrier auth
+        const auth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        // Allow access if user has any meaningful auth data (email, carrierId, id, firstName, etc.)
+        // This handles cases where user comes from dashboard or just registered (where isLoggedIn may not be set)
+        const hasValidAuth = auth.isLoggedIn || 
+                            auth.carrierId || 
+                            auth.id || 
+                            (auth.email && (auth.firstName || auth.companyName));
+        
+        if (!hasValidAuth) {
+            window.location.href = 'login.html';
+        }
+
+        let selectedBusinessType = '';
+        let selectedIdType = '';
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        // Function to update progress bar
+        function updateProgressBar() {
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressBar) {
+                progressBar.style.width = progressPercentage + '%';
+            }
+            
+            if (progressText) {
+                progressText.textContent = Math.round(progressPercentage) + '% Completed';
+            }
+        }
+
+        function selectBusinessType(type) {
+            selectedBusinessType = type;
+            document.getElementById('businessType').value = type;
+            
+            // Update card selection
+            document.querySelectorAll('.business-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            
+            // Enable Next button
+            document.getElementById('nextStep1').disabled = false;
+        }
+
+        function selectIdType(type) {
+            selectedIdType = type;
+            document.getElementById('idDocumentType').value = type;
+            
+            // Update card selection
+            document.querySelectorAll('[data-id-type]').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-id-type="${type}"]`).classList.add('selected');
+            
+            // Show/hide upload sections
+            if (type === 'passport') {
+                document.getElementById('passportUpload').style.display = 'block';
+                document.getElementById('idCardUpload').style.display = 'none';
+            } else if (type === 'idcard') {
+                document.getElementById('passportUpload').style.display = 'none';
+                document.getElementById('idCardUpload').style.display = 'block';
+            }
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                // Validate step 1
+                if (!selectedBusinessType) {
+                    AlphaBrokrage.showAlert('error', 'Please select your business type');
+                    return;
+                }
+                
+                // Show appropriate fields in step 2
+                if (selectedBusinessType === 'business') {
+                    document.getElementById('businessFields').style.display = 'block';
+                    document.getElementById('localFields').style.display = 'none';
+                } else {
+                    document.getElementById('businessFields').style.display = 'none';
+                    document.getElementById('localFields').style.display = 'block';
+                }
+                
+                // Show appropriate documents in step 3
+                if (selectedBusinessType === 'business') {
+                    document.getElementById('businessDocuments').style.display = 'block';
+                    document.getElementById('localDocuments').style.display = 'none';
+                } else {
+                    document.getElementById('businessDocuments').style.display = 'none';
+                    document.getElementById('localDocuments').style.display = 'block';
+                }
+            } else if (currentStep === 2) {
+                // Validate step 2
+                if (!validateStep2()) {
+                    return;
+                }
+            } else if (currentStep === 3) {
+                // Validate step 3 (documents - optional validation)
+                // Documents are optional but can be validated if needed
+            } else if (currentStep === 4) {
+                // Validate step 4
+                if (!validateStep4()) {
+                    return;
+                }
+            } else if (currentStep === 5) {
+                // Validate step 5
+                if (!validateStep5()) {
+                    return;
+                }
+            }
+            
+            if (currentStep < totalSteps) {
+                // Hide current step
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}Item`).classList.remove('active');
+                document.getElementById(`step${currentStep}Item`).classList.add('completed');
+                
+                // Show next step
+                currentStep++;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}Item`).classList.add('active');
+                
+                // Update progress bar
+                updateProgressBar();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                // Hide current step
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}Item`).classList.remove('active');
+                
+                // Show previous step
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}Item`).classList.add('active');
+                document.getElementById(`step${currentStep}Item`).classList.remove('completed');
+                
+                // Update progress bar
+                updateProgressBar();
+            }
+        }
+
+        // Initialize progress bar on page load
+        updateProgressBar();
+
+        function validateStep2() {
+            if (selectedBusinessType === 'business') {
+                const required = ['companyName', 'address', 'postcode', 'city', 'yearsExperience', 'fleetSize', 'employeeSize', 'companyPhone'];
+                for (let field of required) {
+                    const element = document.getElementById(field);
+                    if (!element || !element.value.trim()) {
+                        AlphaBrokrage.showAlert('error', `Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                        element?.focus();
+                        return false;
+                    }
+                }
+            } else {
+                const required = ['truckType', 'truckSize', 'yearsExperienceLocal', 'localAddress'];
+                for (let field of required) {
+                    const element = document.getElementById(field);
+                    if (!element || !element.value.trim()) {
+                        AlphaBrokrage.showAlert('error', `Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                        element?.focus();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function validateStep4() {
+            const required = ['accountHolderName', 'bankName', 'accountNumber', 'sortCode'];
+            for (let field of required) {
+                const element = document.getElementById(field);
+                if (!element || !element.value.trim()) {
+                    const fieldName = field.replace(/([A-Z])/g, ' $1').toLowerCase();
+                    AlphaBrokrage.showAlert('error', `Please fill in ${fieldName}`);
+                    element?.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function validateStep5() {
+            const fullLegalName = document.getElementById('fullLegalName');
+            const passportFile = document.getElementById('passportFile');
+            const idCardFront = document.getElementById('idCardFront');
+            const idCardBack = document.getElementById('idCardBack');
+            const hasAnyFile = !!(
+                (passportFile && passportFile.files && passportFile.files[0]) ||
+                (idCardFront && idCardFront.files && idCardFront.files[0]) ||
+                (idCardBack && idCardBack.files && idCardBack.files[0])
+            );
+            const hasAnyInput = !!(
+                (fullLegalName && fullLegalName.value.trim()) ||
+                selectedIdType ||
+                hasAnyFile
+            );
+
+            if (!hasAnyInput) {
+                return true;
+            }
+
+            if (!fullLegalName || !fullLegalName.value.trim()) {
+                AlphaBrokrage.showAlert('error', 'Please enter your full legal name');
+                fullLegalName?.focus();
+                return false;
+            }
+
+            if (!selectedIdType) {
+                AlphaBrokrage.showAlert('error', 'Please select identity document type (Passport or ID Card)');
+                return false;
+            }
+
+            if (selectedIdType === 'passport') {
+                if (!passportFile || !passportFile.files || !passportFile.files[0]) {
+                    AlphaBrokrage.showAlert('error', 'Please upload passport document');
+                    return false;
+                }
+            } else if (selectedIdType === 'idcard') {
+                if (!idCardFront || !idCardFront.files || !idCardFront.files[0]) {
+                    AlphaBrokrage.showAlert('error', 'Please upload ID card front');
+                    return false;
+                }
+                if (!idCardBack || !idCardBack.files || !idCardBack.files[0]) {
+                    AlphaBrokrage.showAlert('error', 'Please upload ID card back');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // File upload handling
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const fileUpload = this.parentElement;
+                if (this.files && this.files[0]) {
+                    fileUpload.classList.add('has-file');
+                    const nameP = fileUpload.querySelector('p');
+                    if (nameP) {
+                        nameP.textContent = this.files[0].name;
+                        nameP.classList.remove('text-muted');
+                    }
+                    const icon = fileUpload.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('text-muted', 'fa-upload');
+                        icon.classList.add('fa-check-circle');
+                    }
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('completeProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate all steps before submission
+            if (!selectedBusinessType) {
+                AlphaBrokrage.showAlert('error', 'Please select your business type');
+                return;
+            }
+            
+            if (!validateStep2()) {
+                AlphaBrokrage.showAlert('error', 'Please complete all required fields in step 2');
+                return;
+            }
+            
+            if (!validateStep4()) {
+                AlphaBrokrage.showAlert('error', 'Please complete all required bank details');
+                return;
+            }
+            
+            if (!validateStep5()) {
+                AlphaBrokrage.showAlert('error', 'Please complete all required identity verification fields');
+                return;
+            }
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            submitBtn.disabled = true;
+
+            const db = firebase.database();
+            const carrierId = auth.carrierId;
+            
+            if (!carrierId) {
+                AlphaBrokrage.showAlert('error', 'Carrier ID not found. Please login again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            // Collect form data based on business type
+            const profileData = {
+                businessType: selectedBusinessType,
+                profileComplete: true,
+                updatedAt: new Date().toISOString(),
+                // Identity verification
+                identityVerification: {
+                    fullLegalName: document.getElementById('fullLegalName').value,
+                    idDocumentType: selectedIdType
+                },
+                // Bank details for withdrawals
+                bankDetails: {
+                    accountHolderName: document.getElementById('accountHolderName').value,
+                    bankName: document.getElementById('bankName').value,
+                    accountNumber: document.getElementById('accountNumber').value,
+                    sortCode: document.getElementById('sortCode').value,
+                    iban: document.getElementById('iban').value || null,
+                    swiftCode: document.getElementById('swiftCode').value || null,
+                    bankAddress: document.getElementById('bankAddress').value || null
+                }
+            };
+
+            if (selectedBusinessType === 'business') {
+                profileData.companyName = document.getElementById('companyName').value;
+                profileData.companyReg = document.getElementById('companyReg').value;
+                profileData.address = document.getElementById('address').value;
+                profileData.postcode = document.getElementById('postcode').value;
+                profileData.city = document.getElementById('city').value;
+                profileData.yearsExperience = document.getElementById('yearsExperience').value;
+                profileData.fleetSize = document.getElementById('fleetSize').value;
+                profileData.employeeSize = document.getElementById('employeeSize').value;
+                profileData.companyPhone = document.getElementById('companyPhone').value;
+            } else {
+                profileData.truckType = document.getElementById('truckType').value;
+                profileData.truckSize = document.getElementById('truckSize').value;
+                profileData.yearsExperience = document.getElementById('yearsExperienceLocal').value;
+                profileData.address = document.getElementById('localAddress').value;
+            }
+
+            // Process files
+            function getFileAsBase64(file, callback) {
+                if (!file) {
+                    callback(null);
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    callback(reader.result);
+                };
+                reader.onerror = function() {
+                    callback(null);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            const documents = {};
+            const filesToProcess = [];
+            
+            if (selectedBusinessType === 'business') {
+                const operatorLicense = document.getElementById('operatorLicense');
+                const companyCert = document.getElementById('companyCert');
+                if (operatorLicense.files[0]) filesToProcess.push({input: operatorLicense, key: 'operatorLicense'});
+                if (companyCert.files[0]) filesToProcess.push({input: companyCert, key: 'companyCert'});
+            } else {
+                const drivingLicense = document.getElementById('drivingLicense');
+                const vehicleReg = document.getElementById('vehicleReg');
+                if (drivingLicense.files[0]) filesToProcess.push({input: drivingLicense, key: 'drivingLicense'});
+                if (vehicleReg.files[0]) filesToProcess.push({input: vehicleReg, key: 'vehicleReg'});
+            }
+            
+            const insurance = document.getElementById('insurance');
+            if (insurance.files[0]) filesToProcess.push({input: insurance, key: 'insurance'});
+
+            // Process identity documents
+            if (selectedIdType === 'passport') {
+                const passportFile = document.getElementById('passportFile');
+                if (passportFile.files[0]) filesToProcess.push({input: passportFile, key: 'passport'});
+            } else if (selectedIdType === 'idcard') {
+                const idCardFront = document.getElementById('idCardFront');
+                const idCardBack = document.getElementById('idCardBack');
+                if (idCardFront.files[0]) filesToProcess.push({input: idCardFront, key: 'idCardFront'});
+                if (idCardBack.files[0]) filesToProcess.push({input: idCardBack, key: 'idCardBack'});
+            }
+
+            let filesProcessed = 0;
+            const totalFiles = filesToProcess.length;
+
+            if (totalFiles === 0) {
+                saveProfile();
+            } else {
+                filesToProcess.forEach(({input, key}) => {
+                    getFileAsBase64(input.files[0], function(base64) {
+                        if (base64) {
+                            documents[key] = {
+                                fileName: input.files[0].name,
+                                fileSize: input.files[0].size,
+                                fileType: input.files[0].type,
+                                data: base64
+                            };
+                        }
+                        filesProcessed++;
+                        if (filesProcessed === totalFiles) {
+                            profileData.documents = documents;
+                            saveProfile();
+                        }
+                    });
+                });
+            }
+
+            function saveProfile() {
+                const carrierRef = db.ref('carriers/' + carrierId);
+                carrierRef.once('value').then(snapshot => {
+                    const existingStatus = snapshot && snapshot.val() && snapshot.val().status;
+                    const shouldForcePending = !existingStatus || ['pending_profile', 'pending_verification', 'rejected', 'suspended', 'needs_resubmission'].includes(existingStatus);
+                    if (shouldForcePending) {
+                        profileData.status = 'pending_verification';
+                    }
+
+                    carrierRef.update(profileData, function(error) {
+                    if (error) {
+                        AlphaBrokrage.showAlert('error', 'Error saving profile: ' + error.message);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+
+                    // Update local auth
+                    const updatedAuth = Object.assign({}, auth, {
+                        profileComplete: true,
+                            businessType: selectedBusinessType,
+                            status: profileData.status || existingStatus || auth.status
+                    });
+                    localStorage.setItem('carrierAuth', JSON.stringify(updatedAuth));
+
+                    // Automatically save bank details to payment received section
+                    if (profileData.bankDetails) {
+                        const bankData = {
+                            bankName: profileData.bankDetails.bankName || '',
+                            accountName: profileData.bankDetails.accountHolderName || '',
+                            accountNumber: profileData.bankDetails.accountNumber || '',
+                            sortCode: profileData.bankDetails.sortCode || '',
+                            iban: profileData.bankDetails.iban || '',
+                            swift: profileData.bankDetails.swiftCode || '',
+                            updatedAt: new Date().toISOString(),
+                            syncedFromProfile: true
+                        };
+                        
+                        // Save to localStorage in same format as payment-received page
+                        const allBankDetails = JSON.parse(localStorage.getItem('carrierBankDetails') || '{}');
+                        allBankDetails[carrierId] = bankData;
+                        localStorage.setItem('carrierBankDetails', JSON.stringify(allBankDetails));
+                        
+                        console.log('Bank details automatically saved to payment received section');
+                    }
+
+                    // Show success modal
+                    const successModal = document.getElementById('successModal');
+                    successModal.classList.add('show');
+                    
+                    // Redirect after 4 seconds
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 4000);
+                });
+                }).catch((error) => {
+                    AlphaBrokrage.showAlert('error', 'Unable to check current status: ' + error.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+            }
+        });
+
+        // Chatbot functionality
+        function toggleChatbot() {
+            const window = document.getElementById('chatbotWindow');
+            const button = document.getElementById('chatbotButton');
+            window.classList.toggle('active');
+            if (window.classList.contains('active')) {
+                button.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                button.innerHTML = '<i class="fas fa-comments"></i>';
+            }
+        }
+
+        function sendQuickMessage(message) {
+            document.getElementById('chatbotInput').value = message;
+            sendChatbotMessage();
+        }
+
+        function handleChatbotKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatbotMessage();
+            }
+        }
+
+        function sendChatbotMessage() {
+            const input = document.getElementById('chatbotInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            addChatbotMessage(message, 'user');
+            input.value = '';
+
+            // Generate and add bot response
+            setTimeout(() => {
+                const response = generateChatbotResponse(message);
+                addChatbotMessage(response.text, 'bot', response.quickActions);
+            }, 500);
+        }
+
+        function addChatbotMessage(text, type, quickActions = null) {
+            const messagesContainer = document.getElementById('chatbotMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chatbot-message ${type}`;
+            
+            let quickActionsHTML = '';
+            if (quickActions && quickActions.length > 0) {
+                quickActionsHTML = '<div class="quick-actions mt-2">';
+                quickActions.forEach(action => {
+                    quickActionsHTML += `<button class="quick-action-btn" onclick="sendQuickMessage('${action}')">${action}</button>`;
+                });
+                quickActionsHTML += '</div>';
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    ${text}${quickActionsHTML}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function generateChatbotResponse(userMessage) {
+            const msg = userMessage.toLowerCase();
+            const step = currentStep;
+            const businessType = selectedBusinessType;
+
+            // Step 1 related queries
+            if (msg.includes('step 1') || msg.includes('first step') || msg.includes('business type')) {
+                return {
+                    text: `<strong>Step 1: Business Type Selection</strong><br><br>
+                    You need to select your business type:<br>
+                    • <strong>Business:</strong> For Company or Fleet Owner<br>
+                    • <strong>Local Truck:</strong> For Individual or Owner-Operator<br><br>
+                    Select one option, then click the Next button.`,
+                    quickActions: ['What is step 2?', 'What is the difference?']
+                };
+            }
+
+            // Step 2 related queries
+            if (msg.includes('step 2') || msg.includes('second step') || msg.includes('information')) {
+                if (businessType === 'business') {
+                    return {
+                        text: `<strong>Step 2: Company Information</strong><br><br>
+                        You need to fill in these details:<br>
+                        • Company Name (required)<br>
+                        • Company Registration Number (optional)<br>
+                        • Business Address (required)<br>
+                        • Postcode and City (required)<br>
+                        • Years of Experience (required)<br>
+                        • Fleet Size (required)<br>
+                        • Employee Size (required)<br>
+                        • Company Phone (required)<br><br>
+                        Please fill in all required fields.`,
+                        quickActions: ['What is step 3?', 'What documents are needed?']
+                    };
+                } else if (businessType === 'local') {
+                    return {
+                        text: `<strong>Step 2: Truck Information</strong><br><br>
+                        You need to fill in these details:<br>
+                        • Truck Type (required) - 7.5t, 18t, 26t, etc.<br>
+                        • Truck Size/Capacity (required)<br>
+                        • Years of Experience (required)<br>
+                        • Address (required)<br><br>
+                        Please fill in all required fields.`,
+                        quickActions: ['What is step 3?', 'What documents are needed?']
+                    };
+                } else {
+                    return {
+                        text: `Please first select your business type in Step 1.`,
+                        quickActions: ['What is step 1?']
+                    };
+                }
+            }
+
+            // Step 3 related queries
+            if (msg.includes('step 3') || msg.includes('third step') || msg.includes('document')) {
+                if (businessType === 'business') {
+                    return {
+                        text: `<strong>Step 3: Documents</strong><br><br>
+                        You need to upload these documents:<br>
+                        • <strong>Operator License</strong> (required) - PDF, JPG, PNG (Max 5MB)<br>
+                        • Company Registration Certificate (optional)<br>
+                        • <strong>Insurance Certificate</strong> (required)<br><br>
+                        Click to select your files.`,
+                        quickActions: ['What is step 4?', 'What are bank details?']
+                    };
+                } else if (businessType === 'local') {
+                    return {
+                        text: `<strong>Step 3: Documents</strong><br><br>
+                        You need to upload these documents:<br>
+                        • <strong>Driving License</strong> (required) - PDF, JPG, PNG (Max 5MB)<br>
+                        • <strong>Vehicle Registration</strong> (required)<br>
+                        • <strong>Insurance Certificate</strong> (required)<br><br>
+                        Click to select your files.`,
+                        quickActions: ['What is step 4?', 'What are bank details?']
+                    };
+                } else {
+                    return {
+                        text: `Please first select your business type in Step 1.`,
+                        quickActions: ['What is step 1?']
+                    };
+                }
+            }
+
+            // Step 4 related queries
+            if (msg.includes('step 4') || msg.includes('fourth step') || msg.includes('bank')) {
+                return {
+                    text: `<strong>Step 4: Bank Details</strong><br><br>
+                    Bank details are required to receive payments:<br>
+                    • Account Holder Name (required)<br>
+                    • Bank Name (required)<br>
+                    • Account Number (required)<br>
+                    • Sort Code / Routing Number (required)<br>
+                    • IBAN (if applicable)<br>
+                    • SWIFT/BIC Code (if applicable)<br>
+                    • Bank Address (optional)<br><br>
+                    These details are secure and will only be used for processing payments.`,
+                    quickActions: ['What is step 5?', 'How to submit the form?']
+                };
+            }
+
+            // Step 5 related queries
+            if (msg.includes('step 5') || msg.includes('fifth step') || msg.includes('identity') || msg.includes('passport') || msg.includes('id card')) {
+                return {
+                    text: `<strong>Step 5: Identity Verification</strong><br><br>
+                    You need to provide:<br>
+                    • Full Legal Name (Citizen Name) (required)<br>
+                    • Identity Document Type (required) - Select Passport or ID Card<br>
+                    • If Passport: Upload passport document (required)<br>
+                    • If ID Card: Upload ID card front and back (both required)<br><br>
+                    Your identity documents will be securely stored and used only for verification purposes.`,
+                    quickActions: ['How to submit the form?', 'What is step 4?']
+                };
+            }
+
+            // What is required
+            if (msg.includes('required') || msg.includes('what is needed') || msg.includes('what do i need')) {
+                if (step === 1) {
+                    return {
+                        text: `In Step 1, you only need to select your business type - Business or Local Truck.`,
+                        quickActions: ['What is step 2?']
+                    };
+                } else if (step === 2) {
+                    return {
+                        text: `In Step 2, all fields marked with * (asterisk) are required. Please fill them in.`,
+                        quickActions: ['What is step 3?']
+                    };
+                } else if (step === 3) {
+                    return {
+                        text: `In Step 3, you can upload documents (optional).`,
+                        quickActions: ['What is step 4?']
+                    };
+                } else if (step === 4) {
+                    return {
+                        text: `In Step 4, you need to fill in bank details. Account holder name, bank name, account number, and sort code are required.`,
+                        quickActions: ['What is step 5?', 'How to submit the form?']
+                    };
+                } else if (step === 5) {
+                    return {
+                        text: `In Step 5, identity verification is optional. If you provide it, add your full legal name, select document type, and upload the document.`,
+                        quickActions: ['What is step 5?', 'How to submit the form?']
+                    };
+                }
+            }
+
+            // Difference between business types
+            if (msg.includes('difference') || msg.includes('different') || msg.includes('what is the difference')) {
+                return {
+                    text: `<strong>Difference Between Business Types:</strong><br><br>
+                    <strong>Business:</strong><br>
+                    • For Company or Fleet Owner<br>
+                    • Requires company details, fleet size, employee count<br>
+                    • Requires Operator License and Company Certificate<br><br>
+                    <strong>Local Truck:</strong><br>
+                    • For Individual or Owner-Operator<br>
+                    • Requires truck type and size<br>
+                    • Requires Driving License and Vehicle Registration`,
+                    quickActions: ['What is step 1?', 'What is step 2?']
+                };
+            }
+
+            // How to submit
+            if (msg.includes('submit') || msg.includes('complete') || msg.includes('finish') || msg.includes('how to submit')) {
+                return {
+                    text: `To complete the form:<br>
+                    1. Complete all 5 steps<br>
+                    2. Fill in all required fields<br>
+                    3. Upload all required documents<br>
+                    4. Click the "Complete Profile" button on the last step<br>
+                    5. After the success message, you'll be redirected to the dashboard<br><br>
+                    If any field is missing, you'll see an error message.`,
+                    quickActions: ['What is step 1?', 'What is step 5?', 'What is required?']
+                };
+            }
+
+            // Current step help
+            if (msg.includes('current') || msg.includes('now') || msg.includes('help') || msg.includes('current step')) {
+                if (step === 1) {
+                    return {
+                        text: `You are on Step 1. Please select your business type - Business or Local Truck.`,
+                        quickActions: ['What is step 1?', 'What is the difference?']
+                    };
+                } else if (step === 2) {
+                    return {
+                        text: `You are on Step 2. Please fill in ${businessType === 'business' ? 'Company' : 'Truck'} information. All required fields (*) are mandatory.`,
+                        quickActions: ['What is step 2?', 'What is required?']
+                    };
+                } else if (step === 3) {
+                    return {
+                        text: `You are on Step 3. You can upload documents (optional).`,
+                        quickActions: ['What is step 3?', 'What documents are needed?']
+                    };
+                } else if (step === 4) {
+                    return {
+                        text: `You are on Step 4. Please fill in bank details. After filling all required fields, click Next to proceed to Step 5.`,
+                        quickActions: ['What is step 4?', 'What is step 5?']
+                    };
+                } else if (step === 5) {
+                    return {
+                        text: `You are on Step 5. Identity verification is optional. If you provide it, add your full legal name, select document type, and upload the document. Then click "Complete Profile".`,
+                        quickActions: ['What is step 5?', 'How to submit the form?']
+                    };
+                }
+            }
+
+            // General greeting
+            if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('greetings')) {
+                return {
+                    text: `Hello! 👋<br><br>
+                    I'm here to help you fill out the form. Feel free to ask me anything!`,
+                    quickActions: ['What is step 1?', 'What is required?', 'Current step help']
+                };
+            }
+
+            // Default response
+            return {
+                text: `I can help you! You can ask me:<br>
+                • "What is step 1?" - About the first step<br>
+                • "What is required?" - About required fields<br>
+                • "What documents are needed?" - About documents<br>
+                • "What are bank details?" - About bank details<br>
+                • "How to submit the form?" - About completing the form`,
+                quickActions: ['What is step 1?', 'What is required?', 'Current step help']
+            };
+        }
+    </script>
+</body>
+</html>
+
+

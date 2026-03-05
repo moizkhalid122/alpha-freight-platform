@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Letter Pending - Broker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #5a32a3;
+            --secondary: #e83e8c;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --sidebar-bg: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            --sidebar-text: rgba(255, 255, 255, 0.9);
+            --sidebar-active: rgba(255, 255, 255, 0.25);
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 240px;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            margin-left: 240px;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                margin-left: 0;
+            }
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 60px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .broker-nav {
+            padding: 1rem 0.75rem;
+        }
+
+        .broker-nav .nav-link {
+            padding: 0.65rem 0.75rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.85rem;
+            color: var(--sidebar-text) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .broker-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+            color: white !important;
+        }
+
+        .broker-nav .nav-link.active {
+            background: var(--sidebar-active);
+            border-radius: 8px;
+            font-weight: 600;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .broker-nav .nav-link i {
+            width: 18px;
+            margin-right: 0.65rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .broker-nav hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+
+        .header-section {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-icon-btn:hover {
+            background: #F3F4F6;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .header-profile {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-profile:hover {
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--warning);
+        }
+
+        .pending-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .pending-table th {
+            background: #F9FAFB;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .pending-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 0.875rem;
+        }
+
+        .pending-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .pending-table tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        .pending-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .route-info {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn.primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.4);
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            .pending-table {
+                font-size: 0.8125rem;
+            }
+            .pending-table th,
+            .pending-table td {
+                padding: 0.75rem 0.5rem;
+            }
+            .pending-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        /* Custom Alert Styles */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            min-width: 320px;
+            max-width: 400px;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-alert.hide {
+            animation: slideOutRight 0.4s ease-out forwards;
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .custom-alert i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .custom-alert-content {
+            flex: 1;
+        }
+
+        .custom-alert-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-alert-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .custom-alert-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .custom-alert-success i {
+            color: #d1fae5;
+        }
+
+        .custom-alert-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .custom-alert-error i {
+            color: #fee2e2;
+        }
+
+        .custom-alert-warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .custom-alert-warning i {
+            color: #fef3c7;
+        }
+
+        .custom-alert-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .custom-alert-info i {
+            color: #e9d5ff;
+        }
+
+        @media (max-width: 576px) {
+            .custom-alert {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <img src="../../image-removebg-preview - 2026-02-10T062943.516.png" alt="Alpha Freight Logo">
+        </div>
+        <nav class="nav flex-column broker-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="loads.html" class="nav-link">
+                <i class="fas fa-boxes"></i>
+                <span>All Loads</span>
+            </a>
+            <a href="my-loads.html" class="nav-link">
+                <i class="fas fa-clipboard-check"></i>
+                <span>My Loads</span>
+            </a>
+            <a href="post-load.html" class="nav-link">
+                <i class="fas fa-plus-circle"></i>
+                <span>Post Load</span>
+            </a>
+            <a href="matching.html" class="nav-link">
+                <i class="fas fa-random"></i>
+                <span>Matching</span>
+            </a>
+            <a href="carriers.html" class="nav-link">
+                <i class="fas fa-truck"></i>
+                <span>Carriers</span>
+            </a>
+            <a href="suppliers.html" class="nav-link">
+                <i class="fas fa-warehouse"></i>
+                <span>Suppliers</span>
+            </a>
+            <a href="payments.html" class="nav-link">
+                <i class="fas fa-credit-card"></i>
+                <span>Payments</span>
+            </a>
+            <a href="pay-letter-pending.html" class="nav-link active">
+                <i class="fas fa-file-invoice"></i>
+                <span>Pay Letter Pending</span>
+            </a>
+            <a href="invoices.html" class="nav-link">
+                <i class="fas fa-file-invoice"></i>
+                <span>Invoices</span>
+            </a>
+            <a href="commission.html" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Commission</span>
+            </a>
+            <a href="payouts.html" class="nav-link">
+                <i class="fas fa-hand-holding-dollar"></i>
+                <span>Payouts</span>
+            </a>
+            <a href="messages.html" class="nav-link">
+                <i class="fas fa-comments"></i>
+                <span>Messages</span>
+            </a>
+            <a href="profile.html" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <hr>
+            <a href="#" class="nav-link" onclick="logout(); return false;">
+                <i class="fas fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold">Pay Letter Pending Orders</h5>
+                </div>
+                <div class="header-actions">
+                    <button class="header-icon-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <img src="https://ui-avatars.com/api/?name=Broker+User&background=6f42c1&color=fff&size=128" 
+                         alt="Profile" 
+                         class="header-profile" 
+                         id="profileImage">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Pending Orders Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        <i class="fas fa-file-invoice"></i>
+                        Pending Commission Payments
+                    </h5>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h5 class="empty-state-text">No Pending Payments</h5>
+                    <p class="text-muted">You don't have any pending commission payments at the moment.</p>
+                    <a href="post-load.html" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus-circle"></i> Post a New Load
+                    </a>
+                </div>
+
+                <!-- Pending Orders Table -->
+                <div id="pendingOrdersTable" style="display: none;">
+                    <table class="pending-table">
+                        <thead>
+                            <tr>
+                                <th>Load ID</th>
+                                <th>Load Title</th>
+                                <th>Route</th>
+                                <th>Load Value</th>
+                                <th>Commission</th>
+                                <th>Created Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingOrdersBody">
+                            <!-- Orders will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <h6 id="confirmTitle" class="confirm-title">Confirm Action</h6>
+            </div>
+            <div id="confirmMessage" class="confirm-message">Are you sure?</div>
+            <div class="confirm-actions">
+                <button id="confirmCancelBtn" class="confirm-btn cancel" type="button">No, Keep</button>
+                <button id="confirmOkBtn" class="confirm-btn danger" type="button">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Check Authentication
+        const auth = JSON.parse(localStorage.getItem('brokerAuth') || '{}');
+        if (!auth.isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        // Calculate Commission based on load value
+        function calculateCommission(loadValue) {
+            const value = parseFloat(loadValue) || 0;
+            if (value <= 0) return 0;
+            
+            // Commission structure: Small (10%), Medium (15%), Large (20%)
+            if (value <= 1000) {
+                return value * 0.10; // 10%
+            } else if (value <= 5000) {
+                return value * 0.15; // 15%
+            } else {
+                return value * 0.20; // 20%
+            }
+        }
+
+        // Format Currency
+        function formatCurrency(value) {
+            return `£${parseFloat(value || 0).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+        }
+
+        // Format Date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Custom Alert Function
+        function showCustomAlert(type, message, duration = 4000) {
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            const alert = document.createElement('div');
+            alert.className = `custom-alert custom-alert-${type}`;
+            
+            let icon = 'fa-info-circle';
+            let title = 'Info';
+            if (type === 'success') {
+                icon = 'fa-check-circle';
+                title = 'Success';
+            } else if (type === 'error') {
+                icon = 'fa-exclamation-circle';
+                title = 'Error';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+                title = 'Warning';
+            }
+            
+            alert.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div class="custom-alert-content">
+                    <div class="custom-alert-title">${title}</div>
+                    <div class="custom-alert-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.classList.add('hide');
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 400);
+            }, duration);
+        }
+
+        // Custom Confirm Dialog
+        function showConfirm(message, { title = 'Confirm Action', okText = 'Yes', cancelText = 'No', amount = null, totalAmount = null } = {}) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmOverlay');
+                const titleEl = document.getElementById('confirmTitle');
+                const messageEl = document.getElementById('confirmMessage');
+                const okBtn = document.getElementById('confirmOkBtn');
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+
+                titleEl.textContent = title;
+                
+                // If amount is provided, show it prominently
+                if (amount !== null) {
+                    let amountHtml = `
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">${message}</div>
+                    `;
+                    
+                    // Show total amount if provided
+                    if (totalAmount !== null) {
+                        amountHtml += `
+                            <div style="margin-bottom: 1.5rem; padding: 0.75rem; background: #f7fafc; border-radius: 8px;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Total Load Amount</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #2d3748;">
+                                    ${formatCurrency(totalAmount)}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    amountHtml += `
+                            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                                <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">Commission Amount</div>
+                                <div style="font-size: 1.75rem; font-weight: 700; color: var(--primary);">
+                                    ${formatCurrency(amount)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    messageEl.innerHTML = amountHtml;
+                } else {
+                    messageEl.textContent = message;
+                }
+                
+                okBtn.textContent = okText;
+                cancelBtn.textContent = cancelText;
+
+                const cleanup = () => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    overlay.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                };
+
+                const onOk = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (e) => {
+                    if (e.target === overlay) {
+                        onCancel();
+                    }
+                };
+
+                const onKeydown = (e) => {
+                    if (e.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                overlay.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        // Normalize status string
+        function normalizeStatus(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        function renderOrders(orders) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const emptyState = document.getElementById('emptyState');
+            const pendingOrdersTable = document.getElementById('pendingOrdersTable');
+            const pendingOrdersBody = document.getElementById('pendingOrdersBody');
+
+            if (!orders || orders.length === 0) {
+                loadingSpinner.style.display = 'none';
+                showEmptyState();
+                return;
+            }
+
+            loadingSpinner.style.display = 'none';
+            emptyState.style.display = 'none';
+            pendingOrdersTable.style.display = 'block';
+
+            pendingOrdersBody.innerHTML = '';
+            orders.forEach((load) => {
+                const loadId = load.id || '';
+                const loadValue = parseFloat(load.budget || load.price || load.totalCost || load.maxBudget || 0);
+                const commission = calculateCommission(loadValue);
+                const loadTitle = load.title || load.loadTitle || 'Untitled Load';
+                const pickupLocation = load.pickupLocation || load.pickup_location || '-';
+                const deliveryLocation = load.deliveryLocation || load.delivery_location || '-';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="order-id">#${loadId.substring(0, 8)}</td>
+                    <td>
+                        <strong>${loadTitle}</strong>
+                    </td>
+                    <td>
+                        <div>${pickupLocation}</div>
+                        <div class="route-info">→ ${deliveryLocation}</div>
+                    </td>
+                    <td class="amount">${formatCurrency(loadValue)}</td>
+                    <td class="amount" style="color: var(--primary);">${formatCurrency(commission)}</td>
+                    <td>${formatDate(load.createdAt || load.created_at || load.postedDate)}</td>
+                    <td>
+                        <span class="status-badge pending">Pending</span>
+                    </td>
+                    <td>
+                        <button class="action-btn primary" onclick="viewLoad('${loadId}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn primary" onclick="payCommission('${loadId}', ${commission}, ${loadValue})" style="margin-left: 0.5rem;">
+                            <i class="fas fa-credit-card"></i> Pay
+                        </button>
+                    </td>
+                `;
+                pendingOrdersBody.appendChild(row);
+            });
+        }
+
+        // Check if commission is paid
+        async function isCommissionPaid(load) {
+            const loadStatus = normalizeStatus(load.status);
+            
+            // If status is active, commission is paid
+            if (loadStatus === 'active') {
+                return true;
+            }
+            
+            // If status is pending_payment, commission is not paid
+            if (loadStatus === 'pending_payment') {
+                return false;
+            }
+            
+            const loadPaymentStatus = load.paymentStatus || load.payment_status || {};
+            const brokerPaymentStatus = load.brokerPaymentStatus || load.broker_payment_status || {};
+            
+            if (brokerPaymentStatus.completed || brokerPaymentStatus.paid || normalizeStatus(brokerPaymentStatus.status) === 'completed') {
+                return true;
+            }
+
+            // Check if load has commission paid flag
+            if (load.commissionPaid || load.commission_paid) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Load Pending Orders
+        function loadPendingOrders() {
+            const brokerId = auth.brokerId || auth.id;
+            if (!brokerId) {
+                showEmptyState();
+                return;
+            }
+
+            // Get all loads posted by this broker
+            db.ref('loads').orderByChild('brokerId').equalTo(brokerId).on('value', async (snapshot) => {
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const emptyState = document.getElementById('emptyState');
+                const pendingOrdersTable = document.getElementById('pendingOrdersTable');
+
+                if (!snapshot.exists()) {
+                    loadingSpinner.style.display = 'none';
+                    showEmptyState();
+                    return;
+                }
+
+                const loads = [];
+                snapshot.forEach((child) => {
+                    const load = child.val();
+                    load.id = child.key;
+                    loads.push(load);
+                });
+
+                // Sort by creation date (newest first)
+                loads.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || a.created_at || a.postedDate || 0);
+                    const dateB = new Date(b.createdAt || b.created_at || b.postedDate || 0);
+                    return dateB - dateA;
+                });
+
+                if (loads.length === 0) {
+                    loadingSpinner.style.display = 'none';
+                    showEmptyState();
+                    return;
+                }
+
+                // Filter loads that need commission payment (status is pending_payment)
+                const pendingLoads = loads.filter((load) => {
+                    const status = normalizeStatus(load.status);
+                    return status === 'pending_payment';
+                });
+
+                const visibleLoads = pendingLoads;
+
+                if (visibleLoads.length === 0) {
+                    loadingSpinner.style.display = 'none';
+                    showEmptyState();
+                    return;
+                }
+
+                renderOrders(visibleLoads);
+            }, (error) => {
+                console.error('Error loading pending orders:', error);
+                document.getElementById('loadingSpinner').style.display = 'none';
+                showCustomAlert('error', 'Error loading pending orders. Please try again.');
+            });
+        }
+
+        // Show Empty State
+        function showEmptyState() {
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('pendingOrdersTable').style.display = 'none';
+        }
+
+        // View Load
+        function viewLoad(loadId) {
+            window.location.href = `load-details.html?id=${loadId}`;
+        }
+
+        // Pay Commission
+        async function payCommission(loadId, commissionAmount, totalAmount) {
+            const confirmed = await showConfirm('Are you sure you want to pay this commission?', {
+                title: 'Pay Commission',
+                okText: 'Yes, Pay Now',
+                cancelText: 'Cancel',
+                amount: commissionAmount,
+                totalAmount: totalAmount
+            });
+            
+            if (!confirmed) {
+                return;
+            }
+
+            // Redirect to paynow.html page with commission details
+            window.location.href = `paynow.html?loadId=${loadId}&type=commission&amount=${commissionAmount}&paymentFor=Commission Payment`;
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+        }
+
+        // Notifications Toggle
+        function toggleNotifications() {
+            console.log('Notifications clicked');
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('brokerAuth');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load User Data
+        function loadUserData() {
+            const userName = auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Broker User';
+            const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6f42c1&color=fff&size=128`;
+            document.getElementById('profileImage').src = profileImageUrl;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            loadPendingOrders();
+
+            // Close sidebar on mobile when clicking outside
+            document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
+
+            // Close sidebar on navigation click (mobile)
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

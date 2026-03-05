@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Alpha Freight</title>
+    <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-overlay > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader {
+            border: 4px solid rgba(0, 0, 0, .1);
+            border-left-color: transparent;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin89345 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin89345 {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Logo Styling */
+        .top-logo {
+            position: fixed;
+            top: 20px;
+            left: 30px;
+            z-index: 1000;
+            max-width: 200px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .top-logo img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .top-logo:hover {
+            transform: scale(1.05);
+        }
+
+        @media (min-width: 992px) {
+            .top-logo {
+                max-width: 250px;
+                top: 25px;
+                left: 40px;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .top-logo {
+                display: none;
+            }
+        }
+
+        .payment-options-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            max-width: 800px;
+            width: 100%;
+            padding: 0 20px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .payment-options-container.hidden {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+            position: absolute;
+            visibility: hidden;
+        }
+
+        .payment-option-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 35px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            text-align: center;
+        }
+
+        .payment-option-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .payment-option-box.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+            box-shadow: none;
+        }
+
+        .payment-option-box.disabled:hover {
+            transform: none;
+            border-color: #e2e8f0;
+            box-shadow: none;
+        }
+
+        .payment-option-box.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.25);
+        }
+
+        .payment-option-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .payment-option-box.active .payment-option-icon {
+            color: #764ba2;
+        }
+
+        .payment-option-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .payment-option-description {
+            font-size: 14px;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .payment-options-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .payment-option-box {
+                max-width: 100%;
+                padding: 30px 25px;
+            }
+        }
+
+        /* Payment Details Container */
+        .payment-details-container {
+            display: none;
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 20px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .payment-details-container.show {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Left Side - Card & Billing Details */
+        .payment-form-section {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .payment-form-box {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .payment-form-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-box-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-box-title i {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .bank-detail-value {
+            padding: 12px 15px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        /* Card Number Input with Icons */
+        .card-input-wrapper {
+            position: relative;
+        }
+
+        .card-input-wrapper input {
+            padding-right: 80px;
+        }
+
+        .card-brand-icons {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .card-brand-icons.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .card-brand-icon {
+            width: 40px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 4px;
+            font-size: 24px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .card-brand-icon.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .card-brand-icon.visa {
+            color: #1434CB;
+        }
+
+        .card-brand-icon.mastercard {
+            color: #EB001B;
+        }
+
+        .card-brand-icon.amex {
+            color: #006FCF;
+        }
+
+        .card-brand-icon.discover {
+            color: #FF6000;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .separator-line {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 25px 0;
+        }
+
+        /* Payment Details Info Box */
+        .payment-details-info-box {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .payment-details-info-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-details-info-title i {
+            color: #667eea;
+        }
+
+        .payment-details-info-item {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .payment-details-info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .payment-details-info-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        .payment-details-info-value {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 15px;
+        }
+
+        .payment-details-summary-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .payment-details-summary-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .payment-details-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payment-details-total-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 16px;
+        }
+
+        .payment-details-total-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        /* Right Side - Amount & Load Details */
+        .payment-summary-section {
+            flex: 0 0 350px;
+            position: sticky;
+            top: 40px;
+        }
+
+        .summary-box {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-title i {
+            color: #667eea;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #718096;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .summary-value {
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .summary-amount {
+            font-size: 32px;
+            color: #667eea;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .payment-submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 20px;
+        }
+
+        .payment-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        @media (max-width: 992px) {
+            .payment-details-container.show {
+                flex-direction: column;
+            }
+
+            .payment-summary-section {
+                flex: 1;
+                position: static;
+                width: 100%;
+            }
+        }
+
+        .secure-badge {
+            text-align: center;
+            margin-top: 20px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .secure-badge i {
+            color: #48bb78;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 576px) {
+            .payment-form-box,
+            .summary-box {
+                padding: 22px;
+            }
+
+            .payment-details-info-box {
+                padding: 22px;
+            }
+
+            .summary-amount {
+                font-size: 26px;
+            }
+
+            .payment-submit-btn {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+        }
+
+        /* Custom Alert Styles */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            min-width: 320px;
+            max-width: 400px;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-alert.hide {
+            animation: slideOutRight 0.4s ease-out forwards;
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .custom-alert i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .custom-alert-content {
+            flex: 1;
+        }
+
+        .custom-alert-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-alert-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .custom-alert-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .custom-alert-success i {
+            color: #d1fae5;
+        }
+
+        .custom-alert-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .custom-alert-error i {
+            color: #fee2e2;
+        }
+
+        .custom-alert-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .custom-alert-warning i {
+            color: #fef3c7;
+        }
+
+        .custom-alert-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .custom-alert-info i {
+            color: #e9d5ff;
+        }
+
+        @media (max-width: 576px) {
+            .custom-alert {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Payment Sent Modal */
+        .payment-sent-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .payment-sent-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .payment-sent-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            border: 1px solid #e2e8f0;
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+        }
+
+        .payment-sent-overlay.show .payment-sent-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .payment-sent-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-sent-message {
+            color: #718096;
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .payment-sent-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .payment-sent-btn {
+            padding: 0.6rem 1.1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="loader"></div>
+            <div class="loading-text">Loading Payment...</div>
+        </div>
+    </div>
+
+    <!-- Top Logo -->
+    <div class="top-logo">
+        <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo">
+    </div>
+
+    <!-- Payment Options -->
+    <div class="payment-options-container" id="paymentOptionsContainer">
+        <div class="payment-option-box" id="cardPaymentBox" onclick="selectPaymentMethod('card')">
+            <div class="payment-option-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="payment-option-title">Card Payment</div>
+            <div class="payment-option-description">
+                Pay securely with your credit or debit card via Stripe
+            </div>
+        </div>
+
+        <div class="payment-option-box" id="bankTransferBox" onclick="selectPaymentMethod('bank')">
+            <div class="payment-option-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <div class="payment-option-title">Bank Transfer</div>
+            <div class="payment-option-description">
+                Make payment via bank transfer to our account
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Transfer Details -->
+    <div class="payment-details-container" id="bankTransferDetailsContainer">
+        <!-- Left Side - Bank Account Details -->
+        <div class="payment-form-section">
+            <div class="payment-form-box">
+                <div class="form-box-title">
+                    <i class="fas fa-university"></i>
+                    Bank Transfer Details
+                </div>
+                <div class="form-group">
+                    <label>Account Holder Name</label>
+                    <div class="bank-detail-value">Alpha Freight Solutions</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <div class="bank-detail-value">29894043</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sort Code</label>
+                        <div class="bank-detail-value">040605</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>IBAN</label>
+                    <div class="bank-detail-value">GB35CLRB04060529894043</div>
+                </div>
+                <div class="form-group">
+                    <label>SWIFT Code</label>
+                    <div class="bank-detail-value">CLRBGB22</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Amount & Load Details -->
+        <div class="payment-summary-section">
+            <div class="summary-box">
+                <div class="summary-title">
+                    <i class="fas fa-receipt"></i>
+                    Payment Summary
+                </div>
+                <div class="summary-amount" id="bankSummaryAmount">£0.00</div>
+                <div class="summary-item" id="bankSummaryTotalAmountItem" style="display: none;">
+                    <span class="summary-label">Total Load Amount:</span>
+                    <span class="summary-value" id="bankSummaryTotalAmount">-</span>
+                </div>
+                <div class="summary-item" id="bankSummaryCommissionAmountItem" style="display: none;">
+                    <span class="summary-label">Commission Amount:</span>
+                    <span class="summary-value" id="bankSummaryCommissionAmount">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Payment For:</span>
+                    <span class="summary-value" id="bankSummaryPaymentFor">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Load ID:</span>
+                    <span class="summary-value" id="bankSummaryLoadId">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Payment Type:</span>
+                    <span class="summary-value" id="bankSummaryPaymentType">-</span>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f7fafc; border-radius: 10px; font-size: 13px; color: #718096; line-height: 1.6;">
+                    <i class="fas fa-info-circle"></i> Please include your Load ID as a reference when making the transfer.
+                </div>
+                <button class="payment-submit-btn" id="bankTransferConfirmBtn" onclick="confirmBankTransfer()">
+                    <i class="fas fa-check-circle me-2"></i>I Have Sent Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Form -->
+    <div class="payment-details-container" id="paymentDetailsContainer">
+        <!-- Left Side - Card & Billing Details -->
+        <div class="payment-form-section">
+            <!-- Payment Details Info Box -->
+            <div class="payment-details-info-box">
+                <div class="payment-details-info-title">
+                    <i class="fas fa-receipt"></i>
+                    Payment Details
+                </div>
+                <div class="payment-details-info-item">
+                    <span class="payment-details-info-label">Load:</span>
+                    <span class="payment-details-info-value" id="paymentDetailsLoad">-</span>
+                </div>
+                <div class="payment-details-info-item" id="paymentDetailsTotalAmountItem" style="display: none;">
+                    <span class="payment-details-info-label">Total Load Amount:</span>
+                    <span class="payment-details-info-value" id="paymentDetailsTotalAmount">-</span>
+                </div>
+                <div class="payment-details-info-item">
+                    <span class="payment-details-info-label">Amount:</span>
+                    <span class="payment-details-info-value" id="paymentDetailsAmount">-</span>
+                </div>
+                <div class="payment-details-info-item">
+                    <span class="payment-details-info-label">Payment Type:</span>
+                    <span class="payment-details-info-value" id="paymentDetailsType">-</span>
+                </div>
+                <div class="payment-details-summary-section">
+                    <div class="payment-details-summary-title">Summary</div>
+                    <div class="payment-details-total" id="paymentDetailsTotalLoadAmountItem" style="display: none; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                        <span class="payment-details-total-label">Total Load Amount:</span>
+                        <span class="payment-details-total-value" id="paymentDetailsTotalLoadAmount">-</span>
+                    </div>
+                    <div class="payment-details-total">
+                        <span class="payment-details-total-label">Total Due:</span>
+                        <span class="payment-details-total-value" id="paymentDetailsTotal">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Details Box -->
+            <div class="payment-form-box">
+                <div class="form-box-title">
+                    <i class="fas fa-credit-card"></i>
+                    Card Details
+                </div>
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <div class="card-input-wrapper">
+                        <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" id="cardNumber">
+                        <div class="card-brand-icons" id="cardBrandIcons">
+                            <div class="card-brand-icon visa" id="visaIcon">
+                                <i class="fab fa-cc-visa"></i>
+                            </div>
+                            <div class="card-brand-icon mastercard" id="mastercardIcon">
+                                <i class="fab fa-cc-mastercard"></i>
+                            </div>
+                            <div class="card-brand-icon amex" id="amexIcon">
+                                <i class="fab fa-cc-amex"></i>
+                            </div>
+                            <div class="card-brand-icon discover" id="discoverIcon">
+                                <i class="fab fa-cc-discover"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" placeholder="MM/YY" maxlength="5" id="expiryDate">
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" placeholder="123" maxlength="4" id="cvv">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Cardholder Name</label>
+                    <input type="text" placeholder="John Doe" id="cardholderName">
+                </div>
+            </div>
+
+            <!-- Separator Line -->
+            <div class="separator-line"></div>
+
+            <!-- Billing Details Box -->
+            <div class="payment-form-box">
+                <div class="form-box-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Billing Details
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="John Doe" id="billingName">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="john@example.com" id="billingEmail">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="+1 234 567 8900" id="billingPhone">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" placeholder="123 Main Street" id="billingAddress">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" placeholder="New York" id="billingCity">
+                    </div>
+                    <div class="form-group">
+                        <label>Zip Code</label>
+                        <input type="text" placeholder="10001" id="billingZip">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <select id="billingCountry">
+                        <option value="">Select Country</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Amount & Load Details -->
+        <div class="payment-summary-section">
+            <div class="summary-box">
+                <div class="summary-title">
+                    <i class="fas fa-receipt"></i>
+                    Payment Summary
+                </div>
+                <div class="summary-amount" id="summaryAmount">£0.00</div>
+                <div class="summary-item" id="summaryTotalAmountItem" style="display: none;">
+                    <span class="summary-label">Total Load Amount:</span>
+                    <span class="summary-value" id="summaryTotalAmount">-</span>
+                </div>
+                <div class="summary-item" id="summaryCommissionAmountItem" style="display: none;">
+                    <span class="summary-label">Commission Amount:</span>
+                    <span class="summary-value" id="summaryCommissionAmount">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Payment For:</span>
+                    <span class="summary-value" id="summaryPaymentFor">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Load ID:</span>
+                    <span class="summary-value" id="summaryLoadId">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Payment Type:</span>
+                    <span class="summary-value" id="summaryPaymentType">-</span>
+                </div>
+                <button class="payment-submit-btn" id="submitPaymentBtn" onclick="submitPayment()">
+                    <i class="fas fa-lock me-2"></i>Complete Payment
+                </button>
+                <div style="text-align: center; margin-top: 15px; color: #718096; font-size: 12px;">
+                    <i class="fas fa-shield-alt"></i> Secured by Stripe
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Sent Modal -->
+    <div class="payment-sent-overlay" id="paymentSentOverlay" aria-hidden="true">
+        <div class="payment-sent-modal" role="dialog" aria-modal="true" aria-labelledby="paymentSentTitle">
+            <div class="payment-sent-title" id="paymentSentTitle">Payment Submission Received</div>
+            <div class="payment-sent-message">
+                Your payment submission has been sent. We will confirm within 2 hours. Your load will be activated after payment confirmation.
+            </div>
+            <div class="payment-sent-actions">
+                <button class="payment-sent-btn" type="button" onclick="redirectToPayLetter()">Go to Pay Letter Pending</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // Custom Alert Function
+        function showCustomAlert(type, message, duration = 4000) {
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            const alert = document.createElement('div');
+            alert.className = `custom-alert custom-alert-${type}`;
+            
+            let icon = 'fa-info-circle';
+            let title = 'Info';
+            if (type === 'success') {
+                icon = 'fa-check-circle';
+                title = 'Success';
+            } else if (type === 'error') {
+                icon = 'fa-exclamation-circle';
+                title = 'Error';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+                title = 'Warning';
+            }
+            
+            alert.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div class="custom-alert-content">
+                    <div class="custom-alert-title">${title}</div>
+                    <div class="custom-alert-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.classList.add('hide');
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 400);
+            }, duration);
+        }
+
+        // Hide loading overlay after 3 seconds
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.classList.add('hide');
+                    setTimeout(function() {
+                        loadingOverlay.style.display = 'none';
+                    }, 500);
+                }
+            }, 3000);
+        });
+
+        // Stripe Configuration (LIVE MODE)
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Snef8JwsGcenL627huErNXtqNGF92AGxEgXTWOa5WSDNmCS0r7VfdLv9XihRl7xZ0cJVEzRxRQaQUsaHkd3La9g00LKykDcYb';
+        // Use current origin for backend endpoint to avoid CORS issues
+        // Backend endpoint configuration
+        // For LOCAL development: Uses localhost:3000
+        // For CLOUD deployment: Replace with your Railway/Render URL below
+        const CLOUD_BACKEND_URL = 'https://alpha-freight-server.onrender.com'; // Render cloud URL
+        const STRIPE_BACKEND_ENDPOINT = CLOUD_BACKEND_URL 
+            ? `${CLOUD_BACKEND_URL}/api/create-payment-intent`
+            : `${window.location.protocol}//${window.location.hostname}:3000/api/create-payment-intent`;
+        const STRIPE_CARD_PAYMENTS_ENABLED = Boolean(STRIPE_PUBLISHABLE_KEY)
+            && !STRIPE_PUBLISHABLE_KEY.startsWith('YOUR_');
+        let stripe = null;
+        let db = null;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        function initFirebase() {
+            if (typeof firebase === 'undefined') {
+                return null;
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            return db;
+        }
+
+        // Initialize Stripe
+        if (typeof Stripe !== 'undefined' && STRIPE_CARD_PAYMENTS_ENABLED) {
+            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        }
+
+        // Disable card option when Stripe is not configured
+        window.addEventListener('DOMContentLoaded', function() {
+            if (!STRIPE_CARD_PAYMENTS_ENABLED) {
+                const cardPaymentBox = document.getElementById('cardPaymentBox');
+                if (cardPaymentBox) {
+                    cardPaymentBox.classList.add('disabled');
+                    cardPaymentBox.setAttribute('aria-disabled', 'true');
+                }
+            }
+        });
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('loadId');
+        const amount = urlParams.get('amount');
+        const paymentFor = urlParams.get('paymentFor') || 'Payment';
+        const paymentTypeParam = urlParams.get('type');
+        const paymentType = paymentTypeParam === 'commission' ? 'Commission Payment' : (urlParams.get('paymentType') || 'Payment');
+
+        // Select Payment Method
+        function selectPaymentMethod(method) {
+            if (method === 'card') {
+                if (!STRIPE_CARD_PAYMENTS_ENABLED) {
+                    showCustomAlert('info', 'Card payments are temporarily unavailable. Please use bank transfer.');
+                    return;
+                }
+                const optionsContainer = document.getElementById('paymentOptionsContainer');
+                optionsContainer.classList.add('hidden');
+                
+                const bankDetailsContainer = document.getElementById('bankTransferDetailsContainer');
+                if (bankDetailsContainer) {
+                    bankDetailsContainer.classList.remove('show');
+                }
+                
+                setTimeout(() => {
+                    const detailsContainer = document.getElementById('paymentDetailsContainer');
+                    detailsContainer.classList.add('show');
+                    updatePaymentSummary();
+                }, 400);
+            } else if (method === 'bank') {
+                const optionsContainer = document.getElementById('paymentOptionsContainer');
+                optionsContainer.classList.add('hidden');
+                
+                const cardDetailsContainer = document.getElementById('paymentDetailsContainer');
+                if (cardDetailsContainer) {
+                    cardDetailsContainer.classList.remove('show');
+                }
+                
+                setTimeout(() => {
+                    const bankDetailsContainer = document.getElementById('bankTransferDetailsContainer');
+                    bankDetailsContainer.classList.add('show');
+                    updateBankTransferSummary();
+                }, 400);
+            }
+        }
+
+        // Update Payment Summary
+        async function updatePaymentSummary() {
+            const currencySymbol = '£';
+            const commissionAmount = amount ? parseFloat(amount) : 0;
+            const formattedCommissionAmount = `${currencySymbol}${commissionAmount.toFixed(2)}`;
+            
+            document.getElementById('summaryPaymentFor').textContent = paymentFor;
+            document.getElementById('summaryLoadId').textContent = loadId || '-';
+            document.getElementById('summaryPaymentType').textContent = paymentType;
+            
+            document.getElementById('paymentDetailsLoad').textContent = paymentFor || '-';
+            document.getElementById('paymentDetailsAmount').textContent = formattedCommissionAmount;
+            document.getElementById('paymentDetailsType').textContent = paymentType;
+            
+            // Fetch and display total load amount and calculate total
+            if (loadId) {
+                try {
+                    const database = initFirebase();
+                    if (database) {
+                        const loadSnapshot = await database.ref('loads').child(loadId).once('value');
+                        if (loadSnapshot.exists()) {
+                            const load = loadSnapshot.val();
+                            const loadValue = parseFloat(load.budget || load.price || load.totalCost || load.maxBudget || 0);
+                            if (loadValue > 0) {
+                                const formattedTotalAmount = `${currencySymbol}${loadValue.toFixed(2)}`;
+                                
+                                // Calculate total (load + commission)
+                                const totalAmount = loadValue + commissionAmount;
+                                const formattedTotal = `${currencySymbol}${totalAmount.toFixed(2)}`;
+                                
+                                // Update prominent amount with total
+                                document.getElementById('summaryAmount').textContent = formattedTotal;
+                                
+                                // Update "Total Due" with total amount
+                                document.getElementById('paymentDetailsTotal').textContent = formattedTotal;
+                                
+                                // Update right column summary items
+                                document.getElementById('summaryTotalAmount').textContent = formattedTotalAmount;
+                                document.getElementById('summaryTotalAmountItem').style.display = 'flex';
+                                document.getElementById('summaryCommissionAmount').textContent = formattedCommissionAmount;
+                                document.getElementById('summaryCommissionAmountItem').style.display = 'flex';
+                                
+                                // Update left column payment details
+                                document.getElementById('paymentDetailsTotalAmount').textContent = formattedTotalAmount;
+                                document.getElementById('paymentDetailsTotalAmountItem').style.display = 'flex';
+                                
+                                // Update left column summary section
+                                document.getElementById('paymentDetailsTotalLoadAmount').textContent = formattedTotalAmount;
+                                document.getElementById('paymentDetailsTotalLoadAmountItem').style.display = 'block';
+                            } else {
+                                // If load value not found, show only commission
+                                document.getElementById('summaryAmount').textContent = formattedCommissionAmount;
+                                document.getElementById('paymentDetailsTotal').textContent = formattedCommissionAmount;
+                            }
+                        } else {
+                            // If load not found, show only commission
+                            document.getElementById('summaryAmount').textContent = formattedCommissionAmount;
+                            document.getElementById('paymentDetailsTotal').textContent = formattedCommissionAmount;
+                        }
+                    } else {
+                        // If Firebase not available, show only commission
+                        document.getElementById('summaryAmount').textContent = formattedCommissionAmount;
+                        document.getElementById('paymentDetailsTotal').textContent = formattedCommissionAmount;
+                    }
+                } catch (error) {
+                    console.error('Error fetching load amount:', error);
+                    // On error, show only commission
+                    document.getElementById('summaryAmount').textContent = formattedCommissionAmount;
+                    document.getElementById('paymentDetailsTotal').textContent = formattedCommissionAmount;
+                }
+            } else {
+                // If no loadId, show only commission
+                document.getElementById('summaryAmount').textContent = formattedCommissionAmount;
+                document.getElementById('paymentDetailsTotal').textContent = formattedCommissionAmount;
+            }
+        }
+
+        // Update Bank Transfer Summary
+        async function updateBankTransferSummary() {
+            const currencySymbol = '£';
+            const commissionAmount = amount ? parseFloat(amount) : 0;
+            const formattedCommissionAmount = `${currencySymbol}${commissionAmount.toFixed(2)}`;
+            
+            document.getElementById('bankSummaryPaymentFor').textContent = paymentFor;
+            document.getElementById('bankSummaryLoadId').textContent = loadId || '-';
+            document.getElementById('bankSummaryPaymentType').textContent = paymentType;
+            
+            // Fetch and display total load amount and calculate total
+            if (loadId) {
+                try {
+                    const database = initFirebase();
+                    if (database) {
+                        const loadSnapshot = await database.ref('loads').child(loadId).once('value');
+                        if (loadSnapshot.exists()) {
+                            const load = loadSnapshot.val();
+                            const loadValue = parseFloat(load.budget || load.price || load.totalCost || load.maxBudget || 0);
+                            if (loadValue > 0) {
+                                const formattedTotalAmount = `${currencySymbol}${loadValue.toFixed(2)}`;
+                                
+                                // Calculate total (load + commission)
+                                const totalAmount = loadValue + commissionAmount;
+                                const formattedTotal = `${currencySymbol}${totalAmount.toFixed(2)}`;
+                                
+                                // Update prominent amount with total
+                                document.getElementById('bankSummaryAmount').textContent = formattedTotal;
+                                
+                                // Update summary items
+                                document.getElementById('bankSummaryTotalAmount').textContent = formattedTotalAmount;
+                                document.getElementById('bankSummaryTotalAmountItem').style.display = 'flex';
+                                document.getElementById('bankSummaryCommissionAmount').textContent = formattedCommissionAmount;
+                                document.getElementById('bankSummaryCommissionAmountItem').style.display = 'flex';
+                            } else {
+                                // If load value not found, show only commission
+                                document.getElementById('bankSummaryAmount').textContent = formattedCommissionAmount;
+                            }
+                        } else {
+                            // If load not found, show only commission
+                            document.getElementById('bankSummaryAmount').textContent = formattedCommissionAmount;
+                        }
+                    } else {
+                        // If Firebase not available, show only commission
+                        document.getElementById('bankSummaryAmount').textContent = formattedCommissionAmount;
+                    }
+                } catch (error) {
+                    console.error('Error fetching load amount:', error);
+                    // On error, show only commission
+                    document.getElementById('bankSummaryAmount').textContent = formattedCommissionAmount;
+                }
+            } else {
+                // If no loadId, show only commission
+                document.getElementById('bankSummaryAmount').textContent = formattedCommissionAmount;
+            }
+        }
+
+        function showPaymentSentModal() {
+            const overlay = document.getElementById('paymentSentOverlay');
+            if (!overlay) return;
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            setTimeout(() => {
+                redirectToPayLetter();
+            }, 2500);
+        }
+
+        function redirectToPayLetter() {
+            window.location.href = 'pay-letter-pending.html';
+        }
+
+        // Update load status after successful payment
+        async function updateLoadStatusAfterPayment() {
+            if (!loadId) return;
+
+            try {
+                const database = initFirebase();
+                if (!database) {
+                    throw new Error('Firebase not available');
+                }
+
+                const loadSnapshot = await database.ref('loads').child(loadId).once('value');
+                if (!loadSnapshot.exists()) {
+                    return;
+                }
+
+                const load = loadSnapshot.val();
+                const updates = {
+                    status: 'active',
+                    commissionPaid: true
+                };
+
+                // Update brokerPaymentStatus
+                const brokerPaymentStatus = load.brokerPaymentStatus || {};
+                brokerPaymentStatus.completed = true;
+                brokerPaymentStatus.paidAt = new Date().toISOString();
+                brokerPaymentStatus.amount = parseFloat(amount) || 0;
+                updates.brokerPaymentStatus = brokerPaymentStatus;
+
+                await database.ref('loads').child(loadId).update(updates);
+            } catch (error) {
+                console.error('Error updating load status:', error);
+            }
+        }
+
+        async function confirmBankTransfer() {
+            showCustomAlert('info', 'Support team will check your payment within 2 hours.');
+
+            if (!loadId) {
+                showCustomAlert('error', 'Load ID is missing. Please try again.');
+                return;
+            }
+
+            const brokerAuth = JSON.parse(localStorage.getItem('brokerAuth') || '{}');
+            if (!brokerAuth.isLoggedIn) {
+                showCustomAlert('error', 'Please login to continue.');
+                return;
+            }
+
+            const amountValue = parseFloat(amount) || 0;
+            const now = new Date().toISOString();
+
+            try {
+                const database = initFirebase();
+                if (!database) {
+                    throw new Error('Firebase not available');
+                }
+
+                const loadSnapshot = await database.ref('loads').child(loadId).once('value');
+                if (!loadSnapshot.exists()) {
+                    showCustomAlert('error', 'Load not found. Please try again.');
+                    return;
+                }
+
+                const load = loadSnapshot.val();
+                const resolvedAmount = amountValue || load.budget || load.price || load.maxBudget || load.minBudget || 0;
+                const brokerId = brokerAuth.brokerId || brokerAuth.id;
+                const brokerName = brokerAuth.firstName ? `${brokerAuth.firstName} ${brokerAuth.lastName || ''}`.trim() : 'Broker';
+
+                const requestData = {
+                    loadId: loadId,
+                    amount: resolvedAmount,
+                    paymentFor: paymentFor || load.loadTitle || 'Commission Payment',
+                    paymentType: paymentType || 'Bank Transfer',
+                    brokerId: brokerId,
+                    brokerName: brokerName,
+                    brokerEmail: brokerAuth.email || '',
+                    companyName: brokerAuth.companyName || brokerAuth.company || '',
+                    status: 'pending',
+                    createdAt: now
+                };
+
+                await database.ref('bankTransferRequests').push(requestData);
+
+                const paymentStatus = load.paymentStatus || {};
+                paymentStatus.bankTransfer = {
+                    status: 'pending',
+                    amount: resolvedAmount,
+                    paymentType: paymentType || 'bank',
+                    reference: loadId,
+                    transferDate: now
+                };
+
+                await database.ref('loads').child(loadId).update({
+                    paymentStatus: paymentStatus
+                });
+
+                showPaymentSentModal();
+            } catch (error) {
+                console.error('Bank transfer submission error:', error);
+                showCustomAlert('warning', 'Payment submitted locally. Support will verify within 2 hours.');
+                showPaymentSentModal();
+            }
+        }
+
+        // Helper function to parse card expiry
+        function parseExpiry(expiryString) {
+            const parts = expiryString.split('/');
+            return {
+                month: parts[0] ? parseInt(parts[0], 10) : null,
+                year: parts[1] ? parseInt('20' + parts[1], 10) : null
+            };
+        }
+
+        // Submit Payment
+        async function submitPayment() {
+            const btn = document.getElementById('submitPaymentBtn');
+            const originalText = btn.innerHTML;
+            
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvv = document.getElementById('cvv').value;
+            const cardholderName = document.getElementById('cardholderName').value;
+            const billingName = document.getElementById('billingName').value || cardholderName;
+            const billingEmail = document.getElementById('billingEmail').value;
+            const billingPhone = document.getElementById('billingPhone').value;
+            const billingAddress = document.getElementById('billingAddress').value;
+            const billingCity = document.getElementById('billingCity').value;
+            const billingZip = document.getElementById('billingZip').value;
+            const billingCountry = document.getElementById('billingCountry').value;
+            
+            if (!cardNumber || !expiryDate || !cvv || !cardholderName) {
+                showCustomAlert('error', 'Please fill in all card details');
+                return;
+            }
+
+            if (cardNumber.length < 13 || cardNumber.length > 19) {
+                showCustomAlert('error', 'Please enter a valid card number');
+                return;
+            }
+
+            if (cvv.length < 3 || cvv.length > 4) {
+                showCustomAlert('error', 'Please enter a valid CVV');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+
+            try {
+                if (!STRIPE_CARD_PAYMENTS_ENABLED) {
+                    throw new Error('Card payments are not configured yet.');
+                }
+                if (!stripe) {
+                    throw new Error('Stripe is not initialized. Please refresh the page.');
+                }
+
+                const expiry = parseExpiry(expiryDate);
+                if (!expiry.month || !expiry.year) {
+                    throw new Error('Please enter a valid expiry date (MM/YY)');
+                }
+
+                const currentDate = new Date();
+                const expiryDateObj = new Date(expiry.year, expiry.month - 1);
+                if (expiryDateObj < currentDate) {
+                    throw new Error('Card expiry date is invalid');
+                }
+
+                const paymentAmount = parseFloat(amount) || 0;
+                const amountInPence = Math.round(paymentAmount * 100);
+
+                if (amountInPence <= 0) {
+                    throw new Error('Invalid payment amount');
+                }
+
+                const paymentData = {
+                    card: {
+                        number: cardNumber,
+                        exp_month: expiry.month,
+                        exp_year: expiry.year,
+                        cvc: cvv,
+                    },
+                    billing_details: {
+                        name: cardholderName,
+                        email: billingEmail || undefined,
+                        phone: billingPhone || undefined,
+                        address: {
+                            line1: billingAddress || undefined,
+                            city: billingCity || undefined,
+                            postal_code: billingZip || undefined,
+                            country: billingCountry || undefined,
+                        },
+                    },
+                    metadata: {
+                        loadId: loadId || '',
+                        paymentFor: paymentFor || '',
+                        paymentType: paymentType || '',
+                    }
+                };
+
+                const response = await fetch(STRIPE_BACKEND_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: amountInPence,
+                        currency: 'gbp',
+                        payment_method_data: paymentData,
+                        loadId: loadId,
+                        paymentFor: paymentFor,
+                        paymentType: paymentType,
+                    }),
+                });
+
+                const contentType = response.headers.get('content-type') || '';
+                const rawText = await response.text();
+                let data = null;
+
+                if (contentType.includes('application/json')) {
+                    try {
+                        data = JSON.parse(rawText);
+                    } catch (parseError) {
+                        throw new Error('Payment response was invalid. Please try bank transfer.');
+                    }
+                } else {
+                    throw new Error('Card payments are not available on this server. Please use bank transfer.');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data?.error?.message || 'Payment system is not configured. Please try bank transfer or contact support.');
+                }
+
+                if (data.error) {
+                    throw new Error(data.error?.message || 'Payment failed');
+                }
+
+                if (data.status !== 'succeeded') {
+                    if (!data.clientSecret) {
+                        throw new Error('Payment response missing client secret.');
+                    }
+                    const { error: confirmError } = await stripe.confirmCardPayment(data.clientSecret);
+                    if (confirmError) {
+                        throw confirmError;
+                    }
+                }
+
+                // Payment success - Update load status
+                await updateLoadStatusAfterPayment();
+
+                showCustomAlert('success', 'Payment processed successfully! Your load is now active.');
+                
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Payment Successful';
+                btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    window.location.href = 'payment-success.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showCustomAlert('error', error.message || 'Payment failed. Please try again.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Detect Card Brand
+        function detectCardBrand(cardNumber) {
+            const number = cardNumber.replace(/\s/g, '');
+            
+            const cardBrandIcons = document.getElementById('cardBrandIcons');
+            const visaIcon = document.getElementById('visaIcon');
+            const mastercardIcon = document.getElementById('mastercardIcon');
+            const amexIcon = document.getElementById('amexIcon');
+            const discoverIcon = document.getElementById('discoverIcon');
+            
+            if (number.length > 0 && cardBrandIcons) {
+                cardBrandIcons.classList.add('show');
+            } else if (number.length === 0 && cardBrandIcons) {
+                cardBrandIcons.classList.remove('show');
+                return;
+            }
+            
+            if (visaIcon) visaIcon.classList.remove('active');
+            if (mastercardIcon) mastercardIcon.classList.remove('active');
+            if (amexIcon) amexIcon.classList.remove('active');
+            if (discoverIcon) discoverIcon.classList.remove('active');
+            
+            if (number.length === 0) {
+                return;
+            }
+            
+            const firstDigit = number[0];
+            const firstTwoDigits = number.substring(0, 2);
+            const firstFourDigits = number.substring(0, 4);
+            const firstThreeDigits = number.substring(0, 3);
+            
+            if (firstDigit === '4' && visaIcon) {
+                visaIcon.classList.add('active');
+            }
+            else if (mastercardIcon && ((firstTwoDigits >= '51' && firstTwoDigits <= '55') || 
+                     (firstFourDigits >= '2221' && firstFourDigits <= '2720'))) {
+                mastercardIcon.classList.add('active');
+            }
+            else if (amexIcon && (firstTwoDigits === '34' || firstTwoDigits === '37')) {
+                amexIcon.classList.add('active');
+            }
+            else if (discoverIcon && (firstFourDigits === '6011' || 
+                     firstTwoDigits === '65' || 
+                     (firstThreeDigits >= '644' && firstThreeDigits <= '649'))) {
+                discoverIcon.classList.add('active');
+            }
+        }
+
+        // Format Card Number Input
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardNumberInput = document.getElementById('cardNumber');
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                    e.target.value = formattedValue;
+                    detectCardBrand(e.target.value);
+                });
+            }
+
+            const expiryInput = document.getElementById('expiryDate');
+            if (expiryInput) {
+                expiryInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            const cvvInput = document.getElementById('cvv');
+            if (cvvInput) {
+                cvvInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

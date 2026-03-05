@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Freight Platform - Sign Up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #635bff 0%, #7c3aed 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .signup-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .signup-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .signup-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .signup-header p {
+            font-size: 1.125rem;
+            opacity: 0.95;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            background: var(--bg-gray);
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-gray);
+            z-index: 0;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 2px;
+            background: var(--primary);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-medium);
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-medium);
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary);
+        }
+
+        /* Form Container */
+        .form-container {
+            padding: 3rem;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .step-subtitle {
+            color: var(--text-medium);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Password Strength Meter */
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: var(--bg-gray);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .password-strength.weak .password-strength-bar {
+            width: 33%;
+            background: var(--danger);
+        }
+
+        .password-strength.medium .password-strength-bar {
+            width: 66%;
+            background: var(--warning);
+        }
+
+        .password-strength.strong .password-strength-bar {
+            width: 100%;
+            background: var(--success);
+        }
+
+        .password-hint {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            margin-top: 0.25rem;
+        }
+
+        /* Plan Cards */
+        .plan-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .plan-card {
+            border: 2px solid var(--border-gray);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .plan-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.15);
+        }
+
+        .plan-card.selected {
+            border-color: var(--primary);
+            background: rgba(99, 91, 255, 0.05);
+        }
+
+        .plan-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -8px;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .plan-price-sub {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            font-size: 0.875rem;
+        }
+
+        .plan-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .plan-features li i {
+            color: var(--success);
+            font-size: 0.75rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 91, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-gray);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-gray);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Checkboxes */
+        .checkbox-group {
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 0.25rem;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            cursor: pointer;
+        }
+
+        .checkbox-group a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-medium);
+            font-size: 0.875rem;
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 968px) {
+            .plan-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Create Your Freight Platform</h1>
+            <p>Get started in minutes with your own branded platform</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-steps">
+                <div class="progress-line" id="progressLine" style="width: 0%;"></div>
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <span class="step-label">Account</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <span class="step-label">Plan</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <span class="step-label">Details</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form id="signupForm" onsubmit="handleSubmit(event)">
+                <div class="error-message" id="errorMessage"></div>
+
+                <!-- Step 1: Account Information -->
+                <div class="step-content active" id="step1">
+                    <h2 class="step-title">Account Information</h2>
+                    <p class="step-subtitle">Create your admin account</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Company Name *</label>
+                        <input type="text" class="form-input" name="companyName" required placeholder="Swift Logistics Ltd">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Your Name *</label>
+                        <input type="text" class="form-input" name="yourName" required placeholder="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" class="form-input" name="email" required placeholder="john@swiftlogistics.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" class="form-input" name="password" id="password" required placeholder="Minimum 8 characters" minlength="8" oninput="checkPasswordStrength()">
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="password-strength-bar"></div>
+                        </div>
+                        <div class="password-hint" id="passwordHint">Use 8+ characters with letters and numbers</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-input" name="phone" required placeholder="+44 20 1234 5678">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Continue
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Plan Selection -->
+                <div class="step-content" id="step2">
+                    <h2 class="step-title">Choose Your Plan</h2>
+                    <p class="step-subtitle">Select the plan that fits your needs</p>
+
+                    <div class="plan-cards">
+                        <label class="plan-card" onclick="selectPlan('starter')">
+                            <input type="radio" name="plan" value="starter" required>
+                            <div class="plan-name">Starter</div>
+                            <div class="plan-price">£3,000</div>
+                            <div class="plan-price-sub">setup + £299/month</div>
+                            <ul class="plan-features">
+                                <li><i class="fas fa-check"></i> Basic load board</li>
+                                <li><i class="fas fa-check"></i> Carrier matching</li>
+                                <li><i class="fas fa-check"></i> Your logo & branding</li>
+                                <li><i class="fas fa-check"></i> Subdomain</li>
+                                <li><i class="fas fa-times" style="color: var(--text-light);"></i> No API access</li>
+                            </ul>
+                        </label>
+
+                        <label class="plan-card selected" onclick="selectPlan('pro')">
+                            <input type="radio" name="plan" value="pro" checked>
+                            <span class="plan-badge">Most Popular</span>
+                            <div class="plan-name">Pro</div>
+                            <div class="plan-price">£5,000</div>
+                            <div class="plan-price-sub">setup + £599/month</div>
+                            <ul class="plan-features">
+                                <li><i class="fas fa-check"></i> Everything in Starter</li>
+                                <li><i class="fas fa-check"></i> API access</li>
+                                <li><i class="fas fa-check"></i> Custom domain</li>
+                                <li><i class="fas fa-check"></i> Priority support</li>
+                                <li><i class="fas fa-check"></i> 5 user accounts</li>
+                            </ul>
+                        </label>
+
+                        <label class="plan-card" onclick="selectPlan('enterprise')">
+                            <input type="radio" name="plan" value="enterprise" required>
+                            <div class="plan-name">Enterprise</div>
+                            <div class="plan-price">£10,000</div>
+                            <div class="plan-price-sub">setup + £999/month</div>
+                            <ul class="plan-features">
+                                <li><i class="fas fa-check"></i> Everything in Pro</li>
+                                <li><i class="fas fa-check"></i> Dedicated server</li>
+                                <li><i class="fas fa-check"></i> White-glove onboarding</li>
+                                <li><i class="fas fa-check"></i> SLA guarantee</li>
+                                <li><i class="fas fa-check"></i> Unlimited users</li>
+                            </ul>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Continue
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Company Details -->
+                <div class="step-content" id="step3">
+                    <h2 class="step-title">Company Details</h2>
+                    <p class="step-subtitle">Tell us more about your company</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Website</label>
+                        <input type="url" class="form-input" name="website" placeholder="https://swiftlogistics.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Company Size *</label>
+                        <select class="form-select" name="companySize" required>
+                            <option value="">Select size</option>
+                            <option value="1-10">1-10 employees</option>
+                            <option value="11-50">11-50 employees</option>
+                            <option value="51-200">51-200 employees</option>
+                            <option value="200+">200+ employees</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">How did you hear about us? *</label>
+                        <select class="form-select" name="referralSource" required>
+                            <option value="">Select source</option>
+                            <option value="google">Google</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="friend">Friend/Colleague</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="#" target="_blank">Terms of Service</a>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="privacy" name="privacy" required>
+                        <label for="privacy">
+                            I agree to the <a href="#" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Continue to Payment
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-link">
+                Already have an account? <a href="#">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function updateProgress() {
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressLine').style.width = progress + '%';
+
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.remove('active', 'completed');
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Validate current step
+                const currentStepEl = document.getElementById(`step${currentStep}`);
+                const inputs = currentStepEl.querySelectorAll('input[required], select[required]');
+                let isValid = true;
+
+                inputs.forEach(input => {
+                    if (!input.value) {
+                        isValid = false;
+                        input.style.borderColor = 'var(--danger)';
+                    } else {
+                        input.style.borderColor = '';
+                    }
+                });
+
+                if (!isValid) {
+                    showError('Please fill in all required fields');
+                    return;
+                }
+
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                currentStep++;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgress();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgress();
+            }
+        }
+
+        function selectPlan(plan) {
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            event.currentTarget.querySelector('input[type="radio"]').checked = true;
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthEl = document.getElementById('passwordStrength');
+            const hintEl = document.getElementById('passwordHint');
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+            strengthEl.className = 'password-strength';
+            if (strength <= 1) {
+                strengthEl.classList.add('weak');
+                hintEl.textContent = 'Weak password';
+            } else if (strength <= 2) {
+                strengthEl.classList.add('medium');
+                hintEl.textContent = 'Medium strength';
+            } else if (strength >= 3) {
+                strengthEl.classList.add('strong');
+                hintEl.textContent = 'Strong password';
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 5000);
+        }
+
+        // API Base URL
+        const API_BASE = window.location.origin.includes('localhost') 
+            ? 'http://localhost:3000/api/white-label'
+            : '/api/white-label';
+
+        // Check subdomain availability
+        async function checkSubdomainAvailability(subdomain) {
+            if (!subdomain || subdomain.length < 3) {
+                return { available: false, message: 'Subdomain must be at least 3 characters' };
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/subdomain/check?subdomain=${encodeURIComponent(subdomain)}`);
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Subdomain check error:', error);
+                return { available: false, message: 'Error checking subdomain availability' };
+            }
+        }
+
+        // Add subdomain input to step 2 if not exists
+        function addSubdomainInput() {
+            const step2 = document.getElementById('step2');
+            const planCards = step2.querySelector('.plan-cards');
+            if (planCards && !step2.querySelector('#subdomainInput')) {
+                const subdomainGroup = document.createElement('div');
+                subdomainGroup.className = 'form-group';
+                subdomainGroup.innerHTML = `
+                    <label class="form-label">Choose Your Subdomain *</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text" class="form-input" id="subdomainInput" name="subdomain" required 
+                               placeholder="swift" pattern="[a-z0-9-]+" 
+                               oninput="checkSubdomainInput()" style="flex: 1;">
+                        <span style="color: var(--text-medium);">.alphafreightuk.com</span>
+                    </div>
+                    <div id="subdomainStatus" style="margin-top: 0.5rem; font-size: 0.875rem;"></div>
+                `;
+                planCards.parentNode.insertBefore(subdomainGroup, planCards.nextSibling);
+            }
+        }
+
+        let subdomainCheckTimeout;
+        async function checkSubdomainInput() {
+            const input = document.getElementById('subdomainInput');
+            const status = document.getElementById('subdomainStatus');
+            if (!input || !status) return;
+            
+            const subdomain = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            input.value = subdomain;
+            
+            if (subdomain.length < 3) {
+                status.innerHTML = '<span style="color: var(--text-medium);">Enter at least 3 characters</span>';
+                return;
+            }
+            
+            clearTimeout(subdomainCheckTimeout);
+            status.innerHTML = '<span style="color: var(--text-medium);"><i class="fas fa-spinner fa-spin"></i> Checking...</span>';
+            
+            subdomainCheckTimeout = setTimeout(async () => {
+                const result = await checkSubdomainAvailability(subdomain);
+                if (result.available) {
+                    status.innerHTML = '<span style="color: var(--success);"><i class="fas fa-check-circle"></i> Available!</span>';
+                    input.style.borderColor = 'var(--success)';
+                } else {
+                    status.innerHTML = `<span style="color: var(--danger);"><i class="fas fa-times-circle"></i> ${result.message || 'Not available'}</span>`;
+                    input.style.borderColor = 'var(--danger)';
+                }
+            }, 500);
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            // Get subdomain
+            const subdomainInput = document.getElementById('subdomainInput');
+            if (subdomainInput) {
+                data.subdomain = subdomainInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            }
+            
+            // Validate subdomain
+            if (!data.subdomain || data.subdomain.length < 3) {
+                showError('Please enter a valid subdomain (at least 3 characters)');
+                return;
+            }
+            
+            // Check subdomain availability one more time
+            const subdomainCheck = await checkSubdomainAvailability(data.subdomain);
+            if (!subdomainCheck.available) {
+                showError(subdomainCheck.message || 'Subdomain is not available');
+                return;
+            }
+            
+            // Show loading
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+            
+            try {
+                // Register with backend
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        companyName: data.companyName,
+                        email: data.email,
+                        password: data.password,
+                        planType: data.plan || 'pro',
+                        subdomain: data.subdomain
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Registration failed');
+                }
+                
+                // Store signup data and client info
+                data.clientId = result.client.id;
+                data.userId = result.user.id;
+                localStorage.setItem('signupData', JSON.stringify(data));
+                localStorage.setItem('clientData', JSON.stringify(result.client));
+                localStorage.setItem('userData', JSON.stringify(result.user));
+                
+                // Redirect to payment
+                window.location.href = 'payment.html';
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError(error.message || 'Registration failed. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // Initialize
+        updateProgress();
+        
+        // Add subdomain input when step 2 is shown
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add subdomain input after plan selection
+            setTimeout(() => {
+                addSubdomainInput();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

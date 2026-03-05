@@ -1,0 +1,1221 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contracts Management - Admin Panel</title>
+    <!-- Early Authentication Check -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Sidebar Styling */
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .admin-sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff !important;
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff !important;
+            font-weight: 600;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        /* Content Area */
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        /* Mobile Menu Toggle Button */
+        .mobile-menu-btn {
+            display: none;
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+        
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .admin-sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                width: 280px;
+                max-width: 80%;
+            }
+            
+            .admin-sidebar.show {
+                left: 0;
+            }
+            
+            .admin-content {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .header-content .d-flex {
+                flex-wrap: wrap;
+            }
+            
+            .header-content .btn {
+                font-size: 0.875rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .header-content .btn i {
+                margin-right: 0.25rem;
+            }
+            
+            .header-content .btn span.d-none {
+                display: none !important;
+            }
+        }
+        
+        .contract-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6f42c1;
+            cursor: pointer;
+        }
+        .contract-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .contract-card.supplier {
+            border-left-color: #007bff;
+        }
+        .contract-card.carrier {
+            border-left-color: #28a745;
+        }
+        .signature-preview {
+            max-width: 150px;
+            max-height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .contract-type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .type-supplier {
+            background-color: #cfe2ff;
+            color: #084298;
+        }
+        .type-carrier {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem; text-decoration: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white active" href="contracts.html">
+                            <i class="fas fa-file-contract"></i> Contracts
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white" href="company-details.html">
+                            <i class="fas fa-building"></i> Carrier Details
+                        </a>
+                        <a class="nav-link text-white" href="user-ids.html">
+                            <i class="fas fa-id-card"></i> User IDs
+                        </a>
+                        <a class="nav-link text-white" href="user-details.html">
+                            <i class="fas fa-search"></i> Search User
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center header-content">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="mobile-menu-btn" onclick="toggleSidebar()" id="mobileMenuBtn">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Contracts Management</h5>
+                                <small class="text-muted d-none d-md-block">View all signed contracts for loads</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary btn-sm" onclick="refreshContracts()">
+                                <i class="fas fa-sync-alt"></i> <span class="d-none d-md-inline">Refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4">
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Contract Type</label>
+                            <select class="form-select" id="typeFilter">
+                                <option value="">All Types</option>
+                                <option value="supplier">Supplier Agreements</option>
+                                <option value="carrier">Carrier Agreements</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Load Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="in-transit">In Transit</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Date Range</label>
+                            <input type="date" class="form-select" id="dateFilter">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contracts Display -->
+                <div class="row" id="contractsContainer">
+                    <div class="col-12">
+                        <div class="text-center py-5" id="noContractsMessage">
+                            <i class="fas fa-file-contract fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted mb-3">No contracts found</h4>
+                            <p class="text-muted mb-4">Load contracts will appear here once signed by suppliers or carriers.</p>
+                            <button class="btn btn-primary" onclick="refreshContracts()">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Details Modal -->
+    <div class="modal fade" id="contractDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-contract me-2"></i>Contract Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="contractDetailsContent">
+                    <!-- Contract details will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadContract()">
+                        <i class="fas fa-download me-2"></i>Download Contract
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    <!-- JSPDF and Canvas Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Firebase v8.10.1 CDN -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                
+                // Prevent body scroll when sidebar is open
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        // Close sidebar on mobile when nav link is clicked
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 991) {
+                toggleSidebar();
+            }
+        }
+        
+        // Auto-close sidebar when nav links are clicked on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.admin-sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        setTimeout(() => {
+                            closeSidebarOnMobile();
+                        }, 100);
+                    }
+                });
+            });
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (window.innerWidth <= 991 && sidebar && overlay) {
+                // Check if click is outside sidebar and not on menu button
+                if (sidebar.classList.contains('show') && 
+                    !sidebar.contains(event.target) && 
+                    event.target !== menuBtn && 
+                    !menuBtn.contains(event.target)) {
+                    toggleSidebar();
+                }
+            }
+        });
+        
+        // Close sidebar on window resize if it becomes desktop view
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991) {
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+    var firebaseConfig = {
+      apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+      authDomain: "alpha-brokerage.firebaseapp.com",
+      databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+      projectId: "alpha-brokerage",
+      storageBucket: "alpha-brokerage.firebasestorage.app",
+      messagingSenderId: "834712514965",
+      appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    let currentLoadId = null;
+    let allContracts = [];
+
+    function logout() {
+        localStorage.removeItem('adminAuth');
+    }
+
+    function refreshContracts() {
+        fetchFirebaseContracts();
+    }
+
+    function fetchFirebaseContracts() {
+        const db = firebase.database();
+        const contractsContainer = document.getElementById('contractsContainer');
+        const noContractsMessage = document.getElementById('noContractsMessage');
+        
+        // Show loading
+        contractsContainer.innerHTML = '<div class="col-12"><div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i></div></div>';
+        noContractsMessage.style.display = 'none';
+
+        db.ref('loads').once('value').then(function(snapshot) {
+            allContracts = [];
+            snapshot.forEach(function(child) {
+                const load = child.val();
+                load.id = child.key;
+                
+                // Check if load has signed contracts
+                if (load.agreementSigned || load.carrierAgreementSigned) {
+                    allContracts.push(load);
+                }
+            });
+
+            displayContracts(allContracts);
+        }).catch(function(error) {
+            console.error('Error fetching contracts:', error);
+            if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                window.AlphaBrokrage.showAlert('error', 'Error loading contracts');
+            } else {
+                alert('Error loading contracts');
+            }
+            contractsContainer.innerHTML = '';
+            if (noContractsMessage) noContractsMessage.style.display = 'block';
+        });
+    }
+
+    function displayContracts(contracts) {
+        const contractsContainer = document.getElementById('contractsContainer');
+        const noContractsMessage = document.getElementById('noContractsMessage');
+
+        if (!contractsContainer) return;
+
+        if (contracts.length === 0) {
+            contractsContainer.innerHTML = '';
+            if (noContractsMessage) noContractsMessage.style.display = 'block';
+            return;
+        }
+
+        if (noContractsMessage) noContractsMessage.style.display = 'none';
+        let html = '';
+
+        contracts.forEach(function(load) {
+            const signedDate = load.agreementSignedAt ? 
+                new Date(load.agreementSignedAt).toLocaleString() : 
+                (load.carrierAgreementSignedAt ? 
+                    new Date(load.carrierAgreementSignedAt).toLocaleString() : 
+                    'N/A');
+            
+            // Determine contract types
+            const hasSupplierAgreement = load.agreementSigned;
+            const hasCarrierAgreement = load.carrierAgreementSigned;
+
+            html += `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card contract-card ${hasSupplierAgreement ? 'supplier' : 'carrier'}" onclick="viewContractDetails('${load.id}')">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1">Load ID: ${load.id.substring(0, 12)}...</h6>
+                                    <span class="contract-type-badge ${hasSupplierAgreement ? 'type-supplier' : 'type-carrier'}">
+                                        ${hasSupplierAgreement && hasCarrierAgreement ? 
+                                            '<i class="fas fa-check-double"></i> Both Contracts' : 
+                                            (hasSupplierAgreement ? 
+                                                '<i class="fas fa-file-signature"></i> Supplier' : 
+                                                '<i class="fas fa-truck"></i> Carrier')}
+                                    </span>
+                                </div>
+                                <i class="fas fa-eye text-muted"></i>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted d-block"><i class="fas fa-route me-1"></i> Route</small>
+                                <strong class="d-block">${load.pickupLocation || 'N/A'}</strong>
+                                <i class="fas fa-arrow-down text-muted"></i>
+                                <strong class="d-block">${load.deliveryLocation || 'N/A'}</strong>
+                            </div>
+
+                            ${(load.signatureData || load.carrierSignatureData) ? `
+                                <div class="mb-2">
+                                    <small class="text-muted"><i class="fas fa-signature me-1"></i> Signature Preview</small>
+                                    <div class="mt-1">
+                                        <img src="${load.signatureData || load.carrierSignatureData}" 
+                                             class="signature-preview" 
+                                             alt="Signature"
+                                             onclick="event.stopPropagation(); viewSignatureFull('${load.signatureData || load.carrierSignatureData}')">
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i> ${signedDate}
+                                </small>
+                                <span class="badge bg-${load.status === 'active' ? 'primary' : 
+                                                    load.status === 'accepted' ? 'success' : 
+                                                    load.status === 'in-transit' ? 'info' : 
+                                                    load.status === 'completed' ? 'secondary' : 
+                                                    'danger'}">${load.status || 'unknown'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        contractsContainer.innerHTML = html;
+    }
+
+    function viewContractDetails(loadId) {
+        currentLoadId = loadId;
+        const load = allContracts.find(c => c.id === loadId);
+        if (!load) return;
+
+        const supplierInfo = load.agreementSigned ? `
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-file-signature me-2"></i>Supplier Agreement</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Signed:</strong> ${load.agreementSignedAt ? new Date(load.agreementSignedAt).toLocaleString() : 'N/A'}</p>
+                    
+                    <!-- Full Contract Text -->
+                    <div class="bg-light p-4 rounded mb-3" style="max-height: 400px; overflow-y: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+                        <h4 class="text-center mb-3">SUPPLIER AGREEMENT</h4>
+                        <p class="text-center border-bottom pb-2 mb-3">This Supplier Agreement ("Agreement") is made between:</p>
+                        <div class="row mb-3">
+                            <div class="col-6 text-center">
+                                <strong>Alpha Freight Ltd<br>(The Broker)</strong>
+                            </div>
+                            <div class="col-6 text-center">
+                                <strong>[Supplier Company Name]<br>(The Supplier)</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <strong>1. Purpose</strong>
+                            <p>The Broker connects verified suppliers with approved carriers to transport goods safely and efficiently within the UK.</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>2. Payment Terms</strong>
+                            <p>Supplier agrees to pay 50% upfront and 50% upon successful delivery (unless otherwise stated in the load terms). Upfront payment must be made within 24 hours of order confirmation. <strong>Failure to pay within the given time will result in automatic cancellation of the booking.</strong></p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>3. Supplier Responsibilities</strong>
+                            <ul>
+                                <li>Provide accurate pickup and delivery details, contact information, and item weight/dimensions.</li>
+                                <li>Ensure goods are properly packed, insured, and legally allowed for transport.</li>
+                                <li>Provide valid company registration (Companies House) and proof of insurance before first order.</li>
+                                <li><strong>Must not directly contact carriers outside the Alpha Freight platform.</strong></li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <strong>4. Broker Responsibilities</strong>
+                            <ul>
+                                <li>Verify carrier credentials (driving licence, vehicle insurance, company details).</li>
+                                <li>Manage secure payment escrow between supplier and carrier.</li>
+                                <li>Handle disputes and provide support in case of delivery issues.</li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <strong>5. Cancellations and Refunds</strong>
+                            <p>If the supplier cancels after payment but before carrier pickup, a 10% service fee is charged. If the supplier fails to pay upfront within the time limit, the booking will be automatically cancelled.</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>6. Liability</strong>
+                            <p>Broker acts only as a facilitator between supplier and carrier. Broker is not liable for loss or damage of goods once handed to the carrier. Any insurance claim must be handled directly between supplier and insurer.</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>7. Governing Law</strong>
+                            <p>This Agreement shall be governed by and interpreted in accordance with UK law. Both parties agree to resolve any dispute amicably before taking legal action.</p>
+                        </div>
+                        <div class="border-top pt-3 mt-3">
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <p class="mb-1"><strong>Signed by Supplier Representative:</strong></p>
+                                    <div style="min-height: 60px; border-bottom: 1px solid #ddd;"></div>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p class="mb-1"><strong>Signed by Broker Representative:</strong></p>
+                                    <p>Alpha Freight Ltd<br><small class="text-muted">Digital Signature</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${load.signatureData ? `
+                        <p><strong>Digital Signature:</strong></p>
+                        <div class="text-center mb-2">
+                            <img src="${load.signatureData}" class="img-fluid border" style="max-height: 300px;" alt="Supplier Signature">
+                        </div>
+                    ` : '<p class="text-muted">No signature available</p>'}
+                </div>
+            </div>
+        ` : '';
+
+        const carrierInfo = load.carrierAgreementSigned ? `
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="fas fa-truck me-2"></i>Carrier Agreement</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Signed:</strong> ${load.carrierAgreementSignedAt ? new Date(load.carrierAgreementSignedAt).toLocaleString() : 'N/A'}</p>
+                    
+                    <!-- Full Contract Text -->
+                    <div class="bg-light p-4 rounded mb-3" style="max-height: 400px; overflow-y: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+                        <h4 class="text-center mb-3">CARRIER AGREEMENT</h4>
+                        <p class="text-center border-bottom pb-2 mb-3">This Carrier Agreement ("Agreement") is made between:</p>
+                        <div class="row mb-3">
+                            <div class="col-6 text-center">
+                                <strong>Alpha Freight Ltd<br>(The Broker)</strong>
+                            </div>
+                            <div class="col-6 text-center">
+                                <strong>[Carrier Company or Individual Driver Name]<br>(The Carrier)</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <strong>1. Purpose</strong>
+                            <p>The Broker connects verified carriers with paying suppliers to deliver goods safely and on time across the UK.</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>2. Payment Terms</strong>
+                            <p>Carrier will receive payment after delivery confirmation. Payments are processed within 24–48 hours after successful delivery verification. <strong>Broker holds payments securely until completion.</strong></p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>3. Carrier Responsibilities</strong>
+                            <ul>
+                                <li>Must provide valid UK Driving Licence (DVLA verified), vehicle insurance, and company registration (if applicable).</li>
+                                <li>Ensure vehicles are roadworthy and MOT passed.</li>
+                                <li>Deliver goods safely, on time, and with proof of delivery (POD photo/signature).</li>
+                                <li><strong>Must not contact suppliers directly for off-platform work.</strong></li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <strong>4. Broker Responsibilities</strong>
+                            <ul>
+                                <li>Ensure all loads are verified and prepaid by suppliers.</li>
+                                <li>Provide real-time updates, navigation details, and communication tools.</li>
+                                <li>Handle payment transfers and dispute resolution.</li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <strong>5. Cancellations & Penalties</strong>
+                            <p>If carrier cancels after accepting a load, a £25 penalty or temporary suspension may apply. <strong>Repeated cancellations can result in account deactivation.</strong></p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>6. Liability</strong>
+                            <p>Carrier is responsible for safe handling of goods once picked up. Any damage, loss, or delay may result in partial or full payment deduction based on investigation. Broker is not responsible for the carrier's driving conduct or third-party issues.</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>7. Governing Law</strong>
+                            <p>This Agreement shall be governed by UK law, under the jurisdiction of the England and Wales courts.</p>
+                        </div>
+                        <div class="border-top pt-3 mt-3">
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <p class="mb-1"><strong>Signed by Carrier Representative:</strong></p>
+                                    <div style="min-height: 60px; border-bottom: 1px solid #ddd;"></div>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p class="mb-1"><strong>Signed by Broker Representative:</strong></p>
+                                    <p>Alpha Freight Ltd<br><small class="text-muted">Digital Signature</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${load.carrierSignatureData ? `
+                        <p><strong>Digital Signature:</strong></p>
+                        <div class="text-center mb-2">
+                            <img src="${load.carrierSignatureData}" class="img-fluid border" style="max-height: 300px;" alt="Carrier Signature">
+                        </div>
+                    ` : '<p class="text-muted">No signature available</p>'}
+                </div>
+            </div>
+        ` : '';
+
+        const loadDetails = `
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Load Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>Load ID:</strong> ${load.id}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Status:</strong> <span class="badge bg-${load.status === 'active' ? 'primary' : 
+                                                                        load.status === 'accepted' ? 'success' : 
+                                                                        load.status === 'in-transit' ? 'info' : 
+                                                                        load.status === 'completed' ? 'secondary' : 
+                                                                        'danger'}">${load.status || 'unknown'}</span>
+                        </div>
+                        <div class="col-md-12 mb-2">
+                            <strong>Route:</strong> ${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Cargo:</strong> ${load.cargoType || 'N/A'}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Weight:</strong> ${load.cargoWeight || 'N/A'} tonnes
+                        </div>
+                        ${load.supplierId ? `
+                            <div class="col-md-6 mb-2">
+                                <strong>Supplier ID:</strong> ${load.supplierId}
+                            </div>
+                        ` : ''}
+                        ${load.carrierId ? `
+                            <div class="col-md-6 mb-2">
+                                <strong>Carrier ID:</strong> ${load.carrierId}
+                            </div>
+                        ` : ''}
+                        ${load.acceptedBy ? `
+                            <div class="col-md-6 mb-2">
+                                <strong>Accepted By:</strong> ${load.acceptedBy}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const content = loadDetails + supplierInfo + carrierInfo;
+
+        document.getElementById('contractDetailsContent').innerHTML = content;
+        
+        const modal = new bootstrap.Modal(document.getElementById('contractDetailsModal'));
+        modal.show();
+    }
+
+    function viewSignatureFull(signatureData) {
+        const modal = `
+            <div class="modal fade" id="signatureViewModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-signature me-2"></i>Signature</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="${signatureData}" class="img-fluid" alt="Full Signature">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modal);
+        const viewModal = new bootstrap.Modal(document.getElementById('signatureViewModal'));
+        viewModal.show();
+        
+        document.getElementById('signatureViewModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+    }
+
+    function downloadContract() {
+        if (!currentLoadId) {
+            if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                window.AlphaBrokrage.showAlert('error', 'No contract selected');
+            } else {
+                alert('No contract selected');
+            }
+            return;
+        }
+
+        const load = allContracts.find(c => c.id === currentLoadId);
+        if (!load) {
+            if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                window.AlphaBrokrage.showAlert('error', 'Contract not found');
+            } else {
+                alert('Contract not found');
+            }
+            return;
+        }
+
+        // Determine contract type
+        const hasSupplierAgreement = load.agreementSigned;
+        const hasCarrierAgreement = load.carrierAgreementSigned;
+        const contractType = hasSupplierAgreement && hasCarrierAgreement ? 'Both' : 
+                           (hasSupplierAgreement ? 'Supplier' : 'Carrier');
+        
+        // Get signed date
+        const signedDate = load.agreementSignedAt ? 
+            new Date(load.agreementSignedAt).toLocaleDateString('en-GB') : 
+            (load.carrierAgreementSignedAt ? 
+                new Date(load.carrierAgreementSignedAt).toLocaleDateString('en-GB') : 
+                'N/A');
+
+        // Build HTML content for PDF - NO HTML/HEAD/BODY wrappers, just content
+        let pdfContent = `
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+                    h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+                    h3 { color: #666; margin-top: 20px; }
+                    .contract-header { text-align: center; margin-bottom: 30px; }
+                    .contract-parties { display: flex; justify-content: space-around; margin: 20px 0; }
+                    .party { text-align: center; padding: 10px; }
+                    .section { margin: 20px 0; }
+                    ul { margin: 10px 0; padding-left: 30px; }
+                    .signature-section { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; }
+                    .signature-box { text-align: center; margin: 20px 0; }
+                    .signature-img { max-width: 300px; max-height: 150px; border: 1px solid #ddd; }
+                    .load-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                    .info-row { margin: 5px 0; }
+                </style>
+                <div class="contract-header">
+                    <h1>ALPHA FREIGHT LTD</h1>
+                    <h2>CONTRACT DOCUMENT</h2>
+                    <p><strong>Load ID:</strong> ${load.id}</p>
+                    <p><strong>Contract Type:</strong> ${contractType} Agreement</p>
+                    <p><strong>Signed Date:</strong> ${signedDate}</p>
+                </div>
+
+                <div class="load-info">
+                    <h3>Load Information</h3>
+                    <div class="info-row"><strong>Status:</strong> ${load.status || 'N/A'}</div>
+                    <div class="info-row"><strong>Route:</strong> ${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}</div>
+                    ${load.cargoType ? `<div class="info-row"><strong>Cargo Type:</strong> ${load.cargoType}</div>` : ''}
+                    ${load.cargoWeight ? `<div class="info-row"><strong>Weight:</strong> ${load.cargoWeight} tonnes</div>` : ''}
+                    ${load.supplierId ? `<div class="info-row"><strong>Supplier ID:</strong> ${load.supplierId}</div>` : ''}
+                    ${load.carrierId ? `<div class="info-row"><strong>Carrier ID:</strong> ${load.carrierId}</div>` : ''}
+                    ${load.acceptedBy ? `<div class="info-row"><strong>Accepted By:</strong> ${load.acceptedBy}</div>` : ''}
+                </div>
+        `;
+
+        // Add Supplier Agreement if available
+        if (load.agreementSigned) {
+            pdfContent += `
+                <hr style="margin: 40px 0;">
+                <h2>SUPPLIER AGREEMENT</h2>
+                <p class="contract-header">This Supplier Agreement ("Agreement") is made between Alpha Freight Ltd ("The Broker") and the Supplier.</p>
+                
+                <div class="section">
+                    <h3>1. Purpose</h3>
+                    <p>The Broker connects verified suppliers with approved carriers to transport goods safely and efficiently within the UK.</p>
+                </div>
+
+                <div class="section">
+                    <h3>2. Payment Terms</h3>
+                    <p>Supplier agrees to pay 50% upfront and 50% upon successful delivery (unless otherwise stated in the load terms). Upfront payment must be made within 24 hours of order confirmation. <strong>Failure to pay within the given time will result in automatic cancellation of the booking.</strong></p>
+                </div>
+
+                <div class="section">
+                    <h3>3. Supplier Responsibilities</h3>
+                    <ul>
+                        <li>Provide accurate pickup and delivery details, contact information, and item weight/dimensions.</li>
+                        <li>Ensure goods are properly packed, insured, and legally allowed for transport.</li>
+                        <li>Provide valid company registration (Companies House) and proof of insurance before first order.</li>
+                        <li><strong>Must not directly contact carriers outside the Alpha Freight platform.</strong></li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>4. Broker Responsibilities</h3>
+                    <ul>
+                        <li>Verify carrier credentials (driving licence, vehicle insurance, company details).</li>
+                        <li>Manage secure payment escrow between supplier and carrier.</li>
+                        <li>Handle disputes and provide support in case of delivery issues.</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>5. Cancellations and Refunds</h3>
+                    <p>If the supplier cancels after payment but before carrier pickup, a 10% service fee is charged. If the supplier fails to pay upfront within the time limit, the booking will be automatically cancelled.</p>
+                </div>
+
+                <div class="section">
+                    <h3>6. Liability</h3>
+                    <p>Broker acts only as a facilitator between supplier and carrier. Broker is not liable for loss or damage of goods once handed to the carrier. Any insurance claim must be handled directly between supplier and insurer.</p>
+                </div>
+
+                <div class="section">
+                    <h3>7. Governing Law</h3>
+                    <p>This Agreement shall be governed by and interpreted in accordance with UK law. Both parties agree to resolve any dispute amicably before taking legal action.</p>
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p><strong>Signed by Supplier Representative:</strong></p>
+                        ${load.signatureData ? `<img src="${load.signatureData}" class="signature-img" alt="Supplier Signature">` : '<div style="min-height: 60px; border-bottom: 1px solid #ddd;"></div>'}
+                        <p><strong>Date:</strong> ${load.agreementSignedAt ? new Date(load.agreementSignedAt).toLocaleDateString('en-GB') : 'N/A'}</p>
+                    </div>
+                    <div class="signature-box">
+                        <p><strong>Signed by Broker Representative:</strong></p>
+                        <p>Alpha Freight Ltd<br><strong>Digital Signature</strong></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add Carrier Agreement if available
+        if (load.carrierAgreementSigned) {
+            pdfContent += `
+                <hr style="margin: 40px 0;">
+                <h2>CARRIER AGREEMENT</h2>
+                <p class="contract-header">This Carrier Agreement ("Agreement") is made between Alpha Freight Ltd ("The Broker") and the Carrier.</p>
+                
+                <div class="section">
+                    <h3>1. Purpose</h3>
+                    <p>The Broker connects verified carriers with paying suppliers to deliver goods safely and on time across the UK.</p>
+                </div>
+
+                <div class="section">
+                    <h3>2. Payment Terms</h3>
+                    <p>Carrier will receive payment after delivery confirmation. Payments are processed within 24–48 hours after successful delivery verification. <strong>Broker holds payments securely until completion.</strong></p>
+                </div>
+
+                <div class="section">
+                    <h3>3. Carrier Responsibilities</h3>
+                    <ul>
+                        <li>Must provide valid UK Driving Licence (DVLA verified), vehicle insurance, and company registration (if applicable).</li>
+                        <li>Ensure vehicles are roadworthy and MOT passed.</li>
+                        <li>Deliver goods safely, on time, and with proof of delivery (POD photo/signature).</li>
+                        <li><strong>Must not contact suppliers directly for off-platform work.</strong></li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>4. Broker Responsibilities</h3>
+                    <ul>
+                        <li>Ensure all loads are verified and prepaid by suppliers.</li>
+                        <li>Provide real-time updates, navigation details, and communication tools.</li>
+                        <li>Handle payment transfers and dispute resolution.</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>5. Cancellations & Penalties</h3>
+                    <p>If carrier cancels after accepting a load, a £25 penalty or temporary suspension may apply. <strong>Repeated cancellations can result in account deactivation.</strong></p>
+                </div>
+
+                <div class="section">
+                    <h3>6. Liability</h3>
+                    <p>Carrier is responsible for safe handling of goods once picked up. Any damage, loss, or delay may result in partial or full payment deduction based on investigation. Broker is not responsible for the carrier's driving conduct or third-party issues.</p>
+                </div>
+
+                <div class="section">
+                    <h3>7. Governing Law</h3>
+                    <p>This Agreement shall be governed by UK law, under the jurisdiction of the England and Wales courts.</p>
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p><strong>Signed by Carrier Representative:</strong></p>
+                        ${load.carrierSignatureData ? `<img src="${load.carrierSignatureData}" class="signature-img" alt="Carrier Signature">` : '<div style="min-height: 60px; border-bottom: 1px solid #ddd;"></div>'}
+                        <p><strong>Date:</strong> ${load.carrierAgreementSignedAt ? new Date(load.carrierAgreementSignedAt).toLocaleDateString('en-GB') : 'N/A'}</p>
+                    </div>
+                    <div class="signature-box">
+                        <p><strong>Signed by Broker Representative:</strong></p>
+                        <p>Alpha Freight Ltd<br><strong>Digital Signature</strong></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        pdfContent += `
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333; text-align: center;">
+                    <p><strong>This is a digitally signed contract.</strong></p>
+                    <p>Generated on ${new Date().toLocaleString('en-GB')}</p>
+                </div>
+        `;
+
+        // Create a temporary container for PDF generation
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = pdfContent;
+        tempDiv.style.width = '794px'; // A4 width in pixels (210mm ≈ 794px)
+        tempDiv.style.minHeight = '500px'; // Minimum height to ensure content renders
+        tempDiv.style.padding = '20px';
+        tempDiv.style.backgroundColor = 'white';
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.top = '0';
+        tempDiv.style.left = '-10000px'; // Off-screen but visible to canvas
+        tempDiv.style.zIndex = '9999';
+        document.body.appendChild(tempDiv);
+
+        console.log('PDF Content Length:', pdfContent.length);
+
+        // Wait for images to load and DOM to render
+        setTimeout(function() {
+            console.log('Temp Div Height:', tempDiv.offsetHeight);
+            
+            // Preload images before generating PDF
+            const images = tempDiv.getElementsByTagName('img');
+            let imagesLoaded = 0;
+            const totalImages = images.length;
+            
+            if (totalImages === 0) {
+                // No images, generate PDF immediately
+                generatePDF();
+            } else {
+                // Wait for all images to load
+                for (let i = 0; i < totalImages; i++) {
+                    if (images[i].complete) {
+                        imagesLoaded++;
+                    } else {
+                        images[i].addEventListener('load', function() {
+                            imagesLoaded++;
+                            if (imagesLoaded === totalImages) {
+                                generatePDF();
+                            }
+                        });
+                        images[i].addEventListener('error', function() {
+                            imagesLoaded++;
+                            if (imagesLoaded === totalImages) {
+                                generatePDF();
+                            }
+                        });
+                    }
+                }
+                if (imagesLoaded === totalImages) {
+                    generatePDF();
+                }
+            }
+            
+            function generatePDF() {
+                console.log('Generating PDF...');
+                console.log('Element width:', tempDiv.offsetWidth, 'height:', tempDiv.offsetHeight);
+                console.log('Inner HTML length:', tempDiv.innerHTML.length);
+                
+                // Use JSPDF with html2canvas directly
+                html2canvas(tempDiv, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                }).then(function(canvas) {
+                    console.log('Canvas created, dimensions:', canvas.width, 'x', canvas.height);
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const imgWidth = canvas.width;
+                    const imgHeight = canvas.height;
+                    const ratio = imgWidth / imgHeight;
+                    const pdfImgWidth = pdfWidth - 30; // 15mm margin on each side
+                    const pdfImgHeight = pdfImgWidth / ratio;
+                    
+                    // Add multiple pages if content is too tall
+                    let heightLeft = pdfImgHeight;
+                    let position = 0;
+                    
+                    pdf.addImage(imgData, 'PNG', 15, position, pdfImgWidth, pdfImgHeight);
+                    heightLeft -= pdfHeight;
+                    
+                    while (heightLeft >= 0) {
+                        position = heightLeft - pdfImgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 15, position, pdfImgWidth, pdfImgHeight);
+                        heightLeft -= pdfHeight;
+                    }
+                    
+                    const filename = `Contract_${load.id}_${Date.now()}.pdf`;
+                    pdf.save(filename);
+                    
+                    document.body.removeChild(tempDiv);
+                    console.log('PDF generated successfully');
+                    if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                        window.AlphaBrokrage.showAlert('success', 'Contract downloaded successfully!');
+                    }
+                }).catch(function(error) {
+                    document.body.removeChild(tempDiv);
+                    console.error('PDF generation error:', error);
+                    if (window.AlphaBrokrage && window.AlphaBrokrage.showAlert) {
+                        window.AlphaBrokrage.showAlert('error', 'Error generating PDF: ' + error.message);
+                    } else {
+                        alert('Error generating PDF: ' + error.message);
+                    }
+                });
+            }
+        }, 500); // Increased delay for better rendering
+    }
+
+    // Filter functionality
+    const typeFilterEl = document.getElementById('typeFilter');
+    const statusFilterEl = document.getElementById('statusFilter');
+    const dateFilterEl = document.getElementById('dateFilter');
+    
+    if (typeFilterEl) typeFilterEl.addEventListener('change', applyFilters);
+    if (statusFilterEl) statusFilterEl.addEventListener('change', applyFilters);
+    if (dateFilterEl) dateFilterEl.addEventListener('change', applyFilters);
+
+    function applyFilters() {
+        const typeFilter = document.getElementById('typeFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const dateFilter = document.getElementById('dateFilter').value;
+
+        let filtered = allContracts;
+
+        if (typeFilter) {
+            if (typeFilter === 'supplier') {
+                filtered = filtered.filter(c => c.agreementSigned);
+            } else if (typeFilter === 'carrier') {
+                filtered = filtered.filter(c => c.carrierAgreementSigned);
+            }
+        }
+
+        if (statusFilter) {
+            filtered = filtered.filter(c => c.status === statusFilter);
+        }
+
+        if (dateFilter) {
+            filtered = filtered.filter(c => {
+                const signedDate = c.agreementSignedAt || c.carrierAgreementSignedAt;
+                if (!signedDate) return false;
+                const contractDate = new Date(signedDate).toISOString().split('T')[0];
+                return contractDate === dateFilter;
+            });
+        }
+
+        displayContracts(filtered);
+    }
+
+    // Load contracts on page load
+    window.addEventListener('DOMContentLoaded', fetchFirebaseContracts);
+    </script>
+</body>
+</html>
+
+

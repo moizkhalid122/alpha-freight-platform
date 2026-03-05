@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Loads - Swift Logistics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --tenant-primary: #0066cc;
+            --tenant-primary-dark: #0052a3;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border-gray: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gray);
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border-gray);
+            padding: 1rem 0;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--tenant-primary);
+            text-decoration: none;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .filters-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .loads-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .load-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .load-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .load-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .load-id {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .load-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-in-transit {
+            background: rgba(99, 91, 255, 0.1);
+            color: var(--tenant-primary);
+        }
+
+        .load-route {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .route-point {
+            flex: 1;
+        }
+
+        .route-point h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .route-point p {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .route-arrow {
+            color: var(--tenant-primary);
+            font-size: 1.5rem;
+        }
+
+        .load-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg-gray);
+            border-radius: 8px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .load-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-gray);
+        }
+
+        .load-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--tenant-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--tenant-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--tenant-primary-dark);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-gray);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn.active {
+            background: var(--tenant-primary);
+            color: white;
+            border-color: var(--tenant-primary);
+        }
+
+        @media (max-width: 968px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-sidebar {
+                position: static;
+            }
+
+            .load-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="tenant-index.html" class="logo">Swift Logistics</a>
+            <nav>
+                <a href="tenant-index.html" class="btn" style="background: transparent; color: var(--text-dark);">Home</a>
+                <a href="#" class="btn btn-primary">Post Load</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Filters Sidebar -->
+        <aside class="filters-sidebar">
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 700;">Filters</h2>
+            
+            <div class="filter-section">
+                <h3 class="filter-title">Route</h3>
+                <div class="form-group">
+                    <label class="form-label">From</label>
+                    <input type="text" class="form-input" placeholder="London">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">To</label>
+                    <input type="text" class="form-input" placeholder="Manchester">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-title">Load Type</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="full-load">
+                    <label for="full-load">Full Load</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="part-load">
+                    <label for="part-load">Part Load</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="pallet">
+                    <label for="pallet">Pallet</label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-title">Weight</h3>
+                <div class="form-group">
+                    <label class="form-label">Min (kg)</label>
+                    <input type="number" class="form-input" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max (kg)</label>
+                    <input type="number" class="form-input" placeholder="10000">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-title">Price Range</h3>
+                <div class="form-group">
+                    <label class="form-label">Min (£)</label>
+                    <input type="number" class="form-input" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max (£)</label>
+                    <input type="number" class="form-input" placeholder="10000">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="applyFilters()">
+                <i class="fas fa-filter"></i>
+                Apply Filters
+            </button>
+        </aside>
+
+        <!-- Loads List -->
+        <main class="loads-grid">
+            <div class="load-card" onclick="viewLoad('LON-MAN-001')">
+                <div class="load-header">
+                    <span class="load-id">Load ID: LON-MAN-001</span>
+                    <span class="load-status status-open">Open</span>
+                </div>
+                <div class="load-route">
+                    <div class="route-point">
+                        <h3>London</h3>
+                        <p>SW1A 1AA</p>
+                    </div>
+                    <i class="fas fa-arrow-right route-arrow"></i>
+                    <div class="route-point">
+                        <h3>Manchester</h3>
+                        <p>M1 1AA</p>
+                    </div>
+                </div>
+                <div class="load-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Weight</span>
+                        <span class="detail-value">2,500 kg</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Load Type</span>
+                        <span class="detail-value">Full Load</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pickup Date</span>
+                        <span class="detail-value">28 Feb 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Distance</span>
+                        <span class="detail-value">210 miles</span>
+                    </div>
+                </div>
+                <div class="load-footer">
+                    <div class="load-price">£450</div>
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); acceptLoad('LON-MAN-001')">
+                        Accept Load
+                    </button>
+                </div>
+            </div>
+
+            <div class="load-card" onclick="viewLoad('BIR-LEE-002')">
+                <div class="load-header">
+                    <span class="load-id">Load ID: BIR-LEE-002</span>
+                    <span class="load-status status-open">Open</span>
+                </div>
+                <div class="load-route">
+                    <div class="route-point">
+                        <h3>Birmingham</h3>
+                        <p>B1 1AA</p>
+                    </div>
+                    <i class="fas fa-arrow-right route-arrow"></i>
+                    <div class="route-point">
+                        <h3>Leeds</h3>
+                        <p>LS1 1AA</p>
+                    </div>
+                </div>
+                <div class="load-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Weight</span>
+                        <span class="detail-value">1,800 kg</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Load Type</span>
+                        <span class="detail-value">Part Load</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pickup Date</span>
+                        <span class="detail-value">1 Mar 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Distance</span>
+                        <span class="detail-value">120 miles</span>
+                    </div>
+                </div>
+                <div class="load-footer">
+                    <div class="load-price">£380</div>
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); acceptLoad('BIR-LEE-002')">
+                        Accept Load
+                    </button>
+                </div>
+            </div>
+
+            <div class="load-card" onclick="viewLoad('LIV-GLA-003')">
+                <div class="load-header">
+                    <span class="load-id">Load ID: LIV-GLA-003</span>
+                    <span class="load-status status-in-transit">In Transit</span>
+                </div>
+                <div class="load-route">
+                    <div class="route-point">
+                        <h3>Liverpool</h3>
+                        <p>L1 1AA</p>
+                    </div>
+                    <i class="fas fa-arrow-right route-arrow"></i>
+                    <div class="route-point">
+                        <h3>Glasgow</h3>
+                        <p>G1 1AA</p>
+                    </div>
+                </div>
+                <div class="load-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Weight</span>
+                        <span class="detail-value">3,200 kg</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Load Type</span>
+                        <span class="detail-value">Full Load</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pickup Date</span>
+                        <span class="detail-value">25 Feb 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Distance</span>
+                        <span class="detail-value">215 miles</span>
+                    </div>
+                </div>
+                <div class="load-footer">
+                    <div class="load-price">£520</div>
+                    <button class="btn btn-primary" style="background: var(--text-light);" disabled>
+                        In Transit
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="pagination">
+        <button class="page-btn" onclick="changePage(1)">1</button>
+        <button class="page-btn active" onclick="changePage(2)">2</button>
+        <button class="page-btn" onclick="changePage(3)">3</button>
+        <button class="page-btn" onclick="changePage(4)">Next →</button>
+    </div>
+
+    <script>
+        // Multi-tenant: Load tenant config
+        async function loadTenantConfig() {
+            // Backend: GET /api/tenant/config
+            // Returns tenant branding
+        }
+
+        function applyFilters() {
+            // Backend: GET /api/tenant/loads?filters=...
+            console.log('Applying filters...');
+        }
+
+        function viewLoad(loadId) {
+            // Backend: GET /api/tenant/loads/:loadId
+            // Show load details modal or redirect
+            console.log('Viewing load:', loadId);
+        }
+
+        function acceptLoad(loadId) {
+            // Backend: POST /api/tenant/loads/:loadId/accept
+            alert('Load accepted! You will be contacted by the shipper.');
+        }
+
+        function changePage(page) {
+            // Backend: GET /api/tenant/loads?page=page
+            document.querySelectorAll('.page-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTenantConfig);
+    </script>
+</body>
+</html>

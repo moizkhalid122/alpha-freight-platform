@@ -1,0 +1,977 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management - Admin Panel</title>
+    <!-- Early Authentication Check - Must load first -->
+    <script>
+        (function() {
+            const currentPage = window.location.pathname || window.location.href;
+            if (!currentPage.includes('login.html')) {
+                const adminAuth = JSON.parse(localStorage.getItem('adminAuth') || 'null');
+                if (!adminAuth || !adminAuth.isLoggedIn) {
+                    const currentPath = window.location.pathname || window.location.href;
+                    let loginPath = 'login.html';
+                    if (currentPath.includes('/admin/')) {
+                        loginPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/login.html';
+                    }
+                    window.location.replace(loginPath);
+                }
+            }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Sidebar Styling */
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .admin-sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff !important;
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: #fff !important;
+            font-weight: 600;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        /* Content Area */
+        .admin-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        /* Mobile Menu Toggle Button */
+        .mobile-menu-btn {
+            display: none;
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+        
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .admin-sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                width: 280px;
+                max-width: 80%;
+            }
+            
+            .admin-sidebar.show {
+                left: 0;
+            }
+            
+            .admin-content {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .header-content .d-flex {
+                flex-wrap: wrap;
+            }
+            
+            .header-content .btn {
+                font-size: 0.875rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .header-content .btn i {
+                margin-right: 0.25rem;
+            }
+            
+            .header-content .btn span.d-none {
+                display: none !important;
+            }
+        }
+        
+        .user-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6f42c1;
+        }
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .user-card.supplier {
+            border-left-color: #007bff;
+        }
+        .user-card.carrier {
+            border-left-color: #28a745;
+        }
+        .user-card.broker {
+            border-left-color: #ffc107;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-suspended {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 admin-sidebar p-0">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-white fw-bold mb-0">
+                            <i class="fas fa-crown"></i> Admin Panel
+                        </h4>
+                        <button class="btn btn-link text-white d-md-none p-0" onclick="toggleSidebar()" style="font-size: 1.5rem; text-decoration: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link text-white" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a class="nav-link text-white active" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a class="nav-link text-white" href="loads.html">
+                            <i class="fas fa-boxes"></i> Loads
+                        </a>
+                        <a class="nav-link text-white" href="post-load.html">
+                            <i class="fas fa-plus-circle"></i> Post Load
+                        </a>
+                        <a class="nav-link text-white" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link text-white" href="carrier-registrations.html">
+                            <i class="fas fa-truck"></i> Carrier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="supplier-registrations.html">
+                            <i class="fas fa-shipping-fast"></i> Supplier Registrations
+                        </a>
+                        <a class="nav-link text-white" href="contracts.html">
+                            <i class="fas fa-file-contract"></i> Contracts
+                        </a>
+                        <a class="nav-link text-white" href="payments.html">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                        <a class="nav-link text-white" href="bank-transfer-verification.html">
+                            <i class="fas fa-university"></i> Bank Transfers
+                        </a>
+                        <a class="nav-link text-white" href="company-details.html">
+                            <i class="fas fa-building"></i> Carrier Details
+                        </a>
+                        <a class="nav-link text-white" href="user-ids.html">
+                            <i class="fas fa-id-card"></i> User IDs
+                        </a>
+                        <a class="nav-link text-white" href="user-details.html">
+                            <i class="fas fa-search"></i> Search User
+                        </a>
+                        <a class="nav-link text-white" href="analytics.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a class="nav-link text-white" href="reports.html">
+                            <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                        <a class="nav-link text-white" href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a class="nav-link text-white" href="appeals.html">
+                            <i class="fas fa-gavel"></i> Appeals
+                        </a>
+                        <hr class="text-white">
+                        <a class="nav-link text-white" href="#" onclick="adminLogout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 admin-content p-0">
+                <!-- Header -->
+                <div class="bg-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center header-content">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="mobile-menu-btn" onclick="toggleSidebar()" id="mobileMenuBtn">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Users Management</h5>
+                                <small class="text-muted d-none d-md-block">Manage suppliers, carriers, and brokers</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                <i class="fas fa-user-plus"></i> <span class="d-none d-md-inline">Add User</span>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportUsers()">
+                                <i class="fas fa-download"></i> <span class="d-none d-md-inline">Export</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Content -->
+                <div class="p-4">
+                    <!-- Filters -->
+                    <div class="filter-section">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="userTypeFilter" class="form-label">User Type</label>
+                                <select class="form-select" id="userTypeFilter">
+                                    <option value="">All Types</option>
+                                    <option value="supplier">Suppliers</option>
+                                    <option value="carrier">Carriers</option>
+                                    <option value="broker">Brokers</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="statusFilter" class="form-label">Status</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="searchInput" class="form-label">Search</label>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search users...">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-primary" onclick="applyFilters()">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users List -->
+                    <div class="row" id="usersList">
+                        <!-- Users will be loaded dynamically from Firebase -->
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-3">Loading users...</p>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-4" id="paginationInfo">
+                        <div>
+                            <small class="text-muted" id="paginationText">Loading users...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspend User Modal -->
+    <div class="modal fade" id="suspendUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-ban"></i> Suspend User
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Please provide a reason for suspending this user account.</p>
+                    <div class="mb-3">
+                        <label for="suspendReason" class="form-label">Suspension Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="suspendReason" rows="4" placeholder="Enter the reason for suspending this user..." required></textarea>
+                        <small class="text-muted">This reason will be displayed to the user on their account pages.</small>
+                    </div>
+                    <input type="hidden" id="suspendUserId">
+                    <input type="hidden" id="suspendUserType">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="confirmSuspendUser()">
+                        <i class="fas fa-ban"></i> Suspend User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus"></i> Add New User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="userType" class="form-label">User Type</label>
+                                <select class="form-select" id="userType" required>
+                                    <option value="">Select user type</option>
+                                    <option value="supplier">Supplier</option>
+                                    <option value="carrier">Carrier</option>
+                                    <option value="broker">Broker</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="companyName" class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="companyName" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="contactName" class="form-label">Contact Person</label>
+                                <input type="text" class="form-control" id="contactName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" required>
+                                    <option value="active">Active</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addNewUser()">
+                        <i class="fas fa-user-plus"></i> Add User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Admin Authentication Check -->
+    <script src="../assets/js/admin-auth.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/script.js"></script>
+    
+    <script>
+        // Firebase initialization
+        var firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Global variables
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentFilter = {
+            userType: '',
+            status: '',
+            search: ''
+        };
+
+        // Fetch users from Firebase
+        function fetchUsers() {
+            const db = firebase.database();
+            allUsers = [];
+            
+            // Fetch suppliers from Firebase
+            db.ref('suppliers').once('value', function(snapshot) {
+                snapshot.forEach(function(child) {
+                    const user = child.val();
+                    user.id = child.key;
+                    user.userType = 'supplier';
+                    user.status = user.status || 'active';
+                    user.createdAt = user.createdAt || user.registrationDate || new Date().toISOString();
+                    allUsers.push(user);
+                });
+                
+                // Fetch carriers from Firebase
+                db.ref('carriers').once('value', function(snapshot2) {
+                    snapshot2.forEach(function(child2) {
+                        const user = child2.val();
+                        user.id = child2.key;
+                        user.userType = 'carrier';
+                        user.status = user.status || 'active';
+                        user.createdAt = user.createdAt || user.registrationDate || new Date().toISOString();
+                        allUsers.push(user);
+                    });
+                    
+                    // Update filtered users
+                    filteredUsers = [...allUsers];
+                    renderUsers();
+                    updatePagination();
+                });
+            });
+        }
+
+        // Render users on page
+        function renderUsers() {
+            const usersList = document.getElementById('usersList');
+            if (!usersList) return;
+
+            if (filteredUsers.length === 0) {
+                usersList.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No users found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            usersList.innerHTML = filteredUsers.map(user => {
+                const userName = user.companyName || user.firstName + ' ' + (user.lastName || '') || user.email || 'Unknown';
+                const initials = getInitials(userName);
+                const userType = user.userType || 'supplier';
+                const status = user.status || 'active';
+                const statusClass = status === 'active' ? 'status-active' : status === 'pending' ? 'status-pending' : 'status-suspended';
+                const joinDate = user.createdAt ? formatDate(user.createdAt) : 'Recently';
+                
+                // Calculate stats from loads
+                const loadsCount = 0; // Will be calculated from loads
+                const rating = 0; // Will be calculated
+                const amount = 0; // Will be calculated
+
+                return `
+                    <div class="col-lg-4 mb-3">
+                        <div class="user-card card ${userType}">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="user-avatar me-3">${initials}</div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">${userName}</h6>
+                                        <p class="text-muted mb-1">${userType.charAt(0).toUpperCase() + userType.slice(1)}</p>
+                                        <span class="status-badge ${statusClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="viewUser('${user.id}', '${userType}')"><i class="fas fa-eye"></i> View</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="editUser('${user.id}', '${userType}')"><i class="fas fa-edit"></i> Edit</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="suspendUser('${user.id}', '${userType}')"><i class="fas fa-ban"></i> Suspend</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteUser('${user.id}', '${userType}')"><i class="fas fa-trash"></i> Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <h6 class="fw-bold text-primary mb-0">${loadsCount}</h6>
+                                        <small class="text-muted">${userType === 'carrier' ? 'Deliveries' : 'Loads'}</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h6 class="fw-bold text-success mb-0">${rating || '-'}</h6>
+                                        <small class="text-muted">Rating</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h6 class="fw-bold text-warning mb-0">£${formatMoney(amount)}</h6>
+                                        <small class="text-muted">${userType === 'carrier' ? 'Earned' : 'Spent'}</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">Joined: ${joinDate}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper functions
+        function getInitials(name) {
+            if (!name) return 'U';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Recently';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch (e) {
+                return 'Recently';
+            }
+        }
+
+        function formatMoney(amount) {
+            if (!amount || amount === 0) return '0';
+            const val = Math.round(amount * 100) / 100;
+            if (val >= 1000000) return (val/1000000).toFixed(1) + 'M';
+            if (val >= 1000) return (val/1000).toFixed(1) + 'K';
+            return val.toFixed(0);
+        }
+
+        function updatePagination() {
+            const paginationText = document.getElementById('paginationText');
+            if (paginationText) {
+                paginationText.textContent = `Showing ${filteredUsers.length} of ${allUsers.length} users`;
+            }
+        }
+
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                
+                // Prevent body scroll when sidebar is open
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        // Close sidebar on mobile when nav link is clicked
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 991) {
+                toggleSidebar();
+            }
+        }
+        
+        // Auto-close sidebar when nav links are clicked on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.admin-sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        setTimeout(() => {
+                            closeSidebarOnMobile();
+                        }, 100);
+                    }
+                });
+            });
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (window.innerWidth <= 991 && sidebar && overlay) {
+                // Check if click is outside sidebar and not on menu button
+                if (sidebar.classList.contains('show') && 
+                    !sidebar.contains(event.target) && 
+                    event.target !== menuBtn && 
+                    !menuBtn.contains(event.target)) {
+                    toggleSidebar();
+                }
+            }
+        });
+        
+        // Close sidebar on window resize if it becomes desktop view
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991) {
+                const sidebar = document.querySelector('.admin-sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // Initialize users on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchUsers();
+            
+            // Set up real-time listeners for live updates
+            const db = firebase.database();
+            
+            // Listen for new suppliers
+            db.ref('suppliers').on('child_added', function(snapshot) {
+                fetchUsers(); // Refresh users list
+            });
+            
+            // Listen for supplier updates
+            db.ref('suppliers').on('child_changed', function(snapshot) {
+                fetchUsers(); // Refresh users list
+            });
+            
+            // Listen for supplier deletions
+            db.ref('suppliers').on('child_removed', function(snapshot) {
+                fetchUsers(); // Refresh users list
+            });
+            
+            // Listen for new carriers
+            db.ref('carriers').on('child_added', function(snapshot) {
+                fetchUsers(); // Refresh users list
+            });
+            
+            // Listen for carrier updates
+            db.ref('carriers').on('child_changed', function(snapshot) {
+                fetchUsers(); // Refresh users list
+            });
+            
+            // Listen for carrier deletions
+            db.ref('carriers').on('child_removed', function(snapshot) {
+                fetchUsers(); // Refresh users list
+            });
+        });
+    </script>
+    
+    <script>
+        function applyFilters() {
+            currentFilter.userType = document.getElementById('userTypeFilter').value;
+            currentFilter.status = document.getElementById('statusFilter').value;
+            currentFilter.search = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            // Filter users
+            filteredUsers = allUsers.filter(user => {
+                // User type filter
+                if (currentFilter.userType && user.userType !== currentFilter.userType) {
+                    return false;
+                }
+                
+                // Status filter
+                if (currentFilter.status && (user.status || 'active') !== currentFilter.status) {
+                    return false;
+                }
+                
+                // Search filter
+                if (currentFilter.search) {
+                    const searchTerm = currentFilter.search;
+                    const userName = (user.companyName || user.firstName + ' ' + (user.lastName || '') || user.email || '').toLowerCase();
+                    const email = (user.email || '').toLowerCase();
+                    const phone = (user.phone || '').toLowerCase();
+                    
+                    if (!userName.includes(searchTerm) && !email.includes(searchTerm) && !phone.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            renderUsers();
+            updatePagination();
+            
+            if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                AlphaBrokrage.showAlert('info', `Filtering users: Type=${currentFilter.userType || 'All'}, Status=${currentFilter.status || 'All'}, Search=${currentFilter.search || 'None'}`);
+            }
+        }
+
+        function viewUser(userId, userType) {
+            const user = allUsers.find(u => u.id === userId);
+            if (user) {
+                const userName = user.companyName || user.firstName + ' ' + (user.lastName || '') || user.email || 'Unknown';
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('info', `Viewing ${userName} details`);
+                } else {
+                    alert(`Viewing ${userName} details`);
+                }
+            }
+        }
+
+        function editUser(userId, userType) {
+            const user = allUsers.find(u => u.id === userId);
+            if (user) {
+                const userName = user.companyName || user.firstName + ' ' + (user.lastName || '') || user.email || 'Unknown';
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('info', `Editing ${userName}`);
+                } else {
+                    alert(`Editing ${userName}`);
+                }
+            }
+        }
+
+        function suspendUser(userId, userType) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            // Store userId and userType for modal
+            document.getElementById('suspendUserId').value = userId;
+            document.getElementById('suspendUserType').value = userType;
+            document.getElementById('suspendReason').value = '';
+            
+            // Show suspend modal
+            const suspendModal = new bootstrap.Modal(document.getElementById('suspendUserModal'));
+            suspendModal.show();
+        }
+
+        function confirmSuspendUser() {
+            const userId = document.getElementById('suspendUserId').value;
+            const userType = document.getElementById('suspendUserType').value;
+            const reason = document.getElementById('suspendReason').value.trim();
+            
+            if (!reason) {
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('error', 'Please provide a reason for suspension');
+                } else {
+                    alert('Please provide a reason for suspension');
+                }
+                return;
+            }
+            
+            const db = firebase.database();
+            const ref = userType === 'supplier' ? db.ref('suppliers/' + userId) : db.ref('carriers/' + userId);
+            
+            ref.update({
+                status: 'suspended',
+                suspensionReason: reason,
+                suspendedAt: new Date().toISOString()
+            }).then(() => {
+                // Close modal
+                const suspendModal = bootstrap.Modal.getInstance(document.getElementById('suspendUserModal'));
+                suspendModal.hide();
+                
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('warning', 'User suspended successfully');
+                } else {
+                    alert('User suspended successfully');
+                }
+                fetchUsers();
+            }).catch(error => {
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('error', 'Error suspending user: ' + error.message);
+                } else {
+                    alert('Error suspending user: ' + error.message);
+                }
+            });
+        }
+
+        function approveUser(userId, userType) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const db = firebase.database();
+            const ref = userType === 'supplier' ? db.ref('suppliers/' + userId) : db.ref('carriers/' + userId);
+            
+            ref.update({
+                status: 'active',
+                approvedAt: new Date().toISOString()
+            }).then(() => {
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('success', 'User approved successfully');
+                } else {
+                    alert('User approved successfully');
+                }
+                fetchUsers();
+            }).catch(error => {
+                if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                    AlphaBrokrage.showAlert('error', 'Error approving user: ' + error.message);
+                } else {
+                    alert('Error approving user: ' + error.message);
+                }
+            });
+        }
+
+        function deleteUser(userId, userType) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const userName = user.companyName || user.firstName + ' ' + (user.lastName || '') || user.email || 'Unknown';
+            
+            if (confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+                const db = firebase.database();
+                const ref = userType === 'supplier' ? db.ref('suppliers/' + userId) : db.ref('carriers/' + userId);
+                
+                ref.remove().then(() => {
+                    if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                        AlphaBrokrage.showAlert('success', 'User deleted successfully');
+                    } else {
+                        alert('User deleted successfully');
+                    }
+                    fetchUsers();
+                }).catch(error => {
+                    if (typeof AlphaBrokrage !== 'undefined' && typeof AlphaBrokrage.showAlert === 'function') {
+                        AlphaBrokrage.showAlert('error', 'Error deleting user: ' + error.message);
+                    } else {
+                        alert('Error deleting user: ' + error.message);
+                    }
+                });
+            }
+        }
+
+        function addNewUser() {
+            const form = document.getElementById('addUserForm');
+            if (form.checkValidity()) {
+                AlphaBrokrage.showAlert('success', 'New user added successfully!');
+                bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+                form.reset();
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        function exportUsers() {
+            AlphaBrokrage.showAlert('success', 'Users export started!');
+        }
+
+        // Search functionality - auto-filter on input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            applyFilters();
+        });
+        
+        // Auto-filter on filter change
+        document.getElementById('userTypeFilter').addEventListener('change', function() {
+            applyFilters();
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            applyFilters();
+        });
+    </script>
+</body>
+</html>
+

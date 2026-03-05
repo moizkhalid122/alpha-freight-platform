@@ -1,0 +1,2430 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Loads - Carrier Portal</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="shortcut icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --secondary: #6366F1;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            --secondary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --info-gradient: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-text: #374151;
+            --sidebar-active: #EBF4FF;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            width: 220px;
+            animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sidebarSlideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .dashboard-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .sidebar-brand {
+            position: relative;
+            z-index: 2;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, rgba(37, 99, 235, 0.02) 100%);
+            transition: all 0.3s ease;
+            animation: brandFadeIn 0.6s ease 0.1s both;
+        }
+
+        @keyframes brandFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sidebar-brand:hover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+        }
+
+        .sidebar-brand h4 {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand img {
+            max-width: 100%;
+            height: auto;
+            max-height: 40px;
+            object-fit: contain;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-brand:hover img {
+            transform: scale(1.05);
+        }
+
+        .sidebar-brand h4 i {
+            color: var(--primary);
+        }
+
+        .sidebar-nav {
+            position: relative;
+            z-index: 2;
+            padding: 1rem 0.75rem;
+            animation: navFadeIn 0.6s ease 0.2s both;
+        }
+
+        @keyframes navFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-link {
+            padding: 0.65rem 0.875rem;
+            margin-bottom: 0.35rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: var(--sidebar-text) !important;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            animation: navItemSlideIn 0.4s ease both;
+        }
+
+        @keyframes navItemSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-active);
+            transform: translateX(3px);
+            color: var(--primary) !important;
+        }
+
+        .nav-link.active {
+            background: var(--sidebar-active);
+            color: var(--primary) !important;
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.1);
+        }
+
+        .nav-group {
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-group-toggle {
+            cursor: pointer;
+        }
+
+        .nav-group-items {
+            display: none;
+            padding-left: 2.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-group:hover .nav-group-items,
+        .nav-group:focus-within .nav-group-items {
+            display: block;
+        }
+
+        .nav-group-items .nav-link {
+            padding: 0.55rem 0.75rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem 2rem;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content-section { padding: 0 2rem 2rem; }
+        .load-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .load-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .load-card.accepted::before {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            border-left-color: #ffc107;
+        }
+
+        .load-card.picked-up::before {
+            background: linear-gradient(135deg, #ff9800 0%, #ff6b00 100%);
+            border-left-color: #ff9800;
+        }
+
+        .load-card.in-transit::before {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-left-color: #007bff;
+        }
+
+        .load-card.completed::before {
+            background: var(--success-gradient);
+            border-left-color: #10B981;
+        }
+
+        .load-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .load-card .card-body {
+            padding: 2rem;
+        }
+
+        .load-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .load-route {
+            flex: 1;
+        }
+
+        .load-route h5 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .load-route h5 i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .load-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .load-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .load-info-item i {
+            color: var(--primary);
+        }
+
+        .load-price {
+            text-align: right;
+            padding-left: 1rem;
+            border-left: 2px solid #f0f0f0;
+        }
+
+        .load-price-amount {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .load-price-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .load-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .detail-box.pickup {
+            border-left-color: #ffc107;
+        }
+
+        .detail-box.delivery {
+            border-left-color: var(--primary);
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .load-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding-top: 1rem;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .load-actions .btn {
+            border-radius: 12px;
+            padding: 0.65rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: none;
+        }
+
+        .load-actions .btn-outline-primary {
+            border: 2px solid #007bff;
+            background: transparent;
+            color: #007bff;
+        }
+
+        .load-actions .btn-outline-primary:hover {
+            background: #007bff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+        }
+
+        .load-actions .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .load-actions .btn-primary:hover {
+            background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .load-actions .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #000;
+        }
+
+        .load-actions .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #e68900 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 193, 7, 0.4);
+        }
+
+        .load-actions .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+        }
+
+        .load-actions .btn-info:hover {
+            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(23, 162, 184, 0.4);
+        }
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .status-accepted {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            color: #856404;
+            border: 1px solid rgba(133, 100, 4, 0.2);
+        }
+        .status-transit {
+            background: linear-gradient(135deg, #d1ecf1 0%, #a8d8e8 100%);
+            color: #0c5460;
+            border: 1px solid rgba(12, 84, 96, 0.2);
+        }
+        .status-completed {
+            background: var(--success-gradient);
+            color: white;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 0.25rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        /* Loading Skeleton Styles */
+        .loading-skeleton {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.1), transparent);
+            animation: loading-shimmer 1.5s infinite;
+        }
+
+        @keyframes loading-shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        .skeleton-line {
+            height: 1rem;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+        }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+        .skeleton-line.medium {
+            width: 80%;
+        }
+
+        .skeleton-line.long {
+            width: 100%;
+        }
+
+        .skeleton-title {
+            height: 1.5rem;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+            width: 40%;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-button {
+            height: 2.5rem;
+            width: 120px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .dashboard-sidebar { position: fixed; top: 0; left: -100%; width: 280px; z-index: 1050; transition: left 0.3s ease; }
+            .dashboard-sidebar.show { left: 0; }
+            .dashboard-content { margin-left: 0; width: 100%; flex: 1 !important; }
+            .mobile-header { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding: 0.875rem 1rem; 
+                background: white; 
+                border-bottom: 1px solid var(--border); 
+                position: sticky; 
+                top: 0; 
+                z-index: 1040; 
+            }
+            .mobile-header img { 
+                max-height: 35px; 
+                width: auto; 
+                object-fit: contain; 
+            }
+            .sidebar-brand {
+                padding: 1rem 0.875rem !important;
+            }
+            .sidebar-brand img {
+                max-height: 40px !important;
+            }
+            .sidebar-nav {
+                padding: 0.875rem 0.5rem !important;
+            }
+            .nav-link {
+                padding: 0.6rem 0.75rem !important;
+                font-size: 0.85rem !important;
+            }
+            .nav-link i {
+                width: 16px !important;
+                height: 16px !important;
+                font-size: 0.9rem !important;
+                margin-right: 0.5rem !important;
+            }
+            .mobile-menu-btn { background: var(--primary); border: none; color: white; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 1.125rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+            .mobile-header .btn { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+            .header-section { padding: 1rem; margin-bottom: 1rem; }
+            .content-section { padding: 1rem; }
+            .load-card .card-body { padding: 1.5rem; }
+            .load-card-header { flex-direction: column; gap: 1rem; }
+            .load-price { border-left: none; border-top: 2px solid #f0f0f0; padding-top: 1rem; padding-left: 0; text-align: left; }
+            .load-details { grid-template-columns: 1fr; gap: 1rem; }
+            .load-route h5 { font-size: 1.1rem; }
+            .load-price-amount { font-size: 1.5rem; }
+            .load-actions { justify-content: flex-start; }
+            .load-actions .btn { flex: 1; min-width: 100px; }
+        }
+        @media (min-width: 769px) { .mobile-header { display: none; } }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1040; display: none; }
+        .sidebar-overlay.show { display: block; }
+        .rating-stars {
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .rating-stars .star {
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        .rating-stars .star:hover,
+        .rating-stars .star.active {
+            color: #ffc107;
+        }
+        .rating-stars .star.filled {
+            color: #ffc107;
+        }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            width: min(92vw, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .confirm-overlay.show .confirm-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .confirm-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .confirm-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .confirm-btn.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <img src="../supplier/image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo" class="img-fluid">
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary btn-sm" href="available-loads.html"><i class="fas fa-search"></i></a>
+        </div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="row g-0" style="display: flex; flex-wrap: nowrap;">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar p-0" style="flex: 0 0 220px; max-width: 220px; min-width: 220px;">
+                <div class="sidebar-brand">
+                    <img src="../supplier/image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo" class="img-fluid">
+                </div>
+                <div class="sidebar-nav">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <div class="nav-group">
+                            <div class="nav-link nav-group-toggle">
+                                <i class="fas fa-search"></i> Loads
+                            </div>
+                            <div class="nav-group-items">
+                                <a class="nav-link" href="available-loads.html">
+                                    <i class="fas fa-truck-loading"></i> Available Loads
+                                </a>
+                            </div>
+                        </div>
+                        <a class="nav-link active" href="my-loads.html">
+                            <i class="fas fa-boxes"></i> My Loads
+                        </a>
+                        <a class="nav-link" href="../driver/driver-share-location.html">
+                            <i class="fas fa-location-dot"></i> Share Location
+                        </a>
+                        <a class="nav-link" href="vehicles.html">
+                            <i class="fas fa-truck"></i> Vehicles
+                        </a>
+                        <a class="nav-link" href="payment-received.html">
+                            <i class="fas fa-money-bill-wave"></i> Payment Received
+                        </a>
+                        <div class="nav-group">
+                            <div class="nav-link nav-group-toggle">
+                                <i class="fas fa-comments"></i> Chat
+                            </div>
+                            <div class="nav-group-items">
+                                <a class="nav-link" href="messages.html">
+                                    <i class="fas fa-envelope"></i> Messages
+                                </a>
+                            </div>
+                        </div>
+                        <a class="nav-link" href="profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a class="nav-link" href="verification.html">
+                            <i class="fas fa-shield-check"></i> Get Verified
+                        </a>
+                        <a class="nav-link" href="analytics-verified.html">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <hr class="my-3" style="border-color: var(--border);">
+                        <a class="nav-link text-danger" href="javascript:void(0)" onclick="logout()" id="logoutLink">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="dashboard-content p-0" style="flex: 1; min-width: 0;">
+                <!-- Desktop Header -->
+                <div class="header-section d-none d-md-block">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: var(--text-main);">My Loads</h5>
+                            <small class="text-muted" style="color: var(--text-muted);">Track and manage your accepted loads</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="picked-up">Picked Up</option>
+                                <option value="in-transit">In Transit</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshLoads()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loads Content -->
+                <div class="content-section" id="loadsContent">
+                    <!-- Loading Skeleton -->
+                    <div id="loadingSkeleton" class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="loading-skeleton">
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-line long"></div>
+                                <div class="skeleton-line medium"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="mt-3">
+                                    <div class="skeleton-button"></div>
+                                    <div class="skeleton-button"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="loading-skeleton">
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-line long"></div>
+                                <div class="skeleton-line medium"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="mt-3">
+                                    <div class="skeleton-button"></div>
+                                    <div class="skeleton-button"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="loading-skeleton">
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-line long"></div>
+                                <div class="skeleton-line medium"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="mt-3">
+                                    <div class="skeleton-button"></div>
+                                    <div class="skeleton-button"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="noLoadsMessage" class="text-center py-5" style="display:none;">
+                        <i class="fas fa-boxes fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted">No loads assigned yet</h4>
+                        <p class="text-muted mb-4">Accept a load to see it here.</p>
+                    </div>
+                    <!-- Real loads will be rendered here by JS -->
+                </div>
+                
+                <!-- Load Details Modal -->
+                <div class="modal fade" id="loadDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-eye"></i> Load Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">Pickup</small>
+                                            <div class="fw-bold" id="d_pickupLocation">-</div>
+                                            <div class="small" id="d_pickupDateTime">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">Delivery</small>
+                                            <div class="fw-bold" id="d_deliveryLocation">-</div>
+                                            <div class="small" id="d_deliveryDateTime">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <small class="text-muted">Cargo</small>
+                                            <div id="d_cargo">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <small class="text-muted">Budget</small>
+                                            <div id="d_budget">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="p-3 border rounded">
+                                            <small class="text-muted">Special Requirements</small>
+                                            <div id="d_special">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Rate Supplier Modal -->
+                <div class="modal fade" id="rateSupplierModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-star"></i> Rate Supplier</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Rate this supplier</label>
+                                    <div class="rating-stars" id="supplierRatingStars">
+                                        <i class="fas fa-star star" data-rating="1"></i>
+                                        <i class="fas fa-star star" data-rating="2"></i>
+                                        <i class="fas fa-star star" data-rating="3"></i>
+                                        <i class="fas fa-star star" data-rating="4"></i>
+                                        <i class="fas fa-star star" data-rating="5"></i>
+                                    </div>
+                                    <input type="hidden" id="supplierRatingValue" value="0">
+                                    <small class="text-muted d-block mt-2">Click on stars to rate</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="supplierRatingComment" class="form-label">Add a comment (optional)</label>
+                                    <textarea class="form-control" id="supplierRatingComment" rows="3" placeholder="Share your experience..."></textarea>
+                                </div>
+                                <div id="supplierRatingInfo" class="text-muted small"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="submitSupplierRatingBtn" onclick="submitSupplierRating()">
+                                    <i class="fas fa-check"></i> Submit Rating
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confirm Delivery Modal -->
+                <div class="modal fade" id="confirmDeliveryModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-check-circle"></i> Confirm Delivery
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-question-circle fa-3x text-warning mb-3"></i>
+                                </div>
+                                <h6 class="text-center mb-3">Are you sure you want to mark this load as delivered?</h6>
+                                <div class="alert alert-info">
+                                    <div class="mb-2"><strong>Route:</strong> <span id="confirmPickupLocation"></span> → <span id="confirmDeliveryLocation"></span></div>
+                                    <small class="text-muted">This action cannot be undone. The load status will be updated to "Completed" and the supplier will be notified.</small>
+                                </div>
+                                
+                                <!-- POD Upload Section -->
+                                <div class="mb-3">
+                                    <label for="podFile" class="form-label">
+                                        <i class="fas fa-file-upload me-1"></i> Upload Proof of Delivery (POD) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="file" class="form-control" id="podFile" accept="image/*,.pdf" required>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fas fa-info-circle me-1"></i> 
+                                        Please upload POD document (Image or PDF). Max size: 10MB
+                                    </small>
+                                    <div id="podPreview" class="mt-2" style="display: none;">
+                                        <img id="podPreviewImage" src="" alt="POD Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        <div id="podFileName" class="mt-1 text-muted small"></div>
+                                    </div>
+                                    <div id="podUploadProgress" class="mt-2" style="display: none;">
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted">Uploading...</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </button>
+                                <button type="button" class="btn btn-primary" id="confirmDeliveryBtn">
+                                    <i class="fas fa-check-circle me-1"></i> Yes, Mark as Delivered
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Receipt Modal -->
+                <div class="modal fade" id="receiptModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title"><i class="fas fa-receipt"></i> Delivery Receipt</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" id="receiptContent">
+                                <!-- Receipt content will be populated here -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                                    <i class="fas fa-print"></i> Print Receipt
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="downloadReceipt()">
+                                    <i class="fas fa-download"></i> Download PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../assets/js/script.js"></script>
+    
+    <script>
+        // Carrier currency and formatting functions (same as available-loads.html and dashboard.html)
+        const carrierRegionalContext = (window.AlphaBrokrage && typeof window.AlphaBrokrage.createRegionalContext === 'function')
+            ? window.AlphaBrokrage.createRegionalContext('carrier')
+            : null;
+
+        const CARRIER_DEFAULT_SETTINGS = carrierRegionalContext
+            ? Object.assign({}, carrierRegionalContext.getSettings())
+            : {
+                code: 'UK',
+                currencySymbol: '�',
+                currencyCode: 'GBP',
+                locale: 'en-GB',
+                measurementSystem: 'imperial',
+                distanceUnit: 'mi',
+                weightUnit: 'tonnes',
+                fuelUnit: 'litres'
+            };
+
+        function carrierGetSettings() {
+            if (carrierRegionalContext) {
+                return carrierRegionalContext.getSettings();
+            }
+            return CARRIER_DEFAULT_SETTINGS;
+        }
+
+        function formatCarrierCurrency(value, options) {
+            if (carrierRegionalContext) {
+                return carrierRegionalContext.formatCurrency(value, options);
+            }
+            const settings = carrierGetSettings();
+            if (value === null || value === undefined || value === '') {
+                return options && options.fallback !== undefined ? options.fallback : `${settings.currencySymbol}0`;
+            }
+            const numeric = typeof value === 'number' ? value : parseFloat(value);
+            if (Number.isNaN(numeric)) {
+                return options && options.fallback !== undefined ? options.fallback : `${settings.currencySymbol}${value}`;
+            }
+            const digits = options && options.maximumFractionDigits !== undefined ? options.maximumFractionDigits : 2;
+            return `${settings.currencySymbol}${numeric.toFixed(digits)}`;
+        }
+
+        function getNetCarrierAmount(load) {
+            const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (load.minBudget + load.maxBudget) / 2 : load.maxBudget || load.minBudget || 0));
+            const original = parseFloat(originalBudget) || 0;
+            let commissionRate = 0.05; // Small (5%)
+            if (original > 5000) {
+                commissionRate = 0.03; // Large (3%)
+            } else if (original > 1000) {
+                commissionRate = 0.04; // Medium (4%)
+            }
+            const commission = original * commissionRate;
+            return original - commission;
+        }
+
+        function formatCarrierWeight(value, options) {
+            if (carrierRegionalContext) {
+                return carrierRegionalContext.formatWeight(value, options);
+            }
+            if (value === null || value === undefined || value === '') {
+                return '';
+            }
+            const settings = carrierGetSettings();
+            return `${value} ${settings.weightUnit}`;
+        }
+
+        function formatCarrierDistance(value, options) {
+            if (carrierRegionalContext) {
+                return carrierRegionalContext.formatDistance(value, options);
+            }
+            if (value === null || value === undefined || value === '') {
+                return '';
+            }
+            const settings = carrierGetSettings();
+            return `${value} ${settings.distanceUnit}`;
+        }
+
+        function formatCurrencyDisplay(value, fallbackText) {
+            if (value === null || value === undefined || value === '' || value === 'N/A') {
+                return fallbackText !== undefined ? fallbackText : 'N/A';
+            }
+            const numeric = parseFloat(value);
+            if (!Number.isNaN(numeric)) {
+                return formatCarrierCurrency(numeric);
+            }
+            return value;
+        }
+
+        function formatWeightDisplay(value, fallbackText) {
+            if (value === null || value === undefined || value === '' || value === 'N/A') {
+                return fallbackText !== undefined ? fallbackText : '';
+            }
+            const formatted = formatCarrierWeight(value);
+            return formatted || (fallbackText !== undefined ? fallbackText : '');
+        }
+
+        function formatDistanceDisplay(value, fallbackText) {
+            if (value === null || value === undefined || value === '' || value === 'N/A') {
+                return fallbackText !== undefined ? fallbackText : '';
+            }
+            const formatted = formatCarrierDistance(value);
+            return formatted || (fallbackText !== undefined ? fallbackText : '');
+        }
+    </script>
+    
+    <!-- Firebase v8.10.1 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+      authDomain: "alpha-brokerage.firebaseapp.com",
+      databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+      projectId: "alpha-brokerage",
+      storageBucket: "alpha-brokerage.firebasestorage.app",
+      messagingSenderId: "834712514965",
+      appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+    };
+    if (!firebase.apps.length) { 
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    
+    var currentLoads = [];
+    window.currentLoads = currentLoads;
+    var loadsPerSection = 10; // Initial loads per section
+    var displayedCounts = {
+      accepted: 10,
+      'picked-up': 10,
+      'in-transit': 10,
+      completed: 10
+    };
+
+    function listenCarrierLoads() {
+      var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+      var carrierId = carrierAuth.carrierId || carrierAuth.id;
+      if (!carrierId) {
+        AlphaBrokrage.showAlert('error', 'Please log in as carrier');
+        return;
+      }
+      var db = firebase.database();
+      db.ref('loads').on('value', function(snapshot){
+        var myLoads = [];
+        snapshot.forEach(function(child){
+          var load = child.val();
+          load.id = child.key;
+          if (load.carrierId === carrierId) {
+            myLoads.push(load);
+          }
+        });
+        
+        // Ratings are already in load object (supplierRating field), so no need to fetch separately
+        currentLoads = myLoads;
+        window.currentLoads = currentLoads;
+        // Reset display counts when loading fresh data
+        displayedCounts = {
+          accepted: loadsPerSection,
+          'picked-up': loadsPerSection,
+          'in-transit': loadsPerSection,
+          completed: loadsPerSection
+        };
+        // Use setTimeout to allow UI to update first
+        setTimeout(function() {
+          renderCarrierLoads(myLoads);
+        }, 50);
+      });
+    }
+
+    function renderCarrierLoads(loads) {
+      var container = document.getElementById('loadsContent');
+      var noMsg = document.getElementById('noLoadsMessage');
+      var loadingSkeleton = document.getElementById('loadingSkeleton');
+      
+      // Hide loading skeleton when data is loaded
+      if (loadingSkeleton) {
+        loadingSkeleton.style.display = 'none';
+      }
+      
+      if (!container) return;
+      
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(function() {
+        var groups = {
+          accepted: loads.filter(function(l){return l.status === 'accepted';}),
+          'picked-up': loads.filter(function(l){return l.status === 'picked-up';}),
+          'in-transit': loads.filter(function(l){return l.status === 'in-transit';}),
+          completed: loads.filter(function(l){return l.status === 'completed';})
+        };
+        
+        var html = '';
+        if (groups.accepted.length) {
+          var acceptedToShow = groups.accepted.slice(0, displayedCounts.accepted);
+          var hasMoreAccepted = groups.accepted.length > displayedCounts.accepted;
+          html += sectionHtml('Accepted Loads', 'text-warning', 'fa-clock', 'accepted', 'accepted', acceptedToShow, groups.accepted.length, hasMoreAccepted);
+        }
+        if (groups['picked-up'].length) {
+          var pickedUpToShow = groups['picked-up'].slice(0, displayedCounts['picked-up']);
+          var hasMorePickedUp = groups['picked-up'].length > displayedCounts['picked-up'];
+          html += sectionHtml('Picked Up', 'text-warning', 'fa-box-open', 'accepted', 'picked-up', pickedUpToShow, groups['picked-up'].length, hasMorePickedUp);
+        }
+        if (groups['in-transit'].length) {
+          var inTransitToShow = groups['in-transit'].slice(0, displayedCounts['in-transit']);
+          var hasMoreInTransit = groups['in-transit'].length > displayedCounts['in-transit'];
+          html += sectionHtml('In Transit', 'text-primary', 'fa-truck', 'in-transit', 'in-transit', inTransitToShow, groups['in-transit'].length, hasMoreInTransit);
+        }
+        if (groups.completed.length) {
+          var completedToShow = groups.completed.slice(0, displayedCounts.completed);
+          var hasMoreCompleted = groups.completed.length > displayedCounts.completed;
+          html += sectionHtml('Completed', 'text-primary', 'fa-check-circle', 'completed', 'completed', completedToShow, groups.completed.length, hasMoreCompleted);
+        }
+        
+        if (!loads.length) {
+          if (noMsg) noMsg.style.display = 'block';
+          container.innerHTML = '';
+        } else {
+          if (noMsg) noMsg.style.display = 'none';
+          container.innerHTML = html;
+        }
+      });
+    }
+    function sectionHtml(title, colorClass, icon, statusClass, statusKey, items, totalCount, hasMore) {
+      var loadMoreBtn = '';
+      if (hasMore) {
+        var remaining = totalCount - items.length;
+        loadMoreBtn = `<div class="col-12 text-center mt-3">
+          <button class="btn btn-outline-primary" onclick="loadMoreLoads('${statusKey}')">
+            <i class="fas fa-arrow-down me-2"></i>
+            Load More (${remaining} remaining)
+          </button>
+        </div>`;
+      }
+      return `<div class="mb-4"><h6 class="fw-bold ${colorClass} mb-3"><i class="fas ${icon}"></i> ${title} (${totalCount})</h6><div class="row">${items.map(function(load){return loadCard(load, statusClass);}).join('')}${loadMoreBtn}</div></div>`;
+    }
+    
+    window.loadMoreLoads = function(statusKey) {
+      if (displayedCounts[statusKey] !== undefined) {
+        displayedCounts[statusKey] += loadsPerSection;
+        renderCarrierLoads(currentLoads);
+      }
+    };
+    var currentRatingLoadId = null;
+    var currentRatingSupplierId = null;
+    
+    function loadCard(load, statusClass) {
+      var created = load.createdAt ? new Date(load.createdAt).toLocaleDateString() : '';
+      var delivery = load.deliveryDate ? new Date(load.deliveryDate).toLocaleDateString() : '';
+      var netBudget = getNetCarrierAmount(load);
+      var budgetDisplay = formatCarrierCurrency(netBudget);
+      var statusBadgeClass = statusClass === 'accepted' ? 'status-accepted' : statusClass === 'in-transit' ? 'status-transit' : 'status-completed';
+      var statusText = statusClass === 'accepted' ? 'Accepted' : statusClass === 'in-transit' ? 'In Transit' : 'Completed';
+      
+      // Check actual load status for display
+      if (load.status === 'picked-up') {
+        statusText = 'Picked Up';
+        statusBadgeClass = 'status-accepted'; // Use same style as accepted
+      }
+      
+      var pickupDt = (load.pickupDate || load.pickupTime) ? `${load.pickupDate || ''} ${load.pickupTime || ''}`.trim() : '';
+      var deliveryDt = (load.deliveryDate || load.deliveryTime) ? `${load.deliveryDate || ''} ${load.deliveryTime || ''}`.trim() : '';
+      var actions = `<button class="btn btn-outline-primary" onclick="viewDetails('${load.id}')"><i class="fas fa-eye me-1"></i> View Details</button>`;
+      
+      // Receipt button for completed loads
+      if (load.status === 'completed') {
+        actions += ` <button class="btn btn-primary" onclick="viewReceipt('${load.id}')"><i class="fas fa-receipt me-1"></i> Receipt</button>`;
+      }
+      
+      // Three status buttons for accepted and picked-up loads (not completed)
+      if (load.status === 'accepted' || load.status === 'picked-up' || load.status === 'in-transit') {
+        if (load.status === 'accepted') {
+          actions += ` <button class="btn btn-warning" onclick="updateLoadStatus('${load.id}', 'picked-up', event)" title="Picked Up"><i class="fas fa-box-open me-1"></i> Picked Up</button>`;
+        }
+        if (load.status === 'accepted' || load.status === 'picked-up') {
+          actions += ` <button class="btn btn-info" onclick="updateLoadStatus('${load.id}', 'on-route', event)" title="On Route"><i class="fas fa-route me-1"></i> On Route</button>`;
+        }
+        if (load.status !== 'completed') {
+          actions += ` <button class="btn btn-primary" data-load-id="${load.id}" onclick="confirmDelivery('${load.id}', '${load.pickupLocation || 'Pickup'}', '${load.deliveryLocation || 'Delivery'}', event)" title="Delivered"><i class="fas fa-check-circle me-1"></i> Delivered</button>`;
+        }
+      }
+      
+      // Rating section for accepted/completed loads (Carrier rates Supplier)
+      var ratingHtml = '';
+      if ((load.status === 'accepted' || load.status === 'completed') && load.supplierId) {
+        var supplierId = load.supplierId;
+        var hasRated = load.supplierRating || false;
+        var existingRating = load.supplierRating || 0;
+        
+        if (hasRated) {
+          var starsHtml = '';
+          for (var i = 1; i <= 5; i++) {
+            starsHtml += i <= existingRating ? '<i class="fas fa-star text-warning"></i>' : '<i class="far fa-star text-muted"></i>';
+          }
+          ratingHtml = `<div class="mt-2"><small class="text-muted">Your Rating: </small>${starsHtml} ${existingRating}/5</div>`;
+        } else {
+          ratingHtml = `<button class="btn btn-warning mt-3" onclick="rateSupplier('${load.id}', '${supplierId}', '${load.supplierName || 'Supplier'}', event)"><i class="fas fa-star me-1"></i> Rate Supplier</button>`;
+        }
+      }
+      
+      return `<div class="col-lg-6 mb-4">
+        <div class="load-card card ${load.status || statusClass}">
+          <div class="card-body">
+            <div class="load-card-header">
+              <div class="load-route">
+                <h5>
+                  <i class="fas fa-map-marker-alt"></i>
+                  ${load.pickupLocation || 'Pickup'} → ${load.deliveryLocation || 'Delivery'}
+                </h5>
+                <div class="load-info">
+                  <div class="load-info-item">
+                    <i class="fas fa-box"></i>
+                    <span>${load.cargoType || 'General'}</span>
+                  </div>
+                  <div class="load-info-item">
+                    <i class="fas fa-weight"></i>
+                    <span>${formatWeightDisplay(load.cargoWeight || 'N/A', 'N/A')}</span>
+                  </div>
+                  <div class="load-info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>${deliveryDt || delivery || 'N/A'}</span>
+                  </div>
+                </div>
+                ${ratingHtml}
+              </div>
+              <div class="load-status">
+                <span class="status-badge ${statusBadgeClass}"><i class="fas fa-info-circle"></i> ${statusText}</span>
+              </div>
+            </div>
+            <div class="load-card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="info-card">
+                    <small class="text-muted">Budget</small>
+                    <div class="h5 mb-0">${budgetDisplay}</div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="info-card">
+                    <small class="text-muted">Posted</small>
+                    <div class="h5 mb-0">${created}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="load-details">
+                <div class="detail-box pickup">
+                  <div class="detail-label">
+                    <i class="fas fa-map-pin me-1"></i>Pickup Location
+                  </div>
+                  <div class="detail-value">${load.pickupLocation || 'N/A'}</div>
+                  ${pickupDt ? `<div class="text-muted small mt-1"><i class="fas fa-calendar me-1"></i>${pickupDt}</div>` : ''}
+                </div>
+                <div class="detail-box delivery">
+                  <div class="detail-label">
+                    <i class="fas fa-flag-checkered me-1"></i>Delivery Location
+                  </div>
+                  <div class="detail-value">${load.deliveryLocation || 'N/A'}</div>
+                  ${deliveryDt ? `<div class="text-muted small mt-1"><i class="fas fa-calendar me-1"></i>${deliveryDt}</div>` : ''}
+                </div>
+              </div>
+              ${load.specialRequirements ? `<div class="alert alert-info mb-3"><i class="fas fa-info-circle me-2"></i><strong>Special Requirements:</strong> ${load.specialRequirements}</div>` : ''}
+              <div class="load-actions">
+                ${actions}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+    function refreshLoads() {
+      var btn = event && event.target;
+      if (!btn) return;
+      var original = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...'; btn.disabled = true;
+      setTimeout(function(){ btn.innerHTML = original; btn.disabled = false; }, 800);
+    }
+    window.addEventListener('DOMContentLoaded', listenCarrierLoads);
+    </script>
+    
+    <script>
+        function startJourney(loadId) {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Starting...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                AlphaBrokrage.showAlert('success', 'Journey started! Load status updated to "In Transit".');
+                btn.innerHTML = '<i class="fas fa-truck"></i> In Transit';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+            }, 1500);
+        }
+
+        // Store event for confirmation
+        window.pendingDeliveryEvent = null;
+        window.pendingDeliveryLoadId = null;
+
+        function confirmDelivery(loadId, pickupLocation, deliveryLocation, ev) {
+            // Store loadId and event for later use
+            window.pendingDeliveryLoadId = loadId;
+            window.pendingDeliveryEvent = ev;
+            
+            // Reset POD form
+            var podFileInput = document.getElementById('podFile');
+            if (podFileInput) {
+                podFileInput.value = '';
+            }
+            document.getElementById('podPreview').style.display = 'none';
+            document.getElementById('podFileName').textContent = '';
+            document.getElementById('podUploadProgress').style.display = 'none';
+            var progressBar = document.querySelector('#podUploadProgress .progress-bar');
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+            
+            // Update modal content
+            document.getElementById('confirmPickupLocation').textContent = pickupLocation;
+            document.getElementById('confirmDeliveryLocation').textContent = deliveryLocation;
+            
+            // Reset confirm button
+            var confirmBtn = document.getElementById('confirmDeliveryBtn');
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Yes, Mark as Delivered';
+            }
+            
+            // Show modal
+            var modalElement = document.getElementById('confirmDeliveryModal');
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+
+        // Handle POD file preview
+        document.addEventListener('DOMContentLoaded', function() {
+            // Reset POD form when modal is hidden
+            var modalElement = document.getElementById('confirmDeliveryModal');
+            if (modalElement) {
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    var podFileInput = document.getElementById('podFile');
+                    if (podFileInput) {
+                        podFileInput.value = '';
+                    }
+                    document.getElementById('podPreview').style.display = 'none';
+                    document.getElementById('podFileName').textContent = '';
+                    document.getElementById('podUploadProgress').style.display = 'none';
+                    var progressBar = document.querySelector('#podUploadProgress .progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = '0%';
+                    }
+                    // Clear pending POD URL
+                    window.pendingPODUrl = null;
+                });
+            }
+            
+            var podFileInput = document.getElementById('podFile');
+            if (podFileInput) {
+                podFileInput.addEventListener('change', function(e) {
+                    var file = e.target.files[0];
+                    if (file) {
+                        // Validate file
+                        var maxSize = 10 * 1024 * 1024; // 10MB
+                        if (file.size > maxSize) {
+                            AlphaBrokrage.showAlert('error', 'File size exceeds 10MB limit. Please choose a smaller file.');
+                            e.target.value = '';
+                            return;
+                        }
+                        
+                        // Show preview for images
+                        if (file.type.startsWith('image/')) {
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                document.getElementById('podPreviewImage').src = e.target.result;
+                                document.getElementById('podPreview').style.display = 'block';
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            document.getElementById('podPreview').style.display = 'none';
+                        }
+                        
+                        // Show file name
+                        document.getElementById('podFileName').textContent = 'Selected: ' + file.name;
+                    } else {
+                        document.getElementById('podPreview').style.display = 'none';
+                        document.getElementById('podFileName').textContent = '';
+                    }
+                });
+            }
+            
+            // Handle confirm button click
+            var confirmBtn = document.getElementById('confirmDeliveryBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', async function() {
+                    if (window.pendingDeliveryLoadId) {
+                        // Check if POD file is selected
+                        var podFileInput = document.getElementById('podFile');
+                        if (!podFileInput || !podFileInput.files || !podFileInput.files[0]) {
+                            AlphaBrokrage.showAlert('warning', 'Please upload Proof of Delivery (POD) document before marking as delivered.');
+                            return;
+                        }
+                        
+                        var podFile = podFileInput.files[0];
+                        
+                        // Disable button and show loading
+                        var originalBtnText = confirmBtn.innerHTML;
+                        confirmBtn.disabled = true;
+                        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading POD...';
+                        
+                        // Show upload progress
+                        document.getElementById('podUploadProgress').style.display = 'block';
+                        var progressBar = document.querySelector('#podUploadProgress .progress-bar');
+                        
+                        try {
+                            // Get carrier auth for user ID
+                            var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+                            var carrierId = carrierAuth.carrierId || carrierAuth.id || 'unknown';
+                            
+                            // Use Base64 Method (No CORS Issues!)
+                            // Convert file to base64 and store in Firebase Database
+                            var reader = new FileReader();
+                            
+                            reader.onload = function(e) {
+                                try {
+                                    var base64Data = e.target.result;
+                                    
+                                    // Check file size (max 5MB for base64)
+                                    var maxSize = 5 * 1024 * 1024; // 5MB
+                                    if (podFile.size > maxSize) {
+                                        AlphaBrokrage.showAlert('error', 'File size too large. Please use a file smaller than 5MB.');
+                                        confirmBtn.disabled = false;
+                                        confirmBtn.innerHTML = originalBtnText;
+                                        document.getElementById('podUploadProgress').style.display = 'none';
+                                        return;
+                                    }
+                                    
+                                    // Show progress
+                                    if (progressBar) {
+                                        progressBar.style.width = '70%';
+                                        progressBar.setAttribute('aria-valuenow', 70);
+                                    }
+                                    
+                                    // Store POD directly in load object (no separate path needed)
+                                    // This avoids permission issues
+                                    window.pendingPODUrl = base64Data;
+                                    window.pendingPODData = {
+                                        fileName: podFile.name,
+                                        fileType: podFile.type,
+                                        fileSize: podFile.size,
+                                        uploadedBy: carrierId,
+                                        uploadedAt: new Date().toISOString()
+                                    };
+                                    
+                                    if (progressBar) {
+                                        progressBar.style.width = '100%';
+                                        progressBar.setAttribute('aria-valuenow', 100);
+                                    }
+                                    
+                                    // Close modal
+                                    var modalElement = document.getElementById('confirmDeliveryModal');
+                                    var modalInstance = bootstrap.Modal.getInstance(modalElement);
+                                    if (modalInstance) {
+                                        modalInstance.hide();
+                                    }
+                                    
+                                    // Call updateLoadStatus with 'delivered' and POD data
+                                    // POD will be saved in load object itself
+                                    updateLoadStatus(window.pendingDeliveryLoadId, 'delivered', window.pendingDeliveryEvent);
+                                    
+                                    // Clear stored values
+                                    window.pendingDeliveryLoadId = null;
+                                    window.pendingDeliveryEvent = null;
+                                    window.pendingPODUrl = null;
+                                    window.pendingPODData = null;
+                                    
+                                    // Reset form
+                                    if (podFileInput) {
+                                        podFileInput.value = '';
+                                        document.getElementById('podPreview').style.display = 'none';
+                                        document.getElementById('podFileName').textContent = '';
+                                    }
+                                    
+                                    // Reset button
+                                    confirmBtn.disabled = false;
+                                    confirmBtn.innerHTML = originalBtnText;
+                                    document.getElementById('podUploadProgress').style.display = 'none';
+                                    
+                                    AlphaBrokrage.showAlert('success', 'POD uploaded successfully! Load marked as delivered.');
+                                    
+                                } catch (error) {
+                                    console.error('Error processing file:', error);
+                                    AlphaBrokrage.showAlert('error', 'Failed to process POD file: ' + (error.message || 'Unknown error'));
+                                    confirmBtn.disabled = false;
+                                    confirmBtn.innerHTML = originalBtnText;
+                                    document.getElementById('podUploadProgress').style.display = 'none';
+                                }
+                            };
+                            
+                            reader.onerror = function(error) {
+                                console.error('File read error:', error);
+                                AlphaBrokrage.showAlert('error', 'Failed to read POD file. Please try again.');
+                                confirmBtn.disabled = false;
+                                confirmBtn.innerHTML = originalBtnText;
+                                document.getElementById('podUploadProgress').style.display = 'none';
+                            };
+                            
+                            // Show initial progress
+                            if (progressBar) {
+                                progressBar.style.width = '30%';
+                                progressBar.setAttribute('aria-valuenow', 30);
+                            }
+                            
+                            // Read file as base64
+                            reader.readAsDataURL(podFile);
+                            
+                        } catch (error) {
+                            console.error('POD upload error:', error);
+                            AlphaBrokrage.showAlert('error', 'Failed to upload POD: ' + (error.message || 'Unknown error'));
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = originalBtnText;
+                            document.getElementById('podUploadProgress').style.display = 'none';
+                        }
+                    }
+                });
+            }
+        });
+
+        function updateLoadStatus(loadId, newStatus, ev) {
+            var btn = null;
+            // If delivered status and event is from modal, find the original button
+            if (newStatus === 'delivered' && (!ev || !ev.currentTarget)) {
+                // Try to find button by data-load-id attribute
+                var buttons = document.querySelectorAll('button[data-load-id="' + loadId + '"]');
+                if (buttons.length > 0) {
+                    // Find the delivered button
+                    for (var i = 0; i < buttons.length; i++) {
+                        if (buttons[i].onclick && buttons[i].onclick.toString().indexOf('delivered') > -1) {
+                            btn = buttons[i];
+                            break;
+                        }
+                    }
+                    // If not found, use first button with this loadId
+                    if (!btn && buttons.length > 0) {
+                        btn = buttons[0];
+                    }
+                }
+            } else {
+                btn = ev && ev.currentTarget ? ev.currentTarget : null;
+            }
+            
+            var originalText = btn ? btn.innerHTML : '';
+            
+            if (btn) {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+                btn.disabled = true;
+            }
+
+            var db = firebase.database();
+            var loadRef = db.ref('loads/' + loadId);
+            var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+            
+            // Map status values
+            var firebaseStatus = newStatus === 'picked-up' ? 'picked-up' : 
+                                 newStatus === 'on-route' ? 'in-transit' : 
+                                 newStatus === 'delivered' ? 'completed' : newStatus;
+            
+            // Get current load to send notification
+            loadRef.once('value', function(snapshot) {
+                var currentLoad = snapshot.val();
+                if (!currentLoad) {
+                    AlphaBrokrage.showAlert('error', 'Load not found');
+                    if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+                    return;
+                }
+
+                // Update status in Firebase
+                loadRef.transaction(function(current) {
+                    if (!current) return current;
+                    
+                    current.status = firebaseStatus;
+                    if (firebaseStatus === 'picked-up') {
+                        current.pickedUpAt = new Date().toISOString();
+                    } else if (firebaseStatus === 'in-transit') {
+                        current.inTransitAt = new Date().toISOString();
+                    } else if (firebaseStatus === 'completed') {
+                        current.completedAt = new Date().toISOString();
+                        // Add POD data if available (base64 data stored in load object)
+                        if (window.pendingPODUrl) {
+                            current.podUrl = window.pendingPODUrl; // Base64 data URL
+                            current.podUploadedAt = new Date().toISOString();
+                            current.hasPOD = true;
+                            // Add POD metadata if available
+                            if (window.pendingPODData) {
+                                current.podFileName = window.pendingPODData.fileName;
+                                current.podFileType = window.pendingPODData.fileType;
+                                current.podFileSize = window.pendingPODData.fileSize;
+                                current.podUploadedBy = window.pendingPODData.uploadedBy;
+                            }
+                        }
+                    }
+                    
+                    return current;
+                }, function(error, committed, snapshot) {
+                    if (error) {
+                        AlphaBrokrage.showAlert('error', 'Error updating status: ' + error.message);
+                        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+                    } else if (!committed) {
+                        AlphaBrokrage.showAlert('warning', 'Could not update status. Try again.');
+                        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+                    } else {
+                        // Save POD in 3 places: Carrier, Supplier, and Admin
+                        if (firebaseStatus === 'completed' && window.pendingPODUrl && window.pendingPODData) {
+                            try {
+                                var podData = {
+                                    loadId: loadId,
+                                    podUrl: window.pendingPODUrl,
+                                    podFileName: window.pendingPODData.fileName,
+                                    podFileType: window.pendingPODData.fileType,
+                                    podFileSize: window.pendingPODData.fileSize,
+                                    podUploadedBy: window.pendingPODData.uploadedBy,
+                                    podUploadedAt: new Date().toISOString(),
+                                    pickupLocation: currentLoad.pickupLocation,
+                                    deliveryLocation: currentLoad.deliveryLocation,
+                                    carrierName: carrierAuth.firstName && carrierAuth.lastName ? (carrierAuth.firstName + ' ' + carrierAuth.lastName) : 'Carrier',
+                                    carrierId: carrierId,
+                                    loadPrice: currentLoad.price || currentLoad.budget
+                                };
+
+                                // 1. Save POD in Carrier's account
+                                db.ref('pods/carriers/' + carrierId + '/' + loadId).set(podData)
+                                    .catch(function(error) {
+                                        console.error('Error saving POD to carrier:', error);
+                                    });
+
+                                // 2. Save POD in Supplier's account
+                                if (currentLoad.supplierId) {
+                                    podData.supplierId = currentLoad.supplierId;
+                                    db.ref('pods/suppliers/' + currentLoad.supplierId + '/' + loadId).set(podData)
+                                        .catch(function(error) {
+                                            console.error('Error saving POD to supplier:', error);
+                                        });
+                                }
+
+                                // 3. Save POD in Admin's account (if load was posted by admin)
+                                if (currentLoad.postedBy === 'admin' || currentLoad.adminId) {
+                                    var adminId = currentLoad.adminId || 'admin';
+                                    podData.adminId = adminId;
+                                    db.ref('pods/admins/' + adminId + '/' + loadId).set(podData)
+                                        .catch(function(error) {
+                                            console.error('Error saving POD to admin:', error);
+                                        });
+                                }
+                            } catch(e) {
+                                console.error('Error saving POD to collections:', e);
+                            }
+                        }
+
+                        // Send notification to supplier
+                        try {
+                            var statusMessage = newStatus === 'picked-up' ? 'picked up' : 
+                                               newStatus === 'on-route' ? 'on route' : 
+                                               newStatus === 'delivered' ? 'delivered' : newStatus;
+                            
+                            var notif = {
+                                type: 'load_status_update',
+                                loadId: loadId,
+                                status: firebaseStatus,
+                                message: `Load has been ${statusMessage}: ${currentLoad.pickupLocation} → ${currentLoad.deliveryLocation}`,
+                                pickup: currentLoad.pickupLocation,
+                                delivery: currentLoad.deliveryLocation,
+                                carrier: carrierAuth.firstName && carrierAuth.lastName ? (carrierAuth.firstName + ' ' + carrierAuth.lastName) : 'Carrier',
+                                timestamp: new Date().toISOString()
+                            };
+                            
+                            if (currentLoad.supplierId) {
+                                db.ref('notifications/suppliers/' + currentLoad.supplierId).push(notif);
+                            }
+                            
+                            // Also notify admin if load was posted by admin
+                            if (currentLoad.postedBy === 'admin' || currentLoad.adminId) {
+                                var adminId = currentLoad.adminId || 'admin';
+                                db.ref('notifications/admins/' + adminId).push(notif);
+                            }
+                            
+                            AlphaBrokrage.showAlert('success', 'Status updated to ' + statusMessage + '! Supplier notified.');
+                        } catch(e) {
+                            console.error('Notification error:', e);
+                            AlphaBrokrage.showAlert('success', 'Status updated successfully!');
+                        }
+                        
+                        if (btn) {
+                            btn.innerHTML = '<i class="fas fa-check"></i> Updated';
+                            btn.classList.remove('btn-sm');
+                            setTimeout(function() {
+                                btn.innerHTML = originalText;
+                                btn.disabled = false;
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+        }
+        
+        function updateStatus(loadId) {
+            AlphaBrokrage.showAlert('info', 'Status update modal would open here.');
+        }
+
+        function viewDetails(loadId) {
+            var load = (window.currentLoads || []).find(function(l){ return l.id === loadId; });
+            if (!load) {
+                AlphaBrokrage.showAlert('error', 'Load not found. Try refreshing.');
+                return;
+            }
+            document.getElementById('d_pickupLocation').textContent = load.pickupLocation || '-';
+            document.getElementById('d_deliveryLocation').textContent = load.deliveryLocation || '-';
+            var pdt = [(load.pickupDate||''),(load.pickupTime||'')].filter(Boolean).join(' ');
+            var ddt = [(load.deliveryDate||''),(load.deliveryTime||'')].filter(Boolean).join(' ');
+            document.getElementById('d_pickupDateTime').textContent = pdt || '-';
+            document.getElementById('d_deliveryDateTime').textContent = ddt || '-';
+            document.getElementById('d_cargo').textContent = [(load.cargoType||''),(load.cargoDescription||''),(load.cargoWeight? (load.cargoWeight+' tonnes') : '')].filter(Boolean).join(' � ') || '-';
+            var budget = getNetCarrierAmount(load);
+            document.getElementById('d_budget').textContent = formatCarrierCurrency(budget);
+            document.getElementById('d_special').textContent = load.specialRequirements || load.specialInstructions || '-';
+            var modal = new bootstrap.Modal(document.getElementById('loadDetailsModal'));
+            modal.show();
+        }
+
+        function rateSupplier(loadId, supplierId, supplierName, ev) {
+            if (ev) ev.stopPropagation();
+            currentRatingLoadId = loadId;
+            currentRatingSupplierId = supplierId || supplierName;
+            
+            // Reset rating
+            document.getElementById('supplierRatingValue').value = '0';
+            document.getElementById('supplierRatingComment').value = '';
+            document.getElementById('supplierRatingInfo').textContent = supplierName ? 'Rating for: ' + supplierName : '';
+            
+            // Reset stars
+            var stars = document.querySelectorAll('#supplierRatingStars .star');
+            stars.forEach(function(star) {
+                star.classList.remove('filled', 'active');
+            });
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('rateSupplierModal'));
+            modal.show();
+            
+            // Setup star click handlers
+            setTimeout(function() {
+                setupSupplierRatingStars('supplierRatingStars', 'supplierRatingValue');
+            }, 300);
+        }
+        
+        function setupSupplierRatingStars(containerId, inputId) {
+            var stars = document.querySelectorAll('#' + containerId + ' .star');
+            var input = document.getElementById(inputId);
+            
+            stars.forEach(function(star) {
+                star.addEventListener('click', function() {
+                    var rating = parseInt(this.getAttribute('data-rating'));
+                    input.value = rating;
+                    
+                    // Update stars display
+                    stars.forEach(function(s, index) {
+                        if (index < rating) {
+                            s.classList.add('filled');
+                            s.classList.remove('active');
+                        } else {
+                            s.classList.remove('filled', 'active');
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseenter', function() {
+                    var rating = parseInt(this.getAttribute('data-rating'));
+                    stars.forEach(function(s, index) {
+                        if (index < rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Reset on mouse leave
+            var container = document.getElementById(containerId);
+            if (container) {
+                container.addEventListener('mouseleave', function() {
+                    var currentRating = parseInt(input.value) || 0;
+                    stars.forEach(function(s, index) {
+                        if (index < currentRating) {
+                            s.classList.add('filled');
+                            s.classList.remove('active');
+                        } else {
+                            s.classList.remove('filled', 'active');
+                        }
+                    });
+                });
+            }
+        }
+        
+        function submitSupplierRating() {
+            var rating = parseInt(document.getElementById('supplierRatingValue').value);
+            var comment = document.getElementById('supplierRatingComment').value.trim();
+            
+            if (rating === 0) {
+                AlphaBrokrage.showAlert('warning', 'Please select a rating');
+                return;
+            }
+            
+            if (!currentRatingLoadId) {
+                AlphaBrokrage.showAlert('error', 'Load ID not found');
+                return;
+            }
+            
+            var btn = document.getElementById('submitSupplierRatingBtn');
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+            btn.disabled = true;
+            
+            var db = firebase.database();
+            var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+            var loadRef = db.ref('loads/' + currentRatingLoadId);
+            
+            // Get current load to find supplier
+            loadRef.once('value', function(snapshot) {
+                var load = snapshot.val();
+                if (!load) {
+                    AlphaBrokrage.showAlert('error', 'Load not found');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+                
+                var supplierId = load.supplierId || currentRatingSupplierId || 'unknown';
+                var supplierKey = supplierId.replace(/[.#$\[\]]/g, '_');
+                var carrierId = carrierAuth.carrierId || (carrierAuth.firstName && carrierAuth.lastName ? (carrierAuth.firstName + ' ' + carrierAuth.lastName) : 'unknown');
+                var carrierKey = carrierId.replace(/[.#$\[\]]/g, '_');
+                
+                // Save rating to loads/{loadId}/supplierRating (Carrier rates Supplier)
+                var ratingData = {
+                    rating: rating,
+                    comment: comment || '',
+                    carrierId: carrierId,
+                    carrierName: (carrierAuth.firstName || '') + ' ' + (carrierAuth.lastName || ''),
+                    supplierId: supplierId,
+                    supplierName: load.supplierName || 'Supplier',
+                    loadId: currentRatingLoadId,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Save rating in load object directly (this should work with default permissions)
+                loadRef.update({
+                    supplierRating: rating,
+                    supplierRatingComment: comment,
+                    supplierRatedAt: new Date().toISOString()
+                }).then(function() {
+                    // Try to save to ratings path (optional, if permission denied, that's okay)
+                    var ratingRef = db.ref('ratings/suppliers/' + supplierKey + '/' + currentRatingLoadId);
+                    ratingRef.set(ratingData).catch(function(err) {
+                        console.log('Optional ratings path save failed (permission denied is okay):', err);
+                    }).then(function() {
+                        // Try to save to ratings/loads path (optional)
+                        db.ref('ratings/loads/' + currentRatingLoadId + '/supplier').set(ratingData).catch(function(err) {
+                            console.log('Optional ratings/loads path save failed (permission denied is okay):', err);
+                        }).then(function() {
+                            AlphaBrokrage.showAlert('success', 'Rating submitted successfully!');
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('rateSupplierModal'));
+                            if (modal) modal.hide();
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        });
+                    });
+                }).catch(function(error) {
+                    console.error('Rating error:', error);
+                    var errorMsg = error.message || 'Error submitting rating';
+                    if (error.code === 'PERMISSION_DENIED') {
+                        errorMsg = 'Permission denied. Rating saved to load only.';
+                    }
+                    AlphaBrokrage.showAlert('error', errorMsg);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            });
+        }
+
+        function completeOrder(loadId, ev) {
+            var btn = ev && ev.currentTarget ? ev.currentTarget : null;
+            var original = btn ? btn.innerHTML : '';
+            if (btn) { btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Completing...'; btn.disabled = true; }
+
+            var db = firebase.database();
+            var loadRef = db.ref('loads/' + loadId);
+            var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+            loadRef.transaction(function(current){
+                if (!current) return current;
+                current.status = 'completed';
+                current.completedAt = new Date().toISOString();
+                return current;
+            }, function(error, committed, snapshot){
+                if (error) {
+                    AlphaBrokrage.showAlert('error', 'Error completing order: ' + error.message);
+                    if (btn) { btn.innerHTML = original; btn.disabled = false; }
+                } else if (!committed) {
+                    AlphaBrokrage.showAlert('warning', 'Order could not be completed. Try again.');
+                    if (btn) { btn.innerHTML = original; btn.disabled = false; }
+                } else {
+                    try {
+                        // Notify supplier and carrier
+                        var notif = {
+                            type: 'order_completed',
+                            loadId: loadId,
+                            pickup: snapshot.val().pickupLocation,
+                            delivery: snapshot.val().deliveryLocation,
+                            timestamp: new Date().toISOString()
+                        };
+                        if (snapshot.val().supplierId) {
+                            db.ref('notifications/suppliers/' + snapshot.val().supplierId).push(notif);
+                        }
+                        if (carrierAuth.carrierId) {
+                            db.ref('notifications/carriers/' + carrierAuth.carrierId).push(notif);
+                        }
+                    } catch(e) { /* non-blocking */ }
+                    AlphaBrokrage.showAlert('success', 'Order marked as completed!');
+                    if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Completed'; btn.classList.remove('btn-primary'); btn.classList.add('btn-outline-primary'); }
+                }
+            });
+        }
+
+        // Status filter functionality
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const status = this.value;
+            const loadCards = document.querySelectorAll('.load-card');
+            
+            loadCards.forEach(card => {
+                if (status === '' || card.classList.contains(status)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // Receipt generation function
+        function viewReceipt(loadId) {
+            var load = (window.currentLoads || []).find(function(l){ return l.id === loadId; });
+            if (!load) {
+                AlphaBrokrage.showAlert('error', 'Load not found. Try refreshing.');
+                return;
+            }
+            
+            var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+            var carrierName = (carrierAuth.firstName && carrierAuth.lastName) ? 
+                (carrierAuth.firstName + ' ' + carrierAuth.lastName) : 
+                (carrierAuth.email || 'Carrier');
+            var carrierPhone = carrierAuth.phone || 'N/A';
+            var carrierEmail = carrierAuth.email || 'N/A';
+            
+            // Format dates
+            var created = load.createdAt ? new Date(load.createdAt).toLocaleDateString('en-GB') : 'N/A';
+            var completed = load.completedAt ? new Date(load.completedAt).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
+            var pickupDate = load.pickupDate ? new Date(load.pickupDate).toLocaleDateString('en-GB') : 'N/A';
+            var deliveryDate = load.deliveryDate ? new Date(load.deliveryDate).toLocaleDateString('en-GB') : 'N/A';
+            
+            // Calculate net carrier amount (commission hidden in receipt)
+            var originalBudget = load.budget || (load.minBudget && load.maxBudget ? (load.minBudget + load.maxBudget) / 2 : load.maxBudget || load.minBudget || 0);
+            var commission = 0;
+            if (originalBudget > 5000) {
+                commission = originalBudget * 0.03; // Large (3%)
+            } else if (originalBudget > 1000) {
+                commission = originalBudget * 0.03; // Medium (3%)
+            } else {
+                commission = originalBudget * 0.04; // Small (4%)
+            }
+            var carrierAmount = originalBudget - commission;
+            
+            var receiptHtml = `
+                <div id="receiptPrintArea" style="font-family: Arial, sans-serif; padding: 20px; position: relative; background: #fff; min-height: 800px;">
+                    <!-- Background Watermark Logo -->
+                    <!-- YAHAN APNA LOGO LAGAO: Image path ko update karo agar logo file ka naam different hai -->
+                    <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: 0.06; z-index: 0; pointer-events: none; width: 900px; height: 900px; display: flex; align-items: center; justify-content: center;">
+                        <img src="../supplier/image-removebg-preview - 2026-03-04T185605.074.png" alt="Alpha Freight Logo" style="width: 100%; height: 100%; object-fit: contain; filter: grayscale(100%); opacity: 0.8;">
+                    </div>
+                    <div style="position: relative; z-index: 1;">
+                    <div style="text-align: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px;">
+                        <h1 style="color: #28a745; margin: 0; font-size: 32px; font-weight: bold;">ALPHA FREIGHT</h1>
+                        <p style="margin: 5px 0; color: #666; font-size: 14px;">Freight & Logistics Services</p>
+                        <p style="margin: 5px 0; color: #666; font-size: 12px;">Official Delivery Receipt</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="flex: 1;">
+                                <h3 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px; margin-bottom: 10px;">Load Information</h3>
+                                <p style="margin: 5px 0;"><strong>Load ID:</strong> ${load.id.substring(0, 12).toUpperCase()}</p>
+                                <p style="margin: 5px 0;"><strong>Order Date:</strong> ${created}</p>
+                                <p style="margin: 5px 0;"><strong>Completed Date:</strong> ${completed}</p>
+                                <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">COMPLETED</span></p>
+                            </div>
+                            <div style="flex: 1; text-align: right;">
+                                <div style="border: 3px solid #28a745; padding: 15px; display: inline-block; border-radius: 10px; background: #f8f9fa;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #28a745;">? VERIFIED</div>
+                                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Alpha Freight</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 20px 0; margin-bottom: 25px;">
+                            <h4 style="color: #333; margin-bottom: 20px; padding-bottom: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">Route Details</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                                <div>
+                                    <p style="margin: 8px 0 5px 0; font-weight: bold; color: #28a745; font-size: 13px; letter-spacing: 1px;">PICKUP LOCATION</p>
+                                    <p style="margin: 5px 0; font-size: 15px; line-height: 1.6;">${load.pickupLocation || 'N/A'}</p>
+                                    <p style="margin: 8px 0 3px 0; color: #666; font-size: 12px;">Date: ${pickupDate}</p>
+                                    <p style="margin: 3px 0; color: #666; font-size: 12px;">Time: ${load.pickupTime || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 8px 0 5px 0; font-weight: bold; color: #28a745; font-size: 13px; letter-spacing: 1px;">DELIVERY LOCATION</p>
+                                    <p style="margin: 5px 0; font-size: 15px; line-height: 1.6;">${load.deliveryLocation || 'N/A'}</p>
+                                    <p style="margin: 8px 0 3px 0; color: #666; font-size: 12px;">Date: ${deliveryDate}</p>
+                                    <p style="margin: 3px 0; color: #666; font-size: 12px;">Time: ${load.deliveryTime || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 20px 0; margin-bottom: 25px;">
+                            <h4 style="color: #333; margin-bottom: 20px; padding-bottom: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">Cargo Information</h4>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+                                <div>
+                                    <p style="margin: 8px 0 5px 0; font-weight: bold; color: #555; font-size: 13px;">Cargo Type:</p>
+                                    <p style="margin: 5px 0; font-size: 15px;">${load.cargoType || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 8px 0 5px 0; font-weight: bold; color: #555; font-size: 13px;">Weight:</p>
+                                    <p style="margin: 5px 0; font-size: 15px;">${load.cargoWeight || 'N/A'} tonnes</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 8px 0 5px 0; font-weight: bold; color: #555; font-size: 13px;">Volume:</p>
+                                    <p style="margin: 5px 0; font-size: 15px;">${load.cargoVolume || 'N/A'} m�</p>
+                                </div>
+                            </div>
+                            ${load.cargoDescription ? '<p style="margin-top: 15px; line-height: 1.6;"><strong style="color: #555;">Description:</strong> <span style="color: #333;">' + load.cargoDescription + '</span></p>' : ''}
+                            <p style="margin: 15px 0 5px 0; line-height: 1.6;"><strong style="color: #555;">Vehicle Type:</strong> <span style="color: #333;">${load.vehicleType || 'N/A'}</span></p>
+                        </div>
+                        
+                        <div style="padding: 20px 0; margin-bottom: 25px;">
+                            <h4 style="color: #333; margin-bottom: 20px; padding-bottom: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">Parties</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                                <div>
+                                    <p style="margin: 8px 0 8px 0; font-weight: bold; color: #28a745; font-size: 13px; letter-spacing: 1px;">CARRIER</p>
+                                    <p style="margin: 5px 0; font-size: 15px; line-height: 1.6;">${carrierName}</p>
+                                    <p style="margin: 8px 0 3px 0; color: #666; font-size: 12px;">Phone: ${carrierPhone}</p>
+                                    <p style="margin: 3px 0; color: #666; font-size: 12px;">Email: ${carrierEmail}</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 8px 0 8px 0; font-weight: bold; color: #28a745; font-size: 13px; letter-spacing: 1px;">SUPPLIER</p>
+                                    <p style="margin: 5px 0; font-size: 15px; line-height: 1.6;">${load.supplierName || load.supplierId || 'N/A'}</p>
+                                    <p style="margin: 8px 0 3px 0; color: #666; font-size: 12px;">ID: ${load.supplierId || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 25px 0; margin-bottom: 25px; border-top: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef;">
+                            <h4 style="color: #333; margin-bottom: 20px; padding-bottom: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">Payment Summary</h4>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Total Amount:</span>
+                                <span style="font-weight: bold;">${formatCarrierCurrency(carrierAmount)}</span>
+                            </div>
+                            <div style="border-top: 2px solid #28a745; margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between;">
+                                <span style="font-weight: bold; font-size: 18px;">Amount Received:</span>
+                                <span style="font-weight: bold; font-size: 18px; color: #28a745;">${formatCarrierCurrency(carrierAmount)}</span>
+                            </div>
+                            <p style="margin-top: 10px; font-size: 12px; color: #666;">Payment Method: ${load.paymentMethod || 'N/A'}</p>
+                        </div>
+                        
+                        ${load.specialInstructions ? `
+                        <div style="padding: 20px 0; margin-bottom: 25px;">
+                            <h4 style="color: #333; margin-bottom: 12px; font-size: 16px; font-weight: 600; color: #856404;">Special Instructions</h4>
+                            <p style="margin: 0; line-height: 1.6; color: #555;">${load.specialInstructions}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${load.additionalNotes ? `
+                        <div style="padding: 20px 0; margin-bottom: 25px;">
+                            <h4 style="color: #333; margin-bottom: 12px; font-size: 16px; font-weight: 600; color: #0c5460;">Additional Notes</h4>
+                            <p style="margin: 0; line-height: 1.6; color: #555;">${load.additionalNotes}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd;">
+                            <div style="margin-top: 30px;">
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">This is an official receipt issued by Alpha Freight</p>
+                                <p style="margin: 5px 0; font-size: 11px; color: #999;">Generated on: ${new Date().toLocaleString('en-GB')}</p>
+                                <p style="margin: 10px 0 0 0; font-size: 14px; font-weight: bold; color: #28a745;">? Delivery Confirmed & Verified</p>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receiptContent').innerHTML = receiptHtml;
+            
+            // Store load ID for print/download
+            window.currentReceiptLoadId = loadId;
+            
+            var modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+            modal.show();
+        }
+        
+        function printReceipt() {
+            var printContent = document.getElementById('receiptPrintArea').innerHTML;
+            var originalContent = document.body.innerHTML;
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            location.reload();
+        }
+        
+        function downloadReceipt() {
+            printReceipt(); // For now, use print as PDF option
+            AlphaBrokrage.showAlert('info', 'Use Print dialog and select "Save as PDF" to download');
+        }
+    </script>
+    <script>
+    // Mobile Navigation
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.dashboard-sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      sidebar.classList.toggle('show');
+      overlay.classList.toggle('show');
+      document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : 'auto';
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('.nav-link').forEach(function(link){
+        link.addEventListener('click', function(){ if (window.innerWidth <= 768) toggleSidebar(); });
+      });
+      window.addEventListener('resize', function(){
+        const sidebar = document.querySelector('.dashboard-sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+        if (window.innerWidth > 768) { sidebar.classList.remove('show'); overlay.classList.remove('show'); document.body.style.overflow = 'auto'; }
+      });
+    });
+
+    // Custom Confirm Dialog
+    function showConfirmLogout() {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('confirmLogoutOverlay');
+            const messageEl = document.getElementById('confirmLogoutMessage');
+            const okBtn = document.getElementById('confirmLogoutOkBtn');
+            const cancelBtn = document.getElementById('confirmLogoutCancelBtn');
+
+            messageEl.textContent = 'Are you sure you want to logout?';
+            okBtn.textContent = 'Yes, Logout';
+            cancelBtn.textContent = 'Cancel';
+
+            const cleanup = () => {
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+                okBtn.removeEventListener('click', onOk);
+                cancelBtn.removeEventListener('click', onCancel);
+                overlay.removeEventListener('click', onBackdrop);
+                document.removeEventListener('keydown', onKeydown);
+            };
+
+            const onOk = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const onCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const onBackdrop = (e) => {
+                if (e.target === overlay) {
+                    onCancel();
+                }
+            };
+
+            const onKeydown = (e) => {
+                if (e.key === 'Escape') {
+                    onCancel();
+                }
+            };
+
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            overlay.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onKeydown);
+
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    // Logout
+    async function logout() {
+        const confirmed = await showConfirmLogout();
+        if (confirmed) {
+            try {
+                localStorage.removeItem('carrierAuth');
+                localStorage.removeItem('carrierProfile');
+                window.location.href = '../../index.html';
+            } catch (e) {
+                console.error('Logout error:', e);
+                window.location.href = '../../index.html';
+            }
+        }
+    }
+    </script>
+
+    <!-- Confirm Logout Modal -->
+    <div id="confirmLogoutOverlay" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmLogoutTitle">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h6 id="confirmLogoutTitle" class="confirm-title">Confirm Logout</h6>
+            </div>
+            <div id="confirmLogoutMessage" class="confirm-message">Are you sure you want to logout?</div>
+            <div class="confirm-actions">
+                <button id="confirmLogoutCancelBtn" class="confirm-btn cancel" type="button">Cancel</button>
+                <button id="confirmLogoutOkBtn" class="confirm-btn danger" type="button">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

@@ -1,0 +1,1921 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Broker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+        }
+
+        .dashboard-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 240px;
+            z-index: 1000;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dashboard-sidebar.collapsed {
+            width: 70px;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .dashboard-sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            display: block;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content img {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-content hr {
+            display: none;
+        }
+
+        .dashboard-sidebar.collapsed .broker-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px solid #6f42c1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #6f42c1;
+            font-size: 0.85rem;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: #6f42c1;
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(111, 66, 193, 0.35);
+        }
+
+        .sidebar-toggle-btn:active {
+            transform: scale(1.05);
+        }
+
+        .dashboard-sidebar.collapsed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-toggle-btn i {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-content {
+            transition: opacity 0.3s ease;
+            width: 100%;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .dashboard-sidebar img {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-sidebar img:hover {
+            transform: scale(1.05);
+        }
+
+        .broker-nav .nav-link {
+            padding: 0.65rem 0.75rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .broker-nav .nav-link span {
+            transition: opacity 0.2s ease, display 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .broker-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+            color: white !important;
+        }
+
+        .broker-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            font-weight: 600;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .broker-nav .nav-link i {
+            width: 18px;
+            margin-right: 0.65rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .broker-nav hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+
+        .dashboard-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            margin-left: 240px;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: calc(100% - 240px);
+        }
+
+        .dashboard-sidebar.collapsed ~ .dashboard-content {
+            margin-left: 70px;
+            width: calc(100% - 70px);
+        }
+
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-menu-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: #1e293b;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn:hover {
+            color: #6f42c1;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1049;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .header-section {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            padding: 0.75rem 2rem;
+            border-radius: 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .topbar-search {
+            flex: 1;
+            max-width: 520px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: #f4f6fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            padding: 0.45rem 1rem;
+        }
+
+        .topbar-search i {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .topbar-search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .topbar-icon,
+        .topbar-avatar-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .topbar-icon:hover,
+        .topbar-avatar-btn:hover,
+        .topbar-avatar-btn.active {
+            color: #6f42c1;
+            border-color: #c084fc;
+            background: rgba(111, 66, 193, 0.08);
+        }
+
+        .topbar-avatar-btn {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .topbar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .quick-links-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 48px;
+            width: 260px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            padding: 0.9rem;
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: top right;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .quick-links-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .quick-links-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .quick-links-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.6rem;
+        }
+
+        .quick-link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .quick-link-item:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+        }
+
+        .quick-link-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 280px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: top right;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .profile-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .profile-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .profile-menu-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .profile-menu-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .profile-menu-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .profile-menu-email {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.15rem;
+        }
+
+        .profile-menu-links {
+            padding: 0.5rem;
+        }
+
+        .profile-menu-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.75rem;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .profile-menu-links a:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+        }
+
+        .profile-menu-links a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-menu-footer {
+            padding: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .profile-menu-signout {
+            width: 100%;
+        }
+
+        .card {
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            border-radius: 16px 16px 0 0 !important;
+        }
+
+        .card canvas {
+            max-height: 250px;
+        }
+
+        .table th {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .dashboard-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                z-index: 1050;
+                width: 240px;
+                transition: transform 0.3s ease;
+            }
+
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .dashboard-content {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+
+            .dashboard-sidebar.collapsed {
+                width: 240px;
+            }
+
+            .sidebar-toggle-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" class="img-fluid" style="max-height: 36px; object-fit: contain;">
+        <div></div>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container-fluid p-0">
+        <div class="dashboard-sidebar" id="dashboardSidebar">
+            <button class="sidebar-toggle-btn" onclick="toggleSidebarDesktop()" title="Toggle Sidebar">
+                <i class="fas fa-chevron-left" id="toggleIcon"></i>
+            </button>
+            <div class="sidebar-content p-3">
+                <div class="mb-4 text-center">
+                    <img src="../../image-removebg-preview - 2026-02-10T062943.516.png" alt="Alpha Freight Logo" class="img-fluid" style="max-width: 100%; max-height: 60px; object-fit: contain;">
+                </div>
+                <nav class="nav flex-column broker-nav">
+                    <a class="nav-link text-white" href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+                    </a>
+                    <a class="nav-link text-white" href="loads.html">
+                        <i class="fas fa-boxes"></i> <span>All Loads</span>
+                    </a>
+                    <a class="nav-link text-white" href="my-loads.html">
+                        <i class="fas fa-clipboard-check"></i> <span>My Loads</span>
+                    </a>
+                    <a class="nav-link text-white" href="post-load.html">
+                        <i class="fas fa-plus-circle"></i> <span>Post Load</span>
+                    </a>
+                    <a class="nav-link text-white" href="matching.html">
+                        <i class="fas fa-random"></i> <span>Matching</span>
+                    </a>
+                    <a class="nav-link text-white" href="carriers.html">
+                        <i class="fas fa-truck"></i> <span>Carriers</span>
+                    </a>
+                    <a class="nav-link text-white" href="suppliers.html">
+                        <i class="fas fa-warehouse"></i> <span>Suppliers</span>
+                    </a>
+                    <a class="nav-link text-white" href="payments.html">
+                        <i class="fas fa-credit-card"></i> <span>Payments</span>
+                    </a>
+                    <a class="nav-link text-white" href="invoices.html">
+                        <i class="fas fa-file-invoice"></i> <span>Invoices</span>
+                    </a>
+                    <a class="nav-link text-white" href="commission.html">
+                        <i class="fas fa-chart-line"></i> <span>Commission</span>
+                    </a>
+                    <a class="nav-link text-white" href="payouts.html">
+                        <i class="fas fa-hand-holding-dollar"></i> <span>Payouts</span>
+                    </a>
+                    <a class="nav-link text-white" href="messages.html">
+                        <i class="fas fa-comments"></i> <span>Messages</span>
+                    </a>
+                    <a class="nav-link text-white" href="disputes.html">
+                        <i class="fas fa-scale-balanced"></i> <span>Disputes</span>
+                    </a>
+                    <a class="nav-link text-white" href="support-tickets.html">
+                        <i class="fas fa-life-ring"></i> <span>Support</span>
+                    </a>
+                    <a class="nav-link text-white active" href="analytics.html">
+                        <i class="fas fa-chart-bar"></i> <span>Analytics</span>
+                    </a>
+                    <a class="nav-link text-white" href="reports.html">
+                        <i class="fas fa-file-alt"></i> <span>Reports</span>
+                    </a>
+                    <a class="nav-link text-white" href="profile.html">
+                        <i class="fas fa-user"></i> <span>Profile</span>
+                    </a>
+                    <a class="nav-link text-white" href="complete-profile.html">
+                        <i class="fas fa-id-card"></i> <span>Complete Profile</span>
+                    </a>
+                    <a class="nav-link text-white" href="settings.html">
+                        <i class="fas fa-cog"></i> <span>Settings</span>
+                    </a>
+                    <hr class="text-white">
+                    <a class="nav-link text-white" href="login.html">
+                        <i class="fas fa-right-from-bracket"></i> <span>Logout</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="dashboard-content p-0">
+            <!-- Desktop Header -->
+            <div class="header-section d-none d-md-block">
+                <div class="topbar">
+                    <div class="topbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search..." aria-label="Search">
+                    </div>
+                    <div class="topbar-actions position-relative">
+                        <button class="topbar-icon" type="button" title="Theme">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <button class="topbar-icon" type="button" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="topbar-icon" type="button" id="quickLinksToggle" title="Quick Links">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <div class="quick-links-menu" id="quickLinksMenu">
+                            <div class="quick-links-title">Quick Links</div>
+                            <div class="quick-links-grid">
+                                <a class="quick-link-item" href="loads.html">
+                                    <i class="fas fa-boxes"></i> Loads
+                                </a>
+                                <a class="quick-link-item" href="carriers.html">
+                                    <i class="fas fa-truck"></i> Carriers
+                                </a>
+                                <a class="quick-link-item" href="suppliers.html">
+                                    <i class="fas fa-warehouse"></i> Suppliers
+                                </a>
+                                <a class="quick-link-item" href="payments.html">
+                                    <i class="fas fa-money-bill-wave"></i> Payments
+                                </a>
+                                <a class="quick-link-item" href="messages.html">
+                                    <i class="fas fa-comments"></i> Messages
+                                </a>
+                                <a class="quick-link-item" href="profile.html">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                            </div>
+                        </div>
+                        <button class="topbar-avatar-btn" type="button" id="profileMenuToggle" title="Profile">
+                            <div class="topbar-avatar" id="avatarInitials">B</div>
+                        </button>
+
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-menu-header">
+                                <div class="profile-menu-avatar" id="menuAvatarInitials">B</div>
+                                <div>
+                                    <div class="profile-menu-name" id="menuUserName">Broker</div>
+                                    <div class="profile-menu-email" id="menuUserEmail">broker@alphabrokrage.com</div>
+                                </div>
+                            </div>
+                            <div class="profile-menu-links">
+                                <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                                <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                                <a href="messages.html"><i class="fas fa-comments"></i> Messages</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> Settings & Privacy</a>
+                            </div>
+                            <div class="profile-menu-footer">
+                                <button class="btn btn-outline-primary profile-menu-signout" type="button" onclick="logout()">
+                                    <i class="fas fa-right-from-bracket me-2"></i> Sign out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="mb-0 fw-bold">Analytics</h5>
+                        <small class="text-muted">Comprehensive insights into your brokerage performance</small>
+                    </div>
+                    <div>
+                        <select class="form-select form-select-sm" id="timeRangeFilter" style="max-width: 200px;">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="365">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Loads</h6>
+                                        <h3 class="fw-bold mb-0" id="totalLoadsStat">0</h3>
+                                        <small class="text-muted">
+                                            <span id="totalLoadsChange" class="text-success">+0%</span> vs last period
+                                        </small>
+                                    </div>
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-boxes fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Match Rate</h6>
+                                        <h3 class="fw-bold text-success mb-0" id="matchRateStat">0%</h3>
+                                        <small class="text-muted">
+                                            <span id="matchRateChange" class="text-success">+0%</span> vs last period
+                                        </small>
+                                    </div>
+                                    <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-handshake fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Commission</h6>
+                                        <h3 class="fw-bold text-info mb-0" id="totalCommissionStat">£0</h3>
+                                        <small class="text-muted">
+                                            <span id="commissionChange" class="text-success">+0%</span> vs last period
+                                        </small>
+                                    </div>
+                                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-pound-sign fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Avg Load Value</h6>
+                                        <h3 class="fw-bold text-warning mb-0" id="avgLoadValueStat">£0</h3>
+                                        <small class="text-muted">
+                                            <span id="avgLoadValueChange" class="text-success">+0%</span> vs last period
+                                        </small>
+                                    </div>
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                        <i class="fas fa-chart-line fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1 -->
+                <div class="row mb-4">
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-chart-pie text-primary me-2"></i>
+                                    Load Status Distribution
+                                </h6>
+                                <small class="text-muted">Current load status breakdown</small>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="loadStatusChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-chart-line text-success me-2"></i>
+                                    Commission Trend
+                                </h6>
+                                <small class="text-muted">Commission earnings over time</small>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="commissionTrendChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="row mb-4">
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-route text-info me-2"></i>
+                                    Top Routes
+                                </h6>
+                                <small class="text-muted">Most popular routes by volume</small>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="topRoutesChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-boxes text-warning me-2"></i>
+                                    Load Volume by Category
+                                </h6>
+                                <small class="text-muted">Loads by cargo type</small>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="categoryChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 3 -->
+                <div class="row mb-4">
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-calendar-week text-danger me-2"></i>
+                                    Weekly Activity
+                                </h6>
+                                <small class="text-muted">Load activity by week</small>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="weeklyActivityChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-chart-area text-primary me-2"></i>
+                                    Load Volume Trend
+                                </h6>
+                                <small class="text-muted">Total loads over time</small>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="loadVolumeChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Tables -->
+                <div class="row mb-4">
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-truck text-primary me-2"></i>
+                                    Top Performing Carriers
+                                </h6>
+                                <small class="text-muted">Best carriers by delivery count</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Carrier</th>
+                                                <th>Loads</th>
+                                                <th>Rating</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="carrierPerformanceTable">
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-3">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-warehouse text-success me-2"></i>
+                                    Top Suppliers
+                                </h6>
+                                <small class="text-muted">Most active suppliers</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Supplier</th>
+                                                <th>Loads</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="supplierPerformanceTable">
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-3">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Insights -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    Key Insights
+                                </h6>
+                                <small class="text-muted">Actionable insights from your data</small>
+                            </div>
+                            <div class="card-body">
+                                <div id="insightsContainer" class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded">
+                                            <i class="fas fa-info-circle text-primary mb-2"></i>
+                                            <h6 class="fw-bold mb-1">Performance</h6>
+                                            <p class="text-muted small mb-0" id="performanceInsight">Calculating...</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded">
+                                            <i class="fas fa-trending-up text-success mb-2"></i>
+                                            <h6 class="fw-bold mb-1">Growth</h6>
+                                            <p class="text-muted small mb-0" id="growthInsight">Calculating...</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded">
+                                            <i class="fas fa-bullseye text-info mb-2"></i>
+                                            <h6 class="fw-bold mb-1">Recommendations</h6>
+                                            <p class="text-muted small mb-0" id="recommendationInsight">Calculating...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        // Initialize Firebase if not already initialized
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+                authDomain: "alpha-brokerage.firebaseapp.com",
+                databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+                projectId: "alpha-brokerage",
+                storageBucket: "alpha-brokerage.firebasestorage.app",
+                messagingSenderId: "834712514965",
+                appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+            };
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        function toggleSidebarDesktop() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+                
+                if (toggleIcon) {
+                    if (sidebar.classList.contains('collapsed')) {
+                        toggleIcon.classList.remove('fa-chevron-left');
+                        toggleIcon.classList.add('fa-chevron-right');
+                    } else {
+                        toggleIcon.classList.remove('fa-chevron-right');
+                        toggleIcon.classList.add('fa-chevron-left');
+                    }
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('brokerAuth');
+            window.location.href = 'login.html';
+        }
+
+        // Analytics Variables
+        let currentLoads = [];
+        let currentCarriers = [];
+        let currentSuppliers = [];
+        let analyticsCharts = {};
+        let timeRange = 30; // days
+
+        // Listen to Real-time Data
+        function listenBrokerData() {
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (!auth || !auth.isLoggedIn) {
+                return;
+            }
+
+            const db = (window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb)
+                || (window.firebase && firebase.database ? firebase.database() : null);
+
+            if (!db) {
+                console.warn('Firebase database not available');
+                return;
+            }
+
+            // Listen to Loads
+            db.ref('loads').on('value', function(snapshot) {
+                try {
+                    const loads = [];
+                    if (snapshot && snapshot.exists && snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            const load = child.val();
+                            if (load) {
+                                load.id = child.key;
+                                loads.push(load);
+                            }
+                        });
+                    }
+                    currentLoads = loads;
+                    updateAnalyticsStats();
+                    updateAnalyticsCharts();
+                    updatePerformanceTables();
+                    updateInsights();
+                } catch (error) {
+                    console.error('Error loading loads:', error);
+                }
+            });
+
+            // Listen to Carriers
+            db.ref('carriers').on('value', function(snapshot) {
+                try {
+                    const carriers = [];
+                    if (snapshot && snapshot.exists && snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            const carrier = child.val();
+                            if (carrier) {
+                                carrier.id = child.key;
+                                carriers.push(carrier);
+                            }
+                        });
+                    }
+                    currentCarriers = carriers;
+                    updatePerformanceTables();
+                } catch (error) {
+                    console.error('Error loading carriers:', error);
+                }
+            });
+
+            // Listen to Suppliers
+            db.ref('suppliers').on('value', function(snapshot) {
+                try {
+                    const suppliers = [];
+                    if (snapshot && snapshot.exists && snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            const supplier = child.val();
+                            if (supplier) {
+                                supplier.id = child.key;
+                                suppliers.push(supplier);
+                            }
+                        });
+                    }
+                    currentSuppliers = suppliers;
+                    updatePerformanceTables();
+                } catch (error) {
+                    console.error('Error loading suppliers:', error);
+                }
+            });
+        }
+
+        // Update Analytics Statistics
+        function updateAnalyticsStats() {
+            const filteredLoads = getFilteredLoadsByTimeRange();
+            
+            // Total Loads
+            const totalLoads = filteredLoads.length;
+            document.getElementById('totalLoadsStat').textContent = totalLoads.toLocaleString();
+
+            // Match Rate
+            const matchedLoads = filteredLoads.filter(l => {
+                const status = (l.status || '').toLowerCase();
+                return status === 'matched' || l.carrierId || l.carrier_id || 
+                       status === 'completed' || status === 'delivered';
+            }).length;
+            const matchRate = totalLoads > 0 ? ((matchedLoads / totalLoads) * 100).toFixed(1) : 0;
+            document.getElementById('matchRateStat').textContent = matchRate + '%';
+
+            // Total Commission
+            let totalCommission = 0;
+            filteredLoads.forEach(load => {
+                if (load.status === 'completed' || load.status === 'delivered') {
+                    const cost = parseFloat(load.totalCost) || parseFloat(load.price) || parseFloat(load.total_cost) || 0;
+                    if (cost > 0) {
+                        totalCommission += cost * 0.05; // 5% commission
+                    }
+                }
+            });
+            document.getElementById('totalCommissionStat').textContent = '£' + totalCommission.toFixed(0);
+
+            // Average Load Value
+            let totalValue = 0;
+            let valueCount = 0;
+            filteredLoads.forEach(load => {
+                const cost = parseFloat(load.totalCost) || parseFloat(load.price) || parseFloat(load.total_cost) || 0;
+                if (cost > 0) {
+                    totalValue += cost;
+                    valueCount++;
+                }
+            });
+            const avgLoadValue = valueCount > 0 ? (totalValue / valueCount) : 0;
+            document.getElementById('avgLoadValueStat').textContent = '£' + avgLoadValue.toFixed(0);
+        }
+
+        // Get filtered loads by time range
+        function getFilteredLoadsByTimeRange() {
+            const now = new Date();
+            const cutoffDate = new Date(now.getTime() - (timeRange * 24 * 60 * 60 * 1000));
+            
+            return currentLoads.filter(load => {
+                const loadDateStr = load.createdAt || load.postedDate || load.created_at || load.posted_date || load.date || load.timestamp;
+                if (!loadDateStr) return false;
+                
+                let loadDate;
+                if (typeof loadDateStr === 'string') {
+                    loadDate = new Date(loadDateStr);
+                } else if (loadDateStr && loadDateStr.seconds) {
+                    loadDate = new Date(loadDateStr.seconds * 1000);
+                } else {
+                    loadDate = new Date(loadDateStr);
+                }
+                
+                return !isNaN(loadDate.getTime()) && loadDate >= cutoffDate;
+            });
+        }
+
+        // Update Analytics Charts
+        function updateAnalyticsCharts() {
+            if (typeof Chart === 'undefined') return;
+            
+            const filteredLoads = getFilteredLoadsByTimeRange();
+
+            // Load Status Distribution
+            const statusCounts = {
+                active: filteredLoads.filter(l => {
+                    const status = (l.status || '').toLowerCase();
+                    return status === 'active' || status === 'in_transit' || status === 'assigned';
+                }).length,
+                matched: filteredLoads.filter(l => {
+                    const status = (l.status || '').toLowerCase();
+                    return status === 'matched' || l.carrierId || l.carrier_id;
+                }).length,
+                pending: filteredLoads.filter(l => {
+                    const status = (l.status || '').toLowerCase();
+                    return status === 'pending' || (!l.carrierId && !l.carrier_id);
+                }).length,
+                completed: filteredLoads.filter(l => {
+                    const status = (l.status || '').toLowerCase();
+                    return status === 'completed' || status === 'delivered';
+                }).length
+            };
+
+            if (analyticsCharts.loadStatus) {
+                analyticsCharts.loadStatus.data.datasets[0].data = [
+                    statusCounts.active,
+                    statusCounts.matched,
+                    statusCounts.pending,
+                    statusCounts.completed
+                ];
+                analyticsCharts.loadStatus.update();
+            }
+
+            // Commission Trend
+            const monthlyCommission = calculateMonthlyCommission(filteredLoads);
+            if (analyticsCharts.commissionTrend) {
+                analyticsCharts.commissionTrend.data.labels = monthlyCommission.labels;
+                analyticsCharts.commissionTrend.data.datasets[0].data = monthlyCommission.values;
+                analyticsCharts.commissionTrend.update();
+            }
+
+            // Top Routes
+            const topRoutes = calculateTopRoutes(filteredLoads);
+            if (analyticsCharts.topRoutes) {
+                analyticsCharts.topRoutes.data.labels = topRoutes.labels;
+                analyticsCharts.topRoutes.data.datasets[0].data = topRoutes.values;
+                analyticsCharts.topRoutes.update();
+            }
+
+            // Category Distribution
+            const categories = calculateCategoryDistribution(filteredLoads);
+            if (analyticsCharts.category) {
+                analyticsCharts.category.data.labels = categories.labels;
+                analyticsCharts.category.data.datasets[0].data = categories.values;
+                analyticsCharts.category.update();
+            }
+
+            // Weekly Activity
+            const weeklyActivity = calculateWeeklyActivity(filteredLoads);
+            if (analyticsCharts.weeklyActivity) {
+                analyticsCharts.weeklyActivity.data.labels = weeklyActivity.labels;
+                analyticsCharts.weeklyActivity.data.datasets[0].data = weeklyActivity.values;
+                analyticsCharts.weeklyActivity.update();
+            }
+
+            // Load Volume Trend
+            const loadVolume = calculateLoadVolumeTrend(filteredLoads);
+            if (analyticsCharts.loadVolume) {
+                analyticsCharts.loadVolume.data.labels = loadVolume.labels;
+                analyticsCharts.loadVolume.data.datasets[0].data = loadVolume.values;
+                analyticsCharts.loadVolume.update();
+            }
+        }
+
+        // Calculate Monthly Commission
+        function calculateMonthlyCommission(loads) {
+            const months = [];
+            const values = [];
+            const now = new Date();
+            const monthsToShow = Math.min(6, Math.ceil(timeRange / 30));
+            
+            for (let i = monthsToShow - 1; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push(date.toLocaleDateString('en-US', { month: 'short' }));
+                
+                let monthCommission = 0;
+                loads.forEach(load => {
+                    const loadDateStr = load.createdAt || load.postedDate || load.created_at || load.posted_date;
+                    if (!loadDateStr) return;
+                    
+                    let loadDate;
+                    if (typeof loadDateStr === 'string') {
+                        loadDate = new Date(loadDateStr);
+                    } else if (loadDateStr && loadDateStr.seconds) {
+                        loadDate = new Date(loadDateStr.seconds * 1000);
+                    } else {
+                        loadDate = new Date(loadDateStr);
+                    }
+                    
+                    if (isNaN(loadDate.getTime())) return;
+                    
+                    if (loadDate.getMonth() === date.getMonth() && 
+                        loadDate.getFullYear() === date.getFullYear() &&
+                        (load.status === 'completed' || load.status === 'delivered')) {
+                        const cost = parseFloat(load.totalCost) || parseFloat(load.price) || parseFloat(load.total_cost) || 0;
+                        if (cost > 0) {
+                            monthCommission += cost * 0.05;
+                        }
+                    }
+                });
+                values.push(Math.round(monthCommission * 100) / 100);
+            }
+            
+            return { labels: months, values };
+        }
+
+        // Calculate Top Routes
+        function calculateTopRoutes(loads) {
+            const routeCounts = {};
+            loads.forEach(load => {
+                const pickup = load.pickupLocation || load.pickup_location || load.pickup || 'Unknown';
+                const delivery = load.deliveryLocation || load.delivery_location || load.delivery || 'Unknown';
+                const route = `${pickup} - ${delivery}`;
+                if (route !== 'Unknown - Unknown') {
+                    routeCounts[route] = (routeCounts[route] || 0) + 1;
+                }
+            });
+
+            const sorted = Object.entries(routeCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            if (sorted.length === 0) {
+                return { labels: ['No routes yet'], values: [0] };
+            }
+
+            return {
+                labels: sorted.map(r => r[0].length > 30 ? r[0].substring(0, 30) + '...' : r[0]),
+                values: sorted.map(r => r[1])
+            };
+        }
+
+        // Calculate Category Distribution
+        function calculateCategoryDistribution(loads) {
+            const categoryCounts = {};
+            loads.forEach(load => {
+                const category = load.cargoType || load.cargo_type || load.category || load.type || 'General';
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+
+            const sorted = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            if (sorted.length === 0) {
+                return { labels: ['No categories yet'], values: [0] };
+            }
+
+            return {
+                labels: sorted.map(c => c[0]),
+                values: sorted.map(c => c[1])
+            };
+        }
+
+        // Calculate Weekly Activity
+        function calculateWeeklyActivity(loads) {
+            const weeks = [];
+            const values = [];
+            const now = new Date();
+            const weeksToShow = Math.min(6, Math.ceil(timeRange / 7));
+            
+            for (let i = weeksToShow - 1; i >= 0; i--) {
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - (i * 7));
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 7);
+                
+                weeks.push(`Week ${weeksToShow - i}`);
+                
+                let weekCount = 0;
+                loads.forEach(load => {
+                    const loadDateStr = load.createdAt || load.postedDate || load.created_at || load.posted_date;
+                    if (!loadDateStr) return;
+                    
+                    let loadDate;
+                    if (typeof loadDateStr === 'string') {
+                        loadDate = new Date(loadDateStr);
+                    } else if (loadDateStr && loadDateStr.seconds) {
+                        loadDate = new Date(loadDateStr.seconds * 1000);
+                    } else {
+                        loadDate = new Date(loadDateStr);
+                    }
+                    
+                    if (isNaN(loadDate.getTime())) return;
+                    
+                    if (loadDate >= weekStart && loadDate < weekEnd) {
+                        weekCount++;
+                    }
+                });
+                values.push(weekCount);
+            }
+            
+            return { labels: weeks, values };
+        }
+
+        // Calculate Load Volume Trend
+        function calculateLoadVolumeTrend(loads) {
+            const days = [];
+            const values = [];
+            const daysToShow = Math.min(30, timeRange);
+            
+            for (let i = daysToShow - 1; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                
+                let dayCount = 0;
+                loads.forEach(load => {
+                    const loadDateStr = load.createdAt || load.postedDate || load.created_at || load.posted_date;
+                    if (!loadDateStr) return;
+                    
+                    let loadDate;
+                    if (typeof loadDateStr === 'string') {
+                        loadDate = new Date(loadDateStr);
+                    } else if (loadDateStr && loadDateStr.seconds) {
+                        loadDate = new Date(loadDateStr.seconds * 1000);
+                    } else {
+                        loadDate = new Date(loadDateStr);
+                    }
+                    
+                    if (isNaN(loadDate.getTime())) return;
+                    
+                    if (loadDate.toDateString() === date.toDateString()) {
+                        dayCount++;
+                    }
+                });
+                values.push(dayCount);
+            }
+            
+            return { labels: days, values };
+        }
+
+        // Update Performance Tables
+        function updatePerformanceTables() {
+            const filteredLoads = getFilteredLoadsByTimeRange();
+            
+            // Carrier Performance
+            const carrierStats = {};
+            filteredLoads.forEach(load => {
+                if (load.carrierId || load.carrier_id) {
+                    const carrierId = load.carrierId || load.carrier_id;
+                    if (!carrierStats[carrierId]) {
+                        const carrier = currentCarriers.find(c => c.id === carrierId || c.carrierId === carrierId);
+                        carrierStats[carrierId] = {
+                            name: carrier ? (carrier.companyName || carrier.name || `Carrier ${carrierId}`) : `Carrier ${carrierId}`,
+                            loads: 0,
+                            rating: carrier ? (carrier.rating || 4.5) : 4.5
+                        };
+                    }
+                    carrierStats[carrierId].loads++;
+                }
+            });
+
+            const topCarriers = Object.values(carrierStats)
+                .sort((a, b) => b.loads - a.loads)
+                .slice(0, 5);
+
+            const carrierTableBody = document.getElementById('carrierPerformanceTable');
+            if (carrierTableBody) {
+                if (topCarriers.length === 0) {
+                    carrierTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No carrier data available</td></tr>';
+                } else {
+                    let html = '';
+                    topCarriers.forEach((carrier, index) => {
+                        const rank = index + 1;
+                        const badgeClass = rank === 1 ? 'bg-primary' : rank === 2 ? 'bg-secondary' : rank === 3 ? 'bg-warning' : 'bg-info';
+                        html += `
+                            <tr>
+                                <td><span class="badge ${badgeClass}">${rank}</span></td>
+                                <td>${carrier.name}</td>
+                                <td>${carrier.loads}</td>
+                                <td><span class="badge bg-success">${carrier.rating.toFixed(1)}</span></td>
+                            </tr>
+                        `;
+                    });
+                    carrierTableBody.innerHTML = html;
+                }
+            }
+
+            // Supplier Performance
+            const supplierStats = {};
+            filteredLoads.forEach(load => {
+                if (load.supplierId || load.supplier_id) {
+                    const supplierId = load.supplierId || load.supplier_id;
+                    if (!supplierStats[supplierId]) {
+                        const supplier = currentSuppliers.find(s => s.id === supplierId || s.supplierId === supplierId);
+                        supplierStats[supplierId] = {
+                            name: supplier ? (supplier.companyName || supplier.name || `Supplier ${supplierId}`) : `Supplier ${supplierId}`,
+                            loads: 0,
+                            status: supplier ? (supplier.status || 'active') : 'active'
+                        };
+                    }
+                    supplierStats[supplierId].loads++;
+                }
+            });
+
+            const topSuppliers = Object.values(supplierStats)
+                .sort((a, b) => b.loads - a.loads)
+                .slice(0, 5);
+
+            const supplierTableBody = document.getElementById('supplierPerformanceTable');
+            if (supplierTableBody) {
+                if (topSuppliers.length === 0) {
+                    supplierTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No supplier data available</td></tr>';
+                } else {
+                    let html = '';
+                    topSuppliers.forEach((supplier, index) => {
+                        const rank = index + 1;
+                        const badgeClass = rank === 1 ? 'bg-primary' : rank === 2 ? 'bg-secondary' : rank === 3 ? 'bg-warning' : 'bg-info';
+                        const statusBadge = supplier.status === 'active' ? 'bg-success' : 'bg-secondary';
+                        html += `
+                            <tr>
+                                <td><span class="badge ${badgeClass}">${rank}</span></td>
+                                <td>${supplier.name}</td>
+                                <td>${supplier.loads}</td>
+                                <td><span class="badge ${statusBadge}">${supplier.status}</span></td>
+                            </tr>
+                        `;
+                    });
+                    supplierTableBody.innerHTML = html;
+                }
+            }
+        }
+
+        // Update Insights
+        function updateInsights() {
+            const filteredLoads = getFilteredLoadsByTimeRange();
+            const totalLoads = filteredLoads.length;
+            const matchedLoads = filteredLoads.filter(l => l.carrierId || l.carrier_id).length;
+            const matchRate = totalLoads > 0 ? ((matchedLoads / totalLoads) * 100) : 0;
+            
+            let totalCommission = 0;
+            filteredLoads.forEach(load => {
+                if (load.status === 'completed' || load.status === 'delivered') {
+                    const cost = parseFloat(load.totalCost) || parseFloat(load.price) || parseFloat(load.total_cost) || 0;
+                    if (cost > 0) {
+                        totalCommission += cost * 0.05;
+                    }
+                }
+            });
+
+            // Performance Insight
+            const performanceEl = document.getElementById('performanceInsight');
+            if (performanceEl) {
+                if (matchRate >= 70) {
+                    performanceEl.textContent = `Excellent match rate of ${matchRate.toFixed(1)}%. Keep up the great work!`;
+                } else if (matchRate >= 50) {
+                    performanceEl.textContent = `Good match rate of ${matchRate.toFixed(1)}%. Room for improvement.`;
+                } else {
+                    performanceEl.textContent = `Match rate is ${matchRate.toFixed(1)}%. Focus on improving matches.`;
+                }
+            }
+
+            // Growth Insight
+            const growthEl = document.getElementById('growthInsight');
+            if (growthEl) {
+                if (totalLoads > 100) {
+                    growthEl.textContent = `Strong volume with ${totalLoads} loads processed. Excellent growth trajectory.`;
+                } else if (totalLoads > 50) {
+                    growthEl.textContent = `Steady growth with ${totalLoads} loads. Continue expanding.`;
+                } else {
+                    growthEl.textContent = `Building momentum with ${totalLoads} loads. Focus on acquisition.`;
+                }
+            }
+
+            // Recommendation Insight
+            const recommendationEl = document.getElementById('recommendationInsight');
+            if (recommendationEl) {
+                if (matchRate < 50) {
+                    recommendationEl.textContent = 'Consider reviewing unmatched loads and improving carrier relationships.';
+                } else if (totalCommission < 1000) {
+                    recommendationEl.textContent = 'Focus on higher-value loads to increase commission earnings.';
+                } else {
+                    recommendationEl.textContent = 'Maintain current performance and explore new routes for expansion.';
+                }
+            }
+        }
+
+        // Initialize Analytics Charts
+        function initAnalyticsCharts() {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded');
+                return;
+            }
+
+            // Chart 1: Load Status Distribution (Doughnut)
+            const statusCtx = document.getElementById('loadStatusChart');
+            if (statusCtx) {
+                analyticsCharts.loadStatus = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Matched', 'Pending', 'Completed'],
+                        datasets: [{
+                            data: [0, 0, 0, 0],
+                            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#6366f1'],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Commission Trend (Line)
+            const commissionCtx = document.getElementById('commissionTrendChart');
+            if (commissionCtx) {
+                analyticsCharts.commissionTrend = new Chart(commissionCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Commission (GBP)',
+                            data: [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 3: Top Routes (Bar)
+            const routesCtx = document.getElementById('topRoutesChart');
+            if (routesCtx) {
+                analyticsCharts.topRoutes = new Chart(routesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Loads',
+                            data: [],
+                            backgroundColor: '#2563eb',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 4: Category Distribution (Bar)
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                const categoryColors = ['#f59e0b', '#6366f1', '#10b981', '#ef4444', '#8b5cf6'];
+                analyticsCharts.category = new Chart(categoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Loads',
+                            data: [],
+                            backgroundColor: categoryColors,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 5: Weekly Activity (Line)
+            const weeklyCtx = document.getElementById('weeklyActivityChart');
+            if (weeklyCtx) {
+                analyticsCharts.weeklyActivity = new Chart(weeklyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Loads',
+                            data: [],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 6: Load Volume Trend (Line)
+            const loadVolumeCtx = document.getElementById('loadVolumeChart');
+            if (loadVolumeCtx) {
+                analyticsCharts.loadVolume = new Chart(loadVolumeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Loads',
+                            data: [],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Close sidebar when clicking on a nav link on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.broker-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            // Quick Links Toggle
+            const quickLinksToggle = document.getElementById('quickLinksToggle');
+            const quickLinksMenu = document.getElementById('quickLinksMenu');
+            
+            if (quickLinksToggle && quickLinksMenu) {
+                quickLinksToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    quickLinksMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!quickLinksMenu.contains(e.target) && !quickLinksToggle.contains(e.target)) {
+                        quickLinksMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Profile Menu Toggle
+            const profileMenuToggle = document.getElementById('profileMenuToggle');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (profileMenuToggle && profileMenu) {
+                profileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('show');
+                    if (profileMenu.classList.contains('show')) {
+                        quickLinksMenu.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileMenu.contains(e.target) && !profileMenuToggle.contains(e.target)) {
+                        profileMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Time Range Filter
+            const timeRangeFilter = document.getElementById('timeRangeFilter');
+            if (timeRangeFilter) {
+                timeRangeFilter.addEventListener('change', function() {
+                    timeRange = parseInt(this.value);
+                    updateAnalyticsStats();
+                    updateAnalyticsCharts();
+                    updatePerformanceTables();
+                    updateInsights();
+                });
+            }
+
+            // Update avatar initials
+            const auth = JSON.parse(localStorage.getItem('brokerAuth') || 'null');
+            if (auth) {
+                const firstName = auth.firstName || '';
+                const lastName = auth.lastName || '';
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || 'B';
+                
+                const avatarElements = document.querySelectorAll('#avatarInitials, #menuAvatarInitials');
+                avatarElements.forEach(el => {
+                    if (el) el.textContent = initials;
+                });
+
+                const nameEl = document.getElementById('menuUserName');
+                if (nameEl) {
+                    nameEl.textContent = `${firstName} ${lastName}`.trim() || 'Broker';
+                }
+
+                const emailEl = document.getElementById('menuUserEmail');
+                if (emailEl && auth.email) {
+                    emailEl.textContent = auth.email;
+                }
+            }
+
+            // Initialize charts and data
+            setTimeout(function() {
+                initAnalyticsCharts();
+                listenBrokerData();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

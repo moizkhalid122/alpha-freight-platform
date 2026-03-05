@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Rules & Terms - Alpha Freight</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --broker-primary: #6f42c1;
+            --broker-secondary: #e83e8c;
+            --broker-success: #10b981;
+            --broker-warning: #f59e0b;
+            --broker-danger: #ef4444;
+        }
+
+        body {
+            background: radial-gradient(circle at top, rgba(111, 66, 193, 0.08), transparent 55%),
+                radial-gradient(circle at 80% 20%, rgba(232, 62, 140, 0.08), transparent 45%),
+                #f5f6fb;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .rules-header {
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            padding: 4rem 0 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rules-header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.15), transparent 60%);
+            pointer-events: none;
+        }
+
+        .rules-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rules-header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .rules-container {
+            padding: 4rem 0;
+        }
+
+        .rule-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--broker-primary);
+        }
+
+        .rule-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(111, 66, 193, 0.15);
+        }
+
+        .rule-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rule-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            flex-shrink: 0;
+        }
+
+        .rule-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .rule-content {
+            color: #4b5563;
+            line-height: 1.8;
+        }
+
+        .rule-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .rule-content ul li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .rule-content ul li:last-child {
+            border-bottom: none;
+        }
+
+        .rule-content ul li::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--broker-success);
+            font-size: 0.9rem;
+        }
+
+        .rule-content strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .rule-section {
+            margin: 1.5rem 0;
+        }
+
+        .rule-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--broker-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rule-section-title::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: var(--broker-primary);
+            border-radius: 2px;
+        }
+
+        .badge-custom {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem 0.25rem 0.25rem 0;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--broker-success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--broker-warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--broker-danger);
+        }
+
+        .badge-info {
+            background: rgba(111, 66, 193, 0.1);
+            color: var(--broker-primary);
+        }
+
+        .plan-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .plan-box {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .plan-box h4 {
+            color: var(--broker-primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .plan-box .plan-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-box ul {
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .penalty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .penalty-box {
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .penalty-box.minor {
+            border-color: var(--broker-warning);
+        }
+
+        .penalty-box.major {
+            border-color: var(--broker-danger);
+        }
+
+        .penalty-box.critical {
+            border-color: #dc2626;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));
+        }
+
+        .penalty-box h5 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .penalty-box.minor h5 {
+            color: var(--broker-warning);
+        }
+
+        .penalty-box.major h5 {
+            color: var(--broker-danger);
+        }
+
+        .penalty-box.critical h5 {
+            color: #dc2626;
+        }
+
+        .dispute-levels {
+            margin: 1.5rem 0;
+        }
+
+        .dispute-level {
+            background: #f9fafb;
+            border-left: 4px solid var(--broker-primary);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .dispute-level h5 {
+            color: var(--broker-primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .dispute-level p {
+            margin: 0;
+            color: #4b5563;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--broker-primary), var(--broker-secondary));
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(111, 66, 193, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .rules-header h1 {
+                font-size: 2rem;
+            }
+
+            .rules-header p {
+                font-size: 1rem;
+            }
+
+            .rule-card {
+                padding: 1.5rem;
+            }
+
+            .rule-title {
+                font-size: 1.25rem;
+            }
+
+            .plan-comparison,
+            .penalty-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Navigation (same style as index header) -->
+    <nav class="navbar navbar-expand-lg fixed-top main-tool-bar" id="mainNavbar">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">
+                <img src="../../image-removebg-preview - 2026-01-11T181532.561.png" alt="Alpha Freight Logo" class="navbar-logo" style="height: 40px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html#services">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../available-loads.html">Available Loads</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html#suppliers">For Suppliers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html#carriers">For Carriers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../how-it-works.html">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pricing.html">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light ms-2" href="../../index.html#quote">Get Quote</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="rules-header">
+        <div class="container">
+            <h1><i class="fas fa-gavel me-3"></i>Broker Rules & Terms</h1>
+            <p>Comprehensive guidelines and regulations for all Alpha Freight brokers. Please read carefully before joining our platform.</p>
+        </div>
+    </header>
+
+    <!-- Rules Container -->
+    <div class="rules-container">
+        <div class="container">
+            <!-- Rule 1: Broker Eligibility -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h2 class="rule-title">1. BROKER ELIGIBILITY</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>Must be UK registered business/sole trader</li>
+                        <li>Minimum 1 year logistics experience</li>
+                        <li>Valid business bank account required</li>
+                        <li>Company registration proof (Companies House)</li>
+                        <li>VAT number if turnover exceeds £85,000</li>
+                        <li>Clean legal/financial history</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 2: Commission Structure -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-percent"></i>
+                    </div>
+                    <h2 class="rule-title">2. COMMISSION STRUCTURE</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li><strong>Platform Fee:</strong> 5% of your earned commission</li>
+                        <li><strong>Your Commission Range:</strong> 8% minimum, 20% maximum</li>
+                        <li>Commission Charged Only on successful deliveries</li>
+                        <li>Platform fee deducted automatically</li>
+                        <li>Weekly payouts every Friday</li>
+                        <li><strong>Minimum withdrawal:</strong> £100</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 3: Payment Rules -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h2 class="rule-title">3. PAYMENT RULES</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li><strong>ALL payments must go through platform escrow</strong></li>
+                        <li><strong>NO direct payments to carriers allowed</strong></li>
+                        <li>Suppliers pay to platform before load assignment</li>
+                        <li>Carriers paid within 7 days of proof upload</li>
+                        <li>Late payments incur 2% weekly interest</li>
+                        <li>Disputed payments held max 14 days</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 4: Load Posting Rules -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h2 class="rule-title">4. LOAD POSTING RULES</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>Accurate load details mandatory</li>
+                        <li>No fake/inflated loads permitted</li>
+                        <li>Competitive pricing required</li>
+                        <li>Real-time status updates mandatory</li>
+                        <li>Maximum 2% cancellation rate allowed</li>
+                        <li><strong>Cancellation fee:</strong> £10 per extra cancellation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 5: Carrier Selection -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h2 class="rule-title">5. CARRIER SELECTION</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>Must use platform-verified carriers</li>
+                        <li>Can add own carriers after verification</li>
+                        <li>Check carrier ratings before assignment</li>
+                        <li>Insurance verification for loads > £5,000</li>
+                        <li>Your rating affected by carrier disputes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 6: Client Management -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h2 class="rule-title">6. CLIENT MANAGEMENT</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>You own client relationships</li>
+                        <li>Platform provides tools only</li>
+                        <li>Client data confidential (GDPR compliant)</li>
+                        <li><strong>Non-poaching:</strong> Can't approach platform's direct users</li>
+                        <li>Can onboard existing clients</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 7: Dispute Resolution -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <h2 class="rule-title">7. DISPUTE RESOLUTION</h2>
+                </div>
+                <div class="rule-content">
+                    <div class="dispute-levels">
+                        <div class="dispute-level">
+                            <h5><i class="fas fa-robot me-2"></i>Level 1: Platform automated mediation</h5>
+                            <p>24 hours</p>
+                        </div>
+                        <div class="dispute-level">
+                            <h5><i class="fas fa-user-tie me-2"></i>Level 2: Human review</h5>
+                            <p>48 hours</p>
+                        </div>
+                        <div class="dispute-level">
+                            <h5><i class="fas fa-gavel me-2"></i>Level 3: Independent arbitration</h5>
+                            <p>Cost shared 50/50</p>
+                        </div>
+                        <div class="dispute-level">
+                            <h5><i class="fas fa-landmark me-2"></i>Level 4: UK court jurisdiction</h5>
+                            <p>Legal proceedings</p>
+                        </div>
+                    </div>
+                    <p class="mt-3"><strong>Platform decision final for disputes under £5,000</strong></p>
+                </div>
+            </div>
+
+            <!-- Rule 8: Rating System -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h2 class="rule-title">8. RATING SYSTEM</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>Mutual ratings after each transaction</li>
+                        <li>Ratings affect search priority</li>
+                        <li><span class="badge-custom badge-warning">Below 3.5/5 → Warning</span></li>
+                        <li><span class="badge-custom badge-warning">Below 3.0/5 → 7-day suspension</span></li>
+                        <li><span class="badge-custom badge-danger">Below 2.5/5 → Permanent ban</span></li>
+                        <li><span class="badge-custom badge-danger">Fake reviews → Immediate suspension</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 9: Subscription Terms -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h2 class="rule-title">9. SUBSCRIPTION TERMS</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>Monthly/Annual billing</li>
+                        <li>Auto-renew unless cancelled 7 days before</li>
+                        <li>Downgrade anytime, upgrade immediate</li>
+                        <li>No refunds for partial months</li>
+                        <li><span class="badge-custom badge-success">14-day free trial available</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 10: Platform Usage -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h2 class="rule-title">10. PLATFORM USAGE</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>One account per business</li>
+                        <li>No bots/automation allowed</li>
+                        <li>No data scraping</li>
+                        <li>80% minimum response rate to messages</li>
+                        <li>Profile must be updated quarterly</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 11: Minimum Performance -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h2 class="rule-title">11. MINIMUM PERFORMANCE</h2>
+                </div>
+                <div class="rule-content">
+                    <div class="plan-comparison">
+                        <div class="plan-box">
+                            <h4>BASIC PLAN</h4>
+                            <div class="plan-price">£49/month</div>
+                            <ul>
+                                <li>5 loads/month minimum</li>
+                                <li>80% completion rate</li>
+                                <li>4.0+ average rating</li>
+                            </ul>
+                        </div>
+                        <div class="plan-box">
+                            <h4>PRO PLAN</h4>
+                            <div class="plan-price">£149/month</div>
+                            <ul>
+                                <li>20 loads/month minimum</li>
+                                <li>85% completion rate</li>
+                                <li>4.2+ average rating</li>
+                            </ul>
+                        </div>
+                        <div class="plan-box">
+                            <h4>ENTERPRISE</h4>
+                            <div class="plan-price">£299/month</div>
+                            <ul>
+                                <li>50 loads/month minimum</li>
+                                <li>90% completion rate</li>
+                                <li>4.5+ average rating</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 12: Data & Privacy -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2 class="rule-title">12. DATA & PRIVACY</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>You own your client contact data</li>
+                        <li>Platform can't contact your clients directly</li>
+                        <li>Your data encrypted & secure</li>
+                        <li>Data export available anytime</li>
+                        <li>Platform uses anonymized data for analytics</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 13: Penalties & Suspensions -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2 class="rule-title">13. PENALTIES & SUSPENSIONS</h2>
+                </div>
+                <div class="rule-content">
+                    <div class="penalty-grid">
+                        <div class="penalty-box minor">
+                            <h5><i class="fas fa-exclamation-circle me-2"></i>MINOR OFFENSES</h5>
+                            <ul>
+                                <li>Late payment: 2% weekly interest</li>
+                                <li>High cancellation: £10 per extra load</li>
+                                <li>Slow response: Feature restrictions</li>
+                                <li>Inaccurate info: 3-day posting ban</li>
+                            </ul>
+                        </div>
+                        <div class="penalty-box major">
+                            <h5><i class="fas fa-ban me-2"></i>MAJOR OFFENSES</h5>
+                            <ul>
+                                <li>Direct payments: 30-day suspension</li>
+                                <li>Fake reviews: 60-day suspension</li>
+                                <li>Unverified carriers: Account freeze</li>
+                                <li>Multiple complaints: Investigation</li>
+                            </ul>
+                        </div>
+                        <div class="penalty-box critical">
+                            <h5><i class="fas fa-skull me-2"></i>CRITICAL OFFENSES</h5>
+                            <ul>
+                                <li>Fraud/scam: Permanent ban + legal action</li>
+                                <li>Identity theft: Ban + police report</li>
+                                <li>Platform attack: Ban + damages claim</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 14: Cancellation Policy -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h2 class="rule-title">14. CANCELLATION POLICY</h2>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-section">
+                        <div class="rule-section-title">BROKER CANCELS:</div>
+                        <ul>
+                            <li>30-day notice required</li>
+                            <li>Complete active loads first</li>
+                            <li>Final payout after 45 days</li>
+                            <li>Data available for 90 days</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <div class="rule-section-title">PLATFORM CANCELS:</div>
+                        <ul>
+                            <li>Terms violation: Immediate</li>
+                            <li>Fraud: Immediate + legal</li>
+                            <li>Non-payment: After 7 days notice</li>
+                            <li>Inactivity: After 90 days no use</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 15: Broker Responsibilities -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h2 class="rule-title">15. BROKER RESPONSIBILITIES</h2>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-section">
+                        <div class="rule-section-title"><i class="fas fa-check-circle me-2"></i>MUST DO:</div>
+                        <ul>
+                            <li>Verify load details before posting</li>
+                            <li>Check carrier credentials</li>
+                            <li>Clear communication</li>
+                            <li>Prompt status updates</li>
+                            <li>Professional dispute resolution</li>
+                            <li>Maintain recommended insurance</li>
+                            <li>Pay fees on time</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <div class="rule-section-title"><i class="fas fa-times-circle me-2"></i>MUST NOT DO:</div>
+                        <ul>
+                            <li>Take payments outside platform</li>
+                            <li>Use unverified carriers</li>
+                            <li>Post fake loads</li>
+                            <li>Manipulate ratings</li>
+                            <li>Share login credentials</li>
+                            <li>Violate UK transport laws</li>
+                            <li>Discriminate</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 16: Platform Guarantees -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h2 class="rule-title">16. PLATFORM GUARANTEES</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li>Payment protection via escrow</li>
+                        <li>Dispute resolution service</li>
+                        <li>Verified carrier network</li>
+                        <li>Marketing exposure</li>
+                        <li>Business tools</li>
+                        <li>Legal compliance support</li>
+                        <li>24/7 platform access</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rule 17: Legal Clauses -->
+            <div class="rule-card animate-on-scroll">
+                <div class="rule-header">
+                    <div class="rule-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h2 class="rule-title">17. LEGAL CLAUSES</h2>
+                </div>
+                <div class="rule-content">
+                    <ul>
+                        <li><strong>Non-compete:</strong> Can't build competing platform using our data</li>
+                        <li><strong>Confidentiality:</strong> Platform IP protected</li>
+                        <li><strong>Liability Limit:</strong> Platform not liable for broker-client disputes</li>
+                        <li><strong>Terms Updates:</strong> 30-day notice for changes</li>
+                        <li><strong>Governing Law:</strong> UK jurisdiction applies</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="rule-card animate-on-scroll" style="background: linear-gradient(135deg, rgba(111, 66, 193, 0.1), rgba(232, 62, 140, 0.1)); border-left-color: var(--broker-primary);">
+                <div class="rule-content text-center">
+                    <h4 class="mb-3"><i class="fas fa-info-circle me-2"></i>Important Notice</h4>
+                    <p class="mb-0">By using Alpha Freight platform, you agree to abide by all rules and terms outlined above. Violations may result in penalties, suspension, or permanent ban. For questions or clarifications, please contact our support team.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-button" onclick="window.location.href='../../index.html'" title="Back to Home">
+        <i class="fas fa-home"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animate on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
