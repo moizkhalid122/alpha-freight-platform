@@ -71,6 +71,8 @@
     <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
     
     <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://alpha-brokerage-default-rtdb.firebaseio.com">
     <link rel="preconnect" href="https://www.google-analytics.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
@@ -82,8 +84,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Identity Services: loaded on first Google button click -->
 
     <style>
         :root {
@@ -1675,11 +1676,11 @@
 
             document.body.appendChild(toast);
 
-            // Auto remove after 4 seconds
+            // Auto remove after 2 seconds
             setTimeout(() => {
                 toast.classList.add('hiding');
-                setTimeout(() => toast.remove(), 250);
-            }, 4000);
+                setTimeout(() => toast.remove(), 200);
+            }, 2000);
         }
 
         // Populate year dropdown
@@ -1697,7 +1698,7 @@
         // Live counter animation
         (function animateCounter() {
             const target = 1234;
-            const duration = 2500;
+            const duration = 1200;
             let current = 0;
             const step = target / (duration / 16);
 
@@ -1758,8 +1759,8 @@
                     nameEl.textContent = t.name;
                     tagEl.textContent = t.tag;
                     textEl.style.opacity = '1';
-                }, 220);
-            }, 6500);
+                }, 150);
+            }, 5000);
         })();
 
         function setLoading(isLoading) {
@@ -2017,11 +2018,10 @@
                     }));
                     localStorage.setItem('ab.portal.lastRole', 'supplier');
 
-                    // Redirect to complete profile page
-                    showToast('Account created successfully! Please complete your profile.', 'success');
+                    showToast('Account created! Redirecting…', 'success');
                     setTimeout(() => {
                         window.location.href = 'complete-profile.html';
-                    }, 1500);
+                    }, 150);
                 });
             }, function(error) {
                 setLoading(false);
@@ -2030,22 +2030,38 @@
             });
         });
 
-        // Google Sign Up - Complete Implementation
+        // Google Sign Up - loads GSI on first click for faster page load
+        function loadGoogleGSI(callback) {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+                callback();
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = 'https://accounts.google.com/gsi/client';
+            s.async = true;
+            s.onload = callback;
+            document.head.appendChild(s);
+        }
+
         document.getElementById('googleBtn').addEventListener('click', function () {
             const googleBtn = this;
             const originalText = googleBtn.innerHTML;
             
-            // Show loading state
             googleBtn.disabled = true;
             googleBtn.innerHTML = '<span class="spinner" style="display:inline-block;"></span> <span>Connecting...</span>';
             
-            if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-                showToast('Google Sign-In is not available. Please try again later.', 'error');
-                googleBtn.disabled = false;
-                googleBtn.innerHTML = originalText;
-                return;
-            }
+            loadGoogleGSI(function() {
+                if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                showToast('Google Sign-In loading… Please try again.', 'error');
+                    googleBtn.disabled = false;
+                    googleBtn.innerHTML = originalText;
+                    return;
+                }
+                doGoogleSignUp(googleBtn, originalText);
+            });
+        });
 
+        function doGoogleSignUp(googleBtn, originalText) {
             const CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
             
             // Debug: Log current origin and page URL
@@ -2121,7 +2137,7 @@
                 googleBtn.disabled = false;
                 googleBtn.innerHTML = originalText;
             }
-        });
+        }
 
         // Handle Google Sign-In for Supplier Registration
         function handleGoogleSupplierSignIn(userData) {

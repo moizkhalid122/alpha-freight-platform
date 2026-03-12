@@ -18,6 +18,9 @@
     <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
     <link rel="shortcut icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
 
+    <!-- Preconnect for faster API loading -->
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://alpha-brokerage-default-rtdb.firebaseio.com">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +29,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Identity Services: loaded on-demand when user clicks Sign in with Google -->
 
     <style>
         :root {
@@ -883,8 +885,8 @@
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(12px)';
-                setTimeout(() => toast.remove(), 200);
-            }, 2800);
+                setTimeout(() => toast.remove(), 150);
+            }, 2000);
         }
 
         function validateEmail() {
@@ -961,10 +963,10 @@
                 localStorage.setItem('ab.portal.lastRole', 'supplier');
             } catch (err) {}
 
-            showToast('Welcome back! Redirecting to your dashboard…', 'success');
+            showToast('Welcome back! Redirecting…', 'success');
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
-            }, 1200);
+            }, 120);
         }
 
         function syncFloatingLabel(input) {
@@ -1132,12 +1134,30 @@
             });
         });
 
-        // Google Sign-In
-        googleSigninBtn.addEventListener('click', function () {
-            if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-                showToast('Google Sign-In is not available. Please try again later.', 'error');
+        // Google Sign-In (loads GSI on first click for faster page load)
+        function loadGoogleGSI(callback) {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+                callback();
                 return;
             }
+            const s = document.createElement('script');
+            s.src = 'https://accounts.google.com/gsi/client';
+            s.async = true;
+            s.onload = callback;
+            document.head.appendChild(s);
+        }
+
+        googleSigninBtn.addEventListener('click', function () {
+            loadGoogleGSI(function() {
+                if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                    showToast('Google Sign-In loading… Please try again.', 'error');
+                    return;
+                }
+                doGoogleSignIn();
+            });
+        });
+
+        function doGoogleSignIn() {
 
             const CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
             
@@ -1204,7 +1224,7 @@
                 console.error('❌ Error requesting access token:', error);
                 showToast('Failed to start Google sign-in. Please try again.', 'error');
             }
-        });
+        }
 
         function handleGoogleLoginUser(user) {
             const emailRaw = (user && user.email) ? user.email : '';
@@ -1255,10 +1275,10 @@
                     } catch (e) {}
 
                     setLoading(false);
-                    showToast('No supplier account found for this Google email. Redirecting to create an account…', 'info');
+                    showToast('No account found. Redirecting…', 'info');
                     setTimeout(() => {
                         window.location.href = 'supplier-registration.html';
-                    }, 1200);
+                    }, 200);
                 }
             }, function (error) {
                 console.error('Google login Firebase error:', error);

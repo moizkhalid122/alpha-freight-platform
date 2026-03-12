@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -71,14 +71,15 @@
     <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
     
     <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://alpha-brokerage-default-rtdb.firebaseio.com">
     <link rel="preconnect" href="https://www.google-analytics.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google OAuth -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google OAuth: loaded on first Google button click -->
     <style>
         :root {
             --primary: #635bff;
@@ -1893,7 +1894,7 @@
 
                     <div id="google-signin-button" style="width: 100%; display: flex; justify-content: center; margin-top: 1rem;"></div>
                     <!-- Fallback Google Sign Up Button (Uiverse.io by Yaya12085) -->
-                    <button type="button" class="google-signup-btn" onclick="signInWithGoogle()" style="display: none;">
+                    <button type="button" class="google-signup-btn" onclick="loadGoogleGSIAndSignIn()" style="display: none;">
                         <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
                             <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
                             <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
@@ -1963,7 +1964,7 @@
         function animateCounter() {
             const counter = document.getElementById('liveCounter');
             const target = 1234;
-            const duration = 2000;
+            const duration = 1200;
             const increment = target / (duration / 16);
             let current = 0;
 
@@ -2217,10 +2218,10 @@
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
 
-            // Simulate API call then save locally and go to dashboard
+            // Save locally and go to dashboard
             setTimeout(() => {
                 saveProfileAndGoToDashboard(profile);
-            }, 800);
+            }, 200);
         });
 
         // Progress Steps
@@ -2314,6 +2315,19 @@
         // Chat Widget
         function openChat() {
             alert('Chat widget would open here. In production, integrate with your chat service.');
+        }
+
+        // Load Google GSI on first click for faster page load
+        function loadGoogleGSIAndSignIn() {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+                signInWithGoogle();
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = 'https://accounts.google.com/gsi/client';
+            s.async = true;
+            s.onload = function() { signInWithGoogle(); };
+            document.head.appendChild(s);
         }
 
         // Google Sign In with OAuth
@@ -2548,8 +2562,8 @@
 
             setTimeout(() => {
                 notification.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
+                setTimeout(() => notification.remove(), 200);
+            }, 2000);
         }
 
         // Initialize on page load
@@ -2609,7 +2623,7 @@
                 welcomeMsg.style.cssText = 'position: fixed; top: 100px; right: 2rem; background: var(--success); color: white; padding: 1rem; border-radius: 8px; z-index: 10000; box-shadow: var(--shadow-lg);';
                 welcomeMsg.textContent = 'Welcome back! Complete your registration';
                 document.body.appendChild(welcomeMsg);
-                setTimeout(() => welcomeMsg.remove(), 5000);
+                setTimeout(() => welcomeMsg.remove(), 3000);
             }
 
             // Auto-save form data
