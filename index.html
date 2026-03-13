@@ -1189,6 +1189,8 @@
             object-fit: cover;
             object-position: center;
             transition: opacity 0.8s ease;
+            will-change: opacity;
+            transform: translateZ(0);
         }
 
         .hero-video--active {
@@ -8648,11 +8650,11 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-video-background" aria-hidden="true">
-            <video class="hero-video hero-video--1 hero-video--active" autoplay muted playsinline>
+            <video class="hero-video hero-video--1 hero-video--active" autoplay muted playsinline preload="metadata">
                 <source src="18372583-uhd_3840_2160_30fps.mp4" type="video/mp4">
             </video>
-            <video class="hero-video hero-video--2" muted playsinline>
-                <source src="5200378-uhd_3840_2160_30fps.mp4" type="video/mp4">
+            <video class="hero-video hero-video--2" muted playsinline preload="none">
+                <source data-src="5200378-uhd_3840_2160_30fps.mp4" type="video/mp4">
             </video>
         </div>
         <div class="hero-container">
@@ -8685,17 +8687,67 @@
             var v1 = document.querySelector('.hero-section .hero-video--1');
             var v2 = document.querySelector('.hero-section .hero-video--2');
             if (!v1 || !v2) return;
+
+            function ensureSourceLoaded(videoEl) {
+                var sourceEl = videoEl.querySelector('source');
+                if (!sourceEl) return;
+                if (!sourceEl.getAttribute('src')) {
+                    var ds = sourceEl.getAttribute('data-src');
+                    if (ds) {
+                        sourceEl.setAttribute('src', ds);
+                        videoEl.load();
+                    }
+                }
+            }
+
+            function safePlay(videoEl) {
+                try {
+                    videoEl.preload = 'auto';
+                } catch (e) {}
+                var p = videoEl.play();
+                if (p && typeof p.catch === 'function') p.catch(function() {});
+            }
+
+            function activate(next, current) {
+                if (current) {
+                    current.pause();
+                    current.classList.remove('hero-video--active');
+                }
+                next.classList.add('hero-video--active');
+                next.currentTime = 0;
+                ensureSourceLoaded(next);
+                safePlay(next);
+            }
+
+            // Start loading/playing only when hero is visible (improves initial load)
+            var started = false;
+            var startIfNeeded = function() {
+                if (started) return;
+                started = true;
+                ensureSourceLoaded(v1);
+                safePlay(v1);
+            };
+
+            if ('IntersectionObserver' in window) {
+                var obs = new IntersectionObserver(function(entries) {
+                    for (var i = 0; i < entries.length; i++) {
+                        if (entries[i].isIntersecting) {
+                            startIfNeeded();
+                            obs.disconnect();
+                            break;
+                        }
+                    }
+                }, { threshold: 0.01 });
+                obs.observe(document.querySelector('.hero-section'));
+            } else {
+                startIfNeeded();
+            }
+
             v1.addEventListener('ended', function() {
-                v1.classList.remove('hero-video--active');
-                v2.classList.add('hero-video--active');
-                v2.currentTime = 0;
-                v2.play();
+                activate(v2, v1);
             });
             v2.addEventListener('ended', function() {
-                v2.classList.remove('hero-video--active');
-                v1.classList.add('hero-video--active');
-                v1.currentTime = 0;
-                v1.play();
+                activate(v1, v2);
             });
         })();
         </script>
