@@ -269,7 +269,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -279,18 +279,21 @@
             --purple: #7c3aed;
             --purple-light: #a78bfa;
             --success: #10b981;
-            --text-dark: #1f2937;
-            --text-medium: #4b5563;
-            --text-light: #6b7280;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #64748b;
             --bg-white: #ffffff;
-            --bg-gray: #f9fafb;
-            --border-gray: #e5e7eb;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
-            --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            --bg-gray: #f8fafc;
+            --border-gray: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 6px 20px -4px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.1), 0 20px 40px -8px rgba(15, 23, 42, 0.12);
+            --shadow-xl: 0 24px 48px -8px rgba(0, 0, 0, 0.12), 0 32px 64px -12px rgba(15, 23, 42, 0.15);
+            --shadow-premium: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 50%, #7c3aed 100%);
+            --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a78bfa 50%, #c4b5fd 100%);
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         * {
@@ -317,7 +320,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-white);
             color: var(--text-dark);
             line-height: 1.6;
@@ -332,10 +335,40 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* Premium Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes floatSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes shimmerPremium {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(36px);
+            transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth);
+        }
+        .animate-on-scroll.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* Navigation */
         .header {
-            background: var(--bg-white);
-            border-bottom: 1px solid var(--border-gray);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -818,11 +851,11 @@
         }
 
         .live-stats-title {
-            font-size: clamp(1.25rem, 2vw, 1.5rem);
-            font-weight: 600;
-            color: #0a2540;
+            font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+            font-weight: 800;
+            color: #0f172a;
             margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.02em;
         }
 
         .live-stats-subtitle {
@@ -844,18 +877,19 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            border: 1px solid #e3e8ef;
-            border-radius: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 16px;
             padding: 1.25rem;
             display: flex;
             align-items: flex-start;
             gap: 0.875rem;
-            transition: all 0.2s ease;
+            transition: all 0.4s var(--transition-smooth);
             position: relative;
             overflow: hidden;
             opacity: 0;
             transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out, border-color 0.3s, box-shadow 0.4s, transform 0.4s;
         }
 
         .live-stat-card.animate-in {
@@ -873,6 +907,7 @@
             background: rgba(255, 255, 255, 0.3);
             z-index: 0;
             pointer-events: none;
+            transition: background 0.4s ease;
         }
 
         .live-stat-card > * {
@@ -881,8 +916,9 @@
         }
 
         .live-stat-card:hover {
-            border-color: #635bff;
-            box-shadow: 0 2px 8px rgba(99, 91, 255, 0.1);
+            border-color: rgba(99, 91, 255, 0.5);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(99, 91, 255, 0.1);
+            transform: translateY(-6px);
         }
 
         .live-stat-card:hover::after {
@@ -1129,7 +1165,8 @@
             pointer-events: none;
         }
 
-        .hero-section__background {
+        /* Hero video background - auto-play, smooth, no borders */
+        .hero-video-background {
             position: absolute;
             top: 0;
             left: 0;
@@ -1137,35 +1174,46 @@
             bottom: 0;
             width: 100%;
             height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
         }
 
-        .hero-section__fullbleed-line {
+        .hero-video {
             position: absolute;
+            top: 0;
             left: 0;
-            right: 0;
-            height: 1px;
-            background: var(--border-gray);
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .hero-video--active {
+            opacity: 1;
             z-index: 1;
         }
 
-        .hero-section__fullbleed-line--top {
-            top: 0;
+        .hero-video:not(.hero-video--active) {
+            opacity: 0;
+            z-index: 0;
         }
 
-        .hero-section__fullbleed-line--bottom {
+        .hero-video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             bottom: 0;
-            display: block;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
         }
 
         .hero-section::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: var(--border-gray);
-            z-index: 10;
+            display: none;
         }
 
         .hero-wave-animation {
@@ -1286,18 +1334,6 @@
                 padding: 60px 0 40px 0;
             }
 
-            .hero-section::after {
-                display: none;
-            }
-
-            .hero-section__fullbleed-line {
-                display: none;
-            }
-
-            .hero-section__fullbleed-line--top,
-            .hero-section__fullbleed-line--bottom {
-                display: none;
-            }
 
             .section-background {
                 width: 100%;
@@ -1419,17 +1455,19 @@
         }
 
         .hero-title {
-            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+            font-size: clamp(2rem, 4vw, 3rem);
             font-weight: 800;
-            line-height: 1.1;
-            color: var(--text-dark);
+            line-height: 1.15;
+            color: #ffffff;
+            letter-spacing: -0.03em;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
             margin-bottom: 1.25rem;
             letter-spacing: -0.02em;
         }
 
         .hero-subtitle {
             font-size: clamp(0.9rem, 1.6vw, 1rem);
-            color: #374151;
+            color: rgba(255, 255, 255, 0.92);
             margin-bottom: 2rem;
             line-height: 1.7;
         }
@@ -1443,34 +1481,37 @@
         .btn-primary-custom {
             background: var(--purple);
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.85rem 1.75rem;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s var(--transition-smooth);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            box-shadow: 0 4px 14px rgba(99, 91, 255, 0.35);
         }
 
         .btn-primary-custom:hover {
             background: var(--purple-light);
             color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(99, 91, 255, 0.4);
         }
 
         .btn-secondary-custom {
             background: var(--bg-white);
             color: var(--text-dark);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.85rem 1.75rem;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: 0.9rem;
-            border: 1px solid var(--border-gray);
+            font-size: 0.95rem;
+            border: 2px solid var(--border-gray);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s var(--transition-smooth);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -1482,8 +1523,10 @@
         }
 
         .btn-secondary-custom:hover {
-            border-color: var(--text-dark);
-            background: var(--bg-gray);
+            border-color: var(--primary);
+            background: rgba(30, 58, 138, 0.04);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
         .hero-graphic {
@@ -1655,11 +1698,11 @@
         }
 
         .section-title {
-            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-            font-weight: 700;
-            color: #0a2540;
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 800;
+            color: #0f172a;
             margin-bottom: 0.75rem;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.025em;
             line-height: 1.2;
         }
 
@@ -1683,24 +1726,24 @@
         .bento-card {
             background: var(--bg-white);
             border: 1px solid var(--border-gray);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 2rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s var(--transition-smooth);
             position: relative;
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-md);
         }
         
         .bento-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px);
             border: 1.5px solid #a78bfa;
-            box-shadow: var(--shadow-xl), 0 0 0 0.5px #ec4899 inset;
+            box-shadow: var(--shadow-premium), 0 0 0 1px rgba(167, 139, 250, 0.2);
         }
         
         .bento-card.gradient:hover {
             border: 2px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.6), 0 0 50px rgba(240, 147, 251, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.1);
-            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 32px 80px rgba(102, 126, 234, 0.35), 0 0 60px rgba(240, 147, 251, 0.25), inset 0 0 40px rgba(255, 255, 255, 0.1);
+            transform: translateY(-12px) scale(1.02);
         }
         
         .bento-card.gradient:hover::before {
@@ -3070,31 +3113,23 @@
             position: relative;
             width: 100%;
             min-height: 120px;
-            overflow: hidden;
+            max-height: 360px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
         
         .dialog-content-item {
-            opacity: 0;
-            transform: translateX(100%);
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            position: absolute;
-            width: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
-        
-        .dialog-content-item.prev {
-            transform: translateX(-100%) !important;
-            opacity: 0 !important;
-        }
-        
-        .dialog-content-item.active {
-            opacity: 1 !important;
-            transform: translateX(0) !important;
             position: relative;
+            width: 100%;
+            opacity: 1;
+            transform: none;
             pointer-events: auto;
+        }
+
+        .dialog-content-item:not(:first-child) {
+            display: none;
         }
 
         .dialog-header {
@@ -4318,9 +4353,9 @@
         }
 
         .suppliers-carriers-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-            border-color: #cbd5e0;
+            transform: translateY(-12px);
+            box-shadow: var(--shadow-premium), 0 24px 48px rgba(15, 23, 42, 0.15);
+            border-color: rgba(99, 91, 255, 0.3);
         }
 
         .suppliers-carriers-title {
@@ -6990,28 +7025,9 @@
             min-height: 100vh;
         }
 
-        .platform-border-left {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 15%;
-            height: 100vh;
-            background: #ffffff;
-            border-right: 1px solid #d1d5db;
-            z-index: 1;
-            pointer-events: none;
-        }
-
+        .platform-border-left,
         .platform-border-right {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 15%;
-            height: 100vh;
-            background: #ffffff;
-            border-left: 1px solid #d1d5db;
-            z-index: 1;
-            pointer-events: none;
+            display: none;
         }
 
         /* Remove borders and hide entire section on mobile view */
@@ -8629,48 +8645,15 @@
         </div>
     </header>
 
-    <!-- Referral Program Banner -->
-    <div class="referral-banner">
-        <div class="referral-banner-track">
-            <div class="referral-banner-content">
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-                <i class="fas fa-gift"></i>
-                <span class="referral-banner-text">Refer a carrier — earn £50</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Hero Section -->
     <section class="hero-section">
-        <div class="section-background hero-section__background" aria-hidden="true">
-            <span class="hero-section__fullbleed-line hero-section__fullbleed-line--top"></span>
-            <span class="hero-section__fullbleed-line hero-section__fullbleed-line--bottom"></span>
-            <div class="hero-wave-animation">
-                <div class="hero-wave-animation__layout">
-                    <div class="hero-wave-animation__contents hero-wave-animation--drawn">
-                        <div class="hero-wave-animation__static">
-                            <img src="wave-fallback-desktop.png" alt="" aria-hidden="true">
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="hero-video-background" aria-hidden="true">
+            <video class="hero-video hero-video--1 hero-video--active" autoplay muted playsinline>
+                <source src="18372583-uhd_3840_2160_30fps.mp4" type="video/mp4">
+            </video>
+            <video class="hero-video hero-video--2" muted playsinline>
+                <source src="5200378-uhd_3840_2160_30fps.mp4" type="video/mp4">
+            </video>
         </div>
         <div class="hero-container">
             <div class="hero-content fade-in-up">
@@ -8697,6 +8680,26 @@
             </div>
             <div class="hero-graphic fade-in-up"></div>
         </div>
+        <script>
+        (function() {
+            var v1 = document.querySelector('.hero-section .hero-video--1');
+            var v2 = document.querySelector('.hero-section .hero-video--2');
+            if (!v1 || !v2) return;
+            v1.addEventListener('ended', function() {
+                v1.classList.remove('hero-video--active');
+                v2.classList.add('hero-video--active');
+                v2.currentTime = 0;
+                v2.play();
+            });
+            v2.addEventListener('ended', function() {
+                v2.classList.remove('hero-video--active');
+                v1.classList.add('hero-video--active');
+                v1.currentTime = 0;
+                v1.play();
+            });
+        })();
+        </script>
+    </section>
 
     <!-- Live Statistics Counter Section -->
     <section class="live-stats-section">
@@ -8772,92 +8775,6 @@
                     Platform Activity Overview
                 </p>
             </div>
-        </div>
-    </section>
-
-    <!-- Partner Logos Swiper Section -->
-        <div class="partner-logos-section">
-        <div class="partner-logos-container">
-            <h3 class="partner-logos-heading">Serving Businesses Across Major Logistics Networks</h3>
-            <div class="partner-logos-track">
-                <!-- Logistics Company Logos - First Set -->
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T033409.864.png" alt="DHL">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="https://logos-world.net/wp-content/uploads/2020/06/FedEx-Logo.png" alt="FedEx" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="partner-logo-text" style="display: none;">FedEx</div>
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T032723.193.png" alt="UPS">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T033045.588.png" alt="Maersk">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T033254.012.png" alt="DB Schenker">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T030318.888.png" alt="Kuehne + Nagel">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T025927.932.png" alt="XPO Logistics">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T025628.354.png" alt="CEVA Logistics">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T025057.797.png" alt="Penske">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T030142.026.png" alt="Ryder">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T030631.093.png" alt="CH Robinson">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T032502.802.png" alt="Echo Global">
-                </div>
-                <!-- Duplicate Set for Seamless Loop -->
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T033409.864.png" alt="DHL">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="https://logos-world.net/wp-content/uploads/2020/06/FedEx-Logo.png" alt="FedEx" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="partner-logo-text" style="display: none;">FedEx</div>
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T032723.193.png" alt="UPS">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T033045.588.png" alt="Maersk">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T033254.012.png" alt="DB Schenker">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T030318.888.png" alt="Kuehne + Nagel">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T025927.932.png" alt="XPO Logistics">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T025628.354.png" alt="CEVA Logistics">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T025057.797.png" alt="Penske">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T030142.026.png" alt="Ryder">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T030631.093.png" alt="CH Robinson">
-                </div>
-                <div class="partner-logo-item">
-                    <img src="image-removebg-preview - 2026-02-21T032502.802.png" alt="Echo Global">
-                </div>
-            </div>
-            <p class="partner-logos-disclaimer">Logos displayed represent companies operating within the UK & EU logistics ecosystem. Alpha Freight Solutions Limited is not directly affiliated unless otherwise stated.</p>
         </div>
     </section>
 
@@ -9160,6 +9077,92 @@
             </div>
         </div>
     </section>
+
+    <!-- Partner Logos Swiper Section -->
+    <div class="partner-logos-section">
+        <div class="partner-logos-container">
+            <h3 class="partner-logos-heading">Serving Businesses Across Major Logistics Networks</h3>
+            <div class="partner-logos-track">
+                <!-- Logistics Company Logos - First Set -->
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T033409.864.png" alt="DHL">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="https://logos-world.net/wp-content/uploads/2020/06/FedEx-Logo.png" alt="FedEx" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="partner-logo-text" style="display: none;">FedEx</div>
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T032723.193.png" alt="UPS">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T033045.588.png" alt="Maersk">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T033254.012.png" alt="DB Schenker">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T030318.888.png" alt="Kuehne + Nagel">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T025927.932.png" alt="XPO Logistics">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T025628.354.png" alt="CEVA Logistics">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T025057.797.png" alt="Penske">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T030142.026.png" alt="Ryder">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T030631.093.png" alt="CH Robinson">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T032502.802.png" alt="Echo Global">
+                </div>
+                <!-- Duplicate Set for Seamless Loop -->
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T033409.864.png" alt="DHL">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="https://logos-world.net/wp-content/uploads/2020/06/FedEx-Logo.png" alt="FedEx" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="partner-logo-text" style="display: none;">FedEx</div>
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T032723.193.png" alt="UPS">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T033045.588.png" alt="Maersk">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T033254.012.png" alt="DB Schenker">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T030318.888.png" alt="Kuehne + Nagel">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T025927.932.png" alt="XPO Logistics">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T025628.354.png" alt="CEVA Logistics">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T025057.797.png" alt="Penske">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T030142.026.png" alt="Ryder">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T030631.093.png" alt="CH Robinson">
+                </div>
+                <div class="partner-logo-item">
+                    <img src="image-removebg-preview - 2026-02-21T032502.802.png" alt="Echo Global">
+                </div>
+            </div>
+            <p class="partner-logos-disclaimer">Logos displayed represent companies operating within the UK & EU logistics ecosystem. Alpha Freight Solutions Limited is not directly affiliated unless otherwise stated.</p>
+        </div>
+    </div>
 
     <!-- Academy Section -->
     <section class="academy-section" id="academy">
@@ -10512,17 +10515,27 @@
             });
         }, observerOptions);
 
-        // Observe all bento cards and testimonial cards
-        document.querySelectorAll('.bento-card, .testimonial-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
+        // Observe all bento cards, testimonial cards, section headers, partner logos
+        document.querySelectorAll('.bento-card, .testimonial-card, .section-title, .partner-logos-heading, .suppliers-carriers-title, .academy-title, .live-stats-title').forEach((el, i) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(36px)';
+            el.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            el.style.transitionDelay = el.classList.contains('bento-card') || el.classList.contains('testimonial-card') ? `${(i % 20) * 0.08}s` : '0s';
+            observer.observe(el);
         });
 
         // Add stagger delay to bento cards
         document.querySelectorAll('.bento-card').forEach((card, index) => {
-            card.style.transitionDelay = `${index * 0.05}s`;
+            card.style.transitionDelay = `${index * 0.08}s`;
+        });
+
+        // Premium scroll reveal for section wrappers
+        document.querySelectorAll('.live-stats-section, .partner-logos-section, .suppliers-carriers-section, .bento-section, .academy-section').forEach(section => {
+            section.classList.add('animate-on-scroll');
+            const secObs = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('revealed'); });
+            }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+            secObs.observe(section);
         });
 
         // Animate platform browser window on scroll
@@ -10671,59 +10684,10 @@
             const wrapper = document.getElementById('dialogContentWrapper');
             if (!wrapper) return;
 
-            // Create all load items
-            loadData.forEach((load, index) => {
+            // Create all load items (shown together in a list)
+            loadData.forEach((load) => {
                 wrapper.innerHTML += createLoadHTML(load);
             });
-
-            const items = wrapper.querySelectorAll('.dialog-content-item');
-            let currentIndex = 0;
-
-            // Set first item as active
-            if (items.length > 0) {
-                items[0].classList.add('active');
-            }
-
-            // Function to switch to next load with side swipe
-            function switchLoad() {
-                if (items.length === 0) return;
-
-                const currentItem = items[currentIndex];
-                
-                // Slide current item out to left
-                currentItem.classList.remove('active');
-                setTimeout(() => {
-                    currentItem.classList.add('prev');
-                }, 10);
-
-                // Move to next load
-                currentIndex = (currentIndex + 1) % items.length;
-                const nextItem = items[currentIndex];
-
-                // Remove any previous classes and reset
-                nextItem.classList.remove('prev', 'active');
-                nextItem.style.transform = '';
-                nextItem.style.opacity = '';
-                
-                // Force it to start from right
-                setTimeout(() => {
-                    nextItem.style.transform = 'translateX(100%)';
-                    nextItem.style.opacity = '0';
-                    
-                    // Trigger reflow
-                    void nextItem.offsetWidth;
-                    
-                    // Now slide in
-                    setTimeout(() => {
-                        nextItem.classList.add('active');
-                        nextItem.style.transform = '';
-                        nextItem.style.opacity = '';
-                    }, 50);
-                }, 10);
-            }
-
-            // Switch loads every 4 seconds
-            setInterval(switchLoad, 4000);
         }
 
         // Initialize load animation when page loads
