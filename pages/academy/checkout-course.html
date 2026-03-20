@@ -299,6 +299,43 @@
         .pay-actions { display: grid; gap: 10px; margin-top: 14px; }
         .btn-wide { width: 100%; padding: 12px 16px; border-radius: 16px; }
 
+        .coupon-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .coupon-input {
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--secondary);
+            font-weight: 800;
+            outline: none;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .coupon-input:focus {
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        }
+
+        .coupon-status {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 800;
+        }
+
+        .coupon-status strong { color: var(--secondary); }
+
         .spinner {
             display: inline-block;
             width: 16px;
@@ -454,6 +491,15 @@
                                     <div class="help">Payments are processed securely via Stripe.</div>
                                 </div>
 
+                                <div>
+                                    <label for="couponCode">Coupon Code</label>
+                                    <div class="coupon-row">
+                                        <input class="coupon-input" id="couponCode" type="text" placeholder="Enter coupon code">
+                                        <button class="btn btn-outline" type="button" id="applyCouponBtn" style="padding: 10px 14px; border-radius: 14px;">Apply</button>
+                                    </div>
+                                    <div class="coupon-status" id="couponStatus">No coupon applied.</div>
+                                </div>
+
                                 <div class="pay-actions">
                                     <button type="submit" class="btn btn-primary btn-wide" id="submit-btn">
                                         <span id="button-text">Complete Payment</span>
@@ -480,6 +526,11 @@
                         <div class="summary-item" id="discount-row" style="display: none;">
                             <span class="summary-label summary-discount">Bundle Discount</span>
                             <span class="summary-value summary-discount" id="discount-amount">-£0</span>
+                        </div>
+
+                        <div class="summary-item" id="coupon-row" style="display: none;">
+                            <span class="summary-label summary-discount" id="coupon-label">Coupon</span>
+                            <span class="summary-value summary-discount" id="coupon-amount">-£0</span>
                         </div>
 
                         <div class="summary-item summary-total">
@@ -540,25 +591,73 @@
 
         const courseType = isBundle ? 'bundle' : (courses[rawCourseType] ? rawCourseType : 'cpc');
         const courseData = courses[courseType] || courses.cpc;
-        const coursePrice = Number.isFinite(Number(urlParams.get('price'))) ? parseFloat(urlParams.get('price')) : courseData.price;
+        const baseCoursePrice = Number.isFinite(Number(urlParams.get('price'))) ? parseFloat(urlParams.get('price')) : courseData.price;
+
+        const COUPONS = {
+            khalidmehmood11884: { code: 'khalidMehmood11884', percent: 100 },
+            moiz123: { code: 'Moiz123', percent: 50 },
+            alphafreight19: { code: 'Alphafreight19', percent: 20 }
+        };
+
+        let appliedCoupon = null;
+
+        function formatGBP(amount) {
+            const n = Number(amount);
+            if (!Number.isFinite(n)) return '£0.00';
+            return `£${n.toFixed(2)}`;
+        }
+
+        function getCouponPercent() {
+            return appliedCoupon?.percent || 0;
+        }
+
+        function getPricing() {
+            const percent = getCouponPercent();
+            const discountAmount = Math.max(0, (baseCoursePrice * percent) / 100);
+            const final = Math.max(0, baseCoursePrice - discountAmount);
+            const amountPence = Math.max(0, Math.round(final * 100));
+            return { base: baseCoursePrice, percent, discountAmount, final, amountPence };
+        }
 
         function updateOrderSummary() {
             const discount = isBundle ? (courses.bundle.original - courses.bundle.price) : 0;
-            const price = coursePrice;
+            const pricing = getPricing();
 
             document.getElementById('course-name').textContent = courseData.name;
-            document.getElementById('course-price').textContent = `£${price}`;
-            document.getElementById('total-price').textContent = `£${price}`;
-            document.getElementById('button-text').textContent = `Pay £${price}`;
+            document.getElementById('course-price').textContent = formatGBP(pricing.base);
+            document.getElementById('total-price').textContent = formatGBP(pricing.final);
+
+            if (pricing.amountPence === 0) {
+                document.getElementById('button-text').textContent = 'Activate Course';
+            } else {
+                document.getElementById('button-text').textContent = `Pay ${formatGBP(pricing.final)}`;
+            }
+
             document.getElementById('checkoutSubtitle').textContent = `Secure checkout for: ${courseData.name}`;
 
             if (isBundle && discount > 0) {
                 document.getElementById('discount-row').style.display = 'flex';
-                document.getElementById('discount-amount').textContent = `-£${discount}`;
+                document.getElementById('discount-amount').textContent = `-${formatGBP(discount)}`;
                 document.getElementById('included-4').style.display = 'list-item';
             } else {
                 document.getElementById('discount-row').style.display = 'none';
                 document.getElementById('included-4').style.display = 'none';
+            }
+
+            if (pricing.percent > 0) {
+                const couponRow = document.getElementById('coupon-row');
+                couponRow.style.display = 'flex';
+                document.getElementById('coupon-label').textContent = `Coupon (${pricing.percent}% OFF)`;
+                document.getElementById('coupon-amount').textContent = `-${formatGBP(pricing.discountAmount)}`;
+            } else {
+                document.getElementById('coupon-row').style.display = 'none';
+            }
+
+            const couponStatus = document.getElementById('couponStatus');
+            if (appliedCoupon) {
+                couponStatus.innerHTML = `Applied: <strong>${appliedCoupon.code}</strong> — ${appliedCoupon.percent}% OFF`;
+            } else {
+                couponStatus.textContent = 'No coupon applied.';
             }
         }
 
@@ -655,6 +754,7 @@
 
             const submitButton = document.getElementById('submit-btn');
             const buttonText = document.getElementById('button-text');
+            const pricing = getPricing();
             
             submitButton.disabled = true;
             buttonText.innerHTML = '<span class="spinner"></span>Processing...';
@@ -680,14 +780,16 @@
                 hasError = true;
             }
 
-            if (!STRIPE_CARD_PAYMENTS_ENABLED || !stripeReady || !stripe || !cardNumberElement) {
-                setFieldError('card-error', 'Card payments are not available right now.');
-                hasError = true;
+            if (pricing.amountPence > 0) {
+                if (!STRIPE_CARD_PAYMENTS_ENABLED || !stripeReady || !stripe || !cardNumberElement) {
+                    setFieldError('card-error', 'Card payments are not available right now.');
+                    hasError = true;
+                }
             }
 
             if (hasError) {
                 submitButton.disabled = false;
-                buttonText.textContent = `Pay £${coursePrice}`;
+                updateOrderSummary();
                 return;
             }
 
@@ -710,48 +812,55 @@
                     return;
                 }
 
-                const intentResponse = await fetch(STRIPE_BACKEND_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        amount: Math.round(coursePrice * 100),
-                        currency: 'gbp',
-                        loadId: `academy_${courseType}`,
-                        paymentFor: courseData.name,
-                        paymentType: isBundle ? 'academy_bundle' : 'academy_course'
-                    })
-                });
+                let paymentProvider = 'stripe';
+                let paymentIntentId = null;
 
-                const intentData = await intentResponse.json();
-                if (!intentResponse.ok) {
-                    const msg = intentData?.error?.message || intentData?.error || 'Payment failed.';
-                    throw new Error(msg);
-                }
+                if (pricing.amountPence === 0) {
+                    paymentProvider = 'coupon';
+                    paymentIntentId = `coupon_${(appliedCoupon?.code || 'FREE')}`;
+                } else {
+                    const intentResponse = await fetch(STRIPE_BACKEND_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: pricing.amountPence,
+                            currency: 'gbp',
+                            loadId: `academy_${courseType}`,
+                            paymentFor: courseData.name,
+                            paymentType: isBundle ? 'academy_bundle' : 'academy_course',
+                            couponCode: appliedCoupon?.code || '',
+                            couponPercent: pricing.percent || 0
+                        })
+                    });
 
-                const { error, paymentIntent } = await stripe.confirmCardPayment(
-                    intentData.clientSecret,
-                    {
-                        payment_method: {
-                            card: cardNumberElement,
-                            billing_details: {
-                                name: fullName,
-                                email: email,
-                                address: {
-                                    city: city,
-                                    postal_code: postcode,
-                                    country: country
+                    const intentData = await intentResponse.json();
+                    if (!intentResponse.ok) {
+                        const msg = intentData?.error?.message || intentData?.error || 'Payment failed.';
+                        throw new Error(msg);
+                    }
+
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(
+                        intentData.clientSecret,
+                        {
+                            payment_method: {
+                                card: cardNumberElement,
+                                billing_details: {
+                                    name: fullName,
+                                    email: email,
+                                    address: {
+                                        city: city,
+                                        postal_code: postcode,
+                                        country: country
+                                    }
                                 }
                             }
                         }
-                    }
-                );
+                    );
 
-                if (error) {
-                    throw new Error(error.message || 'Payment failed.');
-                }
+                    if (error) throw new Error(error.message || 'Payment failed.');
+                    if (!paymentIntent || paymentIntent.status !== 'succeeded') throw new Error('Payment not completed. Please try again.');
 
-                if (!paymentIntent || paymentIntent.status !== 'succeeded') {
-                    throw new Error('Payment not completed. Please try again.');
+                    paymentIntentId = paymentIntent.id;
                 }
 
                 await enrollmentRef.set({
@@ -763,8 +872,13 @@
                     enrolledAt: existing.exists ? existing.data().enrolledAt : firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     paidAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    paymentProvider: 'stripe',
-                    paymentIntentId: paymentIntent.id,
+                    paymentProvider: paymentProvider,
+                    paymentIntentId: paymentIntentId,
+                    originalPrice: baseCoursePrice,
+                    couponCode: appliedCoupon?.code || '',
+                    couponPercent: pricing.percent || 0,
+                    discountAmount: pricing.discountAmount,
+                    finalPrice: pricing.final,
                     totalLessons: 20,
                     lessonsCompleted: 0,
                     timeLeft: '12h',
@@ -819,7 +933,7 @@
                     confirmButtonColor: '#6366f1'
                 });
                 submitButton.disabled = false;
-                buttonText.textContent = `Pay £${coursePrice}`;
+                updateOrderSummary();
             }
         });
 
@@ -841,6 +955,49 @@
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) nav.classList.add('scrolled');
             else nav.classList.remove('scrolled');
+        });
+
+        const couponInput = document.getElementById('couponCode');
+        const applyCouponBtn = document.getElementById('applyCouponBtn');
+
+        function applyCoupon(codeRaw) {
+            const key = String(codeRaw || '').trim();
+            if (!key) {
+                appliedCoupon = null;
+                updateOrderSummary();
+                return;
+            }
+
+            const normalized = key.toLowerCase();
+            const found = COUPONS[normalized];
+            if (!found) {
+                appliedCoupon = null;
+                updateOrderSummary();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Coupon',
+                    text: 'Coupon code is not valid.',
+                    confirmButtonColor: '#6366f1'
+                });
+                return;
+            }
+
+            appliedCoupon = found;
+            updateOrderSummary();
+            Swal.fire({
+                icon: 'success',
+                title: 'Coupon Applied',
+                text: `${found.percent}% discount applied.`,
+                confirmButtonColor: '#6366f1'
+            });
+        }
+
+        applyCouponBtn.addEventListener('click', () => applyCoupon(couponInput.value));
+        couponInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyCoupon(couponInput.value);
+            }
         });
     </script>
 </body>
