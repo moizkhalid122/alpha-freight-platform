@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Alpha Academy</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #0f172a;
+            --bg-main: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: var(--primary);
+            filter: blur(100px);
+            opacity: 0.1;
+            border-radius: 50%;
+            animation: move 25s infinite alternate;
+        }
+
+        .blob-1 { top: -10%; left: -10%; background: #6366f1; }
+        .blob-2 { bottom: -10%; right: -10%; background: #10b981; animation-delay: -5s; }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(100px, 50px) scale(1.1) rotate(360deg); }
+        }
+
+        /* Auth Card */
+        .auth-card {
+            width: 100%;
+            max-width: 520px;
+            padding: 3rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo i { color: var(--primary); }
+
+        .auth-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-control:focus + i {
+            color: var(--primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+            margin-bottom: 2rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Social Logins */
+        .social-divider {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .social-divider::before, .social-divider::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .social-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-social:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .btn-social i.fa-google { color: #ea4335; }
+        .btn-social i.fa-facebook { color: #1877f2; }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        .lang-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        /* Loading Overlay */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--primary);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* RTL Support */
+        [dir="rtl"] .input-wrapper i {
+            left: auto;
+            right: 16px;
+        }
+
+        [dir="rtl"] .form-control {
+            padding: 14px 48px 14px 16px;
+        }
+
+        [dir="rtl"] .forgot-password {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="lang-switcher">
+        <button class="lang-btn" id="langToggle">
+            <span id="currentLang">English</span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <div class="auth-card" data-aos="zoom-in">
+        <div class="auth-header">
+            <a href="academy.html" class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Alpha Academy</span>
+            </a>
+            <h2 data-i18n="auth.signup.title">Create Account</h2>
+            <p>Join thousands of students on their learning journey</p>
+        </div>
+
+        <form id="signupForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label data-i18n="auth.name.label">Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="name" class="form-control" placeholder="John Doe" required>
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="auth.email.label">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="auth.password.label">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="auth.confirm_password.label">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" required>
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" data-i18n="auth.signup.button">Sign Up</button>
+        </form>
+
+        <div class="social-divider">Or join with</div>
+
+        <div class="social-btns">
+            <button class="btn-social" id="googleSignup">
+                <i class="fab fa-google"></i>
+                <span>Google</span>
+            </button>
+            <button class="btn-social" id="facebookSignup">
+                <i class="fab fa-facebook"></i>
+                <span>Facebook</span>
+            </button>
+        </div>
+
+        <div class="auth-footer">
+            <span data-i18n="auth.have_account">Already have an account?</span>
+            <a href="signin.html" data-i18n="auth.signin.button">Sign In</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- App Logic -->
+    <script src="../../assets/js/i18n.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        AOS.init({ duration: 800, once: true });
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Language toggle logic
+        const langToggle = document.getElementById('langToggle');
+        const currentLangSpan = document.getElementById('currentLang');
+        
+        langToggle.addEventListener('click', () => {
+            const current = window.I18nManager.getLanguage();
+            const next = current === 'en' ? 'ur' : 'en';
+            window.I18nManager.setLanguage(next);
+            currentLangSpan.textContent = next === 'en' ? 'English' : 'اردو';
+        });
+
+        // Initialize with correct text
+        const initialLang = window.I18nManager.getLanguage();
+        currentLangSpan.textContent = initialLang === 'en' ? 'English' : 'اردو';
+
+        const signupForm = document.getElementById('signupForm');
+        const loader = document.getElementById('loader');
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Passwords do not match!',
+                    confirmButtonColor: '#6366f1'
+                });
+                return;
+            }
+
+            loader.style.display = 'flex';
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Update profile
+                await updateProfile(user, { displayName: name });
+                
+                // Create user doc in Firestore
+                await setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    role: 'student',
+                    createdAt: serverTimestamp(),
+                    coursesEnrolled: 0,
+                    coursesCompleted: 0,
+                    certsEarned: 0,
+                    learningHours: 0
+                });
+
+                // Success Alert before redirect
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Welcome!',
+                    text: 'Account created successfully.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Redirect logic
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect');
+                if (redirect) {
+                    window.location.href = decodeURIComponent(redirect);
+                } else {
+                    window.location.href = 'academy-dashboard.html';
+                }
+            } catch (error) {
+                console.error("Signup Error:", error);
+                let errorMessage = error.message;
+                let errorTitle = 'Error';
+
+                if (error.code === 'auth/email-already-in-use') {
+                    errorTitle = 'Email Already Registered';
+                    errorMessage = 'This email is already linked to an account. Please sign in instead.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = "Firebase Error: Email/Password registration is not enabled in your Firebase Console.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorTitle = 'Weak Password';
+                    errorMessage = 'Password should be at least 6 characters.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorTitle = 'Invalid Email';
+                    errorMessage = 'The email address is not valid.';
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: errorTitle,
+                    text: errorMessage,
+                    confirmButtonColor: '#6366f1'
+                });
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        // Social Logins
+        document.getElementById('googleSignup').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Check if user exists in Firestore
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, 'users', user.uid), {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        role: 'student',
+                        createdAt: serverTimestamp(),
+                        coursesEnrolled: 0,
+                        coursesCompleted: 0,
+                        certsEarned: 0,
+                        learningHours: 0
+                    });
+                }
+                
+                // Redirect logic
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect');
+                if (redirect) {
+                    window.location.href = decodeURIComponent(redirect);
+                } else {
+                    window.location.href = 'academy-dashboard.html';
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Error',
+                    text: error.message,
+                    confirmButtonColor: '#6366f1'
+                });
+            }
+        });
+
+        document.getElementById('facebookSignup').addEventListener('click', async () => {
+            const provider = new FacebookAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Check if user exists in Firestore
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, 'users', user.uid), {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        role: 'student',
+                        createdAt: serverTimestamp(),
+                        coursesEnrolled: 0,
+                        coursesCompleted: 0,
+                        certsEarned: 0,
+                        learningHours: 0
+                    });
+                }
+                
+                // Redirect logic
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect');
+                if (redirect) {
+                    window.location.href = decodeURIComponent(redirect);
+                } else {
+                    window.location.href = 'academy-dashboard.html';
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Error',
+                    text: error.message,
+                    confirmButtonColor: '#6366f1'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

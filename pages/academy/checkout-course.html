@@ -6,418 +6,453 @@
     <title>Checkout - Alpha Freight Driver Academy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #0f172a;
+            --accent: #10b981;
+            --bg-main: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            --card-shadow-hover: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: #fafafa;
-            color: #1f2937;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        .bg-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #e2e8f0 100%);
         }
 
-        /* Navigation */
+        .blob {
+            position: absolute;
+            width: 520px;
+            height: 520px;
+            filter: blur(90px);
+            opacity: 0.16;
+            border-radius: 50%;
+            animation: move 18s infinite alternate;
+        }
+
+        .blob-1 { top: -12%; left: -10%; background: #6366f1; }
+        .blob-2 { bottom: -12%; right: -10%; background: #10b981; animation-delay: -6s; }
+        .blob-3 { top: 30%; left: 35%; background: #f43f5e; animation-delay: -12s; }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(90px, 60px) scale(1.15) rotate(360deg); }
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
         nav {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 16px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.1rem 0;
+            transition: all 0.3s ease;
         }
 
-        nav .container {
+        nav.scrolled {
+            padding: 0.8rem 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        nav .container { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .logo i { color: var(--primary); }
+
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+
+        .pill {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--primary);
+            font-weight: 900;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 0.95rem;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover { background: rgba(99, 102, 241, 0.08); }
+
+        .page {
+            padding: 130px 0 70px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .header h1 {
+            font-size: 2.1rem;
+            font-weight: 900;
+            line-height: 1.15;
+            color: var(--secondary);
+        }
+
+        .header p { color: var(--text-muted); font-weight: 700; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .card-body { padding: 18px; }
+
+        .card-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
-        nav .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #635bff;
-            text-decoration: none;
-        }
+        .card-title h2 { font-size: 1.1rem; font-weight: 900; color: var(--secondary); }
 
-        /* Checkout Layout */
-        .checkout-section {
-            padding: 60px 20px;
-        }
-
-        .checkout-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 48px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        /* Order Summary */
-        .order-summary {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-        }
-
-        .order-summary h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            color: #1f2937;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 16px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .order-item-label {
-            color: #6b7280;
-            font-size: 0.95rem;
-        }
-
-        .order-item-value {
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .order-item-value.price {
-            font-size: 1.25rem;
-            color: #635bff;
-        }
-
-        .discount {
-            color: #10b981;
-        }
-
-        .total {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 2px solid #e5e7eb;
-        }
-
-        .total .order-item-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
-
-        /* Payment Form */
-        .payment-form {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .payment-form h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            color: #1f2937;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1f2937;
-            font-size: 0.95rem;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #635bff;
-            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        /* Stripe Elements */
-        .stripe-element {
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: white;
-        }
-
-        .stripe-element:focus {
-            border-color: #635bff;
-            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
-        }
-
-        /* Security Badges */
-        .security-badges {
-            display: flex;
-            gap: 24px;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #e5e7eb;
-            flex-wrap: wrap;
-        }
-
-        .security-badge {
-            display: flex;
+        .secure {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #6b7280;
-            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 0.85rem;
+            white-space: nowrap;
         }
 
-        .security-badge i {
-            color: #10b981;
-        }
+        .secure i { color: var(--accent); }
 
-        /* Buttons */
-        .btn {
-            display: block;
+        .form-grid { display: grid; gap: 12px; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        label { display: block; font-weight: 900; font-size: 0.9rem; color: var(--secondary); margin-bottom: 8px; }
+
+        .input {
             width: 100%;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            color: white;
-            padding: 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            margin-top: 24px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--secondary);
+            font-weight: 700;
+            outline: none;
+            transition: all 0.2s ease;
         }
 
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(99, 91, 255, 0.3);
+        .input:focus {
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #635bff;
-            border: 2px solid #635bff;
-        }
-
-        .btn-secondary:hover {
-            background: #f8f9ff;
-        }
-
-        /* Error Messages */
-        .error-message {
-            color: #ef4444;
-            font-size: 0.875rem;
+        .help {
             margin-top: 8px;
-            display: none;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 700;
         }
 
-        .error-message.show {
-            display: block;
-        }
+        .error-message { color: #ef4444; font-size: 0.85rem; font-weight: 800; margin-top: 8px; display: none; }
+        .error-message.show { display: block; }
 
-        /* Loading Spinner */
+        .pay-actions { display: grid; gap: 10px; margin-top: 14px; }
+        .btn-wide { width: 100%; padding: 12px 16px; border-radius: 16px; }
+
         .spinner {
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.35);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 0.8s linear infinite;
             margin-right: 8px;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .summary { position: sticky; top: 105px; }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
         }
 
-        /* Responsive */
-        @media (max-width: 968px) {
-            .checkout-grid {
-                grid-template-columns: 1fr;
-            }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-label { color: var(--text-muted); font-weight: 800; }
+        .summary-value { color: var(--secondary); font-weight: 900; }
+        .summary-value.price { color: var(--primary); }
+        .summary-discount { color: #0f7a52; }
 
-            .order-summary {
-                position: static;
-            }
+        .summary-total {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(148, 163, 184, 0.35);
+        }
 
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+        .included {
+            margin-top: 14px;
+            border-radius: 18px;
+            padding: 14px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.18);
+            color: #0f7a52;
+            font-weight: 800;
+        }
+
+        .included h3 { font-size: 0.95rem; font-weight: 900; margin-bottom: 8px; color: #0f7a52; }
+        .included ul { margin-left: 18px; display: grid; gap: 6px; }
+
+        @media (max-width: 1024px) {
+            .grid { grid-template-columns: 1fr; }
+            .summary { position: static; }
+        }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: start; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <nav id="navbar">
         <div class="container">
-            <a href="academy.html" class="logo">Alpha Freight Academy</a>
+            <a href="academy.html" class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                Alpha Freight Academy
+            </a>
+            <div class="nav-right">
+                <span class="pill"><i class="fas fa-bag-shopping"></i> Checkout</span>
+                <a href="academy.html" class="btn btn-outline">Back</a>
+            </div>
         </div>
     </nav>
 
-    <!-- Checkout Section -->
-    <section class="checkout-section">
+    <main class="page">
         <div class="container">
-            <div class="checkout-grid">
-                <!-- Payment Form -->
-                <div class="payment-form">
-                    <h2>Payment Details</h2>
-                    
-                    <form id="payment-form">
-                        <div class="form-group">
-                            <label for="email">Email Address</label>
-                            <input type="email" id="email" name="email" required placeholder="your@email.com">
-                            <div class="error-message" id="email-error"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" required placeholder="John Doe">
-                            <div class="error-message" id="name-error"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Card Details</label>
-                            <div id="card-element" class="stripe-element">
-                                <!-- Stripe Elements will create form elements here -->
-                            </div>
-                            <div class="error-message" id="card-error"></div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="city">City</label>
-                                <input type="text" id="city" name="city" required placeholder="London">
-                            </div>
-                            <div class="form-group">
-                                <label for="postcode">Postcode</label>
-                                <input type="text" id="postcode" name="postcode" required placeholder="SW1A 1AA">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="country">Country</label>
-                            <select id="country" name="country" required>
-                                <option value="GB">United Kingdom</option>
-                                <option value="IE">Ireland</option>
-                                <option value="US">United States</option>
-                                <option value="CA">Canada</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn" id="submit-btn">
-                            <span id="button-text">Complete Payment</span>
-                        </button>
-
-                        <a href="academy.html" class="btn btn-secondary" style="margin-top: 12px;">Cancel</a>
-                    </form>
-
-                    <div class="security-badges">
-                        <div class="security-badge">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Secured by Stripe</span>
-                        </div>
-                        <div class="security-badge">
-                            <i class="fas fa-lock"></i>
-                            <span>PCI Compliant</span>
-                        </div>
-                        <div class="security-badge">
-                            <i class="fas fa-undo"></i>
-                            <span>30-day money-back guarantee</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Summary -->
-                <div class="order-summary">
-                    <h2>Order Summary</h2>
-                    
-                    <div class="order-item">
-                        <span class="order-item-label" id="course-name">CPC Training</span>
-                        <span class="order-item-value" id="course-price">£199</span>
-                    </div>
-
-                    <div class="order-item" id="discount-row" style="display: none;">
-                        <span class="order-item-label discount">Bundle Discount</span>
-                        <span class="order-item-value discount" id="discount-amount">-£48</span>
-                    </div>
-
-                    <div class="order-item total">
-                        <span class="order-item-label">Total</span>
-                        <span class="order-item-value price" id="total-price">£199</span>
-                    </div>
-
-                    <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
-                        <p style="color: #166534; font-size: 0.875rem; margin-bottom: 8px;">
-                            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
-                            <strong>What's included:</strong>
-                        </p>
-                        <ul style="color: #166534; font-size: 0.875rem; margin-left: 20px;">
-                            <li id="included-1">Full course access</li>
-                            <li id="included-2">Certificate upon completion</li>
-                            <li id="included-3">Lifetime access</li>
-                            <li id="included-4" style="display: none;">Gold Academy Badge</li>
-                        </ul>
-                    </div>
+            <div class="header">
+                <div>
+                    <h1>Complete Your Purchase</h1>
+                    <p id="checkoutSubtitle">Secure checkout for your selected course.</p>
                 </div>
             </div>
+
+            <div class="grid">
+                <section class="card" aria-label="Payment form">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h2>Payment Details</h2>
+                            <div class="secure"><i class="fas fa-lock"></i> Secure</div>
+                        </div>
+
+                        <form id="payment-form">
+                            <div class="form-grid">
+                                <div>
+                                    <label for="email">Email Address</label>
+                                    <input class="input" type="email" id="email" name="email" required placeholder="name@example.com">
+                                    <div class="error-message" id="email-error"></div>
+                                </div>
+
+                                <div>
+                                    <label for="fullName">Full Name</label>
+                                    <input class="input" type="text" id="fullName" name="fullName" required placeholder="John Doe">
+                                    <div class="error-message" id="name-error"></div>
+                                </div>
+
+                                <div>
+                                    <label for="cardNumber">Card Number</label>
+                                    <input class="input" inputmode="numeric" autocomplete="cc-number" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" required maxlength="19">
+                                    <div class="error-message" id="card-error"></div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div>
+                                        <label for="expiry">Expiry</label>
+                                        <input class="input" inputmode="numeric" autocomplete="cc-exp" id="expiry" name="expiry" placeholder="MM/YY" required maxlength="5">
+                                    </div>
+                                    <div>
+                                        <label for="cvc">CVC</label>
+                                        <input class="input" inputmode="numeric" autocomplete="cc-csc" id="cvc" name="cvc" placeholder="123" required maxlength="4">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div>
+                                        <label for="city">City</label>
+                                        <input class="input" type="text" id="city" name="city" required placeholder="London">
+                                    </div>
+                                    <div>
+                                        <label for="postcode">Postcode</label>
+                                        <input class="input" type="text" id="postcode" name="postcode" required placeholder="SW1A 1AA">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="country">Country</label>
+                                    <select class="input" id="country" name="country" required>
+                                        <option value="GB">United Kingdom</option>
+                                        <option value="IE">Ireland</option>
+                                        <option value="US">United States</option>
+                                        <option value="CA">Canada</option>
+                                    </select>
+                                    <div class="help">This is a simulated checkout UI for the demo environment.</div>
+                                </div>
+
+                                <div class="pay-actions">
+                                    <button type="submit" class="btn btn-primary btn-wide" id="submit-btn">
+                                        <span id="button-text">Complete Payment</span>
+                                    </button>
+                                    <a href="academy.html" class="btn btn-outline btn-wide">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <aside class="card summary" aria-label="Order summary">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h2>Order Summary</h2>
+                            <div class="secure"><i class="fas fa-shield-alt"></i> Protected</div>
+                        </div>
+
+                        <div class="summary-item">
+                            <span class="summary-label" id="course-name">Course</span>
+                            <span class="summary-value" id="course-price">£0</span>
+                        </div>
+
+                        <div class="summary-item" id="discount-row" style="display: none;">
+                            <span class="summary-label summary-discount">Bundle Discount</span>
+                            <span class="summary-value summary-discount" id="discount-amount">-£0</span>
+                        </div>
+
+                        <div class="summary-item summary-total">
+                            <span class="summary-label">Total</span>
+                            <span class="summary-value price" id="total-price">£0</span>
+                        </div>
+
+                        <div class="included">
+                            <h3><i class="fas fa-check-circle"></i> What’s Included</h3>
+                            <ul>
+                                <li id="included-1">Full course access</li>
+                                <li id="included-2">Certificate upon completion</li>
+                                <li id="included-3">Lifetime access</li>
+                                <li id="included-4" style="display: none;">Gold Academy Badge</li>
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+            </div>
         </div>
-    </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
 
     <script>
-        // Initialize Stripe
-        const stripe = Stripe('pk_test_51...'); // Replace with your Stripe publishable key
-        const elements = stripe.elements();
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const courseType = urlParams.get('course') || 'cpc';
-        const coursePrice = parseFloat(urlParams.get('price')) || 199;
-        const isBundle = urlParams.get('bundle') === 'true';
+        const rawCourseType = (urlParams.get('course') || 'cpc').toLowerCase();
+        const isBundle = urlParams.get('bundle') === 'true' || rawCourseType === 'bundle';
 
-        // Course data
         const courses = {
             cpc: { name: 'CPC Training', price: 199 },
             safety: { name: 'Safety & Compliance', price: 149 },
@@ -425,15 +460,19 @@
             bundle: { name: 'Complete Bundle', price: 399, original: 447 }
         };
 
-        // Update order summary
-        function updateOrderSummary() {
-            const course = isBundle ? courses.bundle : courses[courseType] || courses.cpc;
-            const price = isBundle ? coursePrice : coursePrice;
-            const discount = isBundle ? (courses.bundle.original - courses.bundle.price) : 0;
+        const courseType = isBundle ? 'bundle' : (courses[rawCourseType] ? rawCourseType : 'cpc');
+        const courseData = courses[courseType] || courses.cpc;
+        const coursePrice = Number.isFinite(Number(urlParams.get('price'))) ? parseFloat(urlParams.get('price')) : courseData.price;
 
-            document.getElementById('course-name').textContent = course.name;
+        function updateOrderSummary() {
+            const discount = isBundle ? (courses.bundle.original - courses.bundle.price) : 0;
+            const price = coursePrice;
+
+            document.getElementById('course-name').textContent = courseData.name;
             document.getElementById('course-price').textContent = `£${price}`;
             document.getElementById('total-price').textContent = `£${price}`;
+            document.getElementById('button-text').textContent = `Pay £${price}`;
+            document.getElementById('checkoutSubtitle').textContent = `Secure checkout for: ${courseData.name}`;
 
             if (isBundle && discount > 0) {
                 document.getElementById('discount-row').style.display = 'flex';
@@ -445,38 +484,67 @@
             }
         }
 
-        // Create card element
-        const cardElement = elements.create('card', {
-            style: {
-                base: {
-                    fontSize: '16px',
-                    color: '#1f2937',
-                    fontFamily: 'Inter, sans-serif',
-                    '::placeholder': {
-                        color: '#9ca3af',
-                    },
-                },
-                invalid: {
-                    color: '#ef4444',
-                },
-            },
-        });
+        function digitsOnly(value) {
+            return (value || '').replace(/\D/g, '');
+        }
 
-        cardElement.mount('#card-element');
+        function formatCardNumber(value) {
+            const digits = digitsOnly(value).slice(0, 16);
+            return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        }
 
-        // Handle real-time validation errors
-        cardElement.on('change', function(event) {
-            const displayError = document.getElementById('card-error');
-            if (event.error) {
-                displayError.textContent = event.error.message;
-                displayError.classList.add('show');
-            } else {
-                displayError.textContent = '';
-                displayError.classList.remove('show');
+        function formatExpiry(value) {
+            const digits = digitsOnly(value).slice(0, 4);
+            const mm = digits.slice(0, 2);
+            const yy = digits.slice(2, 4);
+            if (!yy) return mm;
+            return `${mm}/${yy}`;
+        }
+
+        function setFieldError(id, message) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (!message) {
+                el.textContent = '';
+                el.classList.remove('show');
+                return;
             }
+            el.textContent = message;
+            el.classList.add('show');
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validateExpiry(expiry) {
+            const match = String(expiry).match(/^(\d{2})\/(\d{2})$/);
+            if (!match) return false;
+            const mm = parseInt(match[1], 10);
+            const yy = parseInt(match[2], 10);
+            if (mm < 1 || mm > 12) return false;
+            if (yy < 0 || yy > 99) return false;
+            return true;
+        }
+
+        const cardNumberInput = document.getElementById('cardNumber');
+        const expiryInput = document.getElementById('expiry');
+        const cvcInput = document.getElementById('cvc');
+
+        cardNumberInput.addEventListener('input', () => {
+            const formatted = formatCardNumber(cardNumberInput.value);
+            if (cardNumberInput.value !== formatted) cardNumberInput.value = formatted;
         });
 
-        // Handle form submission
+        expiryInput.addEventListener('input', () => {
+            const formatted = formatExpiry(expiryInput.value);
+            if (expiryInput.value !== formatted) expiryInput.value = formatted;
+        });
+
+        cvcInput.addEventListener('input', () => {
+            cvcInput.value = digitsOnly(cvcInput.value).slice(0, 4);
+        });
+
         const form = document.getElementById('payment-form');
         form.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -484,105 +552,139 @@
             const submitButton = document.getElementById('submit-btn');
             const buttonText = document.getElementById('button-text');
             
-            // Disable button
             submitButton.disabled = true;
             buttonText.innerHTML = '<span class="spinner"></span>Processing...';
 
-            // Get form data
             const email = document.getElementById('email').value;
             const fullName = document.getElementById('fullName').value;
             const city = document.getElementById('city').value;
             const postcode = document.getElementById('postcode').value;
             const country = document.getElementById('country').value;
+            const cardNumber = digitsOnly(document.getElementById('cardNumber').value);
+            const expiry = document.getElementById('expiry').value;
+            const cvc = digitsOnly(document.getElementById('cvc').value);
 
-            // Validate form
+            setFieldError('email-error', '');
+            setFieldError('name-error', '');
+            setFieldError('card-error', '');
+
             let hasError = false;
-            if (!email || !email.includes('@')) {
-                document.getElementById('email-error').textContent = 'Please enter a valid email address';
-                document.getElementById('email-error').classList.add('show');
+            if (!validateEmail(email)) {
+                setFieldError('email-error', 'Please enter a valid email address.');
                 hasError = true;
             }
 
-            if (!fullName || fullName.length < 2) {
-                document.getElementById('name-error').textContent = 'Please enter your full name';
-                document.getElementById('name-error').classList.add('show');
+            if (!fullName || fullName.trim().length < 2) {
+                setFieldError('name-error', 'Please enter your full name.');
+                hasError = true;
+            }
+
+            if (cardNumber.length !== 16) {
+                setFieldError('card-error', 'Please enter a valid card number.');
+                hasError = true;
+            }
+
+            if (!validateExpiry(expiry) || cvc.length < 3) {
+                setFieldError('card-error', 'Please enter a valid expiry and CVC.');
                 hasError = true;
             }
 
             if (hasError) {
                 submitButton.disabled = false;
-                buttonText.textContent = 'Complete Payment';
+                buttonText.textContent = `Pay £${coursePrice}`;
                 return;
             }
 
             try {
-                // Create payment intent
-                const response = await fetch('/api/create-payment-intent', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        amount: Math.round(coursePrice * 100), // Convert to pence
-                        currency: 'gbp',
-                        course: courseType,
-                        isBundle: isBundle,
-                        email: email,
-                        name: fullName,
-                        metadata: {
-                            course: courseType,
-                            isBundle: isBundle.toString(),
-                            city: city,
-                            postcode: postcode,
-                            country: country
-                        }
-                    }),
-                });
+                const user = auth.currentUser;
+                if (!user) throw new Error("User not authenticated");
 
-                const data = await response.json();
+                const enrollmentRef = db.collection('enrolled_courses').doc(`${user.uid}_${courseType}`);
+                const existing = await enrollmentRef.get();
+                const isNewEnrollment = !existing.exists;
 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Payment failed');
-                }
-
-                // Confirm payment with Stripe
-                const { error, paymentIntent } = await stripe.confirmCardPayment(
-                    data.clientSecret,
-                    {
-                        payment_method: {
-                            card: cardElement,
-                            billing_details: {
-                                name: fullName,
-                                email: email,
-                                address: {
-                                    city: city,
-                                    postal_code: postcode,
-                                    country: country,
-                                },
-                            },
-                        },
+                await enrollmentRef.set({
+                    uid: user.uid,
+                    courseId: courseType,
+                    title: courseData.name,
+                    progress: 0,
+                    status: 'Active',
+                    enrolledAt: existing.exists ? existing.data().enrolledAt : firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    totalLessons: 20,
+                    lessonsCompleted: 0,
+                    timeLeft: '12h',
+                    icon: courseType === 'safety' ? 'fas fa-shield-alt' : (courseType === 'cpc' ? 'fas fa-truck' : (courseType === 'load' ? 'fas fa-box' : 'fas fa-layer-group')),
+                    gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                    billing: {
+                        email,
+                        fullName,
+                        city,
+                        postcode,
+                        country
                     }
-                );
+                }, { merge: true });
 
-                if (error) {
-                    throw new Error(error.message);
+                if (isNewEnrollment) {
+                    const userRef = db.collection('users').doc(user.uid);
+                    await db.runTransaction(async (transaction) => {
+                        const docSnap = await transaction.get(userRef);
+                        if (!docSnap.exists) {
+                            transaction.set(userRef, { coursesEnrolled: 1 }, { merge: true });
+                            return;
+                        }
+                        const newCount = (docSnap.data().coursesEnrolled || 0) + 1;
+                        transaction.update(userRef, { coursesEnrolled: newCount });
+                    });
                 }
 
-                // Payment succeeded
-                if (paymentIntent.status === 'succeeded') {
-                    // Redirect to success page
-                    window.location.href = `course-confirmation.html?payment_intent=${paymentIntent.id}&course=${courseType}`;
+                if (isNewEnrollment) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Payment Successful',
+                        text: 'Your course has been activated in your dashboard.',
+                        confirmButtonColor: '#6366f1'
+                    });
+                } else {
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Already Activated',
+                        text: 'This course is already active on your account.',
+                        confirmButtonColor: '#6366f1'
+                    });
                 }
+                window.location.href = 'academy-dashboard.html';
+
             } catch (error) {
-                document.getElementById('card-error').textContent = error.message;
-                document.getElementById('card-error').classList.add('show');
+                console.error("Enrollment Error:", error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Checkout Error',
+                    text: error.message,
+                    confirmButtonColor: '#6366f1'
+                });
                 submitButton.disabled = false;
-                buttonText.textContent = 'Complete Payment';
+                buttonText.textContent = `Pay £${coursePrice}`;
             }
         });
 
-        // Initialize
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('fullName').value = user.displayName || '';
+                document.getElementById('email').readOnly = true;
+                return;
+            }
+            window.location.href = "signup.html?redirect=" + encodeURIComponent(window.location.href);
+        });
+
         updateOrderSummary();
+
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
     </script>
 </body>
 </html>

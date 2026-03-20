@@ -23,11 +23,11 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification?.title || 'Alpha Freight';
     const notificationOptions = {
         body: payload.notification?.body || payload.data?.body || 'You have a new notification',
-        icon: '/assets/images/logo.png',
-        badge: '/assets/images/logo.png',
-        tag: payload.data?.type || 'notification',
+        icon: '/assets/img/alpha-freight-logo.svg',
+        badge: '/assets/img/alpha-freight-logo.svg',
+        tag: (payload.data?.type || 'notification') + '_' + Date.now(),
         data: payload.data,
-        requireInteraction: false,
+        requireInteraction: true,
         silent: false
     };
 

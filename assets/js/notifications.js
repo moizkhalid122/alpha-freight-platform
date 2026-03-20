@@ -117,11 +117,19 @@ async function initFCM() {
         if (permission === 'granted') {
             console.log('Notification permission granted');
             
-            // Get FCM token
+            // Get FCM token (mobile ke liye SW pehle register karo)
             try {
                 const vapidKey = getVAPIDKey();
+                let swReg = null;
+                if ('serviceWorker' in navigator) {
+                    try {
+                        swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+                        await swReg.update();
+                    } catch (e) { /* use default */ }
+                }
                 fcmToken = await messaging.getToken({ 
-                    vapidKey: vapidKey
+                    vapidKey: vapidKey,
+                    serviceWorkerRegistration: swReg || undefined
                 });
                 
                 if (fcmToken) {
@@ -160,11 +168,21 @@ async function initFCM() {
 function getCurrentUser() {
     const carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
     const supplierAuth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
-    
+    const path = (window.location.pathname || '').toLowerCase();
+
+    // Current page se decide karo - supplier page pe supplier, carrier page pe carrier
+    if (path.includes('/supplier/') && supplierAuth.supplierId) {
+        return { type: 'supplier', id: supplierAuth.supplierId, auth: supplierAuth };
+    }
+    if (path.includes('/carrier/') && carrierAuth.carrierId) {
+        return { type: 'carrier', id: carrierAuth.carrierId, auth: carrierAuth };
+    }
+    // Fallback: pehle supplier, phir carrier
+    if (supplierAuth.supplierId) {
+        return { type: 'supplier', id: supplierAuth.supplierId, auth: supplierAuth };
+    }
     if (carrierAuth.carrierId) {
         return { type: 'carrier', id: carrierAuth.carrierId, auth: carrierAuth };
-    } else if (supplierAuth.supplierId) {
-        return { type: 'supplier', id: supplierAuth.supplierId, auth: supplierAuth };
     }
     return null;
 }
@@ -200,48 +218,69 @@ async function saveFCMToken(token) {
     }
 }
 
-// Show notification
+// Play notification sound
+function playNotificationSound() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 800;
+        osc.type = 'sine';
+        gain.gain.value = 0.3;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+    } catch (e) { /* ignore */ }
+}
+
+// Show notification (system popup + in-page toast + sound)
 function showNotification(payload) {
     const title = payload.notification?.title || payload.data?.title || 'Alpha Freight';
     const body = payload.notification?.body || payload.data?.body || 'You have a new notification';
-    const icon = payload.notification?.icon || '/assets/images/logo.png';
-    
-    if ('Notification' in window && Notification.permission === 'granted') {
-        const notification = new Notification(title, {
-            body: body,
-            icon: icon,
-            badge: icon,
-            tag: payload.data?.type || 'notification',
-            data: payload.data
-        });
+    const icon = payload.notification?.icon || '/assets/img/alpha-freight-logo.svg';
 
-        notification.onclick = (event) => {
-            event.preventDefault();
-            window.focus();
-            
-            // Determine URL based on user type and notification type
-            const user = getCurrentUser();
-            let url = user?.type === 'supplier' ? '/pages/supplier/dashboard.html' : '/app/carrier/dashboard.html';
-            
-            if (payload.data) {
-                if (payload.data.type === 'new_load') {
-                    url = '/app/carrier/loads.html';
-                } else if (payload.data.type === 'load_match' || payload.data.type === 'load_bid') {
-                    url = user?.type === 'supplier' ? '/pages/supplier/my-loads.html' : '/app/carrier/my-loads.html';
-                } else if (payload.data.type === 'load_accepted') {
-                    url = '/app/carrier/my-loads.html';
-                } else if (payload.data.type === 'message') {
-                    url = user?.type === 'supplier' ? '/pages/supplier/messages.html' : '/app/carrier/messages.html';
-                } else if (payload.data.type === 'deposit' || payload.data.type === 'withdrawal') {
-                    url = '/app/carrier/wallet.html';
-                } else if (payload.data.url) {
-                    url = payload.data.url;
+    // Sound play karo
+    playNotificationSound();
+
+    // In-page toast - user ko zaroor dikhega
+    if (typeof window.showInfo === 'function') {
+        window.showInfo(body, { title: title, duration: 5000 });
+    } else if (typeof window.AlertSystem !== 'undefined') {
+        window.AlertSystem.show(body, 'info', { title: title, duration: 5000 });
+    }
+
+    // System notification popup
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const notification = new Notification(title, {
+                body: body,
+                icon: icon,
+                badge: icon,
+                tag: (payload.data?.type || 'notification') + '_' + Date.now(),
+                data: payload.data,
+                silent: false,
+                requireInteraction: true
+            });
+
+            notification.onclick = (event) => {
+                event.preventDefault();
+                window.focus();
+                const user = getCurrentUser();
+                let url = user?.type === 'supplier' ? '/mobile-app/supplier/dashboard.html' : '/mobile-app/carrier/dashboard.html';
+                if (payload.data) {
+                    if (payload.data.type === 'load_accepted' || payload.data.type === 'load_completed') {
+                        url = '/mobile-app/supplier/my-loads.html';
+                    } else if (payload.data.url) {
+                        url = payload.data.url;
+                    }
                 }
-            }
-            
-            window.location.href = url;
-            notification.close();
-        };
+                window.location.href = url;
+                notification.close();
+            };
+        } catch (e) {
+            console.warn('System notification error:', e);
+        }
     }
 }
 

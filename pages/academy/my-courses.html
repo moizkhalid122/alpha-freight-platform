@@ -1,931 +1,625 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K01QL0Z1H8"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-K01QL0Z1H8');
+    </script>
+    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Courses - Alpha Freight Driver Academy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>My Courses | Alpha Freight Academy</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #0f172a;
+            --accent: #10b981;
+            --bg-main: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            --card-shadow-hover: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+            --sidebar-width: 280px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-            color: #1f2937;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Navigation */
-        nav {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            padding: 18px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(99, 91, 255, 0.1);
-        }
-
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav .logo {
-            font-size: 1.6rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-            letter-spacing: -0.5px;
-        }
-
-        nav .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        nav .nav-links a {
-            color: #4b5563;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 8px 0;
-        }
-
-        nav .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #635bff 0%, #8b5cf6 100%);
-            transition: width 0.3s ease;
-        }
-
-        nav .nav-links a:hover {
-            color: #635bff;
-        }
-
-        nav .nav-links a:hover::after {
+        html, body {
+            overflow-x: hidden;
             width: 100%;
         }
 
-        /* Header */
-        .header-section {
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 50%, #a855f7 100%);
-            color: white;
-            padding: 80px 20px;
-            position: relative;
-            overflow: hidden;
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
         }
 
-        .header-section::before {
-            content: '';
+        /* 3D Animated Background */
+        .bg-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #e2e8f0 100%);
+        }
+
+        .blob {
             position: absolute;
-            top: -50%;
-            right: -10%;
             width: 500px;
             height: 500px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            background: var(--primary);
             filter: blur(80px);
-        }
-
-        .header-section::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -5%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.08);
+            opacity: 0.15;
             border-radius: 50%;
-            filter: blur(60px);
+            animation: move 20s infinite alternate;
         }
 
-        .header-content {
+        .blob-1 { top: -10%; left: -10%; background: #6366f1; }
+        .blob-2 { bottom: -10%; right: -10%; background: #10b981; animation-delay: -5s; }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(100px, 50px) scale(1.2) rotate(360deg); }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 3rem;
+        }
+
+        .logo i { color: var(--primary); }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        .nav-link i { font-size: 1.1rem; }
+
+        .logout-btn {
+            margin-top: auto;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+            background: #fef2f2;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2rem 3rem;
+            min-height: 100vh;
+        }
+
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 32px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 3rem;
         }
 
-        .header-content h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            letter-spacing: -1px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content p {
-            font-size: 1.25rem;
-            opacity: 0.95;
-            font-weight: 400;
-        }
-
-        .academy-badge {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 20px 28px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .academy-badge:hover {
-            transform: scale(1.05);
-        }
-
-        .academy-badge i {
-            font-size: 2rem;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-        }
-
-        .academy-badge.gold {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-
-        /* Content Section */
-        .content-section {
-            padding: 80px 20px;
-        }
-
-        .section-title {
+        .page-title h1 {
             font-size: 2rem;
             font-weight: 800;
-            margin-bottom: 32px;
-            color: #1f2937;
-            position: relative;
-            padding-bottom: 12px;
-            letter-spacing: -0.5px;
+            color: var(--secondary);
         }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, #635bff 0%, #8b5cf6 100%);
-            border-radius: 2px;
+        .page-title p {
+            color: var(--text-muted);
+            font-weight: 500;
         }
 
-        /* My Courses Grid */
+        /* Course Filters */
+        .course-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border-radius: 100px;
+            background: white;
+            border: 1px solid #f1f5f9;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        /* Courses Grid */
         .courses-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 28px;
-            margin-bottom: 80px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
         }
 
         .course-card {
             background: white;
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(99, 91, 255, 0.1);
-            position: relative;
+            border-radius: 24px;
             overflow: hidden;
-        }
-
-        .course-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #635bff 0%, #8b5cf6 100%);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s ease;
-        }
-
-        .course-card:hover::before {
-            transform: scaleX(1);
+            border: 1px solid #f1f5f9;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .course-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(99, 91, 255, 0.2);
-            border-color: rgba(99, 91, 255, 0.3);
+            transform: translateY(-8px);
+            box-shadow: var(--card-shadow-hover);
         }
 
-        .course-header {
+        .course-thumb {
+            height: 180px;
+            position: relative;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
             display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
         }
 
-        .course-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: #1f2937;
-            margin-bottom: 6px;
-            letter-spacing: -0.3px;
-        }
-
-        .course-status {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            color: #166534;
+        .course-badge {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
             padding: 6px 14px;
-            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            color: var(--primary);
+            border-radius: 100px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
         }
 
-        .course-status:contains("Not Started") {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
+        .course-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-content h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .course-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .progress-section {
-            margin-bottom: 24px;
+            margin-top: auto;
         }
 
-        .progress-header {
+        .progress-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .progress-label {
-            font-size: 0.875rem;
-            color: #6b7280;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .progress-percent {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 8px;
         }
 
         .progress-bar {
-            width: 100%;
             height: 10px;
-            background: #e5e7eb;
-            border-radius: 10px;
+            background: #f1f5f9;
+            border-radius: 100px;
             overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #635bff 0%, #8b5cf6 50%, #a855f7 100%);
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
+            background: var(--primary);
+            border-radius: 100px;
+            transition: width 1s ease;
         }
 
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .next-lesson {
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-            border-left: 4px solid #635bff;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
-        }
-
-        .next-lesson:hover {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
-            transform: translateX(4px);
-        }
-
-        .next-lesson-label {
-            font-size: 0.75rem;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-
-        .next-lesson-title {
-            font-weight: 700;
-            color: #1f2937;
-            font-size: 0.95rem;
-        }
-
-        .btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            color: white;
-            padding: 14px 28px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(99, 91, 255, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* Course Catalog */
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 28px;
-            margin-bottom: 60px;
-        }
-
-        .catalog-card {
-            background: white;
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(99, 91, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .catalog-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #635bff 0%, #8b5cf6 100%);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s ease;
-        }
-
-        .catalog-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .catalog-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(99, 91, 255, 0.2);
-        }
-
-        .catalog-card .badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(99, 91, 255, 0.3);
-        }
-
-        .catalog-card h3 {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            color: #1f2937;
-            letter-spacing: -0.3px;
-        }
-
-        .catalog-card .price {
-            font-size: 2rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 16px;
-            letter-spacing: -1px;
-        }
-
-        .catalog-card .duration {
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
-
-        .catalog-card .duration i {
-            color: #635bff;
-        }
-
-        /* Certificates Section */
-        .certificates-section {
-            background: white;
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            margin-top: 80px;
-            border: 1px solid rgba(99, 91, 255, 0.1);
-        }
-
-        .certificates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 28px;
-            margin-top: 32px;
-        }
-
-        .certificate-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 20px;
-            padding: 32px;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .certificate-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(99, 91, 255, 0.1) 0%, transparent 70%);
-            transition: all 0.4s ease;
-        }
-
-        .certificate-card:hover::before {
-            top: -20%;
-            right: -20%;
-        }
-
-        .certificate-card:hover {
-            border-color: #635bff;
-            box-shadow: 0 12px 32px rgba(99, 91, 255, 0.2);
-            transform: translateY(-6px);
-        }
-
-        .certificate-card .icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            border-radius: 20px;
+        .course-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 2rem;
-            color: white;
-            box-shadow: 0 8px 24px rgba(99, 91, 255, 0.3);
-            transition: transform 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-
-        .certificate-card:hover .icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .certificate-card h3 {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            color: #1f2937;
-            position: relative;
-            z-index: 1;
-        }
-
-        .certificate-card p {
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            font-weight: 500;
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-outline {
-            background: white;
-            color: #635bff;
-            border: 2px solid #635bff;
-            box-shadow: 0 2px 8px rgba(99, 91, 255, 0.2);
-        }
-
-        .btn-outline:hover {
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-            border-color: #8b5cf6;
-            color: #8b5cf6;
-        }
-
-        /* Account Settings Link */
-        .account-section {
-            margin-top: 80px;
-            text-align: center;
-        }
-
-        .account-link {
-            color: #635bff;
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
             gap: 10px;
-            padding: 12px 24px;
-            border-radius: 12px;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 700;
             transition: all 0.3s ease;
-            background: rgba(99, 91, 255, 0.05);
         }
 
-        .account-link:hover {
-            background: rgba(99, 91, 255, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 91, 255, 0.2);
+        .course-btn:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
         }
 
-        .account-link i {
-            transition: transform 0.3s ease;
-        }
-
-        .account-link:hover i {
-            transform: rotate(90deg);
-        }
-
-        /* Status Badge Variations */
-        .course-status:has-text("Not Started") {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #635bff 0%, #8b5cf6 100%);
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+        .course-btn.completed {
+            background: var(--accent);
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .header-content h1 {
-                font-size: 2.25rem;
+        @media (max-width: 992px) {
+            body { display: block; }
+            .sidebar { 
+                left: -100%; 
+                z-index: 2000;
+                position: fixed;
+            }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; padding: 1rem; width: 100%; }
+            
+            .mobile-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                background: white;
+                padding: 1rem;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                border-bottom: 1px solid var(--glass-border);
             }
 
-            .header-content p {
-                font-size: 1.1rem;
-            }
-
-            .courses-grid,
-            .catalog-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header-content {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .section-title {
-                font-size: 1.75rem;
-            }
-
-            .certificates-section {
-                padding: 24px;
-            }
-
-            nav .nav-links {
-                gap: 20px;
-            }
-
-            nav .nav-links a {
-                font-size: 0.875rem;
-            }
+            header { display: none; }
         }
 
-        @media (max-width: 480px) {
-            .header-section {
-                padding: 60px 20px;
-            }
+        .mobile-header { display: none; }
 
-            .content-section {
-                padding: 40px 20px;
-            }
-
-            .course-card,
-            .catalog-card {
-                padding: 20px;
-            }
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-main);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
         }
 
-        /* Loading Animation */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
         }
 
-        .course-card,
-        .catalog-card,
-        .certificate-card {
-            animation: fadeInUp 0.6s ease-out;
-        }
+        .sidebar-overlay.active { display: block; }
 
-        .course-card:nth-child(1) { animation-delay: 0.1s; }
-        .course-card:nth-child(2) { animation-delay: 0.2s; }
-        .course-card:nth-child(3) { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="container">
-            <a href="academy.html" class="logo">Alpha Freight Academy</a>
-            <ul class="nav-links">
-                <li><a href="academy.html">Home</a></li>
-                <li><a href="my-courses.html">My Courses</a></li>
-                <li><a href="../carrier/dashboard.html">Dashboard</a></li>
-            </ul>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <a href="academy.html" class="logo" style="margin-bottom: 0;">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Alpha Academy</span>
+        </a>
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
         </div>
-    </nav>
+    </div>
 
-    <!-- Header -->
-    <section class="header-section">
-        <div class="container">
-            <div class="header-content">
-                <div>
-                    <h1>Welcome back, John!</h1>
-                    <p>Continue your learning journey</p>
-                </div>
-                <div class="academy-badge gold">
-                    <i class="fas fa-medal"></i>
-                    <div>
-                        <div style="font-weight: 700;">Gold Academy Badge</div>
-                        <div style="font-size: 0.875rem; opacity: 0.9;">Complete Bundle Owner</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Content Section -->
-    <section class="content-section">
-        <div class="container">
-            <!-- My Courses -->
-            <h2 class="section-title">My Courses</h2>
-            <div class="courses-grid">
-                <!-- CPC Training -->
-                <div class="course-card">
-                    <div class="course-header">
-                        <div>
-                            <div class="course-title">CPC Training</div>
-                        </div>
-                        <span class="course-status">In Progress</span>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span class="progress-label">Progress</span>
-                            <span class="progress-percent">75%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 75%"></div>
-                        </div>
-                    </div>
-                    <div class="next-lesson">
-                        <div class="next-lesson-label">Next Lesson</div>
-                        <div class="next-lesson-title">Module 4: Driver Safety & Well-being</div>
-                    </div>
-                    <a href="course-player.html?course=cpc&module=4" class="btn">Continue Learning</a>
-                </div>
-
-                <!-- Safety & Compliance -->
-                <div class="course-card">
-                    <div class="course-header">
-                        <div>
-                            <div class="course-title">Safety & Compliance</div>
-                        </div>
-                        <span class="course-status">In Progress</span>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span class="progress-label">Progress</span>
-                            <span class="progress-percent">30%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 30%"></div>
-                        </div>
-                    </div>
-                    <div class="next-lesson">
-                        <div class="next-lesson-label">Next Lesson</div>
-                        <div class="next-lesson-title">Module 2: Load Security Standards</div>
-                    </div>
-                    <a href="course-player.html?course=safety&module=2" class="btn">Continue Learning</a>
-                </div>
-
-                <!-- Load Securing -->
-                <div class="course-card">
-                    <div class="course-header">
-                        <div>
-                            <div class="course-title">Load Securing</div>
-                        </div>
-                        <span class="course-status" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">Not Started</span>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span class="progress-label">Progress</span>
-                            <span class="progress-percent">0%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="next-lesson">
-                        <div class="next-lesson-label">Start With</div>
-                        <div class="next-lesson-title">Module 1: Weight Distribution Basics</div>
-                    </div>
-                    <a href="course-player.html?course=load&module=1" class="btn">Start Course</a>
-                </div>
-            </div>
-
-            <!-- Course Catalog -->
-            <h2 class="section-title">Recommended Courses</h2>
-            <div class="catalog-grid">
-                <div class="catalog-card">
-                    <span class="badge">New</span>
-                    <h3>Advanced Route Planning</h3>
-                    <div class="price">£79</div>
-                    <div class="duration">
-                        <i class="far fa-clock"></i>
-                        <span>1 week</span>
-                    </div>
-                    <a href="academy.html" class="btn">View Course</a>
-                </div>
-
-                <div class="catalog-card">
-                    <span class="badge">Popular</span>
-                    <h3>Fuel Efficiency Mastery</h3>
-                    <div class="price">£69</div>
-                    <div class="duration">
-                        <i class="far fa-clock"></i>
-                        <span>1 week</span>
-                    </div>
-                    <a href="academy.html" class="btn">View Course</a>
-                </div>
-            </div>
-
-            <!-- Certificates -->
-            <div class="certificates-section">
-                <h2 class="section-title">My Certificates</h2>
-                <div class="certificates-grid">
-                    <div class="certificate-card">
-                        <div class="icon">
-                            <i class="fas fa-certificate"></i>
-                        </div>
-                        <h3>CPC Training</h3>
-                        <p>Completed on March 15, 2024</p>
-                        <a href="#" class="btn btn-outline" onclick="downloadCertificate('cpc'); return false;">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                    </div>
-
-                    <div class="certificate-card">
-                        <div class="icon">
-                            <i class="fas fa-certificate"></i>
-                        </div>
-                        <h3>Safety & Compliance</h3>
-                        <p>In Progress</p>
-                        <button class="btn btn-outline" disabled style="opacity: 0.5;">
-                            <i class="fas fa-lock"></i> Complete Course
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Account Settings -->
-            <div class="account-section">
-                <a href="../carrier/profile.html" class="account-link">
-                    <i class="fas fa-cog"></i>
-                    Account Settings
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="academy.html" class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Alpha Academy</span>
+        </a>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="academy-dashboard.html" class="nav-link">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
                 </a>
+            </li>
+            <li class="nav-item">
+                <a href="my-courses.html" class="nav-link active">
+                    <i class="fas fa-book-open"></i>
+                    <span>My Courses</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="academy.html" class="nav-link">
+                    <i class="fas fa-search"></i>
+                    <span>Browse Courses</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="certificate.html" class="nav-link">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certificates</span>
+                </a>
+            </li>
+        </ul>
+        <a href="#" class="nav-link logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>My Learning Journey</h1>
+                <p>Track your progress and continue your certifications.</p>
+            </div>
+            <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
+                <div class="user-profile" style="background: white; padding: 8px 16px; border-radius: 100px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
+                    <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" style="width: 30px; height: 30px; border-radius: 50%;">
+                    <span style="font-weight: 700; font-size: 0.9rem;">Student</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters -->
+        <div class="course-filters">
+            <button class="filter-btn active">All Courses</button>
+            <button class="filter-btn">In Progress</button>
+            <button class="filter-btn">Completed</button>
+            <button class="filter-btn">Wishlist</button>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="courses-grid" id="coursesGrid">
+            <div class="loading-state" style="padding: 3rem; text-align: center; color: var(--text-muted); width: 100%; grid-column: 1 / -1;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                <p>Loading your courses...</p>
             </div>
         </div>
-    </section>
+    </main>
 
-    <script>
-        // Firebase integration placeholder
-        // function loadUserCourses() {
-        //     const auth = getCarrierAuth();
-        //     const db = firebase.database();
-        //     // Load courses from Firebase
-        // }
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        function downloadCertificate(courseType) {
-            // Generate and download certificate
-            alert(`Downloading ${courseType} certificate...`);
-            // Implement certificate generation logic
+        AOS.init({ duration: 800, once: true });
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                if (user.photoURL) {
+                    document.querySelector('.user-profile img').src = user.photoURL;
+                }
+                document.querySelector('.user-profile span').textContent = user.displayName || 'Student';
+
+                // Fetch real courses
+                renderEnrolledCourses(user.uid);
+            } else {
+                window.location.href = 'signin.html';
+            }
+        });
+
+        async function renderEnrolledCourses(uid) {
+            const grid = document.getElementById('coursesGrid');
+            try {
+                const q = query(collection(db, "enrolled_courses"), where("uid", "==", uid));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="padding: 5rem 2rem; text-align: center; color: var(--text-muted); width: 100%; grid-column: 1 / -1; background: white; border-radius: 24px; border: 1px solid #f1f5f9;">
+                            <i class="fas fa-book-open" style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem; display: block; opacity: 0.2;"></i>
+                            <h2 style="color: var(--secondary); margin-bottom: 0.5rem;">No Courses Found</h2>
+                            <p>You haven't enrolled in any courses yet. Start your journey today!</p>
+                            <a href="academy.html" class="course-btn" style="display: inline-flex; width: auto; margin-top: 2rem; padding: 12px 30px;">Browse All Courses</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                querySnapshot.forEach((doc) => {
+                    const course = doc.data();
+                    html += `
+                        <div class="course-card" data-aos="fade-up">
+                            <div class="course-thumb" style="background: ${course.gradient || 'linear-gradient(135deg, #6366f1, #8b5cf6)'}">
+                                <span class="course-badge">${course.status || 'Active'}</span>
+                                <i class="${course.icon || 'fas fa-book'}"></i>
+                            </div>
+                            <div class="course-content">
+                                <h3>${course.title}</h3>
+                                <div class="course-meta">
+                                    <span><i class="far fa-clock"></i> ${course.timeLeft || '--'} Left</span>
+                                    <span><i class="far fa-play-circle"></i> ${course.lessonsCompleted || 0}/${course.totalLessons || 0} Lessons</span>
+                                </div>
+                                <div class="progress-section">
+                                    <div class="progress-info">
+                                        <span>Overall Progress</span>
+                                        <span>${course.progress || 0}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${course.progress || 0}%;"></div>
+                                    </div>
+                                    <a href="${course.playerUrl || 'course-player.html'}" class="course-btn ${course.progress === 100 ? 'completed' : ''}">
+                                        ${course.progress === 100 ? 'Review Course' : 'Resume Learning'} <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                grid.innerHTML = html;
+
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+                grid.innerHTML = `<p style="text-align:center; width:100%; grid-column: 1/-1;">Error loading courses. Please try again later.</p>`;
+            }
         }
 
-        // Load courses on page load
-        // loadUserCourses();
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Logout functionality
+        document.querySelector('.logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth).then(() => {
+                window.location.href = 'academy.html';
+            });
+        });
     </script>
 </body>
 </html>

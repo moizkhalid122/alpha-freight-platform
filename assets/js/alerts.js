@@ -12,13 +12,10 @@ class AlertSystem {
     }
 
     init() {
-        // Create alert container
         this.container = document.createElement('div');
         this.container.id = 'alertContainer';
         this.container.className = 'alert-container';
         document.body.appendChild(this.container);
-
-        // Add styles
         this.addStyles();
     }
 
@@ -27,33 +24,39 @@ class AlertSystem {
         style.textContent = `
             .alert-container {
                 position: fixed;
-                top: 20px;
-                right: 20px;
+                top: 12px;
+                left: 12px;
+                right: 12px;
                 z-index: 10000;
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 10px;
                 pointer-events: none;
-                max-width: 420px;
+                max-width: 100%;
+                width: calc(100% - 24px);
+                margin: 0 auto;
+                box-sizing: border-box;
             }
 
             .alert {
                 background: white;
-                border-radius: 16px;
-                padding: 18px 20px;
+                border-radius: 14px;
+                padding: 14px 16px;
                 box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
                 display: flex;
                 align-items: flex-start;
-                gap: 14px;
-                min-width: 320px;
-                max-width: 420px;
-                transform: translateX(450px);
+                gap: 12px;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                transform: translateY(-20px);
                 opacity: 0;
-                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
                 pointer-events: auto;
                 border-left: 4px solid;
                 position: relative;
                 overflow: hidden;
+                box-sizing: border-box;
             }
 
             .alert::before {
@@ -73,7 +76,7 @@ class AlertSystem {
             }
 
             .alert.show {
-                transform: translateX(0);
+                transform: translateY(0);
                 opacity: 1;
             }
 
@@ -140,18 +143,19 @@ class AlertSystem {
             }
 
             .alert-title {
-                font-size: 15px;
+                font-size: clamp(14px, 3.5vw, 15px);
                 font-weight: 600;
                 color: #1f2937;
-                margin-bottom: 4px;
+                margin-bottom: 2px;
                 line-height: 1.4;
             }
 
             .alert-message {
-                font-size: 14px;
+                font-size: clamp(13px, 3vw, 14px);
                 font-weight: 400;
                 color: #6b7280;
-                line-height: 1.5;
+                line-height: 1.45;
+                word-break: break-word;
             }
 
             .alert-close {
@@ -199,19 +203,12 @@ class AlertSystem {
                 to { width: 0%; }
             }
 
-            /* Mobile responsive */
-            @media (max-width: 768px) {
+            @media (min-width: 480px) {
                 .alert-container {
-                    top: 10px;
-                    right: 10px;
-                    left: 10px;
-                    max-width: 100%;
-                }
-
-                .alert {
-                    min-width: auto;
-                    max-width: 100%;
-                    padding: 16px 18px;
+                    left: auto;
+                    right: 16px;
+                    width: auto;
+                    max-width: 400px;
                 }
             }
 
@@ -243,50 +240,51 @@ class AlertSystem {
     }
 
     show(message, type = 'info', options = {}) {
-        const {
-            title = this.getDefaultTitle(type),
-            duration = type === 'error' ? 5000 : 4000,
-            showProgress = true,
-            onClose = null
-        } = options;
-
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type}`;
-        
-        const icon = this.getIcon(type);
-        const progressBar = showProgress ? `<div class="alert-progress"><div class="alert-progress-bar" style="animation-duration: ${duration}ms;"></div></div>` : '';
-        
-        alert.innerHTML = `
-            <div class="alert-icon">${icon}</div>
-            <div class="alert-content">
-                <div class="alert-title">${title}</div>
-                <div class="alert-message">${message}</div>
-            </div>
-            <button class="alert-close" onclick="this.closest('.alert').remove()">
-                <i class="fas fa-times"></i>
-            </button>
-            ${progressBar}
-        `;
-
-        this.container.appendChild(alert);
-
-        // Trigger animation
-        setTimeout(() => {
-            alert.classList.add('show');
-        }, 10);
-
-        // Auto remove
+        const types = ['error', 'success', 'warning', 'info'];
+        if (types.includes(message) && typeof type === 'string' && type.length > 0 && !types.includes(type)) {
+            [message, type] = [type, message];
+        }
+        const title = options.title != null ? options.title : this.getDefaultTitle(type);
+        const duration = options.duration != null ? options.duration : (type === 'error' ? 5000 : 4000);
+        const container = this.container;
+        if (!container) return null;
+        container.style.display = 'flex';
+        const alertEl = document.createElement('div');
+        alertEl.className = 'alert alert-' + type;
+        alertEl.innerHTML =
+            '<div class="alert-icon">' + this.getIcon(type) + '</div>' +
+            '<div class="alert-content">' +
+            '<div class="alert-title">' + (title ? this.escapeHtml(title) : '') + '</div>' +
+            '<div class="alert-message">' + (message ? this.escapeHtml(message) : '') + '</div>' +
+            '</div>' +
+            '<button type="button" class="alert-close" aria-label="Close"><i class="fas fa-times"></i></button>';
         if (duration > 0) {
-            setTimeout(() => {
-                this.remove(alert);
-                if (onClose) onClose();
+            const progress = document.createElement('div');
+            progress.className = 'alert-progress';
+            progress.innerHTML = '<div class="alert-progress-bar" style="animation-duration: ' + duration + 'ms"></div>';
+            alertEl.appendChild(progress);
+        }
+        const self = this;
+        alertEl.querySelector('.alert-close').addEventListener('click', function () {
+            self.remove(alertEl);
+        });
+        container.appendChild(alertEl);
+        this.alerts.push(alertEl);
+        requestAnimationFrame(function () {
+            alertEl.classList.add('show');
+        });
+        if (duration > 0) {
+            setTimeout(function () {
+                self.remove(alertEl);
             }, duration);
         }
+        return alertEl;
+    }
 
-        // Store reference
-        this.alerts.push(alert);
-
-        return alert;
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     success(message, options = {}) {
@@ -355,34 +353,36 @@ class AlertSystem {
     }
 }
 
-// Initialize global instance
-window.AlertSystem = new AlertSystem();
+// Single shared instance (so new AlertSystem() in pages uses the same one)
+const _alertInstance = new AlertSystem();
+window.AlertSystem = function AlertSystem() { return _alertInstance; };
+window.AlertSystem.prototype = AlertSystem.prototype;
 
 // Helper functions for easy access
 window.showAlert = (message, type = 'info', options = {}) => {
-    window.AlertSystem.show(message, type, options);
+    _alertInstance.show(message, type, options);
 };
 
 window.showSuccess = (message, options = {}) => {
-    window.AlertSystem.success(message, options);
+    _alertInstance.success(message, options);
 };
 
 window.showError = (message, options = {}) => {
-    window.AlertSystem.error(message, options);
+    _alertInstance.error(message, options);
 };
 
 window.showWarning = (message, options = {}) => {
-    window.AlertSystem.warning(message, options);
+    _alertInstance.warning(message, options);
 };
 
 window.showInfo = (message, options = {}) => {
-    window.AlertSystem.info(message, options);
+    _alertInstance.info(message, options);
 };
 
 // Also update AlphaBrokrage namespace for backward compatibility
 if (window.AlphaBrokrage) {
     window.AlphaBrokrage.showAlert = (message, type = 'info') => {
-        window.AlertSystem.show(message, type);
+        _alertInstance.show(message, type);
     };
 }
 

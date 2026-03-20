@@ -23,6 +23,15 @@
 
     window.AlphaBrokrage = window.AlphaBrokrage || {};
     window.AlphaBrokrage.firebaseApp = firebase.app();
-    window.AlphaBrokrage.firebaseDb = firebase.database();
+    
+    // Safely initialize database only if SDK is loaded
+    if (typeof firebase.database === 'function') {
+        window.AlphaBrokrage.firebaseDb = firebase.database();
+    }
+    
+    // Safely initialize firestore only if SDK is loaded
+    if (typeof firebase.firestore === 'function') {
+        window.AlphaBrokrage.firebaseFirestore = firebase.firestore();
+    }
 })(window);
 

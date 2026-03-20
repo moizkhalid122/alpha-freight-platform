@@ -175,6 +175,19 @@
             ,'loads.map.error': 'Map unavailable for this load'
             ,'loads.map.geocode_error': 'Could not locate one of the addresses'
             ,'loads.map.route_error': 'Could not calculate route. Showing markers only.'
+            ,'auth.signin.title': 'Sign In'
+            ,'auth.signup.title': 'Create Account'
+            ,'auth.email.label': 'Email Address'
+            ,'auth.password.label': 'Password'
+            ,'auth.name.label': 'Full Name'
+            ,'auth.confirm_password.label': 'Confirm Password'
+            ,'auth.forgot_password': 'Forgot Password?'
+            ,'auth.signin.button': 'Sign In'
+            ,'auth.signup.button': 'Sign Up'
+            ,'auth.social.google': 'Continue with Google'
+            ,'auth.social.facebook': 'Continue with Facebook'
+            ,'auth.no_account': "Don't have an account?"
+            ,'auth.have_account': 'Already have an account?'
         },
         es: {
             'header.title': 'Perfil',
@@ -705,8 +718,20 @@
             'language.current': 'Filhal',
             'dialog.logout_confirm': 'Kya aap waqayi logout karna chahte hain?',
             'alerts.settings_coming': 'Settings page bohot jald aa rahi hai!',
-            'alerts.vehicles_coming': 'Vehicle management jald hi available hoga!',
-            'alerts.privacy_coming': 'Privacy settings bohot jald add ki ja rahi hain!'
+            'alerts.vehicles_coming': 'Vehicle management jald hi available hoga!','alerts.privacy_coming': 'Privacy settings bohot jald add ki ja rahi hain!'
+            ,'auth.signin.title': 'لاگ ان کریں'
+            ,'auth.signup.title': 'نیا اکاؤنٹ بنائیں'
+            ,'auth.email.label': 'ای میل ایڈریس'
+            ,'auth.password.label': 'پاس ورڈ'
+            ,'auth.name.label': 'پورا نام'
+            ,'auth.confirm_password.label': 'پاس ورڈ کی تصدیق کریں'
+            ,'auth.forgot_password': 'پاس ورڈ بھول گئے؟'
+            ,'auth.signin.button': 'لاگ ان'
+            ,'auth.signup.button': 'سائن اپ'
+            ,'auth.social.google': 'گوگل کے ساتھ جاری رکھیں'
+            ,'auth.social.facebook': 'فیس بک کے ساتھ جاری رکھیں'
+            ,'auth.no_account': 'اکاؤنٹ نہیں ہے؟'
+            ,'auth.have_account': 'پہلے سے اکاؤنٹ ہے؟'
         },
         hi: {
             'header.title': 'प्रोफ़ाइल',

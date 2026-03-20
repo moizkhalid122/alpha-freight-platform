@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K01QL0Z1H8"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-K01QL0Z1H8');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>Academy Dashboard | Alpha Freight Academy</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #0f172a;
+            --accent: #10b981;
+            --bg-main: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            --card-shadow-hover: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+            --sidebar-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+        }
+
+        /* 3D Animated Background */
+        .bg-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #e2e8f0 100%);
+        }
+
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: var(--primary);
+            filter: blur(80px);
+            opacity: 0.15;
+            border-radius: 50%;
+            animation: move 20s infinite alternate;
+        }
+
+        .blob-1 { top: -10%; left: -10%; background: #6366f1; }
+        .blob-2 { bottom: -10%; right: -10%; background: #10b981; animation-delay: -5s; }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(100px, 50px) scale(1.2) rotate(360deg); }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 3rem;
+        }
+
+        .logo i { color: var(--primary); }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        .nav-link i { font-size: 1.1rem; }
+
+        .logout-btn {
+            margin-top: auto;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+            background: #fef2f2;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2rem 3rem;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .user-welcome h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--secondary);
+        }
+
+        .user-welcome p {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-btn {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid #f1f5f9;
+            cursor: pointer;
+        }
+
+        .user-profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .user-profile span {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.blue { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+        .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* Courses Section */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--secondary);
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .courses-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .course-item {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .course-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .course-thumb {
+            height: 140px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .course-info {
+            padding: 1.5rem;
+        }
+
+        .course-info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 100px;
+        }
+
+        .continue-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-main);
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Bottom Grid */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .activity-card, .cert-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: var(--card-shadow);
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .activity-item:last-child { border-bottom: none; }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .activity-details h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .activity-details p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .cert-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+        }
+
+        .cert-item i { color: var(--accent); font-size: 1.2rem; }
+        .cert-item span { font-weight: 700; font-size: 0.85rem; color: #166534; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .courses-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 992px) {
+            body {
+                display: block;
+            }
+
+            .sidebar { 
+                width: var(--sidebar-width); 
+                left: -100%; 
+                padding: 2rem 1.5rem; 
+                z-index: 2000;
+                position: fixed;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content { 
+                margin-left: 0; 
+                padding: 1rem; 
+                width: 100%;
+            }
+
+            .bottom-grid { 
+                grid-template-columns: 1fr; 
+            }
+            
+            .mobile-header {
+                 display: flex !important;
+                 justify-content: space-between;
+                 align-items: center;
+                 background: white;
+                 padding: 1rem;
+                 position: sticky;
+                 top: 0;
+                 z-index: 1000;
+                 border-bottom: 1px solid var(--glass-border);
+                 width: 100%;
+             }
+             
+             header { 
+                 flex-direction: column;
+                 align-items: flex-start;
+                 gap: 1.5rem;
+                 margin-bottom: 2rem;
+                 display: flex;
+             } 
+             
+             .header-actions {
+                 width: 100%;
+                 justify-content: space-between;
+                 display: flex;
+             }
+             
+             .stats-grid { 
+                 grid-template-columns: 1fr;
+                 margin-top: 1rem; 
+             }
+
+             .courses-row {
+                 grid-template-columns: 1fr;
+             }
+         }
+
+        @media (max-width: 768px) {
+            .user-welcome h1 { font-size: 1.5rem; }
+            .stat-card { padding: 1.25rem; }
+            
+            /* Remove bell icon and student-specific identity elements on mobile */
+            .notification-btn, 
+            .user-profile, 
+            .user-welcome {
+                display: none !important;
+            }
+            
+            /* Adjust header space if elements are removed */
+            header {
+                margin-bottom: 1rem;
+                display: none !important; /* Entire desktop header hidden on mobile */
+            }
+            
+            .stats-grid {
+                margin-top: 0;
+            }
+        }
+
+        .mobile-header {
+            display: none;
+        }
+
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-main);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <a href="academy.html" class="logo" style="margin-bottom: 0;">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Alpha Academy</span>
+        </a>
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="academy.html" class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Alpha Academy</span>
+        </a>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="academy-dashboard.html" class="nav-link active">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="my-courses.html" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>My Courses</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="academy.html" class="nav-link">
+                    <i class="fas fa-search"></i>
+                    <span>Browse Courses</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="certificate.html" class="nav-link">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certificates</span>
+                </a>
+            </li>
+        </ul>
+        <a href="#" class="nav-link logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header>
+            <div class="user-welcome">
+                <h1>Hi, <span id="userName">Student</span>! 👋</h1>
+                <p>Welcome back to your learning portal.</p>
+            </div>
+            <div class="header-actions">
+                <div class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-dot"></div>
+                </div>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="Profile" id="userAvatar">
+                    <span id="userDisplayName">Student</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card" data-aos="fade-up">
+                <div class="stat-icon blue"><i class="fas fa-book"></i></div>
+                <span class="stat-value" id="coursesEnrolled">0</span>
+                <span class="stat-label">Courses Enrolled</span>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                <span class="stat-value" id="coursesCompleted">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-icon purple"><i class="fas fa-award"></i></div>
+                <span class="stat-value" id="certsEarned">0</span>
+                <span class="stat-label">Certificates</span>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                <span class="stat-value" id="learningHours">0h</span>
+                <span class="stat-label">Learning Time</span>
+            </div>
+        </section>
+
+        <!-- Enrolled Courses -->
+        <section class="enrolled-courses">
+            <div class="section-header">
+                <h2>My Active Courses</h2>
+                <a href="my-courses.html" class="view-all">View All</a>
+            </div>
+            <div class="courses-row" id="activeCoursesGrid">
+                <div class="loading-state" style="padding: 2rem; text-align: center; color: var(--text-muted); width: 100%;">
+                    <i class="fas fa-spinner fa-spin"></i> Loading courses...
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Row -->
+        <div class="bottom-grid">
+            <!-- Recent Activity -->
+            <section class="activity-card" data-aos="fade-right">
+                <div class="section-header">
+                    <h2>Recent Activity</h2>
+                </div>
+                <ul class="activity-list" id="activityList">
+                    <div class="loading-state" style="padding: 1rem; color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin"></i> Loading activity...
+                    </div>
+                </ul>
+            </section>
+
+            <!-- My Certificates -->
+            <section class="cert-card" data-aos="fade-left">
+                <div class="section-header">
+                    <h2>Verified Skills</h2>
+                </div>
+                <div id="skillsList">
+                    <div class="loading-state" style="padding: 1rem; color: var(--text-muted);">
+                        No skills earned yet.
+                    </div>
+                </div>
+                <a href="certificate.html" class="btn" style="padding: 10px; font-size: 0.85rem; margin-top: 1rem; display: block; text-align: center; text-decoration: none; background: var(--primary); color: white; border-radius: 8px;">View All Certificates</a>
+            </section>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Initialize AOS
+        AOS.init({ duration: 800, once: true });
+
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                document.getElementById('userName').textContent = user.displayName?.split(' ')[0] || 'Student';
+                document.getElementById('userDisplayName').textContent = user.displayName || 'Student';
+                if (user.photoURL) {
+                    document.getElementById('userAvatar').src = user.photoURL;
+                }
+
+                // Fetch extra data from Firestore
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        
+                        // Update stats
+                        document.getElementById('coursesEnrolled').textContent = data.coursesEnrolled || 0;
+                        document.getElementById('coursesCompleted').textContent = data.coursesCompleted || 0;
+                        document.getElementById('certsEarned').textContent = data.certsEarned || 0;
+                        document.getElementById('learningHours').textContent = (data.learningHours || 0) + 'h';
+
+                        // Render real content
+                        renderEnrolledCourses(user.uid);
+                        renderRecentActivity(user.uid);
+                        renderVerifiedSkills(user.uid);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            } else {
+                window.location.href = 'signin.html'; 
+            }
+        });
+
+        async function renderEnrolledCourses(uid) {
+            const grid = document.getElementById('activeCoursesGrid');
+            // In a real app, you'd fetch from a 'user_courses' collection
+            // For now, we show an empty state if no courses are found
+            grid.innerHTML = `
+                <div class="empty-state" style="padding: 3rem; text-align: center; color: var(--text-muted); width: 100%; grid-column: 1 / -1;">
+                    <i class="fas fa-book-open" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    <p>You haven't enrolled in any courses yet.</p>
+                    <a href="academy.html" class="continue-btn" style="display: inline-flex; margin-top: 1rem; background: var(--primary); color: white;">Browse Courses</a>
+                </div>
+            `;
+        }
+
+        async function renderRecentActivity(uid) {
+            const list = document.getElementById('activityList');
+            list.innerHTML = `
+                <li class="activity-item">
+                    <div class="activity-details">
+                        <p>No recent activity found.</p>
+                    </div>
+                </li>
+            `;
+        }
+
+        async function renderVerifiedSkills(uid) {
+            const list = document.getElementById('skillsList');
+            list.innerHTML = `
+                <div style="padding: 1rem; color: var(--text-muted); text-align: center;">
+                    Complete courses to earn certificates and verify your skills.
+                </div>
+            `;
+        }
+
+        // Logout functionality
+        document.querySelector('.logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth).then(() => {
+                window.location.href = 'academy.html';
+            });
+        });
+    </script>
+</body>
+</html>
