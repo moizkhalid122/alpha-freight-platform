@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
@@ -239,6 +240,62 @@
         .error-message { color: #ef4444; font-size: 0.85rem; font-weight: 800; margin-top: 8px; display: none; }
         .error-message.show { display: block; }
 
+        .stripe-element {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.2s ease;
+        }
+
+        .stripe-element.focused {
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        }
+
+        .card-number-row {
+            position: relative;
+        }
+
+        .card-brand-icons {
+            position: absolute;
+            top: 38px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .card-brand-icon {
+            width: 30px;
+            height: 22px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(148, 163, 184, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            color: rgba(15, 23, 42, 0.55);
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .card-brand-icon i { font-size: 1.05rem; }
+
+        .card-brand-icon.active {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.35);
+            color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.18);
+        }
+
+        .card-brand-icon.visa.active { color: #1a1f71; background: rgba(26, 31, 113, 0.10); border-color: rgba(26, 31, 113, 0.22); }
+        .card-brand-icon.mastercard.active { color: #eb001b; background: rgba(235, 0, 27, 0.08); border-color: rgba(235, 0, 27, 0.18); }
+        .card-brand-icon.amex.active { color: #2e77bc; background: rgba(46, 119, 188, 0.10); border-color: rgba(46, 119, 188, 0.22); }
+        .card-brand-icon.discover.active { color: #ff6000; background: rgba(255, 96, 0, 0.10); border-color: rgba(255, 96, 0, 0.22); }
+
         .pay-actions { display: grid; gap: 10px; margin-top: 14px; }
         .btn-wide { width: 100%; padding: 12px 16px; border-radius: 16px; }
 
@@ -352,20 +409,26 @@
                                     <div class="error-message" id="name-error"></div>
                                 </div>
 
-                                <div>
-                                    <label for="cardNumber">Card Number</label>
-                                    <input class="input" inputmode="numeric" autocomplete="cc-number" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" required maxlength="19">
+                                <div class="card-number-row">
+                                    <label>Card Number</label>
+                                    <div id="card-number-element" class="stripe-element"></div>
+                                    <div class="card-brand-icons" id="cardBrandIcons" aria-hidden="true">
+                                        <div class="card-brand-icon visa" id="visaIcon"><i class="fab fa-cc-visa"></i></div>
+                                        <div class="card-brand-icon mastercard" id="mastercardIcon"><i class="fab fa-cc-mastercard"></i></div>
+                                        <div class="card-brand-icon amex" id="amexIcon"><i class="fab fa-cc-amex"></i></div>
+                                        <div class="card-brand-icon discover" id="discoverIcon"><i class="fab fa-cc-discover"></i></div>
+                                    </div>
                                     <div class="error-message" id="card-error"></div>
                                 </div>
 
                                 <div class="form-row">
                                     <div>
-                                        <label for="expiry">Expiry</label>
-                                        <input class="input" inputmode="numeric" autocomplete="cc-exp" id="expiry" name="expiry" placeholder="MM/YY" required maxlength="5">
+                                        <label>Expiry</label>
+                                        <div id="card-expiry-element" class="stripe-element"></div>
                                     </div>
                                     <div>
-                                        <label for="cvc">CVC</label>
-                                        <input class="input" inputmode="numeric" autocomplete="cc-csc" id="cvc" name="cvc" placeholder="123" required maxlength="4">
+                                        <label>CVC</label>
+                                        <div id="card-cvc-element" class="stripe-element"></div>
                                     </div>
                                 </div>
 
@@ -388,7 +451,7 @@
                                         <option value="US">United States</option>
                                         <option value="CA">Canada</option>
                                     </select>
-                                    <div class="help">This is a simulated checkout UI for the demo environment.</div>
+                                    <div class="help">Payments are processed securely via Stripe.</div>
                                 </div>
 
                                 <div class="pay-actions">
@@ -449,6 +512,21 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Snef8JwsGcenL627huErNXtqNGF92AGxEgXTWOa5WSDNmCS0r7VfdLv9XihRl7xZ0cJVEzRxRQaQUsaHkd3La9g00LKykDcYb';
+        const CLOUD_BACKEND_URL = 'https://alpha-freight-server.onrender.com';
+        const STRIPE_BACKEND_ENDPOINT = CLOUD_BACKEND_URL 
+            ? `${CLOUD_BACKEND_URL}/api/create-payment-intent`
+            : `${window.location.protocol}//${window.location.hostname}:3000/api/create-payment-intent`;
+        const STRIPE_CARD_PAYMENTS_ENABLED = Boolean(STRIPE_PUBLISHABLE_KEY)
+            && !STRIPE_PUBLISHABLE_KEY.startsWith('YOUR_');
+
+        let stripe = null;
+        let elements = null;
+        let cardNumberElement = null;
+        let cardExpiryElement = null;
+        let cardCvcElement = null;
+        let stripeReady = false;
+
         const urlParams = new URLSearchParams(window.location.search);
         const rawCourseType = (urlParams.get('course') || 'cpc').toLowerCase();
         const isBundle = urlParams.get('bundle') === 'true' || rawCourseType === 'bundle';
@@ -484,23 +562,6 @@
             }
         }
 
-        function digitsOnly(value) {
-            return (value || '').replace(/\D/g, '');
-        }
-
-        function formatCardNumber(value) {
-            const digits = digitsOnly(value).slice(0, 16);
-            return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-        }
-
-        function formatExpiry(value) {
-            const digits = digitsOnly(value).slice(0, 4);
-            const mm = digits.slice(0, 2);
-            const yy = digits.slice(2, 4);
-            if (!yy) return mm;
-            return `${mm}/${yy}`;
-        }
-
         function setFieldError(id, message) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -517,33 +578,76 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        function validateExpiry(expiry) {
-            const match = String(expiry).match(/^(\d{2})\/(\d{2})$/);
-            if (!match) return false;
-            const mm = parseInt(match[1], 10);
-            const yy = parseInt(match[2], 10);
-            if (mm < 1 || mm > 12) return false;
-            if (yy < 0 || yy > 99) return false;
-            return true;
+        function updateCardBrandIcon(brand) {
+            const visaIcon = document.getElementById('visaIcon');
+            const mastercardIcon = document.getElementById('mastercardIcon');
+            const amexIcon = document.getElementById('amexIcon');
+            const discoverIcon = document.getElementById('discoverIcon');
+
+            if (visaIcon) visaIcon.classList.remove('active');
+            if (mastercardIcon) mastercardIcon.classList.remove('active');
+            if (amexIcon) amexIcon.classList.remove('active');
+            if (discoverIcon) discoverIcon.classList.remove('active');
+
+            if (brand === 'visa' && visaIcon) visaIcon.classList.add('active');
+            else if (brand === 'mastercard' && mastercardIcon) mastercardIcon.classList.add('active');
+            else if (brand === 'amex' && amexIcon) amexIcon.classList.add('active');
+            else if (brand === 'discover' && discoverIcon) discoverIcon.classList.add('active');
         }
 
-        const cardNumberInput = document.getElementById('cardNumber');
-        const expiryInput = document.getElementById('expiry');
-        const cvcInput = document.getElementById('cvc');
+        function mountStripeElements() {
+            if (stripeReady) return;
+            if (!STRIPE_CARD_PAYMENTS_ENABLED || typeof Stripe === 'undefined') return;
 
-        cardNumberInput.addEventListener('input', () => {
-            const formatted = formatCardNumber(cardNumberInput.value);
-            if (cardNumberInput.value !== formatted) cardNumberInput.value = formatted;
-        });
+            stripe = Stripe(STRIPE_PUBLISHABLE_KEY, { apiVersion: '2023-10-16' });
+            elements = stripe.elements();
 
-        expiryInput.addEventListener('input', () => {
-            const formatted = formatExpiry(expiryInput.value);
-            if (expiryInput.value !== formatted) expiryInput.value = formatted;
-        });
+            const style = {
+                base: {
+                    fontSize: '15px',
+                    color: '#0f172a',
+                    fontFamily: 'Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    '::placeholder': { color: '#94a3b8' }
+                },
+                invalid: { color: '#ef4444', iconColor: '#ef4444' }
+            };
 
-        cvcInput.addEventListener('input', () => {
-            cvcInput.value = digitsOnly(cvcInput.value).slice(0, 4);
-        });
+            cardNumberElement = elements.create('cardNumber', { style });
+            cardExpiryElement = elements.create('cardExpiry', { style });
+            cardCvcElement = elements.create('cardCvc', { style });
+
+            cardNumberElement.mount('#card-number-element');
+            cardExpiryElement.mount('#card-expiry-element');
+            cardCvcElement.mount('#card-cvc-element');
+
+            const bindFocusStyles = (el, selector) => {
+                const container = document.querySelector(selector);
+                if (!container) return;
+                el.on('focus', () => container.classList.add('focused'));
+                el.on('blur', () => container.classList.remove('focused'));
+            };
+
+            bindFocusStyles(cardNumberElement, '#card-number-element');
+            bindFocusStyles(cardExpiryElement, '#card-expiry-element');
+            bindFocusStyles(cardCvcElement, '#card-cvc-element');
+
+            const showStripeError = (event) => {
+                if (event && event.error) {
+                    setFieldError('card-error', event.error.message || 'Card details are invalid.');
+                } else {
+                    setFieldError('card-error', '');
+                }
+            };
+
+            cardNumberElement.on('change', (event) => {
+                showStripeError(event);
+                updateCardBrandIcon(event?.brand || '');
+            });
+            cardExpiryElement.on('change', showStripeError);
+            cardCvcElement.on('change', showStripeError);
+
+            stripeReady = true;
+        }
 
         const form = document.getElementById('payment-form');
         form.addEventListener('submit', async function(event) {
@@ -560,9 +664,6 @@
             const city = document.getElementById('city').value;
             const postcode = document.getElementById('postcode').value;
             const country = document.getElementById('country').value;
-            const cardNumber = digitsOnly(document.getElementById('cardNumber').value);
-            const expiry = document.getElementById('expiry').value;
-            const cvc = digitsOnly(document.getElementById('cvc').value);
 
             setFieldError('email-error', '');
             setFieldError('name-error', '');
@@ -579,13 +680,8 @@
                 hasError = true;
             }
 
-            if (cardNumber.length !== 16) {
-                setFieldError('card-error', 'Please enter a valid card number.');
-                hasError = true;
-            }
-
-            if (!validateExpiry(expiry) || cvc.length < 3) {
-                setFieldError('card-error', 'Please enter a valid expiry and CVC.');
+            if (!STRIPE_CARD_PAYMENTS_ENABLED || !stripeReady || !stripe || !cardNumberElement) {
+                setFieldError('card-error', 'Card payments are not available right now.');
                 hasError = true;
             }
 
@@ -603,6 +699,61 @@
                 const existing = await enrollmentRef.get();
                 const isNewEnrollment = !existing.exists;
 
+                if (!isNewEnrollment && (existing.data()?.status || '').toLowerCase() === 'active') {
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Already Activated',
+                        text: 'This course is already active on your account.',
+                        confirmButtonColor: '#6366f1'
+                    });
+                    window.location.href = 'academy-dashboard.html';
+                    return;
+                }
+
+                const intentResponse = await fetch(STRIPE_BACKEND_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: Math.round(coursePrice * 100),
+                        currency: 'gbp',
+                        loadId: `academy_${courseType}`,
+                        paymentFor: courseData.name,
+                        paymentType: isBundle ? 'academy_bundle' : 'academy_course'
+                    })
+                });
+
+                const intentData = await intentResponse.json();
+                if (!intentResponse.ok) {
+                    const msg = intentData?.error?.message || intentData?.error || 'Payment failed.';
+                    throw new Error(msg);
+                }
+
+                const { error, paymentIntent } = await stripe.confirmCardPayment(
+                    intentData.clientSecret,
+                    {
+                        payment_method: {
+                            card: cardNumberElement,
+                            billing_details: {
+                                name: fullName,
+                                email: email,
+                                address: {
+                                    city: city,
+                                    postal_code: postcode,
+                                    country: country
+                                }
+                            }
+                        }
+                    }
+                );
+
+                if (error) {
+                    throw new Error(error.message || 'Payment failed.');
+                }
+
+                if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+                    throw new Error('Payment not completed. Please try again.');
+                }
+
                 await enrollmentRef.set({
                     uid: user.uid,
                     courseId: courseType,
@@ -611,6 +762,9 @@
                     status: 'Active',
                     enrolledAt: existing.exists ? existing.data().enrolledAt : firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paidAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paymentProvider: 'stripe',
+                    paymentIntentId: paymentIntent.id,
                     totalLessons: 20,
                     lessonsCompleted: 0,
                     timeLeft: '12h',
@@ -647,9 +801,9 @@
                     });
                 } else {
                     await Swal.fire({
-                        icon: 'info',
-                        title: 'Already Activated',
-                        text: 'This course is already active on your account.',
+                        icon: 'success',
+                        title: 'Payment Successful',
+                        text: 'Your course has been activated in your dashboard.',
                         confirmButtonColor: '#6366f1'
                     });
                 }
@@ -657,6 +811,7 @@
 
             } catch (error) {
                 console.error("Enrollment Error:", error);
+                setFieldError('card-error', error.message || 'Payment failed.');
                 await Swal.fire({
                     icon: 'error',
                     title: 'Checkout Error',
@@ -673,12 +828,14 @@
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('fullName').value = user.displayName || '';
                 document.getElementById('email').readOnly = true;
+                mountStripeElements();
                 return;
             }
             window.location.href = "signup.html?redirect=" + encodeURIComponent(window.location.href);
         });
 
         updateOrderSummary();
+        mountStripeElements();
 
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
