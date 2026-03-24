@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -37,18 +37,95 @@
     <meta property="twitter:url" content="https://www.alphafreightuk.com/pages/how-it-works.html">
     <meta property="twitter:title" content="How It Works - Alpha Freight | Freight Brokerage Process">
     <meta property="twitter:description" content="Learn how Alpha Freight works. Step-by-step guide to our freight brokerage platform - from posting loads to delivery.">
+
+    <meta name="theme-color" content="#4F46E5">
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "How It Works - Alpha Freight",
+            "url": "https://www.alphafreightuk.com/pages/how-it-works.html",
+            "description": "Step-by-step guide to using the Alpha Freight brokerage platform for suppliers and verified carriers.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "Alpha Freight Solutions Limited"
+            }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "How long does account verification take?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Supplier accounts are typically verified within 24-48 hours. Carrier accounts may take 1-2 business days as we verify vehicle registration, insurance, and licenses."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What payment methods are accepted?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Stripe accepts all major credit and debit cards (Visa, MasterCard, American Express), bank transfers, Apple Pay, Google Pay, and direct debit for recurring payments."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How secure are my payment details?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Stripe is PCI DSS Level 1 certified. Card details are encrypted and never stored on Alpha Freight servers. Payments are processed through Stripe's secure infrastructure."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "When do carriers receive payment?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Payments are transferred to the carrier within 24-48 hours after delivery confirmation."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What happens if there's a dispute?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Alpha Freight support provides mediation. Payments remain securely held by Stripe until the issue is resolved."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Are there any fees?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "A transparent brokerage fee (typically 5-10% of the load value) is shown before accepting a bid. Stripe processing fees follow standard industry rates."
+                    }
+                }
+            ]
+        }
+    </script>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #7c3aed;
-            --success-color: #22c55e;
+            --primary-color: #4F46E5;
+            --secondary-color: #7C3AED;
+            --success-color: #198754;
             --warning-color: #f97316;
-            --info-color: #0ea5e9;
-            --accent-color: #f59e0b;
+            --info-color: #0dcaf0;
+            --accent-color: #ffc107;
             --surface-color: #f8fafc;
             --surface-highlight: #eef2ff;
             --surface-muted: #e0e7ff;
@@ -60,9 +137,29 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
             background: linear-gradient(135deg, #f1f5f9 0%, #c7d2fe 100%);
-            padding-top: 80px;
+            padding-top: 0;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateY(-120%);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            z-index: 4000;
+            text-decoration: none;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.3);
+        }
+
+        .skip-link:focus {
+            transform: translateY(12px);
+            outline: 3px solid rgba(255, 193, 7, 0.8);
+            outline-offset: 2px;
         }
 
         section.bg-light {
@@ -145,12 +242,9 @@
             margin-bottom: 30px;
             box-shadow: var(--shadow-soft);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(79, 70, 229, 0.14);
             backdrop-filter: blur(4px);
             height: 100%;
-            opacity: 0;
-            transform: translateY(18px);
-            animation: fadeUp 0.8s ease forwards;
         }
 
         .step-card:hover {
@@ -200,6 +294,36 @@
             animation: pulseGlow 2.6s ease-in-out infinite;
         }
 
+        /* Overview icons inside cards */
+        .overview-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 12px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .step-card.icon-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card.icon-card .icon-watermark {
+            position: absolute;
+            right: -8px;
+            bottom: -8px;
+            font-size: 84px;
+            color: rgba(79, 70, 229, 0.08);
+            pointer-events: none;
+            line-height: 1;
+        }
+
         .payment-card {
             background: linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%);
             color: white;
@@ -209,9 +333,6 @@
             box-shadow: var(--shadow-soft);
             position: relative;
             overflow: hidden;
-            opacity: 0;
-            transform: translateY(18px);
-            animation: fadeUp 0.8s ease forwards;
         }
 
         .payment-card::before {
@@ -254,12 +375,9 @@
             color: #1f2937;
             padding: 24px 18px;
             border-radius: 16px;
-            border: 1px solid rgba(37, 99, 235, 0.15);
+            border: 1px solid rgba(79, 70, 229, 0.16);
             box-shadow: var(--shadow-soft);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            transform: translateY(18px);
-            animation: fadeUp 0.8s ease forwards;
         }
 
         .process-box:hover {
@@ -300,9 +418,6 @@
             border-radius: 8px;
             margin: 20px 0;
             box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
-            opacity: 0;
-            transform: translateY(18px);
-            animation: fadeUp 0.8s ease forwards;
         }
 
         .info-box.accent {
@@ -335,73 +450,159 @@
             border-radius: 12px !important;
             overflow: hidden;
             box-shadow: var(--shadow-soft);
-            opacity: 0;
-            transform: translateY(18px);
-            animation: fadeUp 0.8s ease forwards;
         }
 
-        .row.g-4 > div:nth-child(1) .step-card {
-            animation-delay: 0.1s;
+        .how-toc {
+            position: sticky;
+            top: 80px;
+            z-index: 1020;
+            background: rgba(248, 250, 252, 0.86);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
         }
 
-        .row.g-4 > div:nth-child(2) .step-card {
-            animation-delay: 0.2s;
+        .how-toc-inner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+            text-align: center;
         }
 
-        .row.g-4 > div:nth-child(3) .step-card {
-            animation-delay: 0.3s;
+        .how-toc-label {
+            font-weight: 700;
+            color: rgba(15, 23, 42, 0.8);
+            white-space: nowrap;
         }
 
-        .row.g-4 > div:nth-child(4) .step-card {
-            animation-delay: 0.4s;
+        .how-toc-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            justify-content: center;
+            width: 100%;
         }
 
-        .process-flow .process-step:nth-child(1) .process-box {
-            animation-delay: 0.1s;
+        .how-toc-links::-webkit-scrollbar {
+            display: none;
         }
 
-        .process-flow .process-step:nth-child(2) .process-box {
-            animation-delay: 0.25s;
+        @media (max-width: 992px) {
+            .how-toc-inner {
+                flex-direction: column;
+                align-items: center;
+            }
+            .how-toc-label {
+                width: 100%;
+            }
+            .how-toc-links {
+                justify-content: center;
+            }
         }
 
-        .process-flow .process-step:nth-child(3) .process-box {
-            animation-delay: 0.4s;
+        .how-toc-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            text-decoration: none;
+            color: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            background: rgba(255, 255, 255, 0.7);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
-        .payment-card.gradient-secondary {
-            animation-delay: 0.2s;
+        .how-toc-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+            border-color: rgba(79, 70, 229, 0.35);
+            color: rgba(15, 23, 42, 0.92);
         }
 
-        .payment-card.gradient-accent {
-            animation-delay: 0.35s;
+        .how-toc-link[aria-current="true"] {
+            background: rgba(79, 70, 229, 0.12);
+            border-color: rgba(79, 70, 229, 0.4);
+            color: rgba(15, 23, 42, 0.95);
         }
 
-        .info-box {
-            animation-delay: 0.15s;
+        .hero-illustration {
+            margin: 34px auto 0;
+            max-width: 860px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 18px;
+            padding: 18px 18px 12px;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
         }
 
-        .faq .accordion-item:nth-child(1) {
-            animation-delay: 0.05s;
+        .hero-illustration svg {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
-        .faq .accordion-item:nth-child(2) {
-            animation-delay: 0.12s;
+        .flow-path {
+            stroke-dasharray: 12 10;
+            animation: dash 14s linear infinite;
         }
 
-        .faq .accordion-item:nth-child(3) {
-            animation-delay: 0.2s;
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -240;
+            }
         }
 
-        .faq .accordion-item:nth-child(4) {
-            animation-delay: 0.28s;
+        .journey-tabs .nav-link {
+            border-radius: 999px;
+            font-weight: 700;
+            padding: 10px 16px;
         }
 
-        .faq .accordion-item:nth-child(5) {
-            animation-delay: 0.36s;
+        .journey-panel {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(238, 242, 255, 0.96));
+            border-radius: 18px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            box-shadow: var(--shadow-soft);
+            padding: 22px;
         }
 
-        .faq .accordion-item:nth-child(6) {
-            animation-delay: 0.44s;
+        .disclosure {
+            margin-top: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            background: rgba(255, 255, 255, 0.75);
+            padding: 12px 14px;
+        }
+
+        .disclosure summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: rgba(15, 23, 42, 0.9);
+            list-style: none;
+        }
+
+        .disclosure summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .disclosure summary::after {
+            content: "Show details";
+            margin-left: 10px;
+            font-weight: 700;
+            color: rgba(79, 70, 229, 0.95);
+        }
+
+        .disclosure[open] summary::after {
+            content: "Hide details";
         }
 
         @keyframes fadeUp {
@@ -427,11 +628,11 @@
         @keyframes pulseGlow {
             0%, 100% {
                 transform: scale(1);
-                filter: drop-shadow(0 0 0 rgba(37, 99, 235, 0));
+                filter: drop-shadow(0 0 0 rgba(79, 70, 229, 0));
             }
             50% {
                 transform: scale(1.05);
-                filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.35));
+                filter: drop-shadow(0 8px 16px rgba(79, 70, 229, 0.35));
             }
         }
 
@@ -449,107 +650,352 @@
 
         .faq .accordion-button:not(.collapsed) {
             color: var(--primary-color);
-            background: rgba(37, 99, 235, 0.08);
-            box-shadow: inset 0 -1px 0 rgba(37, 99, 235, 0.12);
+            background: rgba(79, 70, 229, 0.08);
+            box-shadow: inset 0 -1px 0 rgba(79, 70, 229, 0.12);
         }
 
         .faq .accordion-body {
             padding: 20px 24px;
             background: white;
         }
+
+        /* Consistent site header (same as index) */
+        .header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+        .header-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+        .header-logo img { height: 50px; width: auto; display: block; object-fit: contain; }
+        .header-nav { display: flex; align-items: center; gap: 1.5rem; list-style: none; margin: 0; padding: 0; }
+        .header-nav-item { position: relative; }
+        .header-nav-link {
+            color: #0a2540;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+            transition: color 0.2s ease;
+        }
+        .header-nav-link:hover, .header-nav-link.active { color: var(--primary-color); }
+        .header-nav-link i { font-size: 0.75rem; transition: transform 0.2s ease; }
+        .header-nav-item.dropdown.active .header-nav-link i { transform: rotate(180deg); }
+        .dropdown-menu {
+            position: absolute; top: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%) translateY(-10px);
+            background: #fff; border: 1px solid #e3e8ef; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            min-width: 220px; padding: 0.5rem; margin-top: 0; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1001; pointer-events: none;
+        }
+        .header-nav-item.dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .dropdown-item {
+            display: flex !important; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #0a2540 !important;
+            text-decoration: none; font-size: 0.875rem; font-weight: 500; border-radius: 8px; transition: all 0.2s ease; white-space: nowrap;
+        }
+        .dropdown-item i { color: #635bff; font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+        .dropdown-item:hover { background: #f8f9fa; color: #635bff !important; }
+        .header-nav-link-quote {
+            background: #635bff; color: #fff !important; padding: 0.5rem 1rem !important; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .header-nav-link-quote:hover { background: #5851ea; color: #fff !important; }
+        .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+        .header-btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; border: none; cursor: pointer; height: 40px; }
+        .header-btn-primary { background: #635bff; color: #fff; }
+        .header-btn-primary:hover { background: #5851ea; transform: translateY(-1px); }
+        .header-btn-secondary { background: transparent; color: #0a2540; }
+        .header-btn-secondary:hover { background: #f1f5f9; color: var(--primary-color); }
+        .mobile-menu-toggle { display: none; background: none; border: none; color: #0a2540; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
+        @media (min-width: 992px) { .header-nav-item:last-child { display: none; } }
+        @media (max-width: 991.98px) {
+            .header-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; flex-direction: column; padding: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); gap: 0.5rem; z-index: 999; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity 0.3s, transform 0.3s; }
+            .header-nav.menu-open { display: flex; opacity: 1; transform: translateY(0); pointer-events: auto; }
+            .dropdown-menu { position: static; transform: translateY(-10px); box-shadow: none; border: none; border-top: 1px solid #e3e8ef; border-radius: 0; margin-top: 0; padding: 0.5rem 0; opacity: 0; visibility: hidden; display: block; max-height: 0; overflow: hidden; transition: all 0.3s; }
+            .header-nav-item.dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); max-height: 500px; }
+            .header-nav-link-quote { width: 100%; text-align: center; }
+            .mobile-menu-toggle { display: block; }
+            .header { position: relative; }
+            .header-actions .header-btn-primary { display: none; }
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <img src="../WhatsApp_Image_2026-03-04_at_12.50.53_PM-removebg-preview.png" alt="Alpha Freight Logo" class="navbar-logo" style="height: 40px;">
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="../index.html" class="header-logo">
+                <img src="../WhatsApp_Image_2026-03-04_at_12.50.53_PM-removebg-preview.png" alt="Alpha Freight Solutions" loading="eager">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#home">Home</a>
+            <nav class="header-nav-wrapper" aria-label="Primary">
+                <ul class="header-nav">
+                    <li class="header-nav-item">
+                        <a href="../index.html" class="header-nav-link">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#services">Services</a>
+                    <li class="header-nav-item dropdown">
+                        <a href="../index.html#services" class="header-nav-link" onclick="toggleDropdown(event, 'services')">
+                            Services <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </a>
+                        <div class="dropdown-menu" id="services-dropdown"></div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="how-it-works.html">How It Works</a>
+                    <li class="header-nav-item dropdown">
+                        <a href="../index.html#suppliers" class="header-nav-link" onclick="toggleDropdown(event, 'suppliers')">
+                            For Suppliers <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </a>
+                        <div class="dropdown-menu" id="suppliers-dropdown">
+                            <a href="supplier/supplier-registration.html" class="dropdown-item">
+                                <i class="fas fa-user-plus"></i><span>Register as Supplier</span>
+                            </a>
+                        </div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#contact">Contact</a>
+                    <li class="header-nav-item dropdown">
+                        <a href="../index.html#carriers" class="header-nav-link" onclick="toggleDropdown(event, 'carriers')">
+                            For Carriers <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </a>
+                        <div class="dropdown-menu" id="carriers-dropdown">
+                            <a href="carrier/register.html" class="dropdown-item">
+                                <i class="fas fa-user-plus"></i><span>Register as Carrier</span>
+                            </a>
+                            <a href="available-loads.html" class="dropdown-item">
+                                <i class="fas fa-briefcase"></i><span>Browse Loads</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="header-nav-item">
+                        <a href="how-it-works.html" class="header-nav-link active" aria-current="page">How It Works</a>
+                    </li>
+                    <li class="header-nav-item">
+                        <a href="academy/academy.html" class="header-nav-link">Academy</a>
+                    </li>
+                    <li class="header-nav-item">
+                        <a href="white-label.html" class="header-nav-link">White-Label</a>
+                    </li>
+                    <li class="header-nav-item">
+                        <a href="blog.html" class="header-nav-link">Blog</a>
+                    </li>
+                    <li class="header-nav-item">
+                        <a href="contact.html" class="header-nav-link">Contact</a>
+                    </li>
+                    <li class="header-nav-item">
+                        <a href="../index.html#get-quote" class="header-nav-link header-nav-link-quote">
+                            Get quote <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
                     </li>
                 </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="choose-account-type.html" class="header-btn header-btn-secondary">Sign in</a>
+                <a href="../index.html#get-quote" class="header-btn header-btn-primary">
+                    <span>Get quote</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <h1 class="display-3 fw-bold mb-4">How Alpha Freight Works</h1>
-            <p class="lead mb-4">Complete Guide to Using Our Freight Brokerage Platform</p>
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a href="#supplier-guide" class="nav-link-custom">
-                    <i class="fas fa-warehouse me-2"></i>Supplier Guide
-                </a>
-                <a href="#carrier-guide" class="nav-link-custom">
-                    <i class="fas fa-truck me-2"></i>Carrier Guide
-                </a>
-                <a href="#payments" class="nav-link-custom">
-                    <i class="fas fa-credit-card me-2"></i>Payments
-                </a>
-                <a href="#security" class="nav-link-custom">
-                    <i class="fas fa-shield-alt me-2"></i>Security
-                </a>
-            </div>
-        </div>
-    </section>
+    <main id="main-content" role="main">
+        <!-- Hero Section -->
+        <section class="hero-section" id="top">
+            <div class="container">
+                <h1 class="display-3 fw-bold mb-3">How Alpha Freight Works</h1>
+                <p class="lead mb-4">A clear, step-by-step guide for suppliers and verified carriers — from posting to delivery, tracking, and payment.</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="#supplier-guide" class="nav-link-custom">
+                        <i class="fas fa-warehouse me-2" aria-hidden="true"></i><span>Supplier Guide</span>
+                    </a>
+                    <a href="#carrier-guide" class="nav-link-custom">
+                        <i class="fas fa-truck me-2" aria-hidden="true"></i><span>Carrier Guide</span>
+                    </a>
+                    <a href="#payments" class="nav-link-custom">
+                        <i class="fas fa-credit-card me-2" aria-hidden="true"></i><span>Payments</span>
+                    </a>
+                    <a href="#security" class="nav-link-custom">
+                        <i class="fas fa-shield-alt me-2" aria-hidden="true"></i><span>Security</span>
+                    </a>
+                </div>
 
-    <!-- Overview Section -->
-    <section class="py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5">
-                    <h2 class="section-title">Platform Overview</h2>
-                    <p class="lead text-muted">Alpha Freight connects suppliers with verified carriers worldwide through a secure, efficient platform.</p>
+                <div class="hero-illustration mt-4 animate-on-scroll fade-in-up">
+                    <svg viewBox="0 0 960 220" role="img" aria-label="Supplier to carrier workflow with tracking and secure payments">
+                        <defs>
+                            <linearGradient id="flowGradient" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0" stop-color="#ffc107"></stop>
+                                <stop offset="0.55" stop-color="#4F46E5"></stop>
+                                <stop offset="1" stop-color="#7C3AED"></stop>
+                            </linearGradient>
+                        </defs>
+                        <path class="flow-path" d="M120 110 C 250 35, 320 35, 440 110 S 650 185, 840 110" fill="none" stroke="url(#flowGradient)" stroke-width="6" stroke-linecap="round"></path>
+                        <g transform="translate(90 68)">
+                            <rect x="0" y="0" width="160" height="86" rx="18" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.26)"></rect>
+                            <text x="80" y="35" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="700">Supplier</text>
+                            <text x="80" y="60" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="14">Post a load</text>
+                        </g>
+                        <g transform="translate(400 54)">
+                            <rect x="0" y="0" width="160" height="114" rx="18" fill="rgba(255,255,255,0.24)" stroke="rgba(255,255,255,0.26)"></rect>
+                            <text x="80" y="36" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="700">Platform</text>
+                            <text x="80" y="62" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="14">Match + Track</text>
+                            <text x="80" y="88" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="14">Secure payments</text>
+                        </g>
+                        <g transform="translate(710 68)">
+                            <rect x="0" y="0" width="160" height="86" rx="18" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.26)"></rect>
+                            <text x="80" y="35" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="700">Carrier</text>
+                            <text x="80" y="60" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="14">Bid + deliver</text>
+                        </g>
+                    </svg>
                 </div>
             </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="step-card text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-warehouse"></i>
-                        </div>
-                        <h4>1. Supplier Posts Load</h4>
-                        <p class="text-muted">Suppliers create and post freight loads with detailed requirements</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <h4>2. Carriers Browse & Bid</h4>
-                        <p class="text-muted">Verified carriers browse available loads and submit competitive bids</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-handshake"></i>
-                        </div>
-                        <h4>3. Match & Deliver</h4>
-                        <p class="text-muted">Supplier selects carrier, payment is secured, and delivery is tracked</p>
+        </section>
+
+        <div class="how-toc">
+            <div class="container">
+                <div class="how-toc-inner">
+                    <span class="how-toc-label">On this page</span>
+                    <div class="how-toc-links" role="navigation" aria-label="How It Works sections">
+                        <a class="how-toc-link" href="#overview" aria-current="true"><i class="fas fa-compass" aria-hidden="true"></i>Overview</a>
+                        <a class="how-toc-link" href="#journey"><i class="fas fa-route" aria-hidden="true"></i>Journey</a>
+                        <a class="how-toc-link" href="#supplier-guide"><i class="fas fa-warehouse" aria-hidden="true"></i>Suppliers</a>
+                        <a class="how-toc-link" href="#carrier-guide"><i class="fas fa-truck" aria-hidden="true"></i>Carriers</a>
+                        <a class="how-toc-link" href="#payments"><i class="fas fa-credit-card" aria-hidden="true"></i>Payments</a>
+                        <a class="how-toc-link" href="#security"><i class="fas fa-shield-alt" aria-hidden="true"></i>Security</a>
+                        <a class="how-toc-link" href="#faq"><i class="fas fa-circle-question" aria-hidden="true"></i>FAQ</a>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- Overview Section -->
+        <section class="py-5" id="overview">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-9 mx-auto text-center mb-4">
+                        <h2 class="section-title animate-on-scroll fade-in-up">Platform Overview</h2>
+                        <p class="lead text-muted animate-on-scroll fade-in-up">Alpha Freight connects suppliers with verified carriers through a secure, efficient workflow designed for speed, transparency, and on-time delivery.</p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="step-card text-center animate-on-scroll fade-in-up icon-card">
+                            <div class="overview-icon" aria-hidden="true">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h3 class="h5 fw-bold">1. Post</h3>
+                            <p class="text-muted mb-0">Publish a detailed load in minutes so the right carriers can respond fast.</p>
+                            <i class="fas fa-clipboard-list icon-watermark" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card text-center animate-on-scroll fade-in-up icon-card">
+                            <div class="overview-icon" aria-hidden="true">
+                                <i class="fas fa-magnifying-glass"></i>
+                            </div>
+                            <h3 class="h5 fw-bold">2. Match</h3>
+                            <p class="text-muted mb-0">Compare bids, review profiles, and select a carrier with confidence.</p>
+                            <i class="fas fa-magnifying-glass icon-watermark" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card text-center animate-on-scroll fade-in-up icon-card">
+                            <div class="overview-icon" aria-hidden="true">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <h3 class="h5 fw-bold">3. Track & Pay</h3>
+                            <p class="text-muted mb-0">Follow progress, confirm delivery, and complete payment securely.</p>
+                            <i class="fas fa-route icon-watermark" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Journey Section -->
+        <section id="journey" class="py-5 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-9 mx-auto text-center mb-4">
+                        <h2 class="section-title animate-on-scroll fade-in-up">Your Journey, Step by Step</h2>
+                        <p class="lead text-muted animate-on-scroll fade-in-up">Progressive, role-friendly guidance — click a step to see what happens and why it benefits you.</p>
+                    </div>
+                </div>
+                <div class="row g-4 align-items-start">
+                    <div class="col-lg-10 mx-auto">
+                        <ul class="nav nav-pills justify-content-center gap-2 flex-wrap journey-tabs mb-3" id="journeyTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="journey-create-tab" data-bs-toggle="pill" data-bs-target="#journey-create" type="button" role="tab" aria-controls="journey-create" aria-selected="true">
+                                    <i class="fas fa-user-plus me-2" aria-hidden="true"></i>Create
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="journey-post-tab" data-bs-toggle="pill" data-bs-target="#journey-post" type="button" role="tab" aria-controls="journey-post" aria-selected="false">
+                                    <i class="fas fa-clipboard-list me-2" aria-hidden="true"></i>Post / Bid
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="journey-track-tab" data-bs-toggle="pill" data-bs-target="#journey-track" type="button" role="tab" aria-controls="journey-track" aria-selected="false">
+                                    <i class="fas fa-route me-2" aria-hidden="true"></i>Track
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="journey-pay-tab" data-bs-toggle="pill" data-bs-target="#journey-pay" type="button" role="tab" aria-controls="journey-pay" aria-selected="false">
+                                    <i class="fas fa-lock me-2" aria-hidden="true"></i>Pay
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="journeyTabsContent">
+                            <div class="tab-pane fade show active" id="journey-create" role="tabpanel" aria-labelledby="journey-create-tab" tabindex="0">
+                                <div class="journey-panel animate-on-scroll fade-in-up">
+                                    <div class="row g-4 align-items-center">
+                                        <div class="col-md-7">
+                                            <h3 class="h4 fw-bold mb-2">Create an account that matches your role</h3>
+                                            <p class="text-muted mb-0">Suppliers and carriers follow a tailored flow so you only see what you need. Verification helps keep the marketplace trustworthy.</p>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="d-flex gap-2 flex-wrap justify-content-md-end">
+                                                <span class="security-badge" style="background: rgba(79,70,229,0.14); color: rgba(15,23,42,0.95);"><i class="fas fa-check-circle me-2" aria-hidden="true"></i>Verified network</span>
+                                                <span class="security-badge" style="background: rgba(255,193,7,0.2); color: rgba(15,23,42,0.95);"><i class="fas fa-clock me-2" aria-hidden="true"></i>Faster matching</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="journey-post" role="tabpanel" aria-labelledby="journey-post-tab" tabindex="0">
+                                <div class="journey-panel animate-on-scroll fade-in-up">
+                                    <h3 class="h4 fw-bold mb-2">Post a load or submit a bid with clarity</h3>
+                                    <p class="text-muted mb-0">Good details reduce back-and-forth, improve accuracy, and lead to smoother delivery. Suppliers compare bids; carriers focus on loads that match capacity and routes.</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="journey-track" role="tabpanel" aria-labelledby="journey-track-tab" tabindex="0">
+                                <div class="journey-panel animate-on-scroll fade-in-up">
+                                    <h3 class="h4 fw-bold mb-2">Track progress from pickup to delivery</h3>
+                                    <p class="text-muted mb-0">Keep everyone aligned with status updates and tracking tools. Fewer surprises, faster decisions, and clearer proof of service.</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="journey-pay" role="tabpanel" aria-labelledby="journey-pay-tab" tabindex="0">
+                                <div class="journey-panel animate-on-scroll fade-in-up">
+                                    <h3 class="h4 fw-bold mb-2">Secure payments, protected for both sides</h3>
+                                    <p class="text-muted mb-0">Payments are processed through Stripe. Funds are secured during the job and released after delivery confirmation, reducing risk and improving trust.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     <!-- Supplier Guide Section -->
     <section id="supplier-guide" class="py-5 bg-light">
@@ -560,114 +1006,131 @@
                         <i class="fas fa-warehouse text-primary me-3"></i>
                         Supplier Guide
                     </h2>
-                    <p class="lead text-muted">Learn how to post loads and find reliable carriers</p>
+                    <p class="lead text-muted">Post loads clearly, compare bids confidently, and keep deliveries on track</p>
                 </div>
             </div>
 
             <div class="row g-4">
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number">1</div>
                             <div class="ms-3">
                                 <h4>Register Your Account</h4>
-                                <p class="text-muted">Create your supplier account by clicking "Register as Supplier". Fill in your business details, company information, and verify your email address.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Business name and registration</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Contact information</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Email verification</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Account approval typically within 1-2 business days, subject to verification.</li>
-                                </ul>
+                                <p class="text-muted mb-0">Create your supplier account and verify key business details so carriers can trust the job from day one.</p>
+                                <details class="disclosure">
+                                    <summary>Checklist</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Business name and registration</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Contact information</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Email verification</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Account approval typically within 1-2 business days, subject to verification.</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number">2</div>
                             <div class="ms-3">
                                 <h4>Post Your Load</h4>
-                                <p class="text-muted">Navigate to "Post Load" in your dashboard and fill in all load details.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Pickup and delivery locations</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Cargo type and dimensions</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Weight and volume</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Delivery date and time requirements</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Special instructions</li>
-                                </ul>
+                                <p class="text-muted mb-0">Clear requirements attract better bids and reduce delays.</p>
+                                <details class="disclosure">
+                                    <summary>What to include</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Pickup and delivery locations</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Cargo type and dimensions</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Weight and volume</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Delivery date and time requirements</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Special instructions</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number">3</div>
                             <div class="ms-3">
                                 <h4>Review Carrier Bids</h4>
-                                <p class="text-muted">Verified carriers will submit bids for your load. Review their profiles, ratings, and pricing.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Compare multiple bids</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>View carrier ratings and reviews</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Check vehicle specifications</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Review delivery history</li>
-                                </ul>
+                                <p class="text-muted mb-0">Compare more than price — choose reliability and fit for your load.</p>
+                                <details class="disclosure">
+                                    <summary>How to compare</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Compare multiple bids</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>View carrier ratings and reviews</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Check vehicle specifications</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Review delivery history</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number">4</div>
                             <div class="ms-3">
                                 <h4>Select & Confirm Carrier</h4>
-                                <p class="text-muted">Choose the best carrier for your load and confirm the assignment.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Accept the winning bid</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Set up payment (Stripe secure)</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Receive confirmation details</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Track delivery in real-time</li>
-                                </ul>
+                                <p class="text-muted mb-0">Confirm the carrier and lock in the job details before pickup.</p>
+                                <details class="disclosure">
+                                    <summary>Next actions</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Accept the winning bid</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Set up payment (Stripe secure)</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Receive confirmation details</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Track delivery in real-time</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number">5</div>
                             <div class="ms-3">
                                 <h4>Track Delivery</h4>
-                                <p class="text-muted">Monitor your load's journey from pickup to delivery.</p>
-                                <p class="text-muted">Tracking updates are provided through carrier updates and integrated platform tools.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Real-time GPS tracking</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Status updates</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Delivery confirmation</li>
-                                </ul>
+                                <p class="text-muted mb-0">Stay informed with updates from pickup to proof of delivery.</p>
+                                <details class="disclosure">
+                                    <summary>What you’ll see</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Real-time GPS tracking</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Status updates</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Delivery confirmation</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number">6</div>
                             <div class="ms-3">
                                 <h4>Payment & Rating</h4>
-                                <p class="text-muted">Payment is automatically processed when delivery is confirmed.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Automatic payment release</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Rate your carrier experience</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Download invoices and receipts</li>
-                                </ul>
+                                <p class="text-muted mb-0">Confirm delivery to trigger secure payment and leave a rating that improves future matches.</p>
+                                <details class="disclosure">
+                                    <summary>After delivery</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Automatic payment release</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Rate your carrier experience</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Download invoices and receipts</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
@@ -691,115 +1154,133 @@
                         <i class="fas fa-truck text-success me-3"></i>
                         Carrier Guide
                     </h2>
-                    <p class="lead text-muted">Learn how to join our network and get quality loads</p>
+                    <p class="lead text-muted">Get verified, win better loads, deliver on time, and get paid securely</p>
                 </div>
             </div>
 
             <div class="row g-4">
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number secondary">1</div>
                             <div class="ms-3">
                                 <h4>Register & Verify</h4>
-                                <p class="text-muted">Create your carrier account and complete verification process.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Company/business details</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Vehicle registration</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Insurance documentation</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>License verification</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Account approval typically within 1-2 business days, subject to verification.</li>
-                                </ul>
+                                <p class="text-muted mb-0">Verification builds trust and helps you win better loads.</p>
+                                <details class="disclosure">
+                                    <summary>Verification items</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Company/business details</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Vehicle registration</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Insurance documentation</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>License verification</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Account approval typically within 1-2 business days, subject to verification.</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number secondary">2</div>
                             <div class="ms-3">
                                 <h4>Add Your Vehicles</h4>
-                                <p class="text-muted">Register all your vehicles in the platform.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Vehicle type and specifications</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Capacity and dimensions</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Registration documents</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Insurance details</li>
-                                </ul>
+                                <p class="text-muted mb-0">Accurate vehicle profiles help you match to the right loads faster.</p>
+                                <details class="disclosure">
+                                    <summary>Vehicle profile</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Vehicle type and specifications</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Capacity and dimensions</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Registration documents</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Insurance details</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number secondary">3</div>
                             <div class="ms-3">
                                 <h4>Browse Available Loads</h4>
-                                <p class="text-muted">Search and filter loads that match your vehicle and routes.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Filter by location and route</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>View load specifications</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Check delivery deadlines</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>View supplier ratings</li>
-                                </ul>
+                                <p class="text-muted mb-0">Find loads aligned with your capacity, route, and schedule.</p>
+                                <details class="disclosure">
+                                    <summary>Smart filtering</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Filter by location and route</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>View load specifications</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Check delivery deadlines</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>View supplier ratings</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number secondary">4</div>
                             <div class="ms-3">
                                 <h4>Submit Competitive Bids</h4>
-                                <p class="text-muted">Submit your bid with competitive pricing and availability.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Set your price</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Specify available dates</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Add notes or special terms</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Submit and wait for response</li>
-                                </ul>
+                                <p class="text-muted mb-0">Bid with confidence — communicate price, timing, and any special handling.</p>
+                                <details class="disclosure">
+                                    <summary>Bid essentials</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Set your price</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Specify available dates</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Add notes or special terms</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Submit and wait for response</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number secondary">5</div>
                             <div class="ms-3">
                                 <h4>Accept & Complete Delivery</h4>
-                                <p class="text-muted">When selected, accept the load and complete the delivery.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Accept load assignment</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Confirm pickup details</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Update delivery status</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Complete delivery confirmation</li>
-                                </ul>
+                                <p class="text-muted mb-0">Once selected, confirm pickup details and keep the supplier updated throughout.</p>
+                                <details class="disclosure">
+                                    <summary>Delivery flow</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Accept load assignment</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Confirm pickup details</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Update delivery status</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Complete delivery confirmation</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <div class="d-flex align-items-start">
                             <div class="step-number secondary">6</div>
                             <div class="ms-3">
                                 <h4>Receive Payment</h4>
-                                <p class="text-muted">Get paid securely and quickly after delivery confirmation.</p>
-                                <ul class="list-unstyled ms-3">
-                                    <li><i class="fas fa-check text-success me-2"></i>Automatic payment processing</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Fast transfer to your account</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Payment history tracking</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Download payment receipts</li>
-                                </ul>
+                                <p class="text-muted mb-0">Payments are processed securely after delivery confirmation.</p>
+                                <details class="disclosure">
+                                    <summary>Payment benefits</summary>
+                                    <ul class="list-unstyled mt-2 mb-0 ms-3">
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Automatic payment processing</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Fast transfer to your account</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Payment history tracking</li>
+                                        <li><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Download payment receipts</li>
+                                    </ul>
+                                </details>
                             </div>
                         </div>
                     </div>
@@ -829,7 +1310,7 @@
 
             <div class="row">
                 <div class="col-lg-10 mx-auto">
-                    <div class="payment-card">
+                    <div class="payment-card animate-on-scroll fade-in-up">
                         <div class="text-center mb-4">
                             <div class="alpha-freight-logo">
                                 <i class="fab fa-stripe me-2"></i>Powered by Stripe
@@ -852,7 +1333,7 @@
                         <div class="process-flow">
                             <div class="row">
                                 <div class="col-md-3 process-step">
-                                    <div class="process-box">
+                                    <div class="process-box animate-on-scroll fade-in-up">
                                         <i class="fas fa-handshake fa-2x mb-2"></i>
                                         <h6>Carrier Selected</h6>
                                     </div>
@@ -861,7 +1342,7 @@
                                     <i class="fas fa-arrow-right process-arrow"></i>
                                 </div>
                                 <div class="col-md-3 process-step">
-                                    <div class="process-box">
+                                    <div class="process-box animate-on-scroll fade-in-up">
                                         <i class="fas fa-lock fa-2x mb-2"></i>
                                         <h6>Payment Secured</h6>
                                         <small>Stripe Secure Payment Holding</small>
@@ -871,7 +1352,7 @@
                                     <i class="fas fa-arrow-right process-arrow"></i>
                                 </div>
                                 <div class="col-md-3 process-step">
-                                    <div class="process-box">
+                                    <div class="process-box animate-on-scroll fade-in-up">
                                         <i class="fas fa-check-double fa-2x mb-2"></i>
                                         <h6>Delivery Confirmed</h6>
                                     </div>
@@ -880,7 +1361,7 @@
                                     <i class="fas fa-arrow-right process-arrow"></i>
                                 </div>
                                 <div class="col-md-3 process-step">
-                                    <div class="process-box">
+                                    <div class="process-box animate-on-scroll fade-in-up">
                                         <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
                                         <h6>Payment Released</h6>
                                         <small>24-48 hours</small>
@@ -894,26 +1375,26 @@
 
             <div class="row g-4 mt-3">
                 <div class="col-md-4">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h5><i class="fas fa-shield-alt text-primary me-2"></i>Payment Protection</h5>
                         <p class="text-muted">All payments are securely held by Stripe. Suppliers can't cancel payment after delivery confirmation, and carriers are guaranteed payment for completed deliveries.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h5><i class="fas fa-clock text-primary me-2"></i>Fast Transfers</h5>
                         <p class="text-muted">Once delivery is confirmed, payments are processed automatically and transferred to your bank account within 24-48 hours. No manual processing required.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h5><i class="fas fa-receipt text-primary me-2"></i>Complete Records</h5>
                         <p class="text-muted">All transactions are recorded and you can download invoices, receipts, and payment history at any time from your dashboard.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="info-box accent mt-4">
+            <div class="info-box accent mt-4 animate-on-scroll fade-in-up">
                 <h5><i class="fas fa-info-circle text-primary me-2"></i>Payment Methods Accepted</h5>
                 <p class="mb-2">Stripe accepts all major payment methods:</p>
                 <ul class="mb-0">
@@ -941,37 +1422,37 @@
 
             <div class="row g-4">
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h4><i class="fas fa-lock text-success me-2"></i>SSL Encryption</h4>
                         <p class="text-muted">All data transmitted between your device and our servers is encrypted using 256-bit SSL encryption. Your information is never exposed during transmission.</p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h4><i class="fas fa-user-shield text-success me-2"></i>Identity Verification</h4>
                         <p class="text-muted">All suppliers and carriers are verified before account approval. We verify business registration, licenses, insurance, and contact information to ensure platform safety.</p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h4><i class="fas fa-credit-card text-success me-2"></i>Stripe PCI Compliance</h4>
                         <p class="text-muted">Stripe is PCI DSS Level 1 certified - the highest level of security certification for payment processors. Your card details are never stored on our servers.</p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h4><i class="fas fa-database text-success me-2"></i>Secure Data Storage</h4>
                         <p class="text-muted">All user data is stored on secure, encrypted databases with regular backups. We follow GDPR and international data protection regulations.</p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h4><i class="fas fa-eye-slash text-success me-2"></i>Privacy Protection</h4>
                         <p class="text-muted">Your personal and financial information is never shared with third parties without your consent. We maintain strict privacy controls and data access protocols.</p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="step-card">
+                    <div class="step-card animate-on-scroll fade-in-up">
                         <h4><i class="fas fa-certificate text-success me-2"></i>Dispute Resolution</h4>
                         <p class="text-muted">In case of any issues, our dedicated support team provides mediation and dispute resolution services. Payments are protected until issues are resolved.</p>
                         <p class="text-muted">Alpha Freight provides mediation support only and is not a party to the transport contract between suppliers and carriers.</p>
@@ -981,7 +1462,7 @@
 
             <div class="row mt-5">
                 <div class="col-lg-10 mx-auto">
-                    <div class="payment-card gradient-secondary">
+                    <div class="payment-card gradient-secondary animate-on-scroll fade-in-up">
                         <h3 class="mb-4 text-center">Security Certifications & Compliance</h3>
                         <div class="text-center">
                             <span class="security-badge">
@@ -1004,7 +1485,7 @@
                 </div>
             </div>
 
-            <div class="info-box accent mt-4">
+            <div class="info-box accent mt-4 animate-on-scroll fade-in-up">
                 <h5><i class="fas fa-question-circle text-primary me-2"></i>What Makes Our Payments Secure?</h5>
                 <ul class="mb-0">
                     <li><strong>Stripe secure payment holding:</strong> Payments are securely held by Stripe until delivery is confirmed, protecting both parties.</li>
@@ -1018,7 +1499,7 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="py-5 bg-light">
+    <section class="py-5 bg-light" id="faq">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center mb-5">
@@ -1028,7 +1509,7 @@
             <div class="row">
                 <div class="col-lg-10 mx-auto">
                     <div class="accordion faq" id="faqAccordion">
-                        <div class="accordion-item mb-3">
+                        <div class="accordion-item mb-3 animate-on-scroll fade-in-up">
                             <h2 class="accordion-header">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
                                     How long does account verification take?
@@ -1040,7 +1521,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="accordion-item mb-3">
+                        <div class="accordion-item mb-3 animate-on-scroll fade-in-up">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
                                     What payment methods are accepted?
@@ -1052,7 +1533,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="accordion-item mb-3">
+                        <div class="accordion-item mb-3 animate-on-scroll fade-in-up">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
                                     How secure are my payment details?
@@ -1064,7 +1545,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="accordion-item mb-3">
+                        <div class="accordion-item mb-3 animate-on-scroll fade-in-up">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
                                     When do carriers receive payment?
@@ -1076,7 +1557,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="accordion-item mb-3">
+                        <div class="accordion-item mb-3 animate-on-scroll fade-in-up">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
                                     What happens if there's a dispute?
@@ -1088,7 +1569,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="accordion-item mb-3">
+                        <div class="accordion-item mb-3 animate-on-scroll fade-in-up">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
                                     Are there any fees?
@@ -1121,6 +1602,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Footer -->
     <footer class="text-white py-5" style="background: #2c3e50;">
@@ -1128,7 +1610,7 @@
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <div class="mb-3">
-                        <img src="../image-removebg-preview - 2025-10-29T072620.142.png" alt="Alpha Freight Logo" style="height: 50px;">
+                        <img src="../image-removebg-preview - 2025-10-29T072620.142.png" alt="Alpha Freight Logo" style="height: 50px;" width="200" height="50" loading="lazy">
                     </div>
                     <p class="text-light">Professional freight brokerage services worldwide. Connecting suppliers with trusted carriers globally.</p>
                 </div>
@@ -1171,9 +1653,123 @@
         </div>
     </footer>
 
+    <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/script.js"></script>
+    <script>
+        function toggleDropdown(event, dropdownId) {
+            event.preventDefault();
+            event.stopPropagation();
+            const dropdownItem = event.target.closest('.header-nav-item');
+            const isActive = dropdownItem.classList.contains('active');
+            document.querySelectorAll('.header-nav-item.dropdown').forEach(item => item.classList.remove('active'));
+            if (!isActive) dropdownItem.classList.add('active');
+        }
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.header-nav-item.dropdown')) {
+                document.querySelectorAll('.header-nav-item.dropdown').forEach(item => item.classList.remove('active'));
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const headerNav = document.querySelector('.header-nav');
+            const header = document.querySelector('.header');
+            if (mobileMenuToggle && headerNav) {
+                function updateMenuState(isOpen) {
+                    if (isOpen) {
+                        headerNav.classList.add('menu-open');
+                        mobileMenuToggle.classList.add('active');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-times"></i>';
+                        header.classList.add('menu-open');
+                    } else {
+                        headerNav.classList.remove('menu-open');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                        header.classList.remove('menu-open');
+                    }
+                }
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isOpen = headerNav.classList.contains('menu-open');
+                    updateMenuState(!isOpen);
+                });
+                document.addEventListener('click', function(event) {
+                    if (!header.contains(event.target) && headerNav.classList.contains('menu-open')) {
+                        updateMenuState(false);
+                    }
+                });
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 991.98) updateMenuState(false);
+                });
+                headerNav.querySelectorAll('.header-nav-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        const parentItem = link.closest('.header-nav-item.dropdown');
+                        const isDropdownToggle = parentItem && link.hasAttribute('onclick');
+                        if (!isDropdownToggle) updateMenuState(false);
+                    });
+                });
+                headerNav.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() { updateMenuState(false); });
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocLinks = Array.from(document.querySelectorAll('.how-toc-link'));
+            const backToTop = document.getElementById('backToTop');
+            const sectionIds = tocLinks
+                .map(link => (link.getAttribute('href') || '').trim())
+                .filter(href => href.startsWith('#') && href.length > 1)
+                .map(href => href.slice(1));
+
+            const sections = sectionIds
+                .map(id => document.getElementById(id))
+                .filter(Boolean);
+
+            const setActive = (id) => {
+                tocLinks.forEach(link => {
+                    const target = (link.getAttribute('href') || '').slice(1);
+                    link.setAttribute('aria-current', target === id ? 'true' : 'false');
+                });
+            };
+
+            if ('IntersectionObserver' in window && sections.length > 0) {
+                const observer = new IntersectionObserver((entries) => {
+                    const visible = entries
+                        .filter(e => e.isIntersecting)
+                        .sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top))[0];
+                    if (visible && visible.target && visible.target.id) {
+                        setActive(visible.target.id);
+                    }
+                }, { rootMargin: '-35% 0px -55% 0px', threshold: 0.1 });
+
+                sections.forEach(section => observer.observe(section));
+            }
+
+            if (backToTop) {
+                const updateBackToTop = () => {
+                    const y = window.scrollY || document.documentElement.scrollTop || 0;
+                    if (y > 700) {
+                        backToTop.classList.add('is-visible');
+                    } else {
+                        backToTop.classList.remove('is-visible');
+                    }
+                };
+
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                window.addEventListener('scroll', updateBackToTop, { passive: true });
+                updateBackToTop();
+            }
+        });
+    </script>
 </body>
 </html>
 

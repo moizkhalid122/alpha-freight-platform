@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -59,52 +59,294 @@
     <link href="../assets/css/style.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            background: radial-gradient(circle at top, rgba(79, 70, 229, 0.14), transparent 55%),
+                        linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
             min-height: 100vh;
-            padding-top: 80px;
+            padding-top: 0;
         }
 
-        .header-section {
-            background: white;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            border-radius: 0 0 15px 15px;
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
-        .loads-section {
-            padding: 2rem 0;
+        .header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+            position: sticky;
+            top: 0;
+            z-index: 1100;
         }
+        .header-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+        .header-logo { display: inline-flex; align-items: center; text-decoration: none; }
+        .header-logo img { height: 50px; width: auto; display: block; object-fit: contain; }
+        .header-nav-wrapper { overflow: visible; }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .header-nav-link {
+            color: #0a2540;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            white-space: nowrap;
+            transition: color 0.2s ease;
+        }
+        .header-nav-link:hover,
+        .header-nav-link.active { color: var(--primary-color); }
+        .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+        .header-btn {
+            padding: 0.5rem 1.1rem;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+        }
+        .header-btn-primary { background: #635bff; color: #ffffff; }
+        .header-btn-primary:hover { background: #5851ea; transform: translateY(-1px); }
+        .header-btn-secondary { background: transparent; color: #0a2540; }
+        .header-btn-secondary:hover { background: #f1f5f9; color: var(--primary-color); }
+        .mobile-menu-toggle { display: none; background: none; border: none; color: #0a2540; font-size: 1.5rem; padding: 0.5rem; }
+        .mobile-nav-panel {
+            display: none;
+            border-top: 1px solid rgba(226, 232, 240, 0.9);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .mobile-nav-panel .mobile-nav-links {
+            list-style: none;
+            margin: 0;
+            padding: 12px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .mobile-nav-panel .mobile-nav-links a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            color: #0a2540;
+            background: rgba(15, 23, 42, 0.03);
+        }
+        .mobile-nav-panel .mobile-nav-links a.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: #1e3a8a;
+        }
+        .header.is-open .mobile-nav-panel { display: block; }
+        @media (max-width: 991.98px) {
+            .mobile-menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+            .header-nav-wrapper { display: none; }
+        }
+        @media (min-width: 992px) {
+            .mobile-nav-panel { display: none !important; }
+        }
+
+        .skip-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateY(-120%);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            z-index: 4000;
+            text-decoration: none;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.3);
+        }
+        .skip-link:focus {
+            transform: translateY(12px);
+            outline: 3px solid rgba(255, 193, 7, 0.8);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+
+        .page-hero {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.92) 0%, rgba(124, 58, 237, 0.92) 100%);
+            color: #ffffff;
+            padding: 44px 0 34px;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-hero::before,
+        .page-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.14);
+            filter: blur(2px);
+            animation: float 10s ease-in-out infinite;
+        }
+        .page-hero::before { top: -160px; left: -160px; }
+        .page-hero::after { bottom: -190px; right: -160px; animation-delay: -4s; }
+        .page-hero .container { position: relative; z-index: 1; }
+
+        .page-hero-title {
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+        }
+        .page-hero-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 0;
+        }
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            font-weight: 700;
+        }
+        .hero-pill i { opacity: 0.95; }
+
+        .toolbar {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            padding: 14px;
+            margin-top: -22px;
+        }
+
+        .toolbar .form-control,
+        .toolbar .form-select {
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 0.75rem 0.9rem;
+        }
+
+        .toolbar .form-control:focus,
+        .toolbar .form-select:focus {
+            border-color: rgba(79, 70, 229, 0.45);
+            box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.14);
+        }
+
+        .toolbar-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.18);
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .loads-section { padding: 24px 0 40px; }
 
         .load-card {
             background: white;
-            border: 1px solid #e9ecef !important;
-            border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(15, 23, 42, 0.1) !important;
+            border-radius: 18px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             height: 100%;
         }
 
         .load-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border-color: #007bff !important;
+            transform: translateY(-6px);
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.14);
+            border-color: rgba(79, 70, 229, 0.35) !important;
         }
 
-        .load-info {
-            display: flex;
+        .load-card-header { border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding-bottom: 0.9rem; }
+        .load-route-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; color: #0f172a; }
+
+        .urgency-pill {
+            display: inline-flex;
             align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.82rem;
+            border: 1px solid transparent;
         }
+        .urgency-pill.normal { background: rgba(100, 116, 139, 0.12); color: #334155; border-color: rgba(100, 116, 139, 0.2); }
+        .urgency-pill.urgent { background: rgba(245, 158, 11, 0.14); color: #92400e; border-color: rgba(245, 158, 11, 0.25); }
+        .urgency-pill.same-day { background: rgba(220, 38, 38, 0.12); color: #991b1b; border-color: rgba(220, 38, 38, 0.22); }
 
-        .back-btn {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
+        .load-info-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .load-price-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.14), rgba(79, 70, 229, 0.07));
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-weight: 900;
+            color: #1e3a8a;
+            border: 1px solid rgba(79, 70, 229, 0.2);
         }
+        .load-cargo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-weight: 800;
+            color: #047857;
+            border: 1px solid rgba(16, 185, 129, 0.18);
+        }
+        .load-meta-row { display: flex; flex-wrap: wrap; gap: 12px 18px; margin-top: 14px; }
+        .load-meta-item { display: inline-flex; align-items: center; gap: 10px; color: rgba(15, 23, 42, 0.78); font-weight: 600; font-size: 0.9rem; }
+        .load-meta-item i { color: rgba(79, 70, 229, 0.95); }
 
-        .back-btn:hover {
-            color: #0056b3;
+        .load-desc { color: rgba(15, 23, 42, 0.68); font-size: 0.92rem; margin-top: 12px; }
+        .load-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(15, 23, 42, 0.08); margin-top: 14px; }
+        .meta-time { color: rgba(15, 23, 42, 0.6); font-weight: 600; }
+        .view-load-btn {
+            border-radius: 999px;
+            padding: 0.55rem 0.95rem;
+            font-weight: 800;
         }
 
         .empty-state {
@@ -175,75 +417,112 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                padding-top: 70px;
-            }
-
             .loads-section {
                 padding: 1rem 0;
             }
-
-            .header-section {
-                padding: 1.5rem 0;
-                margin-bottom: 1rem;
-            }
+            .toolbar { margin-top: -18px; }
+            .page-hero { padding: 38px 0 28px; }
+            .page-hero-title { font-size: 2rem; }
+            .load-meta-row { flex-direction: column; gap: 10px; }
+            .load-actions-row { flex-direction: column; align-items: stretch; }
+            .view-load-btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top bg-white shadow-sm" id="mainNavbar">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <img src="../WhatsApp_Image_2026-03-04_at_12.50.53_PM-removebg-preview.png" alt="Alpha Freight Logo" class="navbar-logo" style="height: 40px;">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <!-- Header (same style as index) -->
+    <header class="header">
+        <div class="header-container">
+            <a href="../index.html" class="header-logo">
+                <img src="../WhatsApp_Image_2026-03-04_at_12.50.53_PM-removebg-preview.png" alt="Alpha Freight Solutions" loading="eager">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#services">Services</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="available-loads.html">Available Loads</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#suppliers">For Suppliers</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#carriers">For Carriers</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#contact">Contact</a>
-                    </li>
+            <nav class="header-nav-wrapper" aria-label="Primary">
+                <ul class="header-nav">
+                    <li class="header-nav-item"><a href="../index.html" class="header-nav-link">Home</a></li>
+                    <li class="header-nav-item"><a href="how-it-works.html" class="header-nav-link">How It Works</a></li>
+                    <li class="header-nav-item"><a href="available-loads.html" class="header-nav-link active" aria-current="page">Available Loads</a></li>
+                    <li class="header-nav-item"><a href="blog.html" class="header-nav-link">Blog</a></li>
+                    <li class="header-nav-item"><a href="contact.html" class="header-nav-link">Contact</a></li>
                 </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="choose-account-type.html" class="header-btn header-btn-secondary">Sign in</a>
+                <a href="../index.html#get-quote" class="header-btn header-btn-primary">
+                    <span>Get quote</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu" aria-controls="mobileNavPanel" aria-expanded="false">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
-    </nav>
+        <div class="mobile-nav-panel" id="mobileNavPanel">
+            <ul class="mobile-nav-links">
+                <li><a href="../index.html">Home <i class="fas fa-arrow-right" aria-hidden="true"></i></a></li>
+                <li><a href="how-it-works.html">How It Works <i class="fas fa-arrow-right" aria-hidden="true"></i></a></li>
+                <li><a href="available-loads.html" class="active" aria-current="page">Available Loads <i class="fas fa-arrow-right" aria-hidden="true"></i></a></li>
+                <li><a href="blog.html">Blog <i class="fas fa-arrow-right" aria-hidden="true"></i></a></li>
+                <li><a href="contact.html">Contact <i class="fas fa-arrow-right" aria-hidden="true"></i></a></li>
+                <li><a href="choose-account-type.html">Sign in <i class="fas fa-arrow-right" aria-hidden="true"></i></a></li>
+            </ul>
+        </div>
+    </header>
 
-    <!-- Header Section -->
-    <div class="header-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <a href="../index.html" class="back-btn mb-2 d-inline-block">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Home
-                    </a>
-                    <h1 class="display-5 fw-bold mb-2">Available Loads</h1>
-                    <p class="lead text-muted mb-0">Browse available freight loads in real-time</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <span class="badge bg-primary fs-6 px-3 py-2">
-                        <i class="fas fa-sync-alt me-2"></i>Real-time Updates
-                    </span>
+    <main id="main-content" role="main">
+        <section class="page-hero">
+            <div class="container">
+                <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+                    <div>
+                        <h1 class="display-5 page-hero-title">Available Loads</h1>
+                        <p class="lead page-hero-subtitle">Browse active freight loads in real-time and accept faster.</p>
+                    </div>
+                    <div class="hero-pill">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        <span>Real-time updates</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+
+        <section class="container">
+            <div class="toolbar">
+                <div class="row g-3 align-items-center">
+                    <div class="col-12 col-lg-5">
+                        <label class="form-label fw-semibold mb-1" for="loadSearch">Search</label>
+                        <input id="loadSearch" class="form-control" type="search" placeholder="Search pickup, delivery, cargo, vehicle..." autocomplete="off">
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label fw-semibold mb-1" for="urgencyFilter">Urgency</label>
+                        <select id="urgencyFilter" class="form-select">
+                            <option value="all" selected>All</option>
+                            <option value="normal">Normal</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="same-day">Same Day</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label fw-semibold mb-1" for="sortBy">Sort</label>
+                        <select id="sortBy" class="form-select">
+                            <option value="newest" selected>Newest</option>
+                            <option value="budgetHigh">Budget: High to Low</option>
+                            <option value="budgetLow">Budget: Low to High</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-1 d-flex align-items-end">
+                        <button id="clearFilters" class="btn btn-outline-secondary w-100" type="button">Clear</button>
+                    </div>
+                </div>
+                <div class="toolbar-meta mt-3">
+                    <div class="count-badge" id="loadsCount">
+                        <i class="fas fa-boxes-stacked" aria-hidden="true"></i>
+                        <span>Loading…</span>
+                    </div>
+                    <div class="text-muted fw-semibold">
+                        <i class="fas fa-lock me-2" aria-hidden="true"></i>View details requires sign in
+                    </div>
+                </div>
+            </div>
+        </section>
 
     <!-- Loads List Section -->
     <section id="loadList" class="loads-section">
@@ -444,11 +723,38 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="../assets/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('.header');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            if (!header || !toggle) return;
+
+            const setOpen = (open) => {
+                header.classList.toggle('is-open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggle.innerHTML = open
+                    ? '<i class="fas fa-times" aria-hidden="true"></i>'
+                    : '<i class="fas fa-bars" aria-hidden="true"></i>';
+            };
+
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                setOpen(!header.classList.contains('is-open'));
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!header.contains(e.target)) {
+                    setOpen(false);
+                }
+            });
+        });
+    </script>
 
     <!-- Firebase v10+ Modular SDK for Real-time Loads Display -->
     <script type="module">
@@ -481,14 +787,15 @@
             return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        // Function to get urgency badge
         function getUrgencyBadge(urgency) {
-            const badges = {
-                'normal': '<span class="badge bg-secondary">Normal</span>',
-                'urgent': '<span class="badge bg-warning">Urgent</span>',
-                'same-day': '<span class="badge bg-danger">Same Day</span>'
-            };
-            return badges[urgency] || badges['normal'];
+            const u = (urgency || 'normal').toLowerCase();
+            if (u === 'same-day') {
+                return '<span class="urgency-pill same-day"><i class="fas fa-bolt" aria-hidden="true"></i>Same Day</span>';
+            }
+            if (u === 'urgent') {
+                return '<span class="urgency-pill urgent"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i>Urgent</span>';
+            }
+            return '<span class="urgency-pill normal"><i class="fas fa-circle" aria-hidden="true"></i>Normal</span>';
         }
 
         // Commission calculation (same as carrier page - silent commission)
@@ -542,67 +849,76 @@
             return 'Negotiable';
         }
 
-        // Function to create load card HTML
+        function getBudgetNumber(loadData) {
+            const minBudget = Number(loadData?.minBudget);
+            const maxBudget = Number(loadData?.maxBudget);
+            const budget = Number(loadData?.budget);
+            let originalBudget = Number.isFinite(budget) && budget > 0 ? budget : null;
+            if (!originalBudget && Number.isFinite(minBudget) && Number.isFinite(maxBudget)) {
+                originalBudget = (minBudget + maxBudget) / 2;
+            } else if (!originalBudget) {
+                originalBudget = Number.isFinite(maxBudget) ? maxBudget : (Number.isFinite(minBudget) ? minBudget : null);
+            }
+            if (!Number.isFinite(originalBudget) || originalBudget <= 0) return null;
+            const carrierAmount = calculateCarrierAmount(originalBudget);
+            return Number.isFinite(carrierAmount) ? carrierAmount : originalBudget;
+        }
+
         function createLoadCard(loadId, loadData) {
+            const pickup = loadData.pickupLocation || '—';
+            const delivery = loadData.deliveryLocation || '—';
+            const title = loadData.loadTitle || `${pickup} → ${delivery}`;
+            const budgetText = formatBudget(loadData.minBudget, loadData.maxBudget, loadData.budget);
+            const cargoType = loadData.cargoType || 'General';
+            const vehicleType = loadData.vehicleType || 'Any vehicle';
+            const pickupDate = formatDate(loadData.pickupDate);
+            const weightText = loadData.cargoWeight ? `${loadData.cargoWeight} tonnes` : 'Weight N/A';
+            const createdAtText = loadData.createdAt
+                ? new Date(loadData.createdAt).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                : 'Just now';
+
+            const desc = loadData.cargoDescription
+                ? `${loadData.cargoDescription.substring(0, 120)}${loadData.cargoDescription.length > 120 ? '...' : ''}`
+                : '';
+
             return `
                 <div class="col-md-6 col-lg-4 mb-4" data-load-id="${loadId}">
-                    <div class="card h-100 shadow-sm load-card">
+                    <div class="card h-100 load-card">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title fw-bold text-primary mb-0" style="font-size: 1.1rem;">${loadData.loadTitle || 'Freight Load'}</h5>
+                            <div class="load-card-header mb-3 d-flex align-items-start justify-content-between gap-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="fas fa-route" style="color: rgba(79, 70, 229, 0.95);" aria-hidden="true"></i>
+                                        <div class="load-route-title">${pickup} → ${delivery}</div>
+                                    </div>
+                                    <div class="text-muted fw-semibold" style="font-size: 0.92rem;">${title}</div>
+                                </div>
                                 ${getUrgencyBadge(loadData.urgency)}
                             </div>
-                            
-                            <div class="mb-3">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                                    <small class="text-muted"><strong>From:</strong> ${loadData.pickupLocation || 'N/A'}</small>
+
+                            <div class="load-info-row mb-3">
+                                <div class="load-price-badge">
+                                    <i class="fas fa-sterling-sign" aria-hidden="true"></i>
+                                    <span>${budgetText}</span>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-map-marker-alt text-success me-2"></i>
-                                    <small class="text-muted"><strong>To:</strong> ${loadData.deliveryLocation || 'N/A'}</small>
+                                <div class="load-cargo-badge">
+                                    <i class="fas fa-box" aria-hidden="true"></i>
+                                    <span>${cargoType}${loadData.cargoWeight ? ` · ${loadData.cargoWeight}t` : ''}</span>
                                 </div>
                             </div>
 
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <div class="load-info">
-                                        <i class="fas fa-calendar text-primary me-1"></i>
-                                        <small class="text-muted">${formatDate(loadData.pickupDate)}</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="load-info">
-                                        <i class="fas fa-weight text-info me-1"></i>
-                                        <small class="text-muted">${loadData.cargoWeight || 'N/A'} tonnes</small>
-                                    </div>
-                                </div>
+                            <div class="load-meta-row">
+                                <div class="load-meta-item"><i class="fas fa-calendar" aria-hidden="true"></i><span>${pickupDate}</span></div>
+                                <div class="load-meta-item"><i class="fas fa-truck" aria-hidden="true"></i><span>${vehicleType}</span></div>
+                                <div class="load-meta-item"><i class="fas fa-weight-hanging" aria-hidden="true"></i><span>${weightText}</span></div>
                             </div>
 
-                            <div class="mb-3">
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="fas fa-box text-warning me-2"></i>
-                                    <small class="text-muted"><strong>Cargo:</strong> ${loadData.cargoType || 'N/A'}</small>
-                                </div>
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="fas fa-truck text-success me-2"></i>
-                                    <small class="text-muted"><strong>Vehicle:</strong> ${loadData.vehicleType || 'N/A'}</small>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-pound-sign text-primary me-2"></i>
-                                    <small class="text-muted"><strong>Budget:</strong> ${formatBudget(loadData.minBudget, loadData.maxBudget, loadData.budget)}</small>
-                                </div>
-                            </div>
+                            ${desc ? `<div class="load-desc">${desc}</div>` : ''}
 
-                            ${loadData.cargoDescription ? `<p class="text-muted mb-3" style="font-size: 0.85rem;">${loadData.cargoDescription.substring(0, 100)}${loadData.cargoDescription.length > 100 ? '...' : ''}</p>` : ''}
-
-                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                                <small class="text-muted">
-                                    <i class="far fa-clock me-1"></i>
-                                    ${loadData.createdAt ? new Date(loadData.createdAt).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
-                                </small>
-                                <button class="btn btn-sm btn-outline-primary view-load-btn" data-load-id="${loadId}">
-                                    <i class="fas fa-eye me-1"></i> View Details
+                            <div class="load-actions-row">
+                                <div class="meta-time"><i class="far fa-clock me-2" aria-hidden="true"></i>${createdAtText}</div>
+                                <button class="btn btn-outline-primary view-load-btn" type="button" data-load-id="${loadId}">
+                                    <i class="fas fa-eye me-2" aria-hidden="true"></i>View Details
                                 </button>
                             </div>
                         </div>
@@ -611,67 +927,132 @@
             `;
         }
 
-        // Function to add or update load card
-        function addOrUpdateLoadCard(loadId, loadData) {
-            if (loadData.status !== 'active') return; // Only show active loads
+        const searchInput = document.getElementById('loadSearch');
+        const urgencySelect = document.getElementById('urgencyFilter');
+        const sortSelect = document.getElementById('sortBy');
+        const clearBtn = document.getElementById('clearFilters');
+        const loadsCount = document.getElementById('loadsCount');
 
-            const existingCard = loadsContainer.querySelector(`[data-load-id="${loadId}"]`);
-            const cardHTML = createLoadCard(loadId, loadData);
+        const state = {
+            query: '',
+            urgency: 'all',
+            sortBy: 'newest'
+        };
 
-            if (existingCard) {
-                // Update existing card
-                existingCard.outerHTML = cardHTML;
-            } else {
-                // Remove loading message if exists
-                const loadingMsg = loadsContainer.querySelector('.loading-placeholder');
-                if (loadingMsg) {
-                    loadsContainer.innerHTML = '';
+        function updateCount(count, isLoading = false) {
+            if (!loadsCount) return;
+            const text = isLoading ? 'Loading…' : `${count} load${count === 1 ? '' : 's'} found`;
+            loadsCount.innerHTML = `<i class="fas fa-boxes-stacked" aria-hidden="true"></i><span>${text}</span>`;
+        }
+
+        function matchesQuery(loadData, query) {
+            if (!query) return true;
+            const q = query.toLowerCase();
+            const hay = [
+                loadData.loadTitle,
+                loadData.pickupLocation,
+                loadData.deliveryLocation,
+                loadData.cargoType,
+                loadData.vehicleType,
+                loadData.cargoDescription
+            ].filter(Boolean).join(' ').toLowerCase();
+            return hay.includes(q);
+        }
+
+        function matchesUrgency(loadData, urgency) {
+            if (!urgency || urgency === 'all') return true;
+            return (loadData.urgency || 'normal').toLowerCase() === urgency;
+        }
+
+        function renderLoads() {
+            const items = Array.from(loadsMap.entries())
+                .map(([id, data]) => ({ id, data }))
+                .filter(item => item.data && item.data.status === 'active')
+                .filter(item => matchesQuery(item.data, state.query))
+                .filter(item => matchesUrgency(item.data, state.urgency));
+
+            const sortBy = state.sortBy;
+            items.sort((a, b) => {
+                if (sortBy === 'budgetHigh' || sortBy === 'budgetLow') {
+                    const av = getBudgetNumber(a.data);
+                    const bv = getBudgetNumber(b.data);
+                    const aNum = Number.isFinite(av) ? av : -Infinity;
+                    const bNum = Number.isFinite(bv) ? bv : -Infinity;
+                    return sortBy === 'budgetHigh' ? (bNum - aNum) : (aNum - bNum);
                 }
+                const aTime = a.data.createdAt ? new Date(a.data.createdAt).getTime() : 0;
+                const bTime = b.data.createdAt ? new Date(b.data.createdAt).getTime() : 0;
+                return bTime - aTime;
+            });
 
-                // Add new card at the beginning
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = cardHTML;
-                loadsContainer.insertBefore(tempDiv.firstElementChild, loadsContainer.firstChild);
+            updateCount(items.length);
+
+            if (items.length === 0) {
+                loadsContainer.innerHTML = `
+                    <div class="col-12 empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h4 class="text-muted">No loads available at the moment</h4>
+                        <p class="text-muted">Try clearing filters or check back later for new loads.</p>
+                    </div>
+                `;
+                return;
             }
 
-            loadsMap.set(loadId, loadData);
+            loadsContainer.innerHTML = items.map(item => createLoadCard(item.id, item.data)).join('');
+        }
 
-            // Add click handlers for view buttons - redirect to supplier login
-            document.querySelectorAll('.view-load-btn').forEach(btn => {
-                // Remove existing listeners to avoid duplicates
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                newBtn.addEventListener('click', function() {
-                    // Redirect to supplier login page
-                    window.location.href = 'supplier/signin.html';
-                });
+        function addOrUpdateLoad(loadId, loadData) {
+            if (!loadData || loadData.status !== 'active') {
+                loadsMap.delete(loadId);
+                renderLoads();
+                return;
+            }
+            loadsMap.set(loadId, loadData);
+            renderLoads();
+        }
+
+        function removeLoad(loadId) {
+            loadsMap.delete(loadId);
+            renderLoads();
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                state.query = (e.target.value || '').trim();
+                renderLoads();
+            });
+        }
+        if (urgencySelect) {
+            urgencySelect.addEventListener('change', (e) => {
+                state.urgency = e.target.value || 'all';
+                renderLoads();
+            });
+        }
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                state.sortBy = e.target.value || 'newest';
+                renderLoads();
+            });
+        }
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                state.query = '';
+                state.urgency = 'all';
+                state.sortBy = 'newest';
+                if (searchInput) searchInput.value = '';
+                if (urgencySelect) urgencySelect.value = 'all';
+                if (sortSelect) sortSelect.value = 'newest';
+                renderLoads();
             });
         }
 
-        // Function to remove load card
-        function removeLoadCard(loadId) {
-            const card = loadsContainer.querySelector(`[data-load-id="${loadId}"]`);
-            if (card) {
-                card.style.transition = 'opacity 0.3s ease';
-                card.style.opacity = '0';
-                setTimeout(() => {
-                    card.remove();
-                    loadsMap.delete(loadId);
+        loadsContainer.addEventListener('click', (event) => {
+            const btn = event.target.closest('.view-load-btn');
+            if (!btn) return;
+            window.location.href = 'supplier/signin.html';
+        });
 
-                    // Show empty message if no loads
-                    if (loadsMap.size === 0) {
-                        loadsContainer.innerHTML = `
-                            <div class="col-12 empty-state">
-                                <i class="fas fa-box-open"></i>
-                                <h4 class="text-muted">No loads available at the moment</h4>
-                                <p class="text-muted">Check back later for new freight loads</p>
-                            </div>
-                        `;
-                    }
-                }, 300);
-            }
-        }
+        updateCount(0, true);
 
         // Set up real-time listeners
         const loadsRef = ref(database, 'loads');
@@ -680,27 +1061,27 @@
         onChildAdded(loadsRef, (snapshot) => {
             const loadId = snapshot.key;
             const loadData = snapshot.val();
-            if (loadData && loadData.status === 'active') {
-                addOrUpdateLoadCard(loadId, loadData);
-            }
+            addOrUpdateLoad(loadId, loadData);
         });
 
         // Listen for removed loads
         onChildRemoved(loadsRef, (snapshot) => {
             const loadId = snapshot.key;
-            removeLoadCard(loadId);
+            removeLoad(loadId);
         });
 
         // Listen for updated loads
         onChildChanged(loadsRef, (snapshot) => {
             const loadId = snapshot.key;
             const loadData = snapshot.val();
-            if (loadData && loadData.status === 'active') {
-                addOrUpdateLoadCard(loadId, loadData);
-            } else {
-                removeLoadCard(loadId);
-            }
+            addOrUpdateLoad(loadId, loadData);
         });
+
+        setTimeout(() => {
+            if (loadsMap.size === 0) {
+                renderLoads();
+            }
+        }, 1200);
 
     </script>
 </body>
