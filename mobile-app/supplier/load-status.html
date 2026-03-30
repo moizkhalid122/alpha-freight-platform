@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>Load Status - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <style>
+        /* —— Premium theme (matches supplier dashboard) —— */
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            /* footer padding from supplier-bottom-nav.css */
+            color: var(--text-dark);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header – premium navy + gold */
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 36px 36px;
+            opacity: 0.7;
+        }
+
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
+        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+
+        /* Cards */
+        .load-summary {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1rem;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .load-summary::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 0 2px 2px 0;
+            opacity: 0.9;
+        }
+        .load-route { font-size: 1rem; font-weight: 800; color: var(--text-dark); margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .load-meta { font-size: 0.8125rem; color: var(--text-medium); font-weight: 600; }
+
+        .status-timeline {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1rem;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            opacity: 0.6;
+        }
+
+        .timeline-title {
+            font-size: 0.9375rem;
+            font-weight: 800;
+            margin-bottom: 1.25rem;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .timeline-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .timeline-step:last-child { margin-bottom: 0; }
+
+        .timeline-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 36px;
+            bottom: -1.25rem;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-step.done:not(:last-child)::after {
+            background: var(--success);
+        }
+
+        .timeline-step.current:not(:last-child)::after {
+            background: linear-gradient(to bottom, var(--primary) 50%, var(--border) 50%);
+        }
+
+        .timeline-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            z-index: 1;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .timeline-step.done .timeline-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .timeline-step.current .timeline-icon {
+            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.22), 0 6px 18px rgba(29, 78, 216, 0.18);
+        }
+
+        .timeline-step.pending .timeline-icon {
+            background: rgba(241, 245, 249, 0.9);
+            border: 1px solid var(--border);
+            color: var(--text-medium);
+            box-shadow: none;
+        }
+
+        .timeline-step.cancelled .timeline-icon {
+            background: var(--error);
+            color: white;
+        }
+
+        .timeline-content { flex: 1; min-width: 0; }
+        .timeline-label { font-size: 0.9375rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.02em; }
+        .timeline-step.pending .timeline-label { color: var(--text-medium); }
+        .timeline-date { font-size: 0.75rem; color: var(--text-medium); margin-top: 0.25rem; }
+
+        .actions-section {
+            margin: 0 1.25rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.875rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-action.primary { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+        .btn-action.success { background: linear-gradient(145deg, #10b981 0%, var(--success) 100%); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
+        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .empty-state i { font-size: 3rem; color: var(--text-medium); margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s var(--ease) infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        @media (min-width: 768px) { body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); } }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Load Status</h1>
+            <p class="page-subtitle" id="loadRef">Loading...</p>
+        </div>
+    </div>
+
+    <div id="contentArea">
+        <div class="loading"><div class="spinner"></div></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="post-load.html" class="bottom-nav-item"><i class="fas fa-plus-circle"></i><span>Post</span></a>
+        <a href="my-loads.html" class="bottom-nav-item active"><i class="fas fa-boxes"></i><span>Loads</span></a>
+        <a href="messages.html" class="bottom-nav-item"><i class="fas fa-comments"></i><span>Chat</span></a>
+        <a href="profile.html" class="bottom-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const loadId = params.get('id') || params.get('loadId') || '';
+
+        const STEPS = [
+            { key: 'posted', label: 'Posted', statuses: ['available', 'pending'], dateKey: 'createdAt' },
+            { key: 'accepted', label: 'Accepted', statuses: ['active', 'accepted'], dateKey: 'acceptedAt' },
+            { key: 'picked', label: 'Picked Up', statuses: ['picked-up', 'picked_up'], dateKey: 'pickedUpAt' },
+            { key: 'transit', label: 'In Transit', statuses: ['in-transit', 'in_transit'], dateKey: 'inTransitAt' },
+            { key: 'delivered', label: 'Delivered', statuses: ['completed', 'delivered'], dateKey: 'deliveredAt' }
+        ];
+
+        const CANCELLED_STEP = { key: 'cancelled', label: 'Cancelled', statuses: ['cancelled', 'canceled'] };
+
+        function formatDate(str) {
+            if (!str) return '';
+            try {
+                return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch { return str; }
+        }
+
+        function formatCurrency(amt) {
+            return '£' + parseFloat(amt || 0).toLocaleString('en-GB', { minimumFractionDigits: 2 });
+        }
+
+        function getCurrentStep(status) {
+            const s = (status || '').toLowerCase();
+            if (['cancelled', 'canceled'].includes(s)) return 'cancelled';
+            for (let i = STEPS.length - 1; i >= 0; i--) {
+                if (STEPS[i].statuses.some(x => s.includes(x))) return STEPS[i].key;
+            }
+            return 'posted';
+        }
+
+        function getLoadFromCache() {
+            try {
+                const raw = sessionStorage.getItem('supplier_my_loads');
+                if (!raw) return null;
+                const { data } = JSON.parse(raw);
+                return Array.isArray(data) ? data.find(l => (l.loadId || l.id) === loadId) : null;
+            } catch (e) { return null; }
+        }
+
+        function renderContent(load) {
+            if (!load) {
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Load Not Found</h3>
+                        <p>This load may have been removed.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const lid = load.loadId || load.id || loadId;
+            const status = (load.status || '').toLowerCase();
+            const pickup = load.pickupLocation || load.from || 'N/A';
+            const delivery = load.deliveryLocation || load.to || 'N/A';
+            const price = load.price || load.budget || load.maxBudget || load.minBudget || 0;
+            const currentStep = getCurrentStep(load.status);
+            const isCancelled = ['cancelled', 'canceled'].includes(status);
+
+            document.getElementById('loadRef').textContent = `Load #${(lid + '').substring(0, 8)}`;
+
+            let stepsToRender = [];
+            const currentIdx = STEPS.findIndex(s => s.key === currentStep);
+
+            if (isCancelled) {
+                stepsToRender = STEPS.slice(0, 1).map((step) => ({
+                    ...step,
+                    state: 'done',
+                    date: load[step.dateKey] ? formatDate(load[step.dateKey]) : ''
+                }));
+                stepsToRender.push({ ...CANCELLED_STEP, state: 'cancelled', date: formatDate(load.cancelledAt) });
+            } else {
+                stepsToRender = STEPS.map((step, i) => {
+                    let state = 'pending';
+                    if (i < currentIdx) state = 'done';
+                    else if (i === currentIdx) state = 'current';
+                    const date = load[step.dateKey] ? formatDate(load[step.dateKey]) : '';
+                    return { ...step, state, date };
+                });
+            }
+            const timelineBody = (stepsToRender || []).map((step) => `
+                <div class="timeline-step ${step.state}">
+                    <div class="timeline-icon">
+                        ${step.state === 'done' ? '<i class="fas fa-check"></i>' : 
+                          step.state === 'cancelled' ? '<i class="fas fa-times"></i>' : 
+                          step.key === 'posted' ? '<i class="fas fa-box"></i>' :
+                          step.key === 'accepted' ? '<i class="fas fa-handshake"></i>' :
+                          step.key === 'picked' ? '<i class="fas fa-truck-loading"></i>' :
+                          step.key === 'transit' ? '<i class="fas fa-truck"></i>' :
+                          step.key === 'delivered' ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-circle"></i>'}
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-label">${step.label}</div>
+                        ${step.date ? `<div class="timeline-date">${step.date}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            let actionsHTML = '';
+            if (!isCancelled) {
+                if (['active', 'accepted', 'in_transit', 'in-transit'].includes(status)) {
+                    actionsHTML = `
+                        <a href="track.html?loadId=${lid}" class="btn-action primary">
+                            <i class="fas fa-map-marker-alt"></i> Track
+                        </a>
+                        <a href="pay-now.html?loadId=${lid}&amount=${price}&paymentFor=Load%20Payment&paymentType=Payment" class="btn-action success">
+                            <i class="fas fa-credit-card"></i> Pay
+                        </a>
+                    `;
+                } else if (['completed', 'delivered'].includes(status)) {
+                    actionsHTML = `
+                        <a href="pay-now.html?loadId=${lid}&amount=${price}&paymentFor=Load%20Payment&paymentType=Payment" class="btn-action success">
+                            <i class="fas fa-credit-card"></i> Pay Now
+                        </a>
+                    `;
+                } else {
+                    actionsHTML = `
+                        <a href="load-details.html?id=${lid}" class="btn-action secondary">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                    `;
+                }
+            }
+
+            document.getElementById('contentArea').innerHTML = `
+                <div class="load-summary">
+                    <div class="load-route">${pickup} → ${delivery}</div>
+                    <div class="load-meta">${load.cargoType || load.cargo || 'General'} • ${formatCurrency(price)}</div>
+                </div>
+                <div class="status-timeline">
+                    <div class="timeline-title">Status Timeline</div>
+                    ${timelineBody}
+                </div>
+                ${actionsHTML ? `<div class="actions-section">${actionsHTML}</div>` : ''}
+            `;
+        }
+
+        async function load() {
+            if (!loadId) {
+                document.getElementById('loadRef').textContent = 'No load selected';
+                renderContent(null);
+                return;
+            }
+
+            const cached = getLoadFromCache();
+            if (cached) renderContent(cached);
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const snap = await db.ref('loads/' + loadId).once('value');
+                const load = snap.val();
+                if (load) {
+                    load.loadId = loadId;
+                    load.id = loadId;
+                    renderContent(load);
+                } else if (!cached) renderContent(null);
+            } catch (e) {
+                if (!cached) renderContent(null);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', load);
+    </script>
+</body>
+</html>

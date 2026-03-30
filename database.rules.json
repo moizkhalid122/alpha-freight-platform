@@ -2,150 +2,188 @@
   "rules": {
     "loads": {
       ".read": true,
-      ".write": true,
+      ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || newData.child('supplierFirebaseUid').val() === auth.uid || newData.child('carrierFirebaseUid').val() === auth.uid)",
       ".indexOn": ["supplierId", "carrierId", "status"],
       "$loadId": {
         ".read": true,
-        ".write": true
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || newData.child('supplierFirebaseUid').val() === auth.uid || newData.child('carrierFirebaseUid').val() === auth.uid)"
       }
     },
     "vehicles": {
-      ".read": true,
-      ".write": true
+      ".read": "auth != null",
+      ".write": "auth != null"
     },
     "users": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$userId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "suppliers": {
-      ".read": true,
-      ".write": true,
-      ".indexOn": ["email"],
+      ".read": "auth != null || (query.orderByChild == 'email' && query.limitToFirst <= 1 && query.equalTo != null)",
+      ".write": "auth != null",
+      ".indexOn": ["email", "firebaseUid"],
       "$supplierId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "carriers": {
-      ".read": true,
-      ".write": true,
-      ".indexOn": ["email"],
+      ".read": "auth != null || (query.orderByChild == 'email' && query.limitToFirst <= 1 && query.equalTo != null)",
+      ".write": "auth != null",
+      ".indexOn": ["email", "firebaseUid"],
       "$carrierId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "appeals": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$appealId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
+    "twoFASecrets": {
+      ".read": false,
+      ".write": false
+    },
     "messages": {
-      ".read": true,
-      ".write": true,
-      ".indexOn": ["recipientId", "senderId", "carrierId", "supplierId"],
-      "$userId": {
+      ".read": "( (query.orderByChild == 'carrierId' && query.equalTo != null) || (query.orderByChild == 'supplierId' && query.equalTo != null) || (auth != null && (query.orderByChild == 'carrierUid' && query.equalTo == auth.uid)) || (auth != null && (query.orderByChild == 'supplierUid' && query.equalTo == auth.uid)) || (auth != null && (query.orderByChild == 'senderUid' && query.equalTo == auth.uid)) )",
+      ".write": "auth != null",
+      ".indexOn": ["recipientId", "senderId", "carrierId", "supplierId", "carrierUid", "supplierUid", "senderUid"],
+      "$messageId": {
         ".read": true,
-        ".write": true,
-        "$messageId": {
-          ".read": true,
-          ".write": true
-        }
+        ".write": "auth != null && (newData.child('carrierUid').val() === auth.uid || newData.child('supplierUid').val() === auth.uid || newData.child('senderUid').val() === auth.uid)"
       }
     },
     "notifications": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       ".indexOn": ["user_id", "user_type", "read"],
       "$notificationId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "refunds": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["loadId", "status", "createdAt"],
+      "$refundId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "chargebacks": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["loadId", "status", "createdAt"],
+      "$chargebackId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "walletLedger": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$carrierId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$entryId": {
+          ".read": "auth != null",
+          ".write": "auth != null"
+        }
       }
     },
     "driverLocations": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$driverId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "loadLocations": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$loadId": {
-        ".read": true,
-        ".write": true,
+        ".read": "auth != null",
+        ".write": "auth != null",
         "$driverId": {
-          ".read": true,
-          ".write": true
+          ".read": "auth != null",
+          ".write": "auth != null"
         }
       }
     },
     "social": {
-      "users": { ".read": true, ".write": true },
-      "posts": { ".read": true, ".write": true },
-      "notifications": { ".read": true, ".write": true },
-      "comments": { ".read": true, ".write": true }
+      "users": { ".read": "auth != null", ".write": "auth != null" },
+      "posts": { ".read": "auth != null", ".write": "auth != null" },
+      "notifications": { ".read": "auth != null", ".write": "auth != null" },
+      "comments": { ".read": "auth != null", ".write": "auth != null" }
     },
     "payments": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$paymentId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "withdrawals": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$withdrawalId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "wallets": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$carrierId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "carrierBankDetails": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$carrierId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
     "carrierWithdrawals": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       "$carrierId": {
-        ".read": true,
-        ".write": true,
+        ".read": "auth != null",
+        ".write": "auth != null",
         "$withdrawalId": {
-          ".read": true,
-          ".write": true
+          ".read": "auth != null",
+          ".write": "auth != null"
         }
       }
     },
     "payLetterPending": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null",
+      ".write": "auth != null",
       ".indexOn": ["supplierId", "status", "loadId"],
       "$orderId": {
-        ".read": true,
-        ".write": true
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "admins": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     }
   }

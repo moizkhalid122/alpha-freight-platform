@@ -841,6 +841,7 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <script>
         // Firebase init
@@ -860,6 +861,34 @@
         })();
 
         var db = (typeof firebase !== 'undefined' && firebase.database) ? firebase.database() : null;
+        var authReady = null;
+
+        function ensureFirebaseAccess() {
+            if (!db || typeof firebase === 'undefined' || !firebase.auth) {
+                return Promise.resolve(false);
+            }
+            if (authReady) return authReady;
+
+            const authSdk = firebase.auth();
+            authReady = new Promise((resolve) => {
+                const unsub = authSdk.onAuthStateChanged((user) => {
+                    if (user) {
+                        try { unsub(); } catch (e) {}
+                        resolve(true);
+                    }
+                });
+
+                authSdk.signInAnonymously().then(() => {
+                    resolve(true);
+                }).catch((err) => {
+                    try { unsub(); } catch (e) {}
+                    console.error('Auth error:', err);
+                    resolve(false);
+                });
+            });
+
+            return authReady;
+        }
 
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -1075,7 +1104,7 @@
         }
 
         // Form submit
-        signinForm.addEventListener('submit', function (e) {
+        signinForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const isEmailValid = validateEmail();
@@ -1098,7 +1127,15 @@
 
             const normalizedEmail = email.trim().toLowerCase();
 
-            db.ref('suppliers').orderByChild('email').equalTo(normalizedEmail).once('value', function (snapshot) {
+            const hasAccess = await ensureFirebaseAccess();
+            if (!hasAccess) {
+                showToast('Login is temporarily blocked by database permissions.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const snapshot = await db.ref('suppliers').orderByChild('email').equalTo(normalizedEmail).limitToFirst(1).once('value');
                 let matched = null;
 
                 if (snapshot && snapshot.exists()) {
@@ -1127,11 +1164,11 @@
                     passwordError.textContent = 'Incorrect email or password.';
                     setLoading(false);
                 }
-            }, function (error) {
+            } catch (error) {
                 console.error('Login error:', error);
                 showToast('Connection issue. Please try again.', 'error');
                 setLoading(false);
-            });
+            }
         });
 
         // Google Sign-In (loads GSI on first click for faster page load)
@@ -1242,48 +1279,57 @@
 
             setLoading(true);
 
-            db.ref('suppliers').orderByChild('email').equalTo(normalizedEmail).once('value', function (snapshot) {
+            ensureFirebaseAccess().then(async (hasAccess) => {
+                if (!hasAccess) {
+                    showToast('Login is temporarily blocked by database permissions.', 'error');
+                    setLoading(false);
+                    return;
+                }
+
                 let matched = null;
 
-                if (snapshot && snapshot.exists()) {
-                    snapshot.forEach(function (child) {
-                        const supplier = child.val() || {};
-                        const supplierEmail = (supplier.email || '').trim().toLowerCase();
-                        if (!supplier.supplierId) {
-                            supplier.supplierId = child.key;
-                        }
-                        if (!supplier.id) {
-                            supplier.id = child.key;
-                        }
-                        if (supplierEmail === normalizedEmail && !matched) {
-                            matched = supplier;
-                        }
-                    });
-                }
+                try {
+                    const snapshot = await db.ref('suppliers').orderByChild('email').equalTo(normalizedEmail).limitToFirst(1).once('value');
 
-                if (matched) {
-                    finishLogin(matched, true);
-                } else {
-                    // No existing supplier for this email -> redirect to registration
-                    try {
-                        localStorage.setItem('pendingGoogleUser', JSON.stringify({
-                            email: normalizedEmail,
-                            firstName: user.given_name || '',
-                            lastName: user.family_name || '',
-                            fullName: user.name || ''
-                        }));
-                    } catch (e) {}
+                    if (snapshot && snapshot.exists()) {
+                        snapshot.forEach(function (child) {
+                            const supplier = child.val() || {};
+                            const supplierEmail = (supplier.email || '').trim().toLowerCase();
+                            if (!supplier.supplierId) {
+                                supplier.supplierId = child.key;
+                            }
+                            if (!supplier.id) {
+                                supplier.id = child.key;
+                            }
+                            if (supplierEmail === normalizedEmail && !matched) {
+                                matched = supplier;
+                            }
+                        });
+                    }
 
+                    if (matched) {
+                        finishLogin(matched, true);
+                    } else {
+                        try {
+                            localStorage.setItem('pendingGoogleUser', JSON.stringify({
+                                email: normalizedEmail,
+                                firstName: user.given_name || '',
+                                lastName: user.family_name || '',
+                                fullName: user.name || ''
+                            }));
+                        } catch (e) {}
+
+                        setLoading(false);
+                        showToast('No account found. Redirecting…', 'info');
+                        setTimeout(() => {
+                            window.location.href = 'supplier-registration.html';
+                        }, 200);
+                    }
+                } catch (error) {
+                    console.error('Google login Firebase error:', error);
+                    showToast('Login failed. Please try again.', 'error');
                     setLoading(false);
-                    showToast('No account found. Redirecting…', 'info');
-                    setTimeout(() => {
-                        window.location.href = 'supplier-registration.html';
-                    }, 200);
                 }
-            }, function (error) {
-                console.error('Google login Firebase error:', error);
-                showToast('Login failed. Please try again.', 'error');
-                setLoading(false);
             });
         }
     </script>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Tracking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --bg: #F3F4F6;
+            --card: rgba(255,255,255,0.92);
+            --border: rgba(148,163,184,0.35);
+            --text: #0F172A;
+            --muted: #64748B;
+            --shadow: 0 12px 30px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+        }
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(1200px 600px at -10% -20%, rgba(99,102,241,0.08), transparent 60%),
+                radial-gradient(1200px 600px at 110% -10%, rgba(20,184,166,0.08), transparent 60%),
+                var(--bg);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 980px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #4F46E5 0%, #22D3EE 100%);
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+        .map {
+            height: 520px;
+        }
+        .footer {
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--muted);
+            flex-wrap: wrap;
+        }
+        .stats {
+            display: flex;
+            gap: 16px;
+        }
+        .stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: rgba(79,70,229,0.08);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <div class="header">
+                <div class="title">
+                    <span>Live Tracking</span>
+                    <span class="badge">LIVE • 30s updates</span>
+                </div>
+                <div id="routeText"></div>
+            </div>
+            <div id="map" class="map"></div>
+            <div class="footer">
+                <div class="stats">
+                    <div class="stat">Speed: <span id="statSpeed">—</span></div>
+                    <div class="stat">Heading: <span id="statHeading">—</span></div>
+                    <div class="stat">Last Update: <span id="statLast">—</span></div>
+                </div>
+                <div>Powered by Alpha Freight • Public tracking view</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/google-maps-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+            authDomain: "alpha-brokerage.firebaseapp.com",
+            databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+            projectId: "alpha-brokerage",
+            storageBucket: "alpha-brokerage.firebasestorage.app",
+            messagingSenderId: "834712514965",
+            appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        const params = new URLSearchParams(window.location.search);
+        const loadId = params.get('loadId');
+
+        let map = null;
+        let marker = null;
+        let currentRef = null;
+        let found = false;
+
+        function formatHeading(h) {
+            if (h === null || h === undefined) return '—';
+            const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+            const i = Math.round(h / 45) % 8;
+            return dirs[i];
+        }
+
+        function updateStats(data) {
+            const s = document.getElementById('statSpeed');
+            const h = document.getElementById('statHeading');
+            const t = document.getElementById('statLast');
+            const sp = parseFloat(data.speed || 0);
+            s.textContent = isNaN(sp) ? '—' : (sp + ' mph');
+            h.textContent = formatHeading(data.heading);
+            t.textContent = data.timestamp ? new Date(data.timestamp).toLocaleString() : '—';
+        }
+
+        function updateMarker(data, label) {
+            const lat = data.latitude || data.lat;
+            const lng = data.longitude || data.lng;
+            if (!lat || !lng) return;
+            if (!marker) {
+                marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map,
+                    title: label || 'Carrier'
+                });
+                map.setCenter({ lat: lat, lng: lng });
+                map.setZoom(13);
+            } else {
+                marker.setPosition({ lat: lat, lng: lng });
+            }
+            updateStats(data);
+        }
+
+        function drawRoute(load) {
+            const p = load.pickupLocation;
+            const d = load.deliveryLocation;
+            const rt = document.getElementById('routeText');
+            rt.textContent = p && d ? (p + ' → ' + d) : '';
+        }
+
+        function listenPaths(loadId, driverId, carrierName) {
+            const paths = [];
+            if (driverId) paths.push(`loadLocations/${loadId}/${driverId}`);
+            paths.push(`loadLocations/${loadId}`);
+            if (driverId) paths.push(`driverLocations/${driverId}`);
+            paths.push(`loads/${loadId}/currentLocation`);
+            paths.forEach((p, idx) => {
+                const ref = db.ref(p);
+                ref.on('value', snap => {
+                    if (found) return;
+                    let data = snap.val();
+                    if (data && p === `loadLocations/${loadId}` && typeof data === 'object') {
+                        const k = Object.keys(data)[0];
+                        data = k ? data[k] : null;
+                    }
+                    if (data && (data.latitude || data.lat) && (data.longitude || data.lng)) {
+                        found = true;
+                        currentRef = ref;
+                        updateMarker(data, carrierName || 'Carrier');
+                        paths.forEach((pp, i) => { if (i !== idx) db.ref(pp).off(); });
+                        ref.on('value', u => {
+                            const d = u.val();
+                            if (d && (d.latitude || d.lat)) updateMarker(d, carrierName || 'Carrier');
+                        });
+                    }
+                });
+            });
+        }
+
+        function start() {
+            if (!loadId) {
+                if (map) {
+                    map.setCenter({ lat: 51.5074, lng: -0.1278 });
+                    map.setZoom(6);
+                }
+                return;
+            }
+            db.ref(`loads/${loadId}`).once('value').then(s => {
+                const load = s.val() || {};
+                const driverId = load.driverId || load.driver_id || '';
+                const carrierName = load.carrierName || 'Carrier';
+                drawRoute(load);
+                listenPaths(loadId, driverId, carrierName);
+            }).catch(() => {
+                listenPaths(loadId, '', 'Carrier');
+            });
+        }
+
+        function loadGoogleMaps() {
+            const apiKey = window.GOOGLE_MAPS_API_KEY || '';
+            if (!apiKey) {
+                document.getElementById('map').innerHTML = '<div style="padding:1rem;text-align:center;color:#64748B;">Google Maps API key required</div>';
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey + '&libraries=geometry';
+            script.async = true;
+            script.defer = true;
+            script.onload = function() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 51.5074, lng: -0.1278 },
+                    zoom: 6,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+                start();
+            };
+            script.onerror = function() {
+                document.getElementById('map').innerHTML = '<div style="padding:1rem;text-align:center;color:#EF4444;">Failed to load Google Maps</div>';
+            };
+            document.head.appendChild(script);
+        }
+
+        loadGoogleMaps();
+    </script>
+</body>
+</html>

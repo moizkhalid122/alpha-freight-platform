@@ -1,24 +1,88 @@
 // Alpha Freight - App Service Worker for Offline Support
 // This service worker caches app files and enables offline functionality
 
-const CACHE_NAME = 'alpha-brokrage-app-v1';
-const OFFLINE_CACHE = 'alpha-brokrage-offline-v1';
+const CACHE_NAME = 'alpha-brokrage-app-v2';
+const OFFLINE_CACHE = 'alpha-brokrage-offline-v2';
+
+// Firebase Cloud Messaging (FCM) for background push notifications
+try {
+    importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
+    importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
+        authDomain: "alpha-brokerage.firebaseapp.com",
+        databaseURL: "https://alpha-brokerage-default-rtdb.firebaseio.com",
+        projectId: "alpha-brokerage",
+        storageBucket: "alpha-brokerage.firebasestorage.app",
+        messagingSenderId: "834712514965",
+        appId: "1:834712514965:web:5dbe0aa2e4eab3cb16c69c"
+    };
+
+    if (!firebase.apps || firebase.apps.length === 0) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const messaging = firebase.messaging();
+
+    messaging.onBackgroundMessage((payload) => {
+        const notificationTitle = payload.notification?.title || 'Alpha Freight';
+        const notificationOptions = {
+            body: payload.notification?.body || payload.data?.body || 'You have a new notification',
+            icon: '/image-removebg-preview - 2025-10-29T055946.105.png',
+            badge: '/image-removebg-preview - 2025-10-29T055946.105.png',
+            tag: (payload.data?.type || 'notification') + '_' + Date.now(),
+            data: payload.data || {},
+            requireInteraction: true,
+            silent: false
+        };
+        self.registration.showNotification(notificationTitle, notificationOptions);
+    });
+
+    self.addEventListener('notificationclick', (event) => {
+        event.notification.close();
+        const data = event.notification.data || {};
+
+        let url = '/mobile-app/carrier/dashboard.html';
+        if (data && data.userType === 'supplier') url = '/mobile-app/supplier/dashboard.html';
+
+        if (data.type === 'new_load') {
+            url = '/mobile-app/carrier/loads.html';
+        } else if (data.type === 'load_accepted') {
+            url = '/mobile-app/supplier/my-loads.html';
+        } else if (data.type === 'message') {
+            url = (data.userType === 'supplier') ? '/mobile-app/supplier/messages.html' : '/mobile-app/carrier/messages.html';
+        } else if (data.type === 'deposit' || data.type === 'withdrawal') {
+            url = '/mobile-app/carrier/wallet.html';
+        }
+
+        event.waitUntil(
+            self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+                for (const client of clientsArr) {
+                    try {
+                        if (client.url.includes(url) && 'focus' in client) return client.focus();
+                    } catch (e) {}
+                }
+                if (self.clients.openWindow) return self.clients.openWindow(url);
+            })
+        );
+    });
+} catch (e) {
+    // ignore - push will be disabled if scripts fail
+}
 
 // Files to cache for offline use
 const STATIC_CACHE_FILES = [
-    '/app/index.html',
-    '/app/splash.html',
-    '/app/onboarding.html',
-    '/app/carrier/dashboard.html',
-    '/app/carrier/loads.html',
-    '/app/carrier/my-loads.html',
-    '/app/carrier/messages.html',
-    '/app/carrier/profile.html',
-    '/app/supplier/dashboard.html',
-    '/app/supplier/post-load.html',
-    '/app/supplier/loads.html',
-    '/app/supplier/messages.html',
-    '/app/supplier/profile.html',
+    '/mobile-app/index.html',
+    '/mobile-app/carrier/dashboard.html',
+    '/mobile-app/carrier/loads.html',
+    '/mobile-app/carrier/my-loads.html',
+    '/mobile-app/carrier/messages.html',
+    '/mobile-app/carrier/profile.html',
+    '/mobile-app/supplier/dashboard.html',
+    '/mobile-app/supplier/post-load.html',
+    '/mobile-app/supplier/messages.html',
+    '/mobile-app/supplier/profile.html',
     '/assets/css/style.css',
     '/assets/js/notifications.js',
     '/assets/js/push-notifications-integration.js',
@@ -84,7 +148,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     // For app HTML files, try cache first
-    if (request.url.includes('/app/') && request.url.endsWith('.html')) {
+    if (request.url.includes('/mobile-app/') && request.url.endsWith('.html')) {
         event.respondWith(
             caches.match(request)
                 .then((cachedResponse) => {
@@ -104,7 +168,7 @@ self.addEventListener('fetch', (event) => {
                         })
                         .catch(() => {
                             // Return offline page if fetch fails
-                            return caches.match('/app/index.html');
+                            return caches.match('/mobile-app/index.html');
                         });
                 })
         );

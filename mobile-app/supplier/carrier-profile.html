@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>Carrier Profile - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <style>
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1rem 1.25rem 1.1rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.25rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0.7;
+        }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
+        .page-subtitle { font-size: 0.82rem; opacity: 0.92; margin-top: 0.2rem; }
+        .card {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1rem;
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+        }
+        .profile-head {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+        .avatar {
+            width: 68px;
+            height: 68px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(29,78,216,0.12), rgba(30,58,138,0.12));
+            border: 1px solid rgba(29,78,216,0.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .name { font-weight: 900; letter-spacing: -0.02em; font-size: 1.05rem; }
+        .meta { color: var(--text-medium); font-size: 0.875rem; margin-top: 0.15rem; }
+        .stars { color: #f59e0b; letter-spacing: 0.08em; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .stat {
+            background: rgba(241, 245, 249, 0.9);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.9rem;
+        }
+        .stat .k { font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.06em; color: var(--text-medium); text-transform: uppercase; }
+        .stat .v { font-size: 1.05rem; font-weight: 900; margin-top: 0.25rem; }
+        .rowline { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-top: 1px solid var(--border); }
+        .rowline:first-child { border-top: 0; padding-top: 0; }
+        .rowline .k { color: var(--text-medium); font-weight: 800; }
+        .rowline .v { font-weight: 800; color: var(--text-dark); text-align: right; }
+        .btn-row { display: flex; gap: 0.75rem; }
+        .btn-action {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            text-decoration: none;
+        }
+        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+        .muted { color: var(--text-medium); font-size: 0.9rem; }
+        @media (min-width: 768px) { body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); } }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Carrier Profile</h1>
+            <p class="page-subtitle" id="subtitle">Loading…</p>
+        </div>
+    </div>
+
+    <div id="contentArea">
+        <div class="card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
+                <div class="muted">Loading carrier…</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="post-load.html" class="bottom-nav-item"><i class="fas fa-plus-circle"></i><span>Post</span></a>
+        <a href="my-loads.html" class="bottom-nav-item active"><i class="fas fa-boxes"></i><span>Loads</span></a>
+        <a href="messages.html" class="bottom-nav-item"><i class="fas fa-comments"></i><span>Chat</span></a>
+        <a href="profile.html" class="bottom-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+    <script>
+        const alertSystem = new AlertSystem();
+        const params = new URLSearchParams(location.search);
+        const carrierId = params.get('id') || params.get('carrierId') || '';
+
+        function getInitials(name) {
+            const n = (name || '').trim();
+            if (!n) return 'C';
+            const parts = n.split(/\s+/).filter(Boolean);
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return n.substring(0, 2).toUpperCase();
+        }
+
+        function buildStars(rating) {
+            const r = Math.max(0, Math.min(5, Math.round((parseFloat(rating) || 0) * 2) / 2));
+            let stars = '';
+            for (let i = 1; i <= 5; i++) stars += i <= Math.round(r) ? '★' : '☆';
+            return stars;
+        }
+
+        function normalizeStatus(s) {
+            const t = String(s || '').toLowerCase().replace(/_/g, '-');
+            if (t === 'complete') return 'completed';
+            if (t === 'intransit') return 'in-transit';
+            return t;
+        }
+
+        function sanitizeFirebaseKey(key) {
+            return String(key || '').replace(/[.#$\[\]\/]/g, '_');
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            if (!authSdk.currentUser && typeof authSdk.signInAnonymously === 'function') {
+                try { await authSdk.signInAnonymously(); } catch (e) {}
+            }
+            if (!authSdk.currentUser) {
+                await new Promise((resolve) => {
+                    let done = false;
+                    const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                    const unsub = authSdk.onAuthStateChanged(() => {
+                        if (done) return;
+                        done = true;
+                        clearTimeout(timer);
+                        try { unsub(); } catch (e) {}
+                        resolve();
+                    });
+                });
+            }
+        }
+
+        async function resolveCarrierProfile(rawId) {
+            const id = String(rawId || '').trim();
+            if (!id) return null;
+            const db = window.AlphaBrokrage.firebaseDb;
+            const candidates = [];
+            candidates.push(id);
+            const sanitized = sanitizeFirebaseKey(id);
+            if (sanitized && sanitized !== id) candidates.push(sanitized);
+
+            for (const cand of candidates) {
+                try {
+                    const snap = await db.ref('carriers/' + cand).once('value');
+                    if (snap.exists()) {
+                        const p = snap.val() || {};
+                        if (!p.carrierId) p.carrierId = cand;
+                        return { key: cand, profile: p };
+                    }
+                } catch (e) {}
+            }
+
+            if (id.includes('@')) {
+                try {
+                    const snap = await db.ref('carriers').orderByChild('email').equalTo(id).limitToFirst(1).once('value');
+                    if (snap.exists()) {
+                        let out = null;
+                        snap.forEach((child) => {
+                            if (out) return true;
+                            const p = child.val() || {};
+                            out = { key: child.key, profile: { ...p, carrierId: p.carrierId || child.key } };
+                            return true;
+                        });
+                        if (out) return out;
+                    }
+                } catch (e) {}
+            }
+
+            return { key: sanitized, profile: null };
+        }
+
+        async function fetchCarrierLoadsByCarrierId(id) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            const snap = await db.ref('loads').orderByChild('carrierId').equalTo(id).limitToLast(500).once('value');
+            const out = [];
+            if (snap.exists()) {
+                snap.forEach((child) => {
+                    const load = child.val() || {};
+                    out.push({ id: child.key, status: load.status, carrierRating: load.carrierRating });
+                });
+            }
+            return out;
+        }
+
+        async function computeCarrierStatsAny(key, profile) {
+            const ids = [];
+            if (key) ids.push(String(key));
+            if (profile && profile.email) ids.push(String(profile.email));
+            if (profile && profile.email) ids.push(sanitizeFirebaseKey(String(profile.email)));
+            const uniq = Array.from(new Set(ids.filter(Boolean)));
+            const seenLoads = new Set();
+            let total = 0;
+            let completed = 0;
+            let active = 0;
+            const ratings = [];
+            for (const id of uniq) {
+                try {
+                    const loads = await fetchCarrierLoadsByCarrierId(id);
+                    for (const load of loads) {
+                        if (!load || !load.id || seenLoads.has(load.id)) continue;
+                        seenLoads.add(load.id);
+                        total += 1;
+                        const st = normalizeStatus(load.status);
+                        if (st === 'completed' || st === 'delivered') completed += 1;
+                        if (['accepted', 'picked-up', 'in-transit', 'active'].includes(st)) active += 1;
+                        const rt = parseFloat(load.carrierRating || 0) || 0;
+                        if ((st === 'completed' || st === 'delivered') && rt > 0) ratings.push(rt);
+                    }
+                } catch (e) {}
+            }
+
+            if (!ratings.length) return { total, completed, active, rating: 0, ratingCount: 0 };
+            const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+            return { total, completed, active, rating: Math.round(avg * 10) / 10, ratingCount: ratings.length };
+        }
+
+        function safe(v) { return v == null ? '' : String(v); }
+
+        function render(profile, stats) {
+            const displayName = (profile && (profile.companyName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email)) || 'Carrier';
+            const photoUrl = profile && (profile.profilePhoto || profile.photoUrl || profile.avatarUrl || profile.photoURL);
+            const addressParts = [profile && profile.address, profile && profile.city, profile && profile.postcode, profile && profile.country].filter(Boolean);
+            const address = addressParts.join(', ');
+            const ratingText = stats && stats.ratingCount ? `${stats.rating}/5 (${stats.ratingCount})` : 'New';
+            const stars = stats && stats.ratingCount ? buildStars(stats.rating) : '☆☆☆☆☆';
+
+            document.getElementById('subtitle').textContent = safe(profile && (profile.email || profile.phone)) || 'Carrier';
+
+            document.getElementById('contentArea').innerHTML = `
+                <div class="card">
+                    <div class="profile-head">
+                        <div class="avatar">${photoUrl ? `<img src="${safe(photoUrl).replace(/\"/g, '&quot;')}" alt="Carrier">` : getInitials(displayName)}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="name">${safe(displayName)}</div>
+                            <div class="meta">
+                                <span class="stars">${stars}</span>
+                                <span style="margin-left:0.4rem;">${ratingText}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <div class="stat"><div class="k">Total Loads</div><div class="v">${stats ? stats.total : 0}</div></div>
+                        <div class="stat"><div class="k">Completed</div><div class="v">${stats ? stats.completed : 0}</div></div>
+                        <div class="stat"><div class="k">Active</div><div class="v">${stats ? stats.active : 0}</div></div>
+                        <div class="stat"><div class="k">Rating</div><div class="v">${stats && stats.ratingCount ? stats.rating : '—'}</div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="rowline"><div class="k">Company</div><div class="v">${safe(profile && profile.companyName) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Name</div><div class="v">${safe((profile && `${profile.firstName || ''} ${profile.lastName || ''}`.trim())) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Email</div><div class="v">${safe(profile && profile.email) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Phone</div><div class="v">${safe(profile && profile.phone) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Address</div><div class="v">${safe(address) || '—'}</div></div>
+                </div>
+
+                <div class="card">
+                    <div class="btn-row">
+                        <a class="btn-action secondary" href="javascript:history.back()"><i class="fas fa-arrow-left"></i> Back</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function init() {
+            (() => { try { return JSON.parse(localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile') || '{}'); } catch { return {}; } })();
+            if (!carrierId) {
+                alertSystem.show('Missing carrier id', 'error');
+                document.getElementById('subtitle').textContent = 'Not available';
+                return;
+            }
+            try {
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) {
+                    alertSystem.show('Unable to start session', 'error');
+                    return;
+                }
+                const resolved = await resolveCarrierProfile(carrierId);
+                const key = resolved && resolved.key ? resolved.key : sanitizeFirebaseKey(carrierId);
+                const profile = resolved ? resolved.profile : null;
+                if (!profile) {
+                    alertSystem.show('Carrier not found', 'error');
+                    document.getElementById('subtitle').textContent = 'Not found';
+                    return;
+                }
+                const stats = await computeCarrierStatsAny(key, profile);
+                render(profile, stats);
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('Failed to load carrier profile', 'error');
+                document.getElementById('subtitle').textContent = 'Error';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

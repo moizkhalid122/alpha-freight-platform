@@ -2057,6 +2057,97 @@
         .offline-indicator.show {
             display: block;
         }
+
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #3730A3;
+            --primary-light: #A5B4FC;
+            --secondary: #14B8A6;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F3F4F6;
+            --card-bg: rgba(255,255,255,0.85);
+            --border: rgba(148,163,184,0.35);
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #94a3b8;
+            --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #22D3EE 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --sidebar-bg: rgba(255,255,255,0.8);
+            --sidebar-text: #374151;
+            --sidebar-active: rgba(99,102,241,0.08);
+            --card-shadow: 0 12px 30px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+            --hover-shadow: 0 20px 40px rgba(15,23,42,0.18), 0 8px 16px rgba(15,23,42,0.10);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 12px 30px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+            --shadow-md: 0 20px 40px rgba(15,23,42,0.18), 0 8px 16px rgba(15,23,42,0.10);
+            --shadow-lg: 0 24px 60px rgba(15,23,42,0.20), 0 10px 24px rgba(15,23,42,0.12);
+        }
+
+        body {
+            background:
+                radial-gradient(1200px 600px at -10% -20%, rgba(99,102,241,0.08), transparent 60%),
+                radial-gradient(1200px 600px at 110% -10%, rgba(20,184,166,0.08), transparent 60%),
+                var(--bg-main);
+        }
+
+        .dashboard-sidebar {
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-section {
+            backdrop-filter: blur(12px);
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-link {
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover {
+            border-color: rgba(99,102,241,0.25);
+            box-shadow: 0 6px 14px rgba(99,102,241,0.15);
+        }
+
+        .nav-link.active {
+            border-color: rgba(99,102,241,0.35);
+            box-shadow: 0 10px 22px rgba(99,102,241,0.20);
+        }
+
+        .card {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .form-control {
+            background: rgba(255,255,255,0.7);
+            border: 1px solid var(--border);
+        }
+
+        .selected-load-info {
+            background: rgba(248,250,252,0.8);
+            border: 1px solid var(--border);
+        }
+
+        .map-container {
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .sidebar-overlay {
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body>
@@ -2689,6 +2780,8 @@
         }
 
         // Initialize Map
+        let googleEnabled = false;
+        let googleMarker = null;
         function initMap() {
             if (currentMap) return;
             
@@ -2700,17 +2793,41 @@
                     return;
                 }
                 
-                currentMap = L.map('currentLocationMap').setView([52.4862, -1.8904], 13);
-                
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(currentMap);
+                const apiKey = window.GOOGLE_MAPS_API_KEY || '';
+                if (apiKey) {
+                    const script = document.createElement('script');
+                    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey + '&libraries=geometry';
+                    script.async = true;
+                    script.defer = true;
+                    script.onload = function() {
+                        googleEnabled = true;
+                        currentMap = new google.maps.Map(document.getElementById('currentLocationMap'), {
+                            center: { lat: 52.4862, lng: -1.8904 },
+                            zoom: 13,
+                            mapTypeId: google.maps.MapTypeId.ROADMAP
+                        });
+                    };
+                    script.onerror = function() {
+                        googleEnabled = false;
+                        currentMap = L.map('currentLocationMap').setView([52.4862, -1.8904], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors',
+                            maxZoom: 19
+                        }).addTo(currentMap);
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    currentMap = L.map('currentLocationMap').setView([52.4862, -1.8904], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(currentMap);
+                }
 
                 // Invalidate size after a short delay to ensure map renders properly
                 setTimeout(() => {
                     if (currentMap) {
-                        currentMap.invalidateSize();
+                        if (!googleEnabled && currentMap.invalidateSize) currentMap.invalidateSize();
                     }
                 }, 100);
 
@@ -2724,7 +2841,7 @@
                             const heading = position.coords.heading || 0;
                             
                             if (currentMap) {
-                                currentMap.setView([lat, lng], 15);
+                                setMapView(lat, lng, 15);
                                 updateMapMarker(lat, lng, heading);
                             }
                             reverseGeocode(lat, lng);
@@ -2778,30 +2895,49 @@
         function updateMapMarker(lat, lng, heading = null) {
             if (!currentMap) return;
 
-            if (currentMarker) {
-                currentMap.removeLayer(currentMarker);
+            if (googleEnabled) {
+                if (!googleMarker) {
+                    googleMarker = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: currentMap,
+                        title: 'You'
+                    });
+                } else {
+                    googleMarker.setPosition({ lat: lat, lng: lng });
+                }
+            } else {
+                if (currentMarker) {
+                    currentMap.removeLayer(currentMarker);
+                }
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="
+                        width: 30px;
+                        height: 30px;
+                        background: #635bff;
+                        border: 3px solid white;
+                        border-radius: 50%;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 14px;
+                    "><i class="fas fa-map-marker-alt"></i></div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30]
+                });
+                currentMarker = L.marker([lat, lng], { icon }).addTo(currentMap);
             }
+        }
 
-            const icon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="
-                    width: 30px;
-                    height: 30px;
-                    background: #635bff;
-                    border: 3px solid white;
-                    border-radius: 50%;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-size: 14px;
-                "><i class="fas fa-map-marker-alt"></i></div>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 30]
-            });
-
-            currentMarker = L.marker([lat, lng], { icon }).addTo(currentMap);
+        function setMapView(lat, lng, zoom) {
+            if (googleEnabled) {
+                currentMap.setCenter({ lat: lat, lng: lng });
+                if (zoom) currentMap.setZoom(zoom);
+            } else {
+                currentMap.setView([lat, lng], zoom || 13);
+            }
         }
 
         // Reverse Geocode
@@ -2862,7 +2998,7 @@
 
             // Update tracking link
             if (currentLoadId) {
-                document.getElementById('trackingLink').textContent = `https://track.alphafreight.com/${currentLoadId}`;
+                document.getElementById('trackingLink').textContent = buildTrackingLink(currentLoadId);
             }
             
             // Load viewers
@@ -2884,7 +3020,7 @@
 
                     // Update UI
                     updateMapMarker(lat, lng, heading);
-                    currentMap.setView([lat, lng], 15);
+                    setMapView(lat, lng, 15);
                     document.getElementById('currentSpeed').textContent = speed;
                     document.getElementById('currentHeading').textContent = getHeadingDirection(heading);
                     document.getElementById('lastUpdate').textContent = 'Just now';
@@ -3046,7 +3182,7 @@
                     const heading = position.coords.heading || 0;
                     
                     updateMapMarker(lat, lng, heading);
-                    currentMap.setView([lat, lng], 15);
+                    setMapView(lat, lng, 15);
                     reverseGeocode(lat, lng);
                     
                     // Update location info
@@ -3085,7 +3221,12 @@
         // Center Map
         function centerMap() {
             if (currentMarker && currentMap) {
-                currentMap.setView(currentMarker.getLatLng(), 15);
+                if (googleEnabled && googleMarker) {
+                    currentMap.setCenter(googleMarker.getPosition());
+                    currentMap.setZoom(15);
+                } else {
+                    currentMap.setView(currentMarker.getLatLng(), 15);
+                }
                 showNotification('Map centered on your location', 'success');
             } else {
                 updateLocation();
@@ -3156,6 +3297,12 @@
             });
         }
 
+        function buildTrackingLink(loadId) {
+            var base = 'https://www.alphafreightuk.com/pages/public/track.html';
+            if (!loadId) return base;
+            return base + '?loadId=' + encodeURIComponent(loadId);
+        }
+
         // Share WhatsApp
         function shareWhatsApp() {
             const link = document.getElementById('trackingLink').textContent;
@@ -3176,7 +3323,7 @@
             const newLoadId = 'LON-MAN-' + Math.floor(Math.random() * 1000);
             currentLoadId = newLoadId;
             localStorage.setItem('loadId', newLoadId);
-            document.getElementById('trackingLink').textContent = `https://track.alphafreight.com/${newLoadId}`;
+            document.getElementById('trackingLink').textContent = buildTrackingLink(newLoadId);
             showNotification('New tracking link generated!', 'success');
         }
 
@@ -3962,7 +4109,7 @@
 
             // Update tracking link
             if (loadId) {
-                document.getElementById('trackingLink').textContent = `https://track.alphafreight.com/${loadId}`;
+                document.getElementById('trackingLink').textContent = buildTrackingLink(loadId);
             }
         }
 
@@ -4202,7 +4349,7 @@
             localStorage.setItem('loadId', loadId);
 
             // Update tracking link
-            document.getElementById('trackingLink').textContent = `https://track.alphafreight.com/${loadId}`;
+            document.getElementById('trackingLink').textContent = buildTrackingLink(loadId);
 
             // Fetch load details
             if (firebaseDb) {

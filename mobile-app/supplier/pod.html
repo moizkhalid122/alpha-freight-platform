@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>POD - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <style>
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1rem 1.25rem 1.1rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.25rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0.7;
+        }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
+        .page-subtitle { font-size: 0.82rem; opacity: 0.92; margin-top: 0.2rem; }
+        .card {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1rem;
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+        }
+        .field-label { font-size: 0.6875rem; font-weight: 800; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
+        .muted { color: var(--text-medium); font-size: 0.9rem; }
+        .thumb {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: block;
+        }
+        .pill {
+            display: inline-flex;
+            gap: 0.4rem;
+            align-items: center;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.02);
+        }
+        .pill.good { border-color: rgba(5, 150, 105, 0.35); background: rgba(5, 150, 105, 0.08); color: var(--success); }
+        .pill.bad { border-color: rgba(220, 38, 38, 0.35); background: rgba(220, 38, 38, 0.08); color: var(--error); }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .btn-action {
+            flex: 1;
+            min-width: 140px;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            text-decoration: none;
+        }
+        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+        @media (min-width: 768px) { body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); } }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">POD</h1>
+            <p class="page-subtitle" id="subtitle">Loading…</p>
+        </div>
+    </div>
+
+    <div id="contentArea">
+        <div class="card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
+                <div class="muted">Loading POD…</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="post-load.html" class="bottom-nav-item"><i class="fas fa-plus-circle"></i><span>Post</span></a>
+        <a href="my-loads.html" class="bottom-nav-item active"><i class="fas fa-boxes"></i><span>Loads</span></a>
+        <a href="messages.html" class="bottom-nav-item"><i class="fas fa-comments"></i><span>Chat</span></a>
+        <a href="profile.html" class="bottom-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+    <script>
+        const alertSystem = new AlertSystem();
+        const params = new URLSearchParams(location.search);
+        const loadId = params.get('id') || params.get('loadId') || '';
+
+        function getSupplierAuth() {
+            try { return JSON.parse(localStorage.getItem('supplierAuth') || '{}'); } catch { return {}; }
+        }
+
+        function supplierKeyFromEmail(email) {
+            return (email || '').replace(/@/g, '_').replace(/\./g, '_');
+        }
+
+        function canAccessLoad(load, auth) {
+            const supplierId = auth.supplierId || auth.id || supplierKeyFromEmail(auth.email);
+            if (!supplierId) return false;
+            const loadSupplierId = load.supplierId || load.postedBy || supplierKeyFromEmail(load.supplierEmail);
+            return loadSupplierId === supplierId || load.supplierEmail === auth.email;
+        }
+
+        function buildSubtitle(load) {
+            const lid = (load && (load.loadId || load.id || loadId)) || loadId;
+            const pickup = (load && (load.pickupLocation || load.from)) || '';
+            const delivery = (load && (load.deliveryLocation || load.to)) || '';
+            const route = [pickup, delivery].filter(Boolean).join(' → ');
+            return 'Load #' + String(lid).substring(0, 8) + (route ? ' • ' + route : '');
+        }
+
+        function renderNotFound() {
+            document.getElementById('subtitle').textContent = 'Not available';
+            document.getElementById('contentArea').innerHTML = `
+                <div class="card text-center">
+                    <div class="mb-2"><i class="fas fa-file-circle-xmark" style="font-size:2.2rem;color:var(--text-medium);"></i></div>
+                    <div class="fw-bold">POD Not Available</div>
+                    <div class="muted mt-2">POD will appear after delivery when the carrier uploads it.</div>
+                    <div class="btn-row mt-3">
+                        <a class="btn-action secondary" href="load-details.html?id=${encodeURIComponent(loadId)}"><i class="fas fa-arrow-left"></i> Back</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPOD(load) {
+            const pod = (load && (load.pod || {})) || {};
+            const receiverName = pod.receiverName || load.podReceiverName || '';
+            const submittedAt = pod.submittedAt || load.podUploadedAt || '';
+            const lat = pod.gps && pod.gps.lat != null ? pod.gps.lat : null;
+            const lng = pod.gps && pod.gps.lng != null ? pod.gps.lng : null;
+            const acc = pod.gps && pod.gps.accuracy != null ? pod.gps.accuracy : null;
+            const photo = pod.photoDataUrl || load.podUrl || '';
+            const sigUrl = pod.signatureDataUrl || '';
+            const hasPhoto = !!photo;
+            const hasSig = !!sigUrl;
+
+            document.getElementById('subtitle').textContent = buildSubtitle(load);
+            document.getElementById('contentArea').innerHTML = `
+                <div class="card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="fw-bold">Proof of Delivery</div>
+                        <div class="pill ${hasPhoto && hasSig ? 'good' : 'bad'}">
+                            <i class="fas ${hasPhoto && hasSig ? 'fa-check' : 'fa-info-circle'}"></i>
+                            ${hasPhoto && hasSig ? 'Verified' : 'Partial'}
+                        </div>
+                    </div>
+                    <div class="grid2">
+                        <div>
+                            <div class="field-label">Receiver</div>
+                            <div class="fw-semibold">${receiverName ? receiverName : 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div class="field-label">Submitted</div>
+                            <div class="fw-semibold">${submittedAt ? new Date(submittedAt).toLocaleString('en-GB') : 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="field-label">Location</div>
+                        <div class="muted">${lat != null && lng != null ? (lat.toFixed(6) + ', ' + lng.toFixed(6) + (acc != null ? (' (±' + Math.round(acc) + 'm)') : '')) : 'N/A'}</div>
+                    </div>
+                </div>
+                ${hasPhoto ? `
+                <div class="card">
+                    <div class="fw-bold mb-2">Delivery Photo</div>
+                    <img class="thumb" src="${photo}" alt="POD Photo">
+                </div>
+                ` : ''}
+                ${hasSig ? `
+                <div class="card">
+                    <div class="fw-bold mb-2">Receiver Signature</div>
+                    <img class="thumb" src="${sigUrl}" alt="Signature">
+                </div>
+                ` : ''}
+                <div class="card">
+                    <div class="btn-row">
+                        <a class="btn-action secondary" href="load-details.html?id=${encodeURIComponent(loadId)}"><i class="fas fa-arrow-left"></i> Back</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function init() {
+            const auth = getSupplierAuth();
+            if (!auth.isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (!loadId) {
+                renderNotFound();
+                return;
+            }
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const snap = await db.ref('loads/' + loadId).once('value');
+                const load = snap.val();
+                if (!load || !canAccessLoad(load, auth)) {
+                    renderNotFound();
+                    return;
+                }
+
+                const hasPod = !!(load.hasPOD || load.podUrl || (load.pod && (load.pod.photoDataUrl || load.pod.signatureDataUrl)));
+                if (!hasPod) {
+                    renderNotFound();
+                    return;
+                }
+
+                renderPOD({ ...load, loadId, id: loadId });
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('Failed to load POD', 'error');
+                renderNotFound();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+

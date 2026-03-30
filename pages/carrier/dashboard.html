@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -1385,6 +1385,130 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
         }
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #3730A3;
+            --primary-light: #A5B4FC;
+            --secondary: #14B8A6;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F3F4F6;
+            --card-bg: rgba(255,255,255,0.85);
+            --border: rgba(148,163,184,0.35);
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #22D3EE 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --sidebar-bg: rgba(255,255,255,0.8);
+            --sidebar-text: #374151;
+            --sidebar-active: rgba(99,102,241,0.08);
+            --card-shadow: 0 12px 30px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+            --hover-shadow: 0 20px 40px rgba(15,23,42,0.18), 0 8px 16px rgba(15,23,42,0.10);
+        }
+        body {
+            background:
+                radial-gradient(1200px 600px at -10% -20%, rgba(99,102,241,0.08), transparent 60%),
+                radial-gradient(1200px 600px at 110% -10%, rgba(20,184,166,0.08), transparent 60%),
+                var(--bg-main);
+        }
+        .dashboard-sidebar {
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+        .header-section {
+            backdrop-filter: blur(12px);
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+        }
+        .nav-link {
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            border-color: rgba(99,102,241,0.25);
+            box-shadow: 0 6px 14px rgba(99,102,241,0.15);
+        }
+        .nav-link.active {
+            border-color: rgba(99,102,241,0.35);
+            box-shadow: 0 10px 22px rgba(99,102,241,0.20);
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--hover-shadow);
+        }
+        .stat-icon {
+            position: relative;
+            background: var(--primary-gradient);
+        }
+        .stat-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 16px;
+            background: radial-gradient(120px 120px at 50% 50%, rgba(255,255,255,0.35), transparent 60%);
+            pointer-events: none;
+        }
+        .overview-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+        .overview-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--hover-shadow);
+        }
+        .overview-summary {
+            background: linear-gradient(180deg, rgba(248,250,252,0.85), rgba(248,250,252,0.65));
+            border: 1px solid var(--border);
+        }
+        .summary-icon {
+            box-shadow: 0 8px 16px rgba(79,70,229,0.18);
+        }
+        .card-shell {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+            border-radius: 20px;
+        }
+        .card-shell .card-header {
+            background: transparent;
+        }
+        .complete-profile-banner {
+            box-shadow: 0 12px 28px rgba(245,158,11,0.25);
+        }
+        .topbar-icon,
+        .topbar-avatar-btn {
+            box-shadow: 0 6px 14px rgba(15,23,42,0.08);
+        }
+        .quick-link-item {
+            background: linear-gradient(180deg, rgba(248,250,252,0.9), rgba(248,250,252,0.7));
+            border: 1px solid var(--border);
+        }
+        .quick-link-item:hover {
+            border-color: rgba(99,102,241,0.25);
+            box-shadow: 0 8px 18px rgba(99,102,241,0.15);
+        }
+        .profile-menu,
+        .quick-links-menu,
+        .notifications-menu {
+            backdrop-filter: blur(12px);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+        .badge-soft {
+            box-shadow: 0 4px 10px rgba(37,99,235,0.12);
+        }
+        .dashboard-loader {
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body>
@@ -1945,7 +2069,6 @@
     <!-- Firebase v8.10.1 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         var firebaseConfig = {
             apiKey: "AIzaSyBdn4T4IpwX_nN2pkhHaBI9yqyZ3faAF6o",
@@ -1960,11 +2083,62 @@
 
         var currentLoads = [];
         var analyticsCharts = {};
+        var chartJsLoading = false;
+        var chartsUpdateTimer = null;
+        var cacheSaveTimer = null;
 
         function setDashboardLoading(isLoading) {
             var loader = document.getElementById('dashboardLoader');
             if (!loader) return;
             loader.classList.toggle('hidden', !isLoading);
+        }
+
+        function loadChartJs() {
+            return new Promise(function(resolve) {
+                if (window.Chart) { resolve(); return; }
+                if (chartJsLoading) {
+                    var iv = setInterval(function() {
+                        if (window.Chart) { clearInterval(iv); resolve(); }
+                    }, 50);
+                    return;
+                }
+                chartJsLoading = true;
+                var s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+                s.onload = function() { resolve(); };
+                s.onerror = function() { resolve(); };
+                document.head.appendChild(s);
+            });
+        }
+
+        function getCachedLoads() {
+            try {
+                var raw = localStorage.getItem('carrierDashboardCache');
+                var obj = raw ? JSON.parse(raw) : null;
+                var arr = obj && Array.isArray(obj.loads) ? obj.loads : [];
+                return arr;
+            } catch (e) { return []; }
+        }
+
+        function saveLoadsCache(loads) {
+            try {
+                var arr = (Array.isArray(loads) ? loads : []).slice(0, 20);
+                localStorage.setItem('carrierDashboardCache', JSON.stringify({ loads: arr, ts: Date.now() }));
+            } catch (e) {}
+        }
+
+        function scheduleAnalyticsUpdate() {
+            if (chartsUpdateTimer) clearTimeout(chartsUpdateTimer);
+            chartsUpdateTimer = setTimeout(function() {
+                updateAnalyticsCharts(currentLoads);
+            }, 250);
+        }
+
+        function scheduleCacheSave() {
+            if (cacheSaveTimer) clearTimeout(cacheSaveTimer);
+            cacheSaveTimer = setTimeout(function() {
+                saveLoadsCache(currentLoads);
+            }, 400);
         }
 
         function parseLoadDate(value) {
@@ -2113,7 +2287,7 @@
         }
 
         function initAnalyticsCharts() {
-            if (!window.Chart) return;
+            if (!window.Chart) { loadChartJs().then(initAnalyticsCharts); return; }
             var data = buildAnalyticsData(currentLoads);
 
             var earningsEl = document.getElementById('earningsChart');
@@ -2262,7 +2436,7 @@
         }
 
         function updateAnalyticsCharts(loads) {
-            if (!window.Chart) return;
+            if (!window.Chart) { loadChartJs().then(function(){ updateAnalyticsCharts(loads); }); return; }
             if (!analyticsCharts.earnings) {
                 initAnalyticsCharts();
                 if (!analyticsCharts.earnings) return;
@@ -2877,10 +3051,11 @@
             
             // Heavy operations in separate frame (charts, routes, etc.)
             setTimeout(function() {
-            updateAnalyticsCharts(currentLoads);
+            scheduleAnalyticsUpdate();
             renderTopRoutes(currentLoads);
             renderPaymentSnapshot(currentLoads);
             renderMessagesPreview(currentLoads);
+            scheduleCacheSave();
             }, 0);
         }
 
@@ -2931,101 +3106,35 @@
             setDashboardLoading(true);
             var db = firebase.database();
             var carrierIdStr = String(carrierId);
-            
-            // OPTIMIZED: Use Firebase query to filter server-side (much faster)
-            // Try carrierId first, then carrier_id as fallback
-            var query1 = db.ref('loads').orderByChild('carrierId').equalTo(carrierIdStr).once('value');
-            var query2 = db.ref('loads').orderByChild('carrier_id').equalTo(carrierIdStr).once('value');
-            
-            Promise.all([query1, query2]).then(function(results) {
-                var loads = [];
-                var seenIds = new Set();
-                
-                // Merge results from both queries (avoid duplicates)
-                results.forEach(function(snapshot) {
-                    if (snapshot && snapshot.exists()) {
-                snapshot.forEach(function(child) {
-                    var load = child.val();
-                            if (!seenIds.has(child.key)) {
-                    load.id = child.key;
-                        loads.push(load);
-                                seenIds.add(child.key);
-                    }
-                });
-                    }
-                });
-                
-                currentLoads = loads;
-                
-                // Hide loading immediately
-                setDashboardLoading(false);
-                
-                // Render dashboard (non-blocking)
-                setTimeout(function() {
-                refreshDashboard();
-                }, 0);
-                
-                // Set up real-time listeners for updates (after initial load)
-                var listener1 = db.ref('loads').orderByChild('carrierId').equalTo(carrierIdStr).on('value', function(updateSnapshot) {
-                    var updatedLoads = [];
-                    if (updateSnapshot && updateSnapshot.exists()) {
-                        updateSnapshot.forEach(function(child) {
-                            var load = child.val();
-                            load.id = child.key;
-                            updatedLoads.push(load);
-                        });
-                    }
-                    // Merge with carrier_id results
-                    currentLoads = updatedLoads;
-                    refreshDashboard();
-                });
-                
-                var listener2 = db.ref('loads').orderByChild('carrier_id').equalTo(carrierIdStr).on('value', function(updateSnapshot) {
-                    var updatedLoads = [];
-                    if (updateSnapshot && updateSnapshot.exists()) {
-                        updateSnapshot.forEach(function(child) {
-                            var load = child.val();
-                            load.id = child.key;
-                            updatedLoads.push(load);
-                        });
-                    }
-                    // Merge with carrierId results
-                    if (currentLoads.length > 0) {
-                        var merged = currentLoads.concat(updatedLoads);
-                        var unique = [];
-                        var seen = new Set();
-                        merged.forEach(function(load) {
-                            if (!seen.has(load.id)) {
-                                seen.add(load.id);
-                                unique.push(load);
-                            }
-                        });
-                        currentLoads = unique;
-                    } else {
-                        currentLoads = updatedLoads;
-                    }
-                    refreshDashboard();
-                });
-                
-            }).catch(function(error) {
-                console.error('Error loading loads:', error);
-                // Fallback to old method if query fails
-                db.ref('loads').once('value', function(snapshot) {
-                    var loads = [];
-                    snapshot.forEach(function(child) {
-                        var load = child.val();
-                        load.id = child.key;
-                        if (load.carrierId === carrierId || load.carrier_id === carrierId) {
-                            loads.push(load);
-                        }
-                    });
-                    currentLoads = loads;
-                setDashboardLoading(false);
-                    setTimeout(function() {
-                        refreshDashboard();
-                    }, 0);
-                });
+            var initialRendered = false;
+            var seen = new Set();
+            var ref1 = db.ref('loads').orderByChild('carrierId').equalTo(carrierIdStr).limitToLast(50);
+            var ref2 = db.ref('loads').orderByChild('carrier_id').equalTo(carrierIdStr).limitToLast(50);
+            ref1.on('child_added', function(child) {
+                var load = child.val(); load.id = child.key;
+                if (!seen.has(load.id)) { seen.add(load.id); currentLoads.push(load); }
+                if (!initialRendered) { initialRendered = true; setDashboardLoading(false); refreshDashboard(); }
+                else { refreshDashboard(); }
             });
+            ref1.on('child_changed', function(child) {
+                var load = child.val(); load.id = child.key;
+                var idx = currentLoads.findIndex(function(l){ return l.id === load.id; });
+                if (idx > -1) { currentLoads[idx] = load; } else if (!seen.has(load.id)) { seen.add(load.id); currentLoads.push(load); }
+                refreshDashboard();
+            });
+            ref2.on('child_added', function(child) {
+                var load = child.val(); load.id = child.key;
+                if (!seen.has(load.id)) { seen.add(load.id); currentLoads.push(load); }
+                if (!initialRendered) { initialRendered = true; setDashboardLoading(false); refreshDashboard(); }
+                else { refreshDashboard(); }
+            });
+            ref2.on('child_changed', function(child) {
+                var load = child.val(); load.id = child.key;
+                var idx = currentLoads.findIndex(function(l){ return l.id === load.id; });
+                if (idx > -1) { currentLoads[idx] = load; } else if (!seen.has(load.id)) { seen.add(load.id); currentLoads.push(load); }
+                refreshDashboard();
+            });
+            setTimeout(function(){ if (!initialRendered) { setDashboardLoading(false); refreshDashboard(); } }, 1200);
         }
 
         // Mobile Navigation
@@ -3110,14 +3219,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             setDashboardLoading(true);
             updateWelcome();
+            var cached = getCachedLoads();
+            if (cached && cached.length) { currentLoads = cached; refreshDashboard(); setDashboardLoading(false); }
             checkProfileCompletion();
             initAnalyticsCharts();
             listenCarrierLoads();
             updateTimestamp();
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(prefetchSidebarPages, { timeout: 2000 });
-            } else {
-                setTimeout(prefetchSidebarPages, 1200);
+            var conn = navigator.connection && navigator.connection.effectiveType;
+            var canPrefetch = conn ? (conn === '4g') : true;
+            if (canPrefetch) {
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(prefetchSidebarPages, { timeout: 3000 });
+                } else {
+                    setTimeout(prefetchSidebarPages, 2000);
+                }
             }
             var profileToggle = document.getElementById('profileMenuToggle');
             var profileMenu = document.getElementById('profileMenu');

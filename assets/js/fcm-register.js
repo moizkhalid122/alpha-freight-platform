@@ -5,7 +5,7 @@
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        navigator.serviceWorker.register('/app-sw.js')
             .then((registration) => {
                 console.log('✅ Service Worker registered:', registration.scope);
             })

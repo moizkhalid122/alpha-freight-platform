@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>My Loads - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        /* Theme: carrier-premium-theme.css */
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Filters */
+        .filters-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 0.5rem;
+        }
+
+        .filters-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-chip:active {
+            transform: scale(0.95);
+        }
+
+        /* Loads List */
+        .loads-section {
+            padding: 0 1.25rem;
+        }
+
+        .load-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .load-card:active {
+            transform: scale(0.98);
+        }
+
+        .load-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .load-route {
+            flex: 1;
+        }
+
+        .route-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .route-title i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .route-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        .load-status {
+            padding: 0.375rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .load-status.accepted {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .load-status.picked-up {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .load-status.in-transit {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .load-status.completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .load-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .load-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .load-detail-item i {
+            color: var(--primary);
+            font-size: 0.875rem;
+            width: 16px;
+        }
+
+        .load-detail-item span {
+            font-size: 0.8125rem;
+            color: var(--text-dark);
+        }
+
+        .load-price {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--success);
+            text-align: right;
+        }
+
+        .load-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 48px;
+            white-space: nowrap;
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        .btn-action.secondary {
+            background: var(--bg-main);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-action.success {
+            background: var(--success);
+        }
+
+        @media (max-width: 360px) {
+            .btn-action { font-size: 0.82rem; padding: 0.7rem; }
+        }
+
+        .btn-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin: 0 1.25rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Skeleton – match my-loads card layout */
+        .skeleton-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .skeleton-card .sk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .skeleton-card .sk-route { flex: 1; }
+
+        .skeleton-card .sk-status {
+            width: 72px;
+            height: 28px;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .skeleton-card .sk-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .skeleton-card .sk-details .skeleton-line { margin-bottom: 0; }
+
+        .skeleton-card .sk-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .skeleton-card .sk-actions .skeleton-line {
+            flex: 1;
+            height: 44px;
+            border-radius: 12px;
+            margin-bottom: 0;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--border) 0%, rgba(0,0,0,0.08) 35%, var(--border) 50%, rgba(0,0,0,0.08) 65%, var(--border) 100%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s ease-in-out infinite;
+        }
+
+        .skeleton-card.sk-1 .skeleton-line { animation-delay: 0s; }
+        .skeleton-card.sk-2 .skeleton-line { animation-delay: 0.15s; }
+        .skeleton-card.sk-3 .skeleton-line { animation-delay: 0.3s; }
+        .skeleton-card.sk-4 .skeleton-line { animation-delay: 0.45s; }
+
+        .skeleton-card .skeleton-line.tall { height: 18px; margin-bottom: 0.35rem; }
+        .skeleton-line.short { width: 50%; }
+        .skeleton-line.medium { width: 75%; }
+        .skeleton-line.long { width: 100%; }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .load-more-wrap {
+            padding: 1rem 1.25rem 1.5rem;
+            text-align: center;
+        }
+
+        .btn-load-more {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-load-more:active { transform: scale(0.98); }
+        .btn-load-more:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .load-card {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">My Loads</h1>
+            <p class="page-subtitle" id="loadsCount">Loading your loads...</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="filters-row">
+            <div class="filter-chip active" data-filter="all" onclick="filterLoads('all')">All</div>
+            <div class="filter-chip" data-filter="accepted" onclick="filterLoads('accepted')">Accepted</div>
+            <div class="filter-chip" data-filter="picked-up" onclick="filterLoads('picked-up')">Picked Up</div>
+            <div class="filter-chip" data-filter="in-transit" onclick="filterLoads('in-transit')">In Transit</div>
+            <div class="filter-chip" data-filter="completed" onclick="filterLoads('completed')">Completed</div>
+        </div>
+    </div>
+
+    <!-- Loads List – skeleton first, replaced when data loads -->
+    <div class="loads-section" id="loadsSection">
+        <div class="skeleton-card sk-1">
+            <div class="sk-header">
+                <div class="sk-route">
+                    <div class="skeleton-line long tall"></div>
+                    <div class="skeleton-line medium short"></div>
+                </div>
+                <div class="skeleton-line sk-status"></div>
+            </div>
+            <div class="sk-details">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="sk-actions">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+            </div>
+        </div>
+        <div class="skeleton-card sk-2">
+            <div class="sk-header">
+                <div class="sk-route">
+                    <div class="skeleton-line long tall"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+                <div class="skeleton-line sk-status"></div>
+            </div>
+            <div class="sk-details">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="sk-actions">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+            </div>
+        </div>
+        <div class="skeleton-card sk-3">
+            <div class="sk-header">
+                <div class="sk-route">
+                    <div class="skeleton-line long tall"></div>
+                    <div class="skeleton-line medium short"></div>
+                </div>
+                <div class="skeleton-line sk-status"></div>
+            </div>
+            <div class="sk-details">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="sk-actions">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+            </div>
+        </div>
+        <div class="skeleton-card sk-4">
+            <div class="sk-header">
+                <div class="sk-route">
+                    <div class="skeleton-line long tall"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+                <div class="skeleton-line sk-status"></div>
+            </div>
+            <div class="sk-details">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="sk-actions">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+            </div>
+        </div>
+    </div>
+    <div class="load-more-wrap" id="loadMoreWrap" style="display: none;">
+        <button type="button" class="btn-load-more" id="btnLoadMore">Load more</button>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => {
+                    if (done) return;
+                    done = true;
+                    resolve();
+                }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+
+        // Global variables
+        let allLoads = [];
+        let filteredLoads = [];
+        let currentFilter = 'all';
+        const INITIAL_DISPLAY = 20;
+        const LOAD_MORE_STEP = 20;
+        let displayedCount = INITIAL_DISPLAY;
+
+        // Format currency
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getCarrierCommissionRate(originalAmount) {
+            const amt = parseFloat(originalAmount) || 0;
+            let commissionRate = 0.05;
+            if (amt > 5000) {
+                commissionRate = 0.03;
+            } else if (amt > 1000) {
+                commissionRate = 0.04;
+            }
+            return commissionRate;
+        }
+
+        function getNetCarrierAmount(load) {
+            const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (parseFloat(load.minBudget) + parseFloat(load.maxBudget)) / 2 : load.maxBudget || load.minBudget || load.price || 0));
+            const original = parseFloat(originalBudget) || 0;
+            const commissionRate = getCarrierCommissionRate(original);
+            const commission = original * commissionRate;
+            return Math.round((original - commission) * 100) / 100;
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            } catch {
+                return dateString;
+            }
+        }
+
+        // Get user data
+        function getUserData() {
+            const carrierAuth = localStorage.getItem('carrierAuth');
+            if (!carrierAuth) return null;
+            return JSON.parse(carrierAuth);
+        }
+
+        function isMyLoad(load, carrierId, userEmail) {
+            return (load.carrierId === carrierId ||
+                    load.assignedCarrier === carrierId ||
+                    load.carrierEmail === userEmail) &&
+                   !['active', 'pending'].includes((load.status || '').toLowerCase());
+        }
+
+        // Load my loads – fast: try carrierId query first, else limited fetch + filter
+        async function loadMyLoads() {
+            const loadsSection = document.getElementById('loadsSection');
+            const loadMoreWrap = document.getElementById('loadMoreWrap');
+            const user = getUserData();
+            if (!user) {
+                loadsSection.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h3>Please Sign In</h3>
+                        <p>Sign in to view your loads</p>
+                    </div>
+                `;
+                loadMoreWrap.style.display = 'none';
+                return;
+            }
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                let allLoadsData = {};
+
+                try {
+                    const myLoadsRef = db.ref('loads').orderByChild('carrierId').equalTo(carrierId);
+                    const snapshot = await myLoadsRef.once('value');
+                    allLoadsData = snapshot.val() || {};
+                } catch (indexError) {
+                    const snapshot = await db.ref('loads').orderByKey().limitToLast(200).once('value');
+                    const raw = snapshot.val() || {};
+                    Object.entries(raw).forEach(([id, load]) => {
+                        if (isMyLoad(load, carrierId, user.email)) allLoadsData[id] = load;
+                    });
+                }
+
+                allLoads = Object.entries(allLoadsData).map(([id, load]) => ({
+                    ...load,
+                    loadId: id,
+                    id: id
+                }));
+
+                allLoads.sort((a, b) => {
+                    const dateA = new Date(a.acceptedAt || a.createdAt || a.pickupDate || 0);
+                    const dateB = new Date(b.acceptedAt || b.createdAt || b.pickupDate || 0);
+                    return dateB - dateA;
+                });
+
+                displayedCount = INITIAL_DISPLAY;
+                if (currentFilter === 'all') {
+                    filteredLoads = [...allLoads];
+                } else {
+                    filteredLoads = allLoads.filter(load => (load.status || '').toLowerCase() === currentFilter);
+                }
+                renderLoads();
+                updateLoadsCount();
+                loadMoreWrap.style.display = filteredLoads.length > INITIAL_DISPLAY ? 'block' : 'none';
+
+            } catch (error) {
+                console.error('Error loading loads:', error);
+                showError('Failed to load loads. Please try again.');
+                loadsSection.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Loads</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+                loadMoreWrap.style.display = 'none';
+            }
+        }
+
+        function loadMoreMyLoads() {
+            displayedCount += LOAD_MORE_STEP;
+            renderLoads();
+            updateLoadsCount();
+            const loadMoreWrap = document.getElementById('loadMoreWrap');
+            if (displayedCount >= filteredLoads.length) loadMoreWrap.style.display = 'none';
+        }
+
+        // Filter loads
+        function filterLoads(filter) {
+            currentFilter = filter;
+
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+
+            if (filter === 'all') {
+                filteredLoads = [...allLoads];
+            } else {
+                filteredLoads = allLoads.filter(load => (load.status || '').toLowerCase() === filter);
+            }
+
+            displayedCount = INITIAL_DISPLAY;
+            renderLoads();
+            updateLoadsCount();
+            const loadMoreWrap = document.getElementById('loadMoreWrap');
+            loadMoreWrap.style.display = filteredLoads.length > INITIAL_DISPLAY ? 'block' : 'none';
+        }
+
+        // Update loads count
+        function updateLoadsCount() {
+            const total = allLoads.length;
+            const filteredTotal = filteredLoads.length;
+            const showing = Math.min(displayedCount, filteredTotal);
+            let text = filteredTotal === total ? `${total} loads` : `${filteredTotal} of ${total} loads`;
+            if (showing < filteredTotal) text = `Showing ${showing} of ${filteredTotal} loads`;
+            document.getElementById('loadsCount').textContent = text;
+        }
+
+        // Render loads (first displayedCount only for speed)
+        function renderLoads() {
+            const section = document.getElementById('loadsSection');
+            const toShow = filteredLoads.slice(0, displayedCount);
+
+            if (toShow.length === 0) {
+                section.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No Loads Found</h3>
+                        <p>${currentFilter !== 'all' ? 'No loads with this status' : 'You haven\'t accepted any loads yet'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            section.innerHTML = toShow.map((load, index) => {
+                const status = (load.status || 'accepted').toLowerCase();
+                const statusClass = status.replace(/\s+/g, '-');
+                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+                const price = formatCurrency(getNetCarrierAmount(load));
+                const pickupDate = formatDate(load.pickupDate);
+                const deliveryDate = formatDate(load.deliveryDate);
+                const cargoType = load.cargoType || 'General';
+                const weight = load.cargoWeight ? `${load.cargoWeight} tonnes` : 'N/A';
+                const distance = load.distance ? `${load.distance} miles` : 'N/A';
+
+                // Action buttons based on status
+                let actionButtons = '';
+                if (status === 'accepted') {
+                    actionButtons = `
+                        <button class="btn-action success" onclick="event.stopPropagation(); updateLoadStatus('${load.loadId}', 'picked-up')">
+                            <i class="fas fa-box"></i>
+                            Mark Picked Up
+                        </button>
+                        <button class="btn-action secondary" onclick="event.stopPropagation(); viewLoadDetails('${load.loadId}')">
+                            <i class="fas fa-eye"></i>
+                            View
+                        </button>
+                    `;
+                } else if (status === 'picked-up') {
+                    actionButtons = `
+                        <button class="btn-action success" onclick="event.stopPropagation(); updateLoadStatus('${load.loadId}', 'in-transit')">
+                            <i class="fas fa-truck"></i>
+                            Start Transit
+                        </button>
+                        <button class="btn-action secondary" onclick="event.stopPropagation(); viewLoadDetails('${load.loadId}')">
+                            <i class="fas fa-eye"></i>
+                            View
+                        </button>
+                    `;
+                } else if (status === 'in-transit') {
+                    actionButtons = `
+                        <button class="btn-action success" onclick="event.stopPropagation(); updateLoadStatus('${load.loadId}', 'completed')">
+                            <i class="fas fa-check"></i>
+                            Mark Completed
+                        </button>
+                        <button class="btn-action secondary" onclick="event.stopPropagation(); viewLoadDetails('${load.loadId}')">
+                            <i class="fas fa-eye"></i>
+                            View
+                        </button>
+                    `;
+                } else if (status === 'completed') {
+                    actionButtons = `
+                        <button class="btn-action secondary" onclick="event.stopPropagation(); viewLoadDetails('${load.loadId}')">
+                            <i class="fas fa-eye"></i>
+                            View Details
+                        </button>
+                        <button class="btn-action" onclick="event.stopPropagation(); viewReceipt('${load.loadId}')">
+                            <i class="fas fa-receipt"></i>
+                            Receipt
+                        </button>
+                    `;
+                } else {
+                    actionButtons = `
+                        <button class="btn-action secondary" onclick="event.stopPropagation(); viewLoadDetails('${load.loadId}')">
+                            <i class="fas fa-eye"></i>
+                            View Details
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="load-card" onclick="viewLoadDetails('${load.loadId}')" style="animation-delay: ${index * 0.1}s">
+                        <div class="load-header">
+                            <div class="load-route">
+                                <div class="route-title">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    ${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}
+                                </div>
+                                <div class="route-subtitle">${cargoType}</div>
+                            </div>
+                            <div class="load-status ${statusClass}">${statusLabel}</div>
+                        </div>
+                        <div class="load-details">
+                            <div class="load-detail-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Pickup: ${pickupDate}</span>
+                            </div>
+                            <div class="load-detail-item">
+                                <i class="fas fa-truck"></i>
+                                <span>${weight}</span>
+                            </div>
+                            <div class="load-detail-item">
+                                <i class="fas fa-route"></i>
+                                <span>${distance}</span>
+                            </div>
+                            <div class="load-detail-item">
+                                <i class="fas fa-box"></i>
+                                <span>${cargoType}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-medium); margin-bottom: 0.25rem;">Payment</div>
+                                <div class="load-price">${price}</div>
+                            </div>
+                        </div>
+                        <div class="load-actions">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update load status
+        async function updateLoadStatus(loadId, newStatus) {
+            const user = getUserData();
+            if (!user) {
+                showError('Please sign in');
+                return;
+            }
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                await ensureAuthReady();
+                const carrierUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : (user.firebaseUid || '');
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                if (!carrierUid) {
+                    showError('Session expired. Please login again.');
+                    return;
+                }
+                const loadRef = db.ref(`loads/${loadId}`);
+                const loadSnap = await loadRef.once('value');
+                const loadData = loadSnap.val() || {};
+                const supplierId = loadData.supplierId || loadData.postedBy || (loadData.supplierEmail || '').replace(/@/g, '_').replace(/\./g, '_');
+
+                const updates = {
+                    status: newStatus,
+                    carrierFirebaseUid: carrierUid || '',
+                    carrierId: loadData.carrierId || carrierId || '',
+                    updatedAt: new Date().toISOString()
+                };
+
+                if (newStatus === 'picked-up') {
+                    updates.pickedUpAt = new Date().toISOString();
+                } else if (newStatus === 'in-transit') {
+                    updates.inTransitAt = new Date().toISOString();
+                } else if (newStatus === 'completed') {
+                    updates.completedAt = new Date().toISOString();
+                }
+
+                await loadRef.update(updates);
+
+                if (supplierId) {
+                    const route = `${loadData.pickupLocation || ''} → ${loadData.deliveryLocation || ''}`;
+                    let title = 'Load Status Update';
+                    let message = `Your load has been updated: ${route}`;
+                    if (newStatus === 'picked-up') {
+                        title = 'Load Picked Up';
+                        message = `Your load has been picked up: ${route}`;
+                    } else if (newStatus === 'in-transit') {
+                        title = 'Load In Transit';
+                        message = `Your load is now in transit: ${route}`;
+                    } else if (newStatus === 'completed') {
+                        title = 'Load Delivered!';
+                        message = `Your load has been delivered: ${route}`;
+                    }
+                    const notif = {
+                        title,
+                        message,
+                        type: newStatus === 'completed' ? 'load_completed' : 'load_status_update',
+                        loadId,
+                        read: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    await db.ref('notifications/suppliers/' + supplierId).push(notif);
+                }
+
+                showSuccess(`Load status updated to ${newStatus.replace('-', ' ')}`);
+
+                // Update list in memory and re-render so new status shows at once – no reload
+                const applyToLoad = (load) =>
+                    load.loadId === loadId ? { ...load, ...updates } : load;
+                allLoads = allLoads.map(applyToLoad);
+                filteredLoads = filteredLoads.map(applyToLoad);
+                renderLoads();
+                updateLoadsCount();
+
+            } catch (error) {
+                console.error('Error updating load status:', error);
+                showError('Failed to update load status. Please try again.');
+            }
+        }
+
+        // View load details
+        function viewLoadDetails(loadId) {
+            window.location.href = `load-details.html?id=${loadId}`;
+        }
+
+        // View receipt
+        function viewReceipt(loadId) {
+            window.location.href = `receipt.html?id=${loadId}`;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMyLoads();
+            document.getElementById('btnLoadMore').addEventListener('click', loadMoreMyLoads);
+        });
+    </script>
+</body>
+</html>

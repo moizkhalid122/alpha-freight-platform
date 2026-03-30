@@ -28,6 +28,10 @@
     if (typeof firebase.database === 'function') {
         window.AlphaBrokrage.firebaseDb = firebase.database();
     }
+
+    if (typeof firebase.auth === 'function') {
+        window.AlphaBrokrage.firebaseAuth = firebase.auth();
+    }
     
     // Safely initialize firestore only if SDK is loaded
     if (typeof firebase.firestore === 'function') {

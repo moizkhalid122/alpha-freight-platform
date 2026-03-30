@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Post Load - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    
+    <style>
+        /* —— Premium theme (matches dashboard) —— */
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* footer from supplier-bottom-nav.css */
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+
+        /* Page Header – premium navy + gold accent */
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.5rem 1.25rem 1.75rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 36px 36px;
+            opacity: 0.7;
+        }
+
+        .header-content { position: relative; z-index: 1; }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.375rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.92;
+        }
+
+        /* Form Card – premium */
+        .form-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin: 0 1.25rem 1.5rem;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            opacity: 0.6;
+        }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-label .required { color: var(--error); margin-left: 0.25rem; }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-main);
+            color: var(--text-dark);
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+            min-height: 48px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+            background: var(--card-bg);
+        }
+
+        .form-input::placeholder { color: var(--text-light); }
+
+        .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-main);
+            color: var(--text-dark);
+            min-height: 48px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--card-bg);
+            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+        }
+
+        textarea.form-input { min-height: 100px; resize: vertical; }
+
+        /* Checkbox */
+        .checkbox-group {
+            margin-bottom: 1rem;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .custom-checkbox:active {
+            background: var(--bg-main);
+        }
+
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .checkbox-label a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Commission Info */
+        .commission-info {
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.06) 0%, rgba(5, 150, 105, 0.06) 100%);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(29, 78, 216, 0.12);
+            display: none;
+        }
+
+        .commission-info.show {
+            display: block;
+        }
+
+        .commission-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .commission-row:last-child {
+            margin-bottom: 0;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .commission-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .commission-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .commission-value.primary {
+            color: var(--primary);
+        }
+
+        .commission-value.success {
+            color: var(--success);
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        /* Submit Button – premium */
+        .submit-btn {
+            width: calc(100% - 2.5rem);
+            margin: 0 1.25rem 1.5rem;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            min-height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 8px 24px rgba(29, 78, 216, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 16px rgba(29, 78, 216, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .save-draft-btn {
+            width: calc(100% - 2.5rem);
+            margin: 0 1.25rem 1rem;
+            padding: 0.875rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .save-draft-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Post a Load</h1>
+            <p class="page-subtitle">Fill in the details to post your load</p>
+        </div>
+    </div>
+
+    <!-- Post Load Form -->
+    <form id="postLoadForm">
+        <!-- Load Summary -->
+        <div class="form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-heading"></i>
+                Load Summary
+            </h3>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Load Title
+                    <span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" id="loadTitle" placeholder="e.g., Electronics delivery London → Manchester" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Urgency Level
+                    <span class="required">*</span>
+                </label>
+                <select class="form-select" id="urgency" required>
+                    <option value="normal">Normal</option>
+                    <option value="urgent">Urgent (+10% premium)</option>
+                    <option value="same-day">Same Day (+25% premium)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Route Details -->
+        <div class="form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-map-marked-alt"></i>
+                Route Details
+            </h3>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Pickup Location
+                    <span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" id="pickupLocation" placeholder="e.g., London, UK" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Delivery Location
+                    <span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" id="deliveryLocation" placeholder="e.g., Manchester, UK" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Pickup Date
+                    <span class="required">*</span>
+                </label>
+                <input type="date" class="form-input" id="pickupDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Pickup Time
+                    <span class="required">*</span>
+                </label>
+                <input type="time" class="form-input" id="pickupTime" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Delivery Date
+                    <span class="required">*</span>
+                </label>
+                <input type="date" class="form-input" id="deliveryDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Delivery Time
+                    <span class="required">*</span>
+                </label>
+                <input type="time" class="form-input" id="deliveryTime" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Special Instructions</label>
+                <textarea class="form-input" id="specialInstructions" rows="3" placeholder="Access restrictions, contact on arrival, loading bay info..."></textarea>
+            </div>
+        </div>
+
+        <!-- Cargo Information -->
+        <div class="form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-box"></i>
+                Cargo Information
+            </h3>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Cargo Type
+                    <span class="required">*</span>
+                </label>
+                <select class="form-select" id="cargoType" required>
+                    <option value="">Select type</option>
+                    <option value="general">General Cargo</option>
+                    <option value="fragile">Fragile</option>
+                    <option value="hazardous">Hazardous</option>
+                    <option value="refrigerated">Refrigerated</option>
+                    <option value="liquid">Liquid</option>
+                    <option value="machinery">Machinery</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="furniture">Furniture</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Weight (kg)
+                    <span class="required">*</span>
+                </label>
+                <input type="number" class="form-input" id="cargoWeight" placeholder="e.g., 1000" required min="1">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Volume (m³)</label>
+                <input type="number" class="form-input" id="cargoVolume" placeholder="e.g., 10" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Cargo Value (£)</label>
+                <input type="number" class="form-input" id="cargoValue" placeholder="e.g., 5000" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Vehicle Type
+                    <span class="required">*</span>
+                </label>
+                <select class="form-select" id="vehicleType" required>
+                    <option value="">Select vehicle</option>
+                    <option value="van">Van</option>
+                    <option value="small-truck">Small Truck (3.5T)</option>
+                    <option value="medium-truck">Medium Truck (7.5T)</option>
+                    <option value="large-truck">Large Truck (18T)</option>
+                    <option value="artic">Artic (44T)</option>
+                    <option value="flatbed">Flatbed</option>
+                    <option value="curtainside">Curtainside</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Cargo Description</label>
+                <textarea class="form-input" id="cargoDescription" rows="3" placeholder="Describe your cargo in detail..."></textarea>
+            </div>
+        </div>
+
+        <!-- Vehicle Requirements -->
+        <div class="form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-truck"></i>
+                Vehicle Requirements
+            </h3>
+
+            <div class="checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="tailLift">
+                    <span class="checkbox-label">Tail Lift Required</span>
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="refrigerated">
+                    <span class="checkbox-label">Refrigerated Vehicle</span>
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="adr">
+                    <span class="checkbox-label">ADR Certified (Hazardous)</span>
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="whiteGlove">
+                    <span class="checkbox-label">White Glove Service</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Budget & Payment -->
+        <div class="form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-pound-sign"></i>
+                Budget & Payment
+            </h3>
+
+            <div class="form-group">
+                <label class="form-label">Minimum Budget (£)</label>
+                <input type="number" class="form-input" id="minBudget" placeholder="e.g., 200" step="0.01" min="0" oninput="calculateSupplierCommission()">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Maximum Budget (£)</label>
+                <input type="number" class="form-input" id="maxBudget" placeholder="e.g., 500" step="0.01" min="0" oninput="calculateSupplierCommission()">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Payment Method
+                    <span class="required">*</span>
+                </label>
+                <select class="form-select" id="paymentMethod" required>
+                    <option value="bank-transfer">Bank Transfer</option>
+                    <option value="card">Card Payment</option>
+                    <option value="invoice">Invoice</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Payment Plan
+                    <span class="required">*</span>
+                </label>
+                <select class="form-select" id="paymentPlan" required>
+                    <option value="full_upfront">Full Upfront</option>
+                    <option value="deposit_remaining">Deposit + Remaining</option>
+                    <option value="cod">Cash on Delivery (COD)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="depositGroup" style="display:none;">
+                <label class="form-label">Deposit Amount (£)</label>
+                <input type="number" class="form-input" id="depositAmount" placeholder="e.g., 200" step="0.01" min="0">
+            </div>
+
+            <div class="form-group" id="codGroup" style="display:none;">
+                <label class="form-label">COD Amount (£)</label>
+                <input type="number" class="form-input" id="codAmount" placeholder="Auto" step="0.01" min="0">
+            </div>
+
+            <!-- Commission Info -->
+            <div class="commission-info" id="commissionInfo">
+                <div class="commission-row">
+                    <span class="commission-label">Platform Commission:</span>
+                    <span class="commission-value primary" id="commissionAmount">£0.00</span>
+                </div>
+                <div class="commission-row">
+                    <span class="commission-label">Commission Rate:</span>
+                    <span class="commission-value" id="commissionRate">0%</span>
+                </div>
+                <div class="commission-row">
+                    <span class="commission-label">Amount You'll Pay:</span>
+                    <span class="commission-value success" id="finalAmount">£0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Notes -->
+        <div class="form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-sticky-note"></i>
+                Additional Notes
+            </h3>
+
+            <div class="form-group">
+                <label class="form-label">Additional Notes</label>
+                <textarea class="form-input" id="additionalNotes" rows="4" placeholder="Any additional information or requirements..."></textarea>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="loadAgreementAccepted" required>
+                    <span class="checkbox-label">
+                        I agree to the Load Posting Agreement
+                    </span>
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="termsAccepted" required>
+                    <span class="checkbox-label">
+                        I agree to the <a href="../../pages/terms.html" target="_blank">Terms of Service</a> and <a href="../../pages/privacy.html" target="_blank">Privacy Policy</a>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Save Draft Button -->
+        <button type="button" class="save-draft-btn" id="saveDraftBtn" onclick="saveDraft()">
+            <i class="fas fa-save"></i>
+            Save Draft
+        </button>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn" id="submitBtn">
+            <i class="fas fa-paper-plane"></i>
+            <span>Post Load</span>
+        </button>
+    </form>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item active">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        // Check authentication
+        function checkAuth() {
+            const supplierAuth = localStorage.getItem('supplierAuth');
+            if (!supplierAuth) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            return JSON.parse(supplierAuth);
+        }
+
+        // Calculate supplier commission
+        function calculateSupplierCommission() {
+            const minBudget = parseFloat(document.getElementById('minBudget').value) || 0;
+            const maxBudget = parseFloat(document.getElementById('maxBudget').value) || 0;
+            const budget = maxBudget > 0 ? maxBudget : (minBudget > 0 ? minBudget : 0);
+
+            if (budget <= 0) {
+                document.getElementById('commissionInfo').classList.remove('show');
+                return;
+            }
+
+            // Calculate commission rate based on budget
+            let supplierCommissionRate = 0.05; // Default 5%
+            if (budget > 5000) {
+                supplierCommissionRate = 0.03; // Large (>5000) - 3%
+            } else if (budget > 1000) {
+                supplierCommissionRate = 0.04; // Medium (1000-5000) - 4%
+            }
+
+            const supplierCommission = budget * supplierCommissionRate;
+            const totalAmount = budget + supplierCommission;
+
+            // Update display
+            document.getElementById('commissionAmount').textContent = '£' + supplierCommission.toFixed(2);
+            document.getElementById('commissionRate').textContent = (supplierCommissionRate * 100).toFixed(0) + '%';
+            document.getElementById('finalAmount').textContent = '£' + totalAmount.toFixed(2);
+            document.getElementById('commissionInfo').classList.add('show');
+        }
+
+        // Save draft
+        function saveDraft() {
+            const auth = checkAuth();
+            if (!auth) return;
+
+            const draftData = {
+                loadTitle: document.getElementById('loadTitle').value,
+                urgency: document.getElementById('urgency').value,
+                pickupLocation: document.getElementById('pickupLocation').value,
+                deliveryLocation: document.getElementById('deliveryLocation').value,
+                pickupDate: document.getElementById('pickupDate').value,
+                pickupTime: document.getElementById('pickupTime').value,
+                deliveryDate: document.getElementById('deliveryDate').value,
+                deliveryTime: document.getElementById('deliveryTime').value,
+                specialInstructions: document.getElementById('specialInstructions').value,
+                cargoType: document.getElementById('cargoType').value,
+                cargoWeight: document.getElementById('cargoWeight').value,
+                cargoVolume: document.getElementById('cargoVolume').value,
+                cargoValue: document.getElementById('cargoValue').value,
+                vehicleType: document.getElementById('vehicleType').value,
+                cargoDescription: document.getElementById('cargoDescription').value,
+                tailLift: document.getElementById('tailLift').checked,
+                refrigerated: document.getElementById('refrigerated').checked,
+                adr: document.getElementById('adr').checked,
+                whiteGlove: document.getElementById('whiteGlove').checked,
+                minBudget: document.getElementById('minBudget').value,
+                maxBudget: document.getElementById('maxBudget').value,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                paymentPlan: document.getElementById('paymentPlan').value,
+                depositAmount: document.getElementById('depositAmount').value,
+                codAmount: document.getElementById('codAmount').value,
+                additionalNotes: document.getElementById('additionalNotes').value,
+                savedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('loadDraft', JSON.stringify(draftData));
+            showSuccess('Draft saved successfully!');
+        }
+
+        // Load draft
+        function loadDraft() {
+            const draftData = localStorage.getItem('loadDraft');
+            if (!draftData) return;
+
+            try {
+                const data = JSON.parse(draftData);
+                if (data.loadTitle) document.getElementById('loadTitle').value = data.loadTitle;
+                if (data.urgency) document.getElementById('urgency').value = data.urgency;
+                if (data.pickupLocation) document.getElementById('pickupLocation').value = data.pickupLocation;
+                if (data.deliveryLocation) document.getElementById('deliveryLocation').value = data.deliveryLocation;
+                if (data.pickupDate) document.getElementById('pickupDate').value = data.pickupDate;
+                if (data.pickupTime) document.getElementById('pickupTime').value = data.pickupTime;
+                if (data.deliveryDate) document.getElementById('deliveryDate').value = data.deliveryDate;
+                if (data.deliveryTime) document.getElementById('deliveryTime').value = data.deliveryTime;
+                if (data.specialInstructions) document.getElementById('specialInstructions').value = data.specialInstructions;
+                if (data.cargoType) document.getElementById('cargoType').value = data.cargoType;
+                if (data.cargoWeight) document.getElementById('cargoWeight').value = data.cargoWeight;
+                if (data.cargoVolume) document.getElementById('cargoVolume').value = data.cargoVolume;
+                if (data.cargoValue) document.getElementById('cargoValue').value = data.cargoValue;
+                if (data.vehicleType) document.getElementById('vehicleType').value = data.vehicleType;
+                if (data.cargoDescription) document.getElementById('cargoDescription').value = data.cargoDescription;
+                if (data.tailLift !== undefined) document.getElementById('tailLift').checked = data.tailLift;
+                if (data.refrigerated !== undefined) document.getElementById('refrigerated').checked = data.refrigerated;
+                if (data.adr !== undefined) document.getElementById('adr').checked = data.adr;
+                if (data.whiteGlove !== undefined) document.getElementById('whiteGlove').checked = data.whiteGlove;
+                if (data.minBudget) document.getElementById('minBudget').value = data.minBudget;
+                if (data.maxBudget) document.getElementById('maxBudget').value = data.maxBudget;
+                if (data.paymentMethod) document.getElementById('paymentMethod').value = data.paymentMethod;
+                if (data.paymentPlan) document.getElementById('paymentPlan').value = data.paymentPlan;
+                if (data.depositAmount) document.getElementById('depositAmount').value = data.depositAmount;
+                if (data.codAmount) document.getElementById('codAmount').value = data.codAmount;
+                if (data.additionalNotes) document.getElementById('additionalNotes').value = data.additionalNotes;
+
+                // Recalculate commission
+                calculateSupplierCommission();
+                updatePaymentPlanUI();
+            } catch (error) {
+                console.error('Error loading draft:', error);
+            }
+        }
+
+        function updatePaymentPlanUI() {
+            const plan = (document.getElementById('paymentPlan').value || 'full_upfront').toLowerCase();
+            const depositGroup = document.getElementById('depositGroup');
+            const codGroup = document.getElementById('codGroup');
+            if (depositGroup) depositGroup.style.display = (plan === 'deposit_remaining') ? '' : 'none';
+            if (codGroup) codGroup.style.display = (plan === 'cod') ? '' : 'none';
+        }
+
+        // Form submission
+        document.getElementById('postLoadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const auth = checkAuth();
+            if (!auth) return;
+
+            // Validate required fields
+            if (!document.getElementById('loadAgreementAccepted').checked || 
+                !document.getElementById('termsAccepted').checked) {
+                showError('Please accept the agreements to continue');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Posting...</span>';
+
+            try {
+                const minBudget = parseFloat(document.getElementById('minBudget').value) || 0;
+                const maxBudget = parseFloat(document.getElementById('maxBudget').value) || 0;
+                const budget = maxBudget > 0 ? maxBudget : (minBudget > 0 ? minBudget : 0);
+
+                if (budget <= 0) {
+                    showError('Please enter a valid budget amount');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Post Load</span>';
+                    return;
+                }
+
+                // Calculate supplier commission
+                let supplierCommissionRate = 0.05;
+                if (budget > 5000) {
+                    supplierCommissionRate = 0.03;
+                } else if (budget > 1000) {
+                    supplierCommissionRate = 0.04;
+                }
+                const supplierCommission = budget * supplierCommissionRate;
+                const totalAmount = budget + supplierCommission;
+                const carrierCommissionRate = supplierCommissionRate;
+                const carrierCommissionAmount = budget * carrierCommissionRate;
+                const carrierNetAmount = budget - carrierCommissionAmount;
+
+                const loadData = {
+                    loadTitle: document.getElementById('loadTitle').value.trim(),
+                    pickupLocation: document.getElementById('pickupLocation').value.trim(),
+                    deliveryLocation: document.getElementById('deliveryLocation').value.trim(),
+                    pickupDate: document.getElementById('pickupDate').value,
+                    deliveryDate: document.getElementById('deliveryDate').value,
+                    pickupTime: document.getElementById('pickupTime').value,
+                    deliveryTime: document.getElementById('deliveryTime').value,
+                    cargoType: document.getElementById('cargoType').value,
+                    cargoDescription: document.getElementById('cargoDescription').value.trim(),
+                    cargoWeight: parseFloat(document.getElementById('cargoWeight').value),
+                    cargoVolume: document.getElementById('cargoVolume').value ? parseFloat(document.getElementById('cargoVolume').value) : null,
+                    cargoValue: document.getElementById('cargoValue').value ? parseFloat(document.getElementById('cargoValue').value) : null,
+                    vehicleType: document.getElementById('vehicleType').value,
+                    tailLift: document.getElementById('tailLift').checked,
+                    refrigerated: document.getElementById('refrigerated').checked,
+                    adr: document.getElementById('adr').checked,
+                    whiteGlove: document.getElementById('whiteGlove').checked,
+                    minBudget: minBudget,
+                    maxBudget: maxBudget,
+                    budget: budget,
+                    price: budget,
+                    supplierCommission: supplierCommission,
+                    supplierCommissionRate: supplierCommissionRate,
+                    totalAmount: totalAmount,
+                    commissionBaseAmount: budget,
+                    totalCost: totalAmount,
+                    carrierCommissionRate: carrierCommissionRate,
+                    carrierCommissionAmount: carrierCommissionAmount,
+                    carrierNetAmount: carrierNetAmount,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    paymentPlan: document.getElementById('paymentPlan').value,
+                    urgency: document.getElementById('urgency').value,
+                    specialInstructions: document.getElementById('specialInstructions').value.trim(),
+                    additionalNotes: document.getElementById('additionalNotes').value.trim(),
+                    loadAgreementAccepted: document.getElementById('loadAgreementAccepted').checked,
+                    loadAgreementAcceptedAt: new Date().toISOString(),
+                    supplierId: auth.supplierId || auth.id,
+                    supplierFirebaseUid: (window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser) ? window.AlphaBrokrage.firebaseAuth.currentUser.uid : (auth.firebaseUid || ''),
+                    supplierEmail: auth.email,
+                    supplierName: auth.firstName ? `${auth.firstName} ${auth.lastName || ''}`.trim() : 'Supplier',
+                    companyName: auth.companyName || auth.company || 'Supplier',
+                    status: 'available',
+                    createdAt: new Date().toISOString(),
+                    paymentStatus: {
+                        status: 'unpaid',
+                        method: (document.getElementById('paymentMethod').value || '').toLowerCase(),
+                        completed: false
+                    }
+                };
+
+                const plan = (document.getElementById('paymentPlan').value || 'full_upfront').toLowerCase();
+                if (plan === 'deposit_remaining') {
+                    const total = totalAmount;
+                    const depositInput = parseFloat(document.getElementById('depositAmount').value) || 0;
+                    const deposit = depositInput > 0 ? Math.min(depositInput, total) : Math.round((total * 0.3) * 100) / 100;
+                    const remaining = Math.max(0, Math.round((total - deposit) * 100) / 100);
+                    loadData.deposit = { required: true, amount: deposit, paid: false };
+                    loadData.remaining = { amount: remaining, paid: false };
+                } else if (plan === 'cod') {
+                    const total = totalAmount;
+                    const codInput = parseFloat(document.getElementById('codAmount').value) || 0;
+                    const codAmt = codInput > 0 ? codInput : total;
+                    loadData.cod = { enabled: true, amount: Math.round(codAmt * 100) / 100 };
+                    loadData.paymentStatus = { ...loadData.paymentStatus, method: 'cash_on_delivery', status: 'unpaid', completed: false };
+                }
+
+                // Save to Firebase
+                const db = window.AlphaBrokrage.firebaseDb;
+                const loadRef = db.ref('loads').push(loadData);
+                const loadId = loadRef.key;
+
+                // Update load with formatted ID
+                await db.ref(`loads/${loadId}`).update({
+                    loadId: loadId,
+                    formattedLoadId: `LOAD-${loadId.substring(0, 8).toUpperCase()}`,
+                    formattedOrderId: `ORD-${loadId.substring(0, 8).toUpperCase()}`,
+                    orderRef: `ORD-${loadId.substring(0, 8).toUpperCase()}`
+                });
+
+                // Clear draft
+                localStorage.removeItem('loadDraft');
+
+                showSuccess('Load posted successfully!');
+
+                // Notify carriers about new load (background push via Cloud Function)
+                try {
+                    if (typeof NotificationManager !== 'undefined' && NotificationManager.triggers && NotificationManager.triggers.newLoadPosted) {
+                        const notifyData = { ...loadData, id: loadId };
+                        NotificationManager.triggers.newLoadPosted(notifyData);
+                    }
+                } catch (e) { /* ignore */ }
+
+                const paymentFor = loadData.loadTitle || 'Load Payment';
+                if (plan === 'cod') {
+                    setTimeout(() => { window.location.href = 'my-loads.html'; }, 1200);
+                } else if (plan === 'deposit_remaining') {
+                    const dep = (loadData.deposit && loadData.deposit.amount) ? loadData.deposit.amount : 0;
+                    const payUrl = `pay-now.html?loadId=${encodeURIComponent(loadId)}&amount=${encodeURIComponent(dep)}&paymentFor=${encodeURIComponent('Deposit - ' + paymentFor)}&paymentType=Deposit`;
+                    setTimeout(() => { window.location.href = payUrl; }, 1500);
+                } else {
+                    const payUrl = `pay-now.html?loadId=${encodeURIComponent(loadId)}&amount=${encodeURIComponent(budget)}&paymentFor=${encodeURIComponent(paymentFor)}&paymentType=Payment`;
+                    setTimeout(() => { window.location.href = payUrl; }, 1500);
+                }
+
+            } catch (error) {
+                console.error('Error posting load:', error);
+                showError('Failed to post load. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Post Load</span>';
+            }
+        });
+
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pickupDate').setAttribute('min', today);
+            document.getElementById('deliveryDate').setAttribute('min', today);
+
+            // Load draft if available
+            loadDraft();
+            const planEl = document.getElementById('paymentPlan');
+            if (planEl) planEl.addEventListener('change', updatePaymentPlanUI);
+            updatePaymentPlanUI();
+        });
+    </script>
+</body>
+</html>

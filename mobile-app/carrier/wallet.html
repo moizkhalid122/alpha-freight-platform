@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Wallet - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        /* Theme: carrier-premium-theme.css */
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Professional focus ring */
+        a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, 0.35);
+            outline-offset: 2px;
+            border-radius: 12px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 0 1.25rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+        }
+
+        .balance-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .balance-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .balance-stat {
+            text-align: center;
+        }
+
+        .balance-stat-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .balance-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .action-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            min-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .action-btn span {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            padding: 0 1.25rem;
+        }
+
+        /* Transactions */
+        .transactions-section {
+            padding: 0 1.25rem;
+        }
+
+        .transaction-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+
+        .transaction-item:active {
+            transform: scale(0.98);
+        }
+        .transaction-item-clickable { cursor: pointer; }
+        .transaction-item .transaction-arrow {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            flex-shrink: 0;
+            margin-left: 0.25rem;
+        }
+
+        .transaction-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .transaction-icon.credit {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+
+        .transaction-icon.debit {
+            background: linear-gradient(135deg, var(--error) 0%, #DC2626 100%);
+        }
+
+        .transaction-icon.pending {
+            background: linear-gradient(135deg, var(--warning) 0%, #D97706 100%);
+        }
+
+        .transaction-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .transaction-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        .transaction-amount {
+            font-size: 1.125rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .transaction-amount.credit {
+            color: var(--success);
+        }
+
+        .transaction-amount.debit {
+            color: var(--error);
+        }
+
+        .transaction-amount.pending {
+            color: var(--warning);
+        }
+
+        /* Filters */
+        .filters-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 0.5rem;
+        }
+
+        .filters-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-chip:active {
+            transform: scale(0.95);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin: 0 1.25rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Skeleton transactions */
+        .skeleton-transaction {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin: 0 1.25rem 0.5rem;
+            border: 1px solid var(--border);
+        }
+        .sk-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+        .sk-content { flex: 1; min-width: 0; }
+        .sk-line {
+            height: 12px;
+            border-radius: 6px;
+            background: var(--border);
+            margin-bottom: 0.5rem;
+        }
+        .sk-line.long { width: 85%; }
+        .sk-line.short { width: 50%; }
+        .sk-amount {
+            width: 72px;
+            height: 20px;
+            border-radius: 6px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .transaction-item {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Wallet</h1>
+            <p class="page-subtitle">Manage your earnings and payments</p>
+        </div>
+    </div>
+
+    <!-- Balance Card -->
+    <div class="balance-card">
+        <div class="balance-label">Available Balance</div>
+        <div class="balance-amount" id="availableBalance">£0.00</div>
+        <div class="balance-stats">
+            <div class="balance-stat">
+                <div class="balance-stat-value" id="totalEarnings">£0.00</div>
+                <div class="balance-stat-label">Total Earnings</div>
+            </div>
+            <div class="balance-stat">
+                <div class="balance-stat-value" id="totalWithdrawn">£0.00</div>
+                <div class="balance-stat-label">Withdrawn</div>
+            </div>
+            <div class="balance-stat">
+                <div class="balance-stat-value" id="pendingAmount">£0.00</div>
+                <div class="balance-stat-label">Pending</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="action-btn" onclick="initiateWithdrawal()">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Withdraw</span>
+        </div>
+        <div class="action-btn" onclick="viewBankDetails()">
+            <i class="fas fa-university"></i>
+            <span>Bank Details</span>
+        </div>
+        <div class="action-btn" onclick="viewPaymentHistory()">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </div>
+        <div class="action-btn" onclick="viewEarnings()">
+            <i class="fas fa-chart-line"></i>
+            <span>Earnings</span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="filters-row">
+            <div class="filter-chip active" data-filter="all" onclick="filterTransactions('all')">All</div>
+            <div class="filter-chip" data-filter="credit" onclick="filterTransactions('credit')">Earnings</div>
+            <div class="filter-chip" data-filter="debit" onclick="filterTransactions('debit')">Withdrawals</div>
+            <div class="filter-chip" data-filter="pending" onclick="filterTransactions('pending')">Pending</div>
+        </div>
+    </div>
+
+    <!-- Transactions – skeleton first, then real data -->
+    <h3 class="section-title">Recent Transactions</h3>
+    <div class="transactions-section" id="transactionsSection">
+        <div class="skeleton-transaction"><div class="sk-icon"></div><div class="sk-content"><div class="sk-line long"></div><div class="sk-line short"></div></div><div class="sk-amount"></div></div>
+        <div class="skeleton-transaction"><div class="sk-icon"></div><div class="sk-content"><div class="sk-line long"></div><div class="sk-line short"></div></div><div class="sk-amount"></div></div>
+        <div class="skeleton-transaction"><div class="sk-icon"></div><div class="sk-content"><div class="sk-line long"></div><div class="sk-line short"></div></div><div class="sk-amount"></div></div>
+        <div class="skeleton-transaction"><div class="sk-icon"></div><div class="sk-content"><div class="sk-line long"></div><div class="sk-line short"></div></div><div class="sk-amount"></div></div>
+        <div class="skeleton-transaction"><div class="sk-icon"></div><div class="sk-content"><div class="sk-line long"></div><div class="sk-line short"></div></div><div class="sk-amount"></div></div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item active">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        // Global variables
+        let allTransactions = [];
+        let filteredTransactions = [];
+        let currentFilter = 'all';
+
+        // Format currency
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getCarrierCommissionRate(originalAmount) {
+            const amt = parseFloat(originalAmount) || 0;
+            let commissionRate = 0.05;
+            if (amt > 5000) {
+                commissionRate = 0.03;
+            } else if (amt > 1000) {
+                commissionRate = 0.04;
+            }
+            return commissionRate;
+        }
+
+        function getNetCarrierAmount(load) {
+            if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
+                const v = parseFloat(load.carrierNetAmount);
+                if (!isNaN(v)) return v;
+            }
+            const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (parseFloat(load.minBudget) + parseFloat(load.maxBudget)) / 2 : load.maxBudget || load.minBudget || load.price || 0));
+            const original = parseFloat(originalBudget) || 0;
+            const commissionRate = getCarrierCommissionRate(original);
+            const commission = original * commissionRate;
+            return Math.round((original - commission) * 100) / 100;
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch {
+                return dateString;
+            }
+        }
+
+        // Get user data
+        function getUserData() {
+            try {
+                const raw = localStorage.getItem('carrierAuth') || localStorage.getItem('lastCarrierProfile');
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            if (!authSdk.currentUser && typeof authSdk.signInAnonymously === 'function') {
+                try { await authSdk.signInAnonymously(); } catch (e) {}
+            }
+        }
+
+        async function loadWalletLedgerEntries(db, carrierId) {
+            try {
+                await ensureAuthReady();
+                const snap = await db.ref(`walletLedger/${carrierId}`).limitToLast(800).once('value');
+                const out = [];
+                if (snap.exists()) {
+                    snap.forEach((ch) => {
+                        const v = ch.val() || {};
+                        out.push({ id: ch.key, ...v });
+                    });
+                }
+                return out;
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // Load wallet data – fast: only this carrier's loads (or limited fetch), withdrawals from localStorage
+        async function loadWalletData() {
+            const user = getUserData();
+            if (!user) {
+                document.getElementById('transactionsSection').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h3>Please Sign In</h3>
+                        <p>Sign in to view your wallet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+
+                const ledgerEntries = await loadWalletLedgerEntries(db, carrierId);
+                const hasLedger = Array.isArray(ledgerEntries) && ledgerEntries.length > 0;
+
+                let allLoads = {};
+                try {
+                    const myLoadsRef = db.ref('loads').orderByChild('carrierId').equalTo(carrierId);
+                    const snap = await myLoadsRef.once('value');
+                    allLoads = snap.val() || {};
+                } catch (e) {
+                    const snap = await db.ref('loads').orderByKey().limitToLast(200).once('value');
+                    const raw = snap.val() || {};
+                    Object.entries(raw).forEach(([id, load]) => {
+                        if ((load.carrierId === carrierId || load.carrierEmail === user.email) && (load.status || '').toLowerCase() === 'completed') {
+                            allLoads[id] = { ...load, loadId: id };
+                        }
+                    });
+                }
+
+                const completedLoads = Object.entries(allLoads).map(([id, load]) => ({ ...load, loadId: id }))
+                    .filter(load => (load.carrierId === carrierId || load.carrierEmail === user.email) && (load.status || '').toLowerCase() === 'completed');
+
+                const earningEntries = hasLedger
+                    ? ledgerEntries.filter(e => String(e.type || '').toLowerCase() === 'earning')
+                    : [];
+                const totalEarnings = hasLedger
+                    ? earningEntries.reduce((sum, e) => sum + (parseFloat(e.amountNet || e.amount || 0) || 0), 0)
+                    : completedLoads.reduce((sum, load) => sum + getNetCarrierAmount(load), 0);
+
+                // Get withdrawals
+                const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
+                const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
+
+                const totalWithdrawn = withdrawals
+                    .filter(w => w.status === 'completed' || w.status === 'approved')
+                    .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
+
+                const pendingWithdrawals = withdrawals
+                    .filter(w => w.status === 'pending')
+                    .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
+
+                const pendingEarnings = hasLedger
+                    ? earningEntries.filter(e => String(e.status || '').toLowerCase() === 'pending').reduce((sum, e) => sum + (parseFloat(e.amountNet || e.amount || 0) || 0), 0)
+                    : 0;
+                const availableEarnings = hasLedger
+                    ? earningEntries.filter(e => {
+                        const s = String(e.status || '').toLowerCase();
+                        return s === 'available' || s === 'paid' || s === 'completed';
+                    }).reduce((sum, e) => sum + (parseFloat(e.amountNet || e.amount || 0) || 0), 0)
+                    : totalEarnings;
+
+                const availableBalance = availableEarnings - totalWithdrawn - pendingWithdrawals;
+
+                // Update balance display
+                document.getElementById('availableBalance').textContent = formatCurrency(availableBalance);
+                document.getElementById('totalEarnings').textContent = formatCurrency(totalEarnings);
+                document.getElementById('totalWithdrawn').textContent = formatCurrency(totalWithdrawn);
+                document.getElementById('pendingAmount').textContent = formatCurrency(pendingWithdrawals + pendingEarnings);
+
+                // Create transactions
+                allTransactions = [];
+
+                if (hasLedger) {
+                    earningEntries.forEach((e) => {
+                        const lid = e.loadId || '';
+                        const orderRef = e.orderRef || (lid ? ('ORD-' + String(lid).substring(0, 8).toUpperCase()) : 'Earning');
+                        const route = e.route || '';
+                        const status = String(e.status || 'available').toLowerCase();
+                        allTransactions.push({
+                            id: e.id || ('load_' + lid) || Date.now(),
+                            loadId: lid || null,
+                            type: 'credit',
+                            title: `Earning • ${orderRef}`,
+                            subtitle: route || (lid ? ('Load #' + String(lid).substring(0, 8)) : 'Earning'),
+                            amount: parseFloat(e.amountNet || e.amount || 0) || 0,
+                            date: e.createdAt || e.paidAt || e.updatedAt || e.created_at,
+                            status: status === 'pending' ? 'pending' : 'completed'
+                        });
+                    });
+                } else {
+                    completedLoads.forEach(load => {
+                        const amount = getNetCarrierAmount(load);
+                        const lid = load.loadId || load.id;
+                        allTransactions.push({
+                            id: lid || Date.now(),
+                            loadId: lid || null,
+                            type: 'credit',
+                            title: `Payment for Load #${(lid || '').substring(0, 8)}`,
+                            subtitle: `${load.pickupLocation || ''} → ${load.deliveryLocation || ''}`,
+                            amount: amount,
+                            date: load.completedAt || load.deliveryDate || load.createdAt,
+                            status: 'completed'
+                        });
+                    });
+                }
+
+                // Add withdrawal transactions
+                withdrawals.forEach(withdrawal => {
+                    allTransactions.push({
+                        id: withdrawal.id || Date.now(),
+                        loadId: null,
+                        type: 'debit',
+                        title: 'Withdrawal Request',
+                        subtitle: `To ${withdrawal.bankDetails?.bankName || withdrawal.bankName || 'Bank Account'}`,
+                        amount: parseFloat(withdrawal.amount || 0),
+                        date: withdrawal.requestedAt || withdrawal.timestamp || withdrawal.createdAt,
+                        status: withdrawal.status || 'pending'
+                    });
+                });
+
+                // Sort by date (newest first)
+                allTransactions.sort((a, b) => {
+                    const dateA = new Date(a.date || 0);
+                    const dateB = new Date(b.date || 0);
+                    return dateB - dateA;
+                });
+
+                filteredTransactions = [...allTransactions];
+                renderTransactions();
+
+            } catch (error) {
+                console.error('Error loading wallet:', error);
+                showError('Failed to load wallet data');
+                document.getElementById('transactionsSection').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Wallet</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Filter transactions
+        function filterTransactions(filter) {
+            currentFilter = filter;
+
+            // Update filter chips
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+
+            if (filter === 'all') {
+                filteredTransactions = [...allTransactions];
+            } else {
+                filteredTransactions = allTransactions.filter(t => {
+                    if (filter === 'credit') return t.type === 'credit';
+                    if (filter === 'debit') return t.type === 'debit';
+                    if (filter === 'pending') return t.status === 'pending';
+                    return true;
+                });
+            }
+
+            renderTransactions();
+        }
+
+        // Render transactions
+        function renderTransactions() {
+            const section = document.getElementById('transactionsSection');
+
+            if (filteredTransactions.length === 0) {
+                section.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No Transactions</h3>
+                        <p>Your transaction history will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            section.innerHTML = filteredTransactions.slice(0, 20).map((transaction, index) => {
+                const iconClass = transaction.type === 'credit' ? 'credit' : 
+                                transaction.status === 'pending' ? 'pending' : 'debit';
+                const icon = transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up';
+                const amountClass = transaction.type === 'credit' ? 'credit' : 
+                                  transaction.status === 'pending' ? 'pending' : 'debit';
+                const amountPrefix = transaction.type === 'credit' ? '+' : '-';
+                const loadId = transaction.loadId || (transaction.type === 'credit' ? transaction.id : '');
+                const canOpenReceipt = !!(loadId && transaction.type === 'credit');
+                const clickAttr = canOpenReceipt ? ` data-loadid="${loadId}" tabindex="0" role="button" aria-label="Open receipt"` : '';
+
+                return `
+                    <div class="transaction-item${canOpenReceipt ? ' transaction-item-clickable' : ''}" style="animation-delay: ${index * 0.05}s"${clickAttr}>
+                        <div class="transaction-icon ${iconClass}">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="transaction-content">
+                            <div class="transaction-title">${transaction.title}</div>
+                            <div class="transaction-subtitle">${formatDate(transaction.date)} • ${transaction.subtitle}</div>
+                        </div>
+                        <div class="transaction-amount ${amountClass}">
+                            ${amountPrefix}${formatCurrency(transaction.amount)}
+                        </div>
+                        ${canOpenReceipt ? '<i class="fas fa-chevron-right transaction-arrow" aria-hidden="true"></i>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openTransactionReceipt(loadId) {
+            if (!loadId) return;
+            window.location.href = 'receipt.html?id=' + encodeURIComponent(loadId) + '&mode=payout';
+        }
+
+        // Initiate withdrawal
+        function initiateWithdrawal() {
+            window.location.href = 'withdraw.html';
+        }
+
+        // View bank details
+        function viewBankDetails() {
+            window.location.href = 'bank-account.html';
+        }
+
+        // View payment history
+        function viewPaymentHistory() {
+            filterTransactions('credit');
+        }
+
+        // View earnings
+        function viewEarnings() {
+            filterTransactions('all');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWalletData();
+
+            // Keyboard + click support for receipt rows
+            const section = document.getElementById('transactionsSection');
+            section.addEventListener('click', (e) => {
+                const row = e.target.closest('.transaction-item[data-loadid]');
+                if (!row) return;
+                openTransactionReceipt(row.getAttribute('data-loadid'));
+            });
+            section.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                const row = e.target.closest('.transaction-item[data-loadid]');
+                if (!row) return;
+                e.preventDefault();
+                openTransactionReceipt(row.getAttribute('data-loadid'));
+            });
+        });
+    </script>
+</body>
+</html>

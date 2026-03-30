@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Settings - Admin Mobile</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #4c2d8b;
+            --primary-light: #c4b5fd;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 10px 34px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 52%, #4c2d8b 100%);
+            color: #fff;
+            padding: 1.55rem 1.25rem 1.1rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px 260px at 18% 12%, rgba(196, 181, 253, 0.18) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .header-row {
+            position: relative;
+            z-index: 1;
+        }
+        .title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        .sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.82);
+            margin-top: 0.25rem;
+        }
+
+        .content { padding: 0 1.25rem 1.25rem; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .row-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .row-item:last-child { border-bottom: none; }
+        .row-item:active { background: rgba(15, 23, 42, 0.03); }
+
+        .left {
+            display: flex;
+            gap: 0.85rem;
+            align-items: center;
+            min-width: 0;
+        }
+        .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(111, 66, 193, 0.10);
+            color: var(--primary);
+            border: 1px solid rgba(111, 66, 193, 0.12);
+            flex-shrink: 0;
+        }
+        .text { min-width: 0; }
+        .row-title { font-weight: 900; letter-spacing: -0.02em; }
+        .row-sub { margin-top: 0.2rem; font-size: 0.84rem; color: var(--text-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chev { color: var(--text-light); }
+
+        .danger .icon {
+            background: rgba(220, 38, 38, 0.10);
+            color: var(--error);
+            border-color: rgba(220, 38, 38, 0.16);
+        }
+        .danger .row-title { color: var(--error); }
+
+        @media (min-width: 768px) {
+            body { max-width: 520px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-row">
+            <div class="title">Settings</div>
+            <div class="sub" id="adminEmail">Loading...</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <a class="row-item" href="dashboard.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-house"></i></div>
+                    <div class="text">
+                        <div class="row-title">Dashboard</div>
+                        <div class="row-sub">Overview of the system</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="loads.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-boxes"></i></div>
+                    <div class="text">
+                        <div class="row-title">Loads</div>
+                        <div class="row-sub">All loads tracking</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="carriers.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-truck"></i></div>
+                    <div class="text">
+                        <div class="row-title">Carriers</div>
+                        <div class="row-sub">Carrier list + status</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="suppliers.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="text">
+                        <div class="row-title">Suppliers</div>
+                        <div class="row-sub">Supplier list + status</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="verifications.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-user-check"></i></div>
+                    <div class="text">
+                        <div class="row-title">Verifications</div>
+                        <div class="row-sub">Approve pending accounts</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="ids.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-id-badge"></i></div>
+                    <div class="text">
+                        <div class="row-title">User IDs</div>
+                        <div class="row-sub">Supplier + carrier IDs list</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="lookup.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-magnifying-glass"></i></div>
+                    <div class="text">
+                        <div class="row-title">ID Lookup</div>
+                        <div class="row-sub">Search user details by ID</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="finance.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-credit-card"></i></div>
+                    <div class="text">
+                        <div class="row-title">Finance</div>
+                        <div class="row-sub">Bank transfers + pay letters</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+            <a class="row-item" href="messages.html">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-comments"></i></div>
+                    <div class="text">
+                        <div class="row-title">Messages</div>
+                        <div class="row-sub">Chat with users</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="row-item danger" onclick="adminLogout()">
+                <div class="left">
+                    <div class="icon"><i class="fas fa-right-from-bracket"></i></div>
+                    <div class="text">
+                        <div class="row-title">Sign Out</div>
+                        <div class="row-sub">Logout from admin panel</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right chev"></i>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-house"></i><span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i><span>Loads</span>
+        </a>
+        <a href="finance.html" class="bottom-nav-item">
+            <i class="fas fa-credit-card"></i><span>Finance</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i><span>Chat</span>
+        </a>
+        <a href="settings.html" class="bottom-nav-item active">
+            <i class="fas fa-gear"></i><span>Settings</span>
+        </a>
+    </nav>
+
+    <script src="../../assets/js/admin-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let auth = null;
+            try { auth = JSON.parse(localStorage.getItem('adminAuth') || 'null'); } catch (e) {}
+            document.getElementById('adminEmail').textContent = auth && auth.email ? auth.email : 'Admin';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>Edit Profile - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <style>
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.75rem 1.25rem 1.5rem;
+            border-radius: 0 0 32px 32px;
+            margin-bottom: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(600px 220px at 10% 10%, rgba(96, 165, 250, 0.22) 0%, transparent 60%),
+                radial-gradient(520px 220px at 90% 30%, rgba(29, 78, 216, 0.18) 0%, transparent 62%);
+            pointer-events: none;
+        }
+        .header-row { position: relative; z-index: 1; display:flex; align-items:center; gap: 0.9rem; }
+        .back-btn {
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.22);
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            text-decoration:none;
+            transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+        }
+        .back-btn:active { transform: scale(0.96); background: rgba(255,255,255,0.22); }
+        .page-title { font-size:1.25rem; font-weight:800; }
+        .page-sub { font-size:0.875rem; opacity:0.9; margin-top:0.25rem; color: rgba(255,255,255,0.9); }
+
+        .form-card {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1.25rem;
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            opacity: 0.7;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display:flex; align-items:center; justify-content:space-between; gap:0.75rem; font-size:0.8125rem; font-weight:800; color:var(--text-medium); margin-bottom:0.55rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .form-label small { font-weight:700; color:var(--text-light); text-transform: none; letter-spacing: 0; }
+        .input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: rgba(241, 245, 249, 0.8);
+            color: var(--text-dark);
+            transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+        }
+        .input:focus { outline:none; border-color: rgba(29, 78, 216, 0.85); box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.14); background:#fff; }
+        .input:disabled { background: rgba(241, 245, 249, 0.75); color: var(--text-medium); }
+        .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+        .submit-btn {
+            width:100%;
+            padding: 0.95rem 1rem;
+            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 60%, #1e3a8a 100%);
+            color:white;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            font-size:1rem;
+            font-weight:900;
+            cursor:pointer;
+            box-shadow: 0 16px 32px rgba(29, 78, 216, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+        }
+        .submit-btn:active { transform: scale(0.99); }
+        .submit-btn:disabled { opacity:0.6; cursor:not-allowed; }
+        .note { font-size:0.75rem; color:var(--text-medium); margin-top:0.75rem; text-align:center; }
+
+        @media (min-width: 768px) { body { max-width: 500px; margin: 0 auto; } }
+        @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-row">
+            <a href="profile.html" class="back-btn" title="Back">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <div class="page-title" id="pageTitle">Edit Profile</div>
+                <div class="page-sub" id="pageSubtitle">Update your business details</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div class="form-group grid-2">
+            <div>
+                <label class="form-label"><span>First name</span></label>
+                <input type="text" id="firstName" class="input" placeholder="John">
+            </div>
+            <div>
+                <label class="form-label"><span>Last name</span></label>
+                <input type="text" id="lastName" class="input" placeholder="Doe">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span>Email</span><small>Read-only</small></label>
+            <input type="email" id="email" class="input" disabled>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span>Company name</span></label>
+            <input type="text" id="companyName" class="input" placeholder="Company Ltd">
+        </div>
+
+        <div class="form-group grid-2">
+            <div>
+                <label class="form-label"><span>Business type</span></label>
+                <select id="businessType" class="input">
+                    <option value="">Select</option>
+                    <option value="Freight Forwarder">Freight Forwarder</option>
+                    <option value="Broker">Broker</option>
+                    <option value="Trader">Trader</option>
+                    <option value="Shipper">Shipper</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label"><span>Years of operation</span></label>
+                <input type="number" id="yearsOperation" class="input" min="0" max="100" placeholder="3">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span>Phone</span><small>International format (e.g., +44 7123 456789)</small></label>
+            <input type="tel" id="phone" class="input" placeholder="+44 7123 456789">
+        </div>
+
+        <div class="form-group" style="margin-top: 1.1rem;">
+            <label class="form-label"><span>Business address</span><small>Required</small></label>
+            <input type="text" id="address" class="input" placeholder="Street address">
+        </div>
+
+        <div class="form-group grid-2">
+            <div>
+                <label class="form-label"><span>City</span><small>Required</small></label>
+                <input type="text" id="city" class="input" placeholder="London">
+            </div>
+            <div>
+                <label class="form-label"><span>Postcode</span><small>Required</small></label>
+                <input type="text" id="postcode" class="input" placeholder="SW1A 1AA">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span>Country</span><small>Required</small></label>
+            <select id="country" class="input">
+                <option value="">Select</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Ireland">Ireland</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <button class="submit-btn" id="saveBtn" onclick="saveProfile()"><i class="fas fa-save"></i> Save Changes</button>
+        <div class="note"><i class="fas fa-shield-halved"></i> Changes sync to your account and device.</div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i><span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i><span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i><span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i><span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item active">
+            <i class="fas fa-user"></i><span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+    <script>
+        const alertSystem = new AlertSystem();
+
+        function getSupplierAuth() {
+            try {
+                const raw = localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile');
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        function prefill() {
+            const user = getSupplierAuth();
+            if (!user) return;
+            document.getElementById('firstName').value = user.firstName || '';
+            document.getElementById('lastName').value = user.lastName || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('companyName').value = user.companyName || user.company || '';
+            document.getElementById('businessType').value = user.businessType || '';
+            document.getElementById('yearsOperation').value = user.yearsOperation || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('address').value = user.address || user.address1 || '';
+            document.getElementById('city').value = user.city || '';
+            document.getElementById('postcode').value = user.postcode || user.zip || '';
+            document.getElementById('country').value = user.country || 'United Kingdom';
+
+            const titleEl = document.getElementById('pageTitle');
+            const subEl = document.getElementById('pageSubtitle');
+            if (titleEl && subEl) {
+                const isComplete = !!user.profileComplete;
+                titleEl.textContent = isComplete ? 'Edit Profile' : 'Complete Profile';
+                subEl.textContent = isComplete ? 'Update your business details' : 'Finish setup to unlock full features';
+            }
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
+                });
+            });
+        }
+
+        async function loadFromFirebase() {
+            const user = getSupplierAuth();
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!user || !db) return;
+            await ensureAuthReady();
+
+            const supplierId = user.supplierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+            try {
+                const snap = await db.ref('suppliers/' + supplierId).once('value');
+                if (!snap.exists()) return;
+                const data = snap.val() || {};
+
+                if (data.firstName && !document.getElementById('firstName').value) document.getElementById('firstName').value = data.firstName;
+                if (data.lastName && !document.getElementById('lastName').value) document.getElementById('lastName').value = data.lastName;
+                if (data.email && !document.getElementById('email').value) document.getElementById('email').value = data.email;
+                if (data.companyName && !document.getElementById('companyName').value) document.getElementById('companyName').value = data.companyName;
+                if (data.businessType && !document.getElementById('businessType').value) document.getElementById('businessType').value = data.businessType;
+                if (data.yearsOperation && !document.getElementById('yearsOperation').value) document.getElementById('yearsOperation').value = data.yearsOperation;
+                if (data.phone && !document.getElementById('phone').value) document.getElementById('phone').value = data.phone;
+                if (data.address && !document.getElementById('address').value) document.getElementById('address').value = data.address;
+                if (data.city && !document.getElementById('city').value) document.getElementById('city').value = data.city;
+                if (data.postcode && !document.getElementById('postcode').value) document.getElementById('postcode').value = data.postcode;
+                if (data.country && !document.getElementById('country').value) document.getElementById('country').value = data.country;
+
+                const merged = { ...user, ...data };
+                localStorage.setItem('supplierAuth', JSON.stringify(merged));
+                localStorage.setItem('lastSupplierProfile', JSON.stringify(merged));
+
+                const titleEl = document.getElementById('pageTitle');
+                const subEl = document.getElementById('pageSubtitle');
+                if (titleEl && subEl) {
+                    const isComplete = !!merged.profileComplete;
+                    titleEl.textContent = isComplete ? 'Edit Profile' : 'Complete Profile';
+                    subEl.textContent = isComplete ? 'Update your business details' : 'Finish setup to unlock full features';
+                }
+            } catch (e) {}
+        }
+
+        async function saveProfile() {
+            const user = getSupplierAuth();
+            if (!user) { alertSystem.show('error', 'Please sign in first'); return; }
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) { alertSystem.show('error', 'Service unavailable. Try again later.'); return; }
+            await ensureAuthReady();
+            if (!authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please login again.'); return; }
+
+            const supplierId = user.supplierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+            const payload = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                companyName: document.getElementById('companyName').value.trim(),
+                businessType: document.getElementById('businessType').value,
+                yearsOperation: document.getElementById('yearsOperation').value,
+                phone: document.getElementById('phone').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                postcode: document.getElementById('postcode').value.trim(),
+                country: document.getElementById('country').value,
+                updatedAt: new Date().toISOString()
+            };
+
+            const requiredMissing = [];
+            if (!payload.firstName) requiredMissing.push('First name');
+            if (!payload.lastName) requiredMissing.push('Last name');
+            if (!payload.companyName) requiredMissing.push('Company name');
+            if (!payload.phone) requiredMissing.push('Phone');
+            if (!payload.businessType) requiredMissing.push('Business type');
+            if (!payload.yearsOperation && payload.yearsOperation !== 0 && payload.yearsOperation !== '0') requiredMissing.push('Years of operation');
+            if (!payload.address) requiredMissing.push('Address');
+            if (!payload.city) requiredMissing.push('City');
+            if (!payload.postcode) requiredMissing.push('Postcode');
+            if (!payload.country) requiredMissing.push('Country');
+
+            payload.profileComplete = requiredMissing.length === 0;
+            if (requiredMissing.length) {
+                alertSystem.show('error', 'Please complete: ' + requiredMissing.slice(0, 4).join(', ') + (requiredMissing.length > 4 ? '…' : ''));
+                return;
+            }
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                await db.ref('suppliers/' + supplierId).update(payload);
+                const updated = { ...user, ...payload };
+                localStorage.setItem('supplierAuth', JSON.stringify(updated));
+                localStorage.setItem('lastSupplierProfile', JSON.stringify(updated));
+                alertSystem.show('success', 'Profile updated');
+                setTimeout(() => { window.location.href = 'profile.html'; }, 800);
+            } catch (e) {
+                alertSystem.show('error', 'Failed to save. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            prefill();
+            loadFromFirebase();
+        });
+    </script>
+</body>
+</html>

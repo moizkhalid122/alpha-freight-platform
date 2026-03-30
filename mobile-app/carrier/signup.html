@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Carrier Sign Up - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap (Mobile Optimized) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    
+    <!-- Google OAuth -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --primary-light: #93C5FD;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --text-dark: #0F172A;
+            --text-medium: #64748B;
+            --text-light: #94A3B8;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom Mobile App Scrollbar */
+        /* Webkit browsers (Chrome, Safari, Edge) */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.3);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: rgba(37, 99, 235, 0.7);
+        }
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .scroll-container {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.3);
+            border-radius: 10px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.5);
+        }
+
+        /* Mobile App Container */
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--bg-main);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+
+        /* Container */
+        .signup-container {
+            max-width: 100%;
+            padding: 1.5rem 1rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .welcome-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .welcome-subtitle {
+            font-size: 0.9375rem;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+
+        .benefits-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: left;
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+        }
+
+        .benefit-item i {
+            color: var(--success);
+            font-size: 1rem;
+            width: 20px;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            transition: all 0.2s;
+            min-height: 48px; /* Touch-friendly */
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--card-bg);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            min-height: 48px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--card-bg);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Phone Input */
+        .phone-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .country-code {
+            flex-shrink: 0;
+            padding: 0.875rem 1rem;
+            background: var(--bg-main);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            color: var(--text-dark);
+            min-width: 90px;
+        }
+
+        .phone-input {
+            flex: 1;
+        }
+
+        /* Password Toggle */
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            font-size: 1.125rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .password-strength.weak .password-strength-bar {
+            width: 33%;
+            background: var(--error);
+        }
+
+        .password-strength.medium .password-strength-bar {
+            width: 66%;
+            background: var(--warning);
+        }
+
+        .password-strength.strong .password-strength-bar {
+            width: 100%;
+            background: var(--success);
+        }
+
+        .password-requirements {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        .requirement-item.met {
+            color: var(--success);
+        }
+
+        .requirement-item i {
+            font-size: 0.75rem;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            margin-bottom: 1rem;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .custom-checkbox:active {
+            background: var(--bg-main);
+        }
+
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .checkbox-label a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .checkbox-label a:active {
+            opacity: 0.7;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 52px; /* Touch-friendly */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary .spinner {
+            display: none;
+        }
+
+        .btn-primary.loading .spinner {
+            display: block;
+        }
+
+        .btn-primary.loading .btn-text {
+            display: none;
+        }
+
+        /* Google Sign In */
+        .google-signin-btn {
+            width: 100%;
+            padding: 0.875rem;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .google-signin-btn:active {
+            transform: scale(0.98);
+            background: var(--bg-main);
+        }
+
+        .google-signin-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: var(--text-medium);
+            font-size: 0.875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Error Message */
+        .error-message {
+            display: none;
+            font-size: 0.8125rem;
+            color: var(--error);
+            margin-top: 0.5rem;
+            padding-left: 0.25rem;
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        .form-group.error .form-input,
+        .form-group.error .form-select {
+            border-color: var(--error);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            font-size: 0.8125rem;
+            color: var(--success);
+            margin-top: 0.5rem;
+            padding-left: 0.25rem;
+        }
+
+        .form-group.success .success-message {
+            display: block;
+        }
+
+        /* Login Link */
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .login-link-text {
+            font-size: 0.9375rem;
+            color: var(--text-medium);
+        }
+
+        .login-link-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link-text a:active {
+            opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+
+        /* Scroll Container */
+        .scroll-container {
+            padding-bottom: 2rem;
+            min-height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        /* Enhanced Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .form-card {
+            animation: slideInUp 0.4s ease-out;
+        }
+
+        .form-card:nth-child(1) { animation-delay: 0.1s; }
+        .form-card:nth-child(2) { animation-delay: 0.2s; }
+        .form-card:nth-child(3) { animation-delay: 0.3s; }
+        .form-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Enhanced Button Hover Effects */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Enhanced Input Focus */
+        .form-input:focus,
+        .form-select:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border);
+            z-index: 1001;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Floating Action Button (FAB) - Optional */
+        .fab {
+            position: fixed;
+            bottom: 100px;
+            right: 1.5rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        /* Enhanced Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            border-radius: 0 0 24px 24px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .welcome-title {
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+
+        .benefits-list {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .benefit-item {
+            color: white;
+        }
+
+        .benefit-item i {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Enhanced Form Cards */
+        .form-card {
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .form-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner-large {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .signup-container {
+                padding: 2rem;
+            }
+        }
+
+        /* Dark Mode Support (Optional) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-main: #0F172A;
+                --card-bg: #1E293B;
+                --text-dark: #F1F5F9;
+                --text-medium: #94A3B8;
+                --border: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- Scroll Container -->
+    <div class="scroll-container">
+        <!-- Main Container -->
+        <div class="signup-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div style="position: relative; z-index: 1;">
+                <h1 class="welcome-title">Join Alpha Freight</h1>
+                <p class="welcome-subtitle">Start earning with verified loads across UK</p>
+            </div>
+            
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Free registration</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Instant load access</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>7-day guaranteed payouts</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Real-time tracking</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <form id="signupForm">
+            <!-- Personal Details -->
+            <div class="form-card">
+                <h3 class="form-section-title">
+                    <i class="fas fa-user"></i>
+                    Personal Details
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="firstName">First Name</label>
+                    <input type="text" class="form-input" id="firstName" placeholder="Enter your first name" required>
+                    <div class="error-message">Please enter your first name</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="lastName">Last Name</label>
+                    <input type="text" class="form-input" id="lastName" placeholder="Enter your last name" required>
+                    <div class="error-message">Please enter your last name</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" class="form-input" id="email" placeholder="your.email@example.com" required>
+                    <div class="error-message">Please enter a valid email address</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <div class="phone-input-group">
+                        <div class="country-code">
+                            <span>🇬🇧</span>
+                            <span>+44</span>
+                        </div>
+                        <input type="tel" class="form-input phone-input" id="phone" placeholder="7123 456789" required>
+                    </div>
+                    <div class="error-message">Please enter a valid phone number</div>
+                </div>
+            </div>
+
+            <!-- Business Details -->
+            <div class="form-card">
+                <h3 class="form-section-title">
+                    <i class="fas fa-building"></i>
+                    Business Details
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="companyName">Company Name</label>
+                    <input type="text" class="form-input" id="companyName" placeholder="Your company name" required>
+                    <div class="error-message">Please enter your company name</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="fleetSize">Fleet Size</label>
+                    <select class="form-select" id="fleetSize" required>
+                        <option value="">Select fleet size</option>
+                        <option value="1-5">1-5 vehicles</option>
+                        <option value="6-20">6-20 vehicles</option>
+                        <option value="21+">21+ vehicles</option>
+                    </select>
+                    <div class="error-message">Please select fleet size</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="yearsOperation">Years in Operation</label>
+                    <select class="form-select" id="yearsOperation" required>
+                        <option value="">Select years</option>
+                        <option value="0-1">0-1 years</option>
+                        <option value="2-5">2-5 years</option>
+                        <option value="6-10">6-10 years</option>
+                        <option value="10+">10+ years</option>
+                    </select>
+                    <div class="error-message">Please select years in operation</div>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="form-card">
+                <h3 class="form-section-title">
+                    <i class="fas fa-lock"></i>
+                    Security
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" class="form-input" id="password" placeholder="Create a strong password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="password-strength-bar"></div>
+                    </div>
+                    <div class="password-requirements" id="passwordRequirements">
+                        <div class="requirement-item" data-requirement="length">
+                            <i class="fas fa-circle"></i>
+                            <span>At least 8 characters</span>
+                        </div>
+                        <div class="requirement-item" data-requirement="uppercase">
+                            <i class="fas fa-circle"></i>
+                            <span>One uppercase letter</span>
+                        </div>
+                        <div class="requirement-item" data-requirement="number">
+                            <i class="fas fa-circle"></i>
+                            <span>One number</span>
+                        </div>
+                        <div class="requirement-item" data-requirement="special">
+                            <i class="fas fa-circle"></i>
+                            <span>One special character</span>
+                        </div>
+                    </div>
+                    <div class="error-message">Password does not meet requirements</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" class="form-input" id="confirmPassword" placeholder="Confirm your password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                            <i class="fas fa-eye" id="confirmPasswordToggleIcon"></i>
+                        </button>
+                    </div>
+                    <div class="error-message">Passwords do not match</div>
+                </div>
+            </div>
+
+            <!-- Agreements -->
+            <div class="form-card">
+                <h3 class="form-section-title">
+                    <i class="fas fa-file-contract"></i>
+                    Agreements
+                </h3>
+
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="checkbox-input" id="terms" required>
+                        <span class="checkbox-label">
+                            I agree to the <a href="../../pages/terms.html" target="_blank">Terms & Conditions</a>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="checkbox-input" id="privacy" required>
+                        <span class="checkbox-label">
+                            I agree to the <a href="../../pages/privacy.html" target="_blank">Privacy Policy</a>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="checkbox-input" id="marketing">
+                        <span class="checkbox-label">
+                            I'd like to receive marketing emails (Get 5% off first load)
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <div class="spinner"></div>
+                <span class="btn-text">Create Account</span>
+            </button>
+
+            <!-- Divider -->
+            <div class="divider">OR</div>
+
+            <!-- Google Sign In -->
+            <button type="button" class="google-signin-btn" onclick="signInWithGoogle()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 262">
+                    <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"/>
+                    <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"/>
+                    <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"/>
+                    <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"/>
+                </svg>
+                Continue with Google
+            </button>
+        </form>
+
+        <!-- Login Link -->
+        <div class="login-link">
+            <p class="login-link-text">
+                Already have an account? <a href="login.html">Sign In</a>
+            </p>
+        </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner-large"></div>
+            <p style="color: var(--text-dark); font-weight: 500;">Creating your account...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Password Toggle
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId === 'password' ? 'passwordToggleIcon' : 'confirmPasswordToggleIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Password Strength Checker
+        function checkPasswordStrength(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+
+            const strength = Object.values(requirements).filter(Boolean).length;
+            const strengthClass = strength <= 2 ? 'weak' : strength === 3 ? 'medium' : 'strong';
+
+            // Update strength bar
+            const strengthBar = document.getElementById('passwordStrength');
+            strengthBar.className = `password-strength ${strengthClass}`;
+
+            // Update requirements
+            Object.keys(requirements).forEach(key => {
+                const item = document.querySelector(`[data-requirement="${key}"]`);
+                if (item) {
+                    if (requirements[key]) {
+                        item.classList.add('met');
+                        item.querySelector('i').classList.remove('fa-circle');
+                        item.querySelector('i').classList.add('fa-check-circle');
+                    } else {
+                        item.classList.remove('met');
+                        item.querySelector('i').classList.remove('fa-check-circle');
+                        item.querySelector('i').classList.add('fa-circle');
+                    }
+                }
+            });
+
+            return Object.values(requirements).every(Boolean);
+        }
+
+        // Form Validation
+        function validateForm() {
+            let isValid = true;
+
+            // Reset errors
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error', 'success');
+            });
+
+            // First Name
+            const firstName = document.getElementById('firstName').value.trim();
+            if (!firstName) {
+                document.getElementById('firstName').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Last Name
+            const lastName = document.getElementById('lastName').value.trim();
+            if (!lastName) {
+                document.getElementById('lastName').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Email
+            const email = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                document.getElementById('email').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Phone
+            const phone = document.getElementById('phone').value.trim();
+            if (!phone || phone.length < 10) {
+                document.getElementById('phone').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Company Name
+            const companyName = document.getElementById('companyName').value.trim();
+            if (!companyName) {
+                document.getElementById('companyName').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Fleet Size
+            const fleetSize = document.getElementById('fleetSize').value;
+            if (!fleetSize) {
+                document.getElementById('fleetSize').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Years Operation
+            const yearsOperation = document.getElementById('yearsOperation').value;
+            if (!yearsOperation) {
+                document.getElementById('yearsOperation').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Password
+            const password = document.getElementById('password').value;
+            const isPasswordValid = checkPasswordStrength(password);
+            if (!isPasswordValid) {
+                document.getElementById('password').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Confirm Password
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPassword').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Terms & Privacy
+            const terms = document.getElementById('terms').checked;
+            const privacy = document.getElementById('privacy').checked;
+            if (!terms || !privacy) {
+                showError('Please accept Terms & Conditions and Privacy Policy');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+
+        // Progress Bar on Scroll
+        function updateProgressBar() {
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+            document.getElementById('progressBar').style.width = scrollPercent + '%';
+        }
+        window.addEventListener('scroll', updateProgressBar);
+
+        // Form Submission
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                showError('Please fill all required fields correctly');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            loadingOverlay.classList.add('show');
+
+            try {
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!authSdk || !db) {
+                    throw new Error('Auth/DB unavailable');
+                }
+
+                const formData = {
+                    firstName: document.getElementById('firstName').value.trim(),
+                    lastName: document.getElementById('lastName').value.trim(),
+                    email: document.getElementById('email').value.trim().toLowerCase(),
+                    phone: '+44' + document.getElementById('phone').value.replace(/\s/g, ''),
+                    companyName: document.getElementById('companyName').value.trim(),
+                    fleetSize: document.getElementById('fleetSize').value,
+                    yearsOperation: document.getElementById('yearsOperation').value,
+                    marketing: document.getElementById('marketing').checked,
+                    userType: 'carrier',
+                    status: 'pending_verification',
+                    profileComplete: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                const password = document.getElementById('password').value;
+                const userCred = await authSdk.createUserWithEmailAndPassword(formData.email, password);
+                const firebaseUid = userCred && userCred.user ? userCred.user.uid : null;
+                if (!firebaseUid) throw new Error('Auth failed');
+
+                try { await userCred.user.sendEmailVerification(); } catch (e) {}
+
+                // Save to Firebase
+                const carriersRef = db.ref('carriers');
+                const carrierId = 'carrier_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const carrierProfile = {
+                    ...formData,
+                    carrierId: carrierId,
+                    firebaseUid: firebaseUid,
+                    isLoggedIn: false
+                };
+                await carriersRef.child(carrierId).set(carrierProfile);
+                try { await carriersRef.child(carrierId).child('password').remove(); } catch (e) {}
+
+                // Save to localStorage for session
+                const carrierAuth = {
+                    ...carrierProfile,
+                    carrierId: carrierId,
+                    firebaseUid: firebaseUid,
+                    isLoggedIn: true,
+                    loginTime: new Date().toISOString()
+                };
+                localStorage.setItem('carrierAuth', JSON.stringify(carrierAuth));
+                localStorage.setItem('lastCarrierProfile', JSON.stringify(carrierAuth));
+
+                showSuccess('Account created successfully! Redirecting...');
+
+                // Redirect to dashboard after 1.5 seconds
+                setTimeout(() => {
+                    loadingOverlay.classList.remove('show');
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                const code = error && error.code ? String(error.code) : '';
+                if (code === 'auth/email-already-in-use') showError('Email already registered. Please sign in instead.');
+                else if (code === 'auth/weak-password') showError('Password is too weak. Please choose a stronger password.');
+                else if (code === 'auth/invalid-email') showError('Invalid email address.');
+                else showError('Registration failed. Please try again.');
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                loadingOverlay.classList.remove('show');
+            }
+        });
+
+        // Password strength on input
+        document.getElementById('password').addEventListener('input', function(e) {
+            checkPasswordStrength(e.target.value);
+        });
+
+        // Google Sign In
+        const GOOGLE_CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
+
+        function signInWithGoogle() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                if (google.accounts.id && typeof google.accounts.id.prompt === 'function') {
+                    google.accounts.id.prompt();
+                    return;
+                }
+                showError('Google Sign In is not available. Please use email registration.');
+            } else {
+                showError('Google Sign In is not available. Please use email registration.');
+            }
+        }
+
+        async function handleGoogleIdCredentialResponse(response) {
+            try {
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!authSdk || !db) throw new Error('Auth/DB unavailable');
+
+                const idToken = response && response.credential ? String(response.credential) : '';
+                if (!idToken) throw new Error('Missing credential');
+
+                const providerCred = firebase.auth.GoogleAuthProvider.credential(idToken);
+                const userCred = await authSdk.signInWithCredential(providerCred);
+                const firebaseUser = userCred && userCred.user ? userCred.user : null;
+                if (!firebaseUser || !firebaseUser.uid) throw new Error('Google sign-in failed');
+
+                const uid = firebaseUser.uid;
+
+                const snap = await db.ref('carriers').orderByChild('firebaseUid').equalTo(uid).limitToFirst(1).once('value');
+                let existing = null;
+                if (snap.exists()) {
+                    snap.forEach((child) => {
+                        existing = child.val() || {};
+                        if (!existing.carrierId) existing.carrierId = child.key;
+                    });
+                }
+
+                if (!existing) {
+                    const carrierId = 'carrier_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    existing = {
+                        carrierId,
+                        firebaseUid: uid,
+                        email: (firebaseUser.email || '').toLowerCase(),
+                        firstName: (firebaseUser.displayName || '').split(' ')[0] || '',
+                        lastName: (firebaseUser.displayName || '').split(' ').slice(1).join(' ') || '',
+                        phone: '',
+                        companyName: '',
+                        fleetSize: '',
+                        yearsOperation: '',
+                        marketing: false,
+                        userType: 'carrier',
+                        status: 'pending_verification',
+                        profileComplete: false,
+                        createdAt: new Date().toISOString(),
+                        isLoggedIn: false
+                    };
+                    await db.ref('carriers/' + carrierId).set(existing);
+                }
+
+                const carrierAuth = {
+                    ...existing,
+                    isLoggedIn: true,
+                    loginTime: new Date().toISOString()
+                };
+                localStorage.setItem('carrierAuth', JSON.stringify(carrierAuth));
+                localStorage.setItem('lastCarrierProfile', JSON.stringify(carrierAuth));
+
+                showSuccess('Signing in...');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 800);
+            } catch (e) {
+                console.error(e);
+                showError('Google sign-in failed. Please try again.');
+            }
+        }
+
+        // Initialize Google Sign In on load
+        window.addEventListener('load', function() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleIdCredentialResponse
+                });
+            }
+        });
+    </script>
+</body>
+</html>

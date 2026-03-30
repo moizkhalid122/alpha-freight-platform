@@ -39,15 +39,15 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     
     const data = event.notification.data;
-    let url = '/app/carrier/dashboard.html';
+    let url = '/mobile-app/carrier/dashboard.html';
     
     if (data) {
         if (data.type === 'new_load') {
-            url = '/app/carrier/loads.html';
+            url = '/mobile-app/carrier/loads.html';
         } else if (data.type === 'load_accepted') {
-            url = '/app/carrier/my-loads.html';
+            url = '/mobile-app/carrier/my-loads.html';
         } else if (data.type === 'deposit' || data.type === 'withdrawal') {
-            url = '/app/carrier/wallet.html';
+            url = '/mobile-app/carrier/wallet.html';
         } else if (data.url) {
             url = data.url;
         }
@@ -67,4 +67,3 @@ self.addEventListener('notificationclick', (event) => {
         })
     );
 });
-

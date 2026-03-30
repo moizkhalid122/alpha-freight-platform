@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Pay Letter - Alpha Freight</title>
+    
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    
+    <style>
+        /* —— Premium theme (matches supplier dashboard) —— */
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --gold: #c9a227;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            /* footer from supplier-bottom-nav.css */
+            color: var(--text-dark);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.5rem 1.25rem 1.75rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 36px 36px;
+            opacity: 0.7;
+        }
+
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+
+        .order-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin: 0 1.25rem 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .order-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 0 2px 2px 0;
+            opacity: 0.9;
+        }
+
+        .order-route { font-size: 1rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.02em; color: var(--text-dark); }
+
+        .order-meta { font-size: 0.8125rem; color: var(--text-medium); margin-bottom: 0.75rem; font-weight: 600; }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .order-amount { font-size: 1.125rem; font-weight: 900; color: var(--primary); letter-spacing: -0.02em; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .status-badge.pending { background: rgba(217, 119, 6, 0.12); color: var(--warning); }
+        .status-badge.sent { background: rgba(29, 78, 216, 0.12); color: var(--primary); }
+        .status-badge.paid { background: rgba(5, 150, 105, 0.12); color: var(--success); }
+
+        .order-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .order-actions button {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+        }
+        .order-actions button:active { transform: scale(0.98); }
+
+        .btn-pay { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+
+        .btn-view { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            margin: 0 1.25rem;
+        }
+
+        .empty-state i { font-size: 2.5rem; color: var(--text-medium); margin-bottom: 0.75rem; }
+        .empty-state h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <h1 class="page-title">Pay Letter</h1>
+        <p class="page-subtitle">Pending orders to pay</p>
+    </div>
+
+    <div id="ordersList">
+        <div class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <h3>Loading...</h3>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+
+        function formatCurrency(val) {
+            return '£' + parseFloat(val || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatDate(str) {
+            if (!str) return '-';
+            return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth');
+            return auth ? JSON.parse(auth) : null;
+        }
+
+        async function checkPayLetterReminder(sid, pendingCount) {
+            if (!pendingCount) return;
+            const db = window.AlphaBrokrage?.firebaseDb;
+            if (!db) return;
+            const THIRTY_FIVE_MIN = 35 * 60 * 1000;
+            try {
+                const now = Date.now();
+                let lastLocal = 0;
+                try { lastLocal = parseInt(localStorage.getItem('payLetterReminderAt:' + sid) || '0', 10) || 0; } catch (e) { lastLocal = 0; }
+                if (lastLocal > 0 && now - lastLocal < THIRTY_FIVE_MIN) return;
+                try { localStorage.setItem('payLetterReminderAt:' + sid, String(now)); } catch (e) {}
+
+                const notif = {
+                    title: 'Pay Letter Reminder',
+                    message: `You have ${pendingCount} pending payment(s) in Pay Letter. Please complete payment.`,
+                    type: 'pay_letter_reminder',
+                    read: false,
+                    createdAt: new Date().toISOString()
+                };
+                await db.ref('notifications/suppliers/' + sid).push(notif);
+                await db.ref('suppliers/' + sid).update({ lastPayLetterReminderAt: new Date().toISOString() });
+            } catch (e) { /* ignore */ }
+        }
+
+        function loadOrders() {
+            const user = getUserData();
+            const container = document.getElementById('ordersList');
+
+            if (!user) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3></div>';
+                return;
+            }
+
+            const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const db = window.AlphaBrokrage.firebaseDb;
+
+            function render(orders) {
+                const filtered = orders.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>No pending orders</h3><p>Add loads from Pay Now page</p></div>';
+                    return;
+                }
+
+                container.innerHTML = filtered.map((o, idx) => {
+                    const id = o.id || o.loadId || '';
+                    const lid = o.loadId || id;
+                    const route = `${o.pickupLocation || o.pickup_location || 'N/A'} → ${o.deliveryLocation || o.delivery_location || 'N/A'}`;
+                    const amt = parseFloat(o.amount || 0);
+                    const status = (o.status || 'pending').toLowerCase();
+                    const hasPaymentSent = !!(o.paymentSentAt || o.paymentSource);
+                    const statusClass = status === 'paid' ? 'paid' : hasPaymentSent ? 'sent' : 'pending';
+                    const statusText = status === 'paid' ? 'Paid' : hasPaymentSent ? 'Payment Sent' : 'Pending';
+
+                    return `
+                        <div class="order-card">
+                            <div class="order-route">${(o.loadTitle || 'Load').replace(/</g, '&lt;')} #${id.substring(0, 8)}</div>
+                            <div class="order-meta">${route} • ${formatDate(o.createdAt)}</div>
+                            <div class="order-row">
+                                <span class="order-amount">${formatCurrency(amt)}</span>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            ${!hasPaymentSent && status !== 'paid' ? `
+                            <div class="order-actions">
+                                <button class="btn-pay" data-load-id="${lid}" data-amount="${amt}">
+                                    <i class="fas fa-credit-card"></i> Pay Now
+                                </button>
+                                <button class="btn-view" onclick="window.location.href='my-loads.html'">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                container.querySelectorAll('.btn-pay').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const loadId = btn.dataset.loadId;
+                        const amount = btn.dataset.amount;
+                        payOrder(loadId, amount);
+                    });
+                });
+            }
+
+            let orders = [];
+
+            if (db) {
+                const baseRef = db.ref('payLetterPending').orderByChild('supplierId').equalTo(supplierId).limitToLast(200);
+                baseRef.on('value', (snap) => {
+                    orders = [];
+                    if (snap.exists()) {
+                        snap.forEach((c) => {
+                            const o = c.val();
+                            o.id = c.key;
+                            orders.push(o);
+                        });
+                    }
+                    const local = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                    const localFiltered = local.filter(l => l.supplierId === supplierId);
+                    const merged = [...orders];
+                    localFiltered.forEach(l => {
+                        if (!merged.some(m => m.loadId === l.loadId)) merged.push(l);
+                    });
+                    merged.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                    render(merged);
+                    try { localStorage.setItem('payLetterPendingCache:' + supplierId, JSON.stringify(merged.slice(0, 200))); } catch (e) {}
+                    const pending = merged.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+                    if (pending.length > 0) checkPayLetterReminder(supplierId, pending.length);
+                });
+                // New item immediate notification
+                baseRef.on('child_added', (c) => {
+                    const v = c.val() || {};
+                    const status = (v.status || 'pending').toLowerCase();
+                    if (status !== 'paid') {
+                        checkPayLetterReminder(supplierId, 1);
+                    }
+                });
+            } else {
+                const local = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                render(local.filter(l => l.supplierId === supplierId));
+            }
+        }
+
+        function payOrder(loadId, amount) {
+            window.location.href = `pay-now.html?loadId=${encodeURIComponent(loadId || '')}&amount=${encodeURIComponent(amount || 0)}&paymentFor=Load%20Payment&paymentType=Pay%20Letter`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            const user = getUserData();
+            const supplierId = user ? (user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_')) : '';
+            if (supplierId) {
+                try {
+                    const cached = JSON.parse(localStorage.getItem('payLetterPendingCache:' + supplierId) || '[]');
+                    if (Array.isArray(cached) && cached.length) {
+                        const container = document.getElementById('ordersList');
+                        if (container) {
+                            const filtered = cached.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+                            if (filtered.length > 0) {
+                                container.innerHTML = filtered.map((o) => {
+                                    const id = o.id || o.loadId || '';
+                                    const lid = o.loadId || id;
+                                    const route = `${o.pickupLocation || o.pickup_location || 'N/A'} → ${o.deliveryLocation || o.delivery_location || 'N/A'}`;
+                                    const amt = parseFloat(o.amount || 0);
+                                    const status = (o.status || 'pending').toLowerCase();
+                                    const hasPaymentSent = !!(o.paymentSentAt || o.paymentSource);
+                                    const statusClass = status === 'paid' ? 'paid' : hasPaymentSent ? 'sent' : 'pending';
+                                    const statusText = status === 'paid' ? 'Paid' : hasPaymentSent ? 'Payment Sent' : 'Pending';
+                                    return `
+                                        <div class="order-card">
+                                            <div class="order-route">${(o.loadTitle || 'Load').replace(/</g, '&lt;')} #${id.substring(0, 8)}</div>
+                                            <div class="order-meta">${route} • ${formatDate(o.createdAt)}</div>
+                                            <div class="order-row">
+                                                <span class="order-amount">${formatCurrency(amt)}</span>
+                                                <span class="status-badge ${statusClass}">${statusText}</span>
+                                            </div>
+                                            ${!hasPaymentSent && status !== 'paid' ? `
+                                            <div class="order-actions">
+                                                <button class="btn-pay" data-load-id="${lid}" data-amount="${amt}">
+                                                    <i class="fas fa-credit-card"></i> Pay Now
+                                                </button>
+                                                <button class="btn-view" onclick="window.location.href='my-loads.html'">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                            </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('');
+
+                                container.querySelectorAll('.btn-pay').forEach(btn => {
+                                    btn.addEventListener('click', () => {
+                                        const loadId = btn.dataset.loadId;
+                                        const amount = btn.dataset.amount;
+                                        payOrder(loadId, amount);
+                                    });
+                                });
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (authSdk && typeof authSdk.onAuthStateChanged === 'function') {
+                await new Promise((resolve) => {
+                    let done = false;
+                    const timer = setTimeout(() => {
+                        if (done) return;
+                        done = true;
+                        resolve();
+                    }, 2500);
+                    const unsub = authSdk.onAuthStateChanged(() => {
+                        if (done) return;
+                        done = true;
+                        clearTimeout(timer);
+                        try { unsub(); } catch (e) {}
+                        resolve();
+                    });
+                });
+            }
+
+            loadOrders();
+            // Background repeating reminders every ~35 minutes while page open
+            if (supplierId) {
+                setInterval(() => {
+                    try {
+                        const cached = JSON.parse(localStorage.getItem('payLetterPendingCache:' + supplierId) || '[]') || [];
+                        const pending = cached.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+                        if (pending.length > 0) checkPayLetterReminder(supplierId, pending.length);
+                    } catch (e) {}
+                }, 35 * 60 * 1000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Settings - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        /* Theme: carrier-premium-theme.css */
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.125rem;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Settings Section */
+        .settings-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        /* Setting Item */
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .setting-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            color: var(--primary);
+        }
+
+        .setting-text {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .setting-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            left: 25px;
+        }
+
+        /* Select Dropdown */
+        .setting-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .setting-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Action Button */
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.danger {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .action-btn.danger:active {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Info Text */
+        .info-text {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+            margin-top: 0.5rem;
+            padding-left: 3.5rem;
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-text">
+                <h1 class="page-title">Settings</h1>
+                <p class="page-subtitle">Manage your preferences</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Settings -->
+    <div class="settings-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-bell"></i>
+                Notifications
+            </h3>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Email Notifications</div>
+                        <div class="setting-subtitle">Receive notifications via email</div>
+                    </div>
+                </div>
+                <div class="toggle-switch active" id="emailNotifications" onclick="toggleSetting(this, 'emailNotifications')"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-sms"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">SMS Notifications</div>
+                        <div class="setting-subtitle">Receive notifications via SMS</div>
+                    </div>
+                </div>
+                <div class="toggle-switch" id="smsNotifications" onclick="toggleSetting(this, 'smsNotifications')"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Load Updates</div>
+                        <div class="setting-subtitle">Get notified about load status changes</div>
+                    </div>
+                </div>
+                <div class="toggle-switch active" id="loadUpdates" onclick="toggleSetting(this, 'loadUpdates')"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">New Messages</div>
+                        <div class="setting-subtitle">Get notified when you receive messages</div>
+                    </div>
+                </div>
+                <div class="toggle-switch active" id="messageNotifications" onclick="toggleSetting(this, 'messageNotifications')"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-pound-sign"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Payment Notifications</div>
+                        <div class="setting-subtitle">Get notified about payments and withdrawals</div>
+                    </div>
+                </div>
+                <div class="toggle-switch active" id="paymentNotifications" onclick="toggleSetting(this, 'paymentNotifications')"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Marketing Emails</div>
+                        <div class="setting-subtitle">Receive promotional emails and updates</div>
+                    </div>
+                </div>
+                <div class="toggle-switch" id="marketingEmails" onclick="toggleSetting(this, 'marketingEmails')"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy & Security -->
+    <div class="settings-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-shield-alt"></i>
+                Privacy & Security
+            </h3>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Profile Visibility</div>
+                        <div class="setting-subtitle">Control who can see your profile</div>
+                    </div>
+                </div>
+                <select class="setting-select" id="profileVisibility" onchange="saveSetting('profileVisibility', this.value)">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Two-Factor Authentication</div>
+                        <div class="setting-subtitle">Add an extra layer of security</div>
+                    </div>
+                </div>
+                <div class="toggle-switch" id="twoFactorAuth" onclick="toggleSetting(this, 'twoFactorAuth')"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Activity Log</div>
+                        <div class="setting-subtitle">Track your account activity</div>
+                    </div>
+                </div>
+                <div class="toggle-switch active" id="activityLog" onclick="toggleSetting(this, 'activityLog')"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Actions -->
+    <div class="settings-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-user-cog"></i>
+                Account
+            </h3>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Change Password</div>
+                        <div class="setting-subtitle">Update your account password</div>
+                    </div>
+                </div>
+                <button class="action-btn" onclick="changePassword()">Change</button>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Download Data</div>
+                        <div class="setting-subtitle">Download your account data</div>
+                    </div>
+                </div>
+                <button class="action-btn" onclick="downloadData()">Download</button>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Delete Account</div>
+                        <div class="setting-subtitle">Permanently delete your account</div>
+                    </div>
+                </div>
+                <button class="action-btn danger" onclick="deleteAccount()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                About
+            </h3>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Help & Support</div>
+                        <div class="setting-subtitle">Get help and contact support</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: var(--text-medium);"></i>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Terms & Conditions</div>
+                        <div class="setting-subtitle">Read our terms of service</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: var(--text-medium);"></i>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">Privacy Policy</div>
+                        <div class="setting-subtitle">Read our privacy policy</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: var(--text-medium);"></i>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-content">
+                    <div class="setting-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="setting-text">
+                        <div class="setting-title">App Version</div>
+                        <div class="setting-subtitle">1.0.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        // Get user data
+        function getUserData() {
+            const carrierAuth = localStorage.getItem('carrierAuth');
+            if (!carrierAuth) return null;
+            return JSON.parse(carrierAuth);
+        }
+
+        // Go back
+        function goBack() {
+            window.history.back();
+        }
+
+        // Toggle setting
+        function toggleSetting(element, settingKey) {
+            const isActive = element.classList.contains('active');
+            if (isActive) {
+                element.classList.remove('active');
+            } else {
+                element.classList.add('active');
+            }
+            saveSetting(settingKey, !isActive);
+        }
+
+        // Save setting
+        async function saveSetting(key, value) {
+            const user = getUserData();
+            if (!user) return;
+
+            try {
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const settingsKey = `carrierSettings_${carrierId}`;
+                
+                // Get existing settings
+                let settings = JSON.parse(localStorage.getItem(settingsKey) || '{}');
+                settings[key] = value;
+                settings.updatedAt = new Date().toISOString();
+
+                // Save to localStorage
+                localStorage.setItem(settingsKey, JSON.stringify(settings));
+
+                // Save to Firebase
+                const db = window.AlphaBrokrage.firebaseDb;
+                await db.ref(`carrierSettings/${carrierId}`).update({ [key]: value, updatedAt: new Date().toISOString() });
+
+            } catch (error) {
+                console.error('Error saving setting:', error);
+            }
+        }
+
+        // Load settings
+        function loadSettings() {
+            const user = getUserData();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+            const settingsKey = `carrierSettings_${carrierId}`;
+            const settings = JSON.parse(localStorage.getItem(settingsKey) || '{}');
+
+            // Apply default settings
+            const defaultSettings = {
+                emailNotifications: true,
+                smsNotifications: false,
+                loadUpdates: true,
+                messageNotifications: true,
+                paymentNotifications: true,
+                marketingEmails: false,
+                profileVisibility: 'public',
+                twoFactorAuth: false,
+                activityLog: true
+            };
+
+            const finalSettings = { ...defaultSettings, ...settings };
+
+            // Apply to UI
+            document.getElementById('emailNotifications').classList.toggle('active', finalSettings.emailNotifications);
+            document.getElementById('smsNotifications').classList.toggle('active', finalSettings.smsNotifications);
+            document.getElementById('loadUpdates').classList.toggle('active', finalSettings.loadUpdates);
+            document.getElementById('messageNotifications').classList.toggle('active', finalSettings.messageNotifications);
+            document.getElementById('paymentNotifications').classList.toggle('active', finalSettings.paymentNotifications);
+            document.getElementById('marketingEmails').classList.toggle('active', finalSettings.marketingEmails);
+            document.getElementById('profileVisibility').value = finalSettings.profileVisibility;
+            document.getElementById('twoFactorAuth').classList.toggle('active', finalSettings.twoFactorAuth);
+            document.getElementById('activityLog').classList.toggle('active', finalSettings.activityLog);
+
+            // Load from Firebase
+            loadFromFirebase();
+        }
+
+        // Load from Firebase
+        async function loadFromFirebase() {
+            const user = getUserData();
+            if (!user) return;
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const settingsRef = db.ref(`carrierSettings/${carrierId}`);
+                const snapshot = await settingsRef.once('value');
+                const firebaseSettings = snapshot.val();
+
+                if (firebaseSettings) {
+                    // Update UI with Firebase data
+                    Object.keys(firebaseSettings).forEach(key => {
+                        if (key === 'updatedAt') return;
+                        
+                        const element = document.getElementById(key);
+                        if (element) {
+                            if (element.classList.contains('toggle-switch')) {
+                                element.classList.toggle('active', firebaseSettings[key]);
+                            } else if (element.tagName === 'SELECT') {
+                                element.value = firebaseSettings[key];
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading from Firebase:', error);
+            }
+        }
+
+        // Change password
+        function changePassword() {
+            const newPassword = prompt('Enter new password:');
+            if (!newPassword) return;
+
+            const confirmPassword = prompt('Confirm new password:');
+            if (newPassword !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            const user = getUserData();
+            if (!user) return;
+
+            // Update password in localStorage
+            user.password = newPassword;
+            localStorage.setItem('carrierAuth', JSON.stringify(user));
+
+            showSuccess('Password changed successfully!');
+        }
+
+        // Download data
+        function downloadData() {
+            const user = getUserData();
+            if (!user) return;
+
+            const data = {
+                profile: user,
+                downloadedAt: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alpha-freight-data-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showSuccess('Data downloaded successfully!');
+        }
+
+        // Delete account
+        function deleteAccount() {
+            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                return;
+            }
+
+            if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) {
+                return;
+            }
+
+            const user = getUserData();
+            if (!user) return;
+
+            // Clear localStorage
+            localStorage.removeItem('carrierAuth');
+            localStorage.removeItem('lastCarrierProfile');
+
+            showSuccess('Account deleted. Redirecting...');
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+        });
+    </script>
+</body>
+</html>

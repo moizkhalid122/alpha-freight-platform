@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -1640,6 +1640,73 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
         }
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #3730A3;
+            --primary-light: #A5B4FC;
+            --secondary: #14B8A6;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-main: #F3F4F6;
+            --card-bg: rgba(255,255,255,0.85);
+            --border: rgba(148,163,184,0.35);
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #22D3EE 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --sidebar-bg: rgba(255,255,255,0.8);
+            --sidebar-text: #374151;
+            --sidebar-active: rgba(99,102,241,0.08);
+            --card-shadow: 0 12px 30px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+            --hover-shadow: 0 20px 40px rgba(15,23,42,0.18), 0 8px 16px rgba(15,23,42,0.10);
+        }
+        body {
+            background:
+                radial-gradient(1200px 600px at -10% -20%, rgba(99,102,241,0.08), transparent 60%),
+                radial-gradient(1200px 600px at 110% -10%, rgba(20,184,166,0.08), transparent 60%),
+                var(--bg-main);
+        }
+        .dashboard-sidebar {
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+        .header-section {
+            backdrop-filter: blur(12px);
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-link {
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            border-color: rgba(99,102,241,0.25);
+            box-shadow: 0 6px 14px rgba(99,102,241,0.15);
+        }
+        .nav-link.active {
+            border-color: rgba(99,102,241,0.35);
+            box-shadow: 0 10px 22px rgba(99,102,241,0.20);
+        }
+        .card, .filter-card, .load-card, .card-shell {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+        .load-card:hover {
+            box-shadow: var(--hover-shadow);
+        }
+        .quick-link-item,
+        .profile-menu,
+        .quick-links-menu,
+        .notifications-menu {
+            backdrop-filter: blur(12px);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
     </style>
 </head>
 <body>
@@ -2301,6 +2368,21 @@
     var displayedLoadsCount = 20; // Initial display limit
     const LOADS_PER_PAGE = 20;
 
+    // Local cache helpers
+    function getCachedAvailableLoads() {
+      try {
+        var raw = localStorage.getItem('availableLoadsCache');
+        var obj = raw ? JSON.parse(raw) : null;
+        return obj && Array.isArray(obj.loads) ? obj.loads : [];
+      } catch (e) { return []; }
+    }
+    function saveAvailableLoadsCache(loads) {
+      try {
+        var arr = (Array.isArray(loads) ? loads : []).slice(0, 30);
+        localStorage.setItem('availableLoadsCache', JSON.stringify({ loads: arr, ts: Date.now() }));
+      } catch (e) {}
+    }
+
     // Get carrier auth
     function getCarrierAuth() {
       try {
@@ -2342,12 +2424,17 @@
       var normalizedCarrierCountry = normalizeCountry(carrierCountry);
       var startTime = Date.now();
       
-      // ULTRA-FAST: Parallel fetch - loads and suppliers together
-      var startTime = Date.now();
-      
-      // Fetch loads and suppliers in PARALLEL (not sequential)
-      var loadsPromise = db.ref('loads').once('value');
-      var suppliersPromise = db.ref('suppliers').once('value');
+    // Show cached snapshot immediately (if any)
+    var cached = getCachedAvailableLoads();
+    if (cached && cached.length) {
+      allAvailableLoads = cached;
+      displayedLoadsCount = Math.min(LOADS_PER_PAGE, cached.length);
+      renderLoads(cached.slice(0, displayedLoadsCount), cached.length, true);
+    }
+    
+    // ULTRA-FAST: Filtered query for recent loads in carrier country
+    var startTime = Date.now();
+    var loadsPromise = db.ref('loads').orderByChild('country').equalTo(normalizedCarrierCountry).limitToLast(150).once('value');
       
       // Process loads first (critical path)
       loadsPromise.then(function(snapshot) {
@@ -2448,29 +2535,27 @@
           var hasSupplierLoads = supplierLoadIds.size > 0;
           // Render IMMEDIATELY (no delay)
           renderLoads(brokerLoads.slice(0, displayedLoadsCount), brokerLoads.length, hasSupplierLoads);
+          saveAvailableLoadsCache(brokerLoads);
         } else {
           console.log('⚠️ No broker loads found');
         }
         
-        // Step 2: Process suppliers from PARALLEL fetch (already loaded)
+        // Step 2: Fetch only required suppliers (no full table scan)
         if (supplierLoadIds.size > 0) {
           var supplierFetchStart = Date.now();
-          
-          // Process suppliers from parallel fetch (already loaded, no network delay)
-          suppliersPromise.then(function(supplierSnapshot) {
+          var supplierIds = Array.from(supplierLoadIds);
+          Promise.all(supplierIds.map(function(id){ return db.ref('suppliers/' + id).once('value'); }))
+          .then(function(snapshots) {
             var supplierProcessStart = Date.now();
             
-            // ULTRA-FAST PROCESSING: Use direct object access with pre-filtering
+            // Build suppliers object from fetched snapshots
             var suppliers = {};
-            if (supplierSnapshot.exists()) {
-              var supplierVal = supplierSnapshot.val();
-              // Pre-filter: only process suppliers we need
-              for (var supplierKey in supplierVal) {
-                if (supplierVal.hasOwnProperty(supplierKey) && supplierLoadIds.has(supplierKey)) {
-                  suppliers[supplierKey] = supplierVal[supplierKey];
-                }
+            snapshots.forEach(function(snap){
+              if (snap && snap.exists()) {
+                var key = snap.key;
+                suppliers[key] = snap.val();
               }
-            }
+            });
             supplierProfilesCache = Object.assign(supplierProfilesCache || {}, suppliers);
             
             var supplierProcessTime = ((Date.now() - supplierProcessStart) / 1000).toFixed(2);
@@ -2561,6 +2646,7 @@
             // Render IMMEDIATELY (no delay) - show supplier loads within 3-4 seconds
             console.log('🔄 Updating display: showing', displayedLoadsCount, 'of', uniqueLoads.length, 'total loads');
             renderLoads(uniqueLoads.slice(0, displayedLoadsCount), uniqueLoads.length, false);
+            saveAvailableLoadsCache(uniqueLoads);
           }, function(error) {
             console.error('Error fetching suppliers:', error);
             // Keep showing broker loads even if supplier fetch fails
@@ -2570,6 +2656,7 @@
           var finalTime = ((Date.now() - startTime) / 1000).toFixed(2);
           console.log('All loads ready in', finalTime, 'seconds. Total:', brokerLoads.length, 'broker loads');
           allAvailableLoads = brokerLoads; // Ensure it's set
+          saveAvailableLoadsCache(brokerLoads);
         }
         
         // Build ratings cache in background (non-blocking) - delay to not slow down supplier loads
@@ -3642,6 +3729,39 @@
 
     // Load when page loads
     window.addEventListener('DOMContentLoaded', fetchFirebaseLoads);
+    // Progressive realtime updates: newest loads by country
+    document.addEventListener('DOMContentLoaded', function(){
+      try {
+        var carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
+        var country = (carrierAuth.country || 'UK').toString();
+        function normalizeCountry(country) {
+          if (!country) return 'UK';
+          var c = String(country).trim().toUpperCase();
+          if (c === 'UAE' || c === 'UNITED ARAB EMIRATES') return 'UAE';
+          if (c === 'UK' || c === 'UNITED KINGDOM' || c === 'GB' || c === 'GBR') return 'UK';
+          if (c === 'USA' || c === 'US' || c === 'UNITED STATES' || c === 'UNITED STATES OF AMERICA') return 'USA';
+          if (c === 'GERMANY' || c === 'DE' || c === 'DEU') return 'Germany';
+          if (c === 'AUSTRALIA' || c === 'AU' || c === 'AUS') return 'Australia';
+          return c;
+        }
+        var normalized = normalizeCountry(country);
+        var db = firebase.database();
+        var ref = db.ref('loads').orderByChild('country').equalTo(normalized).limitToLast(50);
+        var seen = new Set();
+        ref.on('child_added', function(child){
+          var load = child.val(); if (!load) return;
+          var status = (load.status || '').toString().toLowerCase();
+          if (!['active','available','open'].includes(status)) return;
+          load.id = child.key;
+          if (seen.has(load.id)) return;
+          seen.add(load.id);
+          // country already matches; push and re-render small batch
+          allAvailableLoads.push(load);
+          displayedLoadsCount = Math.min(LOADS_PER_PAGE, allAvailableLoads.length);
+          renderLoads(allAvailableLoads.slice(0, displayedLoadsCount), allAvailableLoads.length, true);
+        });
+      } catch (e) {}
+    });
     
     // Apply currency symbols on page load
     document.addEventListener('DOMContentLoaded', function(){
@@ -4027,6 +4147,3 @@
     </div>
 </body>
 </html>
-
-
-

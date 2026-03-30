@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 2FA (QR) - Alpha Freight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary:#2563EB; --primary2:#1E40AF; --navy:#0B1220; --dark:#0F172A; --muted:#64748B; --bg:#F1F5F9; --card:#fff; --border:#E2E8F0; --shadow:0 18px 50px rgba(2,6,23,.10); --radius:22px; --radius2:16px; --error:#EF4444; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,#E2E8F0 0%, var(--bg) 22%, #F8FAFC 100%);min-height:100vh;color:var(--dark);padding-bottom:24px}
+        .wrap{max-width:520px;margin:0 auto}
+        .header{background:linear-gradient(180deg,var(--navy) 0%, #111B31 55%, var(--primary2) 100%);color:#fff;padding:1.25rem 1.25rem 1.1rem;display:flex;gap:1rem;align-items:center;position:sticky;top:0;z-index:5;box-shadow:0 18px 40px rgba(2,6,23,.18)}
+        .back{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none}
+        .title{font-weight:900;letter-spacing:-.02em}
+        .sub{font-size:.875rem;opacity:.92}
+        .card{background:var(--card);margin:1rem 1.25rem 0;padding:1.1rem;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow)}
+        .muted{color:var(--muted);font-size:.875rem}
+        .pill{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .55rem;border-radius:999px;border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.10);color:#1E40AF;font-weight:900;font-size:.74rem}
+        .qr{display:flex;align-items:center;justify-content:center;border:1px dashed rgba(148,163,184,.55);border-radius:18px;padding:1rem;min-height:220px;background:linear-gradient(180deg, rgba(241,245,249,.9), rgba(241,245,249,.55));margin-top:.85rem;overflow:hidden}
+        .skeleton{width:210px;height:210px;border-radius:16px;background:linear-gradient(90deg, rgba(148,163,184,.25), rgba(148,163,184,.10), rgba(148,163,184,.25));background-size:220% 100%;animation:shimmer 1.15s ease-in-out infinite}
+        @keyframes shimmer {0%{background-position:0% 0} 100%{background-position:220% 0}}
+        .actions{display:flex;gap:.6rem;margin-top:.85rem}
+        .linkbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.78rem .9rem;border-radius:14px;border:1px solid rgba(148,163,184,.35);background:#fff;color:var(--dark);font-weight:900;text-decoration:none}
+        .linkbtn.primary{border-color:rgba(37,99,235,.28);background:rgba(37,99,235,.08);color:#1E40AF}
+        .row{margin-top:.75rem}
+        .input{width:100%;padding:.95rem 1rem;font-size:1.05rem;border:2px solid rgba(148,163,184,.28);border-radius:16px;background:rgba(248,250,252,.9);min-height:52px;letter-spacing:6px;text-align:center;font-weight:800}
+        .btn{width:100%;padding:.95rem;background:linear-gradient(135deg,#0B0F19,#111827);color:#fff;border:none;border-radius:16px;font-weight:900;margin-top:.9rem}
+        .btn[disabled]{opacity:.65}
+        .err{color:var(--error);font-size:.875rem;margin-top:.5rem}
+        .tip{margin-top:.9rem;display:flex;gap:.6rem;align-items:flex-start;color:var(--muted);font-size:.875rem}
+        .tip i{color:var(--primary);margin-top:.1rem}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <a href="twofa.html" class="back" aria-label="Back"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <div class="title">Connect with QR <span class="pill"><i class="fas fa-bolt"></i> Fast</span></div>
+                <div class="sub">Scan in your authenticator app, then verify</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="muted"><i class="fas fa-mobile-screen"></i> Google Authenticator → Add → Scan QR</div>
+            <div class="qr" id="qrBox"><div class="skeleton" aria-label="Loading QR"></div></div>
+            <div class="actions">
+                <button class="linkbtn primary" id="refreshBtn" type="button"><i class="fas fa-rotate-right"></i> Refresh</button>
+                <a class="linkbtn" href="twofa-key.html"><i class="fas fa-key"></i> Use Key</a>
+            </div>
+            <div class="row muted" style="margin-top:1rem;"><i class="fas fa-shield-halved"></i> Enter 6‑digit code</div>
+            <div class="row"><input id="code" class="input" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
+            <div id="err" class="err"></div>
+            <button class="btn" id="verifyBtn" type="button" onclick="verify()">Verify & Enable</button>
+            <div class="tip"><i class="fas fa-clock"></i><div>Codes change every 30 seconds. If it fails, wait for the next code and try again.</div></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        const BASE = 'https://us-central1-alpha-brokerage.cloudfunctions.net';
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+        async function getIdToken() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            await ensureAuthReady();
+            if (!authSdk || !authSdk.currentUser) return '';
+            return await authSdk.currentUser.getIdToken();
+        }
+        let setupBusy = false;
+        async function setup() {
+            if (setupBusy) return;
+            setupBusy = true;
+            const qrBox = document.getElementById('qrBox');
+            const err = document.getElementById('err');
+            if (err) err.textContent = '';
+            qrBox.innerHTML = '<div class="skeleton" aria-label="Loading QR"></div>';
+            const token = await getIdToken();
+            if (!token) {
+                qrBox.innerHTML = '<span class="err">Please login again</span>';
+                setupBusy = false;
+                return;
+            }
+            try {
+                const r = await fetch(BASE + '/twoFASetupPublic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ role: 'supplier' })
+                });
+                const js = await r.json();
+                if (js && js.qr) qrBox.innerHTML = '<img alt="QR" src="' + js.qr + '" style="width:210px;height:210px;border-radius:16px;box-shadow:0 10px 30px rgba(2,6,23,.12);">';
+                else qrBox.innerHTML = '<span class="err">Failed to generate QR</span>';
+            } catch (e) {
+                qrBox.innerHTML = '<span class="err">Failed to generate QR</span>';
+            } finally {
+                setupBusy = false;
+            }
+        }
+        async function verify() {
+            const err = document.getElementById('err');
+            const btn = document.getElementById('verifyBtn');
+            err.textContent = '';
+            const token = await getIdToken();
+            const code = (document.getElementById('code').value || '').trim();
+            if (!/^\d{6}$/.test(code)) { err.textContent = 'Enter 6-digit code'; return; }
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            try {
+                const r = await fetch(BASE + '/twoFAVerifyPublic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ role: 'supplier', token: code })
+                });
+                const js = await r.json();
+                if (js && js.success) {
+                    window.location.href = 'profile.html';
+                    return;
+                }
+                err.textContent = (js && js.error && js.error.message) ? js.error.message : 'Invalid code';
+            } catch (e) {
+                err.textContent = 'Verification failed';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify & Enable';
+            }
+        }
+        document.getElementById('refreshBtn').addEventListener('click', setup);
+        setup();
+    </script>
+</body>
+</html>

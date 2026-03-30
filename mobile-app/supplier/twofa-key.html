@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 2FA (Key) - Alpha Freight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary:#2563EB; --primary2:#1E40AF; --navy:#0B1220; --dark:#0F172A; --muted:#64748B; --bg:#F1F5F9; --card:#fff; --border:#E2E8F0; --shadow:0 18px 50px rgba(2,6,23,.10); --radius:22px; --radius2:16px; --error:#EF4444; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,#E2E8F0 0%, var(--bg) 22%, #F8FAFC 100%);min-height:100vh;color:var(--dark);padding-bottom:24px}
+        .wrap{max-width:520px;margin:0 auto}
+        .header{background:linear-gradient(180deg,var(--navy) 0%, #111B31 55%, var(--primary2) 100%);color:#fff;padding:1.25rem 1.25rem 1.1rem;display:flex;gap:1rem;align-items:center;position:sticky;top:0;z-index:5;box-shadow:0 18px 40px rgba(2,6,23,.18)}
+        .back{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none}
+        .title{font-weight:900;letter-spacing:-.02em}
+        .sub{font-size:.875rem;opacity:.92}
+        .card{background:var(--card);margin:1rem 1.25rem 0;padding:1.1rem;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow)}
+        .muted{color:var(--muted);font-size:.875rem}
+        .keywrap{margin-top:.85rem;border:1px solid rgba(148,163,184,.28);border-radius:18px;background:linear-gradient(180deg, rgba(241,245,249,.9), rgba(241,245,249,.55));overflow:hidden}
+        .keytop{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.85rem .9rem;border-bottom:1px solid rgba(148,163,184,.20)}
+        .keylbl{display:flex;align-items:center;gap:.55rem;color:var(--dark);font-weight:900}
+        .copy{border:1px solid rgba(148,163,184,.28);background:#fff;border-radius:14px;padding:.55rem .75rem;font-weight:900;color:var(--dark);display:inline-flex;align-items:center;gap:.45rem}
+        .copy[disabled]{opacity:.6}
+        .keybox{padding:.95rem .9rem;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;word-break:break-all;font-size:1.02rem;line-height:1.45;color:var(--dark);letter-spacing:.02em}
+        .actions{display:flex;gap:.6rem;margin-top:.85rem}
+        .linkbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.78rem .9rem;border-radius:14px;border:1px solid rgba(148,163,184,.35);background:#fff;color:var(--dark);font-weight:900;text-decoration:none}
+        .linkbtn.primary{border-color:rgba(37,99,235,.28);background:rgba(37,99,235,.08);color:#1E40AF}
+        .row{margin-top:.75rem}
+        .input{width:100%;padding:.95rem 1rem;font-size:1.05rem;border:2px solid rgba(148,163,184,.28);border-radius:16px;background:rgba(248,250,252,.9);min-height:52px;letter-spacing:6px;text-align:center;font-weight:800}
+        .btn{width:100%;padding:.95rem;background:linear-gradient(135deg,#0B0F19,#111827);color:#fff;border:none;border-radius:16px;font-weight:900;margin-top:.9rem}
+        .btn[disabled]{opacity:.65}
+        .err{color:var(--error);font-size:.875rem;margin-top:.5rem}
+        .tip{margin-top:.9rem;display:flex;gap:.6rem;align-items:flex-start;color:var(--muted);font-size:.875rem}
+        .tip i{color:var(--primary);margin-top:.1rem}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <a href="twofa.html" class="back" aria-label="Back"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <div class="title">Connect with Key</div>
+                <div class="sub">Manual setup in your authenticator app</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="muted"><i class="fas fa-key"></i> Google Authenticator → Add → Enter a setup key</div>
+            <div class="keywrap">
+                <div class="keytop">
+                    <div class="keylbl"><i class="fas fa-shield-halved"></i> Your setup key</div>
+                    <button class="copy" id="copyBtn" type="button" disabled><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <div class="keybox" id="keyBox"><span class="muted">Generating key…</span></div>
+            </div>
+            <div class="actions">
+                <button class="linkbtn primary" id="regenBtn" type="button"><i class="fas fa-rotate-right"></i> Regenerate</button>
+                <a class="linkbtn" href="twofa-qr.html"><i class="fas fa-qrcode"></i> Use QR</a>
+            </div>
+            <div class="row muted" style="margin-top:1rem;"><i class="fas fa-shield-halved"></i> Enter 6‑digit code</div>
+            <div class="row"><input id="code" class="input" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
+            <div id="err" class="err"></div>
+            <button class="btn" id="verifyBtn" type="button" onclick="verify()">Verify & Enable</button>
+            <div class="tip"><i class="fas fa-circle-info"></i><div>When adding the key, choose “Time‑based” (TOTP) in your authenticator app.</div></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script>
+        const BASE = 'https://us-central1-alpha-brokerage.cloudfunctions.net';
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+        async function getIdToken() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            await ensureAuthReady();
+            if (!authSdk || !authSdk.currentUser) return '';
+            return await authSdk.currentUser.getIdToken();
+        }
+        let currentKey = '';
+        let setupBusy = false;
+        async function setup() {
+            if (setupBusy) return;
+            setupBusy = true;
+            const keyBox = document.getElementById('keyBox');
+            const copyBtn = document.getElementById('copyBtn');
+            const err = document.getElementById('err');
+            if (err) err.textContent = '';
+            currentKey = '';
+            if (copyBtn) copyBtn.disabled = true;
+            const token = await getIdToken();
+            if (!token) {
+                keyBox.innerHTML = '<span class="err">Please login again</span>';
+                setupBusy = false;
+                return;
+            }
+            keyBox.innerHTML = '<span class="muted">Generating key…</span>';
+            try {
+                const r = await fetch(BASE + '/twoFASetupPublic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ role: 'supplier' })
+                });
+                const js = await r.json();
+                if (js && js.secretBase32) {
+                    currentKey = String(js.secretBase32 || '');
+                    keyBox.textContent = currentKey;
+                    if (copyBtn) copyBtn.disabled = false;
+                } else {
+                    keyBox.innerHTML = '<span class="err">Failed to generate key</span>';
+                }
+            } catch (e) {
+                keyBox.innerHTML = '<span class="err">Failed to generate key</span>';
+            } finally {
+                setupBusy = false;
+            }
+        }
+        async function copyKey() {
+            if (!currentKey) return;
+            const btn = document.getElementById('copyBtn');
+            const before = btn ? btn.innerHTML : '';
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(currentKey);
+                else {
+                    const ta = document.createElement('textarea');
+                    ta.value = currentKey;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                if (btn) btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(() => { if (btn) btn.innerHTML = before; }, 1400);
+            } catch (e) {
+                if (btn) btn.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Failed';
+                setTimeout(() => { if (btn) btn.innerHTML = before; }, 1400);
+            }
+        }
+        async function verify() {
+            const err = document.getElementById('err');
+            const btn = document.getElementById('verifyBtn');
+            err.textContent = '';
+            const token = await getIdToken();
+            const code = (document.getElementById('code').value || '').trim();
+            if (!/^\d{6}$/.test(code)) { err.textContent = 'Enter 6-digit code'; return; }
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            try {
+                const r = await fetch(BASE + '/twoFAVerifyPublic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ role: 'supplier', token: code })
+                });
+                const js = await r.json();
+                if (js && js.success) {
+                    window.location.href = 'profile.html';
+                    return;
+                }
+                err.textContent = (js && js.error && js.error.message) ? js.error.message : 'Invalid code';
+            } catch (e) {
+                err.textContent = 'Verification failed';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify & Enable';
+            }
+        }
+        document.getElementById('copyBtn').addEventListener('click', copyKey);
+        document.getElementById('regenBtn').addEventListener('click', setup);
+        setup();
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -1570,6 +1570,7 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/google-maps-config.js"></script>
     
     <script>
         // Firebase Config
@@ -1594,6 +1595,9 @@
             window.location.href = 'login.html';
         }
 
+        const urlParams = new URLSearchParams(window.location.search);
+        let preselectedLoadId = urlParams.get('loadId');
+
         let map = null;
         let currentMarker = null;
         let currentTrackingRef = null;
@@ -1603,6 +1607,8 @@
         let routePolyline = null;
         let pickupMarker = null;
         let deliveryMarker = null;
+        let googleEnabled = false;
+        let googleMarker = null;
 
         // Load User Data
         function loadUserData() {
@@ -1625,20 +1631,64 @@
 
         // Initialize Map
         function initMap() {
-            map = L.map('map').setView([51.5074, -0.1278], 6);
-            
-            // Default standard view
-            currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
+            const apiKey = window.GOOGLE_MAPS_API_KEY || '';
+            if (apiKey) {
+                const script = document.createElement('script');
+                script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey + '&libraries=geometry';
+                script.async = true;
+                script.defer = true;
+                script.onload = function() {
+                    googleEnabled = true;
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        center: { lat: 51.5074, lng: -0.1278 },
+                        zoom: 6,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+                };
+                script.onerror = function() {
+                    googleEnabled = false;
+                    map = L.map('map').setView([51.5074, -0.1278], 6);
+                    currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(map);
+                };
+                document.head.appendChild(script);
+            } else {
+                map = L.map('map').setView([51.5074, -0.1278], 6);
+                currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+            }
         }
 
         // Change Map View
         function changeMapView(viewType) {
             if (!map) return;
             
-            // Remove current tile layer
+            if (googleEnabled) {
+                switch(viewType) {
+                    case 'satellite':
+                        map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+                        currentMapView = 'satellite';
+                        document.getElementById('btnSatellite').classList.add('active');
+                        break;
+                    case 'terrain':
+                        map.setMapTypeId(google.maps.MapTypeId.TERRAIN);
+                        currentMapView = 'terrain';
+                        document.getElementById('btnTerrain').classList.add('active');
+                        break;
+                    default:
+                        map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+                        currentMapView = 'standard';
+                        document.getElementById('btnStandard').classList.add('active');
+                        break;
+                }
+                document.querySelectorAll('.map-view-btn').forEach(btn => btn.classList.remove('active'));
+                return;
+            }
+
             if (currentTileLayer) {
                 map.removeLayer(currentTileLayer);
             }
@@ -1764,7 +1814,7 @@
                 }
                 
                 return `
-                    <div class="load-item" onclick="trackCarrier('${load.id}', '${carrierId}', '${carrierName.replace(/'/g, "\\'")}', event)">
+                    <div class="load-item" data-load-id="${load.id}" onclick="trackCarrier('${load.id}', '${carrierId}', '${carrierName.replace(/'/g, "\\'")}', event)">
                         <div class="load-item-header">
                             <div class="load-item-id">${statusIndicator}Load #${load.id.substring(0, 8)}</div>
                             <span class="status-badge ${statusClass}">${statusText}</span>
@@ -1782,6 +1832,21 @@
             }).join('');
 
             container.innerHTML = loadsHtml;
+
+            if (preselectedLoadId) {
+                const matchEl = container.querySelector(`.load-item[data-load-id="${CSS.escape(preselectedLoadId)}"]`);
+                if (matchEl) {
+                    matchEl.scrollIntoView({ block: 'nearest' });
+                    matchEl.classList.add('active');
+                    const load = loads.find(l => l.id === preselectedLoadId);
+                    if (load) {
+                        const carrierName = load.carrierName || load.carrier_name || 'Carrier';
+                        const carrierId = load.carrierId || load.carrier_id || '';
+                        trackCarrier(load.id, carrierId, carrierName, { currentTarget: matchEl });
+                    }
+                    preselectedLoadId = null;
+                }
+            }
         }
 
         // Track Carrier
@@ -1982,24 +2047,36 @@
             const location = [lat, lng];
             const heading = data.heading || 0;
 
-            // Create truck icon with rotation
-            const truckIcon = L.divIcon({
-                className: 'carrier-marker',
-                html: `
-                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: white; border: 3px solid #2563EB; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transform: rotate(${heading}deg);">
-                        <i class="fas fa-truck" style="color: #2563EB; font-size: 20px;"></i>
-                    </div>
-                `,
-                iconSize: [48, 48],
-                iconAnchor: [24, 24]
-            });
-
-            // Update marker
-            if (currentMarker) {
-                currentMarker.setLatLng(location);
-                currentMarker.setIcon(truckIcon);
+            if (googleEnabled) {
+                if (!googleMarker) {
+                    googleMarker = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: carrierName || 'Carrier'
+                    });
+                } else {
+                    googleMarker.setPosition({ lat: lat, lng: lng });
+                }
+                map.setCenter({ lat: lat, lng: lng });
+                map.setZoom(13);
             } else {
-                currentMarker = L.marker(location, { icon: truckIcon }).addTo(map);
+                const truckIcon = L.divIcon({
+                    className: 'carrier-marker',
+                    html: `
+                        <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: white; border: 3px solid #2563EB; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transform: rotate(${heading}deg);">
+                            <i class="fas fa-truck" style="color: #2563EB; font-size: 20px;"></i>
+                        </div>
+                    `,
+                    iconSize: [48, 48],
+                    iconAnchor: [24, 24]
+                });
+                if (currentMarker) {
+                    currentMarker.setLatLng(location);
+                    currentMarker.setIcon(truckIcon);
+                } else {
+                    currentMarker = L.marker(location, { icon: truckIcon }).addTo(map);
+                }
+                map.setView(location, 13);
             }
 
             // Update popup with driver info
@@ -2019,8 +2096,7 @@
                 updateRoutePolyline(selectedLoad.loadId, location);
             }
 
-            // Update map view
-            map.setView(location, 13);
+            // Update map view handled above
 
             // Update stats
             const speed = data.speed || 0;

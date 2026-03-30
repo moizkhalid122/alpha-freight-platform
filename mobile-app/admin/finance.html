@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Finance - Admin Mobile</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #4c2d8b;
+            --primary-light: #c4b5fd;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 10px 34px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 52%, #4c2d8b 100%);
+            color: #fff;
+            padding: 1.55rem 1.25rem 1.1rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px 260px at 18% 12%, rgba(196, 181, 253, 0.18) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .header-row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        .sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.82);
+            margin-top: 0.25rem;
+        }
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+        }
+        .icon-btn:active { transform: scale(0.98); }
+
+        .content { padding: 0 1.25rem 1.25rem; }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.9rem;
+        }
+        .tab {
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.85);
+            border-radius: 999px;
+            padding: 0.7rem 0.85rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+        .tab.active {
+            border-color: rgba(111, 66, 193, 0.4);
+            background: linear-gradient(145deg, rgba(111, 66, 193, 0.14) 0%, rgba(232, 62, 140, 0.08) 100%);
+            color: var(--primary-dark);
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .row-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .row-item:last-child { border-bottom: none; }
+
+        .row-left { min-width: 0; }
+        .row-title {
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .row-sub {
+            margin-top: 0.25rem;
+            color: var(--text-medium);
+            font-size: 0.84rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 900;
+            border-radius: 999px;
+            padding: 0.35rem 0.65rem;
+            white-space: nowrap;
+            align-self: flex-start;
+        }
+        .badge.primary { background: rgba(111, 66, 193, 0.12); color: var(--primary); }
+        .badge.success { background: rgba(5, 150, 105, 0.12); color: var(--success); }
+        .badge.warning { background: rgba(217, 119, 6, 0.14); color: var(--warning); }
+        .badge.danger { background: rgba(220, 38, 38, 0.14); color: var(--error); }
+
+        .row-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .mini-btn {
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.9);
+            color: var(--text-dark);
+            border-radius: 999px;
+            padding: 0.35rem 0.65rem;
+            font-weight: 900;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .mini-btn.success { border-color: rgba(5, 150, 105, 0.35); background: rgba(5, 150, 105, 0.10); color: var(--success); }
+        .mini-btn.danger { border-color: rgba(220, 38, 38, 0.35); background: rgba(220, 38, 38, 0.10); color: var(--error); }
+
+        .empty {
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-medium);
+        }
+        .empty i { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .empty h3 { color: var(--text-dark); font-size: 1.05rem; font-weight: 900; margin-bottom: 0.25rem; }
+
+        @media (min-width: 768px) {
+            body { max-width: 520px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-row">
+            <div>
+                <div class="title">Finance</div>
+                <div class="sub">Bank transfers + Pay letters + Refunds</div>
+            </div>
+            <button class="icon-btn" type="button" onclick="refresh()">
+                <i class="fas fa-rotate"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="tabs">
+            <button class="tab active" id="tabBank" type="button" onclick="setTab('bank')"><i class="fas fa-building-columns"></i> Bank</button>
+            <button class="tab" id="tabPayLetter" type="button" onclick="setTab('payletter')"><i class="fas fa-file-invoice-dollar"></i> Pay Letter</button>
+                <button class="tab" id="tabRefunds" type="button" onclick="setTab('refunds')"><i class="fas fa-rotate-left"></i> Refunds</button>
+        </div>
+
+        <div class="panel" id="panelList"></div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-house"></i><span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i><span>Loads</span>
+        </a>
+        <a href="finance.html" class="bottom-nav-item active">
+            <i class="fas fa-credit-card"></i><span>Finance</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i><span>Chat</span>
+        </a>
+        <a href="settings.html" class="bottom-nav-item">
+            <i class="fas fa-gear"></i><span>Settings</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/admin-auth.js"></script>
+
+    <script>
+        const CACHE_KEY = 'admin_mobile_finance_cache_v1';
+        const CACHE_MAX_AGE_MS = 60000;
+        let currentTab = 'bank';
+        let bankTransfers = [];
+        let payLetters = [];
+        let refunds = [];
+
+        function normalizeStatus(rawStatus) {
+            return String(rawStatus || '').trim().toLowerCase().replace(/_/g, '-');
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getBadge(status) {
+            const s = normalizeStatus(status);
+            if (!s || s === 'pending' || s === 'submitted') return { cls: 'warning', label: 'Pending' };
+            if (s === 'verified' || s === 'completed' || s === 'paid') return { cls: 'success', label: 'Completed' };
+            if (s === 'rejected' || s === 'failed' || s === 'cancelled') return { cls: 'danger', label: 'Rejected' };
+            return { cls: 'primary', label: s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ') };
+        }
+
+        function setTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabBank').classList.toggle('active', tab === 'bank');
+            document.getElementById('tabPayLetter').classList.toggle('active', tab === 'payletter');
+            document.getElementById('tabRefunds').classList.toggle('active', tab === 'refunds');
+            render();
+        }
+
+        function getCache() {
+            try {
+                const raw = sessionStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || !parsed.ts || !parsed.data) return null;
+                if (Date.now() - parsed.ts > CACHE_MAX_AGE_MS) return null;
+                return parsed.data;
+            } catch { return null; }
+        }
+
+        function setCache(data) {
+            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
+        }
+
+        function render() {
+            const panel = document.getElementById('panelList');
+            const items = currentTab === 'bank' ? bankTransfers : (currentTab === 'refunds' ? refunds : payLetters);
+
+            if (!items.length) {
+                panel.innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No records</h3>
+                        <p>Nothing to show</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = items.slice().sort((a, b) => {
+                const at = a.timestamp || new Date(a.createdAt || 0).getTime() || 0;
+                const bt = b.timestamp || new Date(b.createdAt || 0).getTime() || 0;
+                return bt - at;
+            }).slice(0, 120);
+
+            panel.innerHTML = sorted.map(x => {
+                if (currentTab === 'refunds') {
+                    const badge = getBadge(x.status);
+                    const loadId = x.loadId || x.orderId || x.load || '—';
+                    const reason = x.reason || (x.details && x.details.reason) || '—';
+                    const amount = x.amount || x.totalAmount || '—';
+                    const supplier = x.supplierEmail || x.supplierId || '—';
+                    const actions = String(x.status || '').toLowerCase() === 'pending'
+                        ? `
+                            <button class="mini-btn success" type="button" data-action="approve" data-id="${escapeHtml(x.id || '')}"><i class="fas fa-check"></i> Approve</button>
+                            <button class="mini-btn danger" type="button" data-action="reject" data-id="${escapeHtml(x.id || '')}"><i class="fas fa-times"></i> Reject</button>
+                          `
+                        : '';
+                    return `
+                        <div class="row-item">
+                            <div class="row-left">
+                                <div class="row-title">Refund • Load #${escapeHtml(String(loadId).slice(0, 10))}</div>
+                                <div class="row-sub">${escapeHtml(supplier)} • ${escapeHtml(reason)}</div>
+                            </div>
+                            <div class="row-actions">
+                                ${amount !== '—' ? `<div class="badge primary">£${escapeHtml(String(amount))}</div>` : ''}
+                                <div class="badge ${badge.cls}">${escapeHtml(badge.label)}</div>
+                                ${actions}
+                            </div>
+                        </div>
+                    `;
+                }
+                if (currentTab === 'bank') {
+                    const amount = x.amount || x.totalAmount || x.paymentAmount || x.budget || '—';
+                    const supplier = x.supplierName || x.supplierEmail || x.supplierId || '—';
+                    const badge = getBadge(x.status);
+                    return `
+                        <div class="row-item">
+                            <div class="row-left">
+                                <div class="row-title">${escapeHtml(supplier)}</div>
+                                <div class="row-sub">Amount: ${escapeHtml(amount)} • Ref: ${escapeHtml(x.reference || x.requestId || x.id || '—')}</div>
+                            </div>
+                            <div class="badge ${badge.cls}">${escapeHtml(badge.label)}</div>
+                        </div>
+                    `;
+                }
+                const loadTitle = x.loadTitle || x.paymentFor || x.loadId || 'Pay Letter';
+                const amount = x.amount || x.totalAmount || x.budget || x.price || '—';
+                const supplier = x.supplierName || x.supplierEmail || x.supplierId || '—';
+                const badge = getBadge(x.status);
+                return `
+                    <div class="row-item">
+                        <div class="row-left">
+                            <div class="row-title">${escapeHtml(loadTitle)}</div>
+                            <div class="row-sub">${escapeHtml(supplier)} • Amount: ${escapeHtml(amount)}</div>
+                        </div>
+                        <div class="badge ${badge.cls}">${escapeHtml(badge.label)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            if (currentTab === 'refunds') {
+                panel.querySelectorAll('button.mini-btn[data-action][data-id]').forEach((btn) => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-id') || '';
+                        const action = btn.getAttribute('data-action') || '';
+                        if (!id) return;
+                        if (action === 'approve') await approveRefund(id);
+                        if (action === 'reject') await rejectRefund(id);
+                    });
+                });
+            }
+        }
+
+        async function createDbNotification(userId, userType, title, message, data) {
+            try {
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!db || !userId || !userType) return null;
+                const payload = {
+                    user_id: userId,
+                    user_type: userType,
+                    type: (data && data.type) ? data.type : 'system',
+                    title: title,
+                    message: message,
+                    data: data || {},
+                    read: false,
+                    created_at: new Date().toISOString()
+                };
+                const ref = db.ref('notifications').push();
+                await ref.set(payload).catch(() => {});
+                try {
+                    if (userType === 'supplier') {
+                        await db.ref(`notifications/suppliers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    } else if (userType === 'carrier') {
+                        await db.ref(`notifications/carriers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    }
+                } catch (e) {}
+                return ref.key || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function approveRefund(refundId) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            if (!confirm('Approve this refund?')) return;
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const snap = await db.ref('refunds/' + refundId).once('value');
+                const r = snap.val() || null;
+                if (!r) return;
+                const now = new Date().toISOString();
+                await db.ref('refunds/' + refundId).update({ status: 'processed', processedAt: now, processedByRole: 'admin' });
+                if (r.loadId) {
+                    const loadSnap = await db.ref('loads/' + r.loadId).once('value');
+                    const load = loadSnap.val() || {};
+                    const ps = (load.paymentStatus && typeof load.paymentStatus === 'object') ? load.paymentStatus : {};
+                    await db.ref('loads/' + r.loadId).update({
+                        refundStatus: 'processed',
+                        refundProcessedAt: now,
+                        paymentStatus: { ...ps, status: 'refunded', refundedAt: now }
+                    });
+                    const supplierId = load.supplierId || load.postedBy || (load.supplierEmail || '').replace(/@/g, '_').replace(/\./g, '_');
+                    if (supplierId) {
+                        await createDbNotification(supplierId, 'supplier', 'Refund Approved', 'Your refund has been processed.', { type: 'refund_processed', loadId: r.loadId, url: '/mobile-app/supplier/receipt.html?loadId=' + encodeURIComponent(r.loadId) });
+                    }
+                }
+                await fetchData(true);
+            } catch (e) {
+                console.error(e);
+                alert('Failed: ' + (e && (e.code || e.message) ? (e.code || e.message) : 'unknown'));
+            }
+        }
+
+        async function rejectRefund(refundId) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            const note = (prompt('Reject reason (required):') || '').trim();
+            if (note.length < 3) return;
+            if (!confirm('Reject this refund?')) return;
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const snap = await db.ref('refunds/' + refundId).once('value');
+                const r = snap.val() || null;
+                if (!r) return;
+                const now = new Date().toISOString();
+                await db.ref('refunds/' + refundId).update({ status: 'rejected', rejectedAt: now, rejectedByRole: 'admin', rejectionReason: note });
+                if (r.loadId) {
+                    const loadSnap = await db.ref('loads/' + r.loadId).once('value');
+                    const load = loadSnap.val() || {};
+                    await db.ref('loads/' + r.loadId).update({
+                        refundStatus: 'rejected',
+                        refundRejectedAt: now,
+                        refundRejectionReason: note,
+                        refundRequest: { ...(load.refundRequest || {}), status: 'rejected', rejectedAt: now, rejectionReason: note }
+                    });
+                    const supplierId = load.supplierId || load.postedBy || (load.supplierEmail || '').replace(/@/g, '_').replace(/\./g, '_');
+                    if (supplierId) {
+                        await createDbNotification(supplierId, 'supplier', 'Refund Rejected', 'Refund request was rejected by admin.', { type: 'refund_rejected', loadId: r.loadId, url: '/mobile-app/supplier/receipt.html?loadId=' + encodeURIComponent(r.loadId) });
+                    }
+                }
+                await fetchData(true);
+            } catch (e) {
+                console.error(e);
+                alert('Failed: ' + (e && (e.code || e.message) ? (e.code || e.message) : 'unknown'));
+            }
+        }
+
+        async function fetchData(force = false) {
+            const cached = getCache();
+            if (cached && !force) {
+                bankTransfers = Array.isArray(cached.bankTransfers) ? cached.bankTransfers : [];
+                payLetters = Array.isArray(cached.payLetters) ? cached.payLetters : [];
+                refunds = Array.isArray(cached.refunds) ? cached.refunds : [];
+                render();
+            } else {
+                document.getElementById('panelList').innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>Loading</h3>
+                        <p>Please wait</p>
+                    </div>
+                `;
+            }
+
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const [bankSnap, paySnap, refundSnap] = await Promise.all([
+                    db.ref('bankTransferRequests').limitToLast(400).once('value'),
+                    db.ref('payLetterPending').limitToLast(400).once('value'),
+                    db.ref('refunds').limitToLast(400).once('value')
+                ]);
+
+                const bank = [];
+                if (bankSnap.exists()) bankSnap.forEach(ch => bank.push({ id: ch.key, ...(ch.val() || {}) }));
+                const pay = [];
+                if (paySnap.exists()) paySnap.forEach(ch => pay.push({ id: ch.key, ...(ch.val() || {}) }));
+                const rf = [];
+                if (refundSnap.exists()) refundSnap.forEach(ch => rf.push({ id: ch.key, ...(ch.val() || {}) }));
+
+                bankTransfers = bank;
+                payLetters = pay;
+                refunds = rf;
+                setCache({ bankTransfers: bank, payLetters: pay, refunds: rf });
+                render();
+            } catch (e) {
+                render();
+            }
+        }
+
+        function refresh() {
+            fetchData(true);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchData(false);
+        });
+    </script>
+</body>
+</html>

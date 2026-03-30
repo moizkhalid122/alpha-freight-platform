@@ -1,0 +1,416 @@
+const functions = require('firebase-functions');
+const { onRequest } = require('firebase-functions/v2/https');
+const admin = require('firebase-admin');
+admin.initializeApp();
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
+
+/**
+ * Jab bhi notifications/suppliers/{supplierId} pe naya notification add ho
+ * Supplier ke device pe FCM push bhejta hai (app band hone par bhi dikhega)
+ */
+exports.sendSupplierPush = functions.database
+  .ref('notifications/suppliers/{supplierId}/{notifId}')
+  .onCreate(async (snap, context) => {
+    const notif = snap.val();
+    const supplierId = context.params.supplierId;
+
+    // Supplier ka FCM token lo
+    const tokenSnap = await admin.database()
+      .ref(`suppliers/${supplierId}/fcmToken/token`)
+      .once('value');
+    const token = tokenSnap.val();
+
+    if (!token) {
+      console.log('No FCM token for supplier:', supplierId);
+      return null;
+    }
+
+    try {
+      await admin.messaging().send({
+        token,
+        notification: {
+          title: notif.title || 'Alpha Freight',
+          body: notif.message || 'You have a new notification'
+        },
+        data: {
+          type: notif.type || 'notification',
+          loadId: notif.loadId || ''
+        },
+        android: {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            channelId: 'default'
+          }
+        },
+        apns: {
+          payload: { aps: { sound: 'default' } },
+          fcmOptions: {}
+        },
+        webpush: {
+          fcmOptions: {
+            link: 'https://alpha-brokerage.web.app/mobile-app/supplier/dashboard.html'
+          }
+        }
+      });
+      console.log('Push sent to supplier:', supplierId);
+    } catch (err) {
+      console.error('Push send error:', err);
+    }
+    return null;
+  });
+
+/**
+ * Jab bhi notifications/carriers/{carrierId} pe naya notification add ho
+ * Carrier ke device pe FCM push bhejta hai (app band hone par bhi dikhega)
+ */
+exports.sendCarrierPush = functions.database
+  .ref('notifications/carriers/{carrierId}/{notifId}')
+  .onCreate(async (snap, context) => {
+    const notif = snap.val();
+    const carrierId = context.params.carrierId;
+
+    const tokenSnap = await admin.database()
+      .ref(`carriers/${carrierId}/fcmToken/token`)
+      .once('value');
+    const token = tokenSnap.val();
+
+    if (!token) {
+      console.log('No FCM token for carrier:', carrierId);
+      return null;
+    }
+
+    try {
+      await admin.messaging().send({
+        token,
+        notification: {
+          title: notif.title || 'Alpha Freight',
+          body: notif.message || 'You have a new notification'
+        },
+        data: {
+          type: notif.type || 'notification',
+          loadId: notif.loadId || ''
+        },
+        android: {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            channelId: 'default'
+          }
+        },
+        apns: {
+          payload: { aps: { sound: 'default' } },
+          fcmOptions: {}
+        },
+        webpush: {
+          fcmOptions: {
+            link: 'https://alpha-brokerage.web.app/mobile-app/carrier/dashboard.html'
+          }
+        }
+      });
+      console.log('Push sent to carrier:', carrierId);
+    } catch (err) {
+      console.error('Push send error:', err);
+    }
+    return null;
+  });
+
+/**
+ * Jab bhi loads/{loadId} create ho, sab carriers jinhon ne FCM token save kiya hua ho
+ * unko "New Load Available" push + notification record create karta hai.
+ */
+exports.notifyCarriersOnNewLoad = functions.database
+  .ref('loads/{loadId}')
+  .onCreate(async (snap, context) => {
+    const loadId = context.params.loadId;
+    const load = snap.val() || {};
+
+    const pickup = load.pickupLocation || load.pickup_location || 'Pickup';
+    const delivery = load.deliveryLocation || load.delivery_location || 'Delivery';
+    const price = load.price || load.maxBudget || load.budget || load.totalAmount || '';
+    const priceText = (price !== '' && price !== null && price !== undefined) ? `£${Number(price).toFixed(2)}` : '£TBD';
+
+    const notif = {
+      title: 'New Load Available',
+      message: `${pickup} → ${delivery} • ${priceText}`,
+      type: 'new_load',
+      loadId: loadId,
+      url: 'https://alpha-brokerage.web.app/mobile-app/carrier/loads.html',
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const carriersSnap = await admin.database().ref('carriers').once('value');
+      const tasks = [];
+      carriersSnap.forEach((carrier) => {
+        const c = carrier.val() || {};
+        const token = c && c.fcmToken ? c.fcmToken.token : null;
+        if (!token) return;
+        tasks.push(
+          admin.database().ref(`notifications/carriers/${carrier.key}`).push(notif)
+        );
+      });
+      await Promise.all(tasks);
+      console.log('New load notified to carriers:', loadId, 'count=', tasks.length);
+    } catch (err) {
+      console.error('notifyCarriersOnNewLoad error:', err);
+    }
+    return null;
+  });
+
+const cors = require('cors')({ origin: true });
+
+function setCors(req, res) {
+  const origin = req.get('Origin') || '*';
+  res.set('Access-Control-Allow-Origin', origin);
+  res.set('Vary', 'Origin');
+  res.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.set('Access-Control-Max-Age', '3600');
+}
+
+async function getUidFromAuth(req) {
+  try {
+    const header = String(req.get('Authorization') || '');
+    const m = header.match(/^Bearer\s+(.+)$/i);
+    if (!m) return null;
+    const decoded = await admin.auth().verifyIdToken(m[1]);
+    return decoded && decoded.uid ? decoded.uid : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+
+async function findProfileByUid(role, uid) {
+  const node = role === 'carrier' ? 'carriers' : 'suppliers';
+  const snap = await admin.database().ref(node).orderByChild('firebaseUid').equalTo(uid).limitToFirst(1).once('value');
+  let found = null;
+  if (snap && snap.exists()) {
+    snap.forEach((c) => {
+      found = { key: c.key, val: c.val() || {} };
+    });
+  }
+  return found;
+}
+
+exports.twoFAStatus = functions.https.onRequest((req, res) => {
+  setCors(req, res);
+  if (req.method === 'OPTIONS') return res.status(204).send('');
+  
+  cors(req, res, async () => {
+    if (req.method !== 'GET') return res.status(405).json({ error: { message: 'Method not allowed' } });
+    const role = String(req.query.role || 'supplier');
+    const uid = await getUidFromAuth(req);
+    if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+    try {
+      const profile = await findProfileByUid(role, uid);
+      const twoFA = profile && profile.val ? (profile.val.twoFA || {}) : {};
+      const enabled = !!twoFA.enabled;
+      const verified = !!twoFA.verified;
+      return res.json({ enabled, verified, enforce: enabled && verified });
+    } catch (e) {
+      return res.json({ enabled: false, verified: false, enforce: false });
+    }
+  });
+});
+
+exports.twoFAStatusPublic = onRequest({ cors: true, invoker: 'public' }, async (req, res) => {
+  if (req.method !== 'GET') return res.status(405).json({ error: { message: 'Method not allowed' } });
+  const role = String(req.query.role || 'supplier');
+  const uid = await getUidFromAuth(req);
+  if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+  try {
+    const profile = await findProfileByUid(role, uid);
+    const twoFA = profile && profile.val ? (profile.val.twoFA || {}) : {};
+    const enabled = !!twoFA.enabled;
+    const verified = !!twoFA.verified;
+    return res.json({ enabled, verified, enforce: enabled && verified });
+  } catch (e) {
+    return res.json({ enabled: false, verified: false, enforce: false });
+  }
+});
+
+exports.twoFASetup = functions.https.onRequest((req, res) => {
+  setCors(req, res);
+  if (req.method === 'OPTIONS') return res.status(204).send('');
+
+  cors(req, res, async () => {
+    if (req.method !== 'POST') return res.status(405).json({ error: { message: 'Method not allowed' } });
+    const role = String((req.body && req.body.role) || 'supplier');
+    const uid = await getUidFromAuth(req);
+    if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+    try {
+      const profile = await findProfileByUid(role, uid);
+      if (!profile || !profile.key) return res.status(404).json({ error: { message: 'Profile not found' } });
+      const email = String(profile.val.email || '');
+      const secret = speakeasy.generateSecret({ length: 20, name: `Alpha Freight (${email || uid})` });
+      await admin.database().ref(`twoFASecrets/${uid}`).set({
+        secretBase32: secret.base32,
+        createdAt: new Date().toISOString()
+      });
+      const node = role === 'carrier' ? 'carriers' : 'suppliers';
+      await admin.database().ref(`${node}/${profile.key}/twoFA`).set({
+        enabled: true,
+        verified: false,
+        updatedAt: new Date().toISOString()
+      });
+      const qr = await QRCode.toDataURL(secret.otpauth_url);
+      return res.json({ qr, secretBase32: secret.base32 });
+    } catch (e) {
+      return res.status(500).json({ error: { message: 'Setup failed' } });
+    }
+  });
+});
+
+exports.twoFASetupPublic = onRequest({ cors: true, invoker: 'public' }, async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: { message: 'Method not allowed' } });
+  const role = String((req.body && req.body.role) || 'supplier');
+  const uid = await getUidFromAuth(req);
+  if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+  try {
+    const profile = await findProfileByUid(role, uid);
+    if (!profile || !profile.key) return res.status(404).json({ error: { message: 'Profile not found' } });
+    const email = String(profile.val.email || '');
+    const secret = speakeasy.generateSecret({ length: 20, name: `Alpha Freight (${email || uid})` });
+    await admin.database().ref(`twoFASecrets/${uid}`).set({
+      secretBase32: secret.base32,
+      createdAt: new Date().toISOString()
+    });
+    const node = role === 'carrier' ? 'carriers' : 'suppliers';
+    await admin.database().ref(`${node}/${profile.key}/twoFA`).set({
+      enabled: true,
+      verified: false,
+      updatedAt: new Date().toISOString()
+    });
+    const qr = await QRCode.toDataURL(secret.otpauth_url);
+    return res.json({ qr, secretBase32: secret.base32 });
+  } catch (e) {
+    return res.status(500).json({ error: { message: 'Setup failed' } });
+  }
+});
+
+exports.twoFAVerify = functions.https.onRequest((req, res) => {
+  setCors(req, res);
+  if (req.method === 'OPTIONS') return res.status(204).send('');
+
+  cors(req, res, async () => {
+    if (req.method !== 'POST') return res.status(405).json({ error: { message: 'Method not allowed' } });
+    const role = String((req.body && req.body.role) || 'supplier');
+    const token = String((req.body && req.body.token) || '');
+    const uid = await getUidFromAuth(req);
+    if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+    if (!/^\d{6}$/.test(token)) return res.status(400).json({ error: { message: 'Invalid code' } });
+    try {
+      const profile = await findProfileByUid(role, uid);
+      if (!profile || !profile.key) return res.status(404).json({ error: { message: 'Profile not found' } });
+      const secretSnap = await admin.database().ref(`twoFASecrets/${uid}/secretBase32`).once('value');
+      const secret = String(secretSnap.val() || '');
+      if (!secret) return res.status(400).json({ error: { message: '2FA not set up' } });
+      const ok = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+      if (!ok) return res.status(400).json({ error: { message: 'Invalid code' } });
+      const node = role === 'carrier' ? 'carriers' : 'suppliers';
+      await admin.database().ref(`${node}/${profile.key}/twoFA`).update({
+        enabled: true,
+        verified: true,
+        lastVerifiedAt: new Date().toISOString()
+      });
+      return res.json({ success: true });
+    } catch (e) {
+      return res.status(500).json({ error: { message: 'Verification failed' } });
+    }
+  });
+});
+
+exports.twoFAVerifyPublic = onRequest({ cors: true, invoker: 'public' }, async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: { message: 'Method not allowed' } });
+  const role = String((req.body && req.body.role) || 'supplier');
+  const token = String((req.body && req.body.token) || '');
+  const uid = await getUidFromAuth(req);
+  if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+  if (!/^\d{6}$/.test(token)) return res.status(400).json({ error: { message: 'Invalid code' } });
+  try {
+    const profile = await findProfileByUid(role, uid);
+    if (!profile || !profile.key) return res.status(404).json({ error: { message: 'Profile not found' } });
+    const secretSnap = await admin.database().ref(`twoFASecrets/${uid}/secretBase32`).once('value');
+    const secret = String(secretSnap.val() || '');
+    if (!secret) return res.status(400).json({ error: { message: '2FA not set up' } });
+    const ok = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+    if (!ok) return res.status(400).json({ error: { message: 'Invalid code' } });
+    const node = role === 'carrier' ? 'carriers' : 'suppliers';
+    await admin.database().ref(`${node}/${profile.key}/twoFA`).update({
+      enabled: true,
+      verified: true,
+      lastVerifiedAt: new Date().toISOString()
+    });
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ error: { message: 'Verification failed' } });
+  }
+});
+
+exports.twoFADisable = functions.https.onRequest((req, res) => {
+  setCors(req, res);
+  if (req.method === 'OPTIONS') return res.status(204).send('');
+
+  cors(req, res, async () => {
+    if (req.method !== 'POST') return res.status(405).json({ error: { message: 'Method not allowed' } });
+    const role = String((req.body && req.body.role) || 'supplier');
+    const token = String((req.body && req.body.token) || '');
+    const uid = await getUidFromAuth(req);
+    if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+    if (!/^\d{6}$/.test(token)) return res.status(400).json({ error: { message: 'Invalid code' } });
+    try {
+      const profile = await findProfileByUid(role, uid);
+      if (!profile || !profile.key) return res.status(404).json({ error: { message: 'Profile not found' } });
+      const secretSnap = await admin.database().ref(`twoFASecrets/${uid}/secretBase32`).once('value');
+      const secret = String(secretSnap.val() || '');
+      if (!secret) return res.status(400).json({ error: { message: '2FA not set up' } });
+      const ok = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+      if (!ok) return res.status(400).json({ error: { message: 'Invalid code' } });
+      const node = role === 'carrier' ? 'carriers' : 'suppliers';
+      await admin.database().ref(`${node}/${profile.key}/twoFA`).set({
+        enabled: false,
+        verified: false,
+        disabledAt: new Date().toISOString()
+      });
+      await admin.database().ref(`twoFASecrets/${uid}`).remove();
+      return res.json({ success: true });
+    } catch (e) {
+      return res.status(500).json({ error: { message: 'Disable failed' } });
+    }
+  });
+});
+
+exports.twoFADisablePublic = onRequest({ cors: true, invoker: 'public' }, async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: { message: 'Method not allowed' } });
+  const role = String((req.body && req.body.role) || 'supplier');
+  const token = String((req.body && req.body.token) || '');
+  const uid = await getUidFromAuth(req);
+  if (!uid) return res.status(401).json({ error: { message: 'Unauthorized' } });
+  if (!/^\d{6}$/.test(token)) return res.status(400).json({ error: { message: 'Invalid code' } });
+  try {
+    const profile = await findProfileByUid(role, uid);
+    if (!profile || !profile.key) return res.status(404).json({ error: { message: 'Profile not found' } });
+    const secretSnap = await admin.database().ref(`twoFASecrets/${uid}/secretBase32`).once('value');
+    const secret = String(secretSnap.val() || '');
+    if (!secret) return res.status(400).json({ error: { message: '2FA not set up' } });
+    const ok = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+    if (!ok) return res.status(400).json({ error: { message: 'Invalid code' } });
+    const node = role === 'carrier' ? 'carriers' : 'suppliers';
+    await admin.database().ref(`${node}/${profile.key}/twoFA`).set({
+      enabled: false,
+      verified: false,
+      disabledAt: new Date().toISOString()
+    });
+    await admin.database().ref(`twoFASecrets/${uid}`).remove();
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ error: { message: 'Disable failed' } });
+  }
+});
+
+// Force redeploy - fixing CORS issue 3
+

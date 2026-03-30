@@ -37,6 +37,85 @@
         return true;
     }
 
+    function getFirebaseAuthInstance() {
+        try {
+            if (window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth) {
+                return window.AlphaBrokrage.firebaseAuth;
+            }
+        } catch (e) {}
+        try {
+            if (typeof firebase !== 'undefined' && typeof firebase.auth === 'function') {
+                return firebase.auth();
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    window.ensureAdminFirebaseAuthReady = function(timeoutMs) {
+        const ms = typeof timeoutMs === 'number' ? timeoutMs : 2500;
+        return new Promise((resolve) => {
+            const currentPage = window.location.pathname || window.location.href;
+            if (currentPage.includes('login.html')) {
+                resolve(false);
+                return;
+            }
+            const adminAuth = (() => {
+                try { return JSON.parse(localStorage.getItem('adminAuth') || 'null'); } catch (e) { return null; }
+            })();
+            if (!adminAuth || !adminAuth.isLoggedIn) {
+                resolve(false);
+                return;
+            }
+
+            const auth = getFirebaseAuthInstance();
+            if (!auth) {
+                resolve(false);
+                return;
+            }
+            if (auth.currentUser) {
+                try {
+                    const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                    if (db && auth.currentUser && auth.currentUser.uid) {
+                        db.ref('admins/' + auth.currentUser.uid).set(true).catch(() => {});
+                    }
+                } catch (e) {}
+                resolve(true);
+                return;
+            }
+
+            let done = false;
+            const timer = setTimeout(() => {
+                if (!done) {
+                    done = true;
+                    resolve(!!auth.currentUser);
+                }
+            }, ms);
+
+            let unsub = null;
+            if (typeof auth.onAuthStateChanged === 'function') {
+                unsub = auth.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { if (typeof unsub === 'function') unsub(); } catch (e) {}
+                    try {
+                        const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                        if (db && auth.currentUser && auth.currentUser.uid) {
+                            db.ref('admins/' + auth.currentUser.uid).set(true).catch(() => {});
+                        }
+                    } catch (e) {}
+                    resolve(!!auth.currentUser);
+                });
+            }
+
+            if (typeof auth.signInAnonymously === 'function') {
+                auth.signInAnonymously().catch(() => {});
+            } else {
+                resolve(!!auth.currentUser);
+            }
+        });
+    };
+
     // Check authentication IMMEDIATELY (before page loads)
     checkAdminAuth();
     
@@ -56,6 +135,12 @@
                     localStorage.removeItem('ab.portal.lastRole');
                 }
             } catch (err) {}
+            try {
+                const auth = getFirebaseAuthInstance();
+                if (auth && typeof auth.signOut === 'function') {
+                    auth.signOut().catch(() => {});
+                }
+            } catch (err) {}
             // Get current page path to redirect to login
             const currentPath = window.location.pathname || window.location.href;
             let loginPath;
@@ -71,6 +156,7 @@
 
     // Add logout handler to logout links
     document.addEventListener('DOMContentLoaded', function() {
+        try { window.ensureAdminFirebaseAuthReady(); } catch (e) {}
         const logoutLinks = document.querySelectorAll('a[href*="logout"], a[href*="login.html"], a[href="../index.html"]');
         logoutLinks.forEach(link => {
             if (link.textContent.toLowerCase().includes('logout') || 

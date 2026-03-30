@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Payments - Alpha Freight</title>
+    
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    
+    <style>
+        /* —— Premium theme (matches supplier dashboard) —— */
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            /* footer from supplier-bottom-nav.css */
+            color: var(--text-dark);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.5rem 1.25rem 1.75rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 36px 36px;
+            opacity: 0.7;
+        }
+
+        .page-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.375rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .page-subtitle { font-size: 0.875rem; opacity: 0.92; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            opacity: 0.6;
+        }
+
+        .stat-label { font-size: 0.8125rem; color: var(--text-medium); margin-bottom: 0.375rem; font-weight: 600; }
+        .stat-value { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; color: var(--text-dark); }
+
+        .filter-row {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1.25rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 2px solid var(--border);
+            background: var(--card-bg);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.3s var(--ease), background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+        }
+
+        .filter-btn:active { transform: scale(0.96); }
+
+        .payments-section { padding: 0 1.25rem; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i { color: var(--primary); }
+
+        .payment-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 0.875rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .payment-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 0 2px 2px 0;
+            opacity: 0.9;
+        }
+
+        .payment-route { font-size: 0.9375rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.02em; color: var(--text-dark); }
+
+        .payment-meta {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+            margin-bottom: 0.75rem;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .payment-amount { font-weight: 900; color: var(--text-dark); letter-spacing: -0.02em; }
+        .payment-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .payment-status.completed { background: rgba(5,150,105,0.12); color: var(--success); }
+        .payment-status.pending { background: rgba(217,119,6,0.12); color: var(--warning); }
+        .payment-status.failed { background: rgba(220,38,38,0.12); color: var(--error); }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            margin: 0 1.25rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-state i { font-size: 2.5rem; color: var(--text-medium); margin-bottom: 0.75rem; }
+        .empty-state h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <h1 class="page-title">Payments</h1>
+        <p class="page-subtitle">Track and manage your payment transactions</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Spent (This Month)</div>
+            <div class="stat-value" id="monthlySpent">£0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Pending Amount</div>
+            <div class="stat-value" id="pendingAmount">£0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Completed Payments</div>
+            <div class="stat-value" id="completedCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg per Load</div>
+            <div class="stat-value" id="avgAmount">£0</div>
+        </div>
+    </div>
+
+    <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+    </div>
+
+    <div class="payments-section">
+        <h3 class="section-title">
+            <i class="fas fa-receipt"></i>
+            Payment History
+        </h3>
+        <div id="paymentsList">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>Loading...</h3>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+
+        let allPayments = [];
+        let currentFilter = 'all';
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth');
+            return auth ? JSON.parse(auth) : null;
+        }
+
+        function formatCurrency(val) {
+            return '£' + parseFloat(val || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatDate(str) {
+            if (!str) return '-';
+            return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function getPaymentStatus(load) {
+            const s = (load.status || '').toLowerCase();
+            const ps = load.paymentStatus || {};
+            if (s === 'completed' || s === 'delivered' || ps.completed) return 'completed';
+            if (ps.failed || ps.rejected) return 'failed';
+            return 'pending';
+        }
+
+        function loadPayments() {
+            const user = getUserData();
+            const container = document.getElementById('paymentsList');
+
+            if (!user) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3><p>Sign in to view payments</p></div>';
+                return;
+            }
+
+            const supplierId = user.supplierId || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const db = window.AlphaBrokrage.firebaseDb;
+
+            if (!db) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Could not connect</p></div>';
+                return;
+            }
+
+            db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value', (snap) => {
+                allPayments = [];
+
+                if (snap.exists()) {
+                    snap.forEach((child) => {
+                        const load = child.val();
+                        const loadId = child.key;
+
+                        const ps = load.paymentStatus || {};
+                        const showPaidOrTracked = ps.completed || ps.status || ps.method || ps.paymentIntentId;
+                        if (showPaidOrTracked || load.carrierId || load.carrierName || ['posted', 'available', 'pending', 'completed', 'delivered', 'active', 'accepted', 'in_transit', 'in-transit'].includes((load.status || '').toLowerCase())) {
+                            const amount = parseFloat(load.price || load.budget || load.maxBudget || load.minBudget || 0);
+
+                            let commission = 0, rate = 0.05;
+                            if (load.supplierCommission !== undefined) {
+                                commission = parseFloat(load.supplierCommission) || 0;
+                            } else {
+                                if (amount > 5000) rate = 0.03;
+                                else if (amount > 1000) rate = 0.04;
+                                commission = amount * rate;
+                            }
+
+                            const totalAmount = amount + commission;
+                            const status = getPaymentStatus(load);
+
+                            allPayments.push({
+                                id: loadId,
+                                amount,
+                                commission,
+                                totalAmount,
+                                status,
+                                route: `${load.pickupLocation || load.pickup_location || 'N/A'} → ${load.deliveryLocation || load.delivery_location || 'N/A'}`,
+                                carrierName: load.carrierName || load.carrier_name || 'Carrier',
+                                completedAt: load.completedAt || load.deliveryDate || load.updatedAt || load.createdAt,
+                                createdAt: load.createdAt || load.created_at
+                            });
+                        }
+                    });
+                }
+
+                allPayments.sort((a, b) => {
+                    const da = new Date(a.completedAt || a.createdAt || 0);
+                    const db = new Date(b.completedAt || b.createdAt || 0);
+                    return db - da;
+                });
+
+                updateStats();
+                renderPayments();
+            });
+        }
+
+        function updateStats() {
+            const completed = allPayments.filter(p => p.status === 'completed');
+            const pending = allPayments.filter(p => p.status === 'pending');
+
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthlySpent = completed
+                .filter(p => new Date(p.completedAt || p.createdAt) >= monthStart)
+                .reduce((s, p) => s + p.amount, 0);
+
+            const pendingTotal = pending.reduce((s, p) => s + p.amount, 0);
+            const avg = completed.length > 0
+                ? completed.reduce((s, p) => s + p.amount, 0) / completed.length
+                : 0;
+
+            document.getElementById('monthlySpent').textContent = formatCurrency(monthlySpent);
+            document.getElementById('pendingAmount').textContent = formatCurrency(pendingTotal);
+            document.getElementById('completedCount').textContent = completed.length;
+            document.getElementById('avgAmount').textContent = formatCurrency(avg);
+        }
+
+        function renderPayments() {
+            const container = document.getElementById('paymentsList');
+            let list = allPayments;
+            if (currentFilter !== 'all') {
+                list = allPayments.filter(p => p.status === currentFilter);
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><h3>No payments found</h3><p>Payment history will appear when loads are completed</p></div>';
+                return;
+            }
+
+            container.innerHTML = list.map(p => {
+                const statusClass = p.status === 'completed' ? 'completed' : (p.status === 'failed' ? 'failed' : 'pending');
+                const statusText = p.status === 'completed' ? 'Completed' : (p.status === 'failed' ? 'Failed' : 'Pending');
+                const receiptHref = `receipt.html?loadId=${encodeURIComponent(p.id)}`;
+
+                return `
+                    <div class="payment-card" onclick="window.location.href='${receiptHref}'" style="cursor:pointer;">
+                        <div class="payment-route">${p.route}</div>
+                        <div class="payment-meta">${p.carrierName} • ${formatDate(p.completedAt || p.createdAt)}</div>
+                        <div class="payment-row">
+                            <span>Total: <span class="payment-amount">${formatCurrency(p.totalAmount)}</span></span>
+                            <span class="payment-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="payment-row" style="margin-top:0.5rem;font-size:0.75rem;color:var(--text-medium);">
+                            <span>Budget: ${formatCurrency(p.amount)}</span>
+                            <span>Commission: ${formatCurrency(p.commission)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderPayments();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', loadPayments);
+    </script>
+</body>
+</html>

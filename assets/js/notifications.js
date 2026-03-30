@@ -123,8 +123,9 @@ async function initFCM() {
                 let swReg = null;
                 if ('serviceWorker' in navigator) {
                     try {
-                        swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
-                        await swReg.update();
+                        // Use app service worker (offline + push) to avoid scope conflicts
+                        swReg = await navigator.serviceWorker.register('/app-sw.js', { scope: '/' });
+                        try { await swReg.update(); } catch (e) {}
                     } catch (e) { /* use default */ }
                 }
                 fcmToken = await messaging.getToken({ 
@@ -196,6 +197,30 @@ async function saveFCMToken(token) {
             return;
         }
 
+        // Ensure Firebase Auth session is ready (DB rules require auth)
+        try {
+            if (typeof firebase !== 'undefined' && typeof firebase.auth === 'function') {
+                const auth = firebase.auth();
+                if (!auth.currentUser) {
+                    await new Promise((resolve) => {
+                        let done = false;
+                        const timer = setTimeout(() => {
+                            if (done) return;
+                            done = true;
+                            resolve();
+                        }, 3500);
+                        const unsub = auth.onAuthStateChanged(() => {
+                            if (done) return;
+                            done = true;
+                            clearTimeout(timer);
+                            try { unsub(); } catch (e) {}
+                            resolve();
+                        });
+                    });
+                }
+            }
+        } catch (e) {}
+
         // Check if Firebase is initialized and get database
         let db;
         try {
@@ -206,17 +231,42 @@ async function saveFCMToken(token) {
         }
         const userRef = user.type === 'carrier' ? `carriers/${user.id}/fcmToken` : `suppliers/${user.id}/fcmToken`;
         
-        await db.ref(userRef).set({
-            token: token,
-            updatedAt: new Date().toISOString(),
-            userType: user.type
-        });
+        try {
+            await db.ref(userRef).set({
+                token: token,
+                updatedAt: new Date().toISOString(),
+                userType: user.type
+            });
+        } catch (e) {
+            try {
+                localStorage.setItem('pendingFcmToken', JSON.stringify({ token, userType: user.type, userId: user.id, at: Date.now() }));
+            } catch (e2) {}
+            throw e;
+        }
 
         console.log(`FCM token saved for ${user.type}`);
     } catch (error) {
         console.error('Error saving FCM token:', error);
     }
 }
+
+// Retry saving pending token after auth is ready
+(function retryPendingFcmToken() {
+    try {
+        const raw = localStorage.getItem('pendingFcmToken');
+        if (!raw) return;
+        const pending = JSON.parse(raw);
+        if (!pending || !pending.token) return;
+        const user = getCurrentUser();
+        if (!user || user.id !== pending.userId || user.type !== pending.userType) return;
+        setTimeout(async () => {
+            try {
+                await saveFCMToken(pending.token);
+                try { localStorage.removeItem('pendingFcmToken'); } catch (e) {}
+            } catch (e) {}
+        }, 2000);
+    } catch (e) {}
+})();
 
 // Play notification sound
 function playNotificationSound() {
@@ -348,6 +398,21 @@ async function createNotification(type, title, message, data = {}, targetUserId 
                 }
                 // Don't throw error - just use local storage fallback
             });
+
+            // Additionally write to role-based path to trigger Cloud Functions push
+            try {
+                if (userType === 'supplier') {
+                    await db.ref(`notifications/suppliers/${userId}`).push({
+                        title, message, type, data, read: false, createdAt: new Date().toISOString()
+                    });
+                } else if (userType === 'carrier') {
+                    await db.ref(`notifications/carriers/${userId}`).push({
+                        title, message, type, data, read: false, createdAt: new Date().toISOString()
+                    });
+                }
+            } catch (e2) {
+                // ignore secondary write errors
+            }
         } catch (error) {
             // If Firebase write fails, save to local storage as fallback
             if (error.code === 'PERMISSION_DENIED' || error.message?.includes('permission')) {

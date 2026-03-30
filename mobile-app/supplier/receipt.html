@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>Receipt - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+
+    <style>
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --success: #059669;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 10px 34px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+
+        .header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 52%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.75rem 1.25rem 1.25rem;
+            border-radius: 0 0 34px 34px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.1rem;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(620px 260px at 20% 10%, rgba(96, 165, 250, 0.18) 0%, transparent 60%),
+                radial-gradient(520px 260px at 90% 20%, rgba(29, 78, 216, 0.14) 0%, transparent 62%);
+            pointer-events: none;
+        }
+        .header-row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .title { font-size: 1.25rem; font-weight: 900; letter-spacing: -0.03em; }
+        .sub { margin-top: 0.25rem; font-size: 0.9rem; color: rgba(255,255,255,0.82); }
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+        }
+        .icon-btn:active { transform: scale(0.98); }
+
+        .content { padding: 0 1.25rem 1.25rem; }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 1.1rem;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(96,165,250,1), rgba(29,78,216,1));
+            opacity: 0.75;
+        }
+
+        .brand {
+            text-align: center;
+            padding-bottom: 0.9rem;
+            margin-bottom: 0.9rem;
+            border-bottom: 2px dashed var(--border);
+        }
+        .brand h2 {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.2rem;
+            letter-spacing: -0.02em;
+        }
+        .brand p { color: var(--text-medium); font-size: 0.78rem; }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            font-size: 0.82rem;
+            color: var(--text-medium);
+            margin-bottom: 0.85rem;
+        }
+
+        .receipt-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.85rem;
+            margin-bottom: 0.9rem;
+        }
+        .receipt-title {
+            font-size: 1.15rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            color: var(--text-dark);
+        }
+        .receipt-sub {
+            margin-top: 0.3rem;
+            font-size: 0.82rem;
+            color: var(--text-medium);
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.35rem 0.6rem;
+            font-weight: 950;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(15, 23, 42, 0.04);
+            color: var(--text-dark);
+        }
+        .pill.success {
+            background: rgba(5, 150, 105, 0.10);
+            border-color: rgba(5, 150, 105, 0.18);
+            color: var(--success);
+        }
+        .pill.primary {
+            background: rgba(29, 78, 216, 0.10);
+            border-color: rgba(29, 78, 216, 0.18);
+            color: var(--primary);
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: rgba(248, 250, 252, 0.85);
+            overflow: hidden;
+            margin-bottom: 0.9rem;
+        }
+
+        .box-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.78rem 0.9rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .box-row:last-child { border-bottom: none; }
+        .box-k { color: var(--text-medium); font-weight: 900; }
+        .box-v { color: var(--text-dark); font-weight: 950; text-align: right; word-break: break-word; }
+
+        .route {
+            background: rgba(241, 245, 249, 0.75);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0.85rem 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+        .route-row { display: flex; gap: 0.6rem; margin-bottom: 0.4rem; }
+        .route-row:last-child { margin-bottom: 0; }
+        .route-label { width: 56px; flex-shrink: 0; font-weight: 900; font-size: 0.7rem; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.06em; }
+        .route-value { font-weight: 800; font-size: 0.9rem; color: var(--text-dark); word-break: break-word; }
+
+        .row.small { font-size: 0.82rem; }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .row:last-of-type { border-bottom: none; }
+        .label { color: var(--text-medium); font-weight: 800; }
+        .value { color: var(--text-dark); font-weight: 900; text-align: right; word-break: break-word; }
+
+        .total {
+            margin-top: 0.9rem;
+            padding-top: 0.85rem;
+            border-top: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .total .label { font-size: 1rem; color: var(--text-dark); }
+        .total .value { font-size: 1.45rem; color: var(--success); }
+
+        .qr-box {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.9rem;
+            align-items: center;
+            border: 1px dashed rgba(148, 163, 184, 0.7);
+            border-radius: 18px;
+            background: rgba(248, 250, 252, 0.85);
+            padding: 0.85rem 0.9rem;
+            margin-top: 0.9rem;
+        }
+        .qr-img {
+            width: 92px;
+            height: 92px;
+            border-radius: 14px;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: #fff;
+            padding: 8px;
+            flex-shrink: 0;
+        }
+        .qr-title { font-weight: 950; letter-spacing: -0.02em; }
+        .qr-sub { margin-top: 0.25rem; font-size: 0.78rem; color: var(--text-medium); }
+
+        .status {
+            text-align: center;
+            margin-top: 0.85rem;
+            font-weight: 900;
+            color: var(--success);
+            font-size: 0.85rem;
+        }
+
+        .actions {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .actions .btn {
+            width: 100%;
+            border: 0;
+            border-radius: 999px;
+            padding: 0.9rem 1rem;
+            font-weight: 900;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 18px 40px rgba(29, 78, 216, 0.18); }
+        .btn-whatsapp { background: #25D366; color: #fff; box-shadow: 0 18px 40px rgba(37, 211, 102, 0.18); }
+        .btn-outline { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+        .btn:active { transform: scale(0.99); }
+        .btn:disabled { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
+
+        .empty {
+            text-align: center;
+            padding: 2.2rem 1.25rem;
+            color: var(--text-medium);
+        }
+        .empty i { font-size: 2.5rem; margin-bottom: 0.75rem; color: var(--text-light); }
+        .empty h3 { color: var(--text-dark); font-weight: 900; margin-bottom: 0.25rem; }
+
+        @media print {
+            body.has-bottom-nav { padding-bottom: 0 !important; }
+            .bottom-nav, .actions, .icon-btn { display: none !important; }
+            .header { border-radius: 0; }
+            .card { box-shadow: none; }
+        }
+        @media (min-width: 768px) { body { max-width: 520px; margin: 0 auto; } }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-row">
+            <div>
+                <div class="title">Receipt</div>
+                <div class="sub" id="subtitle">Loading...</div>
+            </div>
+            <button class="icon-btn" type="button" onclick="window.print()"><i class="fas fa-print"></i></button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div id="contentArea" class="card">
+            <div class="empty">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>Loading</h3>
+                <p>Please wait</p>
+            </div>
+        </div>
+
+        <div class="actions" id="actions" style="display:none;">
+            <button class="btn btn-primary" type="button" onclick="downloadReceipt()">
+                <i class="fas fa-download"></i> Download / Print
+            </button>
+            <button class="btn btn-whatsapp" id="btnWhatsApp" type="button" onclick="sendWhatsApp()" disabled>
+                <i class="fab fa-whatsapp"></i> Send WhatsApp
+            </button>
+            <button class="btn btn-outline" id="btnRefund" type="button" onclick="requestRefund()" style="display:none;">
+                <i class="fas fa-rotate-left"></i> Request Refund
+            </button>
+            <button class="btn btn-outline" type="button" onclick="window.location.href='payments.html'">
+                <i class="fas fa-receipt"></i> Back to Payments
+            </button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i><span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i><span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i><span>Loads</span>
+        </a>
+        <a href="payments.html" class="bottom-nav-item active">
+            <i class="fas fa-credit-card"></i><span>Payments</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i><span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <script>
+        let currentReceiptData = null;
+
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatDate(value) {
+            if (!value) return '-';
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
+                });
+            });
+        }
+
+        let pageMode = 'receipt';
+
+        function parseParams() {
+            const params = new URLSearchParams(location.search);
+            pageMode = (params.get('mode') || 'receipt').toLowerCase();
+            return {
+                loadId: params.get('loadId') || '',
+                paymentId: params.get('paymentId') || '',
+                mode: pageMode
+            };
+        }
+
+        function getReceiptShareText() {
+            if (!currentReceiptData) return '';
+            const r = currentReceiptData;
+            const header = pageMode === 'invoice' ? 'Alpha Freight - Supplier Invoice' : 'Alpha Freight - Supplier Receipt';
+            const lines = [
+                header,
+                `${pageMode === 'invoice' ? 'Invoice' : 'Receipt'}: ${r.paymentRef || '-'}`,
+                `Load: ${r.loadShort}`,
+                `Date: ${r.paidAt}`,
+                `Route: ${r.route}`,
+                `Budget: ${r.budget}`,
+                `Commission: ${r.commission}`,
+                `Total Paid: ${r.totalPaid}`
+            ];
+            return lines.join('\n');
+        }
+
+        function getQrDataString() {
+            try {
+                if (location && location.href && location.href.startsWith('http')) return location.href;
+            } catch (e) {}
+            return getReceiptShareText();
+        }
+
+        function getQrUrl(data, size) {
+            const s = size || 220;
+            return `https://api.qrserver.com/v1/create-qr-code/?size=${s}x${s}&margin=0&data=${encodeURIComponent(data || '')}`;
+        }
+
+        function loadImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Image failed'));
+                img.src = url;
+            });
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = String(text || '').split(' ');
+            let line = '';
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line ? (line + ' ' + words[i]) : words[i];
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && line) {
+                    ctx.fillText(line, x, y);
+                    line = words[i];
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            if (line) {
+                ctx.fillText(line, x, y);
+                y += lineHeight;
+            }
+            return y;
+        }
+
+        async function generateReceiptImageBlob() {
+            const r = currentReceiptData;
+            const width = 1080;
+            const padding = 64;
+            const lineHeight = 46;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = 1500;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Canvas not supported');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            function roundRectPath(x, y, w, h, r) {
+                const rr = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + rr, y);
+                ctx.arcTo(x + w, y, x + w, y + h, rr);
+                ctx.arcTo(x + w, y + h, x, y + h, rr);
+                ctx.arcTo(x, y + h, x, y, rr);
+                ctx.arcTo(x, y, x + w, y, rr);
+                ctx.closePath();
+            }
+
+            const headerH = 170;
+            const head = ctx.createLinearGradient(0, 0, width, 0);
+            head.addColorStop(0, '#0f172a');
+            head.addColorStop(1, '#1e3a8a');
+            ctx.fillStyle = head;
+            ctx.fillRect(0, 0, width, headerH);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '950 54px system-ui, -apple-system, "Segoe UI", sans-serif';
+            ctx.fillText('Alpha Freight', padding, 78);
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.font = '800 28px system-ui, -apple-system, "Segoe UI", sans-serif';
+            ctx.fillText(pageMode === 'invoice' ? 'Invoice' : 'Payment Receipt', padding, 122);
+
+            const badgeW = 140;
+            const badgeH = 46;
+            const state = currentReceiptData && currentReceiptData.paymentState ? String(currentReceiptData.paymentState).toLowerCase() : '';
+            const badgeText = state === 'refunded' ? 'REFUND' : (state === 'paid' || state === 'completed' || state === 'success') ? 'PAID' : 'UNPAID';
+            ctx.fillStyle = badgeText === 'PAID' ? 'rgba(5, 150, 105, 0.18)' : badgeText === 'REFUND' ? 'rgba(217, 119, 6, 0.18)' : 'rgba(220, 38, 38, 0.18)';
+            roundRectPath(width - padding - badgeW, 56, badgeW, badgeH, 999);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '950 24px system-ui, -apple-system, "Segoe UI", sans-serif';
+            ctx.fillText(badgeText, width - padding - badgeW + 24, 86);
+
+            const cardX = padding;
+            const cardY = headerH + 42;
+            const cardW = width - padding * 2;
+            const cardR = 26;
+            const cardH = 980;
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(2, 6, 23, 0.14)';
+            ctx.shadowBlur = 26;
+            ctx.shadowOffsetY = 14;
+            roundRectPath(cardX, cardY, cardW, cardH, cardR);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.restore();
+            roundRectPath(cardX, cardY, cardW, cardH, cardR);
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            let y = cardY + 64;
+            const tx = cardX + 44;
+            const maxX = cardX + cardW - 44;
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '950 38px system-ui, -apple-system, "Segoe UI", sans-serif';
+            ctx.fillText('Details', tx, y);
+            y += 44;
+
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(tx, y);
+            ctx.lineTo(maxX, y);
+            ctx.stroke();
+            y += 42;
+
+            const details = [
+                ['Load', r.loadShort],
+                ['Date', r.paidAt],
+                ['Reference', r.paymentRef || '-']
+            ];
+            details.forEach(([k, v]) => {
+                ctx.fillStyle = '#475569';
+                ctx.font = '900 26px system-ui, -apple-system, "Segoe UI", sans-serif';
+                ctx.fillText(k, tx, y);
+                ctx.fillStyle = '#0f172a';
+                ctx.font = '950 26px system-ui, -apple-system, "Segoe UI", sans-serif';
+                const val = String(v || '');
+                const tw = ctx.measureText(val).width;
+                ctx.fillText(val, maxX - tw, y);
+                y += 48;
+                ctx.strokeStyle = 'rgba(226,232,240,1)';
+                ctx.beginPath();
+                ctx.moveTo(tx, y);
+                ctx.lineTo(maxX, y);
+                ctx.stroke();
+                y += 34;
+            });
+
+            y += 10;
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '950 38px system-ui, -apple-system, "Segoe UI", sans-serif';
+            ctx.fillText('Route', tx, y);
+            y += 44;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(tx, y);
+            ctx.lineTo(maxX, y);
+            ctx.stroke();
+            y += 44;
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '900 26px system-ui, -apple-system, "Segoe UI", sans-serif';
+            y = wrapText(ctx, String(r.route || ''), tx, y, maxX - tx, lineHeight) + 22;
+
+            y += 8;
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '950 38px system-ui, -apple-system, "Segoe UI", sans-serif';
+            ctx.fillText('Amounts', tx, y);
+            y += 44;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(tx, y);
+            ctx.lineTo(maxX, y);
+            ctx.stroke();
+            y += 44;
+
+            const rows = [
+                ['Budget', r.budget, '#0f172a'],
+                ['Commission', r.commission, '#0f172a'],
+                ['Total Paid', r.totalPaid, '#059669']
+            ];
+            rows.forEach(([k, v, color], idx) => {
+                ctx.fillStyle = '#475569';
+                ctx.font = '900 26px system-ui, -apple-system, "Segoe UI", sans-serif';
+                ctx.fillText(k, tx, y);
+                ctx.fillStyle = color;
+                ctx.font = idx === 2 ? '950 30px system-ui, -apple-system, "Segoe UI", sans-serif' : '950 26px system-ui, -apple-system, "Segoe UI", sans-serif';
+                const val = String(v || '');
+                const tw = ctx.measureText(val).width;
+                ctx.fillText(val, maxX - tw, y);
+                y += 48;
+                if (idx < 2) {
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.beginPath();
+                    ctx.moveTo(tx, y);
+                    ctx.lineTo(maxX, y);
+                    ctx.stroke();
+                    y += 34;
+                }
+            });
+
+            const qrSize = 220;
+            const qrData = r.qrData || getQrDataString();
+            const qrUrl = getQrUrl(qrData, qrSize);
+            try {
+                const qrImg = await loadImage(qrUrl);
+                const qrX = maxX - qrSize;
+                const qrY = cardY + cardH - qrSize - 56;
+                ctx.fillStyle = '#ffffff';
+                roundRectPath(qrX - 18, qrY - 18, qrSize + 36, qrSize + 36, 22);
+                ctx.fill();
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.stroke();
+                ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+                ctx.fillStyle = '#475569';
+                ctx.font = '900 22px system-ui, -apple-system, "Segoe UI", sans-serif';
+                ctx.fillText('Scan', qrX, qrY + qrSize + 34);
+            } catch (e) {}
+
+            const finalHeight = Math.min(Math.max(cardY + cardH + 90, 1200), 2200);
+            if (finalHeight !== canvas.height) {
+                const out = document.createElement('canvas');
+                out.width = canvas.width;
+                out.height = finalHeight;
+                const octx = out.getContext('2d');
+                octx.drawImage(canvas, 0, 0);
+                return await new Promise((resolve, reject) => {
+                    out.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Failed to create image')), 'image/png', 1);
+                });
+            }
+
+            return await new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Failed to create image')), 'image/png', 1);
+            });
+        }
+
+        async function downloadReceipt() {
+            if (!currentReceiptData) return;
+            const blob = await generateReceiptImageBlob();
+            const name = `receipt-${currentReceiptData.loadShort}.png`;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => { URL.revokeObjectURL(url); }, 1500);
+        }
+
+        async function sendWhatsApp() {
+            if (!currentReceiptData) return;
+            const btn = document.getElementById('btnWhatsApp');
+            if (btn) btn.disabled = true;
+
+            try {
+                const blob = await generateReceiptImageBlob();
+                const file = new File([blob], `receipt-${currentReceiptData.loadShort}.png`, { type: 'image/png' });
+
+                if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+                    await navigator.share({
+                        title: 'Receipt',
+                        text: 'Alpha Freight Receipt',
+                        files: [file]
+                    });
+                    return;
+                }
+
+                try {
+                    if (navigator.clipboard && window.ClipboardItem) {
+                        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    }
+                } catch (e) {}
+
+                await downloadReceipt();
+                const url = 'https://wa.me/?text=' + encodeURIComponent(getReceiptShareText());
+                window.open(url, '_blank');
+            } catch (e) {
+                const url = 'https://wa.me/?text=' + encodeURIComponent(getReceiptShareText());
+                window.open(url, '_blank');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function renderReceipt(loadId, load, payment) {
+            const amount = parseFloat(load.commissionBaseAmount || load.price || load.budget || load.maxBudget || load.minBudget || 0) || 0;
+            const commission = parseFloat(load.supplierCommission || (load.supplierCommissionRate ? amount * parseFloat(load.supplierCommissionRate) : 0)) || 0;
+            const total = parseFloat(load.totalAmount || load.totalCost || (amount + commission)) || (amount + commission);
+
+            const pickup = load.pickupLocation || load.pickup_location || '-';
+            const delivery = load.deliveryLocation || load.delivery_location || '-';
+            const route = `${pickup} → ${delivery}`;
+            const paidAt = (load.paymentStatus && (load.paymentStatus.paidAt || load.paymentStatus.completedAt)) || load.paidAt || (payment && payment.createdAt) || load.updatedAt || load.createdAt;
+            const method = (load.paymentStatus && load.paymentStatus.method) || (payment && payment.method) || '-';
+            const intent = (load.paymentStatus && load.paymentStatus.paymentIntentId) || (payment && payment.paymentIntentId) || '-';
+            const paymentRef = (payment && payment.paymentId) ? payment.paymentId : ((load.paymentStatus && load.paymentStatus.paymentId) ? load.paymentStatus.paymentId : '');
+            const paymentState = String((load.paymentStatus && load.paymentStatus.status) || (payment && payment.status) || '').toLowerCase();
+            const refundState = String(load.refundStatus || (load.refundRequest && load.refundRequest.status) || '').toLowerCase();
+            const docTitle = pageMode === 'invoice' ? 'Invoice' : 'Payment Receipt';
+            const docSub = pageMode === 'invoice' ? 'Supplier Invoice' : 'Supplier Payment Receipt';
+            const stateLabel = paymentState === 'refunded' ? 'Refunded' : (paymentState === 'paid' || paymentState === 'completed' || paymentState === 'success') ? 'Paid' : 'Unpaid';
+            const statePill = paymentState === 'refunded' ? 'warning' : (stateLabel === 'Paid' ? 'success' : 'warning');
+            const stateIcon = paymentState === 'refunded' ? 'fa-rotate-left' : (stateLabel === 'Paid' ? 'fa-circle-check' : 'fa-circle-exclamation');
+
+            document.getElementById('subtitle').textContent = `Load #${loadId.slice(0, 10)}`;
+            const content = document.getElementById('contentArea');
+            const qrData = getQrDataString();
+            const qrUrl = getQrUrl(qrData, 220);
+            content.innerHTML = `
+                <div class="brand">
+                    <h2>Alpha Freight</h2>
+                    <p>${escapeHtml(docSub)}</p>
+                </div>
+                <div class="receipt-head">
+                    <div>
+                        <div class="receipt-title">${escapeHtml(docTitle)}</div>
+                        <div class="receipt-sub">Load #${escapeHtml(String(loadId).slice(0, 10))}${paymentRef ? ` • ${escapeHtml(pageMode === 'invoice' ? 'Invoice' : 'Receipt')} #${escapeHtml(String(paymentRef).slice(0, 10))}` : ''}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
+                        <span class="pill ${statePill}"><i class="fas ${stateIcon}"></i> ${stateLabel}</span>
+                        <span class="pill primary"><i class="fas fa-credit-card"></i> ${escapeHtml(String(method).toUpperCase())}</span>
+                        ${refundState === 'pending' ? `<span class="pill warning"><i class="fas fa-hourglass-half"></i> Refund Pending</span>` : ''}
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-row"><div class="box-k">Date</div><div class="box-v">${escapeHtml(formatDate(paidAt))}</div></div>
+                    <div class="box-row"><div class="box-k">Reference</div><div class="box-v">${escapeHtml(paymentRef || intent || '-')}</div></div>
+                    <div class="box-row"><div class="box-k">Intent</div><div class="box-v">${escapeHtml(intent || '-')}</div></div>
+                </div>
+                <div class="route">
+                    <div class="route-row"><div class="route-label">From</div><div class="route-value">${escapeHtml(pickup)}</div></div>
+                    <div class="route-row"><div class="route-label">To</div><div class="route-value">${escapeHtml(delivery)}</div></div>
+                </div>
+                <div class="box">
+                    <div class="box-row"><div class="box-k">Budget</div><div class="box-v">${escapeHtml(formatCurrency(amount))}</div></div>
+                    <div class="box-row"><div class="box-k">Commission</div><div class="box-v">${escapeHtml(formatCurrency(commission))}</div></div>
+                    <div class="box-row"><div class="box-k">Total Paid</div><div class="box-v" style="color:var(--success);font-size:1.05rem;">${escapeHtml(formatCurrency(total))}</div></div>
+                </div>
+                <div class="status"><i class="fas fa-circle-check"></i> Payment Completed</div>
+                <div class="qr-box">
+                    <div>
+                        <div class="qr-title">QR Receipt</div>
+                        <div class="qr-sub">Scan to open this receipt</div>
+                    </div>
+                    <img class="qr-img" alt="QR" src="${escapeHtml(qrUrl)}">
+                </div>
+            `;
+
+            currentReceiptData = {
+                loadId: loadId,
+                paymentState: paymentState || null,
+                refundState: refundState || null,
+                paymentRef: paymentRef || null,
+                loadShort: String(loadId).slice(0, 10),
+                paidAt: formatDate(paidAt),
+                route,
+                budget: formatCurrency(amount),
+                commission: formatCurrency(commission),
+                totalPaid: formatCurrency(total),
+                qrData: qrData
+            };
+
+            const waBtn = document.getElementById('btnWhatsApp');
+            if (waBtn) waBtn.disabled = false;
+            const refundBtn = document.getElementById('btnRefund');
+            const canRefund = (paymentState === 'paid' || paymentState === 'completed' || paymentState === 'success') && refundState !== 'pending' && paymentState !== 'refunded';
+            if (refundBtn) refundBtn.style.display = canRefund ? '' : 'none';
+            document.getElementById('actions').style.display = 'grid';
+        }
+
+        async function requestRefund() {
+            if (!currentReceiptData || !currentReceiptData.loadId) return;
+            const loadId = currentReceiptData.loadId;
+            const reason = (prompt('Refund reason (required):') || '').trim();
+            if (reason.length < 3) return;
+            if (!confirm('Confirm refund request?')) return;
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            try {
+                await ensureAuthReady();
+                const refundRef = db.ref('refunds').push();
+                const refundId = refundRef.key;
+                await refundRef.set({
+                    refundId,
+                    loadId,
+                    reason,
+                    status: 'pending',
+                    requestedByRole: 'supplier',
+                    createdAt: new Date().toISOString()
+                });
+                await db.ref('loads/' + loadId).update({
+                    refundStatus: 'pending',
+                    refundRequestId: refundId,
+                    refundRequest: {
+                        status: 'pending',
+                        reason,
+                        createdAt: new Date().toISOString()
+                    }
+                });
+                const refundBtn = document.getElementById('btnRefund');
+                if (refundBtn) refundBtn.style.display = 'none';
+                alert('Refund request submitted.');
+            } catch (e) {
+                console.error(e);
+                alert('Failed to request refund.');
+            }
+        }
+
+        async function init() {
+            const { loadId, paymentId } = parseParams();
+            if (!loadId) {
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-receipt"></i>
+                        <h3>Missing receipt</h3>
+                        <p>Load ID not found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) {
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <h3>Service unavailable</h3>
+                        <p>Try again</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                await ensureAuthReady();
+                const loadSnap = await db.ref('loads/' + loadId).once('value');
+                if (!loadSnap.exists()) {
+                    document.getElementById('contentArea').innerHTML = `
+                        <div class="empty">
+                            <i class="fas fa-user-slash"></i>
+                            <h3>Receipt not found</h3>
+                            <p>Load does not exist</p>
+                        </div>
+                    `;
+                    return;
+                }
+                const load = loadSnap.val() || {};
+
+                let payment = null;
+                if (paymentId) {
+                    try {
+                        const pSnap = await db.ref('payments/' + paymentId).once('value');
+                        if (pSnap.exists()) payment = pSnap.val() || null;
+                    } catch (e) {}
+                }
+
+                renderReceipt(loadId, load, payment);
+            } catch (e) {
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <h3>Failed to load</h3>
+                        <p>${escapeHtml((e && (e.code || e.message)) ? (e.code || e.message) : 'Try again')}</p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

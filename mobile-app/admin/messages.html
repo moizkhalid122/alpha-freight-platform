@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Messages - Admin Mobile</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #4c2d8b;
+            --primary-light: #c4b5fd;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 10px 34px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 52%, #4c2d8b 100%);
+            color: #fff;
+            padding: 1.55rem 1.25rem 1.1rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px 260px at 18% 12%, rgba(196, 181, 253, 0.18) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .header-row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        .sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.82);
+            margin-top: 0.25rem;
+        }
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+        }
+        .icon-btn:active { transform: scale(0.98); }
+
+        .content { padding: 0 1.25rem 1.25rem; }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .search {
+            padding: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(241, 245, 249, 0.65);
+        }
+        .search input {
+            width: 100%;
+            padding: 0.85rem 0.95rem;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-dark);
+            font-weight: 700;
+            outline: none;
+        }
+        .search input:focus {
+            border-color: rgba(111, 66, 193, 0.65);
+            box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.12);
+        }
+
+        .conv-list {
+            max-height: 42vh;
+            overflow: auto;
+        }
+        .conv {
+            display: flex;
+            gap: 0.85rem;
+            padding: 0.95rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .conv:last-child { border-bottom: none; }
+        .conv:active { background: rgba(15, 23, 42, 0.03); }
+        .conv.active { background: rgba(111, 66, 193, 0.08); }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(111, 66, 193, 0.16) 0%, rgba(232, 62, 140, 0.10) 100%);
+            border: 1px solid rgba(111, 66, 193, 0.12);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .conv-main { flex: 1; min-width: 0; }
+        .conv-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: baseline;
+        }
+        .conv-name {
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .conv-time { font-size: 0.78rem; color: var(--text-light); white-space: nowrap; }
+        .conv-sub {
+            margin-top: 0.25rem;
+            font-size: 0.84rem;
+            color: var(--text-medium);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pill {
+            font-size: 0.72rem;
+            font-weight: 900;
+            border-radius: 999px;
+            padding: 0.25rem 0.55rem;
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text-dark);
+            margin-left: 0.5rem;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(220, 38, 38, 0.9);
+            flex-shrink: 0;
+            margin-top: 0.4rem;
+        }
+
+        .chat {
+            margin-top: 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            display: none;
+        }
+        .chat-head {
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(241, 245, 249, 0.65);
+        }
+        .chat-title { font-weight: 900; letter-spacing: -0.02em; }
+        .chat-sub { font-size: 0.82rem; color: var(--text-medium); margin-top: 0.15rem; }
+        .chat-back {
+            border: 0;
+            background: rgba(15, 23, 42, 0.06);
+            border-radius: 14px;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+        .messages {
+            padding: 0.95rem 0.95rem 0.6rem;
+            max-height: 44vh;
+            overflow: auto;
+            background: linear-gradient(180deg, rgba(241, 245, 249, 0.35) 0%, rgba(248, 250, 252, 0.85) 100%);
+        }
+        .bubble {
+            max-width: 86%;
+            padding: 0.75rem 0.85rem;
+            border-radius: 18px;
+            margin-bottom: 0.6rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            font-weight: 700;
+            line-height: 1.45;
+        }
+        .bubble.sent {
+            margin-left: auto;
+            background: linear-gradient(145deg, rgba(111, 66, 193, 0.15) 0%, rgba(232, 62, 140, 0.10) 100%);
+            color: var(--text-dark);
+        }
+        .bubble.recv {
+            margin-right: auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-dark);
+        }
+        .bubble-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.35rem;
+            font-weight: 800;
+        }
+
+        .composer {
+            border-top: 1px solid var(--border);
+            padding: 0.85rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            background: #fff;
+        }
+        .composer textarea {
+            flex: 1;
+            resize: none;
+            min-height: 44px;
+            max-height: 140px;
+            padding: 0.8rem 0.9rem;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            outline: none;
+            font-weight: 700;
+            font-family: inherit;
+        }
+        .composer textarea:focus {
+            border-color: rgba(111, 66, 193, 0.65);
+            box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.12);
+        }
+        .send-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            border: 0;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(145deg, rgba(111, 66, 193, 0.95) 0%, rgba(232, 62, 140, 0.95) 100%);
+            box-shadow: 0 18px 46px rgba(232, 62, 140, 0.18);
+            display: grid;
+            place-items: center;
+        }
+        .send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .send-btn:active { transform: scale(0.99); }
+
+        .empty {
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-medium);
+        }
+        .empty i { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .empty h3 { color: var(--text-dark); font-size: 1.05rem; font-weight: 900; margin-bottom: 0.25rem; }
+
+        @media (min-width: 768px) {
+            body { max-width: 520px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-row">
+            <div>
+                <div class="title">Messages</div>
+                <div class="sub">Supplier + Carrier chat</div>
+            </div>
+            <button class="icon-btn" type="button" onclick="refreshAll()">
+                <i class="fas fa-rotate"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="panel">
+            <div class="search">
+                <input id="searchInput" placeholder="Search users">
+            </div>
+            <div class="conv-list" id="conversationsList">
+                <div class="empty">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Loading</h3>
+                    <p>Please wait</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat" id="chatBox">
+            <div class="chat-head">
+                <div>
+                    <div class="chat-title" id="chatName">—</div>
+                    <div class="chat-sub" id="chatType">—</div>
+                </div>
+                <button class="chat-back" type="button" onclick="closeChat()"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="messages" id="chatMessages"></div>
+            <div class="composer">
+                <textarea id="messageInput" rows="1" placeholder="Type a message..." onkeydown="handleKeyDown(event)"></textarea>
+                <button class="send-btn" id="sendBtn" type="button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-house"></i><span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i><span>Loads</span>
+        </a>
+        <a href="finance.html" class="bottom-nav-item">
+            <i class="fas fa-credit-card"></i><span>Finance</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item active">
+            <i class="fas fa-comments"></i><span>Chat</span>
+        </a>
+        <a href="settings.html" class="bottom-nav-item">
+            <i class="fas fa-gear"></i><span>Settings</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/admin-auth.js"></script>
+
+    <script>
+        let db = null;
+        let allUsers = [];
+        let currentConversation = null;
+        let activeQueryRef = null;
+        let activeMessages = [];
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getAvatarInitials(name) {
+            if (!name) return 'U';
+            const parts = String(name).trim().split(' ').filter(Boolean);
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return String(name).substring(0, 2).toUpperCase();
+        }
+
+        function formatTime(ts) {
+            if (!ts) return '';
+            const date = new Date(ts);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            if (minutes < 1) return 'now';
+            if (minutes < 60) return `${minutes}m`;
+            if (hours < 24) return `${hours}h`;
+            if (days < 7) return `${days}d`;
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        }
+
+        function renderConversations() {
+            const container = document.getElementById('conversationsList');
+            const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const convs = allUsers.filter(c => {
+                if (!q) return true;
+                const name = String(c.userName || '').toLowerCase();
+                return name.includes(q) || String(c.userId || '').toLowerCase().includes(q);
+            });
+
+            if (!convs.length) {
+                container.innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-users"></i>
+                        <h3>No users</h3>
+                        <p>No conversations found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = convs.map(c => {
+                const initials = getAvatarInitials(c.userName);
+                const type = c.userType === 'supplier' ? 'Supplier' : 'Carrier';
+                const active = currentConversation && currentConversation.userId === c.userId ? 'active' : '';
+                return `
+                    <div class="conv ${active}" onclick="openConversation('${escapeHtml(c.userId)}', '${escapeHtml(c.userName)}', '${escapeHtml(c.userType)}')">
+                        <div class="avatar">${escapeHtml(initials)}</div>
+                        <div class="conv-main">
+                            <div class="conv-top">
+                                <div class="conv-name">${escapeHtml(c.userName)}<span class="pill">${type}</span></div>
+                                <div class="conv-time"></div>
+                            </div>
+                            <div class="conv-sub">${escapeHtml('Tap to open chat')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openConversation(userId, userName, userType) {
+            currentConversation = { userId, userName, userType };
+            document.getElementById('chatBox').style.display = 'block';
+            document.getElementById('chatName').textContent = userName;
+            document.getElementById('chatType').textContent = userType === 'supplier' ? 'Supplier' : 'Carrier';
+            renderConversations();
+            listenConversation(userId, userType);
+        }
+
+        function closeChat() {
+            stopConversationListener();
+            currentConversation = null;
+            document.getElementById('chatBox').style.display = 'none';
+            renderConversations();
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('chatMessages');
+            if (!currentConversation) {
+                container.innerHTML = '';
+                return;
+            }
+            const messages = activeMessages.slice().sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)).slice(-80);
+
+            if (!messages.length) {
+                container.innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-message"></i>
+                        <h3>No messages</h3>
+                        <p>Start conversation</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(m => {
+                const sent = m.senderType === 'support';
+                const text = (m.message || '').replace(/\n/g, '<br>');
+                const time = formatTime(m.timestamp || m.createdAt || 0);
+                return `
+                    <div class="bubble ${sent ? 'sent' : 'recv'}">
+                        <div>${text}</div>
+                        <div class="bubble-time">${escapeHtml(time)}</div>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function stopConversationListener() {
+            try {
+                if (activeQueryRef) {
+                    activeQueryRef.off();
+                    activeQueryRef = null;
+                }
+            } catch (e) {}
+            activeMessages = [];
+        }
+
+        function listenConversation(userId, userType) {
+            if (!db) return;
+            stopConversationListener();
+            const childKey = userType === 'supplier' ? 'supplierId' : 'carrierId';
+            activeQueryRef = db.ref('messages').orderByChild(childKey).equalTo(userId).limitToLast(300);
+            activeQueryRef.on('value', (snapshot) => {
+                const msgs = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(ch => msgs.push({ id: ch.key, ...(ch.val() || {}) }));
+                }
+                activeMessages = msgs;
+                renderMessages();
+            });
+        }
+
+        async function sendMessage() {
+            if (!currentConversation || !db) return;
+            if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+            }
+            const input = document.getElementById('messageInput');
+            const msg = (input.value || '').trim();
+            if (!msg) return;
+
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+
+            const messageData = {
+                supplierId: currentConversation.userType === 'supplier' ? currentConversation.userId : null,
+                supplierName: currentConversation.userType === 'supplier' ? currentConversation.userName : null,
+                carrierId: currentConversation.userType === 'carrier' ? currentConversation.userId : (currentConversation.userType === 'supplier' ? 'support' : null),
+                carrierName: currentConversation.userType === 'carrier' ? currentConversation.userName : (currentConversation.userType === 'supplier' ? 'Alpha Freight Support' : null),
+                message: msg,
+                senderType: 'support',
+                senderId: 'support',
+                recipientType: currentConversation.userType,
+                recipientId: currentConversation.userId,
+                read: false,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await db.ref('messages').push(messageData);
+                input.value = '';
+                input.style.height = 'auto';
+            } catch (e) {
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function loadUsersDirectory() {
+            const [supSnap, carSnap] = await Promise.all([
+                db.ref('suppliers').once('value'),
+                db.ref('carriers').once('value')
+            ]);
+            const users = [];
+            if (supSnap.exists()) {
+                supSnap.forEach(ch => {
+                    const u = ch.val() || {};
+                    const name = ((u.firstName || '') + ' ' + (u.lastName || '')).trim() || u.companyName || u.email || 'Supplier';
+                    users.push({ userId: ch.key, userType: 'supplier', userName: name });
+                });
+            }
+            if (carSnap.exists()) {
+                carSnap.forEach(ch => {
+                    const u = ch.val() || {};
+                    const name = ((u.firstName || '') + ' ' + (u.lastName || '')).trim() || u.companyName || u.email || 'Carrier';
+                    users.push({ userId: ch.key, userType: 'carrier', userName: name });
+                });
+            }
+            allUsers = users;
+        }
+
+        async function refreshAll() {
+            if (!db) return;
+            if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+            }
+            await loadUsersDirectory();
+            renderConversations();
+            renderMessages();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            refreshAll();
+            document.getElementById('searchInput').addEventListener('input', renderConversations);
+
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+/* Footer – flex, space-around | HOME | POST | LOADS | CHAT | PROFILE */
+/* .footer + .footer-item (aur .bottom-nav + .bottom-nav-item dono same styling) */
+
+/* Footer system bar ke bilkul paas: footer ko bottom se upar fix (gap na ho). */
+:root {
+  --sys-bottom: env(safe-area-inset-bottom, 48px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+}
+
+/* Body ko footer + system bar ke liye space */
+body.has-bottom-nav {
+  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  padding-bottom: calc(80px + var(--sys-bottom));
+  overflow-x: hidden;
+}
+
+.footer,
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  margin: 0;
+  /* System bar ke bilkul upar: bottom = safe area (48px Android), taaki beech gap na ho */
+  bottom: var(--sys-bottom);
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  padding-bottom: 10px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  border-top: 1px solid #eee;
+  box-sizing: border-box;
+  z-index: 1000;
+  max-width: 100vw;
+  overflow: hidden;
+}
+
+.footer-item,
+.bottom-nav-item {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  padding: 5px 0;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.footer-item i,
+.bottom-nav-item i {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.footer-item span,
+.bottom-nav-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.footer-item.active,
+.bottom-nav-item.active {
+  color: var(--primary, #1d4ed8);
+  font-weight: 700;
+}
+
+.footer-item:active,
+.bottom-nav-item:active {
+  transform: scale(0.96);
+}
+
+/* Infinix / jahan viewport already nav bar ke upar khatam hota hai – footer bilkul neeche (gap na ho) */
+html.footer-bottom-zero .footer,
+html.footer-bottom-zero .bottom-nav {
+  bottom: 0;
+}
+html.footer-bottom-zero body.has-bottom-nav {
+  padding-bottom: 80px;
+}
+@media (max-width: 380px) {
+  html.footer-bottom-zero body.has-bottom-nav { padding-bottom: 70px; }
+}
+@media (min-width: 768px) {
+  html.footer-bottom-zero body.has-bottom-nav { padding-bottom: 85px; }
+}
+
+/* Chhoti screens */
+@media screen and (max-width: 380px) {
+  .footer-item,
+  .bottom-nav-item {
+    font-size: 12px;
+    padding: 3px 0;
+  }
+  .footer-item i,
+  .bottom-nav-item i {
+    font-size: 16px;
+  }
+  .footer,
+  .bottom-nav {
+    padding: 8px 0;
+    padding-bottom: 8px;
+  }
+  body.has-bottom-nav {
+    padding-bottom: calc(70px + var(--sys-bottom));
+  }
+}
+
+/* Badi screens */
+@media screen and (min-width: 768px) {
+  .footer-item,
+  .bottom-nav-item {
+    font-size: 16px;
+    padding: 8px 0;
+  }
+  .footer-item i,
+  .bottom-nav-item i {
+    font-size: 20px;
+  }
+  .footer,
+  .bottom-nav {
+    padding: 12px 0;
+    padding-bottom: 12px;
+  }
+  body.has-bottom-nav {
+    padding-bottom: calc(85px + var(--sys-bottom));
+  }
+}

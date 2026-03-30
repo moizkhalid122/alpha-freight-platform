@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title>Alpha Freight</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, #31486a 0%, #1a2b3c 45%, #0b1622 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .tagline { opacity: 0.9; margin-bottom: 48px; font-size: 0.95rem; }
+    .btn {
+      display: block;
+      width: 100%;
+      max-width: 280px;
+      padding: 18px 24px;
+      margin-bottom: 16px;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-supplier {
+      background: #fff;
+      color: #2563EB;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+    .btn-carrier {
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.6);
+    }
+    /* Splash – no box, logo sirf center, normal size, professional */
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #31486a 0%, #1a2b3c 45%, #0b1622 100%);
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+    .splash-screen--hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .splash-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .splash-logo img {
+      width: auto;
+      height: auto;
+      max-width: 180px;
+      max-height: 180px;
+      object-fit: contain;
+      object-position: center;
+    }
+    .splash-logo-wrapper {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .splash-logo-wrapper--visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .splash-footer {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+    }
+    .splash-footer small {
+      display: block;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash Screen – no box, sirf logo center -->
+  <div class="splash-screen" id="appSplash">
+    <div class="splash-logo-wrapper" id="splashLogoWrapper">
+      <div class="splash-logo">
+        <img src="../image-removebg-preview - 2026-03-04T141043.516.png" alt="Alpha Freight">
+      </div>
+    </div>
+    <div class="splash-footer">
+      <small>Version 1.0.0</small>
+      <small>© 2026 Alpha Freight Solutions Limited</small>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="logo">Alpha Freight</div>
+  <div class="tagline">Choose your role</div>
+  <a href="supplier/login.html" class="btn btn-supplier">Supplier Sign In</a>
+  <a href="carrier/login.html" class="btn btn-carrier">Carrier Sign In</a>
+
+  <script>
+    // Splash: show logo box at least 2s, then fade out (original design always visible)
+    (function () {
+      var splash = document.getElementById('appSplash');
+      var logoWrap = document.getElementById('splashLogoWrapper');
+      if (!splash || !logoWrap) return;
+
+      var start = Date.now();
+      var minShowMs = 2000;
+
+      function showThenHide() {
+        logoWrap.classList.add('splash-logo-wrapper--visible');
+        var elapsed = Date.now() - start;
+        var wait = Math.max(0, minShowMs - elapsed);
+        setTimeout(function () {
+          splash.classList.add('splash-screen--hidden');
+          setTimeout(function () {
+            if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+          }, 500);
+        }, wait);
+      }
+
+      if (document.readyState === 'complete') {
+        showThenHide();
+      } else {
+        window.addEventListener('load', showThenHide);
+      }
+    })();
+  </script>
+</body>
+</html>

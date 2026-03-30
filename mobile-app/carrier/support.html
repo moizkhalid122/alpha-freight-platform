@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Support - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        /* Theme: carrier-premium-theme.css */
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Support Section */
+        .support-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        /* Quick Help Items */
+        .help-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-main);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .help-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-item:active {
+            transform: scale(0.98);
+            background: var(--primary-light);
+        }
+
+        .help-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.125rem;
+        }
+
+        .help-content {
+            flex: 1;
+        }
+
+        .help-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .help-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        .help-arrow {
+            color: var(--text-medium);
+            font-size: 0.875rem;
+        }
+
+        /* FAQ Item */
+        .faq-item {
+            background: var(--bg-main);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .faq-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .faq-question {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .faq-question:active {
+            background: var(--card-bg);
+        }
+
+        .faq-question-text {
+            flex: 1;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .faq-icon {
+            color: var(--primary);
+            font-size: 0.875rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        .faq-answer-content {
+            padding: 0 1rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+
+        /* Contact Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-label .required {
+            color: var(--error);
+            margin-left: 0.25rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Contact Info */
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-main);
+            border-radius: 12px;
+        }
+
+        .contact-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9375rem;
+        }
+
+        .contact-text {
+            flex: 1;
+        }
+
+        .contact-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Support & Help</h1>
+            <p class="page-subtitle">We're here to help you</p>
+        </div>
+    </div>
+
+    <!-- Quick Help -->
+    <div class="support-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-question-circle"></i>
+                Quick Help
+            </h3>
+
+            <div class="help-item" onclick="scrollToSection('faq')">
+                <div class="help-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="help-content">
+                    <div class="help-title">FAQs</div>
+                    <div class="help-subtitle">Find answers to common questions</div>
+                </div>
+                <i class="fas fa-chevron-right help-arrow"></i>
+            </div>
+
+            <div class="help-item" onclick="scrollToSection('contact')">
+                <div class="help-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="help-content">
+                    <div class="help-title">Contact Support</div>
+                    <div class="help-subtitle">Send us a message</div>
+                </div>
+                <i class="fas fa-chevron-right help-arrow"></i>
+            </div>
+
+            <div class="help-item" onclick="window.location.href='dashboard.html'">
+                <div class="help-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="help-content">
+                    <div class="help-title">Go to Dashboard</div>
+                    <div class="help-subtitle">Return to main screen</div>
+                </div>
+                <i class="fas fa-chevron-right help-arrow"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="support-section" id="faq">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-book"></i>
+                Frequently Asked Questions
+            </h3>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span class="faq-question-text">How do I accept a load?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Browse available loads in the "Loads" section, select a load that matches your vehicle and route, and tap "Accept Load". You'll receive confirmation and can start tracking the load immediately.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span class="faq-question-text">How do I get paid?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Payments are processed automatically after load completion. You can withdraw funds from your wallet to your bank account. Add your bank details in the "Bank Account" section to enable withdrawals.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span class="faq-question-text">How do I add my vehicles?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Go to "My Vehicles" in your profile, tap the "+" button, and fill in your vehicle details including type, registration, capacity, and features. This helps us match you with suitable loads.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span class="faq-question-text">How does location sharing work?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Enable location sharing in the "Share Location" section to allow suppliers to track your vehicle in real-time. This helps build trust and can lead to more load opportunities.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span class="faq-question-text">What if I need to cancel a load?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Contact the supplier through the Messages section to discuss cancellation. Early cancellations are usually accepted, but late cancellations may affect your rating. Always communicate with the supplier first.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span class="faq-question-text">How do I update my profile?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Go to "Profile" and tap "Edit Profile" to update your personal and company information. Changes are saved automatically and sync across all devices.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Support -->
+    <div class="support-section" id="contact">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-envelope"></i>
+                Contact Support
+            </h3>
+
+            <form id="supportForm" onsubmit="submitSupportRequest(event)">
+                <div class="form-group">
+                    <label class="form-label">
+                        Subject
+                        <span class="required">*</span>
+                    </label>
+                    <select class="form-select" id="subject" required>
+                        <option value="">Select a topic</option>
+                        <option value="account">Account Issues</option>
+                        <option value="payment">Payment & Withdrawals</option>
+                        <option value="loads">Loads & Bookings</option>
+                        <option value="technical">Technical Support</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Message
+                        <span class="required">*</span>
+                    </label>
+                    <textarea class="form-textarea" id="message" placeholder="Describe your issue or question..." required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Send Message</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="support-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-phone"></i>
+                Contact Information
+            </h3>
+
+            <div class="contact-info">
+                <div class="contact-item" onclick="window.location.href='tel:+441234567890'">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-text">
+                        <div class="contact-label">Phone</div>
+                        <div class="contact-value">+44 123 456 7890</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-medium);"></i>
+                </div>
+
+                <div class="contact-item" onclick="window.location.href='mailto:support@alphafreight.com'">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-text">
+                        <div class="contact-label">Email</div>
+                        <div class="contact-value">support@alphafreight.com</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-medium);"></i>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="contact-text">
+                        <div class="contact-label">Support Hours</div>
+                        <div class="contact-value">24/7 Available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        // Get user data
+        function getUserData() {
+            const carrierAuth = localStorage.getItem('carrierAuth');
+            if (!carrierAuth) return null;
+            return JSON.parse(carrierAuth);
+        }
+
+        // Toggle FAQ
+        function toggleFaq(element) {
+            const faqItem = element.closest('.faq-item');
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Toggle current FAQ
+            if (isActive) {
+                faqItem.classList.remove('active');
+            } else {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Scroll to section
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Submit support request
+        async function submitSupportRequest(event) {
+            event.preventDefault();
+
+            const user = getUserData();
+            if (!user) {
+                showError('Please sign in');
+                return;
+            }
+
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value.trim();
+
+            if (!subject || !message) {
+                showError('Please fill all fields');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
+
+            try {
+                const supportRequest = {
+                    carrierId: user.carrierId || user.email?.replace('@', '_').replace('.', '_'),
+                    carrierEmail: user.email,
+                    carrierName: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Carrier',
+                    subject: subject,
+                    message: message,
+                    status: 'open',
+                    createdAt: new Date().toISOString()
+                };
+
+                // Save to Firebase
+                const db = window.AlphaBrokrage.firebaseDb;
+                await db.ref('supportRequests').push(supportRequest);
+
+                showSuccess('Support request submitted successfully! We\'ll get back to you soon.');
+
+                // Reset form
+                document.getElementById('supportForm').reset();
+
+            } catch (error) {
+                console.error('Error submitting support request:', error);
+                showError('Failed to submit support request. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Send Message</span>';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const user = getUserData();
+            if (!user) {
+                // Don't redirect, just show guest message if needed
+            }
+        });
+    </script>
+</body>
+</html>

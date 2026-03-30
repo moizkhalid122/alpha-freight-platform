@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags - system nav bar (back, home, recents) + status bar BLACK -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Supplier Dashboard - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    
+    <style>
+        /* Critical footer – system bar ke bilkul upar (bottom offset), gap na ho */
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        .bottom-nav { position: fixed !important; left: 0 !important; right: 0 !important; width: 100% !important; margin: 0 !important; bottom: env(safe-area-inset-bottom, 48px) !important; background: #fff !important; display: flex !important; justify-content: space-around !important; align-items: center !important; padding: 10px 0 !important; box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important; border-top: 1px solid #eee !important; box-sizing: border-box !important; z-index: 1000 !important; }
+        .bottom-nav-item { flex: 1 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; font-size: 14px !important; color: #666 !important; text-decoration: none !important; }
+        .bottom-nav-item i { font-size: 18px !important; margin-bottom: 2px !important; }
+        .bottom-nav-item.active { color: var(--primary, #1d4ed8) !important; font-weight: 700 !important; }
+        @media (max-width:380px) { .bottom-nav { padding: 8px 0 !important; } body.has-bottom-nav { padding-bottom: calc(70px + env(safe-area-inset-bottom, 48px)) !important; } .bottom-nav-item { font-size: 12px !important; } .bottom-nav-item i { font-size: 16px !important; } }
+        @media (min-width:768px) { .bottom-nav { padding: 12px 0 !important; } body.has-bottom-nav { padding-bottom: calc(85px + env(safe-area-inset-bottom, 48px)) !important; } .bottom-nav-item { font-size: 16px !important; } .bottom-nav-item i { font-size: 20px !important; } }
+
+        /* —— Premium theme —— */
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #0ea5e9;
+            --gold: #c9a227;
+            --gold-light: #fef3c7;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border: rgba(226, 232, 240, 0.8);
+            --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            --shadow-premium: 0 20px 40px -12px rgba(99, 91, 255, 0.12);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Upgraded Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: clamp(1.25rem, 4vw, 1.5rem) 1.25rem;
+            padding-top: max(1.5rem, env(safe-area-inset-top));
+            border-radius: 0 0 32px 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .welcome-text {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .user-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: white;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99, 91, 255, 0.15) 0%, transparent 70%);
+            filter: blur(50px);
+        }
+
+        .user-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, var(--primary), var(--primary-light));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 1.25rem;
+            box-shadow: 0 10px 20px rgba(99, 91, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+        }
+
+        .header-icon-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+        }
+
+        .header-icon-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Stats Cards Redesign */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-top: -2.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            transition: transform 0.3s var(--transition-smooth);
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .stat-card:active {
+            transform: scale(0.96);
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1.25rem;
+            color: white;
+        }
+        .stat-icon.primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .stat-icon.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .stat-icon.info { background: linear-gradient(135deg, #6366f1, #4338ca); }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: block;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem 1.25rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .action-btn {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            white-space: nowrap;
+            font-weight: 700;
+            color: var(--text-dark);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s var(--transition-smooth);
+            min-width: 100px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+            background: var(--bg-main);
+        }
+
+        .action-btn i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        /* Floating Action Button (FAB) */
+        .fab-btn {
+            position: fixed;
+            bottom: calc(90px + env(safe-area-inset-bottom));
+            right: 1.25rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 10px 25px rgba(99, 91, 255, 0.35);
+            z-index: 999;
+            text-decoration: none;
+            transition: all 0.3s var(--transition-smooth);
+        }
+
+        .fab-btn:active {
+            transform: scale(0.85) rotate(45deg);
+        }
+
+        /* Section Headings */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.25rem 1rem;
+            margin-top: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+        }
+        .section-title::before { display: none; }
+
+        .view-all {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Recent Loads */
+        .loads-section {
+            padding: 0 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .load-card {
+            background: white;
+            padding: 1.25rem;
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        .load-card::before { display: none; }
+
+        .load-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .load-id {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .load-status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .status-pending { background: #fff7ed; color: #d97706; }
+        .status-active { background: #ecfdf5; color: #059669; }
+        .status-available { background: #eff6ff; color: #3b82f6; }
+        .status-completed { background: #f0fdf4; color: #16a34a; }
+
+        .load-route {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .route-point { flex: 1; }
+        .route-point-label { font-size: 0.65rem; color: var(--text-light); text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem; }
+        .route-point-value { font-weight: 700; color: var(--text-dark); font-size: 0.9rem; }
+        .route-arrow { color: var(--primary); font-size: 1rem; opacity: 0.5; }
+
+        .load-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .load-detail-item { display: flex; flex-direction: column; }
+        .load-detail-label { font-size: 0.6rem; color: var(--text-light); text-transform: uppercase; font-weight: 700; }
+        .load-detail-value { font-weight: 700; color: var(--text-dark); font-size: 0.8rem; }
+
+        .load-price {
+            font-weight: 800;
+            color: var(--success);
+            font-size: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            margin: 0 1.25rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .empty-state i { font-size: 2.75rem; color: var(--text-light); margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); }
+
+        /* Bottom nav: supplier-bottom-nav.css handles layout & safe area */
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #f8fafc 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-stat { height: 140px; border-radius: var(--radius); }
+        .skeleton-load { height: 160px; border-radius: var(--radius-sm); margin-bottom: 1rem; }
+
+        /* Mini Graph in Stat Cards */
+        .mini-graph {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            overflow: hidden;
+            border-radius: 0 0 var(--radius) var(--radius);
+            opacity: 0.6;
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Improved Recent Loads Card */
+        .load-card {
+            background: white;
+            padding: 1.25rem;
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s var(--transition-smooth);
+        }
+
+        .load-card:active {
+            transform: scale(0.97) translateY(2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .load-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .load-card:active::after {
+            opacity: 1;
+        }
+
+        /* Loading */
+        .loading { display: flex; flex-direction: column; width: 100%; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s var(--ease) infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Entrance – smooth */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stat-card, .load-card, .action-btn { 
+            will-change: transform, opacity;
+            animation: fadeInUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) backwards; 
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+        
+        .quick-actions .action-btn:nth-child(1) { animation-delay: 0.25s; padding: 0.75rem 1.1rem; gap: 0.5rem; min-width: 88px; }
+        .quick-actions .action-btn:nth-child(2) { animation-delay: 0.3s; }
+        .quick-actions .action-btn:nth-child(3) { animation-delay: 0.35s; }
+        .quick-actions .action-btn:nth-child(4) { animation-delay: 0.4s; }
+        .quick-actions .action-btn:nth-child(1) i { font-size: 1.3rem; }
+        .quick-actions .action-btn:nth-child(1) span { font-size: 0.85rem; }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="header-top">
+            <div class="header-left">
+                <div class="user-avatar" id="userAvatar">
+                    <span id="avatarInitials">S</span>
+                </div>
+                <div class="user-info">
+                    <span class="welcome-text">Supplier Dashboard</span>
+                    <h1 class="user-name" id="userName">Loading...</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-icon-btn" onclick="enablePushNotifications()" title="Enable push notifications">
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+        </div>
+        <div class="header-content">
+            <div class="header-meta" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+                <div class="status-badge" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.35rem 0.8rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.4rem; color: #10b981; font-size: 0.75rem; font-weight: 700;">
+                    <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></span>
+                    <span id="statusText">Active Supplier</span>
+                </div>
+            </div>
+            <div class="header-actions" style="display: flex; gap: 0.75rem;">
+                <button class="header-btn" onclick="window.location.href='post-load.html'" style="flex: 1; background: var(--primary); color: white; border: none; padding: 0.85rem; border-radius: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 20px rgba(99, 91, 255, 0.25); font-size: 0.9rem;">
+                    <i class="fas fa-plus-circle"></i>
+                    Post Load
+                </button>
+                <button class="header-btn" onclick="window.location.href='my-loads.html'" style="flex: 1; background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 0.85rem; border-radius: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; backdrop-filter: blur(10px); font-size: 0.9rem;">
+                    <i class="fas fa-boxes"></i>
+                    My Loads
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button (FAB) -->
+    <a href="post-load.html" class="fab-btn">
+        <i class="fas fa-plus"></i>
+    </a>
+
+    <!-- Pay Letter Reminder Banner -->
+    <div class="pay-letter-reminder" id="payLetterReminder" style="display: none; margin: 1.1rem 1.25rem 0; background: #fffbeb; border: 1px solid #fcd34d; padding: 0.75rem 0.85rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+        <div class="reminder-content" style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem;">
+            <i class="fas fa-exclamation-circle" style="color: #f59e0b; font-size: 1.2rem;"></i>
+            <div>
+                <strong>Pay Letter:</strong> <span id="payLetterCount">0</span> pending payment(s)
+            </div>
+        </div>
+        <a href="pay-letter.html" style="background: #f59e0b; color: white; text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 12px; font-weight: 800; font-size: 0.78rem;">Pay Now</a>
+    </div>
+
+    <div id="profileCompleteBanner" style="display:none; margin: 1.1rem 1.25rem 0; background: #eef2ff; border: 1px solid #c7d2fe; padding: 0.85rem 0.9rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 0.85rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.7rem; min-width:0;">
+            <div style="width: 34px; height: 34px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); display:grid; place-items:center; color:#4f46e5; flex-shrink:0;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div style="min-width:0;">
+                <div style="font-weight: 900; font-size: 0.9rem; color:#111827; line-height:1.2;">Complete your profile</div>
+                <div id="profileCompleteBannerText" style="margin-top: 0.25rem; font-size: 0.78rem; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Finish setup to unlock full features</div>
+            </div>
+        </div>
+        <a href="edit-profile.html" style="background: #4f46e5; color: white; text-decoration: none; padding: 0.5rem 0.85rem; border-radius: 12px; font-weight: 900; font-size: 0.78rem; flex-shrink:0;">Complete</a>
+    </div>
+
+    <div class="section-header" style="margin-top: 2rem;">
+        <h3 class="section-title">Overview</h3>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid" id="statsGrid" style="margin-top: 0;">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="stat-label">Total Loads</div>
+            <div class="stat-value" id="totalLoads">0</div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                    <path d="M0,40 L0,20 Q25,10 50,25 T100,15 L100,40 Z" fill="rgba(59, 130, 246, 0.1)"></path>
+                    <path d="M0,20 Q25,10 50,25 T100,15" fill="none" stroke="rgba(59, 130, 246, 0.3)" stroke-width="2"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-label">Active</div>
+            <div class="stat-value" id="activeLoads">0</div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                    <path d="M0,40 L0,25 Q25,35 50,15 T100,10 L100,40 Z" fill="rgba(16, 185, 129, 0.1)"></path>
+                    <path d="M0,25 Q25,35 50,15 T100,10" fill="none" stroke="rgba(16, 185, 129, 0.3)" stroke-width="2"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" id="pendingLoads">0</div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                    <path d="M0,40 L0,30 Q25,15 50,30 T100,20 L100,40 Z" fill="rgba(245, 158, 11, 0.1)"></path>
+                    <path d="M0,30 Q25,15 50,30 T100,20" fill="none" stroke="rgba(245, 158, 11, 0.3)" stroke-width="2"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon info">
+                <i class="fas fa-pound-sign"></i>
+            </div>
+            <div class="stat-label">Spent</div>
+            <div class="stat-value" id="totalSpent">£0</div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                    <path d="M0,40 L0,35 Q25,25 50,30 T100,10 L100,40 Z" fill="rgba(99, 102, 241, 0.1)"></path>
+                    <path d="M0,35 Q25,25 50,30 T100,10" fill="none" stroke="rgba(99, 102, 241, 0.3)" stroke-width="2"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h3 class="section-title">Quick Actions</h3>
+    </div>
+    <div class="quick-actions">
+        <div class="action-btn" onclick="window.location.href='pay-letter.html'">
+            <i class="fas fa-file-invoice-dollar" style="color: #f59e0b;"></i>
+            <span>Pay Letter</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='track.html'">
+            <i class="fas fa-map-marker-alt" style="color: #0ea5e9;"></i>
+            <span>Track</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='payments.html'">
+            <i class="fas fa-credit-card" style="color: #10b981;"></i>
+            <span>Payments</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='messages.html'">
+            <i class="fas fa-comments" style="color: #635bff;"></i>
+            <span>Messages</span>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h3 class="section-title">Recent Loads</h3>
+        <a href="my-loads.html" class="view-all">View All</a>
+    </div>
+    <div class="loads-section" id="loadsSection">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- FCM / Push Notifications -->
+    <script src="../../assets/js/notifications.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Check authentication
+        function checkAuth() {
+            const supplierAuth = localStorage.getItem('supplierAuth');
+            if (!supplierAuth) {
+                return null;
+            }
+            return JSON.parse(supplierAuth);
+        }
+
+        // Get initials
+        function getInitials(name) {
+            if (!name) return 'S';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // Load user data
+        function loadUserData() {
+            const user = checkAuth();
+            const nameEl = document.getElementById('userName');
+            if (!user) {
+                nameEl.textContent = 'Guest Supplier';
+                nameEl.title = '';
+                document.getElementById('avatarInitials').textContent = 'G';
+                return;
+            }
+
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || 'Supplier';
+            const companyName = user.companyName || '';
+            const displayName = companyName || fullName;
+
+            nameEl.textContent = displayName;
+            nameEl.title = displayName;
+            document.getElementById('avatarInitials').textContent = getInitials(displayName);
+
+            // Update status
+            const status = (user.status || 'pending').toLowerCase();
+            const statusTextEl = document.getElementById('statusText');
+            if (status === 'verified' || status === 'approved') {
+                statusTextEl.textContent = 'Verified Supplier';
+            } else {
+                statusTextEl.textContent = 'Pending Verification';
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Load dashboard stats - cache for instant display, then refresh
+        const CACHE_KEY = 'supplier_dashboard_loads';
+        const CACHE_MAX_AGE_MS = 60000; // 1 min - show cache while refreshing
+
+        function getSupplierLoadsFromCache(supplierId) {
+            try {
+                const raw = sessionStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const { data, supplierId: cachedId, ts } = JSON.parse(raw);
+                if (cachedId !== supplierId) return null;
+                if (Date.now() - ts > CACHE_MAX_AGE_MS) return null;
+                return data;
+            } catch (e) { return null; }
+        }
+
+        function setSupplierLoadsCache(supplierId, loads) {
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+                    supplierId,
+                    data: loads,
+                    ts: Date.now()
+                }));
+            } catch (e) { /* ignore */ }
+        }
+
+        function applyStatsToUI(supplierLoads) {
+            const totalLoads = supplierLoads.length;
+            const activeLoads = supplierLoads.filter(load => {
+                const status = (load.status || '').toLowerCase();
+                return ['active', 'accepted', 'in-transit', 'in_transit', 'picked-up'].includes(status);
+            }).length;
+            const pendingLoads = supplierLoads.filter(load => {
+                const status = (load.status || '').toLowerCase();
+                return ['available', 'pending'].includes(status);
+            }).length;
+            const completedLoads = supplierLoads.filter(load => {
+                const status = (load.status || '').toLowerCase();
+                return status === 'completed' || status === 'delivered';
+            });
+            const totalSpent = completedLoads.reduce((sum, load) => {
+                const base = parseFloat(load.price || load.budget || load.maxBudget || load.minBudget || 0);
+                const commission = parseFloat(load.supplierCommission || 0);
+                const total = parseFloat(load.totalAmount || load.totalCost || 0);
+                const amount = !isNaN(total) && total > 0 ? total : (base + (isNaN(commission) ? 0 : commission));
+                return sum + (isNaN(amount) ? 0 : amount);
+            }, 0);
+
+            document.getElementById('totalLoads').textContent = totalLoads;
+            document.getElementById('activeLoads').textContent = activeLoads;
+            document.getElementById('pendingLoads').textContent = pendingLoads;
+            document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
+            loadRecentLoads(supplierLoads);
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
+                });
+            });
+        }
+
+        function computeSupplierProfileMissing(profile) {
+            const missing = [];
+            const p = profile || {};
+            if (!String(p.firstName || '').trim()) missing.push('First name');
+            if (!String(p.lastName || '').trim()) missing.push('Last name');
+            if (!String(p.companyName || p.company || '').trim()) missing.push('Company');
+            if (!String(p.phone || '').trim()) missing.push('Phone');
+            if (!String(p.businessType || '').trim()) missing.push('Business type');
+            if (!String(p.yearsOperation || '').trim()) missing.push('Years');
+            if (!String(p.address || p.address1 || '').trim()) missing.push('Address');
+            if (!String(p.city || '').trim()) missing.push('City');
+            if (!String(p.postcode || p.zip || '').trim()) missing.push('Postcode');
+            if (!String(p.country || '').trim()) missing.push('Country');
+            return missing;
+        }
+
+        async function checkAndShowProfileBanner() {
+            const user = checkAuth();
+            const banner = document.getElementById('profileCompleteBanner');
+            const textEl = document.getElementById('profileCompleteBannerText');
+            if (!user || !banner || !textEl) return;
+
+            const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            let merged = user;
+
+            try {
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (db) {
+                    await ensureAuthReady();
+                    const snap = await db.ref('suppliers/' + supplierId).once('value');
+                    if (snap.exists()) {
+                        const remote = snap.val() || {};
+                        merged = { ...user, ...remote, supplierId };
+                        localStorage.setItem('supplierAuth', JSON.stringify(merged));
+                        localStorage.setItem('lastSupplierProfile', JSON.stringify(merged));
+                    }
+                }
+            } catch (e) {}
+
+            const missing = computeSupplierProfileMissing(merged);
+            if (missing.length === 0 && !merged.profileComplete) {
+                try {
+                    const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                    if (db) await db.ref('suppliers/' + supplierId).update({ profileComplete: true, updatedAt: new Date().toISOString() });
+                } catch (e) {}
+                merged.profileComplete = true;
+                try {
+                    localStorage.setItem('supplierAuth', JSON.stringify(merged));
+                    localStorage.setItem('lastSupplierProfile', JSON.stringify(merged));
+                } catch (e) {}
+            }
+
+            const isComplete = missing.length === 0 && !!merged.profileComplete;
+            if (isComplete) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            const totalRequired = 10;
+            const done = Math.max(0, totalRequired - missing.length);
+            const pct = Math.round((done / totalRequired) * 100);
+            const preview = missing.slice(0, 3).join(', ');
+            textEl.textContent = `${pct}% complete • Missing: ${preview}${missing.length > 3 ? '…' : ''}`;
+            banner.style.display = 'flex';
+        }
+
+        async function loadDashboardStats() {
+            const user = checkAuth();
+            if (!user) {
+                // ... guest state ...
+                return;
+            }
+
+            const supplierId = user.supplierId || user.email?.replace('@', '_').replace('.', '_');
+
+            // Show skeleton loaders for stats if no cache
+            const cached = getSupplierLoadsFromCache(supplierId);
+            if (!cached) {
+                document.getElementById('totalLoads').innerHTML = '<div class="skeleton" style="height: 24px; width: 40px;"></div>';
+                document.getElementById('activeLoads').innerHTML = '<div class="skeleton" style="height: 24px; width: 40px;"></div>';
+                document.getElementById('pendingLoads').innerHTML = '<div class="skeleton" style="height: 24px; width: 40px;"></div>';
+                document.getElementById('totalSpent').innerHTML = '<div class="skeleton" style="height: 24px; width: 80px;"></div>';
+                
+                // Skeleton for loads
+                document.getElementById('loadsSection').innerHTML = `
+                    <div class="skeleton skeleton-load"></div>
+                    <div class="skeleton skeleton-load"></div>
+                    <div class="skeleton skeleton-load"></div>
+                `;
+            } else {
+                applyStatsToUI(cached);
+            }
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                let supplierLoads = [];
+
+                const snapshot = await db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value');
+                const val = snapshot.val();
+                supplierLoads = val ? Object.values(val) : [];
+
+                setSupplierLoadsCache(supplierId, supplierLoads);
+                applyStatsToUI(supplierLoads);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                // Fallback if index fails
+                try {
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    const snapshot = await db.ref('loads').once('value');
+                    const allLoads = snapshot.val() || {};
+                    const supplierLoads = Object.values(allLoads).filter(load => 
+                        load.supplierId === supplierId || load.supplierEmail === user.email
+                    );
+                    setSupplierLoadsCache(supplierId, supplierLoads);
+                    applyStatsToUI(supplierLoads);
+                } catch (e) {
+                    alertSystem.show('error', 'Failed to load dashboard data');
+                }
+            }
+        }
+
+        // Load recent loads
+        function loadRecentLoads(loads) {
+            const loadsSection = document.getElementById('loadsSection');
+            
+            if (loads.length === 0) {
+                loadsSection.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No Loads Yet</h3>
+                        <p>Start by posting your first load</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const recentLoads = loads
+                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                .slice(0, 5);
+
+            loadsSection.innerHTML = recentLoads.map((load, index) => {
+                const status = (load.status || 'available').toLowerCase();
+                let statusClass = 'available';
+                if (['active', 'accepted', 'in-transit', 'picked-up'].includes(status)) statusClass = 'active';
+                else if (status === 'pending') statusClass = 'pending';
+                else if (['completed', 'delivered'].includes(status)) statusClass = 'completed';
+                
+                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+
+                return `
+                    <div class="load-card" onclick="viewLoad('${load.loadId || ''}')" style="animation-delay: ${0.1 * index}s">
+                        <div class="load-header">
+                            <div class="load-id">
+                                <span style="opacity: 0.5; font-weight: 500;">ID:</span> #${load.loadId?.substring(0, 8) || 'N/A'}
+                            </div>
+                            <div class="load-status ${statusClass}">${statusLabel}</div>
+                        </div>
+                        <div class="load-route">
+                            <div class="route-point">
+                                <div class="route-point-label">Pickup</div>
+                                <div class="route-point-value">${load.pickupLocation || 'N/A'}</div>
+                            </div>
+                            <div class="route-visual" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <div style="width: 8px; height: 8px; border: 2px solid var(--primary); border-radius: 50%;"></div>
+                                <div style="width: 2px; height: 20px; background: linear-gradient(to bottom, var(--primary), transparent); opacity: 0.3;"></div>
+                                <i class="fas fa-chevron-down" style="font-size: 10px; color: var(--primary); opacity: 0.5;"></i>
+                            </div>
+                            <div class="route-point">
+                                <div class="route-point-label">Delivery</div>
+                                <div class="route-point-value">${load.deliveryLocation || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div class="load-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                            <div class="load-meta" style="display: flex; gap: 1rem;">
+                                <div class="meta-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-light); font-weight: 600;">
+                                    <i class="far fa-calendar-alt"></i>
+                                    ${formatDate(load.pickupDate)}
+                                </div>
+                                <div class="meta-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-light); font-weight: 600;">
+                                    <i class="fas fa-weight-hanging"></i>
+                                    ${load.weight || 'N/A'}
+                                </div>
+                            </div>
+                            <div class="load-price" style="font-size: 1.15rem; font-weight: 800; color: var(--text-dark);">
+                                ${formatCurrency(load.price || load.budget || 0)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            } catch {
+                return dateString;
+            }
+        }
+
+        // View load details
+        function viewLoad(loadId) {
+            if (loadId) {
+                window.location.href = `load-details.html?id=${loadId}`;
+            }
+        }
+
+        // Load Pay Letter reminder
+        function loadPayLetterReminder() {
+            const user = checkAuth();
+            const banner = document.getElementById('payLetterReminder');
+            const countEl = document.getElementById('payLetterCount');
+            if (!user || !banner || !countEl) return;
+
+            const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const db = window.AlphaBrokrage?.firebaseDb;
+
+            function showCount(orders) {
+                const filtered = orders.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+                if (filtered.length > 0) {
+                    countEl.textContent = filtered.length;
+                    banner.style.display = 'flex';
+                    checkAndSendPayLetterReminder(supplierId, filtered.length);
+                } else {
+                    banner.style.display = 'none';
+                }
+            }
+
+            async function checkAndSendPayLetterReminder(sid, pendingCount) {
+                if (!pendingCount || !db) return;
+                const THREE_HOURS = 3 * 60 * 60 * 1000;
+                try {
+                    const lastSnap = await db.ref('suppliers/' + sid + '/lastPayLetterReminderAt').once('value');
+                    const last = lastSnap.val() ? new Date(lastSnap.val()).getTime() : 0;
+                    const now = Date.now();
+                    if (now - last < THREE_HOURS && last > 0) return;
+
+                    const notif = {
+                        title: 'Pay Letter Reminder',
+                        message: `You have ${pendingCount} pending payment(s) in Pay Letter. Please complete payment.`,
+                        type: 'pay_letter_reminder',
+                        read: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    await db.ref('notifications/suppliers/' + sid).push(notif);
+                    await db.ref('suppliers/' + sid).update({ lastPayLetterReminderAt: new Date().toISOString() });
+                } catch (e) { /* ignore */ }
+            }
+
+            let orders = [];
+            if (db) {
+                db.ref('payLetterPending').orderByChild('supplierId').equalTo(supplierId).on('value', (snap) => {
+                    orders = [];
+                    if (snap.exists()) {
+                        snap.forEach((c) => {
+                            const o = c.val();
+                            orders.push(o);
+                        });
+                    }
+                    try {
+                        const local = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                        const localFiltered = local.filter(l => l.supplierId === supplierId);
+                        localFiltered.forEach(l => {
+                            if (!orders.some(o => o.loadId === l.loadId)) orders.push(l);
+                        });
+                    } catch (e) { /* ignore */ }
+                    showCount(orders);
+                });
+            } else {
+                try {
+                    const local = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
+                    showCount(local.filter(l => l.supplierId === supplierId));
+                } catch (e) {
+                    banner.style.display = 'none';
+                }
+            }
+        }
+
+        // In-app notification check - jab app open ho tab unread notifications dikhao (100% reliable)
+        function loadAndShowUnreadNotifications() {
+            const user = checkAuth();
+            const db = window.AlphaBrokrage?.firebaseDb;
+            if (!user || !db) return;
+            const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            db.ref('notifications/suppliers/' + supplierId).once('value').then(snap => {
+                if (!snap.exists()) return;
+                const list = [];
+                snap.forEach(c => {
+                    const v = c.val();
+                    if (v && v.read !== true) list.push(v);
+                });
+                if (list.length === 0) return;
+                const latest = list[list.length - 1];
+                const title = latest.title || 'New notification';
+                const msg = latest.message || 'You have ' + list.length + ' unread notification(s).';
+                if (typeof window.showInfo === 'function') {
+                    window.showInfo(msg, { title: title, duration: 8000 });
+                } else if (typeof window.AlertSystem !== 'undefined') {
+                    window.AlertSystem.show(msg, 'info', { title: title, duration: 8000 });
+                }
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = 800;
+                    osc.type = 'sine';
+                    gain.gain.value = 0.3;
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } catch (e) {}
+            }).catch(function() {});
+        }
+
+        async function saveTokenToFirebase(token, supplierId) {
+            const db = window.AlphaBrokrage?.firebaseDb;
+            if (!db || !supplierId) return false;
+            try {
+                await db.ref('suppliers/' + supplierId + '/fcmToken').set({ token, updatedAt: new Date().toISOString(), userType: 'supplier' });
+                return true;
+            } catch (e) { return false; }
+        }
+
+        async function initNativePush() {
+            const Push = window.Capacitor?.Plugins?.PushNotifications || window.Capacitor?.Plugins?.['PushNotifications'];
+            if (!Push) return false;
+            const user = checkAuth();
+            if (!user || (user.userType !== 'supplier' && user.type !== 'supplier' && !user.supplierId)) return false;
+            const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const db = window.AlphaBrokrage?.firebaseDb;
+            if (!db) return false;
+            try {
+                Push.addListener('registration', async (e) => {
+                    if (e.value) await saveTokenToFirebase(e.value, supplierId);
+                });
+                let perm = await Push.checkPermissions();
+                if (perm?.receive !== 'granted') perm = await Push.requestPermissions();
+                if (perm?.receive !== 'granted') return false;
+                await Push.register();
+                return true;
+            } catch (e) { console.warn('Native push:', e); return false; }
+        }
+
+        async function enablePushNotifications() {
+            const user = checkAuth();
+            if (!user || (user.userType !== 'supplier' && user.type !== 'supplier' && !user.supplierId)) {
+                if (typeof window.showError === 'function') window.showError('Please login as supplier');
+                return;
+            }
+            const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            if (typeof window.showInfo === 'function') window.showInfo('Registering for notifications...', { title: 'Please wait', duration: 2000 });
+
+            let saved = false;
+            if (window.Capacitor?.Plugins?.PushNotifications || window.Capacitor?.Plugins?.['PushNotifications']) {
+                saved = await initNativePush();
+            }
+            if (!saved && typeof initFCM === 'function') {
+                const m = await initFCM();
+                if (m) saved = true;
+            }
+            if (typeof window.showInfo === 'function') {
+                window.showInfo(saved ? 'Notifications enabled! You will receive push when phone is off.' : 'Could not enable. Try allowing notifications in device settings.', { title: saved ? 'Success' : 'Notice', duration: 5000 });
+            }
+            // Banner removed – push is auto-enabled on load
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            loadUserData();
+            checkAndShowProfileBanner();
+            loadDashboardStats();
+            loadPayLetterReminder();
+            setTimeout(loadAndShowUnreadNotifications, 1500);
+            const user = checkAuth();
+            if (user && user.supplierId) {
+                // Auto-enable push in background – no banner shown
+                initNativePush().catch(function() {});
+                if (typeof initFCM === 'function') initFCM().catch(function() {});
+            }
+        });
+    </script>
+</body>
+</html>

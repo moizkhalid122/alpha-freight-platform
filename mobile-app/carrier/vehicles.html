@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>My Vehicles - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        /* Theme: carrier-premium-theme.css */
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .add-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.125rem;
+        }
+
+        .add-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Vehicles List */
+        .vehicles-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .vehicle-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .vehicle-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .vehicle-info {
+            flex: 1;
+        }
+
+        .vehicle-type {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            text-transform: capitalize;
+        }
+
+        .vehicle-reg {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .vehicle-make {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .vehicle-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-medium);
+            font-size: 0.9375rem;
+        }
+
+        .action-icon.edit {
+            color: var(--primary);
+        }
+
+        .action-icon.edit:active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-icon.delete {
+            color: var(--error);
+        }
+
+        .action-icon.delete:active {
+            background: var(--error);
+            color: white;
+        }
+
+        .vehicle-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        .detail-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .vehicle-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .feature-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-main);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .feature-badge i {
+            color: var(--success);
+            font-size: 0.625rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.25rem;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--text-light);
+            font-size: 2rem;
+        }
+
+        .empty-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-main);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-medium);
+            transition: all 0.2s;
+        }
+
+        .modal-close:active {
+            transform: scale(0.95);
+            background: var(--error);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-label .required {
+            color: var(--error);
+            margin-left: 0.25rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .form-checkbox label {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.875rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: var(--bg-main);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="page-title">My Vehicles</h1>
+                <p class="page-subtitle">Manage your fleet</p>
+            </div>
+            <button class="add-btn" onclick="openAddModal()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Vehicles List -->
+    <div class="vehicles-section" id="vehiclesList">
+        <div class="loading" style="text-align: center; padding: 2rem;">
+            <div class="spinner" style="width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Vehicle Modal -->
+    <div class="modal-overlay" id="vehicleModal" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add Vehicle</h2>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="vehicleForm" onsubmit="saveVehicle(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Vehicle Type
+                            <span class="required">*</span>
+                        </label>
+                        <select class="form-select" id="vehicleType" required>
+                            <option value="">Select vehicle type</option>
+                            <option value="van">Van (up to 3.5t)</option>
+                            <option value="7.5t">7.5 Tonne</option>
+                            <option value="18t">18 Tonne</option>
+                            <option value="artic">Articulated Lorry</option>
+                            <option value="refrigerated">Refrigerated</option>
+                            <option value="flatbed">Flatbed</option>
+                            <option value="curtainside">Curtainside</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Make & Model
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="makeModel" placeholder="e.g., Mercedes Sprinter" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Registration Number
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="registration" placeholder="e.g., AB12 CDE" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Load Capacity
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="capacity" placeholder="e.g., 3.5 tonnes" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Year
+                            <span class="required">*</span>
+                        </label>
+                        <input type="number" class="form-input" id="year" placeholder="e.g., 2020" min="2000" max="2026" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Mileage
+                        </label>
+                        <input type="number" class="form-input" id="mileage" placeholder="Current mileage">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Features</label>
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="tailLift">
+                            <label for="tailLift">Tail Lift</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="refrigerated">
+                            <label for="refrigerated">Refrigerated</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="curtainside">
+                            <label for="curtainside">Curtainside</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="adr">
+                            <label for="adr">ADR (Hazardous Goods)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        <i class="fas fa-save"></i>
+                        <span>Save Vehicle</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        // Get user data
+        function getUserData() {
+            const carrierAuth = localStorage.getItem('carrierAuth');
+            if (!carrierAuth) return null;
+            return JSON.parse(carrierAuth);
+        }
+
+        // Go back
+        function goBack() {
+            window.history.back();
+        }
+
+        // Modal functions
+        let editingVehicleId = null;
+
+        function openAddModal() {
+            editingVehicleId = null;
+            document.getElementById('modalTitle').textContent = 'Add Vehicle';
+            document.getElementById('vehicleForm').reset();
+            document.getElementById('vehicleModal').classList.add('active');
+        }
+
+        function openEditModal(vehicleId) {
+            editingVehicleId = vehicleId;
+            document.getElementById('modalTitle').textContent = 'Edit Vehicle';
+            loadVehicleData(vehicleId);
+            document.getElementById('vehicleModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('vehicleModal').classList.remove('active');
+            editingVehicleId = null;
+            document.getElementById('vehicleForm').reset();
+        }
+
+        function closeModalOnOverlay(event) {
+            if (event.target.id === 'vehicleModal') {
+                closeModal();
+            }
+        }
+
+        // Load vehicle data for editing
+        function loadVehicleData(vehicleId) {
+            const user = getUserData();
+            if (!user) return;
+
+            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+            const vehiclesKey = `carrierVehicles_${carrierId}`;
+            const vehicles = JSON.parse(localStorage.getItem(vehiclesKey) || '[]');
+            const vehicle = vehicles.find(v => v.id === vehicleId);
+
+            if (vehicle) {
+                document.getElementById('vehicleType').value = vehicle.vehicleType || '';
+                document.getElementById('makeModel').value = vehicle.makeModel || '';
+                document.getElementById('registration').value = vehicle.registration || '';
+                document.getElementById('capacity').value = vehicle.capacity || '';
+                document.getElementById('year').value = vehicle.year || '';
+                document.getElementById('mileage').value = vehicle.mileage || '';
+                document.getElementById('tailLift').checked = vehicle.tailLift || false;
+                document.getElementById('refrigerated').checked = vehicle.refrigerated || false;
+                document.getElementById('curtainside').checked = vehicle.curtainside || false;
+                document.getElementById('adr').checked = vehicle.adr || false;
+            }
+        }
+
+        // Load vehicles
+        async function loadVehicles() {
+            const user = getUserData();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+            const vehiclesKey = `carrierVehicles_${carrierId}`;
+            const vehicles = JSON.parse(localStorage.getItem(vehiclesKey) || '[]');
+
+            const container = document.getElementById('vehiclesList');
+            
+            if (vehicles.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h3 class="empty-title">No Vehicles Added</h3>
+                        <p class="empty-text">Add your first vehicle to start managing your fleet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = vehicles.map(vehicle => {
+                const features = [];
+                if (vehicle.tailLift) features.push({ icon: 'fa-arrow-up', text: 'Tail Lift' });
+                if (vehicle.refrigerated) features.push({ icon: 'fa-snowflake', text: 'Refrigerated' });
+                if (vehicle.curtainside) features.push({ icon: 'fa-warehouse', text: 'Curtainside' });
+                if (vehicle.adr) features.push({ icon: 'fa-exclamation-triangle', text: 'ADR' });
+
+                return `
+                    <div class="vehicle-card">
+                        <div class="vehicle-header">
+                            <div class="vehicle-info">
+                                <div class="vehicle-type">${vehicle.vehicleType || 'N/A'}</div>
+                                <div class="vehicle-reg">${vehicle.registration || 'N/A'}</div>
+                                <div class="vehicle-make">${vehicle.makeModel || 'N/A'}</div>
+                            </div>
+                            <div class="vehicle-actions">
+                                <div class="action-icon edit" onclick="openEditModal('${vehicle.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-icon delete" onclick="deleteVehicle('${vehicle.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vehicle-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Capacity</span>
+                                <span class="detail-value">${vehicle.capacity || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Year</span>
+                                <span class="detail-value">${vehicle.year || 'N/A'}</span>
+                            </div>
+                            ${vehicle.mileage ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Mileage</span>
+                                <span class="detail-value">${vehicle.mileage.toLocaleString()} miles</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ${features.length > 0 ? `
+                        <div class="vehicle-features">
+                            ${features.map(f => `
+                                <div class="feature-badge">
+                                    <i class="fas ${f.icon}"></i>
+                                    <span>${f.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Load from Firebase
+            await loadFromFirebase();
+        }
+
+        // Load from Firebase
+        async function loadFromFirebase() {
+            const user = getUserData();
+            if (!user) return;
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const vehiclesRef = db.ref('vehicles');
+                const snapshot = await vehiclesRef.once('value');
+                const allVehicles = snapshot.val() || {};
+
+                // Filter vehicles for this carrier
+                const carrierVehicles = Object.entries(allVehicles)
+                    .filter(([key, vehicle]) => 
+                        vehicle.carrierId === carrierId || 
+                        vehicle.carrierEmail === user.email
+                    )
+                    .map(([key, vehicle]) => ({
+                        id: key,
+                        ...vehicle
+                    }));
+
+                if (carrierVehicles.length > 0) {
+                    const vehiclesKey = `carrierVehicles_${carrierId}`;
+                    localStorage.setItem(vehiclesKey, JSON.stringify(carrierVehicles));
+                    loadVehicles();
+                }
+            } catch (error) {
+                console.error('Error loading from Firebase:', error);
+            }
+        }
+
+        // Save vehicle
+        async function saveVehicle(event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            const user = getUserData();
+            if (!user) {
+                showError('Please sign in');
+                return;
+            }
+
+            const vehicleData = {
+                vehicleType: document.getElementById('vehicleType').value,
+                makeModel: document.getElementById('makeModel').value.trim(),
+                registration: document.getElementById('registration').value.trim().toUpperCase(),
+                capacity: document.getElementById('capacity').value.trim(),
+                year: parseInt(document.getElementById('year').value) || null,
+                mileage: document.getElementById('mileage').value ? parseInt(document.getElementById('mileage').value) : null,
+                tailLift: document.getElementById('tailLift').checked,
+                refrigerated: document.getElementById('refrigerated').checked,
+                curtainside: document.getElementById('curtainside').checked,
+                adr: document.getElementById('adr').checked,
+                carrierId: user.carrierId || user.email?.replace('@', '_').replace('.', '_'),
+                carrierEmail: user.email,
+                carrierName: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Carrier',
+                updatedAt: new Date().toISOString()
+            };
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+
+            try {
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const vehiclesKey = `carrierVehicles_${carrierId}`;
+                const vehicles = JSON.parse(localStorage.getItem(vehiclesKey) || '[]');
+
+                if (editingVehicleId) {
+                    // Update existing vehicle
+                    const index = vehicles.findIndex(v => v.id === editingVehicleId);
+                    if (index !== -1) {
+                        vehicleData.id = editingVehicleId;
+                        vehicleData.createdAt = vehicles[index].createdAt;
+                        vehicles[index] = vehicleData;
+                    }
+                } else {
+                    // Add new vehicle
+                    vehicleData.id = 'vehicle_' + Date.now();
+                    vehicleData.createdAt = new Date().toISOString();
+                    vehicles.push(vehicleData);
+                }
+
+                localStorage.setItem(vehiclesKey, JSON.stringify(vehicles));
+
+                // Save to Firebase
+                const db = window.AlphaBrokrage.firebaseDb;
+                if (editingVehicleId) {
+                    await db.ref(`vehicles/${editingVehicleId}`).update(vehicleData);
+                } else {
+                    await db.ref('vehicles').push(vehicleData);
+                }
+
+                showSuccess(editingVehicleId ? 'Vehicle updated successfully!' : 'Vehicle added successfully!');
+                closeModal();
+                loadVehicles();
+
+            } catch (error) {
+                console.error('Error saving vehicle:', error);
+                showError('Failed to save vehicle. Please try again.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i><span>Save Vehicle</span>';
+            }
+        }
+
+        // Delete vehicle
+        async function deleteVehicle(vehicleId) {
+            if (!confirm('Are you sure you want to delete this vehicle?')) {
+                return;
+            }
+
+            const user = getUserData();
+            if (!user) return;
+
+            try {
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const vehiclesKey = `carrierVehicles_${carrierId}`;
+                const vehicles = JSON.parse(localStorage.getItem(vehiclesKey) || '[]');
+                const filtered = vehicles.filter(v => v.id !== vehicleId);
+                localStorage.setItem(vehiclesKey, JSON.stringify(filtered));
+
+                // Delete from Firebase
+                const db = window.AlphaBrokrage.firebaseDb;
+                await db.ref(`vehicles/${vehicleId}`).remove();
+
+                showSuccess('Vehicle deleted successfully!');
+                loadVehicles();
+
+            } catch (error) {
+                console.error('Error deleting vehicle:', error);
+                showError('Failed to delete vehicle. Please try again.');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVehicles();
+        });
+    </script>
+</body>
+</html>

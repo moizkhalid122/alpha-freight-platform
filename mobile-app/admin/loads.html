@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Loads - Admin Mobile</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #4c2d8b;
+            --primary-light: #c4b5fd;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 10px 34px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 52%, #4c2d8b 100%);
+            color: #fff;
+            padding: 1.55rem 1.25rem 1.1rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px 260px at 18% 12%, rgba(196, 181, 253, 0.18) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .header-row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        .sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.82);
+            margin-top: 0.25rem;
+        }
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+        }
+        .icon-btn:active { transform: scale(0.98); }
+
+        .content { padding: 0 1.25rem 1.25rem; }
+
+        .filters {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 0.9rem;
+            margin-bottom: 0.95rem;
+        }
+        .field {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .field:last-child { margin-bottom: 0; }
+        .input, .select {
+            width: 100%;
+            padding: 0.85rem 0.95rem;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            background: rgba(241, 245, 249, 0.85);
+            color: var(--text-dark);
+            font-weight: 700;
+            outline: none;
+        }
+        .input:focus, .select:focus {
+            border-color: rgba(111, 66, 193, 0.65);
+            box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.12);
+            background: #fff;
+        }
+
+        .counts {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            margin-bottom: 0.85rem;
+        }
+        .counts strong { color: var(--text-dark); }
+
+        .list { display: grid; gap: 0.85rem; }
+        .load-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .load-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            opacity: 0.75;
+        }
+        .load-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .load-id { font-weight: 900; letter-spacing: -0.02em; }
+        .route { color: var(--text-medium); font-size: 0.88rem; margin-top: 0.25rem; }
+        .meta {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+            font-size: 0.82rem;
+            color: var(--text-medium);
+        }
+        .meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 900;
+            border-radius: 999px;
+            padding: 0.35rem 0.65rem;
+            white-space: nowrap;
+        }
+        .badge.primary { background: rgba(111, 66, 193, 0.12); color: var(--primary); }
+        .badge.success { background: rgba(5, 150, 105, 0.12); color: var(--success); }
+        .badge.warning { background: rgba(217, 119, 6, 0.14); color: var(--warning); }
+        .badge.danger { background: rgba(220, 38, 38, 0.14); color: var(--error); }
+
+        .empty {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-medium);
+        }
+        .empty i { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .empty h3 { color: var(--text-dark); font-size: 1.05rem; font-weight: 900; margin-bottom: 0.25rem; }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.55);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            z-index: 2000;
+        }
+        .modal {
+            width: min(520px, 100%);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px rgba(2, 6, 23, 0.35);
+            overflow: hidden;
+        }
+        .modal-head {
+            padding: 1rem 1rem 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .modal-title { font-weight: 900; color: var(--text-dark); letter-spacing: -0.02em; }
+        .modal-sub { font-size: 0.85rem; color: var(--text-medium); margin-top: 0.2rem; }
+        .close-btn {
+            border: 0;
+            background: rgba(15, 23, 42, 0.06);
+            border-radius: 14px;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+        .modal-body {
+            padding: 0 1rem 1rem;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+        .kv {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-top: 1px solid rgba(15, 23, 42, 0.10);
+        }
+        .kv:first-child { border-top: 0; padding-top: 0; }
+        .k { color: var(--text-medium); font-weight: 800; }
+        .v { font-weight: 900; text-align: right; }
+
+        @media (min-width: 768px) {
+            body { max-width: 520px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-row">
+            <div>
+                <div class="title">Loads</div>
+                <div class="sub" id="loadsSub">Loading...</div>
+            </div>
+            <button class="icon-btn" type="button" onclick="refreshLoads()">
+                <i class="fas fa-rotate"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="filters">
+            <div class="field">
+                <input class="input" id="searchInput" placeholder="Search by route, id, supplier, carrier">
+            </div>
+            <div class="field">
+                <select class="select" id="statusFilter">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="counts" id="countsRow">
+            <span>Total: <strong id="totalCount">0</strong></span>
+            <span>Active: <strong id="activeCount">0</strong></span>
+            <span>Completed: <strong id="completedCount">0</strong></span>
+        </div>
+
+        <div class="list" id="loadsList"></div>
+    </div>
+
+    <div id="detailsOverlay" class="overlay">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="modalTitle">Load</div>
+                    <div class="modal-sub" id="modalSub">—</div>
+                </div>
+                <button class="close-btn" type="button" onclick="closeDetails()"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-house"></i><span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item active">
+            <i class="fas fa-boxes"></i><span>Loads</span>
+        </a>
+        <a href="finance.html" class="bottom-nav-item">
+            <i class="fas fa-credit-card"></i><span>Finance</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i><span>Chat</span>
+        </a>
+        <a href="settings.html" class="bottom-nav-item">
+            <i class="fas fa-gear"></i><span>Settings</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/admin-auth.js"></script>
+
+    <script>
+        const CACHE_KEY = 'admin_mobile_loads_cache_v1';
+        const CACHE_MAX_AGE_MS = 60000;
+        let allLoads = [];
+
+        function normalizeStatus(rawStatus) {
+            return String(rawStatus || '').trim().toLowerCase().replace(/_/g, '-');
+        }
+
+        function getLoadCreatedAt(load) {
+            const raw = load.createdAt || load.created_at || load.updatedAt || load.updated_at || 0;
+            if (!raw) return 0;
+            if (typeof raw === 'number') return raw;
+            const t = new Date(raw).getTime();
+            return Number.isNaN(t) ? 0 : t;
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getCache() {
+            try {
+                const raw = sessionStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || !parsed.ts || !parsed.data) return null;
+                if (Date.now() - parsed.ts > CACHE_MAX_AGE_MS) return null;
+                return parsed.data;
+            } catch { return null; }
+        }
+
+        function setCache(data) {
+            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
+        }
+
+        function getBadgeClass(status) {
+            const s = normalizeStatus(status);
+            if (['completed', 'delivered', 'finished', 'done'].includes(s)) return 'success';
+            if (['pending', 'available', 'open', 'unassigned'].includes(s)) return 'warning';
+            if (['cancelled', 'canceled', 'rejected'].includes(s)) return 'danger';
+            return 'primary';
+        }
+
+        function getStatusLabel(status) {
+            const s = normalizeStatus(status);
+            if (!s) return 'Unknown';
+            return s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ');
+        }
+
+        function applyCounts(loads) {
+            const total = loads.length;
+            const active = loads.filter(l => {
+                const s = normalizeStatus(l.status);
+                return ['active', 'accepted', 'picked-up', 'in-transit', 'on-route', 'assigned', 'in progress'].includes(s);
+            }).length;
+            const completed = loads.filter(l => ['completed', 'delivered', 'finished', 'done'].includes(normalizeStatus(l.status))).length;
+            document.getElementById('totalCount').textContent = total.toLocaleString();
+            document.getElementById('activeCount').textContent = active.toLocaleString();
+            document.getElementById('completedCount').textContent = completed.toLocaleString();
+            document.getElementById('loadsSub').textContent = `${total.toLocaleString()} total loads`;
+        }
+
+        function getFilteredLoads() {
+            const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const filter = document.getElementById('statusFilter').value;
+            return allLoads.filter(l => {
+                const status = normalizeStatus(l.status);
+                if (filter !== 'all') {
+                    if (filter === 'active' && !['active', 'accepted', 'picked-up', 'in-transit', 'on-route', 'assigned', 'in progress'].includes(status)) return false;
+                    if (filter === 'pending' && !['pending', 'available', 'open', 'unassigned'].includes(status)) return false;
+                    if (filter === 'completed' && !['completed', 'delivered', 'finished', 'done'].includes(status)) return false;
+                    if (filter === 'cancelled' && !['cancelled', 'canceled', 'rejected'].includes(status)) return false;
+                }
+                if (!q) return true;
+                const id = String(l.loadId || l.id || '').toLowerCase();
+                const route = `${l.pickupLocation || l.pickup_location || ''} ${l.deliveryLocation || l.delivery_location || ''}`.toLowerCase();
+                const supplier = String(l.supplierName || l.supplierEmail || l.supplierId || l.postedBy || '').toLowerCase();
+                const carrier = String(l.carrierName || l.carrierEmail || l.carrierId || l.carrier_id || l.assignedCarrier || '').toLowerCase();
+                return id.includes(q) || route.includes(q) || supplier.includes(q) || carrier.includes(q);
+            });
+        }
+
+        function renderLoads() {
+            const list = document.getElementById('loadsList');
+            const filtered = getFilteredLoads();
+            applyCounts(allLoads);
+            if (!filtered.length) {
+                list.innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-box-open"></i>
+                        <h3>No loads found</h3>
+                        <p>Try changing search or filter</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = filtered.slice().sort((a, b) => getLoadCreatedAt(b) - getLoadCreatedAt(a)).slice(0, 200);
+            list.innerHTML = sorted.map(l => {
+                const id = l.loadId || l.id || '';
+                const pickup = l.pickupLocation || l.pickup_location || '';
+                const delivery = l.deliveryLocation || l.delivery_location || '';
+                const route = (pickup || delivery) ? `${pickup} → ${delivery}` : '—';
+                const badgeClass = getBadgeClass(l.status);
+                const label = getStatusLabel(l.status);
+                const supplier = l.supplierName || l.supplierEmail || l.supplierId || l.postedBy || '—';
+                const carrier = l.carrierName || l.carrierEmail || l.carrierId || l.carrier_id || l.assignedCarrier || '—';
+                return `
+                    <div class="load-card" onclick="openDetails('${escapeHtml(String(id))}')">
+                        <div class="load-top">
+                            <div>
+                                <div class="load-id">Load #${escapeHtml(String(id).slice(0, 10) || '—')}</div>
+                                <div class="route">${escapeHtml(route)}</div>
+                            </div>
+                            <div class="badge ${badgeClass}">${escapeHtml(label)}</div>
+                        </div>
+                        <div class="meta">
+                            <span><i class="fas fa-warehouse"></i>${escapeHtml(String(supplier).slice(0, 22))}</span>
+                            <span><i class="fas fa-truck"></i>${escapeHtml(String(carrier).slice(0, 22))}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openDetails(loadId) {
+            const overlay = document.getElementById('detailsOverlay');
+            const l = allLoads.find(x => String(x.loadId || x.id || '') === String(loadId)) || null;
+            if (!overlay || !l) return;
+            document.getElementById('modalTitle').textContent = `Load #${String(l.loadId || l.id || '').slice(0, 14)}`;
+            const pickup = l.pickupLocation || l.pickup_location || '—';
+            const delivery = l.deliveryLocation || l.delivery_location || '—';
+            document.getElementById('modalSub').textContent = `${pickup} → ${delivery}`;
+
+            const fields = [
+                ['Status', getStatusLabel(l.status)],
+                ['Supplier', l.supplierName || l.supplierEmail || l.supplierId || l.postedBy || '—'],
+                ['Carrier', l.carrierName || l.carrierEmail || l.carrierId || l.carrier_id || l.assignedCarrier || '—'],
+                ['Budget', l.budget || l.maxBudget || l.minBudget || l.price || '—'],
+                ['Pickup Date', l.pickupDate || l.pickup_date || '—'],
+                ['Created At', l.createdAt || l.created_at || '—']
+            ];
+
+            const dispute = l.dispute && typeof l.dispute === 'object' ? l.dispute : null;
+            const hasOpenDispute = dispute && String(dispute.status || '').toLowerCase() === 'open';
+            const disputeHtml = dispute ? `
+                <div class="kv">
+                    <div class="k">Dispute</div>
+                    <div class="v">${escapeHtml(String(dispute.status || '—'))}</div>
+                </div>
+                <div class="kv">
+                    <div class="k">Type</div>
+                    <div class="v">${escapeHtml(String(dispute.type || '—'))}</div>
+                </div>
+                <div class="kv">
+                    <div class="k">Message</div>
+                    <div class="v">${escapeHtml(String(dispute.message || '—')).slice(0, 120)}</div>
+                </div>
+                ${dispute.evidenceDataUrl ? `
+                <div class="kv">
+                    <div class="k">Evidence</div>
+                    <div class="v"><a href="${escapeHtml(String(dispute.evidenceDataUrl))}" target="_blank" rel="noopener">Open</a></div>
+                </div>
+                ` : ''}
+                ${hasOpenDispute ? `
+                <div class="kv">
+                    <div class="k">Resolution</div>
+                    <div class="v" style="text-align:left;width:100%;">
+                        <textarea class="input" id="resolveNote" rows="3" placeholder="Write resolution note..."></textarea>
+                        <div style="display:flex;gap:0.75rem;margin-top:0.75rem;">
+                            <button class="icon-btn" type="button" style="width:auto;padding:0 1rem;border-radius:14px;" onclick="resolveDispute('${escapeHtml(String(loadId))}')">
+                                <i class="fas fa-check"></i>&nbsp;Resolve
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            ` : '';
+
+            document.getElementById('modalBody').innerHTML =
+                fields.map(([k, v]) => `
+                    <div class="kv">
+                        <div class="k">${escapeHtml(k)}</div>
+                        <div class="v">${escapeHtml(v)}</div>
+                    </div>
+                `).join('') +
+                (disputeHtml ? `<div style="margin-top:0.75rem;"></div>${disputeHtml}` : '');
+
+            overlay.style.display = 'flex';
+        }
+
+        function closeDetails() {
+            const overlay = document.getElementById('detailsOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        async function resolveDispute(loadId) {
+            const l = allLoads.find(x => String(x.loadId || x.id || '') === String(loadId)) || null;
+            if (!l || !l.dispute) return;
+            const note = (document.getElementById('resolveNote') && document.getElementById('resolveNote').value) ? document.getElementById('resolveNote').value.trim() : '';
+            if (note.length < 3) return;
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                await db.ref('loads/' + loadId + '/dispute').update({
+                    status: 'resolved',
+                    resolvedAt: new Date().toISOString(),
+                    resolutionNote: note,
+                    resolvedByRole: 'admin'
+                });
+                await db.ref('loads/' + loadId).update({ disputeStatus: 'resolved' });
+                closeDetails();
+                await fetchLoads(true);
+            } catch (e) {
+                console.error(e);
+                alert('Failed to resolve dispute: ' + (e && (e.code || e.message) ? (e.code || e.message) : 'unknown'));
+            }
+        }
+
+        async function fetchLoads(force = false) {
+            const cached = getCache();
+            if (cached && !force) {
+                allLoads = cached;
+                renderLoads();
+            } else {
+                document.getElementById('loadsSub').textContent = 'Loading...';
+            }
+
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const snap = await db.ref('loads').once('value');
+                const loads = [];
+                if (snap.exists()) {
+                    snap.forEach(ch => loads.push({ id: ch.key, ...(ch.val() || {}) }));
+                }
+                allLoads = loads;
+                setCache(loads);
+                renderLoads();
+            } catch (e) {
+                document.getElementById('loadsList').innerHTML = `
+                    <div class="empty">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <h3>Failed to load</h3>
+                        <p>${escapeHtml((e && (e.code || e.message)) ? (e.code || e.message) : 'Check connection and try refresh')}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function refreshLoads() {
+            fetchLoads(true);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchLoads(false);
+            document.getElementById('searchInput').addEventListener('input', renderLoads);
+            document.getElementById('statusFilter').addEventListener('change', renderLoads);
+            document.getElementById('detailsOverlay').addEventListener('click', function(e) {
+                if (e.target && e.target.id === 'detailsOverlay') closeDetails();
+            });
+        });
+    </script>
+</body>
+</html>

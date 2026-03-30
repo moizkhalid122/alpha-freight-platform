@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>Load Details - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <style>
+        /* —— Premium theme (matches supplier dashboard) —— */
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            /* footer from supplier-bottom-nav.css */
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header – premium navy + gold */
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1rem 1.25rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 36px 36px;
+            opacity: 0.7;
+        }
+
+        .back-btn {
+            background: linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s var(--ease), background 0.3s var(--ease);
+        }
+        .back-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
+
+        .header-content { flex: 1; min-width: 0; position: relative; z-index: 1; }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
+        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+
+        /* Card */
+        .details-card {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1rem;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .details-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 0 2px 2px 0;
+            opacity: 0.9;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .load-id { font-size: 1rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.02em; }
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .status-badge.available { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .status-badge.active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-badge.in-transit { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-badge.pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-badge.cancelled { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+
+        .route-section {
+            margin-bottom: 1.25rem;
+        }
+
+        .route-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .route-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .route-dot.pickup { background: var(--success); }
+        .route-dot.delivery { background: var(--primary); }
+
+        .route-label { font-size: 0.6875rem; font-weight: 700; color: var(--text-medium); margin-bottom: 0.15rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .route-value { font-size: 0.9375rem; font-weight: 800; color: var(--text-dark); }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            background: rgba(241, 245, 249, 0.9);
+            padding: 0.875rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .detail-label { font-size: 0.6875rem; font-weight: 700; color: var(--text-medium); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .detail-value { font-size: 0.9375rem; font-weight: 800; color: var(--text-dark); }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .price-label { font-size: 0.9375rem; font-weight: 800; color: var(--text-dark); }
+        .price-value { font-size: 1.25rem; font-weight: 900; color: var(--primary); letter-spacing: -0.02em; }
+
+        .actions-section {
+            margin: 1.25rem 1.25rem 0;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-action.primary { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+        .btn-action.success { background: linear-gradient(145deg, #10b981 0%, var(--success) 100%); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
+        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+        .btn-action.danger { background: linear-gradient(145deg, #ef4444 0%, var(--error) 100%); color: #fff; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
+
+        .btn-action:active { transform: scale(0.98); }
+
+        .mini-profile {
+            background: rgba(241, 245, 249, 0.9);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 0 1.25rem 1rem;
+            padding: 1rem;
+            display: flex;
+            gap: 0.85rem;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+        .mini-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(29, 78, 216, 0.12), rgba(30, 58, 138, 0.12));
+            border: 1px solid rgba(29, 78, 216, 0.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .mini-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mini-name { font-weight: 900; letter-spacing: -0.02em; }
+        .mini-meta { color: var(--text-medium); font-size: 0.85rem; margin-top: 0.1rem; }
+        .mini-stars { color: #f59e0b; letter-spacing: 0.08em; }
+        .mini-chevron { margin-left: auto; color: var(--text-medium); }
+
+        .id-sub {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-medium);
+            margin-top: 0.25rem;
+            letter-spacing: 0.02em;
+        }
+
+        .timeline {
+            background: rgba(241, 245, 249, 0.9);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 0 1.25rem 1rem;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .timeline-title {
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .timeline-items { display: flex; flex-direction: column; gap: 0.65rem; }
+        .timeline-item { display: flex; gap: 0.75rem; align-items: flex-start; }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+            background: rgba(148, 163, 184, 0.7);
+            border: 2px solid rgba(148, 163, 184, 0.5);
+        }
+        .timeline-item.done .timeline-dot {
+            background: rgba(5, 150, 105, 0.18);
+            border-color: rgba(5, 150, 105, 0.55);
+        }
+        .timeline-text { min-width: 0; flex: 1; }
+        .timeline-label { font-weight: 900; letter-spacing: -0.01em; }
+        .timeline-at { color: var(--text-medium); font-size: 0.85rem; margin-top: 0.1rem; }
+
+        .sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+        .sheet-overlay.show { display: flex; }
+        .sheet {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 24px 72px rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+            transform: translateY(18px);
+            opacity: 0;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+        }
+        .sheet-overlay.show .sheet { transform: translateY(0); opacity: 1; }
+        .sheet-head {
+            padding: 1.25rem 1.25rem 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .sheet-title { font-weight: 900; letter-spacing: -0.02em; font-size: 1.05rem; }
+        .sheet-sub { color: var(--text-medium); font-size: 0.85rem; margin-top: 0.15rem; }
+        .sheet-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .sheet-body { padding: 0 1.25rem 1.1rem; }
+        .sheet-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.95rem 1.25rem 1.25rem;
+            border-top: 1px solid var(--border);
+            background: rgba(241, 245, 249, 0.65);
+        }
+        .sheet-btn {
+            flex: 1;
+            border-radius: 14px;
+            padding: 0.9rem 1rem;
+            font-weight: 800;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .sheet-btn.secondary { background: #fff; color: var(--text-dark); border: 2px solid var(--border); }
+        .sheet-btn.primary { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 10px 22px rgba(29, 78, 216, 0.22); }
+        .sheet-btn.danger { background: linear-gradient(145deg, #ef4444 0%, var(--error) 100%); color: #fff; box-shadow: 0 10px 22px rgba(220, 38, 38, 0.22); }
+        .sheet-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+        .sheet-field { margin-top: 0.75rem; }
+        .sheet-label { font-size: 0.75rem; font-weight: 800; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
+        .sheet-input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-weight: 700;
+            outline: none;
+            background: #fff;
+        }
+        .sheet-input:focus { border-color: rgba(29, 78, 216, 0.5); box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12); }
+        .sheet-help { color: var(--text-medium); font-size: 0.85rem; margin-top: 0.35rem; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            margin: 0 1.25rem;
+        }
+
+        .empty-state i { font-size: 3rem; color: var(--text-medium); margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s var(--ease) infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Load Details</h1>
+            <p class="page-subtitle" id="loadIdDisplay">Loading...</p>
+        </div>
+    </div>
+
+    <div id="contentArea">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item active">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        const params = new URLSearchParams(location.search);
+        const loadId = params.get('id') || params.get('loadId') || '';
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+
+        function formatCurrency(amt) {
+            return '£' + parseFloat(amt || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatDate(str) {
+            if (!str) return 'N/A';
+            try {
+                return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch { return str; }
+        }
+
+        function getStatusClass(status) {
+            const s = (status || '').toLowerCase();
+            if (['available', 'pending'].includes(s)) return s === 'available' ? 'available' : 'pending';
+            if (['active', 'accepted'].includes(s)) return 'active';
+            if (s.includes('transit')) return 'in-transit';
+            if (['completed', 'delivered'].includes(s)) return 'completed';
+            if (['cancelled', 'canceled'].includes(s)) return 'cancelled';
+            return 'pending';
+        }
+
+        function getStatusText(status) {
+            const s = (status || '').toLowerCase();
+            if (s === 'available') return 'Available';
+            if (['active', 'accepted'].includes(s)) return 'Active';
+            if (s.includes('transit')) return 'In Transit';
+            if (['completed', 'delivered'].includes(s)) return 'Completed';
+            if (s === 'pending') return 'Pending';
+            if (['cancelled', 'canceled'].includes(s)) return 'Cancelled';
+            return (status || '').charAt(0).toUpperCase() + (status || '').slice(1);
+        }
+
+        function getLoadFromCache() {
+            try {
+                const raw = sessionStorage.getItem('supplier_my_loads');
+                if (!raw) return null;
+                const { data } = JSON.parse(raw);
+                return Array.isArray(data) ? data.find(l => (l.loadId || l.id) === loadId) : null;
+            } catch (e) { return null; }
+        }
+
+        function getInitials(name) {
+            const n = (name || '').trim();
+            if (!n) return 'C';
+            const parts = n.split(/\s+/).filter(Boolean);
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return n.substring(0, 2).toUpperCase();
+        }
+
+        function buildStars(rating) {
+            const r = Math.max(0, Math.min(5, Math.round((parseFloat(rating) || 0) * 2) / 2));
+            let stars = '';
+            for (let i = 1; i <= 5; i++) stars += i <= Math.round(r) ? '★' : '☆';
+            return stars;
+        }
+
+        function normalizeStatus(s) {
+            const t = String(s || '').toLowerCase().replace(/_/g, '-');
+            if (t === 'complete') return 'completed';
+            if (t === 'intransit') return 'in-transit';
+            return t;
+        }
+
+        function getOrderRef(lid, load) {
+            if (load && load.formattedOrderId) return String(load.formattedOrderId);
+            if (load && load.orderRef) return String(load.orderRef);
+            const id = String(lid || loadId || '');
+            const shortId = id ? id.substring(0, 8).toUpperCase() : '--------';
+            return 'ORD-' + shortId;
+        }
+
+        function isLoadPaid(load) {
+            if (!load) return false;
+            const ps = load.paymentStatus;
+            if (ps && typeof ps === 'object') {
+                if (ps.completed === true) return true;
+                const st = String(ps.status || '').toLowerCase();
+                if (st === 'completed' || st === 'paid') return true;
+                if (ps.paidAt) return true;
+                if (ps.upfrontPaid === true) return true;
+                if (ps.depositPaid === true && ps.remainingPaid === true) return true;
+            }
+            if (load.upfrontPaid === true) return true;
+            if (load.isPaid === true) return true;
+            if (load.paid === true) return true;
+            if (String(load.paymentStatus || '').toLowerCase() === 'paid') return true;
+            if (String(load.paymentStatus || '').toLowerCase() === 'completed') return true;
+            if (String(load.paymentState || '').toLowerCase() === 'paid') return true;
+            if (String(load.paymentState || '').toLowerCase() === 'completed') return true;
+            if (String(load.paymentMethod || '').toLowerCase().includes('paid')) return true;
+            return false;
+        }
+
+        function getPaymentPlan(load) {
+            return String((load && load.paymentPlan) ? load.paymentPlan : 'full_upfront').toLowerCase();
+        }
+
+        function getPaymentBaseAmount(load, fallback) {
+            const base = parseFloat(load && (load.commissionBaseAmount || load.price || load.budget || load.maxBudget || load.minBudget || 0)) || 0;
+            if (base > 0) return base;
+            return parseFloat(fallback || 0) || 0;
+        }
+
+        function buildSupplierPaymentAction(load, statusLower, price, cancelReqStatus) {
+            const plan = getPaymentPlan(load);
+            const ps = (load && load.paymentStatus && typeof load.paymentStatus === 'object') ? load.paymentStatus : {};
+            const paid = isLoadPaid(load);
+            const paymentId = ps && ps.paymentId ? String(ps.paymentId) : '';
+            const invoiceHref = `receipt.html?loadId=${encodeURIComponent(loadId)}${paymentId ? `&paymentId=${encodeURIComponent(paymentId)}` : ''}&mode=invoice`;
+            if (paid) {
+                return `
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-check-circle"></i> Paid
+                    </button>
+                    <a class="btn-action secondary" href="${invoiceHref}">
+                        <i class="fas fa-file-invoice"></i> Invoice
+                    </a>
+                `;
+            }
+
+            if (cancelReqStatus === 'fee_pending' || cancelReqStatus === 'pending_approval' || cancelReqStatus === 'pending') return '';
+
+            if (plan === 'cod') {
+                return `
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-money-bill-wave"></i> Cash on Delivery
+                    </button>
+                `;
+            }
+
+            if (plan === 'deposit_remaining') {
+                const depositPaid = ps.depositPaid === true || (load && load.deposit && load.deposit.paid === true);
+                const remainingPaid = ps.remainingPaid === true || (load && load.remaining && load.remaining.paid === true);
+                const depositAmt = parseFloat(load && load.deposit && load.deposit.amount) || 0;
+                const remainingAmt = parseFloat(load && load.remaining && load.remaining.amount) || 0;
+                if (!depositPaid) {
+                    return `
+                        <a href="pay-now.html?loadId=${encodeURIComponent(loadId)}&amount=${encodeURIComponent(depositAmt || price)}&paymentFor=${encodeURIComponent('Deposit')}&paymentType=Deposit" class="btn-action success">
+                            <i class="fas fa-credit-card"></i> Pay Deposit
+                        </a>
+                    `;
+                }
+                if (!remainingPaid) {
+                    if (statusLower === 'completed' || statusLower === 'delivered') {
+                        return `
+                            <a href="pay-now.html?loadId=${encodeURIComponent(loadId)}&amount=${encodeURIComponent(remainingAmt || price)}&paymentFor=${encodeURIComponent('Remaining')}&paymentType=Remaining" class="btn-action success">
+                                <i class="fas fa-credit-card"></i> Pay Remaining
+                            </a>
+                        `;
+                    }
+                    return `
+                        <button class="btn-action secondary" type="button" disabled>
+                            <i class="fas fa-hourglass-half"></i> Remaining after delivery
+                        </button>
+                    `;
+                }
+                return `
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-check-circle"></i> Paid
+                    </button>
+                `;
+            }
+
+            const baseAmount = getPaymentBaseAmount(load, price);
+            return `
+                <a href="pay-now.html?loadId=${encodeURIComponent(loadId)}&amount=${encodeURIComponent(baseAmount || price)}&paymentFor=${encodeURIComponent('Load Payment')}&paymentType=Payment" class="btn-action success">
+                    <i class="fas fa-credit-card"></i> Pay Now
+                </a>
+            `;
+        }
+
+        function formatDateTime(str) {
+            if (!str) return '';
+            try { return new Date(str).toLocaleString('en-GB'); } catch { return String(str); }
+        }
+
+        function getPaidAt(load) {
+            const ps = load && load.paymentStatus;
+            if (ps && typeof ps === 'object') {
+                return ps.paidAt || ps.upfrontPaidDate || ps.paid_at || '';
+            }
+            return load && (load.paidAt || load.paid_at || '');
+        }
+
+        function buildTimelineSteps(load) {
+            const steps = [];
+            steps.push({ label: 'Posted', at: load && (load.createdAt || load.postedAt || '') });
+            steps.push({ label: 'Accepted', at: load && (load.acceptedAt || '') });
+            steps.push({ label: 'Cancelled', at: load && (load.cancelledAt || load.canceledAt || '') });
+            steps.push({ label: 'Picked Up', at: load && (load.pickedUpAt || '') });
+            steps.push({ label: 'In Transit', at: load && (load.inTransitAt || '') });
+            steps.push({ label: 'Delivered', at: load && (load.completedAt || load.deliveredAt || '') });
+            steps.push({ label: 'POD Submitted', at: load && ((load.pod && load.pod.submittedAt) || load.podUploadedAt || '') });
+            steps.push({ label: 'Paid', at: getPaidAt(load) });
+            const trimmed = [];
+            for (const s of steps) {
+                if (!s.at && trimmed.length === 0) continue;
+                trimmed.push(s);
+            }
+            return trimmed.length ? trimmed : steps.slice(0, 2);
+        }
+
+        function buildTimelineHtml(load) {
+            const steps = buildTimelineSteps(load);
+            const items = steps.map((s) => {
+                const done = !!s.at;
+                return `
+                    <div class="timeline-item ${done ? 'done' : ''}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-text">
+                            <div class="timeline-label">${s.label}</div>
+                            <div class="timeline-at">${s.at ? formatDateTime(s.at) : 'Pending'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            return `
+                <div class="timeline">
+                    <div class="timeline-title">
+                        <span>Status Timeline</span>
+                        <span style="color:var(--text-medium);font-weight:800;font-size:0.85rem;">${getOrderRef(load && (load.loadId || load.id || loadId), load)}</span>
+                    </div>
+                    <div class="timeline-items">${items}</div>
+                </div>
+            `;
+        }
+
+        function ensureSheet() {
+            let overlay = document.getElementById('actionSheetOverlay');
+            if (overlay) return overlay;
+            overlay = document.createElement('div');
+            overlay.className = 'sheet-overlay';
+            overlay.id = 'actionSheetOverlay';
+            overlay.innerHTML = `
+                <div class="sheet" role="dialog" aria-modal="true">
+                    <div class="sheet-head">
+                        <div>
+                            <div class="sheet-title" id="sheetTitle">Action</div>
+                            <div class="sheet-sub" id="sheetSub"></div>
+                        </div>
+                        <button class="sheet-close" type="button" id="sheetClose" aria-label="Close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="sheet-body" id="sheetBody"></div>
+                    <div class="sheet-actions">
+                        <button class="sheet-btn secondary" type="button" id="sheetCancel">Cancel</button>
+                        <button class="sheet-btn primary" type="button" id="sheetOk">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+
+        function openSheet(opts) {
+            const overlay = ensureSheet();
+            const titleEl = document.getElementById('sheetTitle');
+            const subEl = document.getElementById('sheetSub');
+            const bodyEl = document.getElementById('sheetBody');
+            const closeBtn = document.getElementById('sheetClose');
+            const cancelBtn = document.getElementById('sheetCancel');
+            const okBtn = document.getElementById('sheetOk');
+
+            titleEl.textContent = (opts && opts.title) ? opts.title : 'Action';
+            subEl.textContent = (opts && opts.sub) ? opts.sub : '';
+            bodyEl.innerHTML = (opts && opts.bodyHtml) ? opts.bodyHtml : '';
+            okBtn.textContent = (opts && opts.okText) ? opts.okText : 'OK';
+            cancelBtn.textContent = (opts && opts.cancelText) ? opts.cancelText : 'Cancel';
+            okBtn.className = 'sheet-btn ' + ((opts && opts.okKind) ? opts.okKind : 'primary');
+
+            overlay.classList.add('show');
+
+            let finished = false;
+            function close(result) {
+                if (finished) return;
+                finished = true;
+                overlay.classList.remove('show');
+                overlay.onclick = null;
+                closeBtn.onclick = null;
+                cancelBtn.onclick = null;
+                okBtn.onclick = null;
+                resolve(result);
+            }
+
+            let resolve;
+            const p = new Promise((res) => { resolve = res; });
+
+            overlay.onclick = (e) => { if (e && e.target === overlay) close(false); };
+            closeBtn.onclick = () => close(false);
+            cancelBtn.onclick = () => close(false);
+            okBtn.onclick = async () => {
+                try {
+                    okBtn.disabled = true;
+                    cancelBtn.disabled = true;
+                    const r = opts && opts.onOk ? await opts.onOk() : true;
+                    okBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                    close(r !== false);
+                } catch (e) {
+                    okBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                    throw e;
+                }
+            };
+            return p;
+        }
+
+        function calculateCancelFee(load) {
+            const amt = parseFloat(load && (load.totalCost || load.totalAmount || load.price || load.budget || load.maxBudget || load.minBudget || 0)) || 0;
+            const fee = Math.round(Math.min(50, amt * 0.1) * 100) / 100;
+            return fee;
+        }
+
+        function getCarrierIdFromLoad(load) {
+            return (load && (load.carrierId || load.assignedCarrier || load.acceptedBy)) ? (load.carrierId || load.assignedCarrier || load.acceptedBy) : '';
+        }
+
+        function getCarrierNameFromLoad(load) {
+            const name = load && (load.carrierName || load.carrierEmail || load.assignedCarrier || load.carrierId);
+            return name ? String(name) : 'Carrier';
+        }
+
+        async function createDbNotification(userId, userType, title, message, data) {
+            try {
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!db || !userId || !userType) return null;
+                const payload = {
+                    user_id: userId,
+                    user_type: userType,
+                    type: (data && data.type) ? data.type : 'system',
+                    title: title,
+                    message: message,
+                    data: data || {},
+                    read: false,
+                    created_at: new Date().toISOString()
+                };
+                const ref = db.ref('notifications').push();
+                await ref.set(payload).catch(() => {});
+                try {
+                    if (userType === 'supplier') {
+                        await db.ref(`notifications/suppliers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    } else if (userType === 'carrier') {
+                        await db.ref(`notifications/carriers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    }
+                } catch (e) {}
+                return ref.key || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function buildCancelFeePayUrl(feeAmount) {
+            const q = new URLSearchParams({
+                loadId: loadId || '',
+                amount: String(feeAmount || 0),
+                paymentFor: 'Cancellation Fee',
+                paymentType: 'CancellationFee',
+                cancelFee: '1'
+            });
+            return `pay-now.html?${q}`;
+        }
+
+        async function cancelNowFree() {
+            await openSheet({
+                title: 'Cancel Load',
+                sub: 'Free cancellation (not accepted yet).',
+                okText: 'Continue',
+                okKind: 'primary',
+                bodyHtml: `
+                    <div class="sheet-field">
+                        <div class="sheet-label">Reason</div>
+                        <textarea class="sheet-input" id="cancelReason" rows="3" placeholder="Write a short reason..."></textarea>
+                    </div>
+                `,
+                onOk: async () => {
+                    const reason = String((document.getElementById('cancelReason') || {}).value || '').trim();
+                    if (reason.length < 3) { alertSystem.show('error', 'Reason is required'); return false; }
+                    const confirmed = await openSheet({
+                        title: 'Confirm Cancellation',
+                        sub: 'This will cancel your order immediately.',
+                        okText: 'Yes, Cancel',
+                        okKind: 'danger',
+                        bodyHtml: `<div class="sheet-help">Reason: ${reason.replace(/</g, '&lt;')}</div>`
+                    });
+                    if (!confirmed) return false;
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    await ensureAuthReady();
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    await db.ref('loads/' + loadId).update({
+                        status: 'cancelled',
+                        cancelledAt: new Date().toISOString(),
+                        cancelledByRole: 'supplier',
+                        cancelledBy: 'supplier',
+                        cancelledReason: reason || '',
+                        cancellationFee: 0,
+                        cancellationPolicyVersion: 1
+                    });
+                    alertSystem.show('success', 'Load cancelled');
+                    await loadDetails();
+                    return true;
+                }
+            });
+        }
+
+        async function requestCancellation() {
+            const fee = calculateCancelFee(loadData || {});
+            await openSheet({
+                title: 'Request Cancellation',
+                sub: 'Reason is required. You will confirm again before payment.',
+                okText: 'Continue',
+                okKind: 'primary',
+                bodyHtml: `
+                    <div class="sheet-field">
+                        <div class="sheet-label">Reason</div>
+                        <textarea class="sheet-input" id="cancelReqReason" rows="3" placeholder="Write a short reason..."></textarea>
+                        <div class="sheet-help">Carrier approval required after fee payment.</div>
+                    </div>
+                `,
+                onOk: async () => {
+                    const reason = String((document.getElementById('cancelReqReason') || {}).value || '').trim();
+                    if (reason.length < 3) { alertSystem.show('error', 'Please enter a reason'); return false; }
+                    const carrierId = getCarrierIdFromLoad(loadData || {});
+                    const carrierName = getCarrierNameFromLoad(loadData || {});
+                    const confirmed = await openSheet({
+                        title: 'Confirm Cancellation Request',
+                        sub: `Fee: £${fee.toFixed(2)} • Carrier: ${carrierName}`,
+                        okText: 'Confirm & Pay Fee',
+                        okKind: 'danger',
+                        bodyHtml: `
+                            <div class="sheet-help">
+                                You will pay the cancellation fee now.<br>
+                                Then we will wait for carrier approval.<br><br>
+                                If carrier rejects, you must complete the order and your fee will be refunded within 7 days.
+                            </div>
+                            <div class="sheet-help" style="margin-top:0.65rem;">Reason: ${reason.replace(/</g, '&lt;')}</div>
+                        `
+                    });
+                    if (!confirmed) return false;
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    await ensureAuthReady();
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    await db.ref('loads/' + loadId).update({
+                        cancellationRequest: {
+                            status: 'fee_pending',
+                            requestedAt: new Date().toISOString(),
+                            requestedByRole: 'supplier',
+                            reason,
+                            proposedFee: fee,
+                            feePaid: false,
+                            carrierId: carrierId || '',
+                            carrierName: carrierName || ''
+                        },
+                        cancellationStatus: 'fee_pending'
+                    });
+                    if (carrierId) {
+                        await createDbNotification(
+                            carrierId,
+                            'carrier',
+                            'Cancellation Requested',
+                            'Supplier requested cancellation. Waiting for fee payment.',
+                            { type: 'cancel_request', loadId: loadId, url: '/mobile-app/carrier/load-details.html?id=' + encodeURIComponent(loadId) }
+                        );
+                    }
+                    alertSystem.show('success', 'Proceed to pay cancellation fee');
+                    setTimeout(() => { window.location.href = buildCancelFeePayUrl(fee); }, 650);
+                    return true;
+                }
+            });
+        }
+
+        async function requestReschedule() {
+            const currentPickup = (loadData && (loadData.pickupDate || loadData.pickup_date)) || '';
+            const currentDelivery = (loadData && (loadData.deliveryDate || loadData.delivery_date)) || '';
+            await openSheet({
+                title: 'Request Reschedule',
+                sub: 'Other party must approve to apply changes.',
+                okText: 'Send Request',
+                okKind: 'primary',
+                bodyHtml: `
+                    <div class="sheet-field">
+                        <div class="sheet-label">New Pickup Date</div>
+                        <input class="sheet-input" id="rsPickup" type="date" value="${String(currentPickup).slice(0, 10)}">
+                    </div>
+                    <div class="sheet-field">
+                        <div class="sheet-label">New Delivery Date</div>
+                        <input class="sheet-input" id="rsDelivery" type="date" value="${String(currentDelivery).slice(0, 10)}">
+                    </div>
+                    <div class="sheet-field">
+                        <div class="sheet-label">Message</div>
+                        <textarea class="sheet-input" id="rsMsg" rows="3" placeholder="Optional message..."></textarea>
+                    </div>
+                `,
+                onOk: async () => {
+                    const pickup = String((document.getElementById('rsPickup') || {}).value || '').trim();
+                    const delivery = String((document.getElementById('rsDelivery') || {}).value || '').trim();
+                    const msg = String((document.getElementById('rsMsg') || {}).value || '').trim();
+                    if (!pickup && !delivery) { alertSystem.show('error', 'Pick at least one date'); return false; }
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    await ensureAuthReady();
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    await db.ref('loads/' + loadId).update({
+                        rescheduleRequest: {
+                            status: 'pending',
+                            requestedAt: new Date().toISOString(),
+                            requestedByRole: 'supplier',
+                            newPickupDate: pickup || '',
+                            newDeliveryDate: delivery || '',
+                            message: msg || ''
+                        }
+                    });
+                    alertSystem.show('success', 'Reschedule request sent');
+                    await loadDetails();
+                    return true;
+                }
+            });
+        }
+
+        async function raiseDispute() {
+            await openSheet({
+                title: 'Open Dispute',
+                sub: 'Add details and (optional) evidence photo.',
+                okText: 'Submit Dispute',
+                okKind: 'danger',
+                bodyHtml: `
+                    <div class="sheet-field">
+                        <div class="sheet-label">Type</div>
+                        <select class="sheet-input" id="dpType">
+                            <option value="pod_dispute">POD Dispute</option>
+                            <option value="damage">Damage</option>
+                            <option value="missing_items">Missing Items</option>
+                            <option value="late_delivery">Late Delivery</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="sheet-field">
+                        <div class="sheet-label">Details</div>
+                        <textarea class="sheet-input" id="dpMsg" rows="4" placeholder="Write full details..."></textarea>
+                    </div>
+                    <div class="sheet-field">
+                        <div class="sheet-label">Evidence Photo (optional)</div>
+                        <input class="sheet-input" id="dpFile" type="file" accept="image/*">
+                        <div class="sheet-help" id="dpFileMeta"></div>
+                    </div>
+                `,
+                onOk: async () => {
+                    const type = String((document.getElementById('dpType') || {}).value || '').trim() || 'other';
+                    const msg = String((document.getElementById('dpMsg') || {}).value || '').trim();
+                    if (msg.length < 10) { alertSystem.show('error', 'Please add more details'); return false; }
+                    const input = document.getElementById('dpFile');
+                    const file = input && input.files && input.files[0] ? input.files[0] : null;
+                    let evidenceDataUrl = '';
+                    let evidenceType = '';
+                    if (file) {
+                        evidenceType = file.type || 'image/jpeg';
+                        evidenceDataUrl = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = () => reject(new Error('read_failed'));
+                            reader.readAsDataURL(file);
+                        });
+                    }
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    await ensureAuthReady();
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    await db.ref('loads/' + loadId).update({
+                        disputeStatus: 'open',
+                        dispute: {
+                            status: 'open',
+                            type,
+                            message: msg,
+                            evidenceDataUrl: evidenceDataUrl || '',
+                            evidenceType: evidenceType || '',
+                            createdAt: new Date().toISOString(),
+                            createdByRole: 'supplier'
+                        }
+                    });
+                    alertSystem.show('success', 'Dispute submitted');
+                    await loadDetails();
+                    return true;
+                }
+            });
+            const input = document.getElementById('dpFile');
+            const meta = document.getElementById('dpFileMeta');
+            if (input && meta) {
+                input.addEventListener('change', () => {
+                    const f = input.files && input.files[0];
+                    meta.textContent = f ? `${f.name} • ${Math.round((f.size || 0) / 1024)} KB` : '';
+                }, { once: true });
+            }
+        }
+
+        const carrierMiniCache = { profile: {}, rating: {} };
+
+        function sanitizeFirebaseKey(key) {
+            return String(key || '').replace(/[.#$\[\]\/]/g, '_');
+        }
+
+        async function resolveCarrierProfile(rawId) {
+            const id = String(rawId || '').trim();
+            if (!id) return null;
+            if (carrierMiniCache.profile[id]) return carrierMiniCache.profile[id];
+            const db = window.AlphaBrokrage.firebaseDb;
+            const candidates = [];
+            candidates.push(id);
+            const sanitized = sanitizeFirebaseKey(id);
+            if (sanitized && sanitized !== id) candidates.push(sanitized);
+
+            for (const cand of candidates) {
+                try {
+                    const snap = await db.ref('carriers/' + cand).once('value');
+                    if (snap.exists()) {
+                        const p = snap.val() || {};
+                        const out = { key: cand, profile: { ...p, carrierId: p.carrierId || cand } };
+                        carrierMiniCache.profile[id] = out;
+                        carrierMiniCache.profile[cand] = out;
+                        return out;
+                    }
+                } catch (e) {}
+            }
+
+            if (id.includes('@')) {
+                try {
+                    const snap = await db.ref('carriers').orderByChild('email').equalTo(id).limitToFirst(1).once('value');
+                    if (snap.exists()) {
+                        let out = null;
+                        snap.forEach((child) => {
+                            if (out) return true;
+                            const p = child.val() || {};
+                            out = { key: child.key, profile: { ...p, carrierId: p.carrierId || child.key } };
+                            return true;
+                        });
+                        if (out) {
+                            carrierMiniCache.profile[id] = out;
+                            carrierMiniCache.profile[out.key] = out;
+                            return out;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            const fallback = { key: sanitized, profile: null };
+            carrierMiniCache.profile[id] = fallback;
+            return fallback;
+        }
+
+        async function computeCarrierRatingAny(ids) {
+            const list = Array.from(new Set((ids || []).map((x) => String(x || '').trim()).filter(Boolean)));
+            const cacheKey = list.slice().sort().join('|');
+            if (carrierMiniCache.rating[cacheKey]) return carrierMiniCache.rating[cacheKey];
+            const db = window.AlphaBrokrage.firebaseDb;
+            const byLoadId = new Map();
+            for (const id of list) {
+                try {
+                    const snap = await db.ref('loads').orderByChild('carrierId').equalTo(id).limitToLast(250).once('value');
+                    if (!snap.exists()) continue;
+                    snap.forEach((child) => {
+                        const load = child.val() || {};
+                        const st = normalizeStatus(load.status);
+                        const rt = parseFloat(load.carrierRating || 0) || 0;
+                        if ((st === 'completed' || st === 'delivered') && rt > 0) byLoadId.set(child.key, rt);
+                    });
+                } catch (e) {}
+            }
+            const ratings = Array.from(byLoadId.values());
+            if (!ratings.length) {
+                const out = { rating: 0, count: 0 };
+                carrierMiniCache.rating[cacheKey] = out;
+                return out;
+            }
+            const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+            const out = { rating: Math.round(avg * 10) / 10, count: ratings.length };
+            carrierMiniCache.rating[cacheKey] = out;
+            return out;
+        }
+
+        function renderCarrierMiniPlaceholder(load) {
+            const holder = document.getElementById('carrierMiniHolder');
+            if (!holder) return;
+            const cid = load && (load.carrierId || load.assignedCarrier || load.acceptedBy) ? (load.carrierId || load.assignedCarrier || load.acceptedBy) : '';
+            if (!cid) { holder.innerHTML = ''; return; }
+            const displayName = load.carrierName || 'Carrier';
+            holder.innerHTML = `
+                <div class="mini-profile" id="carrierMiniCard">
+                    <div class="mini-avatar">${getInitials(displayName)}</div>
+                    <div style="min-width:0;">
+                        <div class="mini-name">${displayName}</div>
+                        <div class="mini-meta"><span class="mini-stars">☆☆☆☆☆</span><span style="margin-left:0.4rem;">Loading…</span></div>
+                    </div>
+                    <div class="mini-chevron"><i class="fas fa-chevron-right"></i></div>
+                </div>
+            `;
+            const card = document.getElementById('carrierMiniCard');
+            if (card) {
+                card.addEventListener('click', () => {
+                    window.location.href = `carrier-profile.html?id=${encodeURIComponent(cid)}`;
+                });
+            }
+        }
+
+        async function hydrateCarrierMini(load) {
+            try {
+                const holder = document.getElementById('carrierMiniHolder');
+                if (!holder) return;
+                const cid = load && (load.carrierId || load.assignedCarrier || load.acceptedBy) ? (load.carrierId || load.assignedCarrier || load.acceptedBy) : '';
+                if (!cid) { holder.innerHTML = ''; return; }
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk) return;
+                if (!authSdk.currentUser && typeof authSdk.onAuthStateChanged === 'function') {
+                    let done = false;
+                    const unsub = authSdk.onAuthStateChanged(() => {
+                        if (done) return;
+                        done = true;
+                        try { unsub(); } catch (e) {}
+                        hydrateCarrierMini(load);
+                    });
+                    return;
+                }
+                if (!authSdk.currentUser) return;
+
+                const resolved = await resolveCarrierProfile(cid);
+                const carrierKey = resolved && resolved.key ? resolved.key : sanitizeFirebaseKey(cid);
+                const profile = resolved ? resolved.profile : null;
+
+                const displayName = (profile && (profile.companyName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email)) || (load.carrierName || 'Carrier');
+                const photoUrl = profile && (profile.profilePhoto || profile.photoUrl || profile.avatarUrl || profile.photoURL);
+                const ids = [];
+                ids.push(carrierKey);
+                ids.push(cid);
+                if (profile && profile.email) ids.push(profile.email);
+                if (profile && profile.email) ids.push(sanitizeFirebaseKey(profile.email));
+                const rating = await computeCarrierRatingAny(ids);
+                const stars = rating && rating.count ? buildStars(rating.rating) : '☆☆☆☆☆';
+                const ratingText = rating && rating.count ? `${rating.rating}/5 (${rating.count})` : 'New';
+
+                holder.innerHTML = `
+                    <div class="mini-profile" id="carrierMiniCard">
+                        <div class="mini-avatar">${photoUrl ? `<img src="${String(photoUrl).replace(/\"/g, '&quot;')}" alt="Carrier">` : getInitials(displayName)}</div>
+                        <div style="min-width:0;">
+                            <div class="mini-name">${displayName}</div>
+                            <div class="mini-meta"><span class="mini-stars">${stars}</span><span style="margin-left:0.4rem;">${ratingText}</span></div>
+                        </div>
+                        <div class="mini-chevron"><i class="fas fa-chevron-right"></i></div>
+                    </div>
+                `;
+                const card = document.getElementById('carrierMiniCard');
+                if (card) {
+                    card.addEventListener('click', () => {
+                        window.location.href = `carrier-profile.html?id=${encodeURIComponent(carrierKey)}`;
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderContent(load) {
+            if (!load) {
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Load Not Found</h3>
+                        <p>This load may have been removed or the link is invalid.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const lid = load.loadId || load.id || loadId;
+            const statusClass = getStatusClass(load.status);
+            const statusText = getStatusText(load.status);
+            const pickup = load.pickupLocation || load.from || load.pickup_location || 'N/A';
+            const delivery = load.deliveryLocation || load.to || load.delivery_location || 'N/A';
+            const cargo = load.cargoType || load.cargo || 'General';
+            const price = load.price || load.budget || load.maxBudget || load.minBudget || 0;
+            const pickupDate = load.pickupDate || load.pickup_date;
+            const deliveryDate = load.deliveryDate || load.delivery_date;
+
+            document.getElementById('loadIdDisplay').textContent = `Load #${(lid + '').substring(0, 8)}`;
+
+            const statusLower = (load.status || '').toLowerCase();
+            const hasPOD = !!(load && (load.hasPOD || load.podUrl || (load.pod && (load.pod.photoDataUrl || load.pod.signatureDataUrl))));
+            const paid = isLoadPaid(load);
+            const cancelReq = load && load.cancellationRequest && typeof load.cancellationRequest === 'object' ? load.cancellationRequest : null;
+            const cancelReqStatus = cancelReq ? String(cancelReq.status || '').toLowerCase() : '';
+            const cancelFeeAmount = cancelReq && typeof cancelReq.proposedFee === 'number' ? cancelReq.proposedFee : calculateCancelFee(load);
+            const cancelFeeUrl = buildCancelFeePayUrl(cancelFeeAmount);
+            let actionsHTML = '';
+
+            if (['available', 'pending'].includes(statusLower)) {
+                actionsHTML = `
+                    <a href="load-status.html?id=${lid}" class="btn-action secondary">
+                        <i class="fas fa-tasks"></i> Status
+                    </a>
+                    <button class="btn-action danger" onclick="cancelLoad()">
+                        <i class="fas fa-times"></i> Cancel Load
+                    </button>
+                `;
+            } else if (['cancelled', 'canceled'].includes(statusLower)) {
+                actionsHTML = `
+                    <a href="load-status.html?id=${lid}" class="btn-action secondary">
+                        <i class="fas fa-tasks"></i> Status
+                    </a>
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-ban"></i> Cancelled
+                    </button>
+                `;
+            } else if (['active', 'accepted'].includes(statusLower)) {
+                actionsHTML = `
+                    <a href="load-status.html?id=${lid}" class="btn-action secondary">
+                        <i class="fas fa-tasks"></i> Status
+                    </a>
+                    <a href="track.html?loadId=${lid}" class="btn-action primary">
+                        <i class="fas fa-map-marker-alt"></i> Track
+                    </a>
+                    <button class="btn-action secondary" type="button" onclick="requestReschedule()">
+                        <i class="fas fa-calendar"></i> Reschedule
+                    </button>
+                    ${cancelReqStatus === 'fee_pending' ? `
+                    <a class="btn-action danger" href="${cancelFeeUrl}">
+                        <i class="fas fa-credit-card"></i> Pay Cancel Fee (£${cancelFeeAmount.toFixed(2)})
+                    </a>
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-hourglass-half"></i> Awaiting Approval
+                    </button>
+                    ` : cancelReqStatus === 'pending_approval' || cancelReqStatus === 'pending' ? `
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-hourglass-half"></i> Awaiting Approval
+                    </button>
+                    ` : cancelReqStatus === 'rejected' ? `
+                    <button class="btn-action secondary" type="button" disabled>
+                        <i class="fas fa-xmark"></i> Cancellation Rejected
+                    </button>
+                    ` : (!paid ? `
+                    <button class="btn-action danger" type="button" onclick="requestCancellation()">
+                        <i class="fas fa-ban"></i> Cancel Request
+                    </button>
+                    ` : '')}
+                    ${buildSupplierPaymentAction(load, statusLower, price, cancelReqStatus)}
+                `;
+            } else if (statusLower.includes('transit')) {
+                actionsHTML = `
+                    <a href="load-status.html?id=${lid}" class="btn-action secondary">
+                        <i class="fas fa-tasks"></i> Status
+                    </a>
+                    <a href="track.html?loadId=${lid}" class="btn-action primary">
+                        <i class="fas fa-map-marker-alt"></i> Track
+                    </a>
+                    ${buildSupplierPaymentAction(load, statusLower, price, cancelReqStatus)}
+                `;
+            } else if (['completed', 'delivered'].includes(statusLower)) {
+                actionsHTML = `
+                    <a href="load-status.html?id=${lid}" class="btn-action secondary">
+                        <i class="fas fa-tasks"></i> Status
+                    </a>
+                    ${hasPOD ? `
+                    <a href="pod.html?id=${lid}" class="btn-action primary">
+                        <i class="fas fa-file-signature"></i> POD
+                    </a>
+                    ` : ''}
+                    <button class="btn-action danger" type="button" onclick="raiseDispute()">
+                        <i class="fas fa-flag"></i> Dispute
+                    </button>
+                    ${buildSupplierPaymentAction(load, statusLower, price, cancelReqStatus)}
+                `;
+            } else {
+                actionsHTML = `
+                    <a href="load-status.html?id=${lid}" class="btn-action secondary">
+                        <i class="fas fa-tasks"></i> Status
+                    </a>
+                    ${buildSupplierPaymentAction(load, statusLower, price, cancelReqStatus)}
+                `;
+            }
+
+            document.getElementById('contentArea').innerHTML = `
+                <div class="details-card">
+                    <div class="details-header">
+                        <div>
+                            <div class="load-id">Load #${(lid + '').substring(0, 8)}</div>
+                            <div class="id-sub">${getOrderRef(lid, load)}</div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="route-section">
+                        <div class="route-row">
+                            <div class="route-dot pickup"></div>
+                            <div>
+                                <div class="route-label">Pickup</div>
+                                <div class="route-value">${pickup}</div>
+                            </div>
+                        </div>
+                        <div class="route-row">
+                            <div class="route-dot delivery"></div>
+                            <div>
+                                <div class="route-label">Delivery</div>
+                                <div class="route-value">${delivery}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Pickup Date</div>
+                            <div class="detail-value">${formatDate(pickupDate)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Cargo Type</div>
+                            <div class="detail-value">${cargo}</div>
+                        </div>
+                        ${deliveryDate ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Delivery Date</div>
+                            <div class="detail-value">${formatDate(deliveryDate)}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="price-row">
+                        <span class="price-label">Amount</span>
+                        <span class="price-value">${formatCurrency(price)}</span>
+                    </div>
+                </div>
+                ${buildTimelineHtml(load)}
+                <div id="carrierMiniHolder"></div>
+                <div class="actions-section">
+                    <div class="action-btns">${actionsHTML}</div>
+                </div>
+            `;
+            renderCarrierMiniPlaceholder(load);
+            hydrateCarrierMini(load);
+        }
+
+        async function loadDetails() {
+            if (!loadId) {
+                document.getElementById('loadIdDisplay').textContent = 'No load selected';
+                renderContent(null);
+                return;
+            }
+
+            // 1. Try cache first for instant display
+            const cached = getLoadFromCache();
+            if (cached) {
+                renderContent(cached);
+            }
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const snap = await db.ref('loads/' + loadId).once('value');
+                const load = snap.val();
+
+                if (load) {
+                    load.loadId = loadId;
+                    load.id = loadId;
+                    renderContent(load);
+                } else if (!cached) {
+                    renderContent(null);
+                }
+            } catch (e) {
+                console.error(e);
+                if (!cached) {
+                    document.getElementById('contentArea').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Error</h3>
+                            <p>Failed to load load details. Please try again.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function cancelLoad() {
+            try {
+                await cancelNowFree();
+            } catch (e) {
+                alertSystem.show('error', 'Failed to cancel load');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDetails);
+    </script>
+</body>
+</html>

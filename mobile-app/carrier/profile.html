@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Profile - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        /* Theme: carrier-premium-theme.css */
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-email {
+            font-size: 0.9375rem;
+            opacity: 0.9;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-status i {
+            font-size: 0.5rem;
+        }
+
+        .profile-status.verified {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        /* Profile Section */
+        .profile-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .info-value {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            text-align: right;
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        /* Menu Items */
+        .menu-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+
+        .menu-item:active {
+            transform: scale(0.98);
+            background: var(--bg-main);
+        }
+
+        .menu-item-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            color: var(--primary);
+        }
+
+        .menu-item-content {
+            flex: 1;
+        }
+
+        .menu-item-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-item-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        .menu-item-arrow {
+            color: var(--text-medium);
+            font-size: 0.875rem;
+        }
+
+        .menu-item.danger .menu-item-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .menu-item.danger .menu-item-title {
+            color: var(--error);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-card, .menu-item {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.875rem 0;
+            border-top: 1px solid var(--border);
+        }
+        .toggle-row:first-of-type { border-top: none; padding-top: 0; }
+        .toggle-meta { min-width: 0; }
+        .toggle-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.25rem; }
+        .toggle-subtitle { font-size: 0.8125rem; color: var(--text-medium); }
+        .chip-btn {
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 0.55rem 0.85rem;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(15, 23, 42, 0.04);
+            color: var(--text-dark);
+            box-shadow: var(--shadow-sm);
+        }
+        .chip-btn:active { transform: scale(0.98); }
+        .switch { position: relative; width: 52px; height: 32px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: rgba(148, 163, 184, 0.55);
+            border-radius: 999px;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+        }
+        .slider::before {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            left: 3px;
+            top: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+        }
+        .switch input:checked + .slider {
+            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            box-shadow: 0 8px 18px rgba(29, 78, 216, 0.22), inset 0 0 0 1px rgba(255,255,255,0.18);
+        }
+        .switch input:checked + .slider::before { transform: translateX(20px); }
+
+        .twofa-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            min-height: 48px;
+        }
+        .twofa-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+            background: var(--card-bg);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">
+            <span id="avatarInitials">C</span>
+        </div>
+        <h1 class="profile-name" id="profileName">Loading...</h1>
+        <p class="profile-email" id="profileEmail">Loading...</p>
+        <div class="profile-status verified" id="profileStatus">
+            <i class="fas fa-circle"></i>
+            <span>Verified Carrier</span>
+        </div>
+    </div>
+
+    <div id="profileCompleteBanner" style="display:none; margin: 0.75rem 1.25rem 0; background: #eef2ff; border: 1px solid #c7d2fe; padding: 0.85rem 0.9rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 0.85rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.7rem; min-width:0;">
+            <div style="width: 34px; height: 34px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); display:grid; place-items:center; color:#4f46e5; flex-shrink:0;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div style="min-width:0;">
+                <div style="font-weight: 900; font-size: 0.9rem; color:#111827; line-height:1.2;">Complete your profile</div>
+                <div id="profileCompleteBannerText" style="margin-top: 0.25rem; font-size: 0.78rem; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Add company registration and fleet details</div>
+            </div>
+        </div>
+        <a href="edit-profile.html" style="background: #4f46e5; color: white; text-decoration: none; padding: 0.5rem 0.85rem; border-radius: 12px; font-weight: 900; font-size: 0.78rem; flex-shrink:0;">Complete</a>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="totalLoads">0</div>
+            <div class="stat-label">Total Loads</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="completedLoads">0</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalEarnings">£0</div>
+            <div class="stat-label">Earnings</div>
+        </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="profile-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-user"></i>
+                Personal Information
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Full Name</span>
+                <span class="info-value" id="fullName">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value" id="email">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value" id="phone">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Information -->
+    <div class="profile-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-building"></i>
+                Company Information
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Company Name</span>
+                <span class="info-value" id="companyName">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Registration Number</span>
+                <span class="info-value" id="companyReg">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Fleet Size</span>
+                <span class="info-value" id="fleetSize">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Years in Operation</span>
+                <span class="info-value" id="yearsOperation">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-section">
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-shield-halved"></i>
+                Security
+            </h3>
+            <div class="toggle-row" id="twoFARow">
+                <div class="toggle-meta">
+                    <div class="toggle-title">Two‑Step Verification</div>
+                    <div class="toggle-subtitle" id="twoFAStatusText">Off</div>
+                </div>
+                <label class="switch" aria-label="Enable two-step verification">
+                    <input type="checkbox" id="twoFAToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div id="twoFASetup" style="display:none; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+                <div class="toggle-subtitle" style="margin-bottom:0.5rem;">
+                    Scan QR in Google Authenticator, then enter 6‑digit code.
+                </div>
+                <div id="twoFAQrBox" style="display:flex;align-items:center;justify-content:center;border:1px dashed var(--border);border-radius:14px;padding:0.75rem;min-height:180px;background:rgba(241,245,249,0.7);"></div>
+                <div style="display:flex; gap:0.75rem; margin-top:0.75rem;">
+                    <input id="twoFACode" inputmode="numeric" maxlength="6" placeholder="6-digit code" class="twofa-input" style="margin:0; flex:1;">
+                    <button type="button" class="chip-btn" id="twoFAVerifyBtn">Verify</button>
+                </div>
+                <div id="twoFAError" style="color:var(--error);font-size:0.8125rem;margin-top:0.5rem;"></div>
+            </div>
+            <div id="twoFADisable" style="display:none; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+                <div class="toggle-subtitle" style="margin-bottom:0.5rem;">Enter 6‑digit code to turn off.</div>
+                <div style="display:flex; gap:0.75rem;">
+                    <input id="twoFADisableCode" inputmode="numeric" maxlength="6" placeholder="6-digit code" class="twofa-input" style="margin:0; flex:1;">
+                    <button type="button" class="chip-btn" id="twoFADisableBtn">Turn Off</button>
+                </div>
+                <div id="twoFADisableError" style="color:var(--error);font-size:0.8125rem;margin-top:0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="profile-section">
+        <a href="edit-profile.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Edit Profile</div>
+                    <div class="menu-item-subtitle">Update your personal information</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="top-carriers.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Top Carriers</div>
+                    <div class="menu-item-subtitle">See ranking by completed loads</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="cancellation-requests.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Cancellation Requests</div>
+                    <div class="menu-item-subtitle">Approve or reject cancel orders</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="vehicles.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">My Vehicles</div>
+                    <div class="menu-item-subtitle">Manage your fleet</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="bank-account.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Bank Account</div>
+                    <div class="menu-item-subtitle">Manage payment details</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="settings.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Settings</div>
+                    <div class="menu-item-subtitle">Privacy and preferences</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="support.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Support</div>
+                    <div class="menu-item-subtitle">Get help and contact us</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <div class="menu-item danger" onclick="handleLogout()">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">Sign Out</div>
+                    <div class="menu-item-subtitle">Log out of your account</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Helper functions
+        function showError(message) {
+            alertSystem.show('error', message);
+        }
+
+        function showSuccess(message) {
+            alertSystem.show('success', message);
+        }
+
+        const TWO_FA_BASE = 'https://us-central1-alpha-brokerage.cloudfunctions.net';
+        let twoFAState = { enabled: false, verified: false };
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => {
+                    if (done) return;
+                    done = true;
+                    resolve();
+                }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+
+        async function getIdToken() {
+            try {
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk) return '';
+                await ensureAuthReady();
+                if (!authSdk.currentUser) return '';
+                return await authSdk.currentUser.getIdToken();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        async function twoFAStatus() {
+            const token = await getIdToken();
+            if (!token) return { enabled: false, verified: false, auth: false };
+            const r = await fetch(TWO_FA_BASE + '/twoFAStatusPublic?role=carrier', { headers: { 'Authorization': 'Bearer ' + token } });
+            const js = await r.json();
+            return { enabled: !!js.enabled, verified: !!js.verified, auth: true };
+        }
+
+        async function twoFASetup() {
+            const token = await getIdToken();
+            const r = await fetch(TWO_FA_BASE + '/twoFASetupPublic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ role: 'carrier' })
+            });
+            return await r.json();
+        }
+
+        async function twoFAVerify(code) {
+            const token = await getIdToken();
+            const r = await fetch(TWO_FA_BASE + '/twoFAVerifyPublic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ role: 'carrier', token: code })
+            });
+            return await r.json();
+        }
+
+        async function twoFADisable(code) {
+            const token = await getIdToken();
+            const r = await fetch(TWO_FA_BASE + '/twoFADisablePublic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ role: 'carrier', token: code })
+            });
+            return await r.json();
+        }
+
+        async function refreshTwoFAUI() {
+            const toggle = document.getElementById('twoFAToggle');
+            const statusEl = document.getElementById('twoFAStatusText');
+            const setupEl = document.getElementById('twoFASetup');
+            const disableEl = document.getElementById('twoFADisable');
+            if (!toggle || !statusEl || !setupEl || !disableEl) return;
+
+            try {
+                statusEl.textContent = 'Checking...';
+                const st = await twoFAStatus();
+                twoFAState = { enabled: !!st.enabled, verified: !!st.verified };
+                if (!st.auth) {
+                    toggle.checked = false;
+                    toggle.disabled = true;
+                    statusEl.textContent = 'Login required';
+                    setupEl.style.display = 'none';
+                    disableEl.style.display = 'none';
+                    return;
+                }
+                toggle.disabled = false;
+                toggle.checked = st.enabled;
+                if (!st.enabled) statusEl.textContent = 'Off';
+                else if (st.verified) statusEl.textContent = 'On • Connected';
+                else statusEl.textContent = 'On • Needs verification';
+
+                setupEl.style.display = 'none';
+                disableEl.style.display = 'none';
+            } catch (e) {
+                statusEl.textContent = 'Unavailable';
+            }
+        }
+
+        function initTwoFAControls() {
+            const toggle = document.getElementById('twoFAToggle');
+            const setupEl = document.getElementById('twoFASetup');
+            const disableEl = document.getElementById('twoFADisable');
+            if (!toggle || !setupEl || !disableEl) return;
+
+            toggle.addEventListener('change', () => {
+                if (toggle.checked && !twoFAState.enabled) {
+                    toggle.checked = false;
+                    window.location.href = 'twofa.html';
+                    return;
+                }
+                if (!toggle.checked && twoFAState.enabled) {
+                    toggle.checked = true;
+                    window.location.href = 'twofa-disable.html';
+                    return;
+                }
+            });
+
+            refreshTwoFAUI();
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function getCarrierCommissionRate(originalAmount) {
+            const amt = parseFloat(originalAmount) || 0;
+            let commissionRate = 0.05;
+            if (amt > 5000) {
+                commissionRate = 0.03;
+            } else if (amt > 1000) {
+                commissionRate = 0.04;
+            }
+            return commissionRate;
+        }
+
+        function getNetCarrierAmount(load) {
+            if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
+                const v = parseFloat(load.carrierNetAmount);
+                if (!isNaN(v)) return v;
+            }
+            const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (parseFloat(load.minBudget) + parseFloat(load.maxBudget)) / 2 : load.maxBudget || load.minBudget || load.price || 0));
+            const original = parseFloat(originalBudget) || 0;
+            const commissionRate = getCarrierCommissionRate(original);
+            const commission = original * commissionRate;
+            return Math.round((original - commission) * 100) / 100;
+        }
+
+        // Get user data
+        function getUserData() {
+            const carrierAuth = localStorage.getItem('carrierAuth');
+            if (!carrierAuth) return null;
+            return JSON.parse(carrierAuth);
+        }
+
+        // Get initials
+        function getInitials(name) {
+            if (!name) return 'C';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
+                });
+            });
+        }
+
+        function computeCarrierProfileMissing(profile) {
+            const missing = [];
+            const p = profile || {};
+            if (!String(p.firstName || '').trim()) missing.push('First name');
+            if (!String(p.lastName || '').trim()) missing.push('Last name');
+            if (!String(p.companyName || '').trim()) missing.push('Company');
+            if (!String(p.phone || '').trim()) missing.push('Phone');
+            if (!String(p.companyReg || '').trim()) missing.push('Company reg');
+            if (!String(p.fleetSize || '').trim()) missing.push('Fleet size');
+            if (!String(p.yearsOperation || '').trim()) missing.push('Years');
+            return missing;
+        }
+
+        function setBannerFromProfile(profile) {
+            const banner = document.getElementById('profileCompleteBanner');
+            const textEl = document.getElementById('profileCompleteBannerText');
+            if (!banner || !textEl) return;
+            const missing = computeCarrierProfileMissing(profile);
+            const isComplete = !!profile.profileComplete && missing.length === 0;
+            if (isComplete) {
+                banner.style.display = 'none';
+                return;
+            }
+            const totalRequired = 7;
+            const done = Math.max(0, totalRequired - missing.length);
+            const pct = Math.round((done / totalRequired) * 100);
+            const preview = missing.slice(0, 3).join(', ');
+            textEl.textContent = `${pct}% complete • Missing: ${preview}${missing.length > 3 ? '…' : ''}`;
+            banner.style.display = 'flex';
+        }
+
+        function applyUserToUI(user) {
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || 'Carrier';
+            const email = user.email || '-';
+            const phone = user.phone || '-';
+            const companyName = user.companyName || '-';
+            const companyReg = user.companyReg || '-';
+            const fleetSize = user.fleetSize || '-';
+            const yearsOperation = user.yearsOperation || '-';
+
+            document.getElementById('profileName').textContent = companyName !== '-' ? companyName : fullName;
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('avatarInitials').textContent = getInitials(companyName !== '-' ? companyName : fullName);
+
+            const status = (user.status || 'pending').toLowerCase();
+            const statusEl = document.getElementById('profileStatus');
+            if (status === 'verified' || status === 'approved') {
+                statusEl.classList.add('verified');
+                statusEl.innerHTML = '<i class="fas fa-circle"></i><span>Verified Carrier</span>';
+            } else {
+                statusEl.classList.remove('verified');
+                statusEl.innerHTML = '<i class="fas fa-circle"></i><span>Pending Verification</span>';
+            }
+
+            document.getElementById('fullName').textContent = fullName;
+            document.getElementById('email').textContent = email;
+            document.getElementById('phone').textContent = phone;
+            document.getElementById('companyName').textContent = companyName;
+            document.getElementById('companyReg').textContent = companyReg;
+            document.getElementById('fleetSize').textContent = fleetSize;
+            document.getElementById('yearsOperation').textContent = yearsOperation;
+        }
+
+        // Load profile data
+        async function loadProfileData() {
+            const user = getUserData();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                applyUserToUI(user);
+                setBannerFromProfile(user);
+
+                try {
+                    const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                    const carrierId = user.carrierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+                    if (db && carrierId) {
+                        await ensureAuthReady();
+                        const snap = await db.ref('carriers/' + carrierId).once('value');
+                        if (snap.exists()) {
+                            const remote = snap.val() || {};
+                            const merged = { ...user, ...remote, carrierId };
+                            localStorage.setItem('carrierAuth', JSON.stringify(merged));
+                            localStorage.setItem('lastCarrierProfile', JSON.stringify(merged));
+                            applyUserToUI(merged);
+                            setBannerFromProfile(merged);
+                            const missing = computeCarrierProfileMissing(merged);
+                            if (missing.length === 0 && !merged.profileComplete) {
+                                try {
+                                    await db.ref('carriers/' + carrierId).update({ profileComplete: true, updatedAt: new Date().toISOString() });
+                                } catch (e) {}
+                                merged.profileComplete = true;
+                                localStorage.setItem('carrierAuth', JSON.stringify(merged));
+                                localStorage.setItem('lastCarrierProfile', JSON.stringify(merged));
+                                setBannerFromProfile(merged);
+                            }
+                        }
+                    }
+                } catch (e) {}
+
+                // Load stats from Firebase
+                await loadStats();
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Failed to load profile data');
+            }
+        }
+
+        // Load stats
+        async function loadStats() {
+            const user = getUserData();
+            if (!user) return;
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+
+                // Fast query: fetch only this carrier's loads (fallback to small recent slice)
+                let carrierLoads = [];
+                try {
+                    const snap = await db.ref('loads').orderByChild('carrierId').equalTo(carrierId).limitToLast(400).once('value');
+                    const raw = snap.val() || {};
+                    carrierLoads = Object.values(raw);
+                } catch (e) {
+                    carrierLoads = [];
+                }
+                if (!carrierLoads.length) {
+                    const snap = await db.ref('loads').orderByKey().limitToLast(300).once('value');
+                    const raw = snap.val() || {};
+                    carrierLoads = Object.values(raw).filter(load => {
+                        return load.carrierId === carrierId ||
+                               load.assignedCarrier === carrierId ||
+                               (user.email && load.carrierEmail === user.email);
+                    });
+                }
+
+                const totalLoads = carrierLoads.length;
+                const completedLoads = carrierLoads.filter(load => 
+                    load.status?.toLowerCase() === 'completed'
+                ).length;
+
+                const totalEarnings = carrierLoads
+                    .filter(load => (load.status || '').toLowerCase() === 'completed')
+                    .reduce((sum, load) => sum + getNetCarrierAmount(load), 0);
+
+                // Update stats
+                document.getElementById('totalLoads').textContent = totalLoads;
+                document.getElementById('completedLoads').textContent = completedLoads;
+                document.getElementById('totalEarnings').textContent = formatCurrency(totalEarnings);
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Handle logout
+        function handleLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                localStorage.removeItem('carrierAuth');
+                localStorage.removeItem('lastCarrierProfile');
+                showSuccess('Signed out successfully');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfileData();
+            initTwoFAControls();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>Cancellation Requests - Alpha Freight</title>
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <style>
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        .page-header { padding: 1rem 1.25rem 1.1rem; }
+        .page-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .page-subtitle { font-size: 0.875rem; opacity: 0.9; margin: 0; }
+        .wrap { padding: 0 1.25rem 1rem; }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+        }
+        .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .title2 { font-weight: 900; letter-spacing: -0.02em; }
+        .sub2 { color: var(--text-medium); margin-top: 0.15rem; font-size: 0.88rem; }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.02);
+            color: var(--text-medium);
+            white-space: nowrap;
+        }
+        .pill.warn { border-color: rgba(217, 119, 6, 0.35); background: rgba(217, 119, 6, 0.08); color: var(--warning); }
+        .pill.danger { border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.08); color: var(--error); }
+        .pill.good { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.10); color: var(--success); }
+        .kv { display: flex; justify-content: space-between; gap: 1rem; padding-top: 0.65rem; margin-top: 0.65rem; border-top: 1px solid var(--border); }
+        .k { color: var(--text-medium); font-weight: 800; }
+        .v { font-weight: 900; text-align: right; }
+        .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.85rem; }
+        .btn-action {
+            flex: 1;
+            min-width: 140px;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            text-decoration: none;
+        }
+        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); }
+        .btn-action.success { background: var(--success); color: #fff; }
+        .btn-action.danger { background: var(--error); color: #fff; }
+        .btn-action:disabled { opacity: 0.65; cursor: not-allowed; }
+        .empty {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 1.25rem;
+            text-align: center;
+            color: var(--text-medium);
+        }
+        @media (min-width: 768px) { body { max-width: 500px; margin: 0 auto; } }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Cancellation Requests</h1>
+            <p class="page-subtitle" id="subtitle">Loading…</p>
+        </div>
+    </div>
+
+    <div class="wrap" id="listArea"></div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="loads.html" class="bottom-nav-item active"><i class="fas fa-clipboard-list"></i><span>Loads</span></a>
+        <a href="messages.html" class="bottom-nav-item"><i class="fas fa-comments"></i><span>Messages</span></a>
+        <a href="wallet.html" class="bottom-nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <a href="profile.html" class="bottom-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+    <script>
+        const alertSystem = new AlertSystem();
+
+        function getCarrierAuth() {
+            try {
+                const raw = localStorage.getItem('carrierAuth') || localStorage.getItem('lastCarrierProfile') || 'null';
+                return JSON.parse(raw);
+            } catch { return null; }
+        }
+
+        function isCarrierSessionValid(user) {
+            return !!(user && (user.isLoggedIn === true || user.carrierId || user.id || user.email));
+        }
+
+        function getCarrierId(user) {
+            if (!user) return '';
+            return user.carrierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            if (!authSdk.currentUser && typeof authSdk.signInAnonymously === 'function') {
+                try { await authSdk.signInAnonymously(); } catch (e) {}
+            }
+            if (!authSdk.currentUser) {
+                await new Promise((resolve) => {
+                    let done = false;
+                    const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                    const unsub = authSdk.onAuthStateChanged(() => {
+                        if (done) return;
+                        done = true;
+                        clearTimeout(timer);
+                        try { unsub(); } catch (e) {}
+                        resolve();
+                    });
+                });
+            }
+        }
+
+        function normalizeStatus(s) {
+            const t = String(s || '').toLowerCase().replace(/_/g, '-');
+            if (t === 'complete') return 'completed';
+            if (t === 'intransit') return 'in-transit';
+            return t;
+        }
+
+        function getOrderRef(loadId, load) {
+            if (load && load.formattedOrderId) return String(load.formattedOrderId);
+            if (load && load.orderRef) return String(load.orderRef);
+            const id = String(loadId || '');
+            const shortId = id ? id.substring(0, 8).toUpperCase() : '--------';
+            return 'ORD-' + shortId;
+        }
+
+        function calculateCancelFee(load) {
+            const amt = parseFloat(load && (load.totalCost || load.totalAmount || load.price || load.budget || load.maxBudget || load.minBudget || 0)) || 0;
+            return Math.round(Math.min(50, amt * 0.1) * 100) / 100;
+        }
+
+        function getSupplierIdFromLoad(load) {
+            if (!load) return '';
+            return load.supplierId || load.postedBy || (load.supplierEmail || '').replace(/@/g, '_').replace(/\./g, '_') || '';
+        }
+
+        async function createDbNotification(userId, userType, title, message, data) {
+            try {
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!db || !userId || !userType) return null;
+                const payload = {
+                    user_id: userId,
+                    user_type: userType,
+                    type: (data && data.type) ? data.type : 'system',
+                    title: title,
+                    message: message,
+                    data: data || {},
+                    read: false,
+                    created_at: new Date().toISOString()
+                };
+                const ref = db.ref('notifications').push();
+                await ref.set(payload).catch(() => {});
+                try {
+                    if (userType === 'supplier') {
+                        await db.ref(`notifications/suppliers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    } else if (userType === 'carrier') {
+                        await db.ref(`notifications/carriers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    }
+                } catch (e) {}
+                return ref.key || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function approveCancellation(loadId, load) {
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please refresh.'); return; }
+                const req = (load && load.cancellationRequest) ? load.cancellationRequest : {};
+                const fee = typeof req.proposedFee === 'number' ? req.proposedFee : calculateCancelFee(load);
+                const feePaid = fee <= 0 || req.feePaid === true || !!req.feePaymentId || !!req.feePaymentIntentId;
+                if (fee > 0 && !feePaid) {
+                    alertSystem.show('error', 'Fee not paid yet.');
+                    return;
+                }
+                await db.ref('loads/' + loadId).update({
+                    status: 'cancelled',
+                    cancelledAt: new Date().toISOString(),
+                    cancelledByRole: 'supplier',
+                    cancelledBy: 'supplier',
+                    cancelledReason: req.reason || '',
+                    cancellationFee: fee,
+                    cancellationPolicyVersion: 1,
+                    cancellationStatus: 'approved',
+                    cancellationRequest: {
+                        ...(req || {}),
+                        status: 'approved',
+                        approvedAt: new Date().toISOString(),
+                        approvedByRole: 'carrier'
+                    }
+                });
+                try {
+                    const supplierId = getSupplierIdFromLoad(load);
+                    if (supplierId) {
+                        await createDbNotification(
+                            supplierId,
+                            'supplier',
+                            'Cancellation Approved',
+                            'Carrier approved your cancellation. Your order is now cancelled.',
+                            { type: 'cancel_approved', loadId: loadId, url: '/mobile-app/supplier/load-details.html?id=' + encodeURIComponent(loadId) }
+                        );
+                    }
+                } catch (e) {}
+                alertSystem.show('success', 'Approved');
+                await loadAndRender();
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('error', (e && (e.code || e.message)) ? (e.code || e.message) : 'Failed to approve');
+            }
+        }
+
+        async function rejectCancellation(loadId, load) {
+            const note = (prompt('Reason for rejecting cancellation?') || '').trim();
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please refresh.'); return; }
+                const req = (load && load.cancellationRequest) ? load.cancellationRequest : {};
+                const fee = typeof req.proposedFee === 'number' ? req.proposedFee : calculateCancelFee(load);
+                const feePaid = fee <= 0 || req.feePaid === true || !!req.feePaymentId || !!req.feePaymentIntentId;
+                const refundDueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+                await db.ref('loads/' + loadId).update({
+                    cancellationStatus: 'rejected',
+                    cancellationRequest: {
+                        ...(req || {}),
+                        status: 'rejected',
+                        rejectedAt: new Date().toISOString(),
+                        rejectedByRole: 'carrier',
+                        rejectionReason: note
+                    },
+                    cancellationRefund: feePaid ? { status: 'pending', amount: fee, dueAt: refundDueAt, createdAt: new Date().toISOString() } : null
+                });
+                try {
+                    const supplierId = getSupplierIdFromLoad(load);
+                    if (supplierId) {
+                        const msg = feePaid
+                            ? 'Carrier rejected your cancellation. You must complete the order. Refund will be processed within 7 days.'
+                            : 'Carrier rejected your cancellation. You must complete the order.';
+                        await createDbNotification(
+                            supplierId,
+                            'supplier',
+                            'Cancellation Rejected',
+                            msg,
+                            { type: 'cancel_rejected', loadId: loadId, url: '/mobile-app/supplier/load-details.html?id=' + encodeURIComponent(loadId) }
+                        );
+                    }
+                } catch (e) {}
+                alertSystem.show('success', 'Rejected');
+                await loadAndRender();
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('error', (e && (e.code || e.message)) ? (e.code || e.message) : 'Failed to reject');
+            }
+        }
+
+        async function fetchMyLoadsWithCancellation(carrierId) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            const snap = await db.ref('loads').orderByChild('carrierId').equalTo(carrierId).once('value');
+            const out = [];
+            if (snap.exists()) {
+                snap.forEach((ch) => {
+                    const v = ch.val() || {};
+                    if (v.cancellationRequest) out.push({ id: ch.key, ...v });
+                });
+            }
+            return out;
+        }
+
+        function getEffectiveCancelStatus(req) {
+            if (!req) return '';
+            const raw = String(req.status || '').toLowerCase();
+            const fee = typeof req.proposedFee === 'number' ? req.proposedFee : 0;
+            const feePaid = fee <= 0 || req.feePaid === true || !!req.feePaymentId || !!req.feePaymentIntentId;
+            if (raw === 'pending') return feePaid ? 'pending_approval' : 'fee_pending';
+            return raw;
+        }
+
+        function renderList(items) {
+            const el = document.getElementById('listArea');
+            if (!items.length) {
+                document.getElementById('subtitle').textContent = 'No requests';
+                el.innerHTML = `<div class="empty"><div class="fw-bold">No cancellation requests</div><div style="margin-top:0.35rem;">When suppliers request cancellation, it will appear here.</div></div>`;
+                return;
+            }
+            document.getElementById('subtitle').textContent = `${items.length} requests`;
+            el.innerHTML = items.map((l) => {
+                const rid = l.id || l.loadId || '';
+                const req = l.cancellationRequest || {};
+                const eff = getEffectiveCancelStatus(req);
+                const fee = typeof req.proposedFee === 'number' ? req.proposedFee : calculateCancelFee(l);
+                const route = `${l.pickupLocation || ''} → ${l.deliveryLocation || ''}`;
+                const badge = eff === 'pending_approval' ? 'danger' : eff === 'fee_pending' ? 'warn' : 'warn';
+                const badgeText = eff === 'pending_approval' ? 'Pending Approval' : eff === 'fee_pending' ? 'Fee Pending' : (eff || 'Pending');
+                return `
+                    <div class="card">
+                        <div class="topbar">
+                            <div style="min-width:0;">
+                                <div class="title2">${getOrderRef(rid, l)} • Load #${String(rid).slice(0, 8)}</div>
+                                <div class="sub2">${route}</div>
+                            </div>
+                            <div class="pill ${badge}"><i class="fas fa-ban"></i> ${badgeText}</div>
+                        </div>
+                        <div class="kv"><div class="k">Fee</div><div class="v">£${fee.toFixed(2)}</div></div>
+                        <div class="kv"><div class="k">Reason</div><div class="v" style="text-align:left; font-weight:800;">${String(req.reason || '—').replace(/</g, '&lt;')}</div></div>
+                        <div class="actions">
+                            <a class="btn-action secondary" href="load-details.html?id=${encodeURIComponent(rid)}"><i class="fas fa-eye"></i> Open</a>
+                            ${eff === 'pending_approval' ? `
+                                <button class="btn-action success js-approve" type="button" data-id="${encodeURIComponent(rid)}"><i class="fas fa-check"></i> Approve</button>
+                                <button class="btn-action danger js-reject" type="button" data-id="${encodeURIComponent(rid)}"><i class="fas fa-times"></i> Reject</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            el.querySelectorAll('.js-approve').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const id = decodeURIComponent(btn.getAttribute('data-id') || '');
+                    const load = window._reqMap ? window._reqMap[id] : null;
+                    if (!id || !load) return;
+                    await approveCancellation(id, load);
+                });
+            });
+            el.querySelectorAll('.js-reject').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const id = decodeURIComponent(btn.getAttribute('data-id') || '');
+                    const load = window._reqMap ? window._reqMap[id] : null;
+                    if (!id || !load) return;
+                    await rejectCancellation(id, load);
+                });
+            });
+        }
+
+        async function loadAndRender() {
+            const user = getCarrierAuth();
+            if (!isCarrierSessionValid(user)) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const carrierId = getCarrierId(user);
+            try {
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Unable to start session'); }
+                const loads = await fetchMyLoadsWithCancellation(carrierId);
+                const filtered = loads.filter((l) => {
+                    const req = l.cancellationRequest || null;
+                    if (!req || String(req.requestedByRole || '').toLowerCase() !== 'supplier') return false;
+                    const eff = getEffectiveCancelStatus(req);
+                    return eff === 'fee_pending' || eff === 'pending_approval';
+                }).sort((a, b) => {
+                    const atA = (a.cancellationRequest && a.cancellationRequest.requestedAt) ? new Date(a.cancellationRequest.requestedAt).getTime() : 0;
+                    const atB = (b.cancellationRequest && b.cancellationRequest.requestedAt) ? new Date(b.cancellationRequest.requestedAt).getTime() : 0;
+                    return atB - atA;
+                });
+                window._reqMap = {};
+                filtered.forEach((l) => { window._reqMap[String(l.id || l.loadId || '')] = l; });
+                renderList(filtered);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('subtitle').textContent = 'Error';
+                document.getElementById('listArea').innerHTML = `<div class="empty"><div class="fw-bold">Failed to load</div><div style="margin-top:0.35rem;">Please refresh and try again.</div></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAndRender);
+    </script>
+</body>
+</html>

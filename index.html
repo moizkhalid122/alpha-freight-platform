@@ -280,6 +280,8 @@
             --primary-light: #3b82f6;
             --purple: #7c3aed;
             --purple-light: #a78bfa;
+            --accent: #635bff;
+            --accent-hover: #5851ea;
             --success: #10b981;
             --text-dark: #0f172a;
             --text-medium: #475569;
@@ -287,11 +289,19 @@
             --bg-white: #ffffff;
             --bg-gray: #f8fafc;
             --border-gray: #e2e8f0;
+            --border-soft: rgba(226, 232, 240, 0.92);
+            --border-accent: rgba(99, 91, 255, 0.26);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
             --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 6px 20px -4px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.1), 0 20px 40px -8px rgba(15, 23, 42, 0.12);
             --shadow-xl: 0 24px 48px -8px rgba(0, 0, 0, 0.12), 0 32px 64px -12px rgba(15, 23, 42, 0.15);
             --shadow-premium: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --shadow-card: 0 12px 28px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+            --shadow-card-hover: 0 22px 56px rgba(15, 23, 42, 0.12), 0 10px 26px rgba(15, 23, 42, 0.08);
             --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 50%, #7c3aed 100%);
             --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a78bfa 50%, #c4b5fd 100%);
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -399,10 +409,12 @@
         }
 
         .header-logo img {
-            height: 50px;
+            height: 54px;
             width: auto;
+            max-width: 200px;
             display: block;
             object-fit: contain;
+            object-position: left center;
         }
 
         .header-nav {
@@ -522,7 +534,7 @@
         }
 
         .header-nav-link-quote {
-            background: #635bff;
+            background: var(--accent);
             color: white !important;
             padding: 0.5rem 1rem !important;
             border-radius: 6px;
@@ -534,7 +546,7 @@
         }
 
         .header-nav-link-quote:hover {
-            background: #5851ea;
+            background: var(--accent-hover);
             color: white !important;
         }
 
@@ -566,16 +578,21 @@
         }
 
         .header-btn-primary {
-            background: #635bff;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
             color: white;
-            box-shadow: none;
+            box-shadow: 0 12px 26px rgba(99, 91, 255, 0.22);
         }
 
         .header-btn-primary:hover {
-            background: #5851ea;
+            background: linear-gradient(135deg, var(--accent-hover) 0%, #6d28d9 100%);
             color: white;
             transform: translateY(-1px);
-            box-shadow: none;
+            box-shadow: 0 16px 34px rgba(99, 91, 255, 0.28);
+        }
+
+        .header-btn:focus-visible {
+            outline: 3px solid rgba(99, 91, 255, 0.28);
+            outline-offset: 2px;
         }
 
         .header-btn-secondary {
@@ -620,6 +637,29 @@
         @media (min-width: 992px) {
             .header-nav-item:last-child {
                 display: none;
+            }
+
+            .header-btn {
+                height: 44px;
+                padding: 0.55rem 1.1rem;
+                border-radius: 10px;
+                font-size: 0.9rem;
+            }
+
+            .header-btn-primary {
+                background: linear-gradient(135deg, #635bff 0%, #7c3aed 100%);
+                box-shadow: 0 10px 26px rgba(99, 91, 255, 0.22);
+            }
+
+            .header-btn-primary:hover {
+                background: linear-gradient(135deg, #5851ea 0%, #6d28d9 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 14px 34px rgba(99, 91, 255, 0.28);
+            }
+
+            .header-btn-primary:focus-visible {
+                outline: 3px solid rgba(99, 91, 255, 0.28);
+                outline-offset: 2px;
             }
         }
 
@@ -733,6 +773,17 @@
         @media (min-width: 992px) {
             .mobile-menu-toggle {
                 display: none !important;
+            }
+
+            .header-logo img {
+                height: 56px;
+                max-width: 220px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .header-logo img {
+                height: 60px;
             }
         }
 
@@ -887,8 +938,8 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            border: 1px solid rgba(226, 232, 240, 0.9);
-            border-radius: 16px;
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-md);
             padding: 1.25rem;
             display: flex;
             align-items: flex-start;
@@ -898,7 +949,7 @@
             overflow: hidden;
             opacity: 0;
             transform: translateY(30px);
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+            box-shadow: var(--shadow-card);
             transition: opacity 0.7s ease-out, transform 0.7s ease-out, border-color 0.3s, box-shadow 0.4s, transform 0.4s;
         }
 
@@ -914,7 +965,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.68);
             z-index: 0;
             pointer-events: none;
             transition: background 0.4s ease;
@@ -926,9 +977,9 @@
         }
 
         .live-stat-card:hover {
-            border-color: rgba(99, 91, 255, 0.5);
-            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(99, 91, 255, 0.1);
-            transform: translateY(-6px);
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(99, 91, 255, 0.08);
+            transform: translateY(-5px);
         }
 
         .live-stat-card:hover::after {
@@ -939,7 +990,7 @@
             width: 40px;
             height: 40px;
             background: linear-gradient(135deg, #635bff 0%, #4f46e5 100%);
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1154,7 +1205,7 @@
 
         /* Hero Section */
         .hero-section {
-            padding: 100px 0 0 0;
+            padding: 90px 0 0 0;
             background: var(--bg-white);
             position: relative;
             overflow: hidden;
@@ -1293,33 +1344,33 @@
         .hero-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            gap: 3.25rem;
             align-items: center;
             max-width: 1400px;
             width: 100%;
             margin: 0 auto;
-            padding: 0 2rem 80px 2rem;
+            padding: 0 2rem 64px 2rem;
             position: relative;
             z-index: 1;
         }
 
         .hero-content {
-            padding-left: 2rem;
+            padding-left: 0;
             position: relative;
             z-index: 1;
-            max-width: 560px;
+            max-width: 640px;
             margin-right: auto;
         }
 
         /* Desktop View - Hero Section */
         @media (min-width: 992px) {
             .hero-section {
-                padding: 120px 0 0 0;
+                padding: 110px 0 0 0;
             }
 
             .hero-container {
-                padding: 0 3.5rem 110px 5rem;
-                gap: 6.5rem;
+                padding: 0 3.5rem 92px 5rem;
+                gap: 5.25rem;
             }
 
             .hero-content {
@@ -1336,8 +1387,8 @@
 
         @media (min-width: 1200px) {
             .hero-container {
-                padding: 0 6rem 120px 6rem;
-                gap: 6rem;
+                padding: 0 6rem 100px 6rem;
+                gap: 5.5rem;
             }
         }
 
@@ -1366,7 +1417,7 @@
         /* Mobile View Hero Section Optimizations */
         @media (max-width: 768px) {
             .hero-section {
-                padding: 60px 0 40px 0;
+                padding: 52px 0 32px 0;
             }
 
 
@@ -1385,8 +1436,8 @@
             }
 
             .hero-container {
-                padding: 0 1rem 40px 1rem;
-                gap: 2rem;
+                padding: 0 1rem 34px 1rem;
+                gap: 1.6rem;
             }
 
             .hero-content {
@@ -1408,14 +1459,14 @@
             }
 
             .hero-title {
-                font-size: 1.75rem;
+                font-size: 1.55rem;
                 margin-bottom: 1rem;
                 line-height: 1.2;
             }
 
             .hero-subtitle {
-                font-size: 0.9rem;
-                margin-bottom: 1.5rem;
+                font-size: 0.85rem;
+                margin-bottom: 1.25rem;
                 line-height: 1.6;
             }
 
@@ -1438,9 +1489,9 @@
             }
 
             .hero-graphic {
-                height: 260px;
+                height: 230px;
                 max-width: 100%;
-                margin: 1.75rem auto 0 auto;
+                margin: 1.4rem auto 0 auto;
             }
         }
 
@@ -1490,14 +1541,14 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.4rem 0.95rem;
+            padding: 0.32rem 0.8rem;
             border-radius: 999px;
             border: 1px solid rgba(59, 130, 246, 0.25);
             background: rgba(59, 130, 246, 0.04);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: #2563eb;
-            margin-bottom: 0.85rem;
+            margin-bottom: 0.7rem;
         }
 
         .hero-pill-icon {
@@ -1514,63 +1565,114 @@
         }
 
         .hero-title {
-            font-size: clamp(2.1rem, 3.4vw, 2.8rem);
+            font-size: clamp(1.9rem, 2.9vw, 2.45rem);
             font-weight: 800;
-            line-height: 1.1;
+            line-height: 1.06;
             color: #111827;
             letter-spacing: -0.03em;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
-            margin-bottom: 0.9rem;
+            text-shadow: 0 2px 14px rgba(15, 23, 42, 0.08);
+            margin-bottom: 0.75rem;
             letter-spacing: -0.02em;
+            max-width: 26ch;
+        }
+
+        .hero-title-accent {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-rotator {
+            display: inline-block;
+            vertical-align: baseline;
+            transition: opacity 260ms var(--transition-smooth), transform 260ms var(--transition-smooth), filter 260ms var(--transition-smooth);
+            will-change: opacity, transform, filter;
+        }
+
+        .hero-rotator.hero-rotator--out {
+            opacity: 0;
+            transform: translateY(0.22em);
+            filter: blur(1px);
         }
 
         .hero-subtitle {
-            font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+            font-size: clamp(0.92rem, 1.25vw, 1.02rem);
             color: #4b5563;
-            margin-bottom: 1.05rem;
-            line-height: 1.7;
+            margin-bottom: 0.9rem;
+            line-height: 1.65;
+            max-width: 56ch;
+        }
+
+        .hero-subtitle-secondary {
+            margin-top: 0;
+            color: #475569;
         }
 
         .hero-buttons {
             display: flex;
-            gap: 0.9rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
-            margin-top: 0.6rem;
+            margin-top: 0.4rem;
+            align-items: center;
+        }
+
+        .hero-buttons a {
+            white-space: nowrap;
         }
 
         .hero-stats-row {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 2.5rem;
-            margin-top: 2.2rem;
+            gap: 2rem;
+            margin-top: 1.35rem;
+            padding-top: 1.05rem;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            align-items: start;
+        }
+
+        .hero-stats-row > div {
+            min-width: 0;
         }
 
         .hero-stat-item-number {
-            font-size: 1.35rem;
+            font-size: 1.65rem;
             font-weight: 800;
             letter-spacing: -0.03em;
-            color: #020617;
+            color: #0f172a;
+            line-height: 1.05;
+        }
+
+        .hero-stat-item-number--word {
+            font-size: 1.2rem;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
         }
 
         .hero-stat-item-label {
-            margin-top: 0.2rem;
-            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
             color: #6b7280;
         }
 
         @media (max-width: 768px) {
             .hero-stats-row {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 1.75rem;
+                gap: 1.25rem;
+                text-align: center;
             }
 
             .hero-stat-item-number {
-                font-size: 1.15rem;
+                font-size: 1.45rem;
+            }
+
+            .hero-stat-item-number--word {
+                font-size: 1.05rem;
             }
         }
 
         .btn-primary-custom {
-            background: var(--purple);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
             color: white;
             padding: 0.85rem 1.75rem;
             border-radius: 12px;
@@ -1587,10 +1689,16 @@
         }
 
         .btn-primary-custom:hover {
-            background: var(--purple-light);
+            background: linear-gradient(135deg, var(--accent-hover) 0%, #6d28d9 100%);
             color: white;
             transform: translateY(-3px);
             box-shadow: 0 8px 24px rgba(99, 91, 255, 0.4);
+        }
+
+        .btn-primary-custom:focus-visible,
+        .btn-secondary-custom:focus-visible {
+            outline: 3px solid rgba(99, 91, 255, 0.28);
+            outline-offset: 2px;
         }
 
         .btn-secondary-custom {
@@ -1622,7 +1730,7 @@
 
         .hero-graphic {
             position: relative;
-            height: 500px;
+            height: 460px;
             width: 100%;
             max-width: 520px;
             margin-left: auto;
@@ -1711,7 +1819,7 @@
 
         @media (max-width: 991.98px) {
             .hero-graphic {
-                height: 300px;
+                height: 280px;
             }
         }
 
@@ -1863,19 +1971,19 @@
 
         .bento-card {
             background: var(--bg-white);
-            border: 1px solid var(--border-gray);
-            border-radius: 20px;
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
             padding: 2rem;
-            transition: all 0.5s var(--transition-smooth);
+            transition: transform 340ms var(--transition-smooth), box-shadow 340ms var(--transition-smooth), border-color 340ms var(--transition-smooth);
             position: relative;
             overflow: hidden;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-card);
         }
         
         .bento-card:hover {
-            transform: translateY(-8px);
-            border: 1.5px solid #a78bfa;
-            box-shadow: var(--shadow-premium), 0 0 0 1px rgba(167, 139, 250, 0.2);
+            transform: translateY(-6px);
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(99, 91, 255, 0.08);
         }
         
         .bento-card.gradient:hover {
@@ -4453,13 +4561,31 @@
         }
 
         .suppliers-carriers-card {
-            background: #ffffff;
-            border: 1px solid #e3e8ef;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
             padding: 2.5rem;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 420ms var(--transition-smooth), box-shadow 420ms var(--transition-smooth), border-color 420ms var(--transition-smooth);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
             opacity: 0;
             transform: translateY(100px);
+        }
+
+        .suppliers-carriers-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.76);
+            pointer-events: none;
+            transition: background 420ms var(--transition-smooth);
+            z-index: 0;
+        }
+
+        .suppliers-carriers-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .suppliers-carriers-section.animate-in .suppliers-carriers-card:nth-child(1) {
@@ -4491,9 +4617,13 @@
         }
 
         .suppliers-carriers-card:hover {
-            transform: translateY(-12px);
-            box-shadow: var(--shadow-premium), 0 24px 48px rgba(15, 23, 42, 0.15);
-            border-color: rgba(99, 91, 255, 0.3);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(99, 91, 255, 0.08);
+            border-color: var(--border-accent);
+        }
+
+        .suppliers-carriers-card:hover::before {
+            background: rgba(255, 255, 255, 0.64);
         }
 
         .suppliers-carriers-title {
@@ -8932,26 +9062,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                     </svg>
                     </span>
-                    <span>Licensed &amp; Insured in All 50 States</span>
+                    <span>UK-wide coverage • Verified carriers • Secure payments</span>
                 </div>
-                <h1 class="hero-title">Smart Freight Brokerage for the UK Market</h1>
+                <h1 class="hero-title">Smart <span class="hero-title-accent">Freight Brokerage</span> for <span class="hero-rotator" data-words="the UK Market|Suppliers|Carriers|Freight Companies">the UK Market</span></h1>
                 <p class="hero-subtitle">Connecting suppliers with verified carriers through a modern, reliable platform.</p>
-                <p class="hero-subtitle" style="margin-top: 1rem;">Real-time tracking, secure payments, and efficient load management — all in one place.</p>
+                <p class="hero-subtitle hero-subtitle-secondary">Real-time tracking, secure payments, and efficient load management — all in one place.</p>
                 <div class="hero-buttons">
-                    <a href="#suppliers-carriers" class="btn-primary-custom">
-                        Get started
+                    <a href="pages/supplier/supplier-registration.html" class="btn-primary-custom">
+                        Supplier Sign Up
                         <i class="fas fa-arrow-right"></i>
                     </a>
-                    <a href="pages/choose-account-type.html" class="btn-secondary-custom">
-                        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-                            <g fill="#000" fill-rule="evenodd">
-                                <path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z" fill="#EA4335"/>
-                                <path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.21 1.18-.78 2.47-2.05 3.58l2.73 2.14c1.63-1.5 2.57-3.7 2.57-6.22z" fill="#4285F4"/>
-                                <path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z" fill="#FBBC05"/>
-                                <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.73-2.14c-.76.53-1.78.9-3.23.9-2.38 0-4.4-1.57-5.12-3.74L.96 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"/>
-                            </g>
-                        </svg>
-                        Sign up with Google
+                    <a href="pages/carrier/register.html" class="btn-secondary-custom">
+                        Carrier Sign Up
+                        <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="hero-stats-row">
@@ -8968,7 +9091,7 @@
                         <div class="hero-stat-item-label">Years Experience</div>
                     </div>
                     <div>
-                        <div class="hero-stat-item-number" style="white-space: nowrap;">Same-Day</div>
+                        <div class="hero-stat-item-number hero-stat-item-number--word">Same‑Day</div>
                         <div class="hero-stat-item-label">Available</div>
                     </div>
                 </div>
@@ -8983,8 +9106,8 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="hero-badge-title">Fully Insured</div>
-                        <div class="hero-badge-subtitle">All belongings protected</div>
+                        <div class="hero-badge-title">Verified Carrier Network</div>
+                        <div class="hero-badge-subtitle">Trusted, UK-wide coverage</div>
                     </div>
                 </div>
             </div>
@@ -10179,7 +10302,7 @@
                     <h3 class="our-services-card-title">Load Management</h3>
                     <p class="our-services-card-description">Efficient load posting and matching system for suppliers</p>
                     <p class="our-services-card-feature">Save time, reduce costs, and ship with confidence.</p>
-                    <a href="#" class="our-services-card-button">
+                    <a href="pages/load-management.html" class="our-services-card-button">
                         Learn more
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -10190,7 +10313,7 @@
                     <h3 class="our-services-card-title">Carrier Network</h3>
                     <p class="our-services-card-description">Verified trucking companies and drivers worldwide</p>
                     <p class="our-services-card-feature">Access trusted carriers and ensure reliable deliveries every time.</p>
-                    <a href="#" class="our-services-card-button">
+                    <a href="pages/carrier-network.html" class="our-services-card-button">
                         Learn more
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -10201,7 +10324,7 @@
                     <h3 class="our-services-card-title">Brokerage Services</h3>
                     <p class="our-services-card-description">Professional mediation between suppliers and carriers</p>
                     <p class="our-services-card-feature">Streamline operations and maximize efficiency with expert support.</p>
-                    <a href="#" class="our-services-card-button">
+                    <a href="pages/brokerage-services.html" class="our-services-card-button">
                         Learn more
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -12756,6 +12879,25 @@
                         updateMenuState(false);
                     });
                 });
+            }
+
+            const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const rotator = document.querySelector('.hero-rotator');
+            if (!reduceMotion && rotator) {
+                const words = (rotator.getAttribute('data-words') || '').split('|').map(w => w.trim()).filter(Boolean);
+                if (words.length > 1) {
+                    const longest = words.reduce((a, b) => (b.length > a.length ? b : a), words[0]);
+                    rotator.style.minWidth = `${Math.max(12, Math.ceil(longest.length * 0.92))}ch`;
+                    let idx = Math.max(0, words.indexOf(rotator.textContent.trim()));
+                    setInterval(() => {
+                        rotator.classList.add('hero-rotator--out');
+                        window.setTimeout(() => {
+                            idx = (idx + 1) % words.length;
+                            rotator.textContent = words[idx];
+                            rotator.classList.remove('hero-rotator--out');
+                        }, 260);
+                    }, 2600);
+                }
             }
         });
     </script>

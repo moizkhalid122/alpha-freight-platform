@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Track Load - Alpha Freight</title>
+    
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Shared responsive bottom nav -->
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <script src="../../assets/js/google-maps-config.js"></script>
+    
+    <style>
+        /* —— Premium theme (matches supplier dashboard) —— */
+        :root {
+            --primary: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --primary-light: #60a5fa;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            min-height: 100vh;
+            /* footer from supplier-bottom-nav.css */
+            color: var(--text-dark);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1rem 1.25rem 1.1rem;
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 36px 36px;
+            opacity: 0.7;
+        }
+
+        .back-btn {
+            background: linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s var(--ease), background 0.3s var(--ease);
+        }
+        .back-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
+
+        .header-content { flex: 1; position: relative; z-index: 1; }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; }
+
+        .map-container {
+            margin: 0 1.25rem 1rem;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            height: 280px;
+            background: var(--bg-main);
+            position: relative;
+            box-shadow: var(--shadow-card);
+        }
+
+        #trackMap { width: 100%; height: 100%; }
+
+        .satellite-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .satellite-toggle.active {
+            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .map-wrapper { margin: 0 1.25rem 1rem; }
+
+        .map-placeholder {
+            height: 280px;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-medium);
+            box-shadow: var(--shadow-card);
+        }
+
+        .map-placeholder i { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+        .status-bar {
+            background: var(--card-bg);
+            margin: 0 1.25rem 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            opacity: 0.6;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-light);
+            flex-shrink: 0;
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+        .status-text { font-size: 0.875rem; font-weight: 800; flex: 1; letter-spacing: -0.02em; }
+        .stat-row { font-size: 0.75rem; color: var(--text-medium); }
+
+        .loads-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i { color: var(--primary); }
+
+        .load-item {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.125rem;
+            margin-bottom: 0.875rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .load-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 0 2px 2px 0;
+            opacity: 0.9;
+        }
+
+        .load-item:active { transform: scale(0.99); box-shadow: var(--shadow-sm); }
+        .load-item.active { border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.16), var(--shadow-card); }
+
+        .load-route { font-size: 0.9375rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.02em; color: var(--text-dark); }
+
+        .load-route i { color: var(--success); margin-right: 0.25rem; }
+
+        .load-meta {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        .load-meta span { margin-right: 1rem; }
+
+        /* Bottom nav: supplier-bottom-nav.css – same size as dashboard */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            margin: 0 1.25rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-state i { font-size: 2.5rem; color: var(--text-medium); margin-bottom: 0.75rem; }
+        .empty-state h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Track Load</h1>
+            <p class="page-subtitle" id="headerSubtitle">Select a load to track</p>
+        </div>
+    </div>
+
+    <div id="mapWrapper" class="map-wrapper">
+        <div class="map-container" id="mapContainer">
+            <div id="trackMap"></div>
+            <button class="satellite-toggle" id="satelliteToggle" onclick="toggleMapType()" title="Toggle Satellite View">
+                <i class="fas fa-satellite"></i>
+                <span id="mapTypeText">Satellite</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="status-bar" id="statusBar" style="display: none;">
+        <div class="status-dot" id="statusDot"></div>
+        <div>
+            <div class="status-text" id="statusText">Connecting...</div>
+            <div class="stat-row">
+                <span id="statSpeed">Speed: —</span>
+                <span id="statHeading">Heading: —</span>
+                <span id="statLast">Last: —</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="loads-section">
+        <h3 class="section-title">
+            <i class="fas fa-truck"></i>
+            Active Loads
+        </h3>
+        <div id="loadsList">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>Loading...</h3>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item active">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+
+        let map = null;
+        let carrierMarker = null;
+        let pickupMarker = null;
+        let deliveryMarker = null;
+        let selectedLoad = null;
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth');
+            return auth ? JSON.parse(auth) : null;
+        }
+
+        function getLoadIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('loadId') || '';
+        }
+
+        let currentMapType = 'roadmap';
+        let routePolylineGM = null;
+
+        function loadGoogleMaps() {
+            const apiKey = window.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
+            if (apiKey === 'YOUR_API_KEY_HERE' || !apiKey) {
+                const el = document.getElementById('trackMap');
+                if (el) el.innerHTML = '<div style="padding:2rem;text-align:center;color:#64748B;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:0.5rem;"></i><p>Google Maps API key required</p></div>';
+                return;
+            }
+            if (map) return;
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,places&callback=initGoogleMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
+        window.initGoogleMap = function initGoogleMap() {
+            if (typeof google === 'undefined' || !google.maps) return;
+            map = new google.maps.Map(document.getElementById('trackMap'), {
+                center: { lat: 51.5074, lng: -0.1278 },
+                zoom: 6,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                zoomControl: true,
+                mapTypeControl: false,
+                fullscreenControl: true
+            });
+            const t = document.getElementById('satelliteToggle');
+            if (t) t.classList.remove('active');
+        };
+
+        function toggleMapType() {
+            if (!map || typeof google === 'undefined') return;
+            currentMapType = currentMapType === 'roadmap' ? 'satellite' : 'roadmap';
+            map.setMapTypeId(currentMapType === 'satellite' ? google.maps.MapTypeId.SATELLITE : google.maps.MapTypeId.ROADMAP);
+            const t = document.getElementById('satelliteToggle');
+            const txt = document.getElementById('mapTypeText');
+            if (t) t.classList.toggle('active', currentMapType === 'satellite');
+            if (txt) txt.textContent = currentMapType === 'satellite' ? 'Map' : 'Satellite';
+        }
+
+        async function geocodeAddress(address) {
+            if (!address) return null;
+            try {
+                await new Promise(r => setTimeout(r, 300));
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`, {
+                    headers: { 'User-Agent': 'AlphaFreight/1.0' }
+                });
+                const data = await res.json();
+                if (data && data[0]) {
+                    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                }
+            } catch (e) { console.error(e); }
+            return null;
+        }
+
+        function updateCarrierOnMap(data, carrierName) {
+            const lat = data.latitude || data.lat;
+            const lng = data.longitude || data.lng;
+            if (!lat || !lng || !map || typeof google === 'undefined') return;
+
+            const pos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+            if (carrierMarker) {
+                carrierMarker.setPosition(pos);
+            } else {
+                carrierMarker = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    title: carrierName || 'Carrier',
+                    icon: {
+                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        scaledSize: new google.maps.Size(40, 40)
+                    }
+                });
+                carrierMarker.addListener('click', () => {
+                    new google.maps.InfoWindow({
+                        content: `<b>${carrierName || 'Carrier'}</b>`
+                    }).open(map, carrierMarker);
+                });
+            }
+
+            map.panTo(pos);
+            map.setZoom(14);
+            document.getElementById('statSpeed').textContent = `Speed: ${(data.speed || 0) > 0 ? (data.speed * 2.237).toFixed(0) + ' mph' : '—'}`;
+            document.getElementById('statHeading').textContent = data.heading ? `Heading: ${Math.round(data.heading)}°` : 'Heading: —';
+            const ts = data.timestamp || data.updatedAt;
+            document.getElementById('statLast').textContent = ts ? 'Last: ' + new Date(ts).toLocaleTimeString() : 'Last: —';
+            document.getElementById('statusText').textContent = `Tracking ${carrierName || 'carrier'}`;
+            document.getElementById('statusDot').classList.add('active');
+        }
+
+        async function showRoute(load) {
+            if (!map || typeof google === 'undefined') return;
+            const pickup = load.pickupLocation || load.pickup_location || '';
+            const delivery = load.deliveryLocation || load.delivery_location || '';
+            const pickupLat = load.pickupLat || load.pickup_lat;
+            const pickupLng = load.pickupLng || load.pickup_lng;
+            const delLat = load.deliveryLat || load.delivery_lat;
+            const delLng = load.deliveryLng || load.delivery_lng;
+
+            let pickupCoords = null;
+            let deliveryCoords = null;
+            if (pickupLat && pickupLng) pickupCoords = { lat: parseFloat(pickupLat), lng: parseFloat(pickupLng) };
+            else if (pickup) pickupCoords = await geocodeAddress(pickup);
+            if (delLat && delLng) deliveryCoords = { lat: parseFloat(delLat), lng: parseFloat(delLng) };
+            else if (delivery) deliveryCoords = await geocodeAddress(delivery);
+
+            if (pickupMarker) { pickupMarker.setMap(null); pickupMarker = null; }
+            if (deliveryMarker) { deliveryMarker.setMap(null); deliveryMarker = null; }
+            if (routePolylineGM) { routePolylineGM.setMap(null); routePolylineGM = null; }
+
+            const path = [];
+            if (pickupCoords) {
+                const p = { lat: parseFloat(pickupCoords.lat), lng: parseFloat(pickupCoords.lng) };
+                path.push(p);
+                pickupMarker = new google.maps.Marker({
+                    position: p,
+                    map: map,
+                    title: 'Pickup: ' + pickup,
+                    icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', scaledSize: new google.maps.Size(36, 36) }
+                });
+            }
+            if (deliveryCoords) {
+                const d = typeof deliveryCoords.lat === 'number' ? deliveryCoords : { lat: parseFloat(deliveryCoords.lat || deliveryCoords[0]), lng: parseFloat(deliveryCoords.lng || deliveryCoords[1]) };
+                path.push(d);
+                deliveryMarker = new google.maps.Marker({
+                    position: d,
+                    map: map,
+                    title: 'Delivery: ' + delivery,
+                    icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', scaledSize: new google.maps.Size(36, 36) }
+                });
+            }
+            if (path.length > 1) {
+                routePolylineGM = new google.maps.Polyline({
+                    path: path,
+                    geodesic: true,
+                    strokeColor: '#2563EB',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 4
+                });
+                routePolylineGM.setMap(map);
+                const bounds = new google.maps.LatLngBounds();
+                path.forEach(pt => bounds.extend(pt));
+                map.fitBounds(bounds, 50);
+            } else if (path.length === 1) {
+                map.setCenter(path[0]);
+                map.setZoom(10);
+            }
+        }
+
+        function trackCarrier(loadId, carrierId, carrierName) {
+            const user = getUserData();
+            if (!user) {
+                showError('Please sign in');
+                return;
+            }
+
+            selectedLoad = { loadId, carrierId, carrierName };
+            document.getElementById('headerSubtitle').textContent = carrierName || 'Tracking...';
+            document.getElementById('statusBar').style.display = 'flex';
+            document.getElementById('statusDot').classList.remove('active');
+            document.getElementById('statusText').textContent = 'Connecting...';
+
+            if (!map) {
+                loadGoogleMaps();
+            } else {
+                if (typeof google !== 'undefined' && google.maps) map.panTo(new google.maps.LatLng(51.5074, -0.1278));
+            }
+
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) {
+                showError('Database not available');
+                return;
+            }
+
+            db.ref(`loads/${loadId}`).once('value', async (snap) => {
+                const load = snap.val();
+                if (load) await showRoute(load);
+            });
+
+            const paths = [];
+            if (carrierId) paths.push(`loadLocations/${loadId}/${carrierId}`);
+            paths.push(`loadLocations/${loadId}`);
+            if (carrierId) paths.push(`carrierLocations/${carrierId}`);
+            if (carrierId) paths.push(`driverLocations/${carrierId}`);
+            paths.push(`loads/${loadId}/currentLocation`);
+
+            let found = false;
+            const tryPath = (path) => {
+                if (found) return;
+                const ref = db.ref(path);
+                ref.on('value', (snap) => {
+                    if (found) return;
+                    let data = snap.val();
+                    if (path === `loadLocations/${loadId}` && data && typeof data === 'object') {
+                        const first = Object.keys(data)[0];
+                        data = first ? data[first] : null;
+                    }
+                    if (data && (data.latitude || data.lat) && (data.longitude || data.lng)) {
+                        found = true;
+                        paths.forEach(p => { if (p !== path) db.ref(p).off(); });
+                        updateCarrierOnMap(data, carrierName);
+                    }
+                });
+            };
+
+            paths.forEach(tryPath);
+
+            setTimeout(() => {
+                if (!found) {
+                    document.getElementById('statusText').textContent = 'No location data yet';
+                    document.getElementById('statusDot').classList.remove('active');
+                }
+            }, 3000);
+        }
+
+        function loadActiveLoads() {
+            const user = getUserData();
+            const container = document.getElementById('loadsList');
+
+            if (!user) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3><p>Sign in to track loads</p></div>';
+                return;
+            }
+
+            const supplierId = user.supplierId || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const loadIdParam = getLoadIdFromUrl();
+
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Could not connect</p></div>';
+                return;
+            }
+
+            db.ref('loads').orderByChild('supplierId').equalTo(supplierId).on('value', (snap) => {
+                const loads = [];
+                if (snap.exists()) {
+                    snap.forEach((child) => {
+                        const l = child.val();
+                        const id = child.key;
+                        const hasCarrier = l.carrierId || l.carrierName || l.carrier_id || l.carrier_name;
+                        const status = (l.status || '').toLowerCase();
+                        const trackable = ['accepted', 'active', 'in_transit', 'in-transit', 'in_transit'].includes(status) && hasCarrier;
+                        if (trackable) loads.push({ ...l, id });
+                    });
+                }
+
+                if (loads.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-truck"></i><h3>No trackable loads</h3><p>Loads with assigned carriers will appear here</p></div>';
+                    return;
+                }
+
+                container.innerHTML = loads.map(l => {
+                    const cid = l.carrierId || l.carrier_id || '';
+                    const cname = (l.carrierName || l.carrier_name || 'Carrier').replace(/"/g, '&quot;');
+                    const pickup = l.pickupLocation || l.pickup_location || 'N/A';
+                    const delivery = l.deliveryLocation || l.delivery_location || 'N/A';
+                    const status = (l.status || 'active').toLowerCase();
+                    const statusText = status === 'in_transit' || status === 'in-transit' ? 'In Transit' : status === 'accepted' ? 'Accepted' : 'Active';
+                    const isSelected = loadIdParam === l.id || (selectedLoad && selectedLoad.loadId === l.id);
+
+                    return `<div class="load-item${isSelected ? ' active' : ''}" data-load-id="${l.id}" data-carrier-id="${cid}" data-carrier-name="${cname}">
+                        <div class="load-route"><i class="fas fa-route"></i> ${pickup} → ${delivery}</div>
+                        <div class="load-meta"><span>${l.carrierName || l.carrier_name || 'Carrier'}</span><span>${statusText}</span></div>
+                    </div>`;
+                }).join('');
+
+                container.querySelectorAll('.load-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        container.querySelectorAll('.load-item').forEach(x => x.classList.remove('active'));
+                        el.classList.add('active');
+                        trackCarrier(el.dataset.loadId, el.dataset.carrierId || '', (el.dataset.carrierName || 'Carrier').replace(/&quot;/g, '"'));
+                    });
+                });
+
+                if (loadIdParam) {
+                    const match = loads.find(l => l.id === loadIdParam);
+                    if (match) {
+                        const cid = match.carrierId || match.carrier_id || '';
+                        const cname = match.carrierName || match.carrier_name || 'Carrier';
+                        trackCarrier(loadIdParam, cid, cname);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGoogleMaps();
+            loadActiveLoads();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Admin Login - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #4c2d8b;
+            --accent: #e83e8c;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg: #0b1220;
+            --card: rgba(255, 255, 255, 0.10);
+            --border: rgba(255, 255, 255, 0.18);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            color: #fff;
+            background:
+                radial-gradient(900px 420px at 20% 10%, rgba(111, 66, 193, 0.45) 0%, transparent 60%),
+                radial-gradient(820px 420px at 80% 20%, rgba(232, 62, 140, 0.28) 0%, transparent 62%),
+                linear-gradient(180deg, #070b14 0%, #0b1220 100%);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wrap {
+            width: min(460px, 100%);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 1.15rem;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(111, 66, 193, 0.9) 0%, rgba(232, 62, 140, 0.85) 100%);
+            display: grid;
+            place-items: center;
+            box-shadow: 0 18px 40px rgba(111, 66, 193, 0.25);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .brand-title {
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            font-size: 1.2rem;
+        }
+
+        .brand-sub {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.9rem;
+            margin-top: 0.15rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 26px 70px rgba(2, 6, 23, 0.55);
+        }
+
+        .title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.35rem;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.92rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .field {
+            margin-bottom: 0.9rem;
+        }
+
+        .label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.78);
+            margin-bottom: 0.55rem;
+        }
+
+        .input {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(2, 6, 23, 0.28);
+            color: #fff;
+            padding: 0.9rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            transition: box-shadow 0.25s var(--ease), border-color 0.25s var(--ease), background 0.25s var(--ease);
+        }
+
+        .input:focus {
+            border-color: rgba(232, 62, 140, 0.65);
+            box-shadow: 0 0 0 4px rgba(232, 62, 140, 0.18);
+            background: rgba(2, 6, 23, 0.42);
+        }
+
+        .btn {
+            width: 100%;
+            border: 0;
+            border-radius: 999px;
+            padding: 0.95rem 1rem;
+            font-weight: 900;
+            font-size: 1rem;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(145deg, rgba(111, 66, 193, 0.95) 0%, rgba(232, 62, 140, 0.95) 100%);
+            box-shadow: 0 18px 46px rgba(232, 62, 140, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            transition: transform 0.25s var(--ease), filter 0.25s var(--ease);
+        }
+
+        .btn:active { transform: scale(0.99); }
+        .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .hint {
+            margin-top: 0.9rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            background: rgba(2, 6, 23, 0.88);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 14px;
+            padding: 0.75rem 0.9rem;
+            color: #fff;
+            font-weight: 700;
+            display: none;
+            width: min(520px, calc(100% - 2rem));
+            box-shadow: 0 22px 60px rgba(2, 6, 23, 0.6);
+        }
+        .toast.error { border-color: rgba(239, 68, 68, 0.35); }
+        .toast.success { border-color: rgba(16, 185, 129, 0.35); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="brand">
+            <div class="brand-badge"><i class="fas fa-crown"></i></div>
+            <div>
+                <div class="brand-title">Alpha Freight</div>
+                <div class="brand-sub">Mobile Admin Panel</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="title">Admin Login</div>
+            <div class="subtitle">Sign in to track carriers, suppliers, loads, and payments.</div>
+
+            <form id="loginForm">
+                <div class="field">
+                    <div class="label"><span>Email</span></div>
+                    <input class="input" type="email" id="email" autocomplete="email" placeholder="info@alphazonix.com" required>
+                </div>
+                <div class="field">
+                    <div class="label"><span>Password</span></div>
+                    <input class="input" type="password" id="password" autocomplete="current-password" placeholder="••••••••" required>
+                </div>
+                <div class="field">
+                    <div class="label"><span>Secret Code</span></div>
+                    <input class="input" type="password" id="secretCode" inputmode="numeric" placeholder="•••••••" required>
+                </div>
+                <button class="btn" id="loginBtn" type="submit">
+                    <i class="fas fa-shield-halved"></i> Sign In
+                </button>
+            </form>
+            <div class="hint">Use your admin credentials.</div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <script>
+        function showToast(type, msg) {
+            const t = document.getElementById('toast');
+            t.className = 'toast ' + (type || '');
+            t.textContent = msg || '';
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2500);
+        }
+
+        function getAdminAuth() {
+            try { return JSON.parse(localStorage.getItem('adminAuth') || 'null'); } catch { return null; }
+        }
+
+        function setAdminAuth(auth) {
+            localStorage.setItem('adminAuth', JSON.stringify(auth));
+            try { localStorage.setItem('ab.portal.lastRole', 'admin'); } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const existing = getAdminAuth();
+            if (existing && existing.isLoggedIn) {
+                window.location.replace('dashboard.html');
+                return;
+            }
+
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+
+                const email = (document.getElementById('email').value || '').trim();
+                const password = document.getElementById('password').value || '';
+                const secretCode = (document.getElementById('secretCode').value || '').trim();
+
+                const ADMIN_EMAIL = 'info@alphazonix.com';
+                const ADMIN_PASSWORD = 'Moizkhalid22@';
+                const ADMIN_SECRET_CODE = '4449090';
+
+                if (email !== ADMIN_EMAIL) {
+                    showToast('error', 'Invalid email');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shield-halved"></i> Sign In';
+                    return;
+                }
+                if (password !== ADMIN_PASSWORD) {
+                    showToast('error', 'Invalid password');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shield-halved"></i> Sign In';
+                    return;
+                }
+                if (secretCode !== ADMIN_SECRET_CODE) {
+                    showToast('error', 'Invalid secret code');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shield-halved"></i> Sign In';
+                    return;
+                }
+
+                (async function () {
+                    try {
+                        const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                        if (authSdk) {
+                            try {
+                                await authSdk.signInWithEmailAndPassword(email, password);
+                            } catch (e) {
+                                try {
+                                    await authSdk.signInAnonymously();
+                                } catch (e2) {}
+                            }
+                        }
+                    } catch (e) {}
+                })();
+
+                setAdminAuth({
+                    isLoggedIn: true,
+                    email,
+                    adminId: email,
+                    loginTime: new Date().toISOString()
+                });
+
+                showToast('success', 'Welcome Admin');
+                setTimeout(() => { window.location.replace('dashboard.html'); }, 450);
+            });
+        });
+    </script>
+</body>
+</html>

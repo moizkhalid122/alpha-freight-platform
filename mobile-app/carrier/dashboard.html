@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PWA Meta Tags - status/nav bar original color (white bg, dark icons), na black -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    
+    <title>Dashboard - Alpha Freight</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    
+    <style>
+        /* Critical footer – system bar ke bilkul upar (bottom offset), gap na ho */
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        .bottom-nav { position: fixed !important; left: 0 !important; right: 0 !important; width: 100% !important; margin: 0 !important; bottom: env(safe-area-inset-bottom, 48px) !important; background: #fff !important; display: flex !important; justify-content: space-around !important; align-items: center !important; padding: 10px 0 !important; box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important; border-top: 1px solid #eee !important; box-sizing: border-box !important; z-index: 1000 !important; }
+        .bottom-nav-item { flex: 1 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; font-size: 14px !important; color: #666 !important; text-decoration: none !important; }
+        .bottom-nav-item i { font-size: 18px !important; margin-bottom: 2px !important; }
+        .bottom-nav-item.active { color: var(--primary, #1d4ed8) !important; font-weight: 700 !important; }
+        @media (max-width:380px) { .bottom-nav { padding: 8px 0 !important; } body.has-bottom-nav { padding-bottom: calc(70px + env(safe-area-inset-bottom, 48px)) !important; } .bottom-nav-item { font-size: 12px !important; } .bottom-nav-item i { font-size: 16px !important; } }
+        @media (min-width:768px) { .bottom-nav { padding: 12px 0 !important; } body.has-bottom-nav { padding-bottom: calc(85px + env(safe-area-inset-bottom, 48px)) !important; } .bottom-nav-item { font-size: 16px !important; } .bottom-nav-item i { font-size: 20px !important; } }
+
+        /* Theme: carrier-premium-theme.css (navy, gold, Plus Jakarta) */
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Professional focus ring */
+        a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, 0.35);
+            outline-offset: 2px;
+            border-radius: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: clamp(1.1rem, 3.5vw, 1.375rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.125rem;
+            position: relative;
+        }
+
+        .header-icon-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--error);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.625rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-btn i {
+            font-size: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .stat-icon.primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .stat-icon.success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+
+        .stat-icon.warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #D97706 100%);
+        }
+
+        .stat-icon.info {
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.2;
+            min-height: 1.8rem; /* keeps layout stable while loading */
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Quick Actions */
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            padding: 0 1.25rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .action-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            min-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .action-btn span {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Recent Loads */
+        .loads-section {
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .load-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .load-card:active {
+            transform: scale(0.98);
+        }
+
+        .load-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .load-id {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .load-status {
+            padding: 0.375rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .load-status.accepted {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .load-status.in-transit {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .load-status.completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .load-route {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .route-point {
+            flex: 1;
+        }
+
+        .route-point-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            margin-bottom: 0.25rem;
+        }
+
+        .route-point-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .route-arrow {
+            color: var(--primary);
+            font-size: 1.25rem;
+            transform: translateX(-34px);
+        }
+
+        .load-details {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .load-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .load-detail-label {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        .load-detail-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .load-price {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin: 0 1.25rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Fast-load skeletons */
+        .skeleton-text {
+            display: inline-block;
+            height: 1em;
+            border-radius: 8px;
+            background: linear-gradient(90deg, rgba(148,163,184,0.25) 0%, rgba(148,163,184,0.45) 45%, rgba(148,163,184,0.25) 90%);
+            background-size: 100% 100%;
+            animation: pulseSk 1.1s ease-in-out infinite;
+        }
+        .stat-value.is-loading {
+            color: transparent;
+            position: relative;
+        }
+        .stat-value.is-loading::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto 0; /* perfectly center in the stat-value line box */
+            transform: none;
+            width: 66%;
+            height: 1.05em;
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(148,163,184,0.25) 0%, rgba(148,163,184,0.45) 45%, rgba(148,163,184,0.25) 90%);
+            background-size: 100% 100%;
+            animation: pulseSk 1.1s ease-in-out infinite;
+        }
+        /* Earnings value is usually wider */
+        #totalEarnings.is-loading::after { width: 78%; }
+        @keyframes pulseSk {
+            0%, 100% { opacity: 0.75; }
+            50% { opacity: 1; }
+        }
+
+        .skeleton-load {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+        .sk-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.9rem; }
+        .sk-pill { width: 84px; height: 22px; border-radius: 999px; background: var(--border); }
+        .sk-title { width: 140px; height: 14px; border-radius: 10px; background: var(--border); }
+        .sk-route { width: 100%; height: 12px; border-radius: 10px; background: var(--border); margin-bottom: 0.6rem; }
+        .sk-meta { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 0.75rem; margin-top: 0.85rem; }
+        .sk-box { height: 14px; border-radius: 10px; background: var(--border); }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="header-top">
+            <div class="header-left">
+                <div class="user-avatar" id="userAvatar">
+                    <span id="avatarInitials">C</span>
+                </div>
+                <div class="user-info">
+                    <h1 class="user-name" id="userName">Loading...</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-icon-btn" onclick="window.location.href='messages.html'">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">3</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-content">
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span id="statusText">Active & Ready</span>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" onclick="window.location.href='share-location.html'">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Share Location
+                </button>
+                <button class="header-btn" onclick="window.location.href='loads.html'">
+                    <i class="fas fa-search"></i>
+                    Find Loads
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileCompleteBanner" style="display:none; margin: 1.1rem 1.25rem 0; background: #eef2ff; border: 1px solid #c7d2fe; padding: 0.85rem 0.9rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 0.85rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.7rem; min-width:0;">
+            <div style="width: 34px; height: 34px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); display:grid; place-items:center; color:#4f46e5; flex-shrink:0;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div style="min-width:0;">
+                <div style="font-weight: 900; font-size: 0.9rem; color:#111827; line-height:1.2;">Complete your profile</div>
+                <div id="profileCompleteBannerText" style="margin-top: 0.25rem; font-size: 0.78rem; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Add your company registration and details</div>
+            </div>
+        </div>
+        <a href="edit-profile.html" style="background: #4f46e5; color: white; text-decoration: none; padding: 0.5rem 0.85rem; border-radius: 12px; font-weight: 900; font-size: 0.78rem; flex-shrink:0;">Complete</a>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon primary">
+                    <i class="fas fa-boxes"></i>
+                </div>
+            </div>
+            <div class="stat-label">Total Loads</div>
+            <div class="stat-value" id="totalLoads">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="stat-label">Active Loads</div>
+            <div class="stat-value" id="activeLoads">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon warning">
+                    <i class="fas fa-truck"></i>
+                </div>
+            </div>
+            <div class="stat-label">In Transit</div>
+            <div class="stat-value" id="inTransitLoads">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon info">
+                    <i class="fas fa-pound-sign"></i>
+                </div>
+            </div>
+            <div class="stat-label">Total Earnings</div>
+            <div class="stat-value" id="totalEarnings">£0</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h3 class="section-title">Quick Actions</h3>
+    <div class="quick-actions">
+        <div class="action-btn" onclick="window.location.href='share-location.html'">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Share Location</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='my-loads.html'">
+            <i class="fas fa-list-check"></i>
+            <span>My Loads</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='messages.html'">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='wallet.html'">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </div>
+        <div class="action-btn" onclick="window.location.href='vehicles.html'">
+            <i class="fas fa-truck"></i>
+            <span>Vehicles</span>
+        </div>
+    </div>
+
+    <!-- Recent Loads -->
+    <h3 class="section-title">Recent Loads</h3>
+    <div class="loads-section" id="loadsSection">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+
+    <!-- Firebase Init -->
+    <script src="../../assets/js/firebase-init.js"></script>
+
+    <!-- Alerts -->
+    <script src="../../assets/js/alerts.js"></script>
+
+    <!-- FCM / Push Notifications -->
+    <script src="../../assets/js/notifications.js"></script>
+
+    <!-- Main Script -->
+    <script>
+        // Initialize alerts
+        const alertSystem = new AlertSystem();
+
+        // Check authentication (without redirect)
+        function checkAuth() {
+            const carrierAuth = localStorage.getItem('carrierAuth');
+            if (!carrierAuth) {
+                return null;
+            }
+            return JSON.parse(carrierAuth);
+        }
+
+        // Get initials
+        function getInitials(name) {
+            if (!name) return 'C';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // Load user data
+        function loadUserData() {
+            const user = checkAuth();
+            const nameEl = document.getElementById('userName');
+            if (!user) {
+                nameEl.textContent = 'Guest User';
+                nameEl.title = '';
+                document.getElementById('avatarInitials').textContent = 'G';
+                return;
+            }
+
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || 'Carrier';
+            const companyName = user.companyName || '';
+            const displayName = companyName || fullName;
+
+            nameEl.textContent = displayName;
+            nameEl.title = displayName;
+            document.getElementById('avatarInitials').textContent = getInitials(displayName);
+
+            // Update status
+            const status = (user.status || 'pending').toLowerCase();
+            const statusTextEl = document.getElementById('statusText');
+            if (status === 'verified' || status === 'approved') {
+                statusTextEl.textContent = 'Verified & Active';
+            } else {
+                statusTextEl.textContent = 'Pending Verification';
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getCarrierCommissionRate(originalAmount) {
+            const amt = parseFloat(originalAmount) || 0;
+            let commissionRate = 0.05;
+            if (amt > 5000) {
+                commissionRate = 0.03;
+            } else if (amt > 1000) {
+                commissionRate = 0.04;
+            }
+            return commissionRate;
+        }
+
+        function getNetCarrierAmount(load) {
+            if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
+                const v = parseFloat(load.carrierNetAmount);
+                if (!isNaN(v)) return v;
+            }
+            const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (parseFloat(load.minBudget) + parseFloat(load.maxBudget)) / 2 : load.maxBudget || load.minBudget || load.price || 0));
+            const original = parseFloat(originalBudget) || 0;
+            const commissionRate = getCarrierCommissionRate(original);
+            const commission = original * commissionRate;
+            return Math.round((original - commission) * 100) / 100;
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
+                });
+            });
+        }
+
+        function computeCarrierProfileMissing(profile) {
+            const missing = [];
+            const p = profile || {};
+            if (!String(p.firstName || '').trim()) missing.push('First name');
+            if (!String(p.lastName || '').trim()) missing.push('Last name');
+            if (!String(p.companyName || '').trim()) missing.push('Company');
+            if (!String(p.phone || '').trim()) missing.push('Phone');
+            if (!String(p.companyReg || '').trim()) missing.push('Company reg');
+            if (!String(p.fleetSize || '').trim()) missing.push('Fleet size');
+            if (!String(p.yearsOperation || '').trim()) missing.push('Years');
+            return missing;
+        }
+
+        async function checkAndShowProfileBanner() {
+            const user = checkAuth();
+            const banner = document.getElementById('profileCompleteBanner');
+            const textEl = document.getElementById('profileCompleteBannerText');
+            if (!user || !banner || !textEl) return;
+
+            const carrierId = user.carrierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            let merged = user;
+
+            try {
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (db && carrierId) {
+                    await ensureAuthReady();
+                    const snap = await db.ref('carriers/' + carrierId).once('value');
+                    if (snap.exists()) {
+                        const remote = snap.val() || {};
+                        merged = { ...user, ...remote, carrierId };
+                        localStorage.setItem('carrierAuth', JSON.stringify(merged));
+                        localStorage.setItem('lastCarrierProfile', JSON.stringify(merged));
+                    }
+                }
+            } catch (e) {}
+
+            const missing = computeCarrierProfileMissing(merged);
+            if (missing.length === 0 && !merged.profileComplete) {
+                try {
+                    const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                    if (db) await db.ref('carriers/' + carrierId).update({ profileComplete: true, updatedAt: new Date().toISOString() });
+                } catch (e) {}
+                merged.profileComplete = true;
+                try {
+                    localStorage.setItem('carrierAuth', JSON.stringify(merged));
+                    localStorage.setItem('lastCarrierProfile', JSON.stringify(merged));
+                } catch (e) {}
+            }
+
+            const isComplete = missing.length === 0 && !!merged.profileComplete;
+            if (isComplete) {
+                banner.style.display = 'none';
+                return;
+            }
+            const totalRequired = 7;
+            const done = Math.max(0, totalRequired - missing.length);
+            const pct = Math.round((done / totalRequired) * 100);
+            const preview = missing.slice(0, 3).join(', ');
+            textEl.textContent = `${pct}% complete • Missing: ${preview}${missing.length > 3 ? '…' : ''}`;
+            banner.style.display = 'flex';
+        }
+
+        async function initNativePush() {
+            const Push = window.Capacitor?.Plugins?.PushNotifications || window.Capacitor?.Plugins?.['PushNotifications'];
+            if (!Push) return false;
+            const user = checkAuth();
+            if (!user) return false;
+            const carrierId = user.carrierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const db = window.AlphaBrokrage?.firebaseDb;
+            if (!db || !carrierId) return false;
+            try {
+                Push.addListener('registration', async (e) => {
+                    if (e.value) {
+                        try {
+                            await db.ref('carriers/' + carrierId + '/fcmToken').set({ token: e.value, updatedAt: new Date().toISOString(), userType: 'carrier' });
+                        } catch (err) {}
+                    }
+                });
+                let perm = await Push.checkPermissions();
+                if (perm?.receive !== 'granted') perm = await Push.requestPermissions();
+                if (perm?.receive !== 'granted') return false;
+                await Push.register();
+                return true;
+            } catch (e) { return false; }
+        }
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            const user = checkAuth();
+            if (!user) {
+                // Show empty state if not logged in
+                document.getElementById('totalLoads').textContent = '0';
+                document.getElementById('activeLoads').textContent = '0';
+                document.getElementById('inTransitLoads').textContent = '0';
+                document.getElementById('totalEarnings').textContent = '£0';
+                document.getElementById('loadsSection').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h3>Please Sign In</h3>
+                        <p>Sign in to view your dashboard</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                
+                // Show fast-loading skeletons immediately
+                setDashboardLoading(true);
+
+                // Fast query: use indexed carrierId (avoid downloading full loads node)
+                let carrierLoads = [];
+                try {
+                    const snap = await db.ref('loads').orderByChild('carrierId').equalTo(carrierId).limitToLast(400).once('value');
+                    const raw = snap.val() || {};
+                    carrierLoads = Object.entries(raw).map(([id, load]) => ({ ...(load || {}), loadId: (load && load.loadId) ? load.loadId : id }));
+                } catch (e) {
+                    carrierLoads = [];
+                }
+
+                // Fallback: small recent slice + client filter (covers older data shapes)
+                if (!carrierLoads.length) {
+                    const snap = await db.ref('loads').orderByKey().limitToLast(300).once('value');
+                    const raw = snap.val() || {};
+                    carrierLoads = Object.entries(raw)
+                        .map(([id, load]) => ({ ...(load || {}), loadId: (load && load.loadId) ? load.loadId : id }))
+                        .filter(load => {
+                            return load.carrierId === carrierId ||
+                                   load.assignedCarrier === carrierId ||
+                                   (user.email && load.carrierEmail === user.email);
+                        });
+                }
+
+                // Calculate stats
+                const totalLoads = carrierLoads.length;
+                const activeLoads = carrierLoads.filter(load => 
+                    ['accepted', 'picked-up'].includes(load.status?.toLowerCase())
+                ).length;
+                const inTransitLoads = carrierLoads.filter(load => 
+                    ['in-transit', 'on-route'].includes(load.status?.toLowerCase())
+                ).length;
+                const completedLoads = carrierLoads.filter(load => 
+                    load.status?.toLowerCase() === 'completed'
+                );
+
+                // Calculate earnings
+                const totalEarnings = completedLoads.reduce((sum, load) => sum + getNetCarrierAmount(load), 0);
+
+                // Update stats
+                document.getElementById('totalLoads').textContent = totalLoads;
+                document.getElementById('activeLoads').textContent = activeLoads;
+                document.getElementById('inTransitLoads').textContent = inTransitLoads;
+                document.getElementById('totalEarnings').textContent = formatCurrency(totalEarnings);
+
+                // Load recent loads
+                loadRecentLoads(carrierLoads);
+                setDashboardLoading(false);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alertSystem.show('error', 'Failed to load dashboard data');
+                setDashboardLoading(false);
+            }
+        }
+
+        function setDashboardLoading(isLoading) {
+            const statIds = ['totalLoads', 'activeLoads', 'inTransitLoads', 'totalEarnings'];
+            statIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (isLoading) {
+                    el.classList.add('is-loading');
+                } else {
+                    el.classList.remove('is-loading');
+                }
+            });
+
+            if (isLoading) {
+                document.getElementById('loadsSection').innerHTML = `
+                    <div class="skeleton-load">
+                        <div class="sk-row"><div class="sk-title"></div><div class="sk-pill"></div></div>
+                        <div class="sk-route"></div>
+                        <div class="sk-route" style="width: 78%;"></div>
+                        <div class="sk-meta">
+                            <div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-load">
+                        <div class="sk-row"><div class="sk-title"></div><div class="sk-pill"></div></div>
+                        <div class="sk-route"></div>
+                        <div class="sk-route" style="width: 82%;"></div>
+                        <div class="sk-meta">
+                            <div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-load">
+                        <div class="sk-row"><div class="sk-title"></div><div class="sk-pill"></div></div>
+                        <div class="sk-route"></div>
+                        <div class="sk-route" style="width: 70%;"></div>
+                        <div class="sk-meta">
+                            <div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Load recent loads
+        function loadRecentLoads(loads) {
+            const loadsSection = document.getElementById('loadsSection');
+            
+            if (loads.length === 0) {
+                loadsSection.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No Loads Yet</h3>
+                        <p>Start by finding and accepting loads</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by date (newest first) and take first 5
+            const recentLoads = loads
+                .sort((a, b) => {
+                    const dateA = new Date(a.createdAt || a.pickupDate || 0);
+                    const dateB = new Date(b.createdAt || b.pickupDate || 0);
+                    return dateB - dateA;
+                })
+                .slice(0, 5);
+
+            loadsSection.innerHTML = recentLoads.map(load => {
+                const status = (load.status || 'pending').toLowerCase();
+                const statusClass = status.includes('transit') ? 'in-transit' : 
+                                   status.includes('completed') ? 'completed' : 'accepted';
+                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+
+                return `
+                    <div class="load-card" onclick="viewLoad('${load.loadId || ''}')">
+                        <div class="load-header">
+                            <div class="load-id">Load #${load.loadId?.substring(0, 8) || 'N/A'}</div>
+                            <div class="load-status ${statusClass}">${statusLabel}</div>
+                        </div>
+                        <div class="load-route">
+                            <div class="route-point">
+                                <div class="route-point-label">From</div>
+                                <div class="route-point-value">${load.pickupLocation || 'N/A'}</div>
+                            </div>
+                            <i class="fas fa-arrow-right route-arrow"></i>
+                            <div class="route-point">
+                                <div class="route-point-label">To</div>
+                                <div class="route-point-value">${load.deliveryLocation || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div class="load-details">
+                            <div class="load-detail-item">
+                                <div class="load-detail-label">Pickup Date</div>
+                                <div class="load-detail-value">${formatDate(load.pickupDate)}</div>
+                            </div>
+                            <div class="load-detail-item">
+                                <div class="load-detail-label">Cargo</div>
+                                <div class="load-detail-value">${load.cargoType || 'General'}</div>
+                            </div>
+                            <div class="load-detail-item">
+                                <div class="load-price">${formatCurrency(getNetCarrierAmount(load))}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            } catch {
+                return dateString;
+            }
+        }
+
+        // View load details
+        function viewLoad(loadId) {
+            if (loadId) {
+                window.location.href = `load-details.html?id=${loadId}`;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            checkAndShowProfileBanner();
+            loadDashboardStats();
+            const user = checkAuth();
+            if (user) {
+                initNativePush().catch(function() {});
+                if (typeof initFCM === 'function') initFCM().catch(function() {});
+            }
+        });
+    </script>
+</body>
+</html>

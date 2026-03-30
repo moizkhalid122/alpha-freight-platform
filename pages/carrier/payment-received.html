@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -32,7 +32,10 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-main);
+            background:
+                radial-gradient(1200px 600px at -10% -20%, rgba(99,102,241,0.08), transparent 60%),
+                radial-gradient(1200px 600px at 110% -10%, rgba(20,184,166,0.08), transparent 60%),
+                var(--bg-main);
             min-height: 100vh;
         }
 
@@ -40,11 +43,12 @@
             min-height: 100vh;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.08), 1px 0 5px rgba(0,0,0,0.05);
+            box-shadow: var(--card-shadow);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             width: 220px;
             animation: sidebarSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(16px);
         }
 
         @keyframes sidebarSlideIn {
@@ -160,10 +164,15 @@
             left: 100%;
         }
 
+        .nav-link {
+            border: 1px solid transparent;
+        }
         .nav-link:hover {
             background: var(--sidebar-active);
             transform: translateX(3px);
             color: var(--primary) !important;
+            border-color: rgba(99,102,241,0.25);
+            box-shadow: 0 6px 14px rgba(99,102,241,0.15);
         }
 
         .nav-link.active {
@@ -171,6 +180,8 @@
             color: var(--primary) !important;
             box-shadow: var(--card-shadow);
             font-weight: 600;
+            border-color: rgba(99,102,241,0.35);
+            box-shadow: 0 10px 22px rgba(99,102,241,0.20);
         }
 
         .nav-link.active::after {
@@ -229,6 +240,7 @@
             border-radius: 0 0 20px 20px;
             margin-bottom: 1rem;
             border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
         }
 
         .content-section {
@@ -236,8 +248,8 @@
         }
 
         .bank-card {
-            background: white;
-            border: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 20px;
             box-shadow: var(--card-shadow);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -908,11 +920,13 @@
         }
 
         .balance-card-secondary {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 15px;
             padding: 1.5rem;
             margin-top: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(8px);
         }
 
         .balance-transactions {
@@ -1780,11 +1794,12 @@
         }
 
         .history-list-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 16px;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--border);
             overflow: hidden;
+            backdrop-filter: blur(8px);
         }
 
         .history-list-header {
@@ -3436,7 +3451,7 @@
                         accountName: bankData.accountName,
                         accountNumber: bankData.accountNumber ? '****' + bankData.accountNumber.slice(-4) : '',
                         requestedAt: new Date().toISOString(),
-                        estimatedProcessing: '3-5 business days',
+                        estimatedProcessing: '24–48 hours',
                         otpVerified: true,
                         verifiedAt: new Date().toISOString()
                     };
@@ -3499,9 +3514,9 @@
                     
                     // Show success message
                     if (window.AlphaBrokrage) {
-                        AlphaBrokrage.showAlert('success', `Withdrawal request of £${withdrawAmount.toFixed(2)} has been verified and submitted successfully! Your new balance is £${newBalance.toFixed(2)}. Funds will be transferred to your bank account within 3-5 business days.`);
+                        AlphaBrokrage.showAlert('success', `Withdrawal request of £${withdrawAmount.toFixed(2)} has been verified and submitted successfully! Your new balance is £${newBalance.toFixed(2)}. Funds will be transferred to your bank account within 24–48 hours.`);
                     } else {
-                        alert(`Withdrawal request of £${withdrawAmount.toFixed(2)} has been verified and submitted successfully! Your new balance is £${newBalance.toFixed(2)}. Funds will be transferred to your bank account within 3-5 business days.`);
+                        alert(`Withdrawal request of £${withdrawAmount.toFixed(2)} has been verified and submitted successfully! Your new balance is £${newBalance.toFixed(2)}. Funds will be transferred to your bank account within 24–48 hours.`);
                     }
                 }, 1000);
             };
@@ -3976,7 +3991,7 @@
                                         </div>
                                         <div class="withdrawal-detail-item">
                                             <span class="withdrawal-detail-label">Processing Time</span>
-                                            <span class="withdrawal-detail-value">${withdrawal.estimatedProcessing || '3-5 business days'}</span>
+                                            <span class="withdrawal-detail-value">${withdrawal.estimatedProcessing || '24–48 hours'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -4406,7 +4421,7 @@
                             <div>
                                 <strong style="color: var(--primary); display: block; margin-bottom: 0.4rem; font-size: 0.95rem;">Processing Time</strong>
                                 <p class="mb-0" style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.5;">
-                                    Funds will be transferred to your bank account within <strong style="color: var(--text-main);">3-5 business days</strong> after approval. You will receive a notification once the transfer is complete.
+                                    Funds will be transferred to your bank account within <strong style="color: var(--text-main);">24–48 hours</strong> after approval. You will receive a notification once the transfer is complete.
                                 </p>
                             </div>
                         </div>
