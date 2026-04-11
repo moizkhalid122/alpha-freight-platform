@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+    <title>My Bids - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .page-header {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
+            color: #fff;
+            padding: 1.75rem 1.25rem 1.5rem;
+            padding-top: max(1.5rem, env(safe-area-inset-top, 0px));
+            border-radius: 0 0 36px 36px;
+            margin-bottom: 1.1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #c9a227, transparent);
+            opacity: 0.75;
+        }
+        .header-content { position: relative; z-index: 1; }
+        .page-title { font-size: 1.45rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.02em; }
+        .page-subtitle { font-size: 0.875rem; opacity: 0.92; }
+        .header-actions { display:flex; align-items:center; gap:0.6rem; margin-top: 0.85rem; }
+        .icon-pill{
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.16);
+            color: #fff;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+        }
+        .icon-pill:active{ transform: scale(0.98); }
+        .chip-row{
+            padding: 0 1.25rem;
+            margin: 0.95rem 0 0.65rem;
+            display:flex;
+            gap: 0.6rem;
+            overflow-x:auto;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(15,23,42,0.22) transparent;
+        }
+        .chip-row::-webkit-scrollbar{ height: 6px; }
+        .chip-row::-webkit-scrollbar-track{ background: transparent; border-radius: 999px; }
+        .chip-row::-webkit-scrollbar-thumb{ background: rgba(15,23,42,0.22); border-radius: 999px; }
+        .chip{
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 999px;
+            padding: 0.52rem 0.9rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            cursor:pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .chip.active{
+            background: rgba(99, 102, 241, 0.10);
+            border-color: rgba(99, 102, 241, 0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .chip:active{ transform: scale(0.98); }
+
+        .bids-section{ padding: 0 1.25rem 1.25rem; }
+        .bid-card{
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 1.1rem 1.1rem 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+        .bid-head{ display:flex; justify-content:space-between; gap:0.75rem; align-items:flex-start; }
+        .route{ font-weight: 900; letter-spacing: -0.02em; font-size: 0.98rem; line-height: 1.25; }
+        .meta{ margin-top: 0.25rem; font-size: 0.82rem; font-weight: 700; color: var(--text-medium); }
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.42rem 0.7rem;
+            font-weight: 900;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(15, 23, 42, 0.04);
+            color: rgba(15, 23, 42, 0.86);
+            flex-shrink:0;
+        }
+        .pill.success{ background: rgba(5,150,105,0.10); border-color: rgba(5,150,105,0.18); color: var(--success); }
+        .pill.warning{ background: rgba(217,119,6,0.10); border-color: rgba(217,119,6,0.18); color: #b45309; }
+        .pill.danger{ background: rgba(220,38,38,0.10); border-color: rgba(220,38,38,0.18); color: var(--error); }
+        .amt{ font-weight: 950; letter-spacing: -0.02em; font-size: 1.08rem; color: var(--text-dark); margin-top: 0.75rem; }
+        .msg{ margin-top: 0.55rem; color: var(--text-medium); font-weight: 700; font-size: 0.86rem; white-space: pre-line; }
+        .actions{ display:flex; gap:0.6rem; flex-wrap:wrap; margin-top: 0.85rem; }
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 0.55rem 0.7rem;
+            font-weight: 900;
+            font-size: 0.82rem;
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap: 0.5rem;
+        }
+        .btn-mini.primary{ background: rgba(99,91,255,0.12); border-color: rgba(99,91,255,0.22); color: rgba(79,70,229,0.98); }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.75rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+        }
+        .empty-state i { font-size: 2.6rem; color: var(--text-light); margin-bottom: 0.9rem; }
+        .empty-state h3 { font-size: 1.05rem; font-weight: 800; color: var(--text-dark); margin-bottom: 0.35rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-medium); font-weight: 700; margin: 0; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+        .modal-sheet {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 24px 72px rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+            transform: translateY(18px);
+            opacity: 0;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-overlay.show .modal-sheet { transform: translateY(0); opacity: 1; }
+        .modal-head {
+            padding: 1rem 1rem 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .modal-title { font-weight: 900; letter-spacing: -0.02em; font-size: 1.05rem; }
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .modal-body { padding: 0 1rem 0.95rem; }
+        .route-mini {
+            margin-top: 0.65rem;
+            padding: 0.75rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+        .route-mini:first-child{ margin-top:0; }
+        .route-mini .label { font-size: 0.72rem; font-weight: 800; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.06em; }
+        .route-mini .value { font-weight: 800; letter-spacing: -0.02em; margin-top: 0.35rem; }
+        .modal-actions {
+            display: flex;
+            gap: 0.6rem;
+            padding: 0.8rem 1rem 1rem;
+            border-top: 1px solid var(--border);
+            background: rgba(241, 245, 249, 0.65);
+        }
+        .btn-sheet {
+            flex: 1;
+            border-radius: 12px;
+            padding: 0.78rem 0.9rem;
+            font-weight: 900;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .btn-sheet.cancel { background: #fff; color: var(--text-dark); border: 2px solid var(--border); }
+        .btn-sheet.accept { background: linear-gradient(145deg, #10b981 0%, var(--success) 100%); color: #fff; box-shadow: 0 10px 22px rgba(5, 150, 105, 0.28); }
+        .btn-sheet:disabled { opacity: 0.65; cursor: not-allowed; }
+        .btn-sheet.danger { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 10px 22px rgba(220, 38, 38, 0.24); }
+
+        .confirm-list{ display:grid; gap: 0.5rem; }
+        .confirm-item{
+            display:flex;
+            justify-content:space-between;
+            gap: 0.75rem;
+            align-items:flex-start;
+            border: 1px solid var(--border);
+            background: rgba(241,245,249,0.7);
+            border-radius: 14px;
+            padding: 0.75rem 0.85rem;
+        }
+        .confirm-item .k{ font-size: 0.72rem; font-weight: 900; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.06em; }
+        .confirm-item .v{ font-weight: 900; letter-spacing: -0.02em; color: var(--text-dark); text-align:right; }
+        .confirm-note{
+            margin-top: 0.9rem;
+            padding: 0.85rem 0.9rem;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.9);
+            color: rgba(71,85,105,0.95);
+            font-weight: 800;
+            font-size: 0.88rem;
+            white-space: pre-line;
+        }
+
+        #reviseModal input,
+        #reviseModal textarea,
+        #templatesModal input,
+        #templatesModal select,
+        #templatesModal textarea {
+            padding: 0.6rem 0.75rem !important;
+            border-radius: 10px !important;
+            font-size: 0.92rem !important;
+        }
+        #reviseModal textarea { min-height: 76px !important; }
+
+        @media (min-width: 768px) {
+            body { max-width: 500px; margin: 0 auto; box-shadow: 0 0 30px rgba(0, 0, 0, 0.1); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem;">
+                <div>
+                    <h1 class="page-title">My Bids</h1>
+                    <p class="page-subtitle" id="bidsSubtitle">Loading bids…</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="icon-pill" id="backBtn" aria-label="Back"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="icon-pill" id="templatesBtn" aria-label="Templates"><i class="fas fa-bolt"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chip-row" id="statusRow">
+        <button type="button" class="chip active" data-status="all">All</button>
+        <button type="button" class="chip" data-status="sent">Sent</button>
+        <button type="button" class="chip" data-status="seen">Seen</button>
+        <button type="button" class="chip" data-status="accepted">Accepted</button>
+        <button type="button" class="chip" data-status="rejected">Rejected</button>
+    </div>
+
+    <div class="bids-section" id="bidsSection">
+        <div class="empty-state">
+            <i class="fas fa-hourglass-half"></i>
+            <h3>Loading</h3>
+            <p>Please wait…</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reviseModal" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="reviseModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="reviseModalTitle">Revise Bid</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;" id="reviseModalSub">—</div>
+                </div>
+                <button class="modal-close" type="button" id="reviseModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="display:grid; gap: 0.85rem;">
+                <div class="route-mini">
+                    <div class="label">Bid amount (net £)</div>
+                    <div class="value">
+                        <input id="reviseAmount" inputmode="numeric" placeholder="e.g., 650" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Message (optional)</div>
+                    <div class="value">
+                        <textarea id="reviseMessage" placeholder="Any note to supplier…" style="width:100%;min-height:92px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:800;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="reviseCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet accept" type="button" id="reviseSend"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="templatesModal" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="templatesModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="templatesModalTitle">Auto-bid Templates</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;">Per mile or per route</div>
+                </div>
+                <button class="modal-close" type="button" id="templatesModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="display:grid; gap: 0.85rem;">
+                <div class="route-mini">
+                    <div class="label">Templates</div>
+                    <div class="value" id="templatesList" style="display:grid;gap:0.6rem;"></div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Create template</div>
+                    <div class="value" style="display:grid;gap:0.6rem;">
+                        <input id="tplName" placeholder="Template name" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                        <select id="tplType" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                            <option value="perMile">Per mile</option>
+                            <option value="perRoute">Per route</option>
+                            <option value="flat">Flat</option>
+                        </select>
+                        <div id="tplFields" style="display:grid;gap:0.6rem;"></div>
+                        <button type="button" class="btn-mini primary" id="tplSaveBtn" style="justify-content:center;padding:0.7rem 0.9rem;border-radius:12px;"><i class="fas fa-plus"></i> Save template</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="tplCloseBtn"><i class="fas fa-check"></i> Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="confirmModalTitle">Confirm</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;" id="confirmModalSub">Please review</div>
+                </div>
+                <button class="modal-close" type="button" id="confirmModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-list" id="confirmModalList"></div>
+                <div class="confirm-note" id="confirmModalNote" style="display:none;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="confirmModalCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet accept" type="button" id="confirmModalOk"><i class="fas fa-check"></i> Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="loads.html" class="bottom-nav-item active">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+        </a>
+        <a href="wallet.html" class="bottom-nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(message) { alertSystem.show('error', message); }
+        function showSuccess(message) { alertSystem.show('success', message); }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+        async function ensureAuthOrAnon() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk) return null;
+            if (authSdk.currentUser) return authSdk.currentUser;
+            try {
+                const cred = await authSdk.signInAnonymously();
+                return cred && cred.user ? cred.user : null;
+            } catch (e) { return null; }
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getCarrierUser() {
+            const authRaw = localStorage.getItem('carrierAuth');
+            if (!authRaw) return null;
+            try { return JSON.parse(authRaw); } catch (e) { return null; }
+        }
+
+        function getCarrierKey(user) {
+            const u = user || {};
+            if (u.carrierId) return String(u.carrierId);
+            if (u.email) return String(u.email).replace(/@/g, '_').replace(/\./g, '_');
+            return '';
+        }
+
+        function storageKey(name) {
+            const user = getCarrierUser();
+            const key = getCarrierKey(user) || 'guest';
+            return 'ab.carrier.' + name + '.' + key;
+        }
+
+        function safeJsonParse(s, fallback) {
+            try { return JSON.parse(s); } catch (e) { return fallback; }
+        }
+
+        function readAutoBidTemplates() {
+            const arr = safeJsonParse(localStorage.getItem(storageKey('autoBidTemplates')) || '[]', []);
+            return Array.isArray(arr) ? arr : [];
+        }
+
+        function writeAutoBidTemplates(arr) {
+            localStorage.setItem(storageKey('autoBidTemplates'), JSON.stringify(arr || []));
+        }
+
+        function genId(prefix) {
+            return String(prefix || 'id') + '_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16);
+        }
+
+        function formatCurrency(amount) {
+            const num = parseFloat(amount) || 0;
+            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function confirmModal(opts) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmModal');
+                const titleEl = document.getElementById('confirmModalTitle');
+                const subEl = document.getElementById('confirmModalSub');
+                const listEl = document.getElementById('confirmModalList');
+                const noteEl = document.getElementById('confirmModalNote');
+                const closeBtn = document.getElementById('confirmModalClose');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+                const okBtn = document.getElementById('confirmModalOk');
+                if (!overlay || !titleEl || !listEl || !cancelBtn || !okBtn) { resolve(false); return; }
+
+                const o = opts || {};
+                const items = Array.isArray(o.items) ? o.items : [];
+                titleEl.textContent = String(o.title || 'Confirm');
+                if (subEl) subEl.textContent = String(o.subtitle || 'Please review');
+                listEl.innerHTML = items.map(it => {
+                    const k = escapeHtml(it && it.k ? it.k : '');
+                    const v = escapeHtml(it && it.v !== undefined ? it.v : '');
+                    return `<div class="confirm-item"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+                }).join('');
+
+                const note = String(o.note || '').trim();
+                if (noteEl) {
+                    if (note) {
+                        noteEl.style.display = '';
+                        noteEl.textContent = note;
+                    } else {
+                        noteEl.style.display = 'none';
+                        noteEl.textContent = '';
+                    }
+                }
+
+                okBtn.classList.remove('accept', 'danger');
+                okBtn.classList.add(o.variant === 'danger' ? 'danger' : 'accept');
+                okBtn.innerHTML = `<i class="fas ${o.variant === 'danger' ? 'fa-triangle-exclamation' : 'fa-check'}"></i> ${escapeHtml(o.confirmText || 'Confirm')}`;
+                cancelBtn.innerHTML = `<i class="fas fa-arrow-left"></i> ${escapeHtml(o.cancelText || 'Cancel')}`;
+
+                function close(val) {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    overlay.onclick = null;
+                    cancelBtn.onclick = null;
+                    okBtn.onclick = null;
+                    if (closeBtn) closeBtn.onclick = null;
+                    document.removeEventListener('keydown', onKey);
+                    resolve(val);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') close(false);
+                }
+                document.addEventListener('keydown', onKey);
+
+                overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+                cancelBtn.onclick = () => close(false);
+                okBtn.onclick = () => close(true);
+                if (closeBtn) closeBtn.onclick = () => close(false);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        function formatWhen(dateVal) {
+            if (!dateVal) return '—';
+            const d = new Date(dateVal);
+            if (Number.isNaN(d.getTime())) return String(dateVal);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function getBidStatus(bid) {
+            const s = String(bid.status || '').toLowerCase();
+            if (s === 'accepted') return 'accepted';
+            if (s === 'rejected') return 'rejected';
+            if (s === 'seen') return 'seen';
+            if (bid.seen) return 'seen';
+            return 'sent';
+        }
+
+        function statusPill(st) {
+            if (st === 'accepted') return { cls: 'success', text: 'Accepted' };
+            if (st === 'rejected') return { cls: 'danger', text: 'Rejected' };
+            if (st === 'seen') return { cls: 'warning', text: 'Seen' };
+            return { cls: '', text: 'Sent' };
+        }
+
+        let currentStatusFilter = 'all';
+        let bids = [];
+        let reviseTarget = null;
+        let reviseMode = 'revise';
+        let templates = [];
+
+        async function loadBids() {
+            const section = document.getElementById('bidsSection');
+            const subtitle = document.getElementById('bidsSubtitle');
+            const user = getCarrierUser();
+            if (!user || !user.email) {
+                showError('Please sign in');
+                window.location.href = 'login.html';
+                return;
+            }
+            const carrierId = getCarrierKey(user);
+            if (!carrierId) {
+                showError('Please sign in');
+                window.location.href = 'login.html';
+                return;
+            }
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) throw new Error('no-db');
+            await ensureAuthReady();
+
+            try {
+                const snap = await db.ref('carrierBids/' + carrierId).once('value');
+                const map = snap.val() || {};
+                const list = Object.entries(map).map(([loadId, v]) => ({ loadId, ...(v || {}) }));
+                list.sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+
+                const top = list.slice(0, 60);
+                const hydrated = await Promise.allSettled(top.map(async (row) => {
+                    const loadId = String(row.loadId || '');
+                    const bidSnap = await db.ref(`bids/${loadId}/${carrierId}`).once('value').catch(() => null);
+                    const bid = (bidSnap && bidSnap.exists && bidSnap.exists()) ? (bidSnap.val() || {}) : {};
+                    const merged = { ...row, ...bid, loadId };
+                    if (!merged.pickupLocation || !merged.deliveryLocation) {
+                        const m1 = await db.ref('marketLoads/' + loadId).once('value').catch(() => null);
+                        const m2 = await db.ref('loads/' + loadId).once('value').catch(() => null);
+                        const load = (m1 && m1.exists && m1.exists()) ? (m1.val() || {}) : ((m2 && m2.exists && m2.exists()) ? (m2.val() || {}) : {});
+                        merged.pickupLocation = merged.pickupLocation || load.pickupLocation || '';
+                        merged.deliveryLocation = merged.deliveryLocation || load.deliveryLocation || '';
+                        merged.supplierId = merged.supplierId || load.supplierId || '';
+                    }
+                    merged.status = String(merged.status || '');
+                    merged.seen = !!merged.seen;
+                    merged._status = getBidStatus(merged);
+                    merged._updatedAt = merged.updatedAt || merged.createdAt || '';
+                    return merged;
+                }));
+
+                bids = hydrated.filter(r => r.status === 'fulfilled').map(r => r.value);
+                bids.sort((a, b) => new Date(b._updatedAt || 0) - new Date(a._updatedAt || 0));
+
+                const counts = {
+                    all: bids.length,
+                    sent: bids.filter(x => x._status === 'sent').length,
+                    seen: bids.filter(x => x._status === 'seen').length,
+                    accepted: bids.filter(x => x._status === 'accepted').length,
+                    rejected: bids.filter(x => x._status === 'rejected').length
+                };
+                subtitle.textContent = `${counts.all} bids • ${counts.accepted} accepted`;
+                renderBids();
+            } catch (e) {
+                console.error(e);
+                section.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Could not load bids</h3><p>Please try again</p></div>';
+            }
+        }
+
+        function renderBids() {
+            const section = document.getElementById('bidsSection');
+            let list = bids;
+            if (currentStatusFilter !== 'all') list = bids.filter(b => b._status === currentStatusFilter);
+
+            if (!list.length) {
+                section.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><h3>No bids</h3><p>Send bids from the Loads page</p></div>';
+                return;
+            }
+
+            section.innerHTML = list.slice(0, 80).map((b) => {
+                const route = `${b.pickupLocation || 'N/A'} → ${b.deliveryLocation || 'N/A'}`;
+                const pill = statusPill(b._status);
+                const when = formatWhen(b.updatedAt || b.createdAt);
+                const msg = String(b.message || '').trim();
+                const msgBlock = msg ? `<div class="msg">${escapeHtml(msg)}</div>` : '';
+                const amount = formatCurrency(b.amount || 0);
+                const canEdit = b._status !== 'accepted';
+                const editBtns = canEdit ? `
+                    <button type="button" class="btn-mini primary" data-act="revise" data-id="${escapeHtml(b.loadId)}"><i class="fas fa-pen"></i> Revise</button>
+                    <button type="button" class="btn-mini primary" data-act="counter" data-id="${escapeHtml(b.loadId)}"><i class="fas fa-handshake"></i> Counter</button>
+                ` : '';
+                return `
+                    <div class="bid-card">
+                        <div class="bid-head">
+                            <div style="min-width:0;">
+                                <div class="route">${escapeHtml(route)}</div>
+                                <div class="meta">${escapeHtml(when)}${b.distanceMiles ? ` • ${escapeHtml(b.distanceMiles)} mi` : ''}</div>
+                            </div>
+                            <span class="pill ${pill.cls}"><i class="fas fa-circle"></i>${pill.text}</span>
+                        </div>
+                        <div class="amt">${escapeHtml(amount)}</div>
+                        ${msgBlock}
+                        <div class="actions">
+                            ${editBtns}
+                            <a class="btn-mini" href="load-details.html?id=${encodeURIComponent(b.loadId)}"><i class="fas fa-eye"></i> Load</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            section.querySelectorAll('button[data-act]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const act = btn.getAttribute('data-act') || '';
+                    const id = btn.getAttribute('data-id') || '';
+                    const bid = bids.find(x => String(x.loadId) === String(id));
+                    if (!bid) return;
+                    if (act === 'revise') openReviseModal(bid, 'revise');
+                    if (act === 'counter') openReviseModal(bid, 'counter');
+                });
+            });
+        }
+
+        function openReviseModal(bid, mode) {
+            reviseTarget = bid;
+            reviseMode = mode || 'revise';
+            const overlay = document.getElementById('reviseModal');
+            const title = document.getElementById('reviseModalTitle');
+            const sub = document.getElementById('reviseModalSub');
+            const amt = document.getElementById('reviseAmount');
+            const msg = document.getElementById('reviseMessage');
+            title.textContent = reviseMode === 'counter' ? 'Counter-offer' : 'Revise Bid';
+            sub.textContent = `${bid.pickupLocation || 'N/A'} → ${bid.deliveryLocation || 'N/A'}`;
+            if (amt) amt.value = String(bid.amount || '');
+            if (msg) msg.value = String(bid.message || '');
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeReviseModal() {
+            const overlay = document.getElementById('reviseModal');
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            reviseTarget = null;
+        }
+
+        async function sendRevision() {
+            if (!reviseTarget) return;
+            const user = getCarrierUser();
+            const carrierId = getCarrierKey(user);
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            const amtEl = document.getElementById('reviseAmount');
+            const msgEl = document.getElementById('reviseMessage');
+            const amount = Number(String(amtEl ? amtEl.value : '').replace(/[^\d.]/g, ''));
+            const message = String(msgEl ? msgEl.value : '').trim();
+            if (!Number.isFinite(amount) || amount <= 0) { showError('Enter valid bid amount'); return; }
+
+            const prev = Number(reviseTarget.amount || 0) || 0;
+            const delta = Math.round((amount - prev) * 100) / 100;
+            const routeText = `${reviseTarget.pickupLocation || 'N/A'} → ${reviseTarget.deliveryLocation || 'N/A'}`;
+            const ok = await confirmModal({
+                title: reviseMode === 'counter' ? 'Confirm Counter-offer' : 'Confirm Revise Bid',
+                subtitle: 'This update will be sent to supplier',
+                items: [
+                    { k: 'Route', v: routeText },
+                    { k: 'Previous', v: formatCurrency(prev) },
+                    { k: 'New', v: `${formatCurrency(amount)}${delta !== 0 ? ` (${delta > 0 ? '+' : ''}${formatCurrency(delta)})` : ''}` }
+                ],
+                note: 'If supplier accepts: payout updates to the new amount and load can be assigned to you.\nIf supplier rejects: no assignment.',
+                confirmText: 'Send',
+                cancelText: 'Cancel'
+            });
+            if (!ok) return;
+
+            const now = new Date().toISOString();
+            const updates = {};
+            updates[`bids/${reviseTarget.loadId}/${carrierId}/amount`] = Math.round(amount * 100) / 100;
+            updates[`bids/${reviseTarget.loadId}/${carrierId}/message`] = message;
+            updates[`bids/${reviseTarget.loadId}/${carrierId}/status`] = 'sent';
+            updates[`bids/${reviseTarget.loadId}/${carrierId}/seen`] = false;
+            updates[`bids/${reviseTarget.loadId}/${carrierId}/lastAction`] = reviseMode === 'counter' ? 'counter' : 'revise';
+            updates[`bids/${reviseTarget.loadId}/${carrierId}/updatedAt`] = now;
+            updates[`carrierBids/${carrierId}/${reviseTarget.loadId}`] = {
+                loadId: reviseTarget.loadId,
+                supplierId: reviseTarget.supplierId || '',
+                pickupLocation: reviseTarget.pickupLocation || '',
+                deliveryLocation: reviseTarget.deliveryLocation || '',
+                distanceMiles: reviseTarget.distanceMiles || 0,
+                carrierFirebaseUid: (window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser && window.AlphaBrokrage.firebaseAuth.currentUser.uid) ? window.AlphaBrokrage.firebaseAuth.currentUser.uid : '',
+                amount: Math.round(amount * 100) / 100,
+                message: message || '',
+                status: 'sent',
+                seen: false,
+                createdAt: reviseTarget.createdAt || now,
+                updatedAt: now
+            };
+            try {
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                await ensureAuthReady();
+                if (!authSdk || !authSdk.currentUser) {
+                    await ensureAuthOrAnon();
+                }
+                await db.ref().update(updates);
+                showSuccess('Bid updated');
+                closeReviseModal();
+                await loadBids();
+            } catch (e) {
+                console.error(e);
+                showError('Could not update bid');
+            }
+        }
+
+        function openTemplatesModal() {
+            const overlay = document.getElementById('templatesModal');
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            templates = readAutoBidTemplates();
+            renderTemplates();
+            renderTemplateFields();
+        }
+
+        function closeTemplatesModal() {
+            const overlay = document.getElementById('templatesModal');
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function renderTemplates() {
+            const host = document.getElementById('templatesList');
+            templates = readAutoBidTemplates();
+            if (!templates.length) {
+                host.innerHTML = '<div style="color:var(--text-medium);font-weight:800;font-size:0.86rem;">No templates yet</div>';
+                return;
+            }
+            host.innerHTML = templates.slice(0, 12).map(t => {
+                const type = String(t.type || '');
+                let meta = '';
+                if (type === 'perMile') meta = `${t.ratePerMile || ''}/mile`;
+                else if (type === 'flat') meta = `£${t.fixedAmount || ''}`;
+                else if (type === 'perRoute') meta = `${t.from || 'Any'} → ${t.to || 'Any'}`;
+                return `
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;border:1px solid var(--border);border-radius:14px;padding:0.75rem;background:rgba(241,245,249,0.7);">
+                        <div style="min-width:0;">
+                            <div style="font-weight:950;letter-spacing:-0.02em;">${escapeHtml(t.name || 'Template')}</div>
+                            <div style="margin-top:0.2rem;color:var(--text-medium);font-weight:800;font-size:0.82rem;">${escapeHtml(type)} • ${escapeHtml(meta || '—')}</div>
+                        </div>
+                        <button type="button" class="btn-mini" data-del="${escapeHtml(t.id)}" style="border-color:rgba(239,68,68,0.18);color:rgba(239,68,68,0.95);"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            }).join('');
+            host.querySelectorAll('button[data-del]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-del') || '';
+                    templates = templates.filter(x => String(x.id) !== String(id));
+                    writeAutoBidTemplates(templates);
+                    renderTemplates();
+                });
+            });
+        }
+
+        function renderTemplateFields() {
+            const type = (document.getElementById('tplType') || {}).value || 'perMile';
+            const host = document.getElementById('tplFields');
+            if (!host) return;
+            if (type === 'perMile') {
+                host.innerHTML = `
+                    <input id="tplRatePerMile" inputmode="decimal" placeholder="Rate per mile (e.g., 1.25)" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                `;
+                return;
+            }
+            if (type === 'flat') {
+                host.innerHTML = `
+                    <input id="tplFixedAmount" inputmode="decimal" placeholder="Fixed amount (e.g., 650)" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                `;
+                return;
+            }
+            host.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+                    <input id="tplFrom" placeholder="From contains" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                    <input id="tplTo" placeholder="To contains" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                </div>
+                <input id="tplFixedAmount" inputmode="decimal" placeholder="Fixed amount (optional)" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+                <input id="tplRatePerMile" inputmode="decimal" placeholder="Rate per mile (optional)" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:900;">
+            `;
+        }
+
+        function saveTemplate() {
+            const name = String((document.getElementById('tplName') || {}).value || '').trim();
+            const type = String((document.getElementById('tplType') || {}).value || 'perMile');
+            if (!name) { showError('Enter template name'); return; }
+            const now = new Date().toISOString();
+            const entry = { id: genId('tpl'), name, type, createdAt: now, updatedAt: now };
+            if (type === 'perMile') {
+                entry.ratePerMile = Number(String((document.getElementById('tplRatePerMile') || {}).value || '').replace(/[^\d.]/g, '')) || 0;
+                if (!entry.ratePerMile || entry.ratePerMile <= 0) { showError('Enter rate per mile'); return; }
+            } else if (type === 'flat') {
+                entry.fixedAmount = Number(String((document.getElementById('tplFixedAmount') || {}).value || '').replace(/[^\d.]/g, '')) || 0;
+                if (!entry.fixedAmount || entry.fixedAmount <= 0) { showError('Enter fixed amount'); return; }
+            } else {
+                entry.from = String((document.getElementById('tplFrom') || {}).value || '').trim();
+                entry.to = String((document.getElementById('tplTo') || {}).value || '').trim();
+                entry.fixedAmount = Number(String((document.getElementById('tplFixedAmount') || {}).value || '').replace(/[^\d.]/g, '')) || 0;
+                entry.ratePerMile = Number(String((document.getElementById('tplRatePerMile') || {}).value || '').replace(/[^\d.]/g, '')) || 0;
+                if (!entry.from && !entry.to) { showError('Enter route from/to'); return; }
+                if ((!entry.fixedAmount || entry.fixedAmount <= 0) && (!entry.ratePerMile || entry.ratePerMile <= 0)) { showError('Enter fixed amount or rate per mile'); return; }
+            }
+            templates = [entry].concat(readAutoBidTemplates()).slice(0, 20);
+            writeAutoBidTemplates(templates);
+            const nameEl = document.getElementById('tplName');
+            if (nameEl) nameEl.value = '';
+            renderTemplates();
+            showSuccess('Template saved');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('backBtn').addEventListener('click', () => { window.location.href = 'loads.html'; });
+            document.getElementById('templatesBtn').addEventListener('click', openTemplatesModal);
+            document.getElementById('reviseModalClose').addEventListener('click', closeReviseModal);
+            document.getElementById('reviseCancel').addEventListener('click', closeReviseModal);
+            document.getElementById('reviseSend').addEventListener('click', sendRevision);
+            document.getElementById('templatesModalClose').addEventListener('click', closeTemplatesModal);
+            document.getElementById('tplCloseBtn').addEventListener('click', closeTemplatesModal);
+            document.getElementById('tplType').addEventListener('change', renderTemplateFields);
+            document.getElementById('tplSaveBtn').addEventListener('click', saveTemplate);
+
+            document.getElementById('reviseModal').addEventListener('click', (e) => {
+                const overlay = document.getElementById('reviseModal');
+                if (e.target === overlay) closeReviseModal();
+            });
+            document.getElementById('templatesModal').addEventListener('click', (e) => {
+                const overlay = document.getElementById('templatesModal');
+                if (e.target === overlay) closeTemplatesModal();
+            });
+
+            document.querySelectorAll('#statusRow button[data-status]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#statusRow .chip').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentStatusFilter = btn.getAttribute('data-status') || 'all';
+                    renderBids();
+                });
+            });
+
+            loadBids().catch(() => showError('Failed to load bids'));
+
+            if (window.location.hash === '#templates') {
+                setTimeout(() => openTemplatesModal(), 50);
+            }
+        });
+    </script>
+</body>
+</html>

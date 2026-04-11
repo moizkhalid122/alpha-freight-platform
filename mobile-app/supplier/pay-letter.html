@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -26,9 +26,10 @@
     <style>
         /* —— Premium theme (matches supplier dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --warning: #d97706;
@@ -36,29 +37,30 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
-            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 14px 34px rgba(15,23,42,0.10);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.26); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
         html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             /* footer from supplier-bottom-nav.css */
             color: var(--text-dark);
@@ -66,38 +68,89 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1.5rem 1.25rem 1.75rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+            background: transparent;
+            color: rgba(15,23,42,0.92);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
-        }
+        .page-header::after { display:none; }
 
-        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; text-shadow: none; }
+        .page-subtitle { font-size: 0.8125rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; margin-top: 0.2rem; }
+        .page-top{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+        }
+        .ai-header-btn{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            color: rgba(15,23,42,0.86);
+            padding: 10px 12px;
+            border-radius: 999px;
+            font-weight: 1000;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display:flex;
+            align-items:center;
+            gap: 8px;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            white-space: nowrap;
+        }
+        .ai-header-btn i{ color: rgba(99,91,255,0.95); }
+        .ai-header-btn:active{ transform: scale(0.99); }
+        .ai-banner{
+            margin: 8px var(--page-pad) 0;
+            padding: 12px;
+            border-radius: 18px;
+            border: 1px solid rgba(99,91,255,0.18);
+            background: rgba(99,91,255,0.10);
+            display:none;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 10px;
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+        }
+        .ai-banner.show{ display:flex; }
+        .ai-banner .t{ font-weight: 1000; color: rgba(15,23,42,0.92); letter-spacing: -0.02em; }
+        .ai-banner .s{ margin-top: 2px; font-weight: 800; color: rgba(71,85,105,0.95); font-size: 0.84rem; }
+        .ai-banner .x{
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.82);
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+            flex: 0 0 auto;
+        }
 
         .order-card {
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 1.25rem;
-            margin: 0 1.25rem 1rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-card);
+            margin: 0 var(--page-pad) 12px;
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
             position: relative;
             overflow: hidden;
         }
@@ -107,8 +160,8 @@
             left: 0;
             top: 12px;
             bottom: 12px;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            width: 3px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.75));
             border-radius: 0 2px 2px 0;
             opacity: 0.9;
         }
@@ -124,7 +177,7 @@
             margin-top: 0.5rem;
         }
 
-        .order-amount { font-size: 1.125rem; font-weight: 900; color: var(--primary); letter-spacing: -0.02em; }
+        .order-amount { font-size: 1.125rem; font-weight: 900; color: rgba(79,70,229,0.98); letter-spacing: -0.02em; }
 
         .status-badge {
             display: inline-flex;
@@ -139,30 +192,150 @@
         }
 
         .status-badge.pending { background: rgba(217, 119, 6, 0.12); color: var(--warning); }
-        .status-badge.sent { background: rgba(29, 78, 216, 0.12); color: var(--primary); }
+        .status-badge.sent { background: rgba(99, 91, 255, 0.14); color: rgba(79,70,229,0.98); }
         .status-badge.paid { background: rgba(5, 150, 105, 0.12); color: var(--success); }
 
         .order-actions {
-            display: flex;
-            gap: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-top: 0.75rem;
         }
 
         .order-actions button {
-            flex: 1;
             padding: 0.6rem;
             border-radius: var(--radius-sm);
             border: none;
             font-size: 0.875rem;
-            font-weight: 700;
+            font-weight: 900;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            min-height: 46px;
+            white-space: nowrap;
         }
-        .order-actions button:active { transform: scale(0.98); }
+        .order-actions button:active { transform: scale(0.99); }
 
-        .btn-pay { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+        .btn-pay { background: var(--primary); color: #fff; box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22); }
 
-        .btn-view { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+        .btn-view { background: rgba(255,255,255,0.92); color: rgba(15,23,42,0.86); border: 1px solid rgba(15,23,42,0.10); box-shadow: 0 10px 22px rgba(15,23,42,0.08); }
+        .btn-ai { background: rgba(99,91,255,0.10); color: rgba(79,70,229,0.98); border: 1px solid rgba(99,91,255,0.18); box-shadow: 0 10px 22px rgba(15,23,42,0.08); }
+
+        .ai-overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 18px 16px 22px;
+        }
+        .ai-sheet{
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.18);
+            padding: 14px 14px 12px;
+            max-height: calc(82vh - env(safe-area-inset-bottom, 0px));
+            overflow: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(15,23,42,0.18) rgba(15,23,42,0.06);
+        }
+        .ai-sheet::-webkit-scrollbar{ width: 8px; }
+        .ai-sheet::-webkit-scrollbar-track{ background: rgba(15,23,42,0.06); border-radius: 999px; }
+        .ai-sheet::-webkit-scrollbar-thumb{ background: rgba(15,23,42,0.18); border-radius: 999px; border: 2px solid rgba(15,23,42,0.06); }
+        .ai-sheet::-webkit-scrollbar-thumb:hover{ background: rgba(15,23,42,0.26); }
+        .ai-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .ai-title{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+        }
+        .ai-title i{
+            width: 34px;
+            height: 34px;
+            border-radius: 14px;
+            display:grid;
+            place-items:center;
+            background: rgba(99,91,255,0.14);
+            color: rgba(79,70,229,0.98);
+        }
+        .ai-close{
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.82);
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+        }
+        .ai-close:active{ transform: scale(0.99); }
+        .ai-box{
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+        }
+        .ai-h{ font-weight: 1000; letter-spacing: -0.02em; color: rgba(15,23,42,0.92); font-size: 0.92rem; }
+        .ai-p{ margin-top: 6px; font-weight: 800; color: rgba(100,116,139,0.92); font-size: 0.84rem; line-height: 1.35; }
+        .ai-actions{
+            margin-top: 12px;
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .ai-actions.row1{ grid-template-columns: 1fr; }
+        .ai-btn{
+            min-height: 46px;
+            border-radius: 14px;
+            font-weight: 1000;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+        }
+        .ai-btn.primary{
+            border: 0;
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 12px 28px rgba(99,91,255,0.22);
+        }
+        .ai-btn:active{ transform: scale(0.99); }
+        .ai-select{
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px 12px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(15,23,42,0.22);
+            background: rgba(255,255,255,0.96);
+            outline: none;
+            font-weight: 800;
+            color: rgba(15,23,42,0.90);
+        }
+        .ai-select:focus{
+            border-color: rgba(15,23,42,0.45);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14);
+        }
 
         /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
         .empty-state {
@@ -182,8 +355,21 @@
 </head>
 <body class="has-bottom-nav">
     <div class="page-header">
-        <h1 class="page-title">Pay Letter</h1>
-        <p class="page-subtitle">Pending orders to pay</p>
+        <div class="page-top">
+            <div>
+                <h1 class="page-title">Pay Letter</h1>
+                <p class="page-subtitle">Pending orders to pay</p>
+            </div>
+            <button type="button" class="ai-header-btn" id="aiRemindersBtn"><i class="fas fa-bell"></i>AI Reminders</button>
+        </div>
+    </div>
+
+    <div class="ai-banner" id="aiReminderBanner">
+        <div style="min-width:0;">
+            <div class="t">Payment follow‑ups due</div>
+            <div class="s" id="aiReminderBannerText">You have reminders to send for pending payments.</div>
+        </div>
+        <button type="button" class="x" id="aiReminderBannerClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
     </div>
 
     <div id="ordersList">
@@ -216,6 +402,16 @@
         </a>
     </nav>
 
+    <div class="ai-overlay" id="payLetterAiOverlay" aria-hidden="true">
+        <div class="ai-sheet" role="dialog" aria-modal="true" aria-label="AI Tools">
+            <div class="ai-head">
+                <div class="ai-title"><i class="fas fa-wand-magic-sparkles"></i><span id="payLetterAiTitle">AI</span></div>
+                <button type="button" class="ai-close" id="payLetterAiClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div id="payLetterAiBody"></div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -224,6 +420,10 @@
 
     <script>
         const alertSystem = new AlertSystem();
+        const PAY_REMINDERS_KEY_PREFIX = 'ab.payletter.reminders.supplier.';
+        let payLetterOrders = [];
+        let payLetterOrdersByLoadId = {};
+        let payLetterSupplierId = '';
 
         function formatCurrency(val) {
             return '£' + parseFloat(val || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -239,28 +439,148 @@
             return auth ? JSON.parse(auth) : null;
         }
 
-        async function checkPayLetterReminder(sid, pendingCount) {
-            if (!pendingCount) return;
-            const db = window.AlphaBrokrage?.firebaseDb;
-            if (!db) return;
-            const THIRTY_FIVE_MIN = 35 * 60 * 1000;
-            try {
-                const now = Date.now();
-                let lastLocal = 0;
-                try { lastLocal = parseInt(localStorage.getItem('payLetterReminderAt:' + sid) || '0', 10) || 0; } catch (e) { lastLocal = 0; }
-                if (lastLocal > 0 && now - lastLocal < THIRTY_FIVE_MIN) return;
-                try { localStorage.setItem('payLetterReminderAt:' + sid, String(now)); } catch (e) {}
+        function normalizeCity(v) {
+            return String(v || '').trim();
+        }
 
-                const notif = {
-                    title: 'Pay Letter Reminder',
-                    message: `You have ${pendingCount} pending payment(s) in Pay Letter. Please complete payment.`,
-                    type: 'pay_letter_reminder',
-                    read: false,
-                    createdAt: new Date().toISOString()
-                };
-                await db.ref('notifications/suppliers/' + sid).push(notif);
-                await db.ref('suppliers/' + sid).update({ lastPayLetterReminderAt: new Date().toISOString() });
-            } catch (e) { /* ignore */ }
+        function formatIdShort(id) {
+            const s = String(id || '');
+            if (!s) return '';
+            return s.substring(0, 8).toUpperCase();
+        }
+
+        function openPayLetterAi(title, html) {
+            const overlay = document.getElementById('payLetterAiOverlay');
+            const head = document.getElementById('payLetterAiTitle');
+            const body = document.getElementById('payLetterAiBody');
+            if (!overlay || !head || !body) return;
+            head.textContent = title || 'AI';
+            body.innerHTML = html || '';
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+            setTimeout(() => {
+                try { document.getElementById('payLetterAiClose')?.focus(); } catch (e) {}
+            }, 0);
+        }
+
+        function closePayLetterAi() {
+            const overlay = document.getElementById('payLetterAiOverlay');
+            if (!overlay) return;
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        async function copyToClipboard(text) {
+            const t = String(text || '');
+            if (!t) return false;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(t);
+                    return true;
+                }
+            } catch (e) {}
+            try {
+                const el = document.createElement('textarea');
+                el.value = t;
+                el.style.position = 'fixed';
+                el.style.left = '-9999px';
+                document.body.appendChild(el);
+                el.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(el);
+                return !!ok;
+            } catch (e) {}
+            return false;
+        }
+
+        function getReminderStoreKey() {
+            return PAY_REMINDERS_KEY_PREFIX + String(payLetterSupplierId || 'unknown');
+        }
+
+        function getReminderState() {
+            try { return JSON.parse(localStorage.getItem(getReminderStoreKey()) || '{}') || {}; } catch (e) { return {}; }
+        }
+
+        function setReminderState(state) {
+            try { localStorage.setItem(getReminderStoreKey(), JSON.stringify(state || {})); } catch (e) {}
+        }
+
+        function computeReminderSchedule(createdAtIso, stage) {
+            const base = createdAtIso ? new Date(createdAtIso) : new Date();
+            const t = new Date(base.getTime());
+            const s = Math.max(0, Math.min(3, parseInt(stage || 0, 10) || 0));
+            if (s === 0) t.setDate(t.getDate() + 1);
+            else if (s === 1) t.setDate(t.getDate() + 3);
+            else if (s === 2) t.setDate(t.getDate() + 7);
+            else t.setDate(t.getDate() + 14);
+            return t.toISOString();
+        }
+
+        function buildFollowUpMessage(order, stage) {
+            const id = order.id || order.loadId || '';
+            const lid = order.loadId || id;
+            const shortId = formatIdShort(lid || id);
+            const title = String(order.loadTitle || 'Load');
+            const pickup = normalizeCity(order.pickupLocation || order.pickup_location || 'N/A');
+            const delivery = normalizeCity(order.deliveryLocation || order.delivery_location || 'N/A');
+            const amt = formatCurrency(parseFloat(order.amount || 0));
+            const lines = [
+                `Hi, quick follow‑up regarding pending payment for ${title} (LOAD-${shortId}).`,
+                `Route: ${pickup} → ${delivery}`,
+                `Amount: ${amt}`,
+                stage === 0 ? 'Please confirm when payment will be completed.' :
+                stage === 1 ? 'Can you please share an update on the payment status?' :
+                stage === 2 ? 'This is a reminder to complete payment or let us know if there is any issue.' :
+                'Final reminder: please complete payment or we may need to close this request.'
+            ];
+            return lines.join('\n');
+        }
+
+        function buildPaymentBreakdown(order) {
+            const id = order.id || order.loadId || '';
+            const lid = order.loadId || id;
+            const shortId = formatIdShort(lid || id);
+            const title = String(order.loadTitle || 'Load');
+            const pickup = normalizeCity(order.pickupLocation || order.pickup_location || 'N/A');
+            const delivery = normalizeCity(order.deliveryLocation || order.delivery_location || 'N/A');
+            const createdAt = order.createdAt || order.created_at || '';
+            const amount = parseFloat(order.amount || 0);
+            const parts = [];
+            const candidates = [
+                ['Base Amount', order.baseAmount || order.subtotal || order.subTotal],
+                ['Service Fee', order.serviceFee || order.fee || order.alphaFee || order.commission],
+                ['VAT', order.vat || order.tax]
+            ];
+            candidates.forEach(([label, val]) => {
+                const n = parseFloat(val);
+                if (Number.isFinite(n) && n > 0) parts.push({ label, value: n });
+            });
+
+            const reason = 'This payment is for your posted load. Paying confirms/settles the order through Alpha Freight.';
+            const breakdownText = parts.length
+                ? parts.map(p => `${p.label}: ${formatCurrency(p.value)}`).join(' • ')
+                : `Total: ${formatCurrency(amount)}`;
+
+            const html = `
+                <div class="ai-box">
+                    <div class="ai-h">What is this payment for?</div>
+                    <div class="ai-p">${reason}</div>
+                </div>
+                <div style="height:10px;"></div>
+                <div class="ai-box">
+                    <div class="ai-h">Breakdown</div>
+                    <div class="ai-p">${title} (LOAD-${shortId})</div>
+                    <div class="ai-p">Route: ${pickup} → ${delivery}</div>
+                    <div class="ai-p">Created: ${formatDate(createdAt)}</div>
+                    <div class="ai-p">${breakdownText}</div>
+                    <div class="ai-actions">
+                        <button type="button" class="ai-btn" id="payLetterAiCopyBreakdown"><i class="fas fa-copy"></i>Copy</button>
+                        <button type="button" class="ai-btn primary" onclick="payOrder('${String(lid || '').replace(/'/g, '\\\\\'')}', '${String(amount || 0).replace(/'/g, '\\\\\'')}')"><i class="fas fa-credit-card"></i>Pay Now</button>
+                    </div>
+                </div>
+            `;
+            const copyText = `Payment breakdown\n${title} (LOAD-${shortId})\nRoute: ${pickup} → ${delivery}\nCreated: ${formatDate(createdAt)}\n${breakdownText}\n`;
+            return { html, copyText };
         }
 
         function loadOrders() {
@@ -273,10 +593,20 @@
             }
 
             const supplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            payLetterSupplierId = supplierId || '';
             const db = window.AlphaBrokrage.firebaseDb;
 
             function render(orders) {
                 const filtered = orders.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+                payLetterOrders = orders || [];
+                payLetterOrdersByLoadId = {};
+                try {
+                    (orders || []).forEach(o => {
+                        const id = o.id || o.loadId || '';
+                        const lid = o.loadId || id;
+                        if (lid) payLetterOrdersByLoadId[String(lid)] = o;
+                    });
+                } catch (e) {}
 
                 if (filtered.length === 0) {
                     container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>No pending orders</h3><p>Add loads from Pay Now page</p></div>';
@@ -306,6 +636,9 @@
                                 <button class="btn-pay" data-load-id="${lid}" data-amount="${amt}">
                                     <i class="fas fa-credit-card"></i> Pay Now
                                 </button>
+                                <button class="btn-ai" data-ai-order="${lid}">
+                                    <i class="fas fa-wand-magic-sparkles"></i> AI
+                                </button>
                                 <button class="btn-view" onclick="window.location.href='my-loads.html'">
                                     <i class="fas fa-eye"></i> View
                                 </button>
@@ -322,6 +655,26 @@
                         payOrder(loadId, amount);
                     });
                 });
+
+                container.querySelectorAll('.btn-ai').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const lid = String(btn.dataset.aiOrder || '');
+                        const o = payLetterOrdersByLoadId[lid] || null;
+                        if (!o) return;
+                        const { html, copyText } = buildPaymentBreakdown(o);
+                        openPayLetterAi('AI Payment Assistant', html);
+                        try {
+                            const copyBtn = document.getElementById('payLetterAiCopyBreakdown');
+                            if (copyBtn) copyBtn.onclick = async function () {
+                                const ok = await copyToClipboard(copyText);
+                                if (ok) alertSystem.show('success', 'Copied');
+                                else alertSystem.show('error', 'Copy failed');
+                            };
+                        } catch (e) {}
+                    });
+                });
+
+                updateReminderBanner(filtered);
             }
 
             let orders = [];
@@ -346,16 +699,6 @@
                     merged.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
                     render(merged);
                     try { localStorage.setItem('payLetterPendingCache:' + supplierId, JSON.stringify(merged.slice(0, 200))); } catch (e) {}
-                    const pending = merged.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
-                    if (pending.length > 0) checkPayLetterReminder(supplierId, pending.length);
-                });
-                // New item immediate notification
-                baseRef.on('child_added', (c) => {
-                    const v = c.val() || {};
-                    const status = (v.status || 'pending').toLowerCase();
-                    if (status !== 'paid') {
-                        checkPayLetterReminder(supplierId, 1);
-                    }
                 });
             } else {
                 const local = JSON.parse(localStorage.getItem('payLetterPendingLocal') || '[]');
@@ -367,9 +710,114 @@
             window.location.href = `pay-now.html?loadId=${encodeURIComponent(loadId || '')}&amount=${encodeURIComponent(amount || 0)}&paymentFor=Load%20Payment&paymentType=Pay%20Letter`;
         }
 
+        function updateReminderBanner(pendingOrders) {
+            const banner = document.getElementById('aiReminderBanner');
+            const text = document.getElementById('aiReminderBannerText');
+            if (!banner || !text) return;
+            if (!payLetterSupplierId) { banner.classList.remove('show'); return; }
+            const state = getReminderState();
+            const now = Date.now();
+            let due = 0;
+            (pendingOrders || []).forEach(o => {
+                const id = o.id || o.loadId || '';
+                const lid = o.loadId || id;
+                const key = String(lid || '');
+                const st = state[key] || { stage: 0, nextAt: '' };
+                const stage = Math.max(0, Math.min(3, parseInt(st.stage || 0, 10) || 0));
+                const nextAt = st.nextAt || computeReminderSchedule(o.createdAt || o.created_at || '', stage);
+                const ts = Date.parse(nextAt);
+                if (Number.isFinite(ts) && ts <= now) due += 1;
+            });
+            if (due > 0) {
+                text.textContent = `You have ${due} follow‑up reminder(s) due. Open AI Reminders to copy messages.`;
+                banner.classList.add('show');
+            } else {
+                banner.classList.remove('show');
+            }
+        }
+
+        function openAiReminders() {
+            const pending = (payLetterOrders || []).filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
+            if (!pending.length) {
+                openPayLetterAi('AI Reminders', `<div class="ai-box"><div class="ai-h">No pending payments</div><div class="ai-p">You have no pending items in Pay Letter right now.</div></div>`);
+                return;
+            }
+            const state = getReminderState();
+            const now = Date.now();
+            const rows = pending.map(o => {
+                const id = o.id || o.loadId || '';
+                const lid = o.loadId || id;
+                const key = String(lid || '');
+                const st = state[key] || { stage: 0, nextAt: '' };
+                const stage = Math.max(0, Math.min(3, parseInt(st.stage || 0, 10) || 0));
+                const nextAt = st.nextAt || computeReminderSchedule(o.createdAt || o.created_at || '', stage);
+                const ts = Date.parse(nextAt);
+                const due = Number.isFinite(ts) ? ts <= now : false;
+                const title = String(o.loadTitle || 'Load');
+                const pickup = normalizeCity(o.pickupLocation || o.pickup_location || 'N/A');
+                const delivery = normalizeCity(o.deliveryLocation || o.delivery_location || 'N/A');
+                const amt = formatCurrency(parseFloat(o.amount || 0));
+                return { key, stage, nextAt, due, title, pickup, delivery, amt, order: o };
+            });
+
+            const html = `
+                <div class="ai-box">
+                    <div class="ai-h">Auto follow‑up schedule (no spam)</div>
+                    <div class="ai-p">We suggest at most 3 reminders per payment: Day 1 → Day 3 → Day 7. Nothing is sent automatically; you copy and send only when needed.</div>
+                </div>
+                <div style="height:10px;"></div>
+                ${rows.map(r => {
+                    const label = r.due ? 'Due now' : `Next: ${formatDate(r.nextAt)}`;
+                    const shortId = formatIdShort(r.key);
+                    return `
+                        <div class="ai-box" style="margin-bottom:10px;">
+                            <div class="ai-h">${r.title} (LOAD-${shortId})</div>
+                            <div class="ai-p">${r.pickup} → ${r.delivery} • ${r.amt}</div>
+                            <div class="ai-p"><strong>${label}</strong></div>
+                            <div class="ai-actions">
+                                <button type="button" class="ai-btn" data-reminder-copy="${r.key}"><i class="fas fa-copy"></i>Copy Msg</button>
+                                <button type="button" class="ai-btn primary" data-reminder-done="${r.key}"><i class="fas fa-check"></i>Mark Sent</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+            openPayLetterAi('AI Reminders', html);
+
+            try {
+                document.querySelectorAll('[data-reminder-copy]').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const key = String(btn.getAttribute('data-reminder-copy') || '');
+                        const r = rows.find(x => x.key === key);
+                        if (!r) return;
+                        const msg = buildFollowUpMessage(r.order, r.stage);
+                        const ok = await copyToClipboard(msg);
+                        if (ok) alertSystem.show('success', 'Copied');
+                        else alertSystem.show('error', 'Copy failed');
+                    });
+                });
+                document.querySelectorAll('[data-reminder-done]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const key = String(btn.getAttribute('data-reminder-done') || '');
+                        const r = rows.find(x => x.key === key);
+                        if (!r) return;
+                        const state = getReminderState();
+                        const nextStage = Math.max(0, Math.min(3, (r.stage || 0) + 1));
+                        const nextAt = computeReminderSchedule(r.order.createdAt || r.order.created_at || '', nextStage);
+                        state[key] = { stage: nextStage, nextAt: nextAt, updatedAt: new Date().toISOString() };
+                        setReminderState(state);
+                        alertSystem.show('success', 'Reminder scheduled');
+                        closePayLetterAi();
+                        updateReminderBanner((payLetterOrders || []).filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase())));
+                    });
+                });
+            } catch (e) {}
+        }
+
         document.addEventListener('DOMContentLoaded', async function () {
             const user = getUserData();
             const supplierId = user ? (user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_')) : '';
+            payLetterSupplierId = supplierId || '';
             if (supplierId) {
                 try {
                     const cached = JSON.parse(localStorage.getItem('payLetterPendingCache:' + supplierId) || '[]');
@@ -400,6 +848,9 @@
                                                 <button class="btn-pay" data-load-id="${lid}" data-amount="${amt}">
                                                     <i class="fas fa-credit-card"></i> Pay Now
                                                 </button>
+                                                <button class="btn-ai" data-ai-order="${lid}">
+                                                    <i class="fas fa-wand-magic-sparkles"></i> AI
+                                                </button>
                                                 <button class="btn-view" onclick="window.location.href='my-loads.html'">
                                                     <i class="fas fa-eye"></i> View
                                                 </button>
@@ -416,6 +867,35 @@
                                         payOrder(loadId, amount);
                                     });
                                 });
+
+                                container.querySelectorAll('.btn-ai').forEach(btn => {
+                                    btn.addEventListener('click', async () => {
+                                        const lid = String(btn.dataset.aiOrder || '');
+                                        const o = (cached || []).find(x => String((x.loadId || x.id || '')) === lid) || null;
+                                        if (!o) return;
+                                        const { html, copyText } = buildPaymentBreakdown(o);
+                                        openPayLetterAi('AI Payment Assistant', html);
+                                        try {
+                                            const copyBtn = document.getElementById('payLetterAiCopyBreakdown');
+                                            if (copyBtn) copyBtn.onclick = async function () {
+                                                const ok = await copyToClipboard(copyText);
+                                                if (ok) alertSystem.show('success', 'Copied');
+                                                else alertSystem.show('error', 'Copy failed');
+                                            };
+                                        } catch (e) {}
+                                    });
+                                });
+
+                                payLetterOrders = cached;
+                                payLetterOrdersByLoadId = {};
+                                try {
+                                    cached.forEach(o => {
+                                        const id = o.id || o.loadId || '';
+                                        const lid = o.loadId || id;
+                                        if (lid) payLetterOrdersByLoadId[String(lid)] = o;
+                                    });
+                                } catch (e) {}
+                                updateReminderBanner(filtered);
                             }
                         }
                     }
@@ -442,16 +922,19 @@
             }
 
             loadOrders();
-            // Background repeating reminders every ~35 minutes while page open
-            if (supplierId) {
-                setInterval(() => {
-                    try {
-                        const cached = JSON.parse(localStorage.getItem('payLetterPendingCache:' + supplierId) || '[]') || [];
-                        const pending = cached.filter(o => !['paid', 'cancelled'].includes((o.status || '').toLowerCase()));
-                        if (pending.length > 0) checkPayLetterReminder(supplierId, pending.length);
-                    } catch (e) {}
-                }, 35 * 60 * 1000);
-            }
+
+            const overlay = document.getElementById('payLetterAiOverlay');
+            const closeBtn = document.getElementById('payLetterAiClose');
+            const remindersBtn = document.getElementById('aiRemindersBtn');
+            const bannerClose = document.getElementById('aiReminderBannerClose');
+            if (closeBtn) closeBtn.addEventListener('click', closePayLetterAi);
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closePayLetterAi(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePayLetterAi(); });
+            if (remindersBtn) remindersBtn.addEventListener('click', openAiReminders);
+            if (bannerClose) bannerClose.addEventListener('click', () => {
+                const banner = document.getElementById('aiReminderBanner');
+                if (banner) banner.classList.remove('show');
+            });
         });
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="theme-color" content="#2563EB">
+    <meta name="theme-color" content="#F6F7FB">
     <title>Pay with Card - Alpha Freight</title>
     <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,43 +12,56 @@
     <script src="https://js.stripe.com/v3/"></script>
     <style>
         :root {
-            --primary: #2563EB;
-            --primary-dark: #1E40AF;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --accent: #06b6d4;
             --success: #10B981;
             --text-dark: #0F172A;
             --text-medium: #64748B;
-            --bg-main: #F8FAFC;
-            --card-bg: #FFFFFF;
-            --border: #E5E7EB;
-            --shadow: 0 14px 40px rgba(2, 6, 23, 0.08);
-            --shadow-sm: 0 10px 26px rgba(2, 6, 23, 0.10);
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow: 0 14px 34px rgba(15,23,42,0.10);
+            --shadow-sm: 0 10px 22px rgba(15,23,42,0.08);
             --black: #0B0F19;
             --muted: #94A3B8;
             --danger: #EF4444;
+            --page-pad: 18px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.3); border-radius: 10px; transition: background 0.3s ease; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(37, 99, 235, 0.5); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(37, 99, 235, 0.3) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s ease; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.26); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
         html { scroll-behavior: smooth; }
 
-        body { font-family: 'Inter', sans-serif; background: radial-gradient(1200px 700px at 20% -10%, rgba(99, 102, 241, 0.10) 0%, rgba(99, 102, 241, 0) 60%), var(--bg-main); min-height: 100vh; padding-bottom: 2rem; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); min-height: 100vh; padding-bottom: 2rem; }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
         .page-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 1.25rem;
+            background: transparent;
+            color: rgba(15,23,42,0.92);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
             display: flex;
             align-items: center;
             gap: 1rem;
         }
         .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            color: rgba(15,23,42,0.85);
             width: 40px;
             height: 40px;
             border-radius: 12px;
@@ -57,16 +70,17 @@
             justify-content: center;
             cursor: pointer;
             text-decoration: none;
+            box-shadow: var(--shadow-sm);
         }
-        .page-title { font-size: 1.25rem; font-weight: 700; }
-        .page-amount { font-size: 0.9375rem; opacity: 0.9; margin-top: 0.25rem; }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+        .page-amount { font-size: 0.9375rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; margin-top: 0.25rem; }
 
         .summary-card {
             background: var(--card-bg);
-            margin: 1rem 1.25rem;
+            margin: 0 var(--page-pad) 12px;
             padding: 1rem;
             border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.18);
+            border: 1px solid rgba(15,23,42,0.10);
             box-shadow: var(--shadow);
         }
         .summary-row { display: flex; justify-content: space-between; padding: 0.45rem 0; font-size: 0.9375rem; color: var(--text-dark); }
@@ -74,16 +88,13 @@
         .summary-total { font-weight: 800; font-size: 1.125rem; color: var(--text-dark); margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px solid rgba(148, 163, 184, 0.18); }
         .summary-total span:last-child { color: var(--primary); }
 
-        .pay-methods {
-            padding: 0 1.25rem;
-            margin-top: 1rem;
-        }
+        .pay-methods { padding: 0 var(--page-pad); margin-top: 12px; }
         .section-label { font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-dark); display:flex; align-items:center; justify-content:space-between; gap:0.75rem; }
         .section-label small { font-weight: 600; color: var(--text-medium); }
 
         .wallet-wrap {
             background: var(--card-bg);
-            border: 1px solid rgba(148, 163, 184, 0.18);
+            border: 1px solid rgba(15,23,42,0.10);
             border-radius: 18px;
             padding: 1rem;
             box-shadow: var(--shadow-sm);
@@ -107,7 +118,7 @@
             background: var(--card-bg);
             padding: 1rem;
             border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.18);
+            border: 1px solid rgba(15,23,42,0.10);
             box-shadow: var(--shadow-sm);
         }
         .form-group { margin-bottom: 1rem; }
@@ -116,14 +127,14 @@
         .stripe-input {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid rgba(148, 163, 184, 0.25);
+            border: 1.5px solid rgba(15,23,42,0.22);
             border-radius: 12px;
             font-size: 1rem;
-            background: rgba(248, 250, 252, 0.6);
+            background: rgba(255,255,255,0.96);
         }
-        .stripe-input:focus { outline: none; border-color: rgba(37, 99, 235, 0.70); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14); background: #fff; }
-        .stripe-box { padding: 0.85rem 1rem; border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 12px; background: rgba(248, 250, 252, 0.6); }
-        .stripe-box.is-focus { border-color: rgba(37, 99, 235, 0.70); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14); background: #fff; }
+        .stripe-input:focus { outline: none; border-color: rgba(15,23,42,0.45); box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14); background: rgba(255,255,255,0.96); }
+        .stripe-box { padding: 0.85rem 1rem; border: 1.5px solid rgba(15,23,42,0.22); border-radius: 12px; background: rgba(255,255,255,0.96); }
+        .stripe-box.is-focus { border-color: rgba(15,23,42,0.45); box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14); background: rgba(255,255,255,0.96); }
         #card-errors { padding-top: 0.25rem; }
 
         .card-brands {
@@ -137,15 +148,15 @@
             width: 34px;
             height: 22px;
             border-radius: 6px;
-            border: 1px solid rgba(148, 163, 184, 0.20);
-            background: rgba(248, 250, 252, 0.6);
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.70);
             display:flex;
             align-items:center;
             justify-content:center;
             overflow:hidden;
             opacity: 0.75;
         }
-        .brand.active { opacity: 1; border-color: rgba(37, 99, 235, 0.35); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15); }
+        .brand.active { opacity: 1; border-color: rgba(99,91,255,0.30); box-shadow: 0 10px 22px rgba(99,91,255,0.14); }
         .brand svg { width: 26px; height: 14px; display:block; }
 
         .submit-btn {
@@ -156,13 +167,13 @@
             border: none;
             border-radius: 12px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 900;
             cursor: pointer;
             margin-top: 1rem;
             box-shadow: 0 16px 32px rgba(2, 6, 23, 0.18);
         }
         .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+        .submit-btn:active:not(:disabled) { transform: scale(0.99); }
 
         .secure-note { font-size: 0.75rem; color: var(--text-medium); margin-top: 1rem; text-align: center; display:flex; gap:0.5rem; align-items:center; justify-content:center; }
         .secure-note i { color: var(--muted); }
@@ -182,10 +193,10 @@
         .processing-card {
             width: 100%;
             max-width: 420px;
-            background: #fff;
+            background: rgba(255,255,255,0.96);
             border-radius: 18px;
             padding: 1.25rem;
-            border: 1px solid rgba(148, 163, 184, 0.18);
+            border: 1px solid rgba(15,23,42,0.10);
             box-shadow: var(--shadow);
             text-align: center;
         }
@@ -193,8 +204,8 @@
             width: 44px;
             height: 44px;
             border-radius: 999px;
-            border: 3px solid rgba(2, 6, 23, 0.12);
-            border-top-color: rgba(37, 99, 235, 0.95);
+            border: 3px solid rgba(15,23,42,0.12);
+            border-top-color: rgba(99, 91, 255, 0.95);
             margin: 0 auto 0.75rem auto;
             animation: spin 0.8s linear infinite;
         }
@@ -388,16 +399,20 @@
             await ensureAuthReady();
             const supplier = getSupplierAuth();
             const supplierId = getSupplierId(supplier);
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const supplierFirebaseUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : (supplier && supplier.firebaseUid ? supplier.firebaseUid : null);
 
             if (isCancellationFee) {
                 const nowIso = new Date().toISOString();
                 let carrierId = '';
                 let carrierName = '';
+                let carrierFirebaseUid = null;
                 try {
                     const loadSnap = await db.ref('loads/' + loadId).once('value');
                     const load = loadSnap.val() || {};
                     carrierId = load.carrierId || (load.assignedCarrier || '') || '';
                     carrierName = load.carrierName || load.carrierEmail || carrierId || 'Carrier';
+                    carrierFirebaseUid = load.carrierFirebaseUid || null;
                 } catch (e) {}
 
                 let paymentId = null;
@@ -408,7 +423,10 @@
                         paymentId: payRef.key,
                         loadId: loadId,
                         supplierId: supplierId || null,
+                        supplierFirebaseUid: supplierFirebaseUid || null,
                         supplierEmail: supplier && supplier.email ? supplier.email : null,
+                        carrierId: carrierId || null,
+                        carrierFirebaseUid: carrierFirebaseUid || null,
                         paymentFor: paymentFor || 'Cancellation Fee',
                         paymentType: paymentType || 'CancellationFee',
                         method: 'card',
@@ -473,7 +491,10 @@
                         paymentId: payRef.key,
                         loadId: loadId,
                         supplierId: supplierId || null,
+                        supplierFirebaseUid: supplierFirebaseUid || null,
                         supplierEmail: supplier && supplier.email ? supplier.email : null,
+                        carrierId: load && (load.carrierId || load.assignedCarrier) ? (load.carrierId || load.assignedCarrier) : null,
+                        carrierFirebaseUid: load && load.carrierFirebaseUid ? load.carrierFirebaseUid : null,
                         paymentFor: paymentFor || (isDeposit ? 'Deposit' : 'Remaining'),
                         paymentType: paymentType || (isDeposit ? 'Deposit' : 'Remaining'),
                         paymentPart: isDeposit ? 'deposit' : 'remaining',
@@ -530,25 +551,6 @@
                     await db.ref('loads/' + loadId).update(updates);
                 } catch (e) {}
 
-                try {
-                    const carrierId = load && (load.carrierId || load.assignedCarrier) ? (load.carrierId || load.assignedCarrier) : '';
-                    if (carrierId && plan === 'deposit_remaining' && nextPs.status === 'paid') {
-                        const net = (typeof load.carrierNetAmount === 'number' ? load.carrierNetAmount : null);
-                        const netAmt = net != null ? net : Math.round((parseFloat(load.commissionBaseAmount || load.price || 0) - parseFloat(load.supplierCommission || 0)) * 100) / 100;
-                        const route = `${load.pickupLocation || load.pickup_location || ''} → ${load.deliveryLocation || load.delivery_location || ''}`.trim();
-                        const entry = {
-                            type: 'earning',
-                            loadId: loadId,
-                            orderRef: load.formattedOrderId || load.orderRef || ('ORD-' + String(loadId).substring(0, 8).toUpperCase()),
-                            route: route || '',
-                            amountNet: netAmt,
-                            status: 'available',
-                            createdAt: nowIso
-                        };
-                        await db.ref(`walletLedger/${carrierId}/load_${loadId}`).set(entry).catch(() => {});
-                    }
-                } catch (e) {}
-
                 return paymentId;
             }
 
@@ -559,12 +561,14 @@
             const nowIso = new Date().toISOString();
             const carrierNetAmount = Math.round((amount - supplierCommission) * 100) / 100;
             let carrierId = '';
+            let carrierFirebaseUid = null;
             let orderRef = '';
             let route = '';
             try {
                 const loadSnap = await db.ref('loads/' + loadId).once('value');
                 const existing = loadSnap.val() || {};
                 carrierId = existing.carrierId || existing.assignedCarrier || '';
+                carrierFirebaseUid = existing.carrierFirebaseUid || null;
                 orderRef = existing.formattedOrderId || existing.orderRef || '';
                 route = `${existing.pickupLocation || existing.pickup_location || ''} → ${existing.deliveryLocation || existing.delivery_location || ''}`.trim();
             } catch (e) {}
@@ -604,27 +608,15 @@
             } catch (e) {}
 
             try {
-                if (carrierId) {
-                    const entry = {
-                        type: 'earning',
-                        loadId: loadId,
-                        orderRef: orderRef || ('ORD-' + String(loadId).substring(0, 8).toUpperCase()),
-                        route: route || '',
-                        amountNet: carrierNetAmount,
-                        status: 'available',
-                        createdAt: nowIso
-                    };
-                    await db.ref(`walletLedger/${carrierId}/load_${loadId}`).set(entry).catch(() => {});
-                }
-            } catch (e) {}
-
-            try {
                 const payRef = db.ref('payments').push();
                 await payRef.set({
                     paymentId: payRef.key,
                     loadId: loadId,
                     supplierId: supplierId || null,
+                    supplierFirebaseUid: supplierFirebaseUid || null,
                     supplierEmail: supplier && supplier.email ? supplier.email : null,
+                    carrierId: carrierId || null,
+                    carrierFirebaseUid: carrierFirebaseUid || null,
                     paymentFor: paymentFor || 'Load Payment',
                     paymentType: paymentType || 'Payment',
                     method: 'card',

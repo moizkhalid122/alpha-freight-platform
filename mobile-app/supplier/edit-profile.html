@@ -145,6 +145,37 @@
         .submit-btn:disabled { opacity:0.6; cursor:not-allowed; }
         .note { font-size:0.75rem; color:var(--text-medium); margin-top:0.75rem; text-align:center; }
 
+        .wizard {
+            margin: -0.25rem 1.25rem 1.15rem;
+            padding: 0.9rem 1rem;
+            border-radius: var(--radius);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+        }
+        .wizard-top { display:flex; align-items:center; justify-content:flex-start; gap:0.75rem; margin-bottom:0.65rem; }
+        .wizard-step { font-weight: 900; letter-spacing: -0.02em; color: var(--text-dark); font-size: 0.95rem; }
+        .wizard-sub { font-size: 0.8rem; color: var(--text-medium); }
+        .wizard-bar { height: 8px; border-radius: 999px; background: rgba(15, 23, 42, 0.08); overflow:hidden; }
+        .wizard-bar > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-light), var(--primary)); border-radius: 999px; transition: width 0.25s var(--ease); }
+
+        .step { display:none; }
+        .step.active { display:block; }
+        .step-actions { display:flex; gap:0.75rem; margin-top: 1rem; }
+        .step-actions .submit-btn { flex: 1; }
+        .step-secondary {
+            flex: 1;
+            padding: 0.95rem 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: rgba(255,255,255,0.6);
+            color: var(--text-dark);
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .step-secondary:active { transform: scale(0.99); }
+
         @media (min-width: 768px) { body { max-width: 500px; margin: 0 auto; } }
         @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
@@ -162,79 +193,132 @@
         </div>
     </div>
 
-    <div class="form-card">
-        <div class="form-group grid-2">
+    <div class="wizard" id="wizard">
+        <div class="wizard-top">
             <div>
-                <label class="form-label"><span>First name</span></label>
-                <input type="text" id="firstName" class="input" placeholder="John">
-            </div>
-            <div>
-                <label class="form-label"><span>Last name</span></label>
-                <input type="text" id="lastName" class="input" placeholder="Doe">
+                <div class="wizard-step" id="wizStepTitle">Step 1 of 3</div>
+                <div class="wizard-sub" id="wizStepSub">Personal details</div>
             </div>
         </div>
+        <div class="wizard-bar"><div id="wizBar"></div></div>
+    </div>
 
-        <div class="form-group">
-            <label class="form-label"><span>Email</span><small>Read-only</small></label>
-            <input type="email" id="email" class="input" disabled>
+    <div class="step active" id="step1">
+        <div class="form-card">
+            <div class="form-group grid-2">
+                <div>
+                    <label class="form-label"><span>First name</span></label>
+                    <input type="text" id="firstName" class="input" placeholder="John">
+                </div>
+                <div>
+                    <label class="form-label"><span>Last name</span></label>
+                    <input type="text" id="lastName" class="input" placeholder="Doe">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><span>Email</span><small>Read-only</small></label>
+                <input type="email" id="email" class="input" disabled>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><span>Phone</span><small>International format (e.g., +44 7123 456789)</small></label>
+                <input type="tel" id="phone" class="input" placeholder="+44 7123 456789">
+            </div>
+
+            <div class="step-actions">
+                <button class="submit-btn" type="button" id="next1"><i class="fas fa-arrow-right"></i> Next</button>
+            </div>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label class="form-label"><span>Company name</span></label>
-            <input type="text" id="companyName" class="input" placeholder="Company Ltd">
+    <div class="step" id="step2">
+        <div class="form-card">
+            <div class="form-group">
+                <label class="form-label"><span>Company name</span></label>
+                <input type="text" id="companyName" class="input" placeholder="Company Ltd">
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label class="form-label"><span>Business type</span></label>
+                    <select id="businessType" class="input">
+                        <option value="">Select</option>
+                        <option value="Freight Forwarder">Freight Forwarder</option>
+                        <option value="Broker">Broker</option>
+                        <option value="Trader">Trader</option>
+                        <option value="Shipper">Shipper</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label"><span>Years of operation</span></label>
+                    <input type="number" id="yearsOperation" class="input" min="0" max="100" placeholder="3">
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button class="step-secondary" type="button" id="back2"><i class="fas fa-arrow-left"></i> Back</button>
+                <button class="submit-btn" type="button" id="next2"><i class="fas fa-arrow-right"></i> Next</button>
+            </div>
         </div>
+    </div>
 
-        <div class="form-group grid-2">
-            <div>
-                <label class="form-label"><span>Business type</span></label>
-                <select id="businessType" class="input">
+    <div class="step" id="step3">
+        <div class="form-card">
+            <div class="form-group" style="margin-top: 0.25rem;">
+                <label class="form-label"><span>Business address</span><small>Required</small></label>
+                <input type="text" id="address" class="input" placeholder="Street address">
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label class="form-label"><span>City</span><small>Required</small></label>
+                    <input type="text" id="city" class="input" placeholder="London">
+                </div>
+                <div>
+                    <label class="form-label"><span>Postcode</span><small>Required</small></label>
+                    <input type="text" id="postcode" class="input" placeholder="SW1A 1AA">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><span>Country</span><small>Required</small></label>
+                <select id="country" class="input">
                     <option value="">Select</option>
-                    <option value="Freight Forwarder">Freight Forwarder</option>
-                    <option value="Broker">Broker</option>
-                    <option value="Trader">Trader</option>
-                    <option value="Shipper">Shipper</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Ireland">Ireland</option>
                     <option value="Other">Other</option>
                 </select>
             </div>
-            <div>
-                <label class="form-label"><span>Years of operation</span></label>
-                <input type="number" id="yearsOperation" class="input" min="0" max="100" placeholder="3">
+        </div>
+
+        <div class="form-card">
+            <div class="form-group">
+                <label class="form-label"><span>Verification status</span><small id="kycStatusText">Pending</small></label>
+                <div class="note" style="text-align:left; margin-top:0.25rem;">
+                    Upload company documents to get verified by admin.
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label class="form-label"><span>Phone</span><small>International format (e.g., +44 7123 456789)</small></label>
-            <input type="tel" id="phone" class="input" placeholder="+44 7123 456789">
-        </div>
-
-        <div class="form-group" style="margin-top: 1.1rem;">
-            <label class="form-label"><span>Business address</span><small>Required</small></label>
-            <input type="text" id="address" class="input" placeholder="Street address">
-        </div>
-
-        <div class="form-group grid-2">
-            <div>
-                <label class="form-label"><span>City</span><small>Required</small></label>
-                <input type="text" id="city" class="input" placeholder="London">
+            <div class="form-group" style="margin-top: 0.75rem;">
+                <label class="form-label"><span>Company Registration</span><small>Upload</small></label>
+                <input type="file" id="docCompanyReg" class="input" accept="image/*,application/pdf">
+                <div class="note" id="docCompanyRegHelp" style="text-align:left; margin-top:0.45rem;"><i class="fas fa-paperclip"></i> JPG/PNG/PDF</div>
             </div>
-            <div>
-                <label class="form-label"><span>Postcode</span><small>Required</small></label>
-                <input type="text" id="postcode" class="input" placeholder="SW1A 1AA">
+
+            <div class="form-group">
+                <label class="form-label"><span>Proof of Address</span><small>Optional</small></label>
+                <input type="file" id="docProofAddress" class="input" accept="image/*,application/pdf">
+                <div class="note" id="docProofAddressHelp" style="text-align:left; margin-top:0.45rem;"><i class="fas fa-paperclip"></i> JPG/PNG/PDF</div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label class="form-label"><span>Country</span><small>Required</small></label>
-            <select id="country" class="input">
-                <option value="">Select</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="Ireland">Ireland</option>
-                <option value="Other">Other</option>
-            </select>
+            <button class="submit-btn" id="saveBtn" onclick="saveProfile()"><i class="fas fa-save"></i> Finish & Save</button>
+            <div class="step-actions">
+                <button class="step-secondary" type="button" id="back3"><i class="fas fa-arrow-left"></i> Back</button>
+            </div>
+            <div class="note"><i class="fas fa-shield-halved"></i> Changes sync to your account and device.</div>
         </div>
-
-        <button class="submit-btn" id="saveBtn" onclick="saveProfile()"><i class="fas fa-save"></i> Save Changes</button>
-        <div class="note"><i class="fas fa-shield-halved"></i> Changes sync to your account and device.</div>
     </div>
 
     <nav class="bottom-nav" aria-label="Main navigation">
@@ -258,10 +342,74 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="../../assets/js/firebase-init.js"></script>
     <script src="../../assets/js/alerts.js"></script>
     <script>
         const alertSystem = new AlertSystem();
+        const WIZ_KEY = 'ab.supplier.editprofile.step.v1';
+
+        function setWizardUI(stepIndex, stepsTotal) {
+            const title = document.getElementById('wizStepTitle');
+            const sub = document.getElementById('wizStepSub');
+            const bar = document.getElementById('wizBar');
+            const labels = ['Personal details', 'Business details', 'Address & verification'];
+            if (title) title.textContent = `Step ${stepIndex + 1} of ${stepsTotal}`;
+            if (sub) sub.textContent = labels[stepIndex] || '';
+            if (bar) bar.style.width = `${Math.round(((stepIndex + 1) / stepsTotal) * 100)}%`;
+        }
+
+        function showStep(stepIndex) {
+            const steps = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3')].filter(Boolean);
+            const total = steps.length || 3;
+            steps.forEach((el, i) => {
+                if (!el) return;
+                if (i === stepIndex) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            setWizardUI(stepIndex, total);
+            try { sessionStorage.setItem(WIZ_KEY, String(stepIndex)); } catch (e) {}
+            try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+        }
+
+        function getSavedStep() {
+            try {
+                const raw = sessionStorage.getItem(WIZ_KEY);
+                const n = raw ? parseInt(raw, 10) : 0;
+                return Number.isFinite(n) ? Math.max(0, Math.min(2, n)) : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function isFilled(id) {
+            const el = document.getElementById(id);
+            if (!el) return false;
+            const v = String(el.value || '').trim();
+            return v.length > 0;
+        }
+
+        function validateStep(stepIndex) {
+            if (stepIndex === 0) {
+                if (!isFilled('firstName') || !isFilled('lastName') || !isFilled('phone')) {
+                    alertSystem.show('error', 'Please complete: First name, Last name, Phone');
+                    return false;
+                }
+            }
+            if (stepIndex === 1) {
+                if (!isFilled('companyName') || !isFilled('businessType') || !isFilled('yearsOperation')) {
+                    alertSystem.show('error', 'Please complete: Company name, Business type, Years of operation');
+                    return false;
+                }
+            }
+            if (stepIndex === 2) {
+                if (!isFilled('address') || !isFilled('city') || !isFilled('postcode') || !isFilled('country')) {
+                    alertSystem.show('error', 'Please complete: Address, City, Postcode, Country');
+                    return false;
+                }
+            }
+            return true;
+        }
 
         function getSupplierAuth() {
             try {
@@ -296,24 +444,50 @@
 
         async function ensureAuthReady() {
             const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
-            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
-            if (authSdk.currentUser) return;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
             await new Promise((resolve) => {
                 let done = false;
-                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 2500);
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 6500);
                 const unsub = authSdk.onAuthStateChanged(() => {
                     if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
                 });
             });
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveSupplierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('suppliers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
         }
 
         async function loadFromFirebase() {
             const user = getSupplierAuth();
             const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
             if (!user || !db) return;
-            await ensureAuthReady();
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const authUid = ok && authSdk && authSdk.currentUser ? String(authSdk.currentUser.uid || '') : '';
 
-            const supplierId = user.supplierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+            const fallbackSupplierId = user.supplierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+            const supplierId = await resolveSupplierIdByUid(db, authUid, fallbackSupplierId);
             try {
                 const snap = await db.ref('suppliers/' + supplierId).once('value');
                 if (!snap.exists()) return;
@@ -335,6 +509,22 @@
                 localStorage.setItem('supplierAuth', JSON.stringify(merged));
                 localStorage.setItem('lastSupplierProfile', JSON.stringify(merged));
 
+                try {
+                    const statusRaw = String(merged.status || 'pending').toLowerCase();
+                    const statusLabel = (statusRaw === 'verified' || statusRaw === 'approved' || statusRaw === 'active') ? 'Verified' : 'Pending';
+                    const el = document.getElementById('kycStatusText');
+                    if (el) el.textContent = statusLabel;
+                } catch (e) {}
+                try {
+                    const docs = merged.verificationDocs || {};
+                    if (docs.companyRegistration && docs.companyRegistration.url) {
+                        document.getElementById('docCompanyRegHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.companyRegistration.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                    }
+                    if (docs.proofOfAddress && docs.proofOfAddress.url) {
+                        document.getElementById('docProofAddressHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.proofOfAddress.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                    }
+                } catch (e) {}
+
                 const titleEl = document.getElementById('pageTitle');
                 const subEl = document.getElementById('pageSubtitle');
                 if (titleEl && subEl) {
@@ -351,10 +541,12 @@
             const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
             const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
             if (!db) { alertSystem.show('error', 'Service unavailable. Try again later.'); return; }
-            await ensureAuthReady();
-            if (!authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please login again.'); return; }
+            const ok = await ensureAuthReady();
+            if (!ok || !authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please login again.'); return; }
 
-            const supplierId = user.supplierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+            const authUid = String(authSdk.currentUser.uid || '');
+            const fallbackSupplierId = user.supplierId || user.id || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+            const supplierId = await resolveSupplierIdByUid(db, authUid, fallbackSupplierId);
             const payload = {
                 firstName: document.getElementById('firstName').value.trim(),
                 lastName: document.getElementById('lastName').value.trim(),
@@ -383,32 +575,95 @@
 
             payload.profileComplete = requiredMissing.length === 0;
             if (requiredMissing.length) {
+                try {
+                    const step = (!payload.firstName || !payload.lastName || !payload.phone) ? 0
+                        : (!payload.companyName || !payload.businessType || (!payload.yearsOperation && payload.yearsOperation !== 0 && payload.yearsOperation !== '0')) ? 1
+                        : 2;
+                    showStep(step);
+                } catch (e) {}
                 alertSystem.show('error', 'Please complete: ' + requiredMissing.slice(0, 4).join(', ') + (requiredMissing.length > 4 ? '…' : ''));
                 return;
             }
 
             const btn = document.getElementById('saveBtn');
+            const originalBtnHtml = btn ? btn.innerHTML : '';
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
             try {
+                let existingDocs = {};
+                try {
+                    const ds = await db.ref('suppliers/' + supplierId + '/verificationDocs').once('value');
+                    if (ds.exists()) existingDocs = ds.val() || {};
+                } catch (e) {}
+
+                const storage = (typeof firebase !== 'undefined' && firebase.storage) ? firebase.storage() : null;
+                const newDocs = {};
+
+                async function uploadDoc(inputId, docKey) {
+                    const input = document.getElementById(inputId);
+                    const file = input && input.files && input.files[0] ? input.files[0] : null;
+                    if (!file || !storage) return;
+                    const ts = Date.now();
+                    const safeName = String(file.name || '').replace(/[^\w.\-]+/g, '_').slice(0, 80) || (docKey + '_' + ts);
+                    const ref = storage.ref().child(`kyc/suppliers/${supplierId}/${docKey}_${ts}_${safeName}`);
+                    await ref.put(file);
+                    const url = await ref.getDownloadURL();
+                    newDocs[docKey] = { url, name: file.name || null, type: file.type || null, size: file.size || null, uploadedAt: new Date().toISOString() };
+                }
+
+                try {
+                    await uploadDoc('docCompanyReg', 'companyRegistration');
+                    await uploadDoc('docProofAddress', 'proofOfAddress');
+                } catch (e) {
+                    alertSystem.show('error', 'Failed to upload document(s). Please try again.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml || '<i class="fas fa-save"></i> Finish & Save';
+                    return;
+                }
+
+                if (Object.keys(newDocs).length) {
+                    payload.verificationDocs = Object.assign({}, existingDocs, newDocs);
+                    payload.kycSubmittedAt = payload.kycSubmittedAt || new Date().toISOString();
+                    payload.kycUpdatedAt = new Date().toISOString();
+                    payload.kycStatus = 'submitted';
+                }
+
                 await db.ref('suppliers/' + supplierId).update(payload);
                 const updated = { ...user, ...payload };
                 localStorage.setItem('supplierAuth', JSON.stringify(updated));
                 localStorage.setItem('lastSupplierProfile', JSON.stringify(updated));
                 alertSystem.show('success', 'Profile updated');
-                setTimeout(() => { window.location.href = 'profile.html'; }, 800);
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
             } catch (e) {
                 alertSystem.show('error', 'Failed to save. Please try again.');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                btn.innerHTML = originalBtnHtml || '<i class="fas fa-save"></i> Finish & Save';
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             prefill();
             loadFromFirebase();
+            setTimeout(() => {
+                const n1 = (!isFilled('firstName') || !isFilled('lastName') || !isFilled('phone')) ? 0
+                    : (!isFilled('companyName') || !isFilled('businessType') || !isFilled('yearsOperation')) ? 1
+                    : (!isFilled('address') || !isFilled('city') || !isFilled('postcode') || !isFilled('country')) ? 2
+                    : 2;
+                const start = Math.max(n1, getSavedStep());
+                showStep(start);
+
+                const b1 = document.getElementById('next1');
+                const b2 = document.getElementById('next2');
+                const back2 = document.getElementById('back2');
+                const back3 = document.getElementById('back3');
+
+                if (b1) b1.onclick = () => { if (validateStep(0)) showStep(1); };
+                if (b2) b2.onclick = () => { if (validateStep(1)) showStep(2); };
+                if (back2) back2.onclick = () => showStep(0);
+                if (back3) back3.onclick = () => showStep(1);
+            }, 350);
         });
     </script>
 </body>

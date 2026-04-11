@@ -3,34 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#F6F7FB">
   <title>Alpha Freight</title>
+  <script>
+    (function () {
+      try {
+        var doneKey = 'ab.mobile.onboarding.screens.v2.done';
+        var params = new URLSearchParams(location.search);
+        if (params.get('skipOnboarding') === '1') return;
+        if (params.get('forceOnboarding') === '1') {
+          location.replace('/mobile-app/onboarding.html?next=' + encodeURIComponent('/mobile-app/index.html?skipOnboarding=1'));
+          return;
+        }
+        var done = false;
+        try { done = localStorage.getItem(doneKey) === '1'; } catch (e) { done = false; }
+        if (!done) {
+          location.replace('/mobile-app/onboarding.html?next=' + encodeURIComponent('/mobile-app/index.html?skipOnboarding=1'));
+        }
+      } catch (e2) {}
+    })();
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(circle at top, #31486a 0%, #1a2b3c 45%, #0b1622 100%);
+      background:
+        radial-gradient(900px 520px at 12% 6%, rgba(124,58,237,0.12), rgba(246,247,251,0) 62%),
+        radial-gradient(900px 520px at 88% 22%, rgba(37,99,235,0.10), rgba(246,247,251,0) 62%),
+        linear-gradient(180deg, #FFFFFF, #F6F7FB);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
-      color: #fff;
+      color: #0F172A;
       position: relative;
       overflow: hidden;
     }
-    .logo { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
-    .tagline { opacity: 0.9; margin-bottom: 48px; font-size: 0.95rem; }
+    body::before{
+      content:"";
+      position:absolute;
+      right:-110px;
+      top:-80px;
+      width: 460px;
+      height: 720px;
+      background-image: url("../assets/img/onboarding/screen-2.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: 72% 26%;
+      transform: rotate(-14deg);
+      opacity: 0.22;
+      filter: blur(0px);
+      border-radius: 42px;
+      box-shadow: 0 28px 90px rgba(15, 23, 42, 0.16);
+      pointer-events:none;
+    }
+    body::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(246,247,251,0.88), rgba(246,247,251,0.70) 38%, rgba(246,247,251,0.92));
+      pointer-events:none;
+    }
+
+    .content{
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .logo { font-size: 2.05rem; font-weight: 1000; margin-bottom: 6px; letter-spacing: -0.03em; }
+    .tagline { opacity: 0.75; margin-bottom: 34px; font-size: 0.95rem; font-weight: 700; color: rgba(100,116,139,0.95); }
     .btn {
       display: block;
       width: 100%;
-      max-width: 280px;
-      padding: 18px 24px;
+      max-width: 320px;
+      padding: 16px 18px;
       margin-bottom: 16px;
-      border-radius: 14px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      border-radius: 18px;
+      font-size: 1.02rem;
+      font-weight: 900;
       text-decoration: none;
       text-align: center;
       border: none;
@@ -39,15 +97,131 @@
     }
     .btn:active { transform: scale(0.98); }
     .btn-supplier {
-      background: #fff;
-      color: #2563EB;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      background: linear-gradient(145deg, #7C3AED, #5B21B6);
+      color: #fff;
+      box-shadow: 0 18px 46px rgba(124,58,237,0.22);
     }
     .btn-carrier {
-      background: rgba(255,255,255,0.25);
-      color: #fff;
-      border: 2px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.92);
+      color: rgba(15,23,42,0.92);
+      border: 1px solid rgba(148,163,184,0.28);
+      box-shadow: 0 14px 34px rgba(15,23,42,0.10);
     }
+    .tour-link {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      opacity: 0.9;
+      color: rgba(15,23,42,0.75);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(15,23,42,0.28);
+      padding-bottom: 2px;
+    }
+    .tour-link:active { opacity: 1; }
+
+    .tour-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 16px 22px;
+    }
+    .tour-overlay.show { display: flex; }
+    .tour-spot {
+      position: fixed;
+      border-radius: 18px;
+      box-shadow: 0 0 0 4px rgba(15,23,42,0.55), 0 24px 60px rgba(0,0,0,0.25);
+      background: rgba(255,255,255,0.08);
+      z-index: 10001;
+      pointer-events: none;
+      display: none;
+    }
+    .tour-spot.show { display: block; }
+    .tour-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(15,23,42,0.10);
+      border-radius: 20px;
+      padding: 16px 16px 14px;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.22);
+    }
+    .tour-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .tour-steps {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      letter-spacing: 0.02em;
+      color: rgba(15,23,42,0.78);
+      font-weight: 900;
+    }
+    .tour-skip {
+      background: rgba(15,23,42,0.06);
+      border: 1px solid rgba(15,23,42,0.10);
+      color: rgba(15,23,42,0.82);
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 8px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .tour-skip:active { transform: scale(0.99); }
+    .tour-title {
+      font-size: 1.05rem;
+      font-weight: 1000;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: rgba(15,23,42,0.92);
+    }
+    .tour-body {
+      font-size: 0.92rem;
+      line-height: 1.45;
+      opacity: 0.92;
+      margin-bottom: 14px;
+      color: rgba(71,85,105,0.95);
+    }
+    .tour-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tour-actions-left { display: flex; gap: 10px; }
+    .tour-btn {
+      border: 0;
+      cursor: pointer;
+      font-weight: 800;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 0.92rem;
+    }
+    .tour-btn.secondary {
+      background: rgba(15,23,42,0.06);
+      color: rgba(15,23,42,0.86);
+      border: 1px solid rgba(15,23,42,0.10);
+    }
+    .tour-btn.primary {
+      background: #635bff;
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(99,91,255,0.22);
+    }
+    .tour-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .tour-dots { display: flex; gap: 6px; align-items: center; }
+    .tour-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(15,23,42,0.18);
+    }
+    .tour-dot.active { background: rgba(99,91,255,0.95); }
     /* Splash – no box, logo sirf center, normal size, professional */
     .splash-screen {
       position: fixed;
@@ -55,7 +229,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at top, #31486a 0%, #1a2b3c 45%, #0b1622 100%);
+      background:
+        radial-gradient(900px 520px at 12% 6%, rgba(124,58,237,0.12), rgba(246,247,251,0) 62%),
+        radial-gradient(900px 520px at 88% 22%, rgba(37,99,235,0.10), rgba(246,247,251,0) 62%),
+        linear-gradient(180deg, #FFFFFF, #F6F7FB);
       z-index: 9999;
       transition: opacity 0.5s ease;
     }
@@ -92,7 +269,7 @@
       transform: translateX(-50%);
       text-align: center;
       font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(100, 116, 139, 0.85);
       pointer-events: none;
     }
     .splash-footer small {
@@ -116,10 +293,32 @@
   </div>
 
   <!-- Main Content -->
-  <div class="logo">Alpha Freight</div>
-  <div class="tagline">Choose your role</div>
-  <a href="supplier/login.html" class="btn btn-supplier">Supplier Sign In</a>
-  <a href="carrier/login.html" class="btn btn-carrier">Carrier Sign In</a>
+  <div class="content">
+    <div class="logo">Alpha Freight</div>
+    <div class="tagline">Choose your role</div>
+    <a href="supplier/login.html" class="btn btn-supplier" id="btnSupplier">Supplier Sign In</a>
+    <a href="carrier/login.html" class="btn btn-carrier" id="btnCarrier">Carrier Sign In</a>
+    <a href="javascript:void(0)" class="tour-link" id="btnTour">App Tour</a>
+  </div>
+
+  <div class="tour-spot" id="tourSpot"></div>
+  <div class="tour-overlay" id="tourOverlay" aria-hidden="true">
+    <div class="tour-card" role="dialog" aria-modal="true" aria-label="App Tour">
+      <div class="tour-top">
+        <div class="tour-steps" id="tourSteps">Step 1/5</div>
+        <button class="tour-skip" type="button" id="tourSkip">Skip</button>
+      </div>
+      <div class="tour-title" id="tourTitle"></div>
+      <div class="tour-body" id="tourBody"></div>
+      <div class="tour-actions">
+        <div class="tour-actions-left">
+          <button class="tour-btn secondary" type="button" id="tourBack">Back</button>
+          <button class="tour-btn primary" type="button" id="tourNext">Next</button>
+        </div>
+        <div class="tour-dots" id="tourDots"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Splash: show logo box at least 2s, then fade out (original design always visible)
@@ -148,6 +347,153 @@
       } else {
         window.addEventListener('load', showThenHide);
       }
+    })();
+  </script>
+  <script>
+    (function () {
+      var KEY = 'ab.mobile.onboarding.v1.done';
+      var overlay = document.getElementById('tourOverlay');
+      var spot = document.getElementById('tourSpot');
+      var stepsEl = document.getElementById('tourSteps');
+      var titleEl = document.getElementById('tourTitle');
+      var bodyEl = document.getElementById('tourBody');
+      var btnSkip = document.getElementById('tourSkip');
+      var btnBack = document.getElementById('tourBack');
+      var btnNext = document.getElementById('tourNext');
+      var dotsWrap = document.getElementById('tourDots');
+      var btnTour = document.getElementById('btnTour');
+
+      if (!overlay || !spot || !stepsEl || !titleEl || !bodyEl || !btnSkip || !btnBack || !btnNext || !dotsWrap || !btnTour) return;
+
+      function hasDone() {
+        try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; }
+      }
+      function setDone() {
+        try { localStorage.setItem(KEY, '1'); } catch (e) {}
+      }
+
+      var steps = [
+        {
+          title: 'Welcome to Alpha Freight',
+          body: 'We connect Suppliers with Carriers for fast, secure deliveries.',
+          targetId: ''
+        },
+        {
+          title: 'Supplier Mode',
+          body: 'Post loads, manage payments, and track your orders.',
+          targetId: 'btnSupplier'
+        },
+        {
+          title: 'Carrier Mode',
+          body: 'Find nearby loads, deliver with POD, and get paid in your wallet.',
+          targetId: 'btnCarrier'
+        },
+        {
+          title: 'Security & Payments',
+          body: 'Your data is protected with role-based access and auditable finance flows.',
+          targetId: ''
+        },
+        {
+          title: 'Tracking & Support',
+          body: 'Get status updates and use support anytime. You are ready to start.',
+          targetId: ''
+        }
+      ];
+
+      var index = 0;
+      var open = false;
+
+      function buildDots() {
+        dotsWrap.innerHTML = '';
+        for (var i = 0; i < steps.length; i++) {
+          var d = document.createElement('div');
+          d.className = 'tour-dot' + (i === index ? ' active' : '');
+          dotsWrap.appendChild(d);
+        }
+      }
+
+      function positionSpot() {
+        if (!open) return;
+        var step = steps[index] || {};
+        var tid = step.targetId || '';
+        if (!tid) {
+          spot.classList.remove('show');
+          return;
+        }
+        var el = document.getElementById(tid);
+        if (!el) {
+          spot.classList.remove('show');
+          return;
+        }
+        try { el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' }); } catch (e) {}
+        var r = el.getBoundingClientRect();
+        var pad = 8;
+        var top = Math.max(10, r.top - pad);
+        var left = Math.max(10, r.left - pad);
+        var w = Math.min(window.innerWidth - 20, r.width + pad * 2);
+        var h = r.height + pad * 2;
+        spot.style.top = top + 'px';
+        spot.style.left = left + 'px';
+        spot.style.width = w + 'px';
+        spot.style.height = h + 'px';
+        spot.classList.add('show');
+      }
+
+      function render() {
+        var step = steps[index] || {};
+        stepsEl.textContent = 'Step ' + (index + 1) + '/' + steps.length;
+        titleEl.textContent = step.title || '';
+        bodyEl.textContent = step.body || '';
+        btnBack.disabled = index === 0;
+        btnNext.textContent = index === steps.length - 1 ? 'Finish' : 'Next';
+        buildDots();
+        positionSpot();
+      }
+
+      function show() {
+        open = true;
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+        index = 0;
+        render();
+      }
+
+      function hide(markDone) {
+        open = false;
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        spot.classList.remove('show');
+        if (markDone) setDone();
+      }
+
+      function next() {
+        if (index >= steps.length - 1) {
+          hide(true);
+          return;
+        }
+        index += 1;
+        render();
+      }
+
+      function back() {
+        if (index <= 0) return;
+        index -= 1;
+        render();
+      }
+
+      btnSkip.addEventListener('click', function () { hide(true); });
+      btnBack.addEventListener('click', back);
+      btnNext.addEventListener('click', next);
+      btnTour.addEventListener('click', function () { show(); });
+      overlay.addEventListener('click', function (e) { if (e && e.target === overlay) hide(true); });
+      window.addEventListener('resize', positionSpot);
+
+      function autoStart() {
+        if (hasDone()) return;
+        show();
+      }
+
+      setTimeout(autoStart, 2700);
     })();
   </script>
 </body>

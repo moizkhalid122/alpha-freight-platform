@@ -510,6 +510,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <!-- Firebase Init -->
@@ -555,6 +556,14 @@
         }
 
         function getNetCarrierAmount(load) {
+            if (load && load.acceptedOffer && String(load.acceptedOffer.type || '').toLowerCase() === 'bid' && load.acceptedOffer.amount !== undefined && load.acceptedOffer.amount !== null && load.acceptedOffer.amount !== '') {
+                const v = parseFloat(load.acceptedOffer.amount);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
+            if (load && load.agreedPrice !== undefined && load.agreedPrice !== null && load.agreedPrice !== '') {
+                const v = parseFloat(load.agreedPrice);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
             if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
                 const v = parseFloat(load.carrierNetAmount);
                 if (!isNaN(v)) return v;
@@ -590,8 +599,8 @@
 
         async function ensureAuthReady() {
             const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
-            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
-            if (authSdk.currentUser) return;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
             await new Promise((resolve) => {
                 let done = false;
                 const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
@@ -603,14 +612,35 @@
                     resolve();
                 });
             });
-            if (!authSdk.currentUser && typeof authSdk.signInAnonymously === 'function') {
-                try { await authSdk.signInAnonymously(); } catch (e) {}
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveCarrierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('carriers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
             }
+            try {
+                const snap = await db.ref('carriers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
         }
 
         async function loadWalletLedgerEntries(db, carrierId) {
             try {
-                await ensureAuthReady();
+                const ok = await ensureAuthReady();
+                if (!ok) return [];
                 const snap = await db.ref(`walletLedger/${carrierId}`).limitToLast(800).once('value');
                 const out = [];
                 if (snap.exists()) {
@@ -641,28 +671,46 @@
 
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
-                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
-
-                const ledgerEntries = await loadWalletLedgerEntries(db, carrierId);
-                const hasLedger = Array.isArray(ledgerEntries) && ledgerEntries.length > 0;
-
-                let allLoads = {};
-                try {
-                    const myLoadsRef = db.ref('loads').orderByChild('carrierId').equalTo(carrierId);
-                    const snap = await myLoadsRef.once('value');
-                    allLoads = snap.val() || {};
-                } catch (e) {
-                    const snap = await db.ref('loads').orderByKey().limitToLast(200).once('value');
-                    const raw = snap.val() || {};
-                    Object.entries(raw).forEach(([id, load]) => {
-                        if ((load.carrierId === carrierId || load.carrierEmail === user.email) && (load.status || '').toLowerCase() === 'completed') {
-                            allLoads[id] = { ...load, loadId: id };
-                        }
-                    });
+                const ok = await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!ok || !authSdk || !authSdk.currentUser) {
+                    document.getElementById('transactionsSection').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <h3>Please Sign In</h3>
+                            <p>Session expired. Please login again.</p>
+                        </div>
+                    `;
+                    return;
                 }
 
-                const completedLoads = Object.entries(allLoads).map(([id, load]) => ({ ...load, loadId: id }))
-                    .filter(load => (load.carrierId === carrierId || load.carrierEmail === user.email) && (load.status || '').toLowerCase() === 'completed');
+                const authUid = String(authSdk.currentUser.uid || '');
+                const authEmail = String(authSdk.currentUser.email || user.email || '');
+                const fallbackCarrierId = user.carrierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+                const resolvedCarrierId = await resolveCarrierIdByUid(db, authUid, fallbackCarrierId);
+
+                const candidateCarrierIds = Array.from(new Set([resolvedCarrierId, fallbackCarrierId].filter(Boolean).map(String)));
+
+                let ledgerEntries = [];
+                for (const cid of candidateCarrierIds) {
+                    const part = await loadWalletLedgerEntries(db, cid);
+                    if (part && part.length) ledgerEntries = ledgerEntries.concat(part);
+                }
+                const hasLedger = Array.isArray(ledgerEntries) && ledgerEntries.length > 0;
+
+                const loadsMap = {};
+                async function mergeQuery(q) {
+                    const snap = await q.once('value');
+                    if (!snap.exists()) return;
+                    snap.forEach((ch) => { loadsMap[ch.key] = ch.val() || {}; });
+                }
+                const jobs = [mergeQuery(db.ref('loads').orderByChild('carrierFirebaseUid').equalTo(authUid))];
+                if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('carrierEmail').equalTo(authEmail)));
+                for (const cid of candidateCarrierIds) jobs.push(mergeQuery(db.ref('loads').orderByChild('carrierId').equalTo(cid)));
+                await Promise.allSettled(jobs);
+
+                const completedLoads = Object.entries(loadsMap).map(([id, load]) => ({ ...load, loadId: id }))
+                    .filter(load => (load.status || '').toLowerCase() === 'completed' || (load.status || '').toLowerCase() === 'delivered');
 
                 const earningEntries = hasLedger
                     ? ledgerEntries.filter(e => String(e.type || '').toLowerCase() === 'earning')
@@ -672,15 +720,24 @@
                     : completedLoads.reduce((sum, load) => sum + getNetCarrierAmount(load), 0);
 
                 // Get withdrawals
-                const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
-                const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
+                let withdrawals = [];
+                try {
+                    for (const cid of candidateCarrierIds) {
+                        const snap = await db.ref(`withdrawRequests/${cid}`).limitToLast(600).once('value');
+                        if (snap.exists()) {
+                            snap.forEach((ch) => {
+                                withdrawals.push({ id: ch.key, ...(ch.val() || {}) });
+                            });
+                        }
+                    }
+                } catch (e) {}
 
                 const totalWithdrawn = withdrawals
-                    .filter(w => w.status === 'completed' || w.status === 'approved')
+                    .filter(w => ['processed', 'paid', 'completed'].includes(String(w.status || '').toLowerCase()))
                     .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
 
                 const pendingWithdrawals = withdrawals
-                    .filter(w => w.status === 'pending')
+                    .filter(w => ['pending', 'approved'].includes(String(w.status || '').toLowerCase()))
                     .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
 
                 const pendingEarnings = hasLedger
@@ -740,12 +797,15 @@
 
                 // Add withdrawal transactions
                 withdrawals.forEach(withdrawal => {
+                    const bankName = (withdrawal.bankSnapshot && withdrawal.bankSnapshot.bankName)
+                        ? withdrawal.bankSnapshot.bankName
+                        : (withdrawal.bankDetails && withdrawal.bankDetails.bankName ? withdrawal.bankDetails.bankName : (withdrawal.bankName || 'Bank Account'));
                     allTransactions.push({
                         id: withdrawal.id || Date.now(),
                         loadId: null,
                         type: 'debit',
                         title: 'Withdrawal Request',
-                        subtitle: `To ${withdrawal.bankDetails?.bankName || withdrawal.bankName || 'Bank Account'}`,
+                        subtitle: `To ${bankName}`,
                         amount: parseFloat(withdrawal.amount || 0),
                         date: withdrawal.requestedAt || withdrawal.timestamp || withdrawal.createdAt,
                         status: withdrawal.status || 'pending'

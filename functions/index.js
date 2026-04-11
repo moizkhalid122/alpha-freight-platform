@@ -144,19 +144,264 @@ exports.notifyCarriersOnNewLoad = functions.database
     try {
       const carriersSnap = await admin.database().ref('carriers').once('value');
       const tasks = [];
+      const pushes = [];
       carriersSnap.forEach((carrier) => {
         const c = carrier.val() || {};
         const token = c && c.fcmToken ? c.fcmToken.token : null;
         if (!token) return;
+        pushes.push(
+          admin.messaging().sendToDevice(token, {
+            notification: { title: notif.title, body: notif.message },
+            data: {
+              type: 'new_load',
+              userType: 'carrier',
+              userId: String(carrier.key),
+              loadId: String(loadId),
+              url: '/mobile-app/carrier/loads.html'
+            }
+          }, { priority: 'high' }).catch(() => null)
+        );
         tasks.push(
           admin.database().ref(`notifications/carriers/${carrier.key}`).push(notif)
         );
       });
       await Promise.all(tasks);
+      await Promise.all(pushes);
       console.log('New load notified to carriers:', loadId, 'count=', tasks.length);
     } catch (err) {
       console.error('notifyCarriersOnNewLoad error:', err);
     }
+    return null;
+  });
+
+exports.syncMarketLoads = functions.database
+  .ref('loads/{loadId}')
+  .onWrite(async (change, context) => {
+    const loadId = String(context.params.loadId || '');
+    const marketRef = admin.database().ref(`marketLoads/${loadId}`);
+
+    if (!change.after.exists()) {
+      try { await marketRef.remove(); } catch (e) {}
+      return null;
+    }
+
+    const load = change.after.val() || {};
+    const statusRaw = String(load.status || '').toLowerCase();
+    const status = statusRaw || 'available';
+
+    const carrierAssigned = !!(load.carrierId || load.carrierFirebaseUid || load.assignedCarrier || load.acceptedBy);
+    const isTerminal = status === 'completed' || status === 'delivered' || status === 'cancelled' || status === 'canceled';
+    const isMarketStatus = status === 'available' || status === 'pending' || status === 'active' || status === 'posted';
+
+    if (!isMarketStatus || carrierAssigned || isTerminal) {
+      try { await marketRef.remove(); } catch (e) {}
+      return null;
+    }
+
+    const pickup = load.pickupLocation || load.pickup_location || '';
+    const delivery = load.deliveryLocation || load.delivery_location || '';
+    const price = load.price || load.budget || load.maxBudget || load.max_budget || load.totalAmount || load.totalCost || null;
+    const createdAt = load.createdAt || load.postedAt || load.timestamp || new Date().toISOString();
+    const supplierId = load.supplierId || load.postedBy || load.supplier_id || '';
+    const supplierName = load.supplierName || load.companyName || load.supplierCompanyName || load.supplierEmail || '';
+
+    const market = {
+      loadId,
+      status,
+      pickupLocation: pickup,
+      deliveryLocation: delivery,
+      cargoType: load.cargoType || load.cargo_type || '',
+      cargoWeight: load.weight || load.cargoWeight || load.cargo_weight || '',
+      vehicleType: load.vehicleType || load.vehicle_type || '',
+      pickupDate: load.pickupDate || load.pickup_date || '',
+      deliveryDate: load.deliveryDate || load.delivery_date || '',
+      price,
+      urgent: !!load.urgent,
+      supplierId,
+      supplierName,
+      createdAt
+    };
+
+    try {
+      await marketRef.set(market);
+    } catch (e) {}
+    return null;
+  });
+
+exports.processNotificationQueue = functions.database
+  .ref('notificationQueue/{eventId}')
+  .onCreate(async (snap, context) => {
+    const ev = snap.val() || {};
+    const toUserType = String(ev.toUserType || ev.userType || '').toLowerCase();
+    const toUserId = String(ev.toUserId || ev.userId || '');
+    const senderUid = String(ev.senderUid || '');
+    const createdAt = ev.createdAt || new Date().toISOString();
+
+    if (!toUserId || (toUserType !== 'supplier' && toUserType !== 'carrier') || !senderUid) {
+      try {
+        await snap.ref.update({ processed: false, rejected: true, processedAt: new Date().toISOString() });
+      } catch (e) {}
+      return null;
+    }
+
+    const notif = {
+      title: ev.title || 'Alpha Freight',
+      message: ev.message || 'You have a new notification',
+      type: ev.type || 'system',
+      data: ev.data || {},
+      read: false,
+      createdAt: createdAt,
+      senderUid: senderUid
+    };
+
+    const listRef = toUserType === 'supplier'
+      ? `notifications/suppliers/${toUserId}`
+      : `notifications/carriers/${toUserId}`;
+
+    async function sendPushIfPossible() {
+      try {
+        const profileRef = toUserType === 'supplier'
+          ? admin.database().ref(`suppliers/${toUserId}/fcmToken/token`)
+          : admin.database().ref(`carriers/${toUserId}/fcmToken/token`);
+        const tokenSnap = await profileRef.once('value');
+        const token = tokenSnap.exists() ? String(tokenSnap.val() || '') : '';
+        if (!token) return false;
+
+        const data = Object.assign({}, (notif.data || {}), {
+          type: String(notif.type || 'system'),
+          userType: toUserType,
+          userId: toUserId
+        });
+        if (!data.url && ev.data && ev.data.url) data.url = String(ev.data.url);
+
+        const payload = {
+          notification: {
+            title: String(notif.title || 'Alpha Freight'),
+            body: String(notif.message || 'You have a new notification')
+          },
+          data: Object.fromEntries(
+            Object.entries(data).map(([k, v]) => [String(k), v === null || v === undefined ? '' : String(v)])
+          )
+        };
+
+        await admin.messaging().sendToDevice(token, payload, {
+          priority: 'high'
+        });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    try {
+      await admin.database().ref(listRef).push(notif);
+      const pushed = await sendPushIfPossible();
+      await snap.ref.update({ processed: true, processedAt: new Date().toISOString(), pushSent: !!pushed });
+    } catch (e) {
+      try {
+        await snap.ref.update({ processed: false, processedAt: new Date().toISOString(), error: String(e && e.message ? e.message : e) });
+      } catch (e2) {}
+    }
+    return null;
+  });
+
+exports.onLoadPaidAccounting = functions.database
+  .ref('loads/{loadId}/paymentStatus/status')
+  .onWrite(async (change, context) => {
+    const before = String(change.before.val() || '').toLowerCase();
+    const after = String(change.after.val() || '').toLowerCase();
+    if (after !== 'paid' || before === 'paid') return null;
+
+    const loadId = String(context.params.loadId || '');
+    if (!loadId) return null;
+
+    const loadRef = change.after.ref.parent && change.after.ref.parent.parent
+      ? change.after.ref.parent.parent
+      : admin.database().ref(`loads/${loadId}`);
+
+    let load = {};
+    try {
+      const loadSnap = await loadRef.once('value');
+      load = loadSnap.val() || {};
+    } catch (e) {
+      return null;
+    }
+
+    let carrierId = String(load.carrierId || load.assignedCarrier || '');
+    const carrierFirebaseUid = String(load.carrierFirebaseUid || '');
+    if (carrierFirebaseUid) {
+      let carrierOk = false;
+      if (carrierId) {
+        try {
+          const cSnap = await admin.database().ref(`carriers/${carrierId}`).once('value');
+          carrierOk = cSnap.exists();
+        } catch (e) { carrierOk = false; }
+      }
+      if (!carrierOk) {
+        try {
+          const prof = await findProfileByUid('carrier', carrierFirebaseUid);
+          if (prof && prof.key) carrierId = String(prof.key);
+        } catch (e) {}
+      }
+    }
+    if (!carrierId) return null;
+
+    const nowIso = new Date().toISOString();
+    const now = new Date();
+    const year = now.getFullYear();
+
+    let invoiceNumber = String(load.invoiceNumber || '');
+    let invoiceSequence = load.invoiceSequence || null;
+    if (!invoiceNumber) {
+      try {
+        const counterRef = admin.database().ref(`counters/invoices/${year}`);
+        const txn = await counterRef.transaction((cur) => (cur || 0) + 1);
+        if (txn && txn.committed) {
+          invoiceSequence = txn.snapshot && txn.snapshot.val ? txn.snapshot.val() : null;
+          const seq = Number(invoiceSequence || 0) || 0;
+          invoiceNumber = `INV-${year}-${String(seq).padStart(6, '0')}`;
+          try {
+            await loadRef.update({
+              invoiceNumber,
+              invoiceSequence: seq,
+              invoiceYear: year,
+              invoiceGeneratedAt: nowIso
+            });
+          } catch (e2) {}
+        }
+      } catch (e) {}
+    }
+
+    try {
+      const ledgerKey = `load_${loadId}`;
+      const ledgerRef = admin.database().ref(`walletLedger/${carrierId}/${ledgerKey}`);
+      const ledgerSnap = await ledgerRef.once('value');
+      if (!ledgerSnap.exists()) {
+        const existingNet = typeof load.carrierNetAmount === 'number'
+          ? load.carrierNetAmount
+          : parseFloat(load.carrierNetAmount);
+        const base = parseFloat(load.commissionBaseAmount || load.price || load.budget || load.maxBudget || load.totalAmount || 0) || 0;
+        const commission = parseFloat(load.supplierCommission || load.carrierCommissionAmount || 0) || 0;
+        const net = Number.isFinite(existingNet) ? existingNet : Math.round((base - commission) * 100) / 100;
+        const pickup = load.pickupLocation || load.pickup_location || '';
+        const delivery = load.deliveryLocation || load.delivery_location || '';
+        const route = `${pickup} → ${delivery}`.trim();
+        const orderRef = load.formattedOrderId || load.orderRef || (`ORD-${String(loadId).substring(0, 8).toUpperCase()}`);
+
+        await ledgerRef.set({
+          type: 'earning',
+          loadId: loadId,
+          orderRef: orderRef,
+          route: route,
+          amountNet: net,
+          status: 'available',
+          invoiceNumber: invoiceNumber || null,
+          carrierFirebaseUid: carrierFirebaseUid || null,
+          createdAt: nowIso
+        });
+      }
+    } catch (e) {}
+
     return null;
   });
 

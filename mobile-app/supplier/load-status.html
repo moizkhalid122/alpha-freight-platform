@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -20,9 +20,10 @@
     <style>
         /* —— Premium theme (matches supplier dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
@@ -30,25 +31,26 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
             --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             /* footer padding from supplier-bottom-nav.css */
             color: var(--text-dark);
@@ -56,39 +58,40 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
-        /* Header – premium navy + gold */
+        /* Header */
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1.25rem;
+            background: transparent;
+            color: rgba(15,23,42,0.92);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
             display: flex;
             align-items: center;
             gap: 0.875rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
-        }
+        .page-header::after { display:none; }
 
         .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
-        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+        .page-subtitle { font-size: 0.8125rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; margin-top: 0.2rem; }
 
         /* Cards */
         .load-summary {
             background: var(--card-bg);
-            margin: 0 1.25rem 1rem;
+            margin: 0 var(--page-pad) 12px;
             padding: 1.5rem;
             border-radius: var(--radius);
             border: 1px solid var(--border);
@@ -102,8 +105,8 @@
             left: 0;
             top: 12px;
             bottom: 12px;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            width: 3px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.75));
             border-radius: 0 2px 2px 0;
             opacity: 0.9;
         }
@@ -112,7 +115,7 @@
 
         .status-timeline {
             background: var(--card-bg);
-            margin: 0 1.25rem 1rem;
+            margin: 0 var(--page-pad) 12px;
             padding: 1.5rem;
             border-radius: var(--radius);
             border: 1px solid var(--border);
@@ -127,8 +130,8 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            opacity: 0.6;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.45;
         }
 
         .timeline-title {
@@ -155,7 +158,7 @@
             top: 36px;
             bottom: -1.25rem;
             width: 2px;
-            background: var(--border);
+            background: rgba(15,23,42,0.10);
         }
 
         .timeline-step.done:not(:last-child)::after {
@@ -163,7 +166,7 @@
         }
 
         .timeline-step.current:not(:last-child)::after {
-            background: linear-gradient(to bottom, var(--primary) 50%, var(--border) 50%);
+            background: linear-gradient(to bottom, rgba(99,91,255,0.95) 50%, rgba(15,23,42,0.10) 50%);
         }
 
         .timeline-icon {
@@ -185,14 +188,14 @@
         }
 
         .timeline-step.current .timeline-icon {
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            background: var(--primary);
             color: white;
-            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.22), 0 6px 18px rgba(29, 78, 216, 0.18);
+            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.18), 0 14px 34px rgba(99, 91, 255, 0.18);
         }
 
         .timeline-step.pending .timeline-icon {
-            background: rgba(241, 245, 249, 0.9);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.78);
+            border: 1px solid rgba(15,23,42,0.10);
             color: var(--text-medium);
             box-shadow: none;
         }
@@ -208,17 +211,17 @@
         .timeline-date { font-size: 0.75rem; color: var(--text-medium); margin-top: 0.25rem; }
 
         .actions-section {
-            margin: 0 1.25rem;
-            display: flex;
-            gap: 0.75rem;
+            margin: 0 var(--page-pad);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
         }
 
         .btn-action {
-            flex: 1;
             padding: 0.875rem;
             border-radius: 12px;
             font-size: 0.9375rem;
-            font-weight: 600;
+            font-weight: 900;
             border: none;
             cursor: pointer;
             display: flex;
@@ -226,11 +229,13 @@
             justify-content: center;
             gap: 0.5rem;
             text-decoration: none;
+            min-height: 52px;
+            white-space: nowrap;
         }
 
-        .btn-action.primary { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
-        .btn-action.success { background: linear-gradient(145deg, #10b981 0%, var(--success) 100%); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
-        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+        .btn-action.primary { background: var(--primary); color: #fff; box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22); }
+        .btn-action.success { background: linear-gradient(145deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 14px 34px rgba(5, 150, 105, 0.22); }
+        .btn-action.secondary { background: rgba(255,255,255,0.92); color: rgba(15,23,42,0.86); border: 1px solid rgba(15,23,42,0.10); box-shadow: 0 10px 22px rgba(15,23,42,0.08); }
 
         .empty-state {
             text-align: center;
@@ -284,6 +289,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="../../assets/js/firebase-init.js"></script>
 
     <script>

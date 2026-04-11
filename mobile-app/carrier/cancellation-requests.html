@@ -188,27 +188,31 @@
 
         async function createDbNotification(userId, userType, title, message, data) {
             try {
-                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
-                if (!db || !userId || !userType) return null;
-                const payload = {
-                    user_id: userId,
-                    user_type: userType,
-                    type: (data && data.type) ? data.type : 'system',
-                    title: title,
-                    message: message,
-                    data: data || {},
-                    read: false,
-                    created_at: new Date().toISOString()
-                };
-                const ref = db.ref('notifications').push();
-                await ref.set(payload).catch(() => {});
+                if (!userId || !userType) return null;
+                const type = (data && data.type) ? data.type : 'system';
+
                 try {
-                    if (userType === 'supplier') {
-                        await db.ref(`notifications/suppliers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
-                    } else if (userType === 'carrier') {
-                        await db.ref(`notifications/carriers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    if (typeof NotificationManager !== 'undefined' && NotificationManager.create) {
+                        return await NotificationManager.create(type, title, message, data || {}, userId, userType);
                     }
                 } catch (e) {}
+
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!db) return null;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const senderUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
+                if (!senderUid) return null;
+                const ref = db.ref('notificationQueue').push();
+                await ref.set({
+                    senderUid,
+                    toUserId: userId,
+                    toUserType: userType,
+                    title,
+                    message,
+                    type,
+                    data: data || {},
+                    createdAt: new Date().toISOString()
+                }).catch(() => {});
                 return ref.key || null;
             } catch (e) {
                 return null;

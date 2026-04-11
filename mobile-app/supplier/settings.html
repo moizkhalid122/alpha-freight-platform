@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Settings - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+            --page-pad: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .title{
+            font-size: 1.2rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .sub{
+            margin-top: 6px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .quick-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .quick-row::-webkit-scrollbar{ display:none; }
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            cursor:pointer;
+        }
+        .chip i { color: var(--primary); }
+        .chip:active{ transform: scale(0.98); }
+
+        .content{ padding: 0 var(--page-pad) 18px; }
+
+        .section-title{
+            margin-top: 16px;
+            font-size: 1rem;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .muted{ color: rgba(71,85,105,0.92); font-weight: 800; font-size: 0.86rem; }
+
+        .card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 14px 14px 12px;
+            margin-top: 10px;
+            overflow:hidden;
+            position: relative;
+        }
+        .card::before{
+            content:"";
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            height:2px;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.55;
+        }
+
+        .setting-row{
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+        }
+        .setting-row:last-child{ border-bottom: 0; padding-bottom: 2px; }
+        .setting-meta{ min-width:0; }
+        .setting-title{ font-weight: 950; letter-spacing: -0.02em; font-size: 0.92rem; }
+        .setting-sub{ margin-top: 2px; color: rgba(71,85,105,0.92); font-weight: 800; font-size: 0.78rem; white-space: nowrap; overflow:hidden; text-overflow: ellipsis; max-width: 240px; }
+
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-weight: 950;
+            font-size: 0.82rem;
+            cursor:pointer;
+            text-decoration:none;
+            flex-shrink:0;
+        }
+        .btn-mini.primary{
+            background: rgba(99,91,255,0.12);
+            border-color: rgba(99,91,255,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-mini.danger{
+            background: rgba(220,38,38,0.10);
+            border-color: rgba(220,38,38,0.18);
+            color: rgba(220,38,38,0.95);
+        }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .switch{
+            position: relative;
+            width: 50px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+        .switch input{
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider{
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            background: rgba(15,23,42,0.14);
+            border: 1px solid rgba(15,23,42,0.10);
+            transition: 0.2s var(--ease);
+            border-radius: 999px;
+        }
+        .slider::before{
+            content:"";
+            position:absolute;
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.18);
+            transition: 0.2s var(--ease);
+        }
+        .switch input:checked + .slider{
+            background: rgba(99,91,255,0.35);
+            border-color: rgba(99,91,255,0.45);
+        }
+        .switch input:checked + .slider::before{
+            transform: translate(20px, -50%);
+        }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="title">Settings</h1>
+                    <div class="sub">Preferences, security, and app tools</div>
+                </div>
+            </div>
+            <div class="quick-row" aria-label="Quick links">
+                <a class="chip" href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>
+                <a class="chip" href="analytics.html"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+                <a class="chip" href="invoice-center.html"><i class="fas fa-file-invoice-dollar"></i><span>Invoice Center</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section-title">
+            <div>Preferences</div>
+            <div class="muted">Local</div>
+        </div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Reduce motion</div>
+                    <div class="setting-sub">Less animations (this device)</div>
+                </div>
+                <label class="switch" aria-label="Reduce motion">
+                    <input type="checkbox" id="reduceMotionToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Remember filters</div>
+                    <div class="setting-sub">Keep last used filters</div>
+                </div>
+                <label class="switch" aria-label="Remember filters">
+                    <input type="checkbox" id="rememberFiltersToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Auto-assign preferred first</div>
+                    <div class="setting-sub">Invite preferred carriers before others</div>
+                </div>
+                <label class="switch" aria-label="Auto assign preferred">
+                    <input type="checkbox" id="autoAssignPreferredToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div>Network</div>
+            <div class="muted">Tools</div>
+        </div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Saved Carriers / Preferred Network</div>
+                    <div class="setting-sub">Favorites, blocklist, invite</div>
+                </div>
+                <a class="btn-mini primary" href="saved-carriers.html">Open</a>
+            </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Address Book</div>
+                    <div class="setting-sub">Saved pickup & delivery locations</div>
+                </div>
+                <a class="btn-mini primary" href="address-book.html">Open</a>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div>Security</div>
+            <div class="muted">Quick</div>
+        </div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">PIN lock & 2‑Step</div>
+                    <div class="setting-sub">Manage in profile</div>
+                </div>
+                <a class="btn-mini primary" href="profile.html">Open</a>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div>App tools</div>
+            <div class="muted">Cleanup</div>
+        </div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Reset app tour</div>
+                    <div class="setting-sub">Show onboarding again</div>
+                </div>
+                <button type="button" class="btn-mini" id="resetTourBtn">Reset</button>
+            </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Clear drafts</div>
+                    <div class="setting-sub">Post Load draft & temp apply</div>
+                </div>
+                <button type="button" class="btn-mini" id="clearDraftsBtn">Clear</button>
+            </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Clear templates</div>
+                    <div class="setting-sub">Remove saved load templates</div>
+                </div>
+                <button type="button" class="btn-mini" id="clearTemplatesBtn">Clear</button>
+            </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Clear support history</div>
+                    <div class="setting-sub">Support AI state (local)</div>
+                </div>
+                <button type="button" class="btn-mini" id="clearSupportBtn">Clear</button>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div>Account</div>
+            <div class="muted">Session</div>
+        </div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Sign out</div>
+                    <div class="setting-sub">Logout from this device</div>
+                </div>
+                <button type="button" class="btn-mini danger" id="logoutBtn">Sign out</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+        function showSuccess(msg) { alertSystem.show('success', msg); }
+
+        function safeJsonParse(s, fallback) {
+            try { return JSON.parse(s); } catch (e) { return fallback; }
+        }
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile');
+            return auth ? safeJsonParse(auth, null) : null;
+        }
+
+        function supplierKey() {
+            const u = getUserData();
+            return String((u && (u.supplierId || u.id || u.email)) || 'guest');
+        }
+
+        function prefKey(name) {
+            return 'ab.supplier.settings.' + supplierKey() + '.' + name;
+        }
+
+        function readToggle(name, fallback) {
+            const v = localStorage.getItem(prefKey(name));
+            if (v === null || v === undefined) return !!fallback;
+            return v === '1';
+        }
+
+        function writeToggle(name, on) {
+            localStorage.setItem(prefKey(name), on ? '1' : '0');
+        }
+
+        function resetTour() {
+            const keys = [
+                'ab.mobile.onboarding.v1.done',
+                'ab.mobile.onboarding.screens.v2.done',
+                'ab.mobile.onboarding.supplier.dashboard.v1.done',
+                'ab.mobile.onboarding.carrier.dashboard.v1.done'
+            ];
+            keys.forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+            showSuccess('App tour reset');
+        }
+
+        function clearDrafts() {
+            try { localStorage.removeItem('loadDraft'); } catch (e) {}
+            try { localStorage.removeItem('ab.loadTemplate.apply'); } catch (e) {}
+            showSuccess('Drafts cleared');
+        }
+
+        function clearTemplates() {
+            const key = 'ab.loadTemplates.supplier.' + supplierKey();
+            try { localStorage.removeItem(key); } catch (e) {}
+            showSuccess('Templates cleared');
+        }
+
+        function clearSupportState() {
+            const sid = supplierKey();
+            try { localStorage.removeItem('ab.support.state.' + sid); } catch (e) {}
+            try { localStorage.removeItem('ab.support.escalations.' + sid); } catch (e) {}
+            showSuccess('Support history cleared');
+        }
+
+        function logout() {
+            try { localStorage.removeItem('supplierAuth'); } catch (e) {}
+            try { localStorage.removeItem('lastSupplierProfile'); } catch (e) {}
+            showSuccess('Signed out');
+            setTimeout(() => { window.location.href = 'login.html'; }, 600);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const reduce = document.getElementById('reduceMotionToggle');
+            const remember = document.getElementById('rememberFiltersToggle');
+            const autoAssign = document.getElementById('autoAssignPreferredToggle');
+
+            if (reduce) reduce.checked = readToggle('reduceMotion', false);
+            if (remember) remember.checked = readToggle('rememberFilters', true);
+            if (autoAssign) autoAssign.checked = readToggle('autoAssignPreferred', true);
+
+            if (reduce) reduce.addEventListener('change', () => {
+                writeToggle('reduceMotion', !!reduce.checked);
+                showSuccess(reduce.checked ? 'Reduce motion enabled' : 'Reduce motion disabled');
+            });
+            if (remember) remember.addEventListener('change', () => {
+                writeToggle('rememberFilters', !!remember.checked);
+                showSuccess(remember.checked ? 'Filters will be remembered' : 'Filters will not be remembered');
+            });
+            if (autoAssign) autoAssign.addEventListener('change', () => {
+                writeToggle('autoAssignPreferred', !!autoAssign.checked);
+                showSuccess(autoAssign.checked ? 'Auto-assign enabled' : 'Auto-assign disabled');
+            });
+
+            const resetBtn = document.getElementById('resetTourBtn');
+            const draftsBtn = document.getElementById('clearDraftsBtn');
+            const templatesBtn = document.getElementById('clearTemplatesBtn');
+            const supportBtn = document.getElementById('clearSupportBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (resetBtn) resetBtn.addEventListener('click', resetTour);
+            if (draftsBtn) draftsBtn.addEventListener('click', clearDrafts);
+            if (templatesBtn) templatesBtn.addEventListener('click', clearTemplates);
+            if (supportBtn) supportBtn.addEventListener('click', clearSupportState);
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        });
+    </script>
+</body>
+</html>

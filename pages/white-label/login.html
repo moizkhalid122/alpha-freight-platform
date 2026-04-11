@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K01QL0Z1H8"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-K01QL0Z1H8');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Label Login • Alpha Freight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --secondary: #0f172a;
+            --text-dark: #0f172a;
+            --text-medium: #334155;
+            --text-light: #64748b;
+            --bg-white: #ffffff;
+            --bg-main: #f8fafc;
+            --border-gray: rgba(148, 163, 184, 0.22);
+            --success: #10b981;
+            --danger: #ef4444;
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-md: 0 22px 60px rgba(2, 6, 23, 0.14);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background:
+                linear-gradient(180deg, #8fd3ff 0%, #cbeeff 52%, #a7ddff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 22% 22%, rgba(219,242,255,0.55) 0%, rgba(219,242,255,0) 52%),
+                radial-gradient(circle at 68% 28%, rgba(219,242,255,0.50) 0%, rgba(219,242,255,0) 52%),
+                radial-gradient(circle at 86% 44%, rgba(219,242,255,0.42) 0%, rgba(219,242,255,0) 56%),
+                radial-gradient(circle at 12% 48%, rgba(219,242,255,0.38) 0%, rgba(219,242,255,0) 60%);
+            filter: blur(2px);
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            left: -12%;
+            right: -12%;
+            bottom: -24%;
+            height: 62%;
+            background:
+                radial-gradient(circle at 18% 40%, rgba(203,238,255,0.70) 0%, rgba(203,238,255,0) 64%),
+                radial-gradient(circle at 52% 28%, rgba(203,238,255,0.64) 0%, rgba(203,238,255,0) 64%),
+                radial-gradient(circle at 82% 44%, rgba(143,211,255,0.52) 0%, rgba(143,211,255,0) 64%);
+            filter: blur(10px);
+            opacity: 0.75;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .top-brand {
+            position: absolute;
+            top: 22px;
+            left: 34px;
+            z-index: 3;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(255,255,255,0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 16px 60px rgba(15,23,42,0.12);
+            color: rgba(15,23,42,0.92);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            user-select: none;
+        }
+        .top-brand .mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: rgba(15,23,42,0.88);
+            color: #fff;
+            font-weight: 950;
+        }
+        .top-brand .brand-logo {
+            height: 42px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 10px 22px rgba(15,23,42,0.12));
+        }
+
+        .form-side {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .page {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 56px 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .rings {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .ring {
+            position: absolute;
+            left: 50%;
+            top: 55%;
+            transform: translate(-50%, -50%);
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.56);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset;
+            opacity: 0.9;
+        }
+        .ring.r1 { width: min(1100px, 120vw); height: min(1100px, 120vw); }
+        .ring.r2 { width: min(860px, 92vw); height: min(860px, 92vw); opacity: 0.55; }
+        .ring.r3 { width: min(620px, 74vw); height: min(620px, 74vw); opacity: 0.35; }
+        .visual-side { display: none; }
+        .card {
+            width: 100%;
+            max-width: 460px;
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(255,255,255,0.72);
+            border-radius: 30px;
+            box-shadow: 0 30px 90px rgba(15,23,42,0.18);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            overflow: hidden;
+        }
+        .card-head {
+            padding: 2.1rem 2rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .card-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: rgba(255,255,255,0.70);
+            border: 1px solid rgba(255,255,255,0.78);
+            box-shadow: 0 18px 60px rgba(15,23,42,0.10);
+            color: rgba(15,23,42,0.88);
+        }
+        .card-title { margin-top: 1rem; font-weight: 950; letter-spacing: -0.03em; font-size: 1.35rem; color: rgba(15,23,42,0.92); }
+        .card-sub { margin-top: 0.55rem; color: rgba(30,41,59,0.78); font-weight: 650; line-height: 1.45; font-size: 0.92rem; max-width: 360px; }
+        .card-body { padding: 1.2rem 2rem 2rem; }
+        .field { margin-top: 0.9rem; }
+        .field label { display: none; }
+        .input-wrap {
+            position: relative;
+        }
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(15,23,42,0.46);
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+        label { display:block; font-size: 0.78rem; font-weight: 900; color: rgba(71,85,105,0.95); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .input {
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.75);
+            border-radius: 16px;
+            padding: 0.92rem 1rem 0.92rem 2.6rem;
+            background: rgba(255,255,255,0.52);
+            color: rgba(15,23,42,0.92);
+            font-weight: 800;
+            outline: none;
+            transition: border 0.2s var(--transition-smooth), box-shadow 0.2s var(--transition-smooth), background 0.2s var(--transition-smooth);
+        }
+        .input:focus {
+            border-color: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.65);
+            box-shadow: 0 0 0 7px rgba(255,255,255,0.26);
+        }
+        .row { display:flex; align-items:center; justify-content: space-between; gap: 12px; margin-top: 0.95rem; }
+        .check { display:flex; align-items:center; gap: 10px; color: var(--text-medium); font-weight: 750; }
+        .check input { width: 18px; height: 18px; accent-color: var(--primary); }
+        .link { color: rgba(15,23,42,0.72); font-weight: 900; text-decoration: none; }
+        .link:hover { text-decoration: underline; }
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 18px;
+            padding: 0.95rem 1rem;
+            margin-top: 1.1rem;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            color: #fff;
+            background: linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.94));
+            box-shadow: 0 22px 60px rgba(15,23,42,0.22);
+            cursor: pointer;
+            transition: transform 0.2s var(--transition-smooth), filter 0.2s var(--transition-smooth), opacity 0.2s var(--transition-smooth);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 10px;
+        }
+        .btn:active { transform: scale(0.99); }
+        .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+        .divider {
+            margin-top: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(15,23,42,0.50);
+            font-weight: 800;
+            font-size: 0.82rem;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            height: 1px;
+            flex: 1;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.82), rgba(255,255,255,0));
+        }
+        .social-row {
+            margin-top: 0.9rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .social-btn {
+            height: 46px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.78);
+            background: rgba(255,255,255,0.52);
+            color: rgba(15,23,42,0.76);
+            font-size: 1.05rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s var(--transition-smooth), background 0.2s var(--transition-smooth);
+        }
+        .social-btn:active { transform: scale(0.99); }
+        .social-btn:hover { background: rgba(255,255,255,0.66); }
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+        .alert {
+            margin-top: 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.70);
+            background: rgba(255,255,255,0.62);
+            color: rgba(15,23,42,0.86);
+            font-weight: 750;
+            display: none;
+        }
+        .alert.error { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.16); color: rgba(153,27,27,0.98); }
+        .alert.success { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.18); color: rgba(5,150,105,0.98); }
+        .foot { margin-top: 1.05rem; text-align: center; color: rgba(15,23,42,0.64); font-weight: 800; }
+
+        @media (max-width: 980px) {
+            .visual-side { display: none; }
+            .form-side { width: 100%; border-left: none; }
+        }
+        @media (min-width: 981px) {
+            html, body { overflow: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-brand">
+        <img class="brand-logo" src="../../WhatsApp_Image_2026-03-04_at_12.50.53_PM-removebg-preview.png" alt="Alpha Freight">
+    </div>
+    <div class="rings">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+    </div>
+    <div class="page">
+        <section class="visual-side">
+            <div class="visual-content">
+                <div class="brand-row">
+                    <div class="brand-mark">A</div>
+                    <div class="brand-name">Alpha Freight • White Label</div>
+                </div>
+                <div class="visual-title">Login to your platform dashboard</div>
+                <div class="visual-sub">Manage branding, tenants, loads, carriers, payments, and analytics from one place.</div>
+                <ul class="visual-features">
+                    <li><i class="fas fa-check-circle"></i> Custom domain & branding tools</li>
+                    <li><i class="fas fa-check-circle"></i> Multi-tenant routing ready</li>
+                    <li><i class="fas fa-check-circle"></i> Analytics & billing pages</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="form-side">
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-right-to-bracket"></i>
+                    </div>
+                    <div class="card-title">Sign in</div>
+                    <div class="card-sub">Make a new doc to bring your words, data, and teams together. For free</div>
+                </div>
+                <div class="card-body">
+                    <form id="loginForm">
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="Email" required>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="password">Password</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="check" style="margin:0; text-transform:none; letter-spacing:0; font-size:0.92rem; font-weight:800;">
+                                <input type="checkbox" id="rememberMe">
+                                Remember me
+                            </label>
+                            <a class="link" href="support.html">Forgot password?</a>
+                        </div>
+                        <button class="btn" type="submit" id="btnLogin">
+                            Get Started
+                        </button>
+                        <div class="divider">Or sign in with</div>
+                        <div class="social-row">
+                            <button class="social-btn" type="button" aria-label="Sign in with Google">
+                                <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.61l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 5.99C44.3 38.09 46.98 31.85 46.98 24.55z"></path>
+                                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-5.99c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                                </svg>
+                            </button>
+                            <button class="social-btn" type="button" aria-label="Sign in with Facebook">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path fill="#1877F2" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.93-1.95 1.88v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.08 24 18.09 24 12.07z"></path>
+                                    <path fill="#fff" d="M16.67 15.56l.53-3.49h-3.32V9.81c0-.95.46-1.88 1.95-1.88h1.51V4.98s-1.37-.24-2.68-.24c-2.74 0-4.53 1.67-4.53 4.69v2.66H7.08v3.49h3.05V24c.61.1 1.23.16 1.87.16s1.26-.06 1.87-.16v-8.44h2.8z"></path>
+                                </svg>
+                            </button>
+                            <button class="social-btn" type="button" aria-label="Sign in with Apple">
+                                <svg viewBox="0 0 384 512" aria-hidden="true" focusable="false">
+                                    <path fill="#111827" d="M318.7 268.6c.1 37.7 16.5 66.9 51.9 88.7-7.4 21.9-17.1 42.6-29.1 61.4-16.2 25.2-33.2 50.3-59.7 50.8-26.0.5-34.4-15.4-64.2-15.4s-39.0 15.0-63.7 15.9c-25.8 1.0-45.3-25.9-61.6-51.0-33.4-51.3-59.0-145.0-24.7-208.2 17.0-31.3 47.5-51.1 80.6-51.6 25.2-.5 49.0 16.9 64.3 16.9s43.9-20.9 74.0-17.8c12.6.5 48.0 5.1 70.8 38.5-1.8 1.1-42.3 24.9-41.8 74.8zM260.3 60.2c12.0-14.6 20.1-34.9 17.9-55.2-17.4.7-38.5 11.6-51.0 26.2-11.2 12.9-21.0 33.6-18.4 53.3 19.2 1.5 39.5-9.7 51.5-24.3z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="alert" id="alertBox"></div>
+                        <div class="foot">
+                            <a class="link" href="signup.html">Create account</a>
+                            <span style="opacity:0.55; padding: 0 10px;">•</span>
+                            <a class="link" href="../white-label.html">Back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script>
+        const alertBox = document.getElementById('alertBox');
+        const form = document.getElementById('loginForm');
+        const btn = document.getElementById('btnLogin');
+
+        function showAlert(type, msg) {
+            alertBox.classList.remove('error', 'success');
+            alertBox.classList.add(type === 'success' ? 'success' : 'error');
+            alertBox.textContent = String(msg || '');
+            alertBox.style.display = 'block';
+        }
+
+        function setBusy(busy) {
+            btn.disabled = !!busy;
+            btn.innerHTML = busy
+                ? '<i class="fas fa-spinner fa-spin"></i> Signing in...'
+                : 'Get Started';
+        }
+
+        async function tryAutoLogin() {
+            const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            if (!token) return;
+            try {
+                const res = await apiRequest('/auth/verify', { method: 'GET' });
+                if (!res.ok) throw new Error('verify_failed');
+                window.location.href = 'client-dashboard.html';
+            } catch (e) {}
+        }
+
+        async function login(email, password, rememberMe) {
+            const body = { email, password };
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(json && json.error ? json.error : 'Login failed');
+            }
+            const token = json && json.token ? String(json.token) : '';
+            if (!token) throw new Error('Token missing');
+            if (rememberMe) {
+                localStorage.setItem('authToken', token);
+                sessionStorage.removeItem('authToken');
+            } else {
+                sessionStorage.setItem('authToken', token);
+                localStorage.removeItem('authToken');
+            }
+            localStorage.setItem('wlClient', JSON.stringify({ user: json.user || null, client: json.client || null, at: Date.now() }));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            tryAutoLogin();
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = String(document.getElementById('email').value || '').trim();
+            const password = String(document.getElementById('password').value || '').trim();
+            const rememberMe = !!document.getElementById('rememberMe').checked;
+            if (!email || !password) { showAlert('error', 'Email and password are required'); return; }
+            setBusy(true);
+            try {
+                await login(email, password, rememberMe);
+                showAlert('success', 'Signed in successfully');
+                setTimeout(() => { window.location.href = 'client-dashboard.html'; }, 250);
+            } catch (err) {
+                showAlert('error', err && err.message ? err.message : 'Login failed');
+            } finally {
+                setBusy(false);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let’s Start - White Label</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root{
+            --text: rgba(15,23,42,0.92);
+            --muted: rgba(15,23,42,0.68);
+            --muted2: rgba(15,23,42,0.54);
+            --glass: rgba(255,255,255,0.72);
+            --border: rgba(255,255,255,0.86);
+            --shadow: 0 34px 110px rgba(2,6,23,0.16);
+        }
+        *{ margin:0; padding:0; box-sizing:border-box; }
+        html, body { height: 100%; }
+        body{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background:
+                radial-gradient(circle at 22% 22%, rgba(37,99,235,0.10) 0%, rgba(37,99,235,0) 52%),
+                radial-gradient(circle at 72% 24%, rgba(139,92,246,0.08) 0%, rgba(139,92,246,0) 52%),
+                radial-gradient(circle at 54% 92%, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0) 52%),
+                linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.98) 100%);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding: 56px 18px;
+            overflow: hidden;
+            color: var(--text);
+        }
+        .rings{ position:absolute; inset:0; pointer-events:none; opacity:0.55; }
+        .ring{
+            position:absolute;
+            left:50%;
+            top:55%;
+            transform: translate(-50%, -50%);
+            border-radius: 9999px;
+            border: 1px solid rgba(15,23,42,0.08);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.30) inset;
+        }
+        .ring.r1{ width: min(1100px, 120vw); height: min(1100px, 120vw); }
+        .ring.r2{ width: min(860px, 92vw); height: min(860px, 92vw); opacity: 0.65; }
+        .ring.r3{ width: min(620px, 74vw); height: min(620px, 74vw); opacity: 0.45; }
+        .card{
+            width: min(640px, 100%);
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 26px 24px;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(14px);
+            animation: fadeUp 700ms ease-out forwards;
+        }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        .top{
+            display:flex;
+            justify-content: space-between;
+            align-items:center;
+            gap: 12px;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            text-decoration:none;
+            color: var(--text);
+            font-weight: 950;
+            letter-spacing: -0.02em;
+        }
+        .brand img{
+            height: 34px;
+            width: auto;
+            display:block;
+            filter: drop-shadow(0 10px 22px rgba(15,23,42,0.10));
+        }
+        .back{
+            display:inline-flex;
+            align-items:center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            font-weight: 850;
+        }
+        .kicker{
+            margin-top: 18px;
+            display:inline-flex;
+            align-items:center;
+            gap: 10px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            color: rgba(15,23,42,0.78);
+        }
+        h1{
+            margin-top: 12px;
+            font-size: 1.8rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            line-height: 1.12;
+        }
+        .sub{
+            margin-top: 10px;
+            color: var(--muted);
+            font-weight: 650;
+            line-height: 1.5;
+        }
+        .meta{
+            margin-top: 18px;
+            display:grid;
+            gap: 10px;
+        }
+        .pill{
+            display:flex;
+            justify-content: space-between;
+            align-items:center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+        }
+        .pill .l{
+            font-weight: 900;
+            color: rgba(15,23,42,0.82);
+            font-size: 0.92rem;
+        }
+        .pill .r{
+            font-weight: 950;
+            color: rgba(15,23,42,0.92);
+            letter-spacing: -0.01em;
+        }
+        .progress{
+            margin-top: 16px;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(2,6,23,0.06);
+            overflow:hidden;
+        }
+        .progress > div{
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.94));
+            border-right: 1px solid rgba(255,255,255,0.85);
+            animation: bar 1200ms ease-out forwards;
+        }
+        @keyframes bar{ to { width: 100%; } }
+        .actions{
+            margin-top: 16px;
+            display:flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn{
+            border: none;
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-weight: 950;
+            cursor: pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap: 10px;
+        }
+        .btn.primary{
+            background: linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.94));
+            color: #fff;
+            box-shadow: 0 22px 60px rgba(2,6,23,0.18);
+            flex: 1;
+            min-width: 220px;
+        }
+        .btn.ghost{
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+            color: rgba(15,23,42,0.86);
+        }
+        .foot{
+            margin-top: 12px;
+            color: var(--muted2);
+            font-weight: 650;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 520px){
+            .card{ padding: 18px 16px; }
+            .brand img{ height: 30px; }
+            h1{ font-size: 1.55rem; }
+            .actions{ flex-direction: column; }
+            .btn.primary{ width: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce){
+            *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rings" aria-hidden="true">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+    </div>
+    <div class="card">
+        <div class="top">
+            <a class="brand" href="../white-label.html">
+                <img src="../../image-removebg-preview - 2026-04-11T040053.052.png" alt="Alpha Freight">
+            </a>
+            <a class="back" href="../white-label.html#pricing"><i class="fas fa-arrow-left"></i>Back</a>
+        </div>
+
+        <div class="kicker"><i class="fas fa-star"></i> Let’s Start</div>
+        <h1 id="title">Preparing your checkout</h1>
+        <div class="sub" id="subtitle">We’re setting up a secure payment and getting your onboarding ready.</div>
+
+        <div class="meta">
+            <div class="pill">
+                <div class="l">Selected plan</div>
+                <div class="r" id="planText">Pro</div>
+            </div>
+            <div class="pill">
+                <div class="l">Next step</div>
+                <div class="r">Card payment</div>
+            </div>
+        </div>
+
+        <div class="progress" aria-hidden="true"><div></div></div>
+
+        <div class="actions">
+            <button class="btn primary" type="button" id="continueBtn">
+                Continue to payment
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <a class="btn ghost" href="../white-label.html#contact">
+                Talk to sales
+            </a>
+        </div>
+
+        <div class="foot">You will be redirected automatically in a moment.</div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const rawPlan = (params.get('plan') || 'pro').toLowerCase();
+        const plan = rawPlan === 'starter' ? 'starter' : rawPlan === 'pro' ? 'pro' : 'pro';
+        const planLabel = plan === 'starter' ? 'Starter' : 'Pro';
+
+        const planText = document.getElementById('planText');
+        if (planText) planText.textContent = planLabel;
+
+        const continueToPayment = () => {
+            window.location.href = `card-payment.html?plan=${encodeURIComponent(plan)}&src=pricing`;
+        };
+
+        const continueBtn = document.getElementById('continueBtn');
+        if (continueBtn) continueBtn.addEventListener('click', continueToPayment);
+
+        setTimeout(continueToPayment, 1400);
+    </script>
+</body>
+</html>

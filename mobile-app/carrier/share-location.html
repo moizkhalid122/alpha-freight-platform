@@ -697,7 +697,13 @@
                 const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
                 const db = window.AlphaBrokrage.firebaseDb;
                 if (db) {
-                    db.ref(`carrierLocations/${carrierId}`).remove().catch(console.error);
+                    const params = new URLSearchParams(window.location.search);
+                    const loadId = params.get('loadId') || params.get('id') || '';
+                    db.ref(`driverLocations/${carrierId}`).remove().catch(console.error);
+                    if (loadId) {
+                        db.ref(`loadLocations/${loadId}/${carrierId}`).remove().catch(console.error);
+                        db.ref(`loads/${loadId}/currentLocation`).remove().catch(console.error);
+                    }
                 }
             }
 
@@ -715,20 +721,35 @@
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
                 const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const params = new URLSearchParams(window.location.search);
+                const loadId = params.get('loadId') || params.get('id') || '';
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const carrierUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
 
+                const speedKmh = parseFloat(speed) || 0;
+                const speedMps = speedKmh > 0 ? (speedKmh / 3.6) : 0;
                 const locationData = {
                     lat: lat,
                     lng: lng,
-                    speed: parseFloat(speed) || 0,
+                    speed: speedMps,
+                    speedKmh: speedKmh,
                     heading: heading !== null ? parseFloat(heading) : null,
                     accuracy: accuracy || null,
                     timestamp: Date.now(),
                     updatedAt: new Date().toISOString(),
                     carrierId: carrierId,
-                    carrierName: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+                    carrierName: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+                    carrierFirebaseUid: carrierUid || null,
+                    loadId: loadId || null
                 };
 
-                await db.ref(`carrierLocations/${carrierId}`).set(locationData);
+                await db.ref(`driverLocations/${carrierId}`).set(locationData);
+                if (loadId) {
+                    await Promise.allSettled([
+                        db.ref(`loadLocations/${loadId}/${carrierId}`).set(locationData),
+                        db.ref(`loads/${loadId}/currentLocation`).set(locationData)
+                    ]);
+                }
 
             } catch (error) {
                 console.error('Firebase error:', error);

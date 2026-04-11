@@ -63,7 +63,7 @@
 
         .search-input {
             width: 100%;
-            padding: 0.875rem 1rem 0.875rem 3rem;
+            padding: 0.875rem 3.25rem 0.875rem 3rem;
             font-size: 1rem;
             border: 2px solid var(--border);
             border-radius: 12px;
@@ -86,6 +86,87 @@
             color: var(--text-medium);
             font-size: 1.125rem;
         }
+
+        .search-filter-btn{
+            position: absolute;
+            right: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            color: var(--text-dark);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            transition: all 0.2s;
+        }
+        .search-filter-btn:active{ transform: translateY(-50%) scale(0.98); }
+
+        .active-filters{
+            padding: 0 1.25rem;
+            margin: 0 0 0.5rem;
+            display:flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .active-filters::-webkit-scrollbar{ display:none; }
+        .filter-pill{
+            background: rgba(99, 102, 241, 0.10);
+            border: 1px solid rgba(99, 102, 241, 0.22);
+            color: rgba(79,70,229,0.98);
+            border-radius: 999px;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            white-space: nowrap;
+            display:inline-flex;
+            align-items:center;
+            gap: 0.5rem;
+        }
+        .filter-pill button{
+            border: 0;
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .recommend-row{
+            padding: 0 1.25rem;
+            margin-bottom: 0.75rem;
+            display:flex;
+            gap: 0.75rem;
+            overflow-x:auto;
+            scrollbar-width:none;
+            -ms-overflow-style:none;
+        }
+        .recommend-row::-webkit-scrollbar{ display:none; }
+        .recommend-chip{
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 999px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor:pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .recommend-chip.primary{
+            background: rgba(99, 102, 241, 0.10);
+            border-color: rgba(99, 102, 241, 0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .recommend-chip:active{ transform: scale(0.98); }
 
         /* Filters */
         .filters-section {
@@ -254,6 +335,32 @@
         .btn-sheet.cancel { background: #fff; color: var(--text-dark); border: 2px solid var(--border); }
         .btn-sheet.accept { background: linear-gradient(145deg, #10b981 0%, var(--success) 100%); color: #fff; box-shadow: 0 10px 22px rgba(5, 150, 105, 0.28); }
         .btn-sheet:disabled { opacity: 0.65; cursor: not-allowed; }
+        .btn-sheet.danger { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 10px 22px rgba(220, 38, 38, 0.24); }
+
+        .confirm-list{ display:grid; gap: 0.5rem; margin-top: 0.6rem; }
+        .confirm-item{
+            display:flex;
+            justify-content:space-between;
+            gap: 0.75rem;
+            align-items:flex-start;
+            border: 1px solid var(--border);
+            background: rgba(241,245,249,0.7);
+            border-radius: 14px;
+            padding: 0.75rem 0.85rem;
+        }
+        .confirm-item .k{ font-size: 0.72rem; font-weight: 900; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.06em; }
+        .confirm-item .v{ font-weight: 900; letter-spacing: -0.02em; color: var(--text-dark); text-align:right; }
+        .confirm-note{
+            margin-top: 0.9rem;
+            padding: 0.85rem 0.9rem;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.9);
+            color: rgba(71,85,105,0.95);
+            font-weight: 800;
+            font-size: 0.88rem;
+            white-space: pre-line;
+        }
 
         .load-header {
             display: flex;
@@ -374,6 +481,24 @@
         .btn-view:active {
             transform: scale(0.98);
         }
+
+        .btn-bid{
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(99, 102, 241, 0.10);
+            color: rgba(79,70,229,0.98);
+            border: 2px solid rgba(99, 102, 241, 0.24);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-bid:active{ transform: scale(0.98); }
 
         /* Empty State */
         .empty-state {
@@ -572,8 +697,13 @@
         <div class="search-bar">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="search-input" id="searchInput" placeholder="Search by location, cargo type...">
+            <button type="button" class="search-filter-btn" id="openFiltersBtn" aria-label="Filters">
+                <i class="fas fa-sliders"></i>
+            </button>
         </div>
     </div>
+
+    <div class="active-filters" id="activeFiltersRow" style="display:none;"></div>
 
     <!-- Filters -->
     <div class="filters-section">
@@ -586,6 +716,8 @@
             <div class="filter-chip" data-filter="urgent" onclick="filterLoads('urgent')">Urgent</div>
         </div>
     </div>
+
+    <div class="recommend-row" id="recommendRow" style="display:none;"></div>
 
     <!-- Loads List – skeleton cards (match real card layout), replaced when data loads -->
     <div class="loads-section" id="loadsSection">
@@ -694,6 +826,132 @@
         </a>
     </nav>
 
+    <div class="modal-overlay" id="filtersModalOverlay" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="filtersModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="filtersModalTitle">Advanced Filters</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;">Vehicle, distance, pickup window, rate</div>
+                </div>
+                <button class="modal-close" type="button" id="filtersModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="display:grid; gap: 0.85rem;">
+                <div class="route-mini">
+                    <div class="label">Vehicle</div>
+                    <div class="value">
+                        <select id="fltVehicle" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                            <option value="any">Any</option>
+                            <option value="van">Van</option>
+                            <option value="luton">Luton</option>
+                            <option value="7.5t">7.5T</option>
+                            <option value="18t">18T</option>
+                            <option value="artic">Artic</option>
+                            <option value="flatbed">Flatbed</option>
+                            <option value="curtainside">Curtainside</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Pickup window</div>
+                    <div class="value">
+                        <select id="fltPickupWindow" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                            <option value="any">Any</option>
+                            <option value="today">Today</option>
+                            <option value="tomorrow">Tomorrow</option>
+                            <option value="3days">Next 3 days</option>
+                            <option value="7days">Next 7 days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Distance (miles)</div>
+                    <div class="value" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <input id="fltMinDistance" inputmode="numeric" placeholder="Min" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                        <input id="fltMaxDistance" inputmode="numeric" placeholder="Max" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Rate (net £)</div>
+                    <div class="value" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <input id="fltMinRate" inputmode="numeric" placeholder="Min" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                        <input id="fltMaxRate" inputmode="numeric" placeholder="Max" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Preferred lanes</div>
+                    <div class="value" style="display:grid;gap:0.5rem;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                            <input id="laneFrom" placeholder="From contains" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                            <input id="laneTo" placeholder="To contains" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                        </div>
+                        <button type="button" class="btn-view" id="addLaneBtn" style="width:100%;padding:0.75rem;border-radius:12px;">
+                            <i class="fas fa-plus"></i> Add lane
+                        </button>
+                        <div id="laneList" style="display:flex;flex-wrap:wrap;gap:0.5rem;"></div>
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Saved searches</div>
+                    <div class="value">
+                        <div style="display:flex;gap:0.75rem;align-items:center;">
+                            <input id="saveSearchName" placeholder="Search name" style="flex:1;min-width:0;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;">
+                            <button type="button" class="btn-accept" id="saveSearchBtn" style="flex:0 0 auto; padding:0.75rem 0.95rem;">
+                                <i class="fas fa-bookmark"></i> Save
+                            </button>
+                        </div>
+                        <div id="savedSearchList" style="margin-top:0.75rem;display:grid;gap:0.6rem;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="filtersModalClear"><i class="fas fa-eraser"></i> Clear</button>
+                <button class="btn-sheet accept" type="button" id="filtersModalApply"><i class="fas fa-check"></i> Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bidModalOverlay" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="bidModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="bidModalTitle">Place Bid</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;" id="bidModalSub">Enter your offer</div>
+                </div>
+                <button class="modal-close" type="button" id="bidModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="display:grid; gap: 0.85rem;">
+                <div class="route-mini">
+                    <div class="label">Auto-bid template</div>
+                    <div class="value" style="display:flex;gap:0.75rem;align-items:center;">
+                        <select id="bidTemplate" style="flex:1;min-width:0;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:700;"></select>
+                        <button type="button" class="btn-view" id="manageTemplatesBtn" style="flex:0 0 auto;padding:0.75rem 0.85rem;border-radius:12px;">Manage</button>
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Bid amount (net £)</div>
+                    <div class="value">
+                        <input id="bidAmount" inputmode="numeric" placeholder="e.g., 650" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:700;">
+                        <div id="bidSuggest" style="margin-top:0.4rem;color:var(--text-medium);font-weight:700;font-size:0.85rem;"></div>
+                    </div>
+                </div>
+                <div class="route-mini">
+                    <div class="label">Message (optional)</div>
+                    <div class="value">
+                        <textarea id="bidMessage" placeholder="Any note to supplier…" style="width:100%;min-height:92px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.85rem;background:var(--card-bg);color:var(--text-dark);font-weight:600;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="bidModalCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet accept" type="button" id="bidModalSend"><i class="fas fa-paper-plane"></i> Send Bid</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="acceptModalOverlay" aria-hidden="true">
         <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="acceptModalTitle">
             <div class="modal-head">
@@ -729,6 +987,28 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="confirmModalOverlay" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="confirmModalTitle">Confirm</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;" id="confirmModalSub">Please review</div>
+                </div>
+                <button class="modal-close" type="button" id="confirmModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-list" id="confirmModalList"></div>
+                <div class="confirm-note" id="confirmModalNote" style="display:none;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="confirmModalCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet accept" type="button" id="confirmModalOk"><i class="fas fa-check"></i> Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -740,6 +1020,8 @@
 
     <!-- Alerts -->
     <script src="../../assets/js/alerts.js"></script>
+
+    <script src="../../assets/js/notifications.js"></script>
 
     <!-- Main Script -->
     <script>
@@ -753,6 +1035,69 @@
 
         function showSuccess(message) {
             alertSystem.show('success', message);
+        }
+
+        function confirmModal(opts) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmModalOverlay');
+                const titleEl = document.getElementById('confirmModalTitle');
+                const subEl = document.getElementById('confirmModalSub');
+                const listEl = document.getElementById('confirmModalList');
+                const noteEl = document.getElementById('confirmModalNote');
+                const closeBtn = document.getElementById('confirmModalClose');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+                const okBtn = document.getElementById('confirmModalOk');
+                if (!overlay || !titleEl || !listEl || !cancelBtn || !okBtn) { resolve(false); return; }
+
+                const o = opts || {};
+                const items = Array.isArray(o.items) ? o.items : [];
+                titleEl.textContent = String(o.title || 'Confirm');
+                if (subEl) subEl.textContent = String(o.subtitle || 'Please review');
+                listEl.innerHTML = items.map(it => {
+                    const k = escapeHtml(it && it.k ? it.k : '');
+                    const v = escapeHtml(it && it.v !== undefined ? it.v : '');
+                    return `<div class="confirm-item"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+                }).join('');
+
+                const note = String(o.note || '').trim();
+                if (noteEl) {
+                    if (note) {
+                        noteEl.style.display = '';
+                        noteEl.textContent = note;
+                    } else {
+                        noteEl.style.display = 'none';
+                        noteEl.textContent = '';
+                    }
+                }
+
+                okBtn.classList.remove('accept', 'danger');
+                okBtn.classList.add(o.variant === 'danger' ? 'danger' : 'accept');
+                okBtn.innerHTML = `<i class="fas ${o.variant === 'danger' ? 'fa-triangle-exclamation' : 'fa-check'}"></i> ${escapeHtml(o.confirmText || 'Confirm')}`;
+                cancelBtn.innerHTML = `<i class="fas fa-arrow-left"></i> ${escapeHtml(o.cancelText || 'Cancel')}`;
+
+                function close(val) {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    overlay.onclick = null;
+                    cancelBtn.onclick = null;
+                    okBtn.onclick = null;
+                    if (closeBtn) closeBtn.onclick = null;
+                    document.removeEventListener('keydown', onKey);
+                    resolve(val);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') close(false);
+                }
+                document.addEventListener('keydown', onKey);
+
+                overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+                cancelBtn.onclick = () => close(false);
+                okBtn.onclick = () => close(true);
+                if (closeBtn) closeBtn.onclick = () => close(false);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
         }
 
         async function ensureAuthReady() {
@@ -776,6 +1121,18 @@
             });
         }
 
+        async function ensureAuthOrAnon() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk) return null;
+            if (authSdk.currentUser) return authSdk.currentUser;
+            try {
+                const cred = await authSdk.signInAnonymously();
+                return cred && cred.user ? cred.user : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
         function getInitials(name) {
             const n = (name || '').trim();
             if (!n) return 'S';
@@ -789,6 +1146,15 @@
             let stars = '';
             for (let i = 1; i <= 5; i++) stars += i <= Math.round(r) ? '★' : '☆';
             return stars;
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         async function computeSupplierRating(supplierId) {
@@ -912,6 +1278,20 @@
         let filteredLoads = [];
         let currentFilter = 'all';
         let searchQuery = '';
+        let advancedFilters = {
+            vehicle: 'any',
+            pickupWindow: 'any',
+            minDistance: '',
+            maxDistance: '',
+            minRate: '',
+            maxRate: ''
+        };
+        let preferredLanes = [];
+        let savedSearches = [];
+        let activeLaneId = '';
+        let bidTargetLoadId = '';
+        let autoBidTemplates = [];
+        let bidTargetLoad = null;
 
         // Format currency
         function formatCurrency(amount) {
@@ -931,6 +1311,14 @@
         }
 
         function getNetCarrierAmount(load) {
+            if (load && load.acceptedOffer && String(load.acceptedOffer.type || '').toLowerCase() === 'bid' && load.acceptedOffer.amount !== undefined && load.acceptedOffer.amount !== null && load.acceptedOffer.amount !== '') {
+                const v = parseFloat(load.acceptedOffer.amount);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
+            if (load && load.agreedPrice !== undefined && load.agreedPrice !== null && load.agreedPrice !== '') {
+                const v = parseFloat(load.agreedPrice);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
             const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (parseFloat(load.minBudget) + parseFloat(load.maxBudget)) / 2 : load.maxBudget || load.minBudget || load.price || 0));
             const original = parseFloat(originalBudget) || 0;
             const commissionRate = getCarrierCommissionRate(original);
@@ -980,13 +1368,174 @@
             });
         }
 
+        function getCarrierUser() {
+            const authRaw = localStorage.getItem('carrierAuth');
+            if (!authRaw) return null;
+            try { return JSON.parse(authRaw); } catch (e) { return null; }
+        }
+
+        function getCarrierKey(user) {
+            const u = user || {};
+            if (u.carrierId) return String(u.carrierId);
+            if (u.email) return String(u.email).replace(/@/g, '_').replace(/\./g, '_');
+            return '';
+        }
+
+        function storageKey(name) {
+            const user = getCarrierUser();
+            const key = getCarrierKey(user) || 'guest';
+            return 'ab.carrier.' + name + '.' + key;
+        }
+
+        function safeJsonParse(s, fallback) {
+            try { return JSON.parse(s); } catch (e) { return fallback; }
+        }
+
+        function readPreferredLanes() {
+            const arr = safeJsonParse(localStorage.getItem(storageKey('preferredLanes')) || '[]', []);
+            return Array.isArray(arr) ? arr : [];
+        }
+
+        function writePreferredLanes(arr) {
+            localStorage.setItem(storageKey('preferredLanes'), JSON.stringify(arr || []));
+        }
+
+        function readSavedSearches() {
+            const arr = safeJsonParse(localStorage.getItem(storageKey('savedSearches')) || '[]', []);
+            return Array.isArray(arr) ? arr : [];
+        }
+
+        function writeSavedSearches(arr) {
+            localStorage.setItem(storageKey('savedSearches'), JSON.stringify(arr || []));
+        }
+
+        function readAutoBidTemplates() {
+            const arr = safeJsonParse(localStorage.getItem(storageKey('autoBidTemplates')) || '[]', []);
+            return Array.isArray(arr) ? arr : [];
+        }
+
+        function writeAutoBidTemplates(arr) {
+            localStorage.setItem(storageKey('autoBidTemplates'), JSON.stringify(arr || []));
+        }
+
+        function normalizeText(v) {
+            return String(v || '').toLowerCase().trim();
+        }
+
+        function parsePickupDateValue(load) {
+            const raw = load.pickupDate || load.pickup_date || load.pickupAt || load.pickup_time || '';
+            if (!raw) return null;
+            const d = new Date(raw);
+            if (Number.isNaN(d.getTime())) return null;
+            return d;
+        }
+
+        function parseDistanceMiles(load) {
+            const raw = load.distanceMiles !== undefined ? load.distanceMiles : (load.distance !== undefined ? load.distance : (load.distanceKm !== undefined ? (Number(load.distanceKm) / 1.60934) : 0));
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function normalizeVehicle(load) {
+            const v = normalizeText(load.vehicleType || load.vehicle || load.truckType || '');
+            if (!v) return '';
+            if (v.includes('7.5')) return '7.5t';
+            if (v.includes('18')) return '18t';
+            if (v.includes('artic')) return 'artic';
+            if (v.includes('curtain')) return 'curtainside';
+            if (v.includes('flat')) return 'flatbed';
+            if (v.includes('luton')) return 'luton';
+            if (v.includes('van')) return 'van';
+            return v;
+        }
+
+        function isWithinPickupWindow(load, windowKey) {
+            const k = String(windowKey || 'any');
+            if (k === 'any') return true;
+            const d = parsePickupDateValue(load);
+            if (!d) return false;
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const end = new Date(start.getTime());
+            if (k === 'today') end.setDate(end.getDate() + 1);
+            else if (k === 'tomorrow') { start.setDate(start.getDate() + 1); end.setDate(end.getDate() + 2); }
+            else if (k === '3days') end.setDate(end.getDate() + 3);
+            else if (k === '7days') end.setDate(end.getDate() + 7);
+            else return true;
+            return d >= start && d < end;
+        }
+
+        function laneMatches(load, lane) {
+            const from = normalizeText(lane && lane.from);
+            const to = normalizeText(lane && lane.to);
+            const pickup = normalizeText(load.pickupLocation || '');
+            const delivery = normalizeText(load.deliveryLocation || '');
+            if (from && !pickup.includes(from)) return false;
+            if (to && !delivery.includes(to)) return false;
+            return true;
+        }
+
+        function doesLoadMatchFilters(load) {
+            if (currentFilter !== 'all') {
+                const cargoType = (load.cargoType || '').toLowerCase();
+                if (currentFilter === 'urgent') {
+                    if (!load.urgent) return false;
+                } else if (cargoType !== currentFilter) {
+                    return false;
+                }
+            }
+
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                const pickup = (load.pickupLocation || '').toLowerCase();
+                const delivery = (load.deliveryLocation || '').toLowerCase();
+                const cargo = (load.cargoType || '').toLowerCase();
+                if (!pickup.includes(query) && !delivery.includes(query) && !cargo.includes(query)) return false;
+            }
+
+            const v = String(advancedFilters.vehicle || 'any');
+            if (v !== 'any') {
+                const nv = normalizeVehicle(load);
+                if (!nv || nv !== v) return false;
+            }
+
+            if (!isWithinPickupWindow(load, advancedFilters.pickupWindow)) return false;
+
+            const miles = parseDistanceMiles(load);
+            const minD = Number(String(advancedFilters.minDistance || '').replace(/[^\d.]/g, ''));
+            const maxD = Number(String(advancedFilters.maxDistance || '').replace(/[^\d.]/g, ''));
+            if (Number.isFinite(minD) && minD > 0 && miles > 0 && miles < minD) return false;
+            if (Number.isFinite(maxD) && maxD > 0 && miles > 0 && miles > maxD) return false;
+
+            const net = getNetCarrierAmount(load);
+            const minR = Number(String(advancedFilters.minRate || '').replace(/[^\d.]/g, ''));
+            const maxR = Number(String(advancedFilters.maxRate || '').replace(/[^\d.]/g, ''));
+            if (Number.isFinite(minR) && minR > 0 && net < minR) return false;
+            if (Number.isFinite(maxR) && maxR > 0 && net > maxR) return false;
+
+            if (activeLaneId) {
+                const lane = preferredLanes.find(x => String(x.id) === String(activeLaneId));
+                if (lane && !laneMatches(load, lane)) return false;
+            }
+
+            return true;
+        }
+
+        function isRecommendedLoad(load) {
+            if (!preferredLanes.length) return false;
+            for (const lane of preferredLanes) {
+                if (laneMatches(load, lane)) return true;
+            }
+            return false;
+        }
+
         async function loadAllLoads() {
             const loadsSection = document.getElementById('loadsSection');
             const loadMoreWrap = document.getElementById('loadMoreWrap');
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
                 // First screen: only 20 loads = much faster (small payload)
-                const loadsRef = db.ref('loads').orderByKey().limitToLast(INITIAL_FETCH_LIMIT);
+                const loadsRef = db.ref('marketLoads').orderByKey().limitToLast(INITIAL_FETCH_LIMIT);
                 const snapshot = await loadsRef.once('value');
                 const loads = snapshot.val() || {};
 
@@ -996,9 +1545,7 @@
                 const keys = Object.keys(loads);
                 oldestLoadedKey = keys.length ? keys.reduce((a, b) => a < b ? a : b) : null;
 
-                filteredLoads = [...allLoads];
-                renderLoads();
-                updateLoadsCount();
+                applyFilters();
                 loadMoreWrap.style.display = allLoads.length >= INITIAL_FETCH_LIMIT ? 'block' : 'none';
 
             } catch (error) {
@@ -1023,7 +1570,7 @@
             btn.textContent = 'Loading...';
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
-                const ref = db.ref('loads').orderByKey().endAt(oldestLoadedKey).limitToLast(LOADS_MORE_PAGE + 1);
+                const ref = db.ref('marketLoads').orderByKey().endAt(oldestLoadedKey).limitToLast(LOADS_MORE_PAGE + 1);
                 const snapshot = await ref.once('value');
                 const loads = snapshot.val() || {};
                 const newList = parseLoadsSnapshot(loads);
@@ -1039,23 +1586,7 @@
                 sortLoadsByDate(allLoads);
                 const allKeys = Object.keys(snapshot.val() || {});
                 oldestLoadedKey = allKeys.length ? allKeys.reduce((a, b) => a < b ? a : b) : null;
-                filteredLoads = allLoads.filter(load => {
-                    if (currentFilter !== 'all') {
-                        const cargoType = (load.cargoType || '').toLowerCase();
-                        if (currentFilter === 'urgent') { if (!load.urgent) return false; }
-                        else if (cargoType !== currentFilter) return false;
-                    }
-                    if (searchQuery) {
-                        const q = searchQuery.toLowerCase();
-                        const pickup = (load.pickupLocation || '').toLowerCase();
-                        const delivery = (load.deliveryLocation || '').toLowerCase();
-                        const cargo = (load.cargoType || '').toLowerCase();
-                        if (!pickup.includes(q) && !delivery.includes(q) && !cargo.includes(q)) return false;
-                    }
-                    return true;
-                });
-                renderLoads();
-                updateLoadsCount();
+                applyFilters();
                 if (added.length < LOADS_MORE_PAGE) loadMoreWrap.style.display = 'none';
             } catch (e) {
                 console.error(e);
@@ -1080,34 +1611,21 @@
 
         // Apply filters and search
         function applyFilters() {
-            filteredLoads = allLoads.filter(load => {
-                // Filter by type
-                if (currentFilter !== 'all') {
-                    const cargoType = (load.cargoType || '').toLowerCase();
-                    if (currentFilter === 'urgent') {
-                        if (!load.urgent) return false;
-                    } else if (cargoType !== currentFilter) {
-                        return false;
-                    }
-                }
-
-                // Search filter
-                if (searchQuery) {
-                    const query = searchQuery.toLowerCase();
-                    const pickup = (load.pickupLocation || '').toLowerCase();
-                    const delivery = (load.deliveryLocation || '').toLowerCase();
-                    const cargo = (load.cargoType || '').toLowerCase();
-                    
-                    if (!pickup.includes(query) && !delivery.includes(query) && !cargo.includes(query)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-
+            filteredLoads = allLoads.filter(doesLoadMatchFilters);
+            if (preferredLanes.length && !activeLaneId) {
+                filteredLoads.sort((a, b) => {
+                    const ra = isRecommendedLoad(a) ? 1 : 0;
+                    const rb = isRecommendedLoad(b) ? 1 : 0;
+                    if (ra !== rb) return rb - ra;
+                    const da = new Date(a.createdAt || a.pickupDate || 0).getTime();
+                    const db2 = new Date(b.createdAt || b.pickupDate || 0).getTime();
+                    return db2 - da;
+                });
+            }
             renderLoads();
             updateLoadsCount();
+            renderActiveFilterPills();
+            renderRecommendRow();
         }
 
         // Search handler
@@ -1115,6 +1633,555 @@
             searchQuery = e.target.value.trim();
             applyFilters();
         });
+
+        function renderActiveFilterPills() {
+            const row = document.getElementById('activeFiltersRow');
+            if (!row) return;
+            const pills = [];
+
+            if (searchQuery) pills.push({ key: 'q', label: `Search: ${searchQuery}` });
+            if (currentFilter && currentFilter !== 'all') pills.push({ key: 'type', label: `Type: ${currentFilter}` });
+            if (advancedFilters.vehicle && advancedFilters.vehicle !== 'any') pills.push({ key: 'veh', label: `Vehicle: ${advancedFilters.vehicle}` });
+            if (advancedFilters.pickupWindow && advancedFilters.pickupWindow !== 'any') pills.push({ key: 'pw', label: `Pickup: ${advancedFilters.pickupWindow}` });
+            if (advancedFilters.minDistance) pills.push({ key: 'minD', label: `Min miles: ${advancedFilters.minDistance}` });
+            if (advancedFilters.maxDistance) pills.push({ key: 'maxD', label: `Max miles: ${advancedFilters.maxDistance}` });
+            if (advancedFilters.minRate) pills.push({ key: 'minR', label: `Min £: ${advancedFilters.minRate}` });
+            if (advancedFilters.maxRate) pills.push({ key: 'maxR', label: `Max £: ${advancedFilters.maxRate}` });
+
+            if (activeLaneId) {
+                const lane = preferredLanes.find(x => String(x.id) === String(activeLaneId));
+                if (lane) pills.push({ key: 'lane', label: `Lane: ${lane.from || 'Any'} → ${lane.to || 'Any'}` });
+            }
+
+            if (pills.length === 0) {
+                row.style.display = 'none';
+                row.innerHTML = '';
+                return;
+            }
+
+            row.style.display = '';
+            row.innerHTML = pills.map(p => {
+                return `<div class="filter-pill">${escapeHtml(p.label)} <button type="button" data-k="${escapeHtml(p.key)}"><i class="fas fa-xmark"></i></button></div>`;
+            }).join('') + `<div class="filter-pill"><button type="button" data-k="clear"><i class="fas fa-eraser"></i> Clear all</button></div>`;
+
+            row.querySelectorAll('button[data-k]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const k = btn.getAttribute('data-k') || '';
+                    if (k === 'clear') {
+                        searchQuery = '';
+                        const si = document.getElementById('searchInput');
+                        if (si) si.value = '';
+                        currentFilter = 'all';
+                        document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+                        const allChip = document.querySelector('[data-filter="all"]');
+                        if (allChip) allChip.classList.add('active');
+                        advancedFilters = { vehicle: 'any', pickupWindow: 'any', minDistance: '', maxDistance: '', minRate: '', maxRate: '' };
+                        activeLaneId = '';
+                        applyFilters();
+                        return;
+                    }
+
+                    if (k === 'q') {
+                        searchQuery = '';
+                        const si = document.getElementById('searchInput');
+                        if (si) si.value = '';
+                    } else if (k === 'type') {
+                        currentFilter = 'all';
+                        document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+                        const allChip = document.querySelector('[data-filter="all"]');
+                        if (allChip) allChip.classList.add('active');
+                    } else if (k === 'veh') {
+                        advancedFilters.vehicle = 'any';
+                    } else if (k === 'pw') {
+                        advancedFilters.pickupWindow = 'any';
+                    } else if (k === 'minD') {
+                        advancedFilters.minDistance = '';
+                    } else if (k === 'maxD') {
+                        advancedFilters.maxDistance = '';
+                    } else if (k === 'minR') {
+                        advancedFilters.minRate = '';
+                    } else if (k === 'maxR') {
+                        advancedFilters.maxRate = '';
+                    } else if (k === 'lane') {
+                        activeLaneId = '';
+                    }
+                    applyFilters();
+                });
+            });
+        }
+
+        function renderRecommendRow() {
+            const row = document.getElementById('recommendRow');
+            if (!row) return;
+
+            const chips = [];
+            chips.push({ kind: 'link', id: 'bids', label: 'My Bids', cls: 'primary', href: 'my-bids.html' });
+
+            if (preferredLanes.length) {
+                preferredLanes.slice(0, 6).forEach(l => {
+                    const label = `${l.from || 'Any'} → ${l.to || 'Any'}`;
+                    chips.push({ kind: 'lane', id: String(l.id), label });
+                });
+            } else {
+                chips.push({ kind: 'action', id: 'addLane', label: 'Add preferred lane', cls: '' });
+            }
+
+            row.style.display = '';
+            row.innerHTML = chips.map(c => {
+                const cls = c.cls ? `recommend-chip ${c.cls}` : 'recommend-chip';
+                const active = c.kind === 'lane' && activeLaneId && String(activeLaneId) === String(c.id) ? ' primary' : '';
+                return `<button type="button" class="${cls}${active}" data-kind="${escapeHtml(c.kind)}" data-id="${escapeHtml(c.id)}"${c.href ? ` data-href="${escapeHtml(c.href)}"` : ''}>${escapeHtml(c.label)}</button>`;
+            }).join('');
+
+            row.querySelectorAll('button[data-kind]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const kind = btn.getAttribute('data-kind') || '';
+                    const id = btn.getAttribute('data-id') || '';
+                    const href = btn.getAttribute('data-href') || '';
+
+                    if (kind === 'link' && href) {
+                        window.location.href = href;
+                        return;
+                    }
+                    if (kind === 'action' && id === 'addLane') {
+                        openFiltersModal();
+                        return;
+                    }
+                    if (kind === 'lane') {
+                        activeLaneId = (activeLaneId === id) ? '' : id;
+                        applyFilters();
+                    }
+                });
+            });
+        }
+
+        function openFiltersModal() {
+            const overlay = document.getElementById('filtersModalOverlay');
+            if (!overlay) return;
+
+            const veh = document.getElementById('fltVehicle');
+            const pw = document.getElementById('fltPickupWindow');
+            const minD = document.getElementById('fltMinDistance');
+            const maxD = document.getElementById('fltMaxDistance');
+            const minR = document.getElementById('fltMinRate');
+            const maxR = document.getElementById('fltMaxRate');
+
+            if (veh) veh.value = advancedFilters.vehicle || 'any';
+            if (pw) pw.value = advancedFilters.pickupWindow || 'any';
+            if (minD) minD.value = advancedFilters.minDistance || '';
+            if (maxD) maxD.value = advancedFilters.maxDistance || '';
+            if (minR) minR.value = advancedFilters.minRate || '';
+            if (maxR) maxR.value = advancedFilters.maxRate || '';
+
+            renderLaneList();
+            renderSavedSearchList();
+
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeFiltersModal() {
+            const overlay = document.getElementById('filtersModalOverlay');
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function renderLaneList() {
+            const host = document.getElementById('laneList');
+            if (!host) return;
+            if (!preferredLanes.length) {
+                host.innerHTML = `<span style="color:var(--text-medium);font-size:0.85rem;">No lanes yet</span>`;
+                return;
+            }
+            host.innerHTML = preferredLanes.slice(0, 10).map(l => {
+                const label = `${l.from || 'Any'} → ${l.to || 'Any'}`;
+                return `<span class="filter-pill" style="background:rgba(15,23,42,0.04);border-color:var(--border);color:var(--text-dark);">${escapeHtml(label)} <button type="button" data-lane="${escapeHtml(l.id)}"><i class="fas fa-xmark"></i></button></span>`;
+            }).join('');
+
+            host.querySelectorAll('button[data-lane]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-lane') || '';
+                    preferredLanes = preferredLanes.filter(x => String(x.id) !== String(id));
+                    writePreferredLanes(preferredLanes);
+                    if (String(activeLaneId) === String(id)) activeLaneId = '';
+                    renderLaneList();
+                    renderRecommendRow();
+                    applyFilters();
+                });
+            });
+        }
+
+        function genId(prefix) {
+            return String(prefix || 'id') + '_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16);
+        }
+
+        function addLane() {
+            const fromEl = document.getElementById('laneFrom');
+            const toEl = document.getElementById('laneTo');
+            const from = fromEl ? String(fromEl.value || '').trim() : '';
+            const to = toEl ? String(toEl.value || '').trim() : '';
+            if (!from && !to) {
+                showError('Enter from/to');
+                return;
+            }
+            preferredLanes = [{ id: genId('lane'), from, to, createdAt: new Date().toISOString() }, ...preferredLanes].slice(0, 12);
+            writePreferredLanes(preferredLanes);
+            if (fromEl) fromEl.value = '';
+            if (toEl) toEl.value = '';
+            renderLaneList();
+            renderRecommendRow();
+            showSuccess('Lane saved');
+        }
+
+        function renderSavedSearchList() {
+            const host = document.getElementById('savedSearchList');
+            if (!host) return;
+            if (!savedSearches.length) {
+                host.innerHTML = `<div style="color:var(--text-medium);font-size:0.85rem;">No saved searches</div>`;
+                return;
+            }
+            host.innerHTML = savedSearches.slice(0, 10).map(s => {
+                const meta = [s.filter !== 'all' ? s.filter : '', s.query ? `q:${s.query}` : '', s.filters?.vehicle && s.filters.vehicle !== 'any' ? s.filters.vehicle : '']
+                    .filter(Boolean).join(' • ');
+                return `
+                    <div class="profile-row" style="padding:0.75rem;border:1px solid var(--border);border-radius:14px;background:rgba(241,245,249,0.7);">
+                        <div style="flex:1;min-width:0;">
+                            <div class="profile-name" style="font-size:0.95rem;">${escapeHtml(s.name || 'Search')}</div>
+                            <div class="profile-meta" style="margin-top:0.25rem;">${escapeHtml(meta || '—')}</div>
+                        </div>
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <button type="button" class="btn-view" data-act="apply" data-id="${escapeHtml(s.id)}" style="padding:0.55rem 0.85rem;border-radius:12px;">Apply</button>
+                            <button type="button" class="btn-view" data-act="del" data-id="${escapeHtml(s.id)}" style="padding:0.55rem 0.7rem;border-radius:12px;border-color:rgba(239,68,68,0.25);color:rgba(239,68,68,0.95);"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            host.querySelectorAll('button[data-act]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const act = btn.getAttribute('data-act') || '';
+                    const id = btn.getAttribute('data-id') || '';
+                    if (act === 'apply') {
+                        applySavedSearch(id);
+                        closeFiltersModal();
+                    } else if (act === 'del') {
+                        savedSearches = savedSearches.filter(x => String(x.id) !== String(id));
+                        writeSavedSearches(savedSearches);
+                        renderSavedSearchList();
+                        showSuccess('Deleted');
+                    }
+                });
+            });
+        }
+
+        function saveCurrentSearch() {
+            const nameEl = document.getElementById('saveSearchName');
+            const name = nameEl ? String(nameEl.value || '').trim() : '';
+            if (!name) {
+                showError('Enter search name');
+                return;
+            }
+
+            const entry = {
+                id: genId('srch'),
+                name,
+                filter: currentFilter,
+                query: searchQuery,
+                filters: { ...advancedFilters },
+                activeLaneId: activeLaneId || '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            savedSearches = [entry, ...savedSearches].slice(0, 15);
+            writeSavedSearches(savedSearches);
+            if (nameEl) nameEl.value = '';
+            renderSavedSearchList();
+            showSuccess('Saved');
+        }
+
+        function applySavedSearch(id) {
+            const s = savedSearches.find(x => String(x.id) === String(id));
+            if (!s) return;
+            currentFilter = s.filter || 'all';
+            searchQuery = s.query || '';
+            advancedFilters = { vehicle: 'any', pickupWindow: 'any', minDistance: '', maxDistance: '', minRate: '', maxRate: '', ...(s.filters || {}) };
+            activeLaneId = s.activeLaneId || '';
+
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            const chip = document.querySelector(`[data-filter="${currentFilter}"]`);
+            if (chip) chip.classList.add('active');
+            const si = document.getElementById('searchInput');
+            if (si) si.value = searchQuery;
+            applyFilters();
+        }
+
+        async function openBidModal(loadId) {
+            bidTargetLoadId = String(loadId || '');
+            if (!bidTargetLoadId) return;
+            const overlay = document.getElementById('bidModalOverlay');
+            if (!overlay) return;
+
+            const amountEl = document.getElementById('bidAmount');
+            const msgEl = document.getElementById('bidMessage');
+            const subEl = document.getElementById('bidModalSub');
+            const tplEl = document.getElementById('bidTemplate');
+            const suggestEl = document.getElementById('bidSuggest');
+
+            const load = allLoads.find(l => String(l.loadId) === bidTargetLoadId) || {};
+            bidTargetLoad = load;
+            if (subEl) {
+                const route = `${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}`;
+                subEl.textContent = route;
+            }
+
+            if (amountEl) amountEl.value = String(Math.round(getNetCarrierAmount(load) || 0) || '');
+            if (msgEl) msgEl.value = '';
+            if (suggestEl) {
+                const miles = parseDistanceMiles(load);
+                const net = getNetCarrierAmount(load);
+                let rpm = miles > 0 ? Math.round((net / miles) * 100) / 100 : 0;
+                if (!Number.isFinite(rpm) || rpm <= 0) rpm = 1;
+                const low = Math.max(0, Math.round((net * 0.9) * 100) / 100);
+                const high = Math.round((net * 1.05) * 100) / 100;
+                suggestEl.textContent = `Recommended: £${low.toFixed(2)} – £${high.toFixed(2)} (${miles > 0 ? `~£${rpm.toFixed(2)}/mi × ${Math.round(miles)}mi` : 'distance N/A'})`;
+                suggestEl.setAttribute('data-low', String(low));
+                suggestEl.setAttribute('data-high', String(high));
+            }
+
+            const user = getCarrierUser();
+            const carrierId = getCarrierKey(user);
+            if (carrierId) {
+                try {
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    const snap = await db.ref(`bids/${bidTargetLoadId}/${carrierId}`).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (amountEl && v.amount) amountEl.value = String(v.amount);
+                        if (msgEl && v.message) msgEl.value = String(v.message);
+                    }
+                } catch (e) {}
+            }
+
+            renderBidTemplateSelect(tplEl, load);
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeBidModal() {
+            const overlay = document.getElementById('bidModalOverlay');
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            bidTargetLoadId = '';
+            bidTargetLoad = null;
+        }
+
+        function renderBidTemplateSelect(selectEl, load) {
+            if (!selectEl) return;
+            autoBidTemplates = readAutoBidTemplates();
+            const opts = [{ id: '', name: 'No template' }].concat(autoBidTemplates.map(t => ({ id: String(t.id || ''), name: String(t.name || 'Template') })));
+            selectEl.innerHTML = opts.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}</option>`).join('');
+            selectEl.value = '';
+            selectEl.onchange = () => {
+                const id = String(selectEl.value || '');
+                if (!id) return;
+                applyAutoBidTemplate(id, load);
+            };
+        }
+
+        function applyAutoBidTemplate(templateId, load) {
+            const t = autoBidTemplates.find(x => String(x.id) === String(templateId));
+            if (!t) return;
+            const amountEl = document.getElementById('bidAmount');
+            if (!amountEl) return;
+            const type = String(t.type || '');
+            const miles = parseDistanceMiles(load);
+            let amount = 0;
+            if (type === 'perMile') {
+                const rpm = Number(t.ratePerMile || 0);
+                if (Number.isFinite(rpm) && rpm > 0 && miles > 0) amount = miles * rpm;
+            } else if (type === 'perRoute') {
+                const from = String(t.from || '').trim();
+                const to = String(t.to || '').trim();
+                const laneOk = laneMatches(load, { from, to });
+                if (laneOk) {
+                    const fixed = Number(t.fixedAmount || 0);
+                    const rpm = Number(t.ratePerMile || 0);
+                    if (Number.isFinite(fixed) && fixed > 0) amount = fixed;
+                    else if (Number.isFinite(rpm) && rpm > 0 && miles > 0) amount = miles * rpm;
+                }
+            } else if (type === 'flat') {
+                const fixed = Number(t.fixedAmount || 0);
+                if (Number.isFinite(fixed) && fixed > 0) amount = fixed;
+            }
+            if (amount > 0) amountEl.value = String(Math.round(amount * 100) / 100);
+        }
+
+        async function sendBid() {
+            const loadId = String(bidTargetLoadId || '');
+            if (!loadId) return;
+
+            const user = getCarrierUser();
+            if (!user || !user.email) {
+                showError('Please sign in to bid');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const carrierId = getCarrierKey(user);
+            if (!carrierId) {
+                showError('Please sign in to bid');
+                return;
+            }
+
+            const amountEl = document.getElementById('bidAmount');
+            const msgEl = document.getElementById('bidMessage');
+            const suggestEl = document.getElementById('bidSuggest');
+            const sendBtn = document.getElementById('bidModalSend');
+            const amount = Number(String(amountEl ? amountEl.value : '').replace(/[^\d.]/g, ''));
+            const message = String(msgEl ? msgEl.value : '').trim();
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showError('Enter valid bid amount');
+                return;
+            }
+            if (suggestEl) {
+                const low = Number(suggestEl.getAttribute('data-low') || '0');
+                const high = Number(suggestEl.getAttribute('data-high') || '0');
+                if (Number.isFinite(low) && Number.isFinite(high) && low > 0 && high > 0) {
+                    if (amount < low * 0.8 || amount > high * 1.2) {
+                        showError(`Amount looks off-range (rec £${low.toFixed(2)}–£${high.toFixed(2)})`);
+                        return;
+                    }
+                }
+            }
+
+            const previewLoad = allLoads.find(l => String(l.loadId) === loadId) || {};
+            const originalBudget = previewLoad && (previewLoad.budget || (previewLoad.minBudget && previewLoad.maxBudget ? (parseFloat(previewLoad.minBudget) + parseFloat(previewLoad.maxBudget)) / 2 : previewLoad.maxBudget || previewLoad.minBudget || previewLoad.price || 0));
+            const original = parseFloat(originalBudget) || 0;
+            const commissionRate = getCarrierCommissionRate(original);
+            const commissionPct = Math.round((commissionRate * 100) * 10) / 10;
+            const currentNet = getNetCarrierAmount(previewLoad);
+            const routeText = `${previewLoad.pickupLocation || 'N/A'} → ${previewLoad.deliveryLocation || 'N/A'}`;
+            const ok = await confirmModal({
+                title: 'Confirm Bid',
+                subtitle: 'Bid will be sent to supplier',
+                items: [
+                    { k: 'Route', v: routeText },
+                    { k: 'Current payout', v: formatCurrency(currentNet) },
+                    { k: 'Your bid (net)', v: formatCurrency(amount) },
+                    { k: 'Platform fee', v: `~${commissionPct}%` }
+                ],
+                note: 'If supplier accepts: load will be assigned to you and payout becomes your bid amount.\nIf supplier rejects: load will not be assigned.',
+                confirmText: 'Send Bid',
+                cancelText: 'Cancel',
+                variant: 'success'
+            });
+            if (!ok) return;
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                await ensureAuthReady();
+                if (!authSdk || !authSdk.currentUser) {
+                    await ensureAuthOrAnon();
+                }
+                const carrierUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : (user.firebaseUid || '');
+
+                const load = previewLoad;
+                const carrierName = `${(user.firstName || '').trim()} ${(user.lastName || '').trim()}`.trim() || user.companyName || 'Carrier';
+
+                if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; }
+                const data = {
+                    carrierId,
+                    carrierFirebaseUid: carrierUid || '',
+                    carrierEmail: user.email,
+                    carrierName,
+                    amount: Math.round(amount * 100) / 100,
+                    message,
+                    status: 'sent',
+                    seen: false,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    loadId: loadId,
+                    supplierId: load.supplierId || load.supplier_id || ''
+                };
+
+                const updates = {};
+                updates[`bids/${loadId}/${carrierId}`] = data;
+                updates[`carrierBids/${carrierId}/${loadId}`] = {
+                    loadId: loadId,
+                    supplierId: data.supplierId || '',
+                    pickupLocation: load.pickupLocation || '',
+                    deliveryLocation: load.deliveryLocation || '',
+                    distanceMiles: Math.round(parseDistanceMiles(load) * 10) / 10,
+                    carrierFirebaseUid: data.carrierFirebaseUid || '',
+                    amount: data.amount,
+                    message: data.message || '',
+                    status: data.status,
+                    seen: data.seen,
+                    createdAt: data.createdAt,
+                    updatedAt: data.updatedAt
+                };
+                await db.ref().update(updates);
+
+                closeBidModal();
+                showSuccess('Bid sent');
+
+                try {
+                    const authUser = (authSdk && authSdk.currentUser) ? authSdk.currentUser : null;
+                    const senderUid = authUser && authUser.uid ? String(authUser.uid) : '';
+                    const supplierId = String(data.supplierId || '').trim();
+                    if (senderUid && supplierId) {
+                        const route = `${load.pickupLocation || 'N/A'} → ${load.deliveryLocation || 'N/A'}`;
+                        const title = 'New Bid Received';
+                        const body = `${carrierName} bid £${Number(data.amount || 0).toFixed(2)} • ${route}`;
+                        await db.ref('notificationQueue').push({
+                            senderUid,
+                            toUserId: supplierId,
+                            toUserType: 'supplier',
+                            title,
+                            message: body,
+                            type: 'bid_received',
+                            data: {
+                                type: 'bid_received',
+                                loadId: loadId,
+                                url: '/mobile-app/supplier/quotes-inbox.html',
+                                icon: '/assets/img/alpha-freight-logo.svg',
+                                carrierId: carrierId,
+                                carrierName: carrierName,
+                                amount: String(data.amount || '')
+                            },
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                } catch (e) {}
+
+                try {
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        const route = `${(load.pickupLocation || 'N/A')} → ${(load.deliveryLocation || 'N/A')}`;
+                        new Notification('Bid Sent', {
+                            body: `£${Number(data.amount || 0).toFixed(2)} • ${route}`,
+                            icon: '/assets/img/alpha-freight-logo.svg',
+                            badge: '/assets/img/alpha-freight-logo.svg',
+                            tag: 'bid_sent_' + loadId
+                        });
+                    }
+                } catch (e) {}
+            } catch (e) {
+                console.error(e);
+                const raw = String((e && e.message) ? e.message : e || '');
+                const low = raw.toLowerCase();
+                if (low.includes('permission') || low.includes('denied') || low.includes('insufficient')) {
+                    showError('Permission denied (database rules). Please deploy database rules, then try again.');
+                } else if (raw) {
+                    showError(raw);
+                } else {
+                    showError('Failed to send bid');
+                }
+            }
+            if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Bid'; }
+        }
 
         // Build HTML for one load card
         function buildLoadCardHtml(load, index) {
@@ -1162,8 +2229,9 @@
                             <i class="fas fa-check"></i>
                             Accept Load
                         </button>
-                        <button class="btn-view" onclick="event.stopPropagation(); viewLoadDetails('${load.loadId}')">
-                            View
+                        <button class="btn-bid" onclick="event.stopPropagation(); openBidModal('${load.loadId}')">
+                            <i class="fas fa-tag"></i>
+                            Bid
                         </button>
                     </div>
                 </div>
@@ -1221,15 +2289,17 @@
                     return;
                 }
                 const loadRef = db.ref(`loads/${loadId}`);
-
-                const loadSnap = await loadRef.once('value');
-                const loadData = loadSnap.val() || {};
-                const currentStatus = String(loadData.status || '').toLowerCase();
-                if (currentStatus && currentStatus !== 'available' && currentStatus !== 'pending' && currentStatus !== 'active') {
+                let market = {};
+                try {
+                    const ms = await db.ref(`marketLoads/${loadId}`).once('value');
+                    market = ms.val() || {};
+                } catch (e) {}
+                const currentStatus = String(market.status || '').toLowerCase();
+                if (currentStatus && currentStatus !== 'available' && currentStatus !== 'pending' && currentStatus !== 'active' && currentStatus !== 'posted') {
                     showError('This load is no longer available.');
                     return;
                 }
-                let supplierId = loadData.supplierId || loadData.supplier_id || loadData.supplier || loadData.postedBy || (loadData.supplierEmail || '').replace(/@/g, '_').replace(/\./g, '_');
+                let supplierId = market.supplierId || '';
                 if (supplierId === 'broker' || supplierId === 'admin') supplierId = '';
                 if (!supplierId && clickedEl) {
                     const card = clickedEl.closest && clickedEl.closest('.load-card');
@@ -1239,8 +2309,8 @@
 
                 const ok = await showAcceptModal({
                     supplierId,
-                    fallbackName: loadData.supplierName || loadData.companyName || loadData.supplierEmail || '',
-                    route: `${loadData.pickupLocation || ''} → ${loadData.deliveryLocation || ''}`
+                    fallbackName: market.supplierName || market.companyName || market.supplierEmail || '',
+                    route: `${market.pickupLocation || ''} → ${market.deliveryLocation || ''}`
                 });
                 if (!ok) return;
 
@@ -1258,15 +2328,12 @@
 
                 if (supplierId) {
                     const carrierName = `${(user.firstName || '').trim()} ${(user.lastName || '').trim()}`.trim() || user.companyName || 'A carrier';
-                    const notif = {
-                        title: 'Load Accepted!',
-                        message: `${carrierName} has accepted your load: ${loadData.pickupLocation || ''} → ${loadData.deliveryLocation || ''}`,
-                        type: 'load_accepted',
-                        loadId,
-                        read: false,
-                        createdAt: new Date().toISOString()
-                    };
-                    await db.ref('notifications/suppliers/' + supplierId).push(notif);
+                    const msg = `${carrierName} has accepted your load: ${(market.pickupLocation || '')} → ${(market.deliveryLocation || '')}`;
+                    try {
+                        if (typeof NotificationManager !== 'undefined' && NotificationManager.create) {
+                            await NotificationManager.create('load_accepted', 'Load Accepted!', msg, { type: 'load_accepted', loadId, url: '/mobile-app/supplier/load-details.html?id=' + encodeURIComponent(loadId) }, supplierId, 'supplier');
+                        }
+                    } catch (e) {}
                 }
 
                 showSuccess('Load accepted successfully!');
@@ -1293,8 +2360,85 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            preferredLanes = readPreferredLanes();
+            savedSearches = readSavedSearches();
+            autoBidTemplates = readAutoBidTemplates();
+            renderRecommendRow();
             loadAllLoads();
             document.getElementById('btnLoadMore').addEventListener('click', loadMoreLoads);
+
+            const filtersOpen = document.getElementById('openFiltersBtn');
+            const filtersClose = document.getElementById('filtersModalClose');
+            const filtersApply = document.getElementById('filtersModalApply');
+            const filtersClear = document.getElementById('filtersModalClear');
+            const filtersOverlay = document.getElementById('filtersModalOverlay');
+            const addLaneBtn = document.getElementById('addLaneBtn');
+            const saveSearchBtn = document.getElementById('saveSearchBtn');
+
+            if (filtersOpen) filtersOpen.addEventListener('click', openFiltersModal);
+            if (filtersClose) filtersClose.addEventListener('click', closeFiltersModal);
+            if (filtersOverlay) {
+                filtersOverlay.addEventListener('click', (e) => {
+                    if (e.target === filtersOverlay) closeFiltersModal();
+                });
+            }
+            if (filtersApply) {
+                filtersApply.addEventListener('click', () => {
+                    const veh = document.getElementById('fltVehicle');
+                    const pw = document.getElementById('fltPickupWindow');
+                    const minD = document.getElementById('fltMinDistance');
+                    const maxD = document.getElementById('fltMaxDistance');
+                    const minR = document.getElementById('fltMinRate');
+                    const maxR = document.getElementById('fltMaxRate');
+                    advancedFilters.vehicle = veh ? String(veh.value || 'any') : 'any';
+                    advancedFilters.pickupWindow = pw ? String(pw.value || 'any') : 'any';
+                    advancedFilters.minDistance = minD ? String(minD.value || '').trim() : '';
+                    advancedFilters.maxDistance = maxD ? String(maxD.value || '').trim() : '';
+                    advancedFilters.minRate = minR ? String(minR.value || '').trim() : '';
+                    advancedFilters.maxRate = maxR ? String(maxR.value || '').trim() : '';
+                    closeFiltersModal();
+                    applyFilters();
+                });
+            }
+            if (filtersClear) {
+                filtersClear.addEventListener('click', () => {
+                    advancedFilters = { vehicle: 'any', pickupWindow: 'any', minDistance: '', maxDistance: '', minRate: '', maxRate: '' };
+                    activeLaneId = '';
+                    const veh = document.getElementById('fltVehicle');
+                    const pw = document.getElementById('fltPickupWindow');
+                    const minD = document.getElementById('fltMinDistance');
+                    const maxD = document.getElementById('fltMaxDistance');
+                    const minR = document.getElementById('fltMinRate');
+                    const maxR = document.getElementById('fltMaxRate');
+                    if (veh) veh.value = 'any';
+                    if (pw) pw.value = 'any';
+                    if (minD) minD.value = '';
+                    if (maxD) maxD.value = '';
+                    if (minR) minR.value = '';
+                    if (maxR) maxR.value = '';
+                    renderActiveFilterPills();
+                    renderRecommendRow();
+                    applyFilters();
+                });
+            }
+            if (addLaneBtn) addLaneBtn.addEventListener('click', addLane);
+            if (saveSearchBtn) saveSearchBtn.addEventListener('click', saveCurrentSearch);
+
+            const bidClose = document.getElementById('bidModalClose');
+            const bidCancel = document.getElementById('bidModalCancel');
+            const bidSend = document.getElementById('bidModalSend');
+            const bidOverlay = document.getElementById('bidModalOverlay');
+            const manageTplBtn = document.getElementById('manageTemplatesBtn');
+
+            if (bidClose) bidClose.addEventListener('click', closeBidModal);
+            if (bidCancel) bidCancel.addEventListener('click', closeBidModal);
+            if (bidOverlay) {
+                bidOverlay.addEventListener('click', (e) => {
+                    if (e.target === bidOverlay) closeBidModal();
+                });
+            }
+            if (bidSend) bidSend.addEventListener('click', () => sendBid());
+            if (manageTplBtn) manageTplBtn.addEventListener('click', () => { window.location.href = 'my-bids.html#templates'; });
         });
     </script>
 </body>

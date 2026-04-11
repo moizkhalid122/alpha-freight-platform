@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
     <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
     <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script>window.__AB_DISABLE_RESUME_RELOAD__ = true;</script>
     <script src="../../assets/js/app-resume-fix.js"></script>
     <style>
         body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
@@ -132,6 +133,7 @@
         let loadData = null;
         let photoDataUrl = '';
         let signatureDataUrl = '';
+        let attachments = [];
         let gps = null;
         let sig = null;
         let editLocked = false;
@@ -172,6 +174,10 @@
             return (v == null ? '' : String(v));
         }
 
+        function supplierKeyFromEmail(email) {
+            return String(email || '').replace(/@/g, '_').replace(/\./g, '_');
+        }
+
         function buildSubtitle(load) {
             const lid = (load && (load.loadId || load.id || loadId)) || loadId;
             const pickup = (load && (load.pickupLocation || load.from)) || '';
@@ -198,24 +204,28 @@
             const pod = (load && (load.pod || {})) || {};
             const receiverName = pod.receiverName || load.podReceiverName || '';
             const submittedAt = pod.submittedAt || load.podUploadedAt || '';
+            const podStatus = String(pod.status || load.podStatus || (pod.submittedAt ? 'submitted' : '')).toLowerCase();
             const lat = pod.gps && pod.gps.lat != null ? pod.gps.lat : null;
             const lng = pod.gps && pod.gps.lng != null ? pod.gps.lng : null;
             const acc = pod.gps && pod.gps.accuracy != null ? pod.gps.accuracy : null;
             const photo = pod.photoDataUrl || load.podUrl || '';
             const sigUrl = pod.signatureDataUrl || '';
+            const extra = Array.isArray(pod.attachments) ? pod.attachments : [];
 
             document.getElementById('pageTitle').textContent = 'POD';
             document.getElementById('pageSubtitle').textContent = buildSubtitle(load);
             const hasPhoto = !!photo;
             const hasSig = !!sigUrl;
+            const pillText = podStatus === 'verified' ? 'Verified' : podStatus === 'rejected' ? 'Rejected' : (hasPhoto && hasSig ? 'Submitted' : 'Partial');
+            const pillKind = podStatus === 'verified' ? 'good' : podStatus === 'rejected' ? 'bad' : (hasPhoto && hasSig ? 'good' : 'bad');
 
             document.getElementById('contentArea').innerHTML = `
                 <div class="card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="fw-bold">Proof of Delivery</div>
-                        <div class="pill ${hasPhoto && hasSig ? 'good' : 'bad'}">
-                            <i class="fas ${hasPhoto && hasSig ? 'fa-check' : 'fa-info-circle'}"></i>
-                            ${hasPhoto && hasSig ? 'Complete' : 'Partial'}
+                        <div class="pill ${pillKind}">
+                            <i class="fas ${pillKind === 'good' ? 'fa-check' : 'fa-info-circle'}"></i>
+                            ${pillText}
                         </div>
                     </div>
                     <div class="grid2">
@@ -232,6 +242,7 @@
                         <div class="field-label">Location</div>
                         <div class="muted">${lat != null && lng != null ? (lat.toFixed(6) + ', ' + lng.toFixed(6) + (acc != null ? (' (±' + Math.round(acc) + 'm)') : '')) : 'N/A'}</div>
                     </div>
+                    ${podStatus === 'rejected' && pod.rejectReason ? `<div class="mt-3"><div class="field-label">Rejected Reason</div><div class="muted">${safeText(pod.rejectReason)}</div></div>` : ''}
                 </div>
                 ${hasPhoto ? `
                 <div class="card">
@@ -243,6 +254,15 @@
                 <div class="card">
                     <div class="fw-bold mb-2">Receiver Signature</div>
                     <img class="thumb" src="${sigUrl}" alt="Signature">
+                </div>
+                ` : ''}
+                ${extra.length ? `
+                <div class="card">
+                    <div class="fw-bold mb-2">Additional Documents</div>
+                    <div class="muted mb-3">${extra.length} attachment(s)</div>
+                    <div class="grid2">
+                        ${extra.map((a) => `<img class="thumb" src="${String(a && a.dataUrl ? a.dataUrl : '').replace(/\"/g,'&quot;')}" alt="Attachment">`).join('')}
+                    </div>
                 </div>
                 ` : ''}
                 <div class="card">
@@ -477,7 +497,8 @@
             document.getElementById('pageSubtitle').textContent = buildSubtitle(load);
 
             const existingPod = !!(load && (load.hasPOD || load.podUrl || (load.pod && (load.pod.photoDataUrl || load.pod.signatureDataUrl))));
-            editLocked = existingPod;
+            const existingPodStatus = String((load.pod && load.pod.status) || load.podStatus || '').toLowerCase();
+            editLocked = existingPod && existingPodStatus !== 'rejected';
             const disabledEdit = !canEdit();
 
             document.getElementById('contentArea').innerHTML = `
@@ -485,8 +506,8 @@
                 <div class="card">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="fw-bold">POD already exists</div>
-                            <div class="muted mt-1">You can view the existing POD evidence.</div>
+                            <div class="fw-bold">${existingPodStatus === 'rejected' ? 'POD rejected' : 'POD already exists'}</div>
+                            <div class="muted mt-1">${existingPodStatus === 'rejected' ? 'Please resubmit with correct evidence.' : 'You can view the existing POD evidence.'}</div>
                         </div>
                         <a class="btn-action secondary" href="pod.html?id=${encodeURIComponent(loadId)}&mode=view"><i class="fas fa-eye"></i> View</a>
                     </div>
@@ -510,7 +531,12 @@
                 <div class="card">
                     <div class="fw-bold mb-2">Delivery Photo</div>
                     <div class="muted mb-3">Take a clear photo at delivery.</div>
-                    <input id="photoInput" class="input" style="padding:0.75rem 1rem" type="file" accept="image/*" capture="environment" ${disabledEdit ? 'disabled' : ''}>
+                    <div class="btn-row">
+                        <button class="btn-action secondary" type="button" id="btnPhotoCamera" ${disabledEdit ? 'disabled' : ''}><i class="fas fa-camera"></i> Camera</button>
+                        <button class="btn-action secondary" type="button" id="btnPhotoGallery" ${disabledEdit ? 'disabled' : ''}><i class="fas fa-image"></i> Gallery</button>
+                    </div>
+                    <input id="photoCameraInput" type="file" accept="image/*" capture="environment" style="display:none" ${disabledEdit ? 'disabled' : ''}>
+                    <input id="photoGalleryInput" type="file" accept="image/*" style="display:none" ${disabledEdit ? 'disabled' : ''}>
                     <div class="mt-3" id="photoPreviewWrap" style="display:none">
                         <img id="photoPreview" class="thumb" alt="POD Photo Preview">
                         <div class="muted mt-2" id="photoMeta"></div>
@@ -531,6 +557,13 @@
                 </div>
 
                 <div class="card">
+                    <div class="fw-bold mb-2">Additional Documents (optional)</div>
+                    <div class="muted mb-3">Add up to 3 extra photos (damage, seal, paperwork).</div>
+                    <input id="docsInput" class="input" style="padding:0.75rem 1rem" type="file" accept="image/*" multiple ${disabledEdit ? 'disabled' : ''}>
+                    <div class="mt-3" id="docsPreviewWrap" style="display:none"></div>
+                </div>
+
+                <div class="card">
                     <div class="btn-row">
                         <a class="btn-action secondary" href="load-details.html?id=${encodeURIComponent(loadId)}"><i class="fas fa-arrow-left"></i> Back</a>
                         <button class="btn-action primary" id="submitBtn" type="button" disabled><i class="fas fa-check"></i> Submit</button>
@@ -540,37 +573,50 @@
             `;
 
             const receiverInput = document.getElementById('receiverName');
-            const photoInput = document.getElementById('photoInput');
+            const btnPhotoCamera = document.getElementById('btnPhotoCamera');
+            const btnPhotoGallery = document.getElementById('btnPhotoGallery');
+            const photoCameraInput = document.getElementById('photoCameraInput');
+            const photoGalleryInput = document.getElementById('photoGalleryInput');
             const clearSigBtn = document.getElementById('clearSigBtn');
             const captureGpsBtn = document.getElementById('captureGpsBtn');
             const submitBtn = document.getElementById('submitBtn');
             const signatureCanvas = document.getElementById('signatureCanvas');
+            const docsInput = document.getElementById('docsInput');
 
             if (receiverInput) receiverInput.addEventListener('input', updateChecks);
 
-            if (photoInput) {
-                photoInput.addEventListener('change', async function () {
-                    const f = photoInput.files && photoInput.files[0];
-                    if (!f) return;
-                    try {
-                        const compressed = await compressImageToJpeg(f, { maxSize: 1280, quality: 0.72 });
-                        photoDataUrl = compressed.dataUrl;
-                        const previewWrap = document.getElementById('photoPreviewWrap');
-                        const preview = document.getElementById('photoPreview');
-                        const meta = document.getElementById('photoMeta');
-                        if (preview) preview.src = photoDataUrl;
-                        if (previewWrap) previewWrap.style.display = '';
-                        const bytes = approxBytesFromDataUrl(photoDataUrl);
-                        if (meta) meta.textContent = compressed.width + '×' + compressed.height + ' • ' + Math.round(bytes / 1024) + ' KB';
-                        updateChecks();
-                    } catch (e) {
-                        console.error(e);
-                        photoDataUrl = '';
-                        alertSystem.show('Failed to process photo. Please try another image.', 'error');
-                        updateChecks();
-                    }
+            async function handlePhotoFile(f) {
+                if (!f) return;
+                try {
+                    const compressed = await compressImageToJpeg(f, { maxSize: 1280, quality: 0.72 });
+                    photoDataUrl = compressed.dataUrl;
+                    const previewWrap = document.getElementById('photoPreviewWrap');
+                    const preview = document.getElementById('photoPreview');
+                    const meta = document.getElementById('photoMeta');
+                    if (preview) preview.src = photoDataUrl;
+                    if (previewWrap) previewWrap.style.display = '';
+                    const bytes = approxBytesFromDataUrl(photoDataUrl);
+                    if (meta) meta.textContent = compressed.width + '×' + compressed.height + ' • ' + Math.round(bytes / 1024) + ' KB';
+                    updateChecks();
+                } catch (e) {
+                    console.error(e);
+                    photoDataUrl = '';
+                    alertSystem.show('Failed to process photo. Please try another image.', 'error');
+                    updateChecks();
+                }
+            }
+            function wirePhotoInput(input) {
+                if (!input) return;
+                input.addEventListener('change', async () => {
+                    const f = input.files && input.files[0];
+                    input.value = '';
+                    await handlePhotoFile(f);
                 });
             }
+            wirePhotoInput(photoCameraInput);
+            wirePhotoInput(photoGalleryInput);
+            if (btnPhotoCamera && photoCameraInput) btnPhotoCamera.addEventListener('click', () => { try { photoCameraInput.click(); } catch (e) {} });
+            if (btnPhotoGallery && photoGalleryInput) btnPhotoGallery.addEventListener('click', () => { try { photoGalleryInput.click(); } catch (e) {} });
 
             if (signatureCanvas) {
                 sig = createSignaturePad(signatureCanvas);
@@ -597,6 +643,38 @@
                     } finally {
                         submitBtn.disabled = false;
                         updateChecks();
+                    }
+                });
+            }
+
+            if (docsInput) {
+                docsInput.addEventListener('change', async () => {
+                    const wrap = document.getElementById('docsPreviewWrap');
+                    attachments = [];
+                    if (wrap) { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+                    const files = Array.from((docsInput.files || [])).slice(0, 3);
+                    if (!files.length) return;
+                    try {
+                        const out = [];
+                        for (const f of files) {
+                            const compressed = await compressImageToJpeg(f, { maxSize: 1280, quality: 0.7 });
+                            out.push({
+                                dataUrl: compressed.dataUrl,
+                                type: 'image/jpeg',
+                                fileName: f.name || 'photo.jpg',
+                                size: approxBytesFromDataUrl(compressed.dataUrl),
+                                uploadedAt: new Date().toISOString()
+                            });
+                        }
+                        attachments = out;
+                        if (wrap) {
+                            wrap.style.display = '';
+                            wrap.innerHTML = out.map((a) => `<img class="thumb mb-2" src="${String(a.dataUrl).replace(/\"/g,'&quot;')}" alt="Attachment">`).join('');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        attachments = [];
+                        alertSystem.show('Failed to process document(s). Try smaller images.', 'error');
                     }
                 });
             }
@@ -650,9 +728,11 @@
                 receiverName,
                 carrierId: carrierId || (loadData.carrierId || ''),
                 carrierFirebaseUid: carrierUid,
+                status: 'submitted',
                 gps: gps || null,
                 photoDataUrl,
                 signatureDataUrl,
+                attachments: attachments || [],
                 device: { userAgent: navigator.userAgent || '' }
             };
 
@@ -664,6 +744,7 @@
                 podFileSize: approxBytesFromDataUrl(photoDataUrl),
                 podUploadedAt: now,
                 podUploadedBy: carrierId || (loadData.carrierId || 'carrier'),
+                podStatus: 'submitted',
                 carrierFirebaseUid: carrierUid,
                 pod: podNode
             };
@@ -676,6 +757,26 @@
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
                 await db.ref('loads/' + loadId).update(updates);
+                try {
+                    const supplierId = String(loadData.supplierId || supplierKeyFromEmail(loadData.supplierEmail || '')).trim();
+                    if (supplierId) {
+                        await db.ref('notificationQueue').push({
+                            senderUid: carrierUid,
+                            toUserId: supplierId,
+                            toUserType: 'supplier',
+                            title: 'POD Submitted',
+                            message: 'Carrier submitted Proof of Delivery',
+                            type: 'pod_submitted',
+                            data: {
+                                type: 'pod_submitted',
+                                loadId: String(loadId),
+                                url: '/mobile-app/supplier/pod.html?id=' + encodeURIComponent(loadId),
+                                icon: '/image-removebg-preview - 2026-03-04T141043.516.png'
+                            },
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                } catch (e) {}
                 alertSystem.show('POD submitted successfully', 'success');
                 setTimeout(() => {
                     window.location.href = 'load-details.html?id=' + encodeURIComponent(loadId);

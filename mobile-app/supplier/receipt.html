@@ -731,6 +731,7 @@
             const method = (load.paymentStatus && load.paymentStatus.method) || (payment && payment.method) || '-';
             const intent = (load.paymentStatus && load.paymentStatus.paymentIntentId) || (payment && payment.paymentIntentId) || '-';
             const paymentRef = (payment && payment.paymentId) ? payment.paymentId : ((load.paymentStatus && load.paymentStatus.paymentId) ? load.paymentStatus.paymentId : '');
+            const invoiceNumber = (load && (load.invoiceNumber || (load.paymentStatus && load.paymentStatus.invoiceNumber))) ? String(load.invoiceNumber || load.paymentStatus.invoiceNumber) : '';
             const paymentState = String((load.paymentStatus && load.paymentStatus.status) || (payment && payment.status) || '').toLowerCase();
             const refundState = String(load.refundStatus || (load.refundRequest && load.refundRequest.status) || '').toLowerCase();
             const docTitle = pageMode === 'invoice' ? 'Invoice' : 'Payment Receipt';
@@ -743,6 +744,11 @@
             const content = document.getElementById('contentArea');
             const qrData = getQrDataString();
             const qrUrl = getQrUrl(qrData, 220);
+            const docRefLabel = pageMode === 'invoice' ? (invoiceNumber || paymentRef) : paymentRef;
+            const subRefText = pageMode === 'invoice'
+              ? (invoiceNumber ? ` • Invoice #${escapeHtml(String(invoiceNumber))}` : (paymentRef ? ` • Invoice #${escapeHtml(String(paymentRef).slice(0, 10))}` : ''))
+              : (paymentRef ? ` • Receipt #${escapeHtml(String(paymentRef).slice(0, 10))}` : '');
+
             content.innerHTML = `
                 <div class="brand">
                     <h2>Alpha Freight</h2>
@@ -751,7 +757,7 @@
                 <div class="receipt-head">
                     <div>
                         <div class="receipt-title">${escapeHtml(docTitle)}</div>
-                        <div class="receipt-sub">Load #${escapeHtml(String(loadId).slice(0, 10))}${paymentRef ? ` • ${escapeHtml(pageMode === 'invoice' ? 'Invoice' : 'Receipt')} #${escapeHtml(String(paymentRef).slice(0, 10))}` : ''}</div>
+                        <div class="receipt-sub">Load #${escapeHtml(String(loadId).slice(0, 10))}${subRefText}</div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
                         <span class="pill ${statePill}"><i class="fas ${stateIcon}"></i> ${stateLabel}</span>
@@ -761,7 +767,7 @@
                 </div>
                 <div class="box">
                     <div class="box-row"><div class="box-k">Date</div><div class="box-v">${escapeHtml(formatDate(paidAt))}</div></div>
-                    <div class="box-row"><div class="box-k">Reference</div><div class="box-v">${escapeHtml(paymentRef || intent || '-')}</div></div>
+                    <div class="box-row"><div class="box-k">Reference</div><div class="box-v">${escapeHtml(docRefLabel || intent || '-')}</div></div>
                     <div class="box-row"><div class="box-k">Intent</div><div class="box-v">${escapeHtml(intent || '-')}</div></div>
                 </div>
                 <div class="route">
@@ -787,7 +793,7 @@
                 loadId: loadId,
                 paymentState: paymentState || null,
                 refundState: refundState || null,
-                paymentRef: paymentRef || null,
+                paymentRef: (pageMode === 'invoice' ? (invoiceNumber || paymentRef) : paymentRef) || null,
                 loadShort: String(loadId).slice(0, 10),
                 paidAt: formatDate(paidAt),
                 route,
@@ -815,11 +821,30 @@
             if (!db) return;
             try {
                 await ensureAuthReady();
+                let load = {};
+                try {
+                    const loadSnap = await db.ref('loads/' + loadId).once('value');
+                    load = loadSnap.val() || {};
+                } catch (e) {}
+
+                let supplierAuth = null;
+                try { supplierAuth = JSON.parse(localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile') || 'null'); } catch (e) { supplierAuth = null; }
+                const supplierId = (supplierAuth && (supplierAuth.supplierId || supplierAuth.id)) ? (supplierAuth.supplierId || supplierAuth.id) : (load && load.supplierId ? load.supplierId : null);
+                const carrierId = load && (load.carrierId || load.assignedCarrier) ? (load.carrierId || load.assignedCarrier) : null;
+
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const supplierFirebaseUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : (supplierAuth && supplierAuth.firebaseUid ? supplierAuth.firebaseUid : null);
+                const carrierFirebaseUid = load && load.carrierFirebaseUid ? load.carrierFirebaseUid : null;
+
                 const refundRef = db.ref('refunds').push();
                 const refundId = refundRef.key;
                 await refundRef.set({
                     refundId,
                     loadId,
+                    supplierId: supplierId || null,
+                    supplierFirebaseUid: supplierFirebaseUid || null,
+                    carrierId: carrierId || null,
+                    carrierFirebaseUid: carrierFirebaseUid || null,
                     reason,
                     status: 'pending',
                     requestedByRole: 'supplier',

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -22,9 +22,10 @@
     <style>
         /* —— Premium theme (matches supplier dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
@@ -32,26 +33,27 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
             --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
         html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             color: var(--text-dark);
             /* footer from supplier-bottom-nav.css */
@@ -59,36 +61,37 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
-        /* Header – premium navy + gold */
+        /* Header */
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1rem 1.25rem 1.1rem;
+            background: transparent;
+            color: rgba(15,23,42,0.92);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
             display: flex;
             align-items: center;
             gap: 0.875rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
-        }
+        .page-header::after { display:none; }
 
         .back-btn {
-            background: linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: #fff;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            color: rgba(15,23,42,0.85);
             width: 44px;
             height: 44px;
             border-radius: var(--radius-sm);
@@ -98,21 +101,22 @@
             cursor: pointer;
             text-decoration: none;
             transition: transform 0.3s var(--ease), background 0.3s var(--ease);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
         }
-        .back-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
+        .back-btn:active { transform: scale(0.99); }
 
         .header-content { flex: 1; min-width: 0; position: relative; z-index: 1; }
         .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
-        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+        .page-subtitle { font-size: 0.8125rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; margin-top: 0.2rem; }
 
         /* Card */
         .details-card {
-            background: var(--card-bg);
-            margin: 0 1.25rem 1rem;
+            background: rgba(255,255,255,0.92);
+            margin: 0 var(--page-pad) 12px;
             padding: 1.5rem;
             border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
             position: relative;
             overflow: hidden;
         }
@@ -122,8 +126,8 @@
             left: 0;
             top: 12px;
             bottom: 12px;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            width: 3px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.75));
             border-radius: 0 2px 2px 0;
             opacity: 0.9;
         }
@@ -134,7 +138,7 @@
             align-items: flex-start;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(15,23,42,0.10);
         }
 
         .load-id { font-size: 1rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.02em; }
@@ -147,11 +151,11 @@
             letter-spacing: 0.04em;
         }
 
-        .status-badge.available { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .status-badge.available { background: rgba(99, 91, 255, 0.14); color: rgba(79,70,229,0.98); }
         .status-badge.active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .status-badge.in-transit { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-badge.in-transit { background: rgba(245, 158, 11, 0.14); color: rgba(217, 119, 6, 0.98); }
         .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .status-badge.pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-badge.pending { background: rgba(245, 158, 11, 0.14); color: rgba(217, 119, 6, 0.98); }
         .status-badge.cancelled { background: rgba(239, 68, 68, 0.1); color: var(--error); }
 
         .route-section {
@@ -174,7 +178,7 @@
         }
 
         .route-dot.pickup { background: var(--success); }
-        .route-dot.delivery { background: var(--primary); }
+        .route-dot.delivery { background: rgba(99,91,255,0.95); }
 
         .route-label { font-size: 0.6875rem; font-weight: 700; color: var(--text-medium); margin-bottom: 0.15rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .route-value { font-size: 0.9375rem; font-weight: 800; color: var(--text-dark); }
@@ -187,10 +191,10 @@
         }
 
         .detail-item {
-            background: rgba(241, 245, 249, 0.9);
+            background: rgba(255,255,255,0.78);
             padding: 0.875rem;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
+            border: 1px solid rgba(15,23,42,0.10);
         }
 
         .detail-label { font-size: 0.6875rem; font-weight: 700; color: var(--text-medium); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -201,28 +205,27 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 1rem;
-            border-top: 2px solid var(--border);
+            border-top: 1px solid rgba(15,23,42,0.10);
         }
 
         .price-label { font-size: 0.9375rem; font-weight: 800; color: var(--text-dark); }
-        .price-value { font-size: 1.25rem; font-weight: 900; color: var(--primary); letter-spacing: -0.02em; }
+        .price-value { font-size: 1.25rem; font-weight: 900; color: rgba(79,70,229,0.98); letter-spacing: -0.02em; }
 
         .actions-section {
-            margin: 1.25rem 1.25rem 0;
+            margin: 12px var(--page-pad) 0;
         }
 
         .action-btns {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
         }
 
         .btn-action {
-            flex: 1;
             padding: 0.875rem 1rem;
             border-radius: 12px;
             font-size: 0.9375rem;
-            font-weight: 600;
+            font-weight: 900;
             border: none;
             cursor: pointer;
             display: flex;
@@ -230,40 +233,42 @@
             justify-content: center;
             gap: 0.5rem;
             text-decoration: none;
+            min-height: 52px;
+            white-space: nowrap;
         }
 
-        .btn-action.primary { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
-        .btn-action.success { background: linear-gradient(145deg, #10b981 0%, var(--success) 100%); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
-        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
-        .btn-action.danger { background: linear-gradient(145deg, #ef4444 0%, var(--error) 100%); color: #fff; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
+        .btn-action.primary { background: var(--primary); color: #fff; box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22); }
+        .btn-action.success { background: linear-gradient(145deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 14px 34px rgba(5, 150, 105, 0.22); }
+        .btn-action.secondary { background: rgba(255,255,255,0.92); color: rgba(15,23,42,0.86); border: 1px solid rgba(15,23,42,0.10); box-shadow: 0 10px 22px rgba(15,23,42,0.08); }
+        .btn-action.danger { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 14px 34px rgba(220, 38, 38, 0.20); }
 
-        .btn-action:active { transform: scale(0.98); }
+        .btn-action:active { transform: scale(0.99); }
 
         .mini-profile {
-            background: rgba(241, 245, 249, 0.9);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
             border-radius: var(--radius);
-            margin: 0 1.25rem 1rem;
+            margin: 0 var(--page-pad) 12px;
             padding: 1rem;
             display: flex;
             gap: 0.85rem;
             align-items: center;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
             cursor: pointer;
         }
         .mini-avatar {
             width: 54px;
             height: 54px;
             border-radius: 16px;
-            background: linear-gradient(145deg, rgba(29, 78, 216, 0.12), rgba(30, 58, 138, 0.12));
-            border: 1px solid rgba(29, 78, 216, 0.22);
+            background: rgba(99,91,255,0.14);
+            border: 1px solid rgba(15,23,42,0.10);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
             font-weight: 900;
-            color: var(--primary);
+            color: rgba(79,70,229,0.98);
         }
         .mini-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .mini-name { font-weight: 900; letter-spacing: -0.02em; }
@@ -280,12 +285,12 @@
         }
 
         .timeline {
-            background: rgba(241, 245, 249, 0.9);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
             border-radius: var(--radius);
-            margin: 0 1.25rem 1rem;
+            margin: 0 var(--page-pad) 12px;
             padding: 1rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
         }
         .timeline-title {
             font-weight: 900;
@@ -330,8 +335,8 @@
         .sheet {
             width: 100%;
             max-width: 520px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.10);
             border-radius: 22px;
             box-shadow: 0 24px 72px rgba(15, 23, 42, 0.35);
             overflow: hidden;
@@ -353,8 +358,8 @@
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            border: 1px solid var(--border);
-            background: #fff;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
             color: var(--text-dark);
             display: inline-flex;
             align-items: center;
@@ -367,8 +372,8 @@
             display: flex;
             gap: 0.75rem;
             padding: 0.95rem 1.25rem 1.25rem;
-            border-top: 1px solid var(--border);
-            background: rgba(241, 245, 249, 0.65);
+            border-top: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
         }
         .sheet-btn {
             flex: 1;
@@ -382,8 +387,8 @@
             gap: 0.5rem;
             cursor: pointer;
         }
-        .sheet-btn.secondary { background: #fff; color: var(--text-dark); border: 2px solid var(--border); }
-        .sheet-btn.primary { background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%); color: #fff; box-shadow: 0 10px 22px rgba(29, 78, 216, 0.22); }
+        .sheet-btn.secondary { background: rgba(255,255,255,0.92); color: rgba(15,23,42,0.86); border: 1px solid rgba(15,23,42,0.10); }
+        .sheet-btn.primary { background: var(--primary); color: #fff; box-shadow: 0 12px 28px rgba(99,91,255,0.22); }
         .sheet-btn.danger { background: linear-gradient(145deg, #ef4444 0%, var(--error) 100%); color: #fff; box-shadow: 0 10px 22px rgba(220, 38, 38, 0.22); }
         .sheet-btn:disabled { opacity: 0.65; cursor: not-allowed; }
         .sheet-field { margin-top: 0.75rem; }
@@ -391,19 +396,19 @@
         .sheet-input {
             width: 100%;
             padding: 0.85rem 1rem;
-            border: 1px solid var(--border);
+            border: 1.5px solid rgba(15,23,42,0.22);
             border-radius: 14px;
             font-weight: 700;
             outline: none;
             background: #fff;
         }
-        .sheet-input:focus { border-color: rgba(29, 78, 216, 0.5); box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12); }
+        .sheet-input:focus { border-color: rgba(15,23,42,0.45); box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14); }
         .sheet-help { color: var(--text-medium); font-size: 0.85rem; margin-top: 0.35rem; }
 
         .empty-state {
             text-align: center;
             padding: 3rem 1.5rem;
-            margin: 0 1.25rem;
+            margin: 0 var(--page-pad);
         }
 
         .empty-state i { font-size: 3rem; color: var(--text-medium); margin-bottom: 1rem; }
@@ -481,14 +486,15 @@
         const alertSystem = new AlertSystem();
         const params = new URLSearchParams(location.search);
         const loadId = params.get('id') || params.get('loadId') || '';
+        let loadData = null;
 
         async function ensureAuthReady() {
             const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
-            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
-            if (authSdk.currentUser) return;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
             await new Promise((resolve) => {
                 let done = false;
-                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 9000);
                 const unsub = authSdk.onAuthStateChanged(() => {
                     if (done) return;
                     done = true;
@@ -497,6 +503,20 @@
                     resolve();
                 });
             });
+            return !!authSdk.currentUser;
+        }
+
+        function getSupplierAuth() {
+            try {
+                return JSON.parse(localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile') || 'null');
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function getSupplierIdFromAuth(u) {
+            if (!u) return '';
+            return u.supplierId || u.id || (u.email || '').replace(/@/g, '_').replace(/\./g, '_');
         }
 
         function formatCurrency(amt) {
@@ -767,6 +787,14 @@
             okBtn.textContent = (opts && opts.okText) ? opts.okText : 'OK';
             cancelBtn.textContent = (opts && opts.cancelText) ? opts.cancelText : 'Cancel';
             okBtn.className = 'sheet-btn ' + ((opts && opts.okKind) ? opts.okKind : 'primary');
+            okBtn.disabled = false;
+            cancelBtn.disabled = false;
+            try { closeBtn.disabled = false; } catch (e) {}
+            try {
+                if (opts && typeof opts.onInit === 'function') {
+                    opts.onInit({ overlay, bodyEl, titleEl, subEl });
+                }
+            } catch (e) {}
 
             overlay.classList.add('show');
 
@@ -790,6 +818,12 @@
             cancelBtn.onclick = () => close(false);
             okBtn.onclick = async () => {
                 try {
+                    try {
+                        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                            document.activeElement.blur();
+                        }
+                    } catch (e0) {}
+                    await new Promise((r) => setTimeout(r, 60));
                     okBtn.disabled = true;
                     cancelBtn.disabled = true;
                     const r = opts && opts.onOk ? await opts.onOk() : true;
@@ -799,10 +833,24 @@
                 } catch (e) {
                     okBtn.disabled = false;
                     cancelBtn.disabled = false;
-                    throw e;
+                    try {
+                        alertSystem.show('error', (e && e.message) ? e.message : 'Action failed. Please try again.');
+                    } catch (e2) {}
                 }
             };
             return p;
+        }
+
+        function countWords(text) {
+            return String(text || '').trim().split(/\s+/).filter(Boolean).length;
+        }
+
+        function getSheetInputValue(inputId) {
+            const body = document.getElementById('sheetBody');
+            const el = (body && body.querySelector('#' + inputId)) || document.getElementById(inputId);
+            if (!el || typeof el.value === 'undefined') return '';
+            try { if (typeof el.blur === 'function') el.blur(); } catch (e) {}
+            return String(el.value || '');
         }
 
         function calculateCancelFee(load) {
@@ -822,27 +870,31 @@
 
         async function createDbNotification(userId, userType, title, message, data) {
             try {
-                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
-                if (!db || !userId || !userType) return null;
-                const payload = {
-                    user_id: userId,
-                    user_type: userType,
-                    type: (data && data.type) ? data.type : 'system',
-                    title: title,
-                    message: message,
-                    data: data || {},
-                    read: false,
-                    created_at: new Date().toISOString()
-                };
-                const ref = db.ref('notifications').push();
-                await ref.set(payload).catch(() => {});
+                if (!userId || !userType) return null;
+                const type = (data && data.type) ? data.type : 'system';
+
                 try {
-                    if (userType === 'supplier') {
-                        await db.ref(`notifications/suppliers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
-                    } else if (userType === 'carrier') {
-                        await db.ref(`notifications/carriers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    if (typeof NotificationManager !== 'undefined' && NotificationManager.create) {
+                        return await NotificationManager.create(type, title, message, data || {}, userId, userType);
                     }
                 } catch (e) {}
+
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!db) return null;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const senderUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
+                if (!senderUid) return null;
+                const ref = db.ref('notificationQueue').push();
+                await ref.set({
+                    senderUid,
+                    toUserId: userId,
+                    toUserType: userType,
+                    title,
+                    message,
+                    type,
+                    data: data || {},
+                    createdAt: new Date().toISOString()
+                }).catch(() => {});
                 return ref.key || null;
             } catch (e) {
                 return null;
@@ -861,6 +913,8 @@
         }
 
         async function cancelNowFree() {
+            let reasonVal = '';
+            let reasonEl = null;
             await openSheet({
                 title: 'Cancel Load',
                 sub: 'Free cancellation (not accepted yet).',
@@ -872,9 +926,23 @@
                         <textarea class="sheet-input" id="cancelReason" rows="3" placeholder="Write a short reason..."></textarea>
                     </div>
                 `,
+                onInit: ({ bodyEl }) => {
+                    try {
+                        const el = bodyEl.querySelector('#cancelReason');
+                        if (el) {
+                            reasonEl = el;
+                            reasonVal = String(el.value || '');
+                            el.addEventListener('input', () => { reasonVal = String(el.value || ''); });
+                            el.addEventListener('change', () => { reasonVal = String(el.value || ''); });
+                            el.addEventListener('blur', () => { reasonVal = String(el.value || ''); });
+                        }
+                    } catch (e) {}
+                },
                 onOk: async () => {
-                    const reason = String((document.getElementById('cancelReason') || {}).value || '').trim();
-                    if (reason.length < 3) { alertSystem.show('error', 'Reason is required'); return false; }
+                    const live = reasonEl && typeof reasonEl.value !== 'undefined' ? String(reasonEl.value || '') : '';
+                    const reason = String(live || reasonVal || getSheetInputValue('cancelReason')).trim();
+                    const chars = reason.replace(/\s+/g, ' ').length;
+                    if (countWords(reason) < 3 && chars < 10) { alertSystem.show('error', 'Please enter at least 3 words'); return false; }
                     const confirmed = await openSheet({
                         title: 'Confirm Cancellation',
                         sub: 'This will cancel your order immediately.',
@@ -887,6 +955,9 @@
                     await ensureAuthReady();
                     const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
                     if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    const authUid = authSdk.currentUser.uid || '';
+                    const authEmail = String(authSdk.currentUser.email || '');
+                    const canClaimSupplierUid = ((loadData && loadData.supplierFirebaseUid && loadData.supplierFirebaseUid === authUid) || (loadData && loadData.supplierEmail && authEmail && loadData.supplierEmail === authEmail));
                     await db.ref('loads/' + loadId).update({
                         status: 'cancelled',
                         cancelledAt: new Date().toISOString(),
@@ -894,7 +965,8 @@
                         cancelledBy: 'supplier',
                         cancelledReason: reason || '',
                         cancellationFee: 0,
-                        cancellationPolicyVersion: 1
+                        cancellationPolicyVersion: 1,
+                        ...(canClaimSupplierUid ? { supplierFirebaseUid: authUid } : {})
                     });
                     alertSystem.show('success', 'Load cancelled');
                     await loadDetails();
@@ -905,6 +977,8 @@
 
         async function requestCancellation() {
             const fee = calculateCancelFee(loadData || {});
+            let reasonVal = '';
+            let reasonEl = null;
             await openSheet({
                 title: 'Request Cancellation',
                 sub: 'Reason is required. You will confirm again before payment.',
@@ -917,9 +991,23 @@
                         <div class="sheet-help">Carrier approval required after fee payment.</div>
                     </div>
                 `,
+                onInit: ({ bodyEl }) => {
+                    try {
+                        const el = bodyEl.querySelector('#cancelReqReason');
+                        if (el) {
+                            reasonEl = el;
+                            reasonVal = String(el.value || '');
+                            el.addEventListener('input', () => { reasonVal = String(el.value || ''); });
+                            el.addEventListener('change', () => { reasonVal = String(el.value || ''); });
+                            el.addEventListener('blur', () => { reasonVal = String(el.value || ''); });
+                        }
+                    } catch (e) {}
+                },
                 onOk: async () => {
-                    const reason = String((document.getElementById('cancelReqReason') || {}).value || '').trim();
-                    if (reason.length < 3) { alertSystem.show('error', 'Please enter a reason'); return false; }
+                    const live = reasonEl && typeof reasonEl.value !== 'undefined' ? String(reasonEl.value || '') : '';
+                    const reason = String(live || reasonVal || getSheetInputValue('cancelReqReason')).trim();
+                    const chars = reason.replace(/\s+/g, ' ').length;
+                    if (countWords(reason) < 3 && chars < 10) { alertSystem.show('error', 'Please enter at least 3 words'); return false; }
                     const carrierId = getCarrierIdFromLoad(loadData || {});
                     const carrierName = getCarrierNameFromLoad(loadData || {});
                     const confirmed = await openSheet({
@@ -938,22 +1026,35 @@
                     });
                     if (!confirmed) return false;
                     const db = window.AlphaBrokrage.firebaseDb;
-                    await ensureAuthReady();
+                    const ok = await ensureAuthReady();
                     const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
-                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
-                    await db.ref('loads/' + loadId).update({
-                        cancellationRequest: {
-                            status: 'fee_pending',
-                            requestedAt: new Date().toISOString(),
-                            requestedByRole: 'supplier',
-                            reason,
-                            proposedFee: fee,
-                            feePaid: false,
-                            carrierId: carrierId || '',
-                            carrierName: carrierName || ''
-                        },
-                        cancellationStatus: 'fee_pending'
-                    });
+                    if (!ok || !authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please login again.'); return false; }
+                    const authUid = authSdk.currentUser.uid || '';
+                    const authEmail = String(authSdk.currentUser.email || '');
+                    const canClaimSupplierUid = ((loadData && loadData.supplierFirebaseUid && loadData.supplierFirebaseUid === authUid) || (loadData && loadData.supplierEmail && authEmail && loadData.supplierEmail === authEmail));
+                    const supplierAuth = getSupplierAuth();
+                    const supplierId = getSupplierIdFromAuth(supplierAuth);
+                    try {
+                        const updates = {
+                            cancellationRequest: {
+                                status: 'fee_pending',
+                                requestedAt: new Date().toISOString(),
+                                requestedByRole: 'supplier',
+                                reason,
+                                proposedFee: fee,
+                                feePaid: false,
+                                carrierId: carrierId || '',
+                                carrierName: carrierName || ''
+                            },
+                            cancellationStatus: 'fee_pending',
+                            ...(canClaimSupplierUid ? { supplierFirebaseUid: authUid } : {})
+                        };
+                        if (supplierId && !(loadData && loadData.supplierId)) updates.supplierId = supplierId;
+                        await db.ref('loads/' + loadId).update(updates);
+                    } catch (e) {
+                        alertSystem.show('error', 'Failed to submit cancellation request');
+                        return false;
+                    }
                     if (carrierId) {
                         await createDbNotification(
                             carrierId,
@@ -993,24 +1094,37 @@
                     </div>
                 `,
                 onOk: async () => {
-                    const pickup = String((document.getElementById('rsPickup') || {}).value || '').trim();
-                    const delivery = String((document.getElementById('rsDelivery') || {}).value || '').trim();
-                    const msg = String((document.getElementById('rsMsg') || {}).value || '').trim();
+                    const pickup = getSheetInputValue('rsPickup').trim();
+                    const delivery = getSheetInputValue('rsDelivery').trim();
+                    const msg = getSheetInputValue('rsMsg').trim();
                     if (!pickup && !delivery) { alertSystem.show('error', 'Pick at least one date'); return false; }
                     const db = window.AlphaBrokrage.firebaseDb;
-                    await ensureAuthReady();
+                    const ok = await ensureAuthReady();
                     const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
-                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
-                    await db.ref('loads/' + loadId).update({
-                        rescheduleRequest: {
-                            status: 'pending',
-                            requestedAt: new Date().toISOString(),
-                            requestedByRole: 'supplier',
-                            newPickupDate: pickup || '',
-                            newDeliveryDate: delivery || '',
-                            message: msg || ''
-                        }
-                    });
+                    if (!ok || !authSdk || !authSdk.currentUser) { alertSystem.show('error', 'Session expired. Please login again.'); return false; }
+                    const authUid = authSdk.currentUser.uid || '';
+                    const authEmail = String(authSdk.currentUser.email || '');
+                    const canClaimSupplierUid = ((loadData && loadData.supplierFirebaseUid && loadData.supplierFirebaseUid === authUid) || (loadData && loadData.supplierEmail && authEmail && loadData.supplierEmail === authEmail));
+                    const supplierAuth = getSupplierAuth();
+                    const supplierId = getSupplierIdFromAuth(supplierAuth);
+                    try {
+                        const updates = {
+                            rescheduleRequest: {
+                                status: 'pending',
+                                requestedAt: new Date().toISOString(),
+                                requestedByRole: 'supplier',
+                                newPickupDate: pickup || '',
+                                newDeliveryDate: delivery || '',
+                                message: msg || ''
+                            },
+                            ...(canClaimSupplierUid ? { supplierFirebaseUid: authUid } : {})
+                        };
+                        if (supplierId && !(loadData && loadData.supplierId)) updates.supplierId = supplierId;
+                        await db.ref('loads/' + loadId).update(updates);
+                    } catch (e) {
+                        alertSystem.show('error', 'Failed to send reschedule request');
+                        return false;
+                    }
                     alertSystem.show('success', 'Reschedule request sent');
                     await loadDetails();
                     return true;
@@ -1019,6 +1133,10 @@
         }
 
         async function raiseDispute() {
+            if (loadData && loadData.dispute && String(loadData.dispute.status || '').toLowerCase() === 'open') {
+                alertSystem.show('warning', 'A dispute is already open for this load');
+                return;
+            }
             await openSheet({
                 title: 'Open Dispute',
                 sub: 'Add details and (optional) evidence photo.',
@@ -1066,6 +1184,9 @@
                     await ensureAuthReady();
                     const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
                     if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    const authUid = authSdk.currentUser.uid || '';
+                    const authEmail = String(authSdk.currentUser.email || '');
+                    const canClaimSupplierUid = ((loadData && loadData.supplierFirebaseUid && loadData.supplierFirebaseUid === authUid) || (loadData && loadData.supplierEmail && authEmail && loadData.supplierEmail === authEmail));
                     await db.ref('loads/' + loadId).update({
                         disputeStatus: 'open',
                         dispute: {
@@ -1076,8 +1197,22 @@
                             evidenceType: evidenceType || '',
                             createdAt: new Date().toISOString(),
                             createdByRole: 'supplier'
-                        }
+                        },
+                        ...(canClaimSupplierUid ? { supplierFirebaseUid: authUid } : {})
                     });
+                    try {
+                        const carrierRaw = getCarrierIdFromLoad(loadData || {}) || (loadData && loadData.carrierEmail) || '';
+                        const carrierId = sanitizeFirebaseKey(carrierRaw);
+                        if (carrierId) {
+                            await createDbNotification(
+                                carrierId,
+                                'carrier',
+                                'Dispute Opened',
+                                'Supplier opened a dispute on this load',
+                                { type: 'dispute_opened', loadId: String(loadId), url: '/mobile-app/carrier/load-details.html?id=' + encodeURIComponent(loadId) }
+                            );
+                        }
+                    } catch (e) {}
                     alertSystem.show('success', 'Dispute submitted');
                     await loadDetails();
                     return true;
@@ -1091,6 +1226,68 @@
                     meta.textContent = f ? `${f.name} • ${Math.round((f.size || 0) / 1024)} KB` : '';
                 }, { once: true });
             }
+        }
+
+        async function resolveDispute() {
+            if (!loadData || !loadData.dispute || String(loadData.dispute.status || '').toLowerCase() !== 'open') {
+                alertSystem.show('warning', 'No open dispute');
+                return;
+            }
+            await openSheet({
+                title: 'Resolve Dispute',
+                sub: 'Add a resolution note (optional).',
+                okText: 'Resolve',
+                okKind: 'success',
+                bodyHtml: `
+                    <div class="sheet-field">
+                        <div class="sheet-label">Resolution Note</div>
+                        <textarea class="sheet-input" id="dpResMsg" rows="4" placeholder="Write resolution details..."></textarea>
+                    </div>
+                `,
+                onOk: async () => {
+                    const note = String(getSheetInputValue('dpResMsg') || '').trim();
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    await ensureAuthReady();
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return false; }
+                    const authUid = String(authSdk.currentUser.uid || '');
+                    const authEmail = String(authSdk.currentUser.email || '');
+                    const canClaimSupplierUid = ((loadData && loadData.supplierFirebaseUid && loadData.supplierFirebaseUid === authUid) || (loadData && loadData.supplierEmail && authEmail && loadData.supplierEmail === authEmail));
+                    const updates = {
+                        disputeStatus: 'resolved',
+                        dispute: {
+                            ...(loadData.dispute || {}),
+                            status: 'resolved',
+                            resolvedAt: new Date().toISOString(),
+                            resolvedByRole: 'supplier',
+                            resolutionNote: note || ''
+                        },
+                        ...(canClaimSupplierUid ? { supplierFirebaseUid: authUid } : {})
+                    };
+                    try {
+                        await db.ref('loads/' + loadId).update(updates);
+                        try {
+                            const carrierRaw = getCarrierIdFromLoad(loadData || {}) || (loadData && loadData.carrierEmail) || '';
+                            const carrierId = sanitizeFirebaseKey(carrierRaw);
+                            if (carrierId) {
+                                await createDbNotification(
+                                    carrierId,
+                                    'carrier',
+                                    'Dispute Resolved',
+                                    'Supplier resolved the dispute',
+                                    { type: 'dispute_resolved', loadId: String(loadId), url: '/mobile-app/carrier/load-details.html?id=' + encodeURIComponent(loadId) }
+                                );
+                            }
+                        } catch (e) {}
+                    } catch (e) {
+                        alertSystem.show('error', 'Failed to resolve dispute');
+                        return false;
+                    }
+                    alertSystem.show('success', 'Dispute resolved');
+                    await loadDetails();
+                    return true;
+                }
+            });
         }
 
         const carrierMiniCache = { profile: {}, rating: {} };
@@ -1269,6 +1466,8 @@
                 return;
             }
 
+            loadData = load;
+
             const lid = load.loadId || load.id || loadId;
             const statusClass = getStatusClass(load.status);
             const statusText = getStatusText(load.status);
@@ -1284,16 +1483,50 @@
             const statusLower = (load.status || '').toLowerCase();
             const hasPOD = !!(load && (load.hasPOD || load.podUrl || (load.pod && (load.pod.photoDataUrl || load.pod.signatureDataUrl))));
             const paid = isLoadPaid(load);
+            const dispute = (load && load.dispute && typeof load.dispute === 'object') ? load.dispute : null;
+            const disputeStatus = dispute ? String(dispute.status || '').toLowerCase() : '';
             const cancelReq = load && load.cancellationRequest && typeof load.cancellationRequest === 'object' ? load.cancellationRequest : null;
             const cancelReqStatus = cancelReq ? String(cancelReq.status || '').toLowerCase() : '';
             const cancelFeeAmount = cancelReq && typeof cancelReq.proposedFee === 'number' ? cancelReq.proposedFee : calculateCancelFee(load);
             const cancelFeeUrl = buildCancelFeePayUrl(cancelFeeAmount);
             let actionsHTML = '';
+            let disputeBlock = '';
+            if (dispute && disputeStatus) {
+                const evidence = dispute.evidenceDataUrl ? `<a class="btn-action secondary" href="${String(dispute.evidenceDataUrl).replace(/\"/g,'&quot;')}" target="_blank" rel="noopener"><i class="fas fa-image"></i> Evidence</a>` : '';
+                const typeText = String(dispute.type || 'other').replace(/</g, '&lt;');
+                const msgText = String(dispute.message || '').replace(/</g, '&lt;');
+                const resText = String(dispute.resolutionNote || '').replace(/</g, '&lt;');
+                const badge = disputeStatus === 'open'
+                    ? `<span class="status-badge cancelled" style="background: rgba(239, 68, 68, 0.10); color: rgba(220,38,38,0.98);">Dispute</span>`
+                    : `<span class="status-badge completed" style="background: rgba(16, 185, 129, 0.10); color: rgba(5,150,105,0.98);">Resolved</span>`;
+                disputeBlock = `
+                    <div class="details-card">
+                        <div class="details-header">
+                            <div>
+                                <div class="load-id">Dispute</div>
+                                <div class="page-subtitle" style="margin-top:0.2rem;">Type: ${typeText}</div>
+                            </div>
+                            ${badge}
+                        </div>
+                        <div style="font-weight:800;color:rgba(71,85,105,0.95);white-space:pre-line;">${msgText}</div>
+                        ${disputeStatus === 'resolved' && resText ? `<div style="margin-top:0.85rem;border-top:1px solid rgba(15,23,42,0.10);padding-top:0.85rem;"><div class="detail-label">Resolution</div><div style="font-weight:800;color:rgba(71,85,105,0.95);white-space:pre-line;margin-top:0.2rem;">${resText}</div></div>` : ''}
+                        <div class="actions-section" style="margin: 1rem 0 0;">
+                            <div class="action-btns" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                                ${evidence || ''}
+                                ${disputeStatus === 'open' ? `<button class="btn-action success" type="button" onclick="resolveDispute()"><i class="fas fa-check"></i> Resolve</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
             if (['available', 'pending'].includes(statusLower)) {
                 actionsHTML = `
                     <a href="load-status.html?id=${lid}" class="btn-action secondary">
                         <i class="fas fa-tasks"></i> Status
+                    </a>
+                    <a href="award-load.html?loadId=${lid}" class="btn-action primary">
+                        <i class="fas fa-trophy"></i> Award Load
                     </a>
                     <button class="btn-action danger" onclick="cancelLoad()">
                         <i class="fas fa-times"></i> Cancel Load
@@ -1422,6 +1655,7 @@
                     </div>
                 </div>
                 ${buildTimelineHtml(load)}
+                ${disputeBlock}
                 <div id="carrierMiniHolder"></div>
                 <div class="actions-section">
                     <div class="action-btns">${actionsHTML}</div>
@@ -1478,7 +1712,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadDetails);
+        document.addEventListener('DOMContentLoaded', async () => {
+            try { await ensureAuthReady(); } catch (e) {}
+            loadDetails();
+        });
     </script>
 </body>
 </html>

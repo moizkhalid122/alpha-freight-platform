@@ -103,7 +103,7 @@
 
         .tabs {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 0.75rem;
             margin-bottom: 0.9rem;
         }
@@ -207,7 +207,7 @@
         <div class="header-row">
             <div>
                 <div class="title">Finance</div>
-                <div class="sub">Bank transfers + Pay letters + Refunds</div>
+                <div class="sub">Bank transfers + Pay letters + Refunds + Withdrawals</div>
             </div>
             <button class="icon-btn" type="button" onclick="refresh()">
                 <i class="fas fa-rotate"></i>
@@ -220,6 +220,7 @@
             <button class="tab active" id="tabBank" type="button" onclick="setTab('bank')"><i class="fas fa-building-columns"></i> Bank</button>
             <button class="tab" id="tabPayLetter" type="button" onclick="setTab('payletter')"><i class="fas fa-file-invoice-dollar"></i> Pay Letter</button>
                 <button class="tab" id="tabRefunds" type="button" onclick="setTab('refunds')"><i class="fas fa-rotate-left"></i> Refunds</button>
+                <button class="tab" id="tabWithdrawals" type="button" onclick="setTab('withdrawals')"><i class="fas fa-wallet"></i> Withdrawals</button>
         </div>
 
         <div class="panel" id="panelList"></div>
@@ -256,6 +257,7 @@
         let bankTransfers = [];
         let payLetters = [];
         let refunds = [];
+        let withdrawals = [];
 
         function normalizeStatus(rawStatus) {
             return String(rawStatus || '').trim().toLowerCase().replace(/_/g, '-');
@@ -283,6 +285,7 @@
             document.getElementById('tabBank').classList.toggle('active', tab === 'bank');
             document.getElementById('tabPayLetter').classList.toggle('active', tab === 'payletter');
             document.getElementById('tabRefunds').classList.toggle('active', tab === 'refunds');
+            document.getElementById('tabWithdrawals').classList.toggle('active', tab === 'withdrawals');
             render();
         }
 
@@ -303,7 +306,11 @@
 
         function render() {
             const panel = document.getElementById('panelList');
-            const items = currentTab === 'bank' ? bankTransfers : (currentTab === 'refunds' ? refunds : payLetters);
+            const items = currentTab === 'bank'
+                ? bankTransfers
+                : (currentTab === 'refunds'
+                    ? refunds
+                    : (currentTab === 'withdrawals' ? withdrawals : payLetters));
 
             if (!items.length) {
                 panel.innerHTML = `
@@ -343,6 +350,40 @@
                             </div>
                             <div class="row-actions">
                                 ${amount !== '—' ? `<div class="badge primary">£${escapeHtml(String(amount))}</div>` : ''}
+                                <div class="badge ${badge.cls}">${escapeHtml(badge.label)}</div>
+                                ${actions}
+                            </div>
+                        </div>
+                    `;
+                }
+                if (currentTab === 'withdrawals') {
+                    const badge = getBadge(x.status);
+                    const amount = x.amount || '—';
+                    const carrierId = x.carrierId || x.userId || x.carrier || '—';
+                    const carrierEmail = x.carrierEmail || '—';
+                    const last4 = x.bankSnapshot && x.bankSnapshot.accountLast4 ? String(x.bankSnapshot.accountLast4) : '';
+                    const bankName = x.bankSnapshot && x.bankSnapshot.bankName ? String(x.bankSnapshot.bankName) : '';
+                    const createdAt = x.requestedAt || x.createdAt || '';
+                    const actions = (() => {
+                        const st = String(x.status || '').toLowerCase();
+                        if (st === 'pending') {
+                            return `
+                                <button class="mini-btn success" type="button" data-action="approve_wd" data-id="${escapeHtml(x.id || '')}"><i class="fas fa-check"></i> Approve</button>
+                                <button class="mini-btn danger" type="button" data-action="reject_wd" data-id="${escapeHtml(x.id || '')}"><i class="fas fa-times"></i> Reject</button>
+                            `;
+                        }
+                        if (st === 'approved') {
+                            return `<button class="mini-btn success" type="button" data-action="paid_wd" data-id="${escapeHtml(x.id || '')}"><i class="fas fa-money-bill-wave"></i> Mark Paid</button>`;
+                        }
+                        return '';
+                    })();
+                    return `
+                        <div class="row-item">
+                            <div class="row-left">
+                                <div class="row-title">Withdrawal • £${escapeHtml(String(amount))}</div>
+                                <div class="row-sub">${escapeHtml(carrierEmail)} • ${escapeHtml(String(carrierId))}${bankName ? ` • ${escapeHtml(bankName)}` : ''}${last4 ? ` • ****${escapeHtml(last4)}` : ''}${createdAt ? ` • ${escapeHtml(String(createdAt).slice(0, 10))}` : ''}</div>
+                            </div>
+                            <div class="row-actions">
                                 <div class="badge ${badge.cls}">${escapeHtml(badge.label)}</div>
                                 ${actions}
                             </div>
@@ -389,6 +430,93 @@
                         if (action === 'reject') await rejectRefund(id);
                     });
                 });
+            }
+            if (currentTab === 'withdrawals') {
+                panel.querySelectorAll('button.mini-btn[data-action][data-id]').forEach((btn) => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-id') || '';
+                        const action = btn.getAttribute('data-action') || '';
+                        if (!id) return;
+                        if (action === 'approve_wd') await approveWithdrawal(id);
+                        if (action === 'reject_wd') await rejectWithdrawal(id);
+                        if (action === 'paid_wd') await markWithdrawalPaid(id);
+                    });
+                });
+            }
+        }
+
+        async function approveWithdrawal(withdrawalId) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            if (!confirm('Approve this withdrawal?')) return;
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const snap = await db.ref('withdrawAudit/' + withdrawalId).once('value').catch(() => null);
+                const audit = snap && snap.val ? snap.val() : null;
+                const carrierId = audit && audit.carrierId ? audit.carrierId : null;
+                if (!carrierId) return;
+                const reqSnap = await db.ref(`withdrawRequests/${carrierId}/${withdrawalId}`).once('value');
+                const req = reqSnap.val() || null;
+                if (!req) return;
+                const now = new Date().toISOString();
+                await db.ref(`withdrawRequests/${carrierId}/${withdrawalId}`).update({ status: 'approved', approvedAt: now, approvedByRole: 'admin' });
+                await db.ref(`withdrawAudit/${withdrawalId}/events/approved`).set({ at: now, byRole: 'admin' }).catch(() => {});
+                await createDbNotification(carrierId, 'carrier', 'Withdrawal Approved', 'Your withdrawal was approved. It will be paid shortly.', { type: 'withdrawal_approved', withdrawalId, url: '/mobile-app/carrier/wallet.html' });
+                await fetchData(true);
+            } catch (e) {
+                console.error(e);
+                alert('Failed: ' + (e && (e.code || e.message) ? (e.code || e.message) : 'unknown'));
+            }
+        }
+
+        async function rejectWithdrawal(withdrawalId) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            const note = (prompt('Reject reason (required):') || '').trim();
+            if (note.length < 3) return;
+            if (!confirm('Reject this withdrawal?')) return;
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const snap = await db.ref('withdrawAudit/' + withdrawalId).once('value').catch(() => null);
+                const audit = snap && snap.val ? snap.val() : null;
+                const carrierId = audit && audit.carrierId ? audit.carrierId : null;
+                if (!carrierId) return;
+                const now = new Date().toISOString();
+                await db.ref(`withdrawRequests/${carrierId}/${withdrawalId}`).update({ status: 'rejected', rejectedAt: now, rejectedByRole: 'admin', rejectionReason: note });
+                await db.ref(`withdrawAudit/${withdrawalId}/events/rejected`).set({ at: now, byRole: 'admin', reason: note }).catch(() => {});
+                await createDbNotification(carrierId, 'carrier', 'Withdrawal Rejected', 'Your withdrawal was rejected by admin.', { type: 'withdrawal_rejected', withdrawalId, url: '/mobile-app/carrier/wallet.html' });
+                await fetchData(true);
+            } catch (e) {
+                console.error(e);
+                alert('Failed: ' + (e && (e.code || e.message) ? (e.code || e.message) : 'unknown'));
+            }
+        }
+
+        async function markWithdrawalPaid(withdrawalId) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            if (!confirm('Mark this withdrawal as paid?')) return;
+            try {
+                if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
+                    try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
+                }
+                const snap = await db.ref('withdrawAudit/' + withdrawalId).once('value').catch(() => null);
+                const audit = snap && snap.val ? snap.val() : null;
+                const carrierId = audit && audit.carrierId ? audit.carrierId : null;
+                if (!carrierId) return;
+                const now = new Date().toISOString();
+                await db.ref(`withdrawRequests/${carrierId}/${withdrawalId}`).update({ status: 'processed', processedAt: now, processedByRole: 'admin' });
+                await db.ref(`withdrawAudit/${withdrawalId}/events/paid`).set({ at: now, byRole: 'admin' }).catch(() => {});
+                await createDbNotification(carrierId, 'carrier', 'Withdrawal Paid', 'Your withdrawal was paid successfully.', { type: 'withdrawal_paid', withdrawalId, url: '/mobile-app/carrier/wallet.html' });
+                await fetchData(true);
+            } catch (e) {
+                console.error(e);
+                alert('Failed: ' + (e && (e.code || e.message) ? (e.code || e.message) : 'unknown'));
             }
         }
 
@@ -492,11 +620,12 @@
         }
 
         async function fetchData(force = false) {
-            const cached = getCache();
+                const cached = getCache();
             if (cached && !force) {
                 bankTransfers = Array.isArray(cached.bankTransfers) ? cached.bankTransfers : [];
                 payLetters = Array.isArray(cached.payLetters) ? cached.payLetters : [];
                 refunds = Array.isArray(cached.refunds) ? cached.refunds : [];
+                    withdrawals = Array.isArray(cached.withdrawals) ? cached.withdrawals : [];
                 render();
             } else {
                 document.getElementById('panelList').innerHTML = `
@@ -515,10 +644,11 @@
                 if (typeof window.ensureAdminFirebaseAuthReady === 'function') {
                     try { await window.ensureAdminFirebaseAuthReady(); } catch (e) {}
                 }
-                const [bankSnap, paySnap, refundSnap] = await Promise.all([
+                const [bankSnap, paySnap, refundSnap, wdSnap] = await Promise.all([
                     db.ref('bankTransferRequests').limitToLast(400).once('value'),
                     db.ref('payLetterPending').limitToLast(400).once('value'),
-                    db.ref('refunds').limitToLast(400).once('value')
+                    db.ref('refunds').limitToLast(400).once('value'),
+                    db.ref('withdrawRequests').limitToLast(200).once('value')
                 ]);
 
                 const bank = [];
@@ -527,11 +657,22 @@
                 if (paySnap.exists()) paySnap.forEach(ch => pay.push({ id: ch.key, ...(ch.val() || {}) }));
                 const rf = [];
                 if (refundSnap.exists()) refundSnap.forEach(ch => rf.push({ id: ch.key, ...(ch.val() || {}) }));
+                const wd = [];
+                if (wdSnap.exists()) {
+                    const rootVal = wdSnap.val() || {};
+                    Object.keys(rootVal).forEach((cid) => {
+                        const bucket = rootVal[cid] || {};
+                        Object.keys(bucket).forEach((wid) => {
+                            wd.push({ id: wid, carrierId: cid, ...(bucket[wid] || {}) });
+                        });
+                    });
+                }
 
                 bankTransfers = bank;
                 payLetters = pay;
                 refunds = rf;
-                setCache({ bankTransfers: bank, payLetters: pay, refunds: rf });
+                withdrawals = wd;
+                setCache({ bankTransfers: bank, payLetters: pay, refunds: rf, withdrawals: wd });
                 render();
             } catch (e) {
                 render();

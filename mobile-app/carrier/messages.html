@@ -514,17 +514,21 @@
                 const snapshot = await queryRef.once('value');
                 const allMessages = snapshot.val() || {};
 
-                // Group messages by supplier
+                // Group messages by supplier + load
                 const conversationMap = {};
                 Object.entries(allMessages).forEach(([msgId, msg]) => {
                     if (msg.carrierId === carrierId || msg.carrierEmail === user.email) {
                         const supplierId = msg.supplierId || 'support';
                         const supplierName = msg.supplierName || 'Support';
+                        const loadId = msg.loadId ? String(msg.loadId) : '';
+                        const convKey = supplierId + '|' + loadId;
 
-                        if (!conversationMap[supplierId]) {
-                            conversationMap[supplierId] = {
+                        if (!conversationMap[convKey]) {
+                            conversationMap[convKey] = {
+                                key: convKey,
                                 supplierId: supplierId,
                                 supplierName: supplierName,
+                                loadId: loadId,
                                 lastMessage: '',
                                 lastMessageTime: 0,
                                 unreadCount: 0,
@@ -532,21 +536,21 @@
                             };
                         }
 
-                        conversationMap[supplierId].messages.push({
+                        conversationMap[convKey].messages.push({
                             ...msg,
                             id: msgId
                         });
 
                         // Update last message
                         const msgTime = msg.timestamp || msg.createdAt || 0;
-                        if (msgTime > conversationMap[supplierId].lastMessageTime) {
-                            conversationMap[supplierId].lastMessage = msg.message || '';
-                            conversationMap[supplierId].lastMessageTime = msgTime;
+                        if (msgTime > conversationMap[convKey].lastMessageTime) {
+                            conversationMap[convKey].lastMessage = msg.message || '';
+                            conversationMap[convKey].lastMessageTime = msgTime;
                         }
 
                         // Count unread
                         if ((msg.senderType === 'supplier' || msg.senderType === 'support') && !msg.read) {
-                            conversationMap[supplierId].unreadCount++;
+                            conversationMap[convKey].unreadCount++;
                         }
                     }
                 });
@@ -591,12 +595,13 @@
                     ? `<span class="unread-badge">${conv.unreadCount}</span>` 
                     : '';
 
+                const loadSuffix = conv.loadId ? ` • #${String(conv.loadId).substring(0, 8)}` : '';
                 return `
-                    <div class="conversation-item" onclick="openConversation('${conv.supplierId}', '${conv.supplierName}')" style="animation-delay: ${index * 0.1}s">
+                    <div class="conversation-item" onclick="openConversation('${String(conv.supplierId).replace(/'/g, '&#39;')}', '${String(conv.supplierName).replace(/'/g, '&#39;')}', '${String(conv.loadId || '').replace(/'/g, '&#39;')}')" style="animation-delay: ${index * 0.1}s">
                         <div class="conversation-avatar">${initials}</div>
                         <div class="conversation-content">
                             <div class="conversation-header">
-                                <div class="conversation-name">${conv.supplierName}</div>
+                                <div class="conversation-name">${conv.supplierName}${loadSuffix}</div>
                                 <div class="conversation-time">${formatTime(conv.lastMessageTime)}</div>
                             </div>
                             <div class="conversation-preview">${conv.lastMessage || 'No messages yet'}</div>
@@ -608,11 +613,58 @@
         }
 
         // Open conversation
-        function openConversation(supplierId, supplierName) {
-            currentConversation = { supplierId, supplierName };
-            document.getElementById('chatTitle').textContent = supplierName;
+        let bidLockQuery = null;
+        let bidLockHandler = null;
+
+        function setChatLocked(locked, reason) {
+            const input = document.getElementById('messageInput');
+            const btn = document.getElementById('sendBtn');
+            if (input) {
+                input.disabled = !!locked;
+                input.placeholder = locked ? (reason || 'Chat locked') : 'Type a message...';
+            }
+            if (btn) btn.disabled = !!locked;
+        }
+
+        function attachBidLockListener() {
+            try {
+                if (bidLockQuery && bidLockHandler) bidLockQuery.off('value', bidLockHandler);
+            } catch (e) {}
+            bidLockQuery = null;
+            bidLockHandler = null;
+
+            if (!currentConversation || !currentConversation.loadId) {
+                setChatLocked(false, '');
+                return;
+            }
+            if (String(currentConversation.supplierId) === 'support') {
+                setChatLocked(false, '');
+                return;
+            }
+            const user = getUserData() || {};
+            const carrierId = String(user.carrierId || (user.email ? user.email.replace(/@/g, '_').replace(/\./g, '_') : ''));
+            const loadId = String(currentConversation.loadId || '');
+            if (!carrierId || !loadId) return;
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+
+            bidLockQuery = db.ref(`bids/${loadId}/${carrierId}/status`);
+            bidLockHandler = (snap) => {
+                const st = String(snap.val() || '').toLowerCase();
+                if (st === 'accepted') setChatLocked(true, 'Chat locked (bid accepted)');
+                else if (st === 'rejected') setChatLocked(true, 'Chat locked (bid rejected)');
+                else setChatLocked(false, '');
+            };
+            bidLockQuery.on('value', bidLockHandler);
+        }
+
+        function openConversation(supplierId, supplierName, loadId) {
+            currentConversation = { supplierId, supplierName, loadId: String(loadId || '') };
+            const lidShort = currentConversation.loadId ? ` • #${currentConversation.loadId.substring(0, 8)}` : '';
+            document.getElementById('chatTitle').textContent = supplierName + lidShort;
             document.getElementById('chatView').classList.add('active');
             loadMessages(supplierId);
+            attachBidLockListener();
         }
 
         // Close chat
@@ -624,6 +676,12 @@
             }
             messagesRef = null;
             messagesQuery = null;
+            try {
+                if (bidLockQuery && bidLockHandler) bidLockQuery.off('value', bidLockHandler);
+            } catch (e) {}
+            bidLockQuery = null;
+            bidLockHandler = null;
+            setChatLocked(false, '');
         }
 
         // Load messages
@@ -644,6 +702,9 @@
                 snapshot.forEach((child) => {
                     const msg = child.val() || {};
                     if (msg.supplierId === supplierId) {
+                        if (currentConversation && currentConversation.loadId) {
+                            if (String(msg.loadId || '') !== String(currentConversation.loadId)) return;
+                        }
                         messages.push({ ...msg, id: child.key });
                     }
                 });
@@ -703,6 +764,10 @@
             }
 
             const messageInput = document.getElementById('messageInput');
+            if (messageInput && messageInput.disabled) {
+                showError('Chat is locked');
+                return;
+            }
             const message = messageInput.value.trim();
 
             if (!message) return;
@@ -722,6 +787,14 @@
                 const carrierName = user.companyName || 
                     (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : '') ||
                     user.name || user.email || 'Carrier';
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const authUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
+                if (!authUid) {
+                    showError('Session expired. Please login again.');
+                    setTimeout(() => { window.location.href = 'login.html'; }, 800);
+                    return;
+                }
 
                 const messageData = {
                     supplierId: currentConversation.supplierId,
@@ -729,6 +802,7 @@
                     carrierId: carrierId,
                     carrierEmail: user.email,
                     carrierName: carrierName,
+                    ...(currentConversation.loadId ? { loadId: currentConversation.loadId } : {}),
                     message: message,
                     senderType: 'carrier',
                     senderId: carrierId,
@@ -742,6 +816,23 @@
                 };
 
                 await db.ref('messages').push(messageData);
+                try {
+                    if (authUid && currentConversation.supplierId && currentConversation.supplierId !== 'support') {
+                        const title = 'New Message';
+                        const msg = `New message from ${carrierName}`;
+                        const url = '/mobile-app/supplier/messages.html?carrierId=' + encodeURIComponent(carrierId) + '&carrierName=' + encodeURIComponent(carrierName) + (currentConversation.loadId ? ('&loadId=' + encodeURIComponent(currentConversation.loadId)) : '');
+                        await db.ref('notificationQueue').push({
+                            senderUid: authUid,
+                            toUserId: String(currentConversation.supplierId),
+                            toUserType: 'supplier',
+                            title,
+                            message: msg,
+                            type: 'new_message',
+                            data: { type: 'new_message', loadId: currentConversation.loadId || null, carrierId: carrierId, url: url, icon: '/image-removebg-preview - 2026-03-04T141043.516.png' },
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                } catch (e) {}
 
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
@@ -808,7 +899,17 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            ensureAuthReady().then(loadConversations);
+            (async function () {
+                await ensureAuthReady();
+                await loadConversations();
+                try {
+                    const p = new URLSearchParams(window.location.search);
+                    const supplierId = p.get('supplierId') || '';
+                    const supplierName = p.get('supplierName') || 'Supplier';
+                    const loadId = p.get('loadId') || '';
+                    if (supplierId) openConversation(supplierId, supplierName, loadId);
+                } catch (e) {}
+            })();
         });
 
         async function ensureAuthReady() {

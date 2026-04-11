@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Invoice Center - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+            --page-pad: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .title{
+            font-size: 1.2rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .sub{
+            margin-top: 6px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .icon-btn{
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            display:grid;
+            place-items:center;
+            color: rgba(15,23,42,0.86);
+            box-shadow: 0 12px 28px rgba(15,23,42,0.10);
+            cursor:pointer;
+            flex-shrink:0;
+        }
+        .icon-btn:active { transform: scale(0.98); }
+
+        .content{ padding: 0 var(--page-pad) 18px; }
+
+        .stats-grid{
+            display:grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .stat{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 20px;
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            padding: 14px 12px;
+            overflow:hidden;
+            position: relative;
+        }
+        .stat::before{
+            content:"";
+            position:absolute;
+            top:0; left:0; right:0;
+            height:2px;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.55;
+        }
+        .stat-k{ font-size: 0.72rem; font-weight: 800; color: rgba(71,85,105,0.90); text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat-v{ margin-top: 4px; font-size: 1.25rem; font-weight: 950; letter-spacing: -0.03em; }
+
+        .quick-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .quick-row::-webkit-scrollbar{ display:none; }
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            cursor:pointer;
+        }
+        .chip i { color: var(--primary); }
+        .chip:active{ transform: scale(0.98); }
+
+        .filter-row{
+            margin-top: 14px;
+            display:flex;
+            gap: 8px;
+            overflow-x:auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .filter-row::-webkit-scrollbar{ display:none; }
+        .filter-btn{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            white-space: nowrap;
+        }
+        .filter-btn.active{
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            border-color: rgba(99,91,255,0.65);
+            color: #fff;
+            box-shadow: 0 16px 34px rgba(99,91,255,0.22);
+        }
+        .filter-btn:active{ transform: scale(0.98); }
+
+        .section-title{
+            margin-top: 16px;
+            font-size: 1rem;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .muted{ color: rgba(71,85,105,0.92); font-weight: 800; font-size: 0.86rem; }
+
+        .list{ margin-top: 10px; }
+        .item{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            padding: 14px 14px 12px;
+            margin-bottom: 10px;
+            cursor:pointer;
+            position: relative;
+            overflow:hidden;
+        }
+        .item::before{
+            content:"";
+            position:absolute;
+            left:0;
+            top: 14px;
+            bottom: 14px;
+            width: 4px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.78));
+            border-radius: 0 3px 3px 0;
+            opacity: 0.9;
+        }
+        .item-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .route{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 0.95rem;
+            padding-left: 8px;
+            margin: 0;
+        }
+        .meta{
+            margin-top: 4px;
+            padding-left: 8px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 800;
+            font-size: 0.82rem;
+        }
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-weight: 950;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(15, 23, 42, 0.04);
+            color: rgba(15, 23, 42, 0.86);
+            flex-shrink:0;
+        }
+        .pill.success{ background: rgba(5,150,105,0.10); border-color: rgba(5,150,105,0.18); color: var(--success); }
+        .pill.warning{ background: rgba(217,119,6,0.10); border-color: rgba(217,119,6,0.18); color: var(--warning); }
+
+        .row2{
+            margin-top: 10px;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-left: 8px;
+        }
+        .amt{ font-weight: 950; letter-spacing: -0.02em; }
+        .mini-actions{
+            display:flex;
+            gap: 8px;
+        }
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-weight: 950;
+            font-size: 0.82rem;
+            cursor:pointer;
+            text-decoration:none;
+        }
+        .btn-mini.primary{
+            background: rgba(99,91,255,0.12);
+            border-color: rgba(99,91,255,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .empty{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            padding: 20px 14px;
+            text-align:center;
+            color: rgba(71,85,105,0.92);
+        }
+        .empty i{ font-size: 2rem; color: rgba(71,85,105,0.65); margin-bottom: 10px; }
+        .empty h3{ margin: 0 0 4px; font-size: 1rem; font-weight: 950; color: rgba(15,23,42,0.90); }
+        .empty p{ margin: 0; font-weight: 800; font-size: 0.86rem; }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="title">Invoice Center</h1>
+                    <div class="sub">Billing, receipts, and payment tracking</div>
+                </div>
+                <button type="button" class="icon-btn" id="refreshBtn" aria-label="Refresh">
+                    <i class="fas fa-rotate-right"></i>
+                </button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-k">Paid (This Month)</div>
+                    <div class="stat-v" id="paidMonth">£0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-k">Outstanding</div>
+                    <div class="stat-v" id="outstanding">£0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-k">Invoices</div>
+                    <div class="stat-v" id="invoiceCount">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-k">Paid Invoices</div>
+                    <div class="stat-v" id="paidCount">0</div>
+                </div>
+            </div>
+            <div class="quick-row" aria-label="Quick links">
+                <a class="chip" href="payments.html"><i class="fas fa-credit-card"></i><span>Payments</span></a>
+                <a class="chip" href="pay-letter.html"><i class="fas fa-file-invoice-dollar"></i><span>Pay Letter</span></a>
+                <a class="chip" href="my-loads.html"><i class="fas fa-boxes"></i><span>My Loads</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="filter-row" role="tablist" aria-label="Invoice filters">
+            <button type="button" class="filter-btn active" data-filter="all">All</button>
+            <button type="button" class="filter-btn" data-filter="paid">Paid</button>
+            <button type="button" class="filter-btn" data-filter="pending">Pending</button>
+        </div>
+
+        <div class="section-title">
+            <div>Recent Invoices</div>
+            <div class="muted" id="smallHint">Tap an item to view</div>
+        </div>
+
+        <div class="list" id="invoiceList">
+            <div class="empty">
+                <i class="fas fa-receipt"></i>
+                <h3>Loading…</h3>
+                <p>Please wait</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+
+        let allInvoices = [];
+        let currentFilter = 'all';
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth');
+            return auth ? JSON.parse(auth) : null;
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveSupplierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('suppliers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
+        }
+
+        function formatCurrency(val) {
+            const n = Number(val || 0);
+            const safe = Number.isFinite(n) ? n : 0;
+            return '£' + safe.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatDate(str) {
+            if (!str) return '-';
+            const d = new Date(str);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function getInvoiceStatus(load) {
+            const s = String(load.status || '').toLowerCase();
+            const ps = load.paymentStatus || {};
+            if (s === 'completed' || s === 'delivered' || ps.completed) return 'paid';
+            if (ps.failed || ps.rejected) return 'pending';
+            if (ps.status && String(ps.status).toLowerCase() === 'paid') return 'paid';
+            return 'pending';
+        }
+
+        function getInvoiceAmount(load) {
+            const raw = load.totalAmount !== undefined ? load.totalAmount : (load.totalCost !== undefined ? load.totalCost : (load.price || load.budget || load.maxBudget || load.minBudget || 0));
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function getInvoiceWhen(load) {
+            return load.completedAt || load.deliveryDate || load.updatedAt || load.createdAt || '';
+        }
+
+        function escapeHtml(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        async function loadInvoices() {
+            const user = getUserData();
+            const list = document.getElementById('invoiceList');
+
+            if (!user) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3><p>Login to view invoices</p></div>';
+                return;
+            }
+
+            const db = window.AlphaBrokrage.firebaseDb;
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!db || !ok || !authSdk || !authSdk.currentUser) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-wifi"></i><h3>Not connected</h3><p>Please login again</p></div>';
+                return;
+            }
+
+            const authUid = String(authSdk.currentUser.uid || '');
+            const authEmail = String(authSdk.currentUser.email || user.email || '');
+            const fallbackSupplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const supplierId = await resolveSupplierIdByUid(db, authUid, fallbackSupplierId);
+
+            const map = {};
+            async function mergeQuery(q) {
+                const snap = await q.once('value');
+                if (!snap.exists()) return;
+                snap.forEach((ch) => { map[ch.key] = ch.val() || {}; });
+            }
+
+            const jobs = [mergeQuery(db.ref('loads').orderByChild('supplierFirebaseUid').equalTo(authUid))];
+            if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierEmail').equalTo(authEmail)));
+            if (supplierId) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierId').equalTo(supplierId)));
+            await Promise.allSettled(jobs);
+
+            allInvoices = [];
+            Object.entries(map).forEach(([loadId, load]) => {
+                const status = getInvoiceStatus(load);
+                const amount = getInvoiceAmount(load);
+                const when = getInvoiceWhen(load);
+                const pickup = load.pickupLocation || load.pickup_location || 'N/A';
+                const delivery = load.deliveryLocation || load.delivery_location || 'N/A';
+                const carrierName = load.carrierName || load.carrier_name || 'Carrier';
+
+                allInvoices.push({
+                    loadId,
+                    route: `${pickup} → ${delivery}`,
+                    carrierName,
+                    amount,
+                    status,
+                    when
+                });
+            });
+
+            allInvoices.sort((a, b) => {
+                const da = new Date(a.when || 0);
+                const db2 = new Date(b.when || 0);
+                return db2 - da;
+            });
+
+            updateStats();
+            renderList();
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const paid = allInvoices.filter(x => x.status === 'paid');
+            const pending = allInvoices.filter(x => x.status === 'pending');
+
+            const paidMonth = paid
+                .filter(x => {
+                    const d = new Date(x.when || 0);
+                    return d >= monthStart;
+                })
+                .reduce((s, x) => s + (Number(x.amount) || 0), 0);
+            const outstanding = pending.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+            document.getElementById('paidMonth').textContent = formatCurrency(paidMonth);
+            document.getElementById('outstanding').textContent = formatCurrency(outstanding);
+            document.getElementById('invoiceCount').textContent = String(allInvoices.length);
+            document.getElementById('paidCount').textContent = String(paid.length);
+        }
+
+        function renderList() {
+            const list = document.getElementById('invoiceList');
+            let items = allInvoices;
+            if (currentFilter !== 'all') items = allInvoices.filter(x => x.status === currentFilter);
+
+            if (!items.length) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><h3>No invoices</h3><p>Invoices will appear here after posting loads</p></div>';
+                return;
+            }
+
+            list.innerHTML = items.slice(0, 60).map(inv => {
+                const pillClass = inv.status === 'paid' ? 'success' : 'warning';
+                const pillText = inv.status === 'paid' ? 'Paid' : 'Pending';
+                const receiptHref = `receipt.html?loadId=${encodeURIComponent(inv.loadId)}&mode=invoice`;
+                const detailsHref = `load-details.html?loadId=${encodeURIComponent(inv.loadId)}`;
+                return `
+                    <div class="item" role="button" tabindex="0" data-receipt-href="${escapeHtml(receiptHref)}">
+                        <div class="item-head">
+                            <div style="min-width:0;">
+                                <p class="route">${escapeHtml(inv.route)}</p>
+                                <div class="meta">${escapeHtml(inv.carrierName)} • ${escapeHtml(formatDate(inv.when))}</div>
+                            </div>
+                            <span class="pill ${pillClass}"><i class="fas fa-circle"></i>${pillText}</span>
+                        </div>
+                        <div class="row2">
+                            <div class="amt">${escapeHtml(formatCurrency(inv.amount))}</div>
+                            <div class="mini-actions">
+                                <a class="btn-mini primary" href="${escapeHtml(receiptHref)}">Invoice</a>
+                                <a class="btn-mini" href="${escapeHtml(detailsHref)}">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('.item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const href = el.dataset.receiptHref || '';
+                    if (href) window.location.href = href;
+                });
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const href = el.dataset.receiptHref || '';
+                        if (href) window.location.href = href;
+                    }
+                });
+            });
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter || 'all';
+                renderList();
+            });
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => loadInvoices().catch(() => showError('Could not refresh')));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInvoices().catch(() => showError('Failed to load invoices'));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Award Load • Alpha Freight</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
+    <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+    <style>
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        .page-header { padding: 1rem 1.25rem 1.1rem; }
+        .page-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .page-subtitle { font-size: 0.875rem; opacity: 0.9; margin: 0; }
+        .content { padding: 1.1rem 1.1rem 0.2rem; }
+        .card { background: var(--card-bg); border: 1px solid rgba(15,23,42,0.08); border-radius: 18px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); padding: 1rem; margin-bottom: 0.9rem; }
+        .muted { color: rgba(71,85,105,0.9); font-weight: 700; }
+        .badge-soft { display:inline-flex; align-items:center; gap:0.4rem; border-radius: 999px; padding: 0.35rem 0.65rem; font-weight: 900; font-size: 0.72rem; border: 1px solid rgba(15,23,42,0.10); background: rgba(241,245,249,0.8); color: rgba(15,23,42,0.88); }
+        .bid-grid { display:grid; gap: 0.85rem; }
+        .bid-card { border-radius: 20px; border: 1px solid rgba(15,23,42,0.10); background: rgba(255,255,255,0.95); box-shadow: 0 14px 34px rgba(15,23,42,0.08); padding: 1rem; }
+        .bid-head { display:flex; justify-content:space-between; align-items:flex-start; gap: 0.75rem; }
+        .bid-name { font-weight: 1000; letter-spacing: -0.02em; color: rgba(15,23,42,0.92); }
+        .bid-price { font-weight: 1100; font-size: 1.3rem; letter-spacing: -0.03em; color: rgba(15,23,42,0.92); }
+        .metrics { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-top: 0.85rem; }
+        .metric { border: 1px solid rgba(15,23,42,0.10); background: rgba(241,245,249,0.75); border-radius: 16px; padding: 0.7rem 0.75rem; }
+        .metric .k { font-size: 0.7rem; font-weight: 950; color: rgba(71,85,105,0.92); text-transform: uppercase; letter-spacing: 0.06em; }
+        .metric .v { margin-top: 0.35rem; font-weight: 1000; letter-spacing: -0.02em; color: rgba(15,23,42,0.92); }
+        .actions { display:flex; gap: 0.6rem; margin-top: 0.9rem; }
+        .btn-action { flex: 1; border: none; border-radius: 16px; padding: 0.85rem 0.9rem; font-weight: 1000; display:inline-flex; align-items:center; justify-content:center; gap: 0.5rem; }
+        .btn-award { background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92)); color:#fff; box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22); }
+        .btn-reject { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color:#fff; box-shadow: 0 14px 34px rgba(220, 38, 38, 0.18); }
+        .btn-chat { background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.12); color: rgba(15,23,42,0.92); }
+        .btn-action:disabled { opacity: 0.6; cursor:not-allowed; }
+        .btn-action:active { transform: scale(0.99); }
+
+        .modal-overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.62);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+        .modal-overlay.show{ display:flex; }
+        .modal-sheet{
+            width: 100%;
+            max-width: 520px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.12);
+            border-radius: 26px;
+            box-shadow: 0 24px 72px rgba(15, 23, 42, 0.30);
+            overflow: hidden;
+            transform: translateY(18px);
+            opacity: 0;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+        }
+        .modal-overlay.show .modal-sheet{ transform: translateY(0); opacity: 1; }
+        .modal-head{
+            padding: 16px 16px 10px;
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+        }
+        .modal-title{ font-weight: 1000; letter-spacing: -0.03em; font-size: 1.05rem; }
+        .modal-sub{ margin-top: 4px; font-size: 0.88rem; font-weight: 800; color: rgba(71,85,105,0.92); }
+        .modal-close{
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            display:grid;
+            place-items:center;
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+        }
+        .modal-body{ padding: 0 16px 14px; }
+        .confirm-list{ display:grid; gap: 8px; }
+        .confirm-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap: 10px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(241,245,249,0.75);
+            border-radius: 18px;
+            padding: 12px 12px;
+        }
+        .confirm-item .k{ font-size: 0.70rem; font-weight: 950; color: rgba(71,85,105,0.92); text-transform: uppercase; letter-spacing: 0.06em; }
+        .confirm-item .v{ font-size: 0.98rem; font-weight: 1000; letter-spacing: -0.02em; color: rgba(15,23,42,0.92); text-align:right; }
+        .confirm-note{
+            margin-top: 10px;
+            padding: 12px 12px;
+            border-radius: 18px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            color: rgba(71,85,105,0.95);
+            font-weight: 850;
+            font-size: 0.88rem;
+            white-space: pre-line;
+        }
+        .modal-actions{
+            padding: 12px 16px 16px;
+            display:flex;
+            gap: 10px;
+            border-top: 1px solid rgba(15,23,42,0.10);
+            background: rgba(241,245,249,0.65);
+        }
+        .btn-sheet{
+            flex: 1;
+            border-radius: 16px;
+            padding: 12px 12px;
+            font-weight: 1000;
+            border: none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+            cursor:pointer;
+        }
+        .btn-sheet.cancel{ background: rgba(255,255,255,0.96); color: rgba(15,23,42,0.92); border: 2px solid rgba(15,23,42,0.12); }
+        .btn-sheet.accept{ background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92)); color: #fff; box-shadow: 0 14px 34px rgba(99,91,255,0.22); }
+        .btn-sheet.danger{ background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 12px 28px rgba(220,38,38,0.22); }
+        .btn-sheet:active{ transform: scale(0.99); }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="page-title">Award Load</div>
+                    <p class="page-subtitle" id="subtitle">Compare carrier bids</p>
+                </div>
+                <a class="btn-action btn-chat" style="flex:0 0 auto; padding:0.65rem 0.9rem; border-radius:16px; text-decoration:none;" id="btnBack">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card" id="loadCard">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <div style="font-weight:1000;letter-spacing:-0.02em;">Load</div>
+                    <div class="muted mt-1" id="routeText">—</div>
+                </div>
+                <div class="badge-soft" id="statusPill"><i class="fas fa-hourglass-half"></i> Pending</div>
+            </div>
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+                <span class="badge-soft" id="currentPricePill"><i class="fas fa-tag"></i> Price: —</span>
+                <span class="badge-soft" id="bidsCountPill"><i class="fas fa-gavel"></i> Bids: —</span>
+            </div>
+        </div>
+
+        <div class="bid-grid" id="bidsGrid">
+            <div class="card">
+                <div class="muted">Loading bids…</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModalOverlay" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="confirmModalTitle">Confirm</div>
+                    <div class="modal-sub" id="confirmModalSub">Please review</div>
+                </div>
+                <button class="modal-close" type="button" id="confirmModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-list" id="confirmModalList"></div>
+                <div class="confirm-note" id="confirmModalNote" style="display:none;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="confirmModalCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet accept" type="button" id="confirmModalOk"><i class="fas fa-check"></i> Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item active">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+    <script>
+        const alertSystem = new AlertSystem();
+        const params = new URLSearchParams(location.search);
+        const loadId = params.get('loadId') || params.get('id') || '';
+        let loadData = null;
+        let bids = [];
+        let isBusy = false;
+
+        function showError(msg) { alertSystem.show('error', msg); }
+        function showSuccess(msg) { alertSystem.show('success', msg); }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatCurrency(v) {
+            const n = Number(v || 0) || 0;
+            return '£' + n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getSupplierAuth() {
+            try { return JSON.parse(localStorage.getItem('supplierAuth') || 'null'); } catch (e) { return null; }
+        }
+
+        function supplierKeyFromEmail(email) {
+            return String(email || '').replace(/@/g, '_').replace(/\./g, '_');
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+
+        function canAccessLoad(load, auth) {
+            const supplierId = auth.supplierId || auth.id || supplierKeyFromEmail(auth.email);
+            if (!supplierId) return false;
+            const loadSupplierId = load.supplierId || load.postedBy || supplierKeyFromEmail(load.supplierEmail);
+            return loadSupplierId === supplierId || load.supplierEmail === auth.email;
+        }
+
+        function getLoadRoute(load) {
+            const p = load.pickupLocation || load.pickup_location || 'N/A';
+            const d = load.deliveryLocation || load.delivery_location || 'N/A';
+            return `${p} → ${d}`;
+        }
+
+        function getBasePrice(load) {
+            const v = load.agreedPrice ?? load.price ?? load.budget ?? load.maxBudget ?? load.minBudget ?? 0;
+            return Number(v || 0) || 0;
+        }
+
+        function getStatusPill(load) {
+            const st = String(load.status || '').toLowerCase();
+            if (st === 'accepted' || st === 'active') return { icon: 'fa-check', text: 'Accepted' };
+            if (st.includes('transit')) return { icon: 'fa-truck', text: 'In transit' };
+            if (st === 'completed' || st === 'delivered') return { icon: 'fa-clipboard-check', text: 'Completed' };
+            if (st === 'cancelled' || st === 'canceled') return { icon: 'fa-ban', text: 'Cancelled' };
+            return { icon: 'fa-hourglass-half', text: 'Pending' };
+        }
+
+        function confirmModal(opts) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmModalOverlay');
+                const titleEl = document.getElementById('confirmModalTitle');
+                const subEl = document.getElementById('confirmModalSub');
+                const listEl = document.getElementById('confirmModalList');
+                const noteEl = document.getElementById('confirmModalNote');
+                const closeBtn = document.getElementById('confirmModalClose');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+                const okBtn = document.getElementById('confirmModalOk');
+                if (!overlay || !titleEl || !listEl || !cancelBtn || !okBtn) { resolve(false); return; }
+
+                const o = opts || {};
+                const items = Array.isArray(o.items) ? o.items : [];
+                titleEl.textContent = String(o.title || 'Confirm');
+                if (subEl) subEl.textContent = String(o.subtitle || 'Please review');
+                listEl.innerHTML = items.map(it => {
+                    const k = escapeHtml(it && it.k ? it.k : '');
+                    const v = escapeHtml(it && it.v !== undefined ? it.v : '');
+                    return `<div class="confirm-item"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+                }).join('');
+
+                const note = String(o.note || '').trim();
+                if (noteEl) {
+                    if (note) {
+                        noteEl.style.display = '';
+                        noteEl.textContent = note;
+                    } else {
+                        noteEl.style.display = 'none';
+                        noteEl.textContent = '';
+                    }
+                }
+
+                okBtn.classList.remove('accept', 'danger');
+                okBtn.classList.add(o.variant === 'danger' ? 'danger' : 'accept');
+                okBtn.innerHTML = `<i class="fas ${o.variant === 'danger' ? 'fa-triangle-exclamation' : 'fa-check'}"></i> ${escapeHtml(o.confirmText || 'Confirm')}`;
+                cancelBtn.innerHTML = `<i class="fas fa-arrow-left"></i> ${escapeHtml(o.cancelText || 'Cancel')}`;
+
+                function close(val) {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    overlay.onclick = null;
+                    cancelBtn.onclick = null;
+                    okBtn.onclick = null;
+                    if (closeBtn) closeBtn.onclick = null;
+                    document.removeEventListener('keydown', onKey);
+                    resolve(val);
+                }
+                function onKey(e) { if (e.key === 'Escape') close(false); }
+                document.addEventListener('keydown', onKey);
+
+                overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+                cancelBtn.onclick = () => close(false);
+                okBtn.onclick = () => close(true);
+                if (closeBtn) closeBtn.onclick = () => close(false);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        async function fetchCarrierStats(carrierId) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db || !carrierId) return { completed: 0, onTimePct: null, vehicle: '—' };
+            let vehicle = '—';
+            try {
+                const prof = await db.ref('carriers/' + carrierId).once('value');
+                const v = prof.val() || {};
+                vehicle = v.vehicleType || v.vehicle || v.fleetType || '—';
+            } catch (e) {}
+
+            try {
+                const snap = await db.ref('loads').orderByChild('carrierId').equalTo(String(carrierId)).limitToLast(180).once('value');
+                const loads = [];
+                snap.forEach((ch) => loads.push(ch.val() || {}));
+                const completed = loads.filter(l => ['completed', 'delivered'].includes(String(l.status || '').toLowerCase()));
+                const n = completed.length;
+                let onTimePct = null;
+                if (n) {
+                    let ok = 0;
+                    let denom = 0;
+                    completed.forEach((l) => {
+                        const due = l.deliveryDate || l.deliveryBy || l.deliveryTime || '';
+                        const done = l.completedAt || l.deliveredAt || l.podUploadedAt || '';
+                        const dueT = due ? new Date(due).getTime() : 0;
+                        const doneT = done ? new Date(done).getTime() : 0;
+                        if (dueT && doneT) {
+                            denom += 1;
+                            if (doneT <= dueT) ok += 1;
+                        }
+                    });
+                    if (denom) onTimePct = Math.round((ok / denom) * 100);
+                }
+                return { completed: n, onTimePct, vehicle };
+            } catch (e) {
+                return { completed: 0, onTimePct: null, vehicle };
+            }
+        }
+
+        async function sendAutoChatMessage(auth, carrierId, carrierName, text) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+            await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const authUid = authSdk && authSdk.currentUser && authSdk.currentUser.uid ? String(authSdk.currentUser.uid) : '';
+            const supplierId = auth.supplierId || auth.id || supplierKeyFromEmail(auth.email);
+            const supplierName = auth.companyName || auth.company || auth.email || 'Supplier';
+            const now = Date.now();
+            const msg = {
+                supplierId,
+                supplierName,
+                supplierEmail: auth.email || '',
+                supplierUid: authUid,
+                carrierId: String(carrierId),
+                carrierName: String(carrierName || 'Carrier'),
+                loadId: String(loadId || ''),
+                message: String(text || '').trim(),
+                senderType: 'supplier',
+                senderId: supplierId,
+                senderUid: authUid,
+                recipientType: 'carrier',
+                recipientId: String(carrierId),
+                read: false,
+                timestamp: now,
+                createdAt: new Date().toISOString()
+            };
+            await db.ref('messages').push(msg);
+            try {
+                if (authUid && carrierId) {
+                    const url = '/mobile-app/carrier/messages.html?supplierId=' + encodeURIComponent(supplierId) + '&supplierName=' + encodeURIComponent(supplierName) + (loadId ? ('&loadId=' + encodeURIComponent(loadId)) : '');
+                    await db.ref('notificationQueue').push({
+                        senderUid: String(authUid),
+                        toUserId: String(carrierId),
+                        toUserType: 'carrier',
+                        title: 'New Message',
+                        message: `New message from ${supplierName}`,
+                        type: 'new_message',
+                        data: { type: 'new_message', loadId: String(loadId || ''), supplierId: supplierId, url: url, icon: '/image-removebg-preview - 2026-03-04T141043.516.png' },
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            } catch (e) {}
+        }
+
+        async function notifyCarrier(authUid, carrierId, title, message, data) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db || !authUid || !carrierId) return;
+            await db.ref('notificationQueue').push({
+                senderUid: String(authUid),
+                toUserId: String(carrierId),
+                toUserType: 'carrier',
+                title: String(title || 'Notification'),
+                message: String(message || ''),
+                type: String((data && data.type) ? data.type : 'notification'),
+                data: data || {},
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        function openChatWithCarrier(carrierId, carrierName) {
+            try {
+                localStorage.setItem('ab.messages.openCarrier', JSON.stringify({ carrierId: String(carrierId), carrierName: String(carrierName || 'Carrier'), at: Date.now(), loadId: String(loadId) }));
+            } catch (e) {}
+            window.location.href = 'messages.html';
+        }
+
+        async function awardBid(bid) {
+            if (isBusy) return;
+            if (!loadData) return;
+            const auth = getSupplierAuth();
+            if (!auth) { window.location.href = 'login.html'; return; }
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+
+            const prev = getBasePrice(loadData);
+            const next = Number(bid.amount || 0) || 0;
+            const delta = Math.round((next - prev) * 100) / 100;
+            const ok = await confirmModal({
+                title: 'Confirm Award',
+                subtitle: 'This will assign the load and notify the carrier',
+                items: [
+                    { k: 'Route', v: getLoadRoute(loadData) },
+                    { k: 'Old Price', v: formatCurrency(prev) },
+                    { k: 'Accepted Price', v: `${formatCurrency(next)}${delta !== 0 ? ` (${delta > 0 ? '+' : ''}${formatCurrency(delta)})` : ''}` },
+                    { k: 'Carrier', v: bid.carrierName || 'Carrier' }
+                ],
+                note: 'After award: load status becomes accepted and chat will open.',
+                confirmText: 'Award',
+                cancelText: 'Cancel'
+            });
+            if (!ok) return;
+
+            isBusy = true;
+            renderBids();
+            try {
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return; }
+                const authUid = String(authSdk.currentUser.uid || '');
+                const nowIso = new Date().toISOString();
+
+                const updates = {};
+                updates[`bids/${loadId}/${bid.carrierId}/status`] = 'accepted';
+                updates[`bids/${loadId}/${bid.carrierId}/respondedAt`] = nowIso;
+                updates[`carrierBids/${bid.carrierId}/${loadId}/status`] = 'accepted';
+                updates[`carrierBids/${bid.carrierId}/${loadId}/seen`] = true;
+                updates[`carrierBids/${bid.carrierId}/${loadId}/updatedAt`] = nowIso;
+
+                updates[`loads/${loadId}/status`] = 'accepted';
+                updates[`loads/${loadId}/carrierId`] = bid.carrierId;
+                if (bid.carrierName) updates[`loads/${loadId}/carrierName`] = bid.carrierName;
+                if (bid.carrierFirebaseUid) updates[`loads/${loadId}/carrierFirebaseUid`] = bid.carrierFirebaseUid;
+                if (bid.carrierEmail) updates[`loads/${loadId}/carrierEmail`] = bid.carrierEmail;
+                updates[`loads/${loadId}/acceptedAt`] = nowIso;
+                updates[`loads/${loadId}/acceptedOffer`] = { type: 'bid', offerId: bid.carrierId, amount: Number(bid.amount || 0) || 0 };
+                updates[`loads/${loadId}/agreedPrice`] = Number(bid.amount || 0) || 0;
+                updates[`loads/${loadId}/agreedAt`] = nowIso;
+                updates[`loads/${loadId}/agreedFrom`] = 'bid';
+
+                const bidsSnap = await db.ref(`bids/${loadId}`).once('value');
+                const all = bidsSnap.val() || {};
+                Object.keys(all).forEach((cid) => {
+                    if (String(cid) === String(bid.carrierId)) return;
+                    updates[`bids/${loadId}/${cid}/status`] = 'rejected';
+                    updates[`bids/${loadId}/${cid}/respondedAt`] = nowIso;
+                    updates[`carrierBids/${cid}/${loadId}/status`] = 'rejected';
+                    updates[`carrierBids/${cid}/${loadId}/seen`] = true;
+                    updates[`carrierBids/${cid}/${loadId}/updatedAt`] = nowIso;
+                });
+
+                await db.ref().update(updates);
+
+                await notifyCarrier(
+                    authUid,
+                    bid.carrierId,
+                    'Load Awarded',
+                    `Supplier awarded the load • ${getLoadRoute(loadData)}`,
+                    { type: 'bid_accepted', loadId: String(loadId), url: '/mobile-app/carrier/load-details.html?id=' + encodeURIComponent(loadId), icon: '/image-removebg-preview - 2026-03-04T141043.516.png' }
+                );
+
+                await sendAutoChatMessage(auth, bid.carrierId, bid.carrierName || 'Carrier', `Load awarded: #${String(loadId).substring(0, 8)} • ${getLoadRoute(loadData)} • Agreed ${formatCurrency(next)}`);
+
+                showSuccess('Load awarded');
+                openChatWithCarrier(bid.carrierId, bid.carrierName);
+            } catch (e) {
+                console.error(e);
+                showError('Failed to award load');
+            } finally {
+                isBusy = false;
+                renderBids();
+            }
+        }
+
+        async function rejectBid(bid) {
+            if (isBusy) return;
+            const auth = getSupplierAuth();
+            if (!auth) { window.location.href = 'login.html'; return; }
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) return;
+
+            const ok = await confirmModal({
+                title: 'Reject Bid',
+                subtitle: 'This will notify the carrier',
+                items: [
+                    { k: 'Carrier', v: bid.carrierName || 'Carrier' },
+                    { k: 'Bid', v: formatCurrency(bid.amount || 0) },
+                    { k: 'Route', v: loadData ? getLoadRoute(loadData) : '—' }
+                ],
+                note: 'Rejected bid will not be assigned.',
+                confirmText: 'Reject',
+                cancelText: 'Cancel',
+                variant: 'danger'
+            });
+            if (!ok) return;
+
+            isBusy = true;
+            renderBids();
+            try {
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return; }
+                const authUid = String(authSdk.currentUser.uid || '');
+                const nowIso = new Date().toISOString();
+
+                const updates = {};
+                updates[`bids/${loadId}/${bid.carrierId}/status`] = 'rejected';
+                updates[`bids/${loadId}/${bid.carrierId}/respondedAt`] = nowIso;
+                updates[`carrierBids/${bid.carrierId}/${loadId}/status`] = 'rejected';
+                updates[`carrierBids/${bid.carrierId}/${loadId}/seen`] = true;
+                updates[`carrierBids/${bid.carrierId}/${loadId}/updatedAt`] = nowIso;
+                await db.ref().update(updates);
+
+                await notifyCarrier(
+                    authUid,
+                    bid.carrierId,
+                    'Bid Rejected',
+                    `Supplier rejected your bid • ${loadData ? getLoadRoute(loadData) : ''}`,
+                    { type: 'bid_rejected', loadId: String(loadId), url: '/mobile-app/carrier/my-bids.html', icon: '/image-removebg-preview - 2026-03-04T141043.516.png' }
+                );
+
+                showSuccess('Bid rejected');
+                await loadBids();
+            } catch (e) {
+                console.error(e);
+                showError('Failed to reject bid');
+            } finally {
+                isBusy = false;
+                renderBids();
+            }
+        }
+
+        function renderBids() {
+            const grid = document.getElementById('bidsGrid');
+            const count = bids.length;
+            document.getElementById('bidsCountPill').innerHTML = `<i class="fas fa-gavel"></i> Bids: ${count}`;
+            if (!count) {
+                grid.innerHTML = `<div class="card"><div style="font-weight:1000;">No bids yet</div><div class="muted mt-1">Wait for carriers to place bids.</div></div>`;
+                return;
+            }
+            grid.innerHTML = bids.map((b) => {
+                const stats = b._stats || { completed: 0, onTimePct: null, vehicle: '—' };
+                const onTimeText = stats.onTimePct == null ? '—' : (stats.onTimePct + '%');
+                const canAct = !isBusy && (String(loadData && loadData.status || '').toLowerCase() === 'available' || String(loadData && loadData.status || '').toLowerCase() === 'pending');
+                const disabled = canAct ? '' : 'disabled';
+                const note = b.message ? `<div class="muted mt-2" style="white-space:pre-line;">${escapeHtml(b.message)}</div>` : '';
+                const cid = encodeURIComponent(String(b.carrierId || ''));
+                const cname = encodeURIComponent(String(b.carrierName || 'Carrier'));
+                return `
+                    <div class="bid-card">
+                        <div class="bid-head">
+                            <div>
+                                <div class="bid-name">${escapeHtml(b.carrierName || 'Carrier')}</div>
+                                <div class="muted mt-1">${escapeHtml(b.carrierId)}</div>
+                            </div>
+                            <div class="bid-price">${formatCurrency(b.amount || 0)}</div>
+                        </div>
+                        <div class="metrics">
+                            <div class="metric"><div class="k">Completed</div><div class="v">${stats.completed}</div></div>
+                            <div class="metric"><div class="k">On-time</div><div class="v">${onTimeText}</div></div>
+                            <div class="metric"><div class="k">Vehicle</div><div class="v">${escapeHtml(stats.vehicle || '—')}</div></div>
+                        </div>
+                        ${note}
+                        <div class="actions">
+                            <button class="btn-action btn-award" type="button" ${disabled} onclick="awardBidById('${cid}')"><i class="fas fa-trophy"></i> Award</button>
+                            <button class="btn-action btn-reject" type="button" ${disabled} onclick="rejectBidById('${cid}')"><i class="fas fa-times"></i> Reject</button>
+                            <button class="btn-action btn-chat" type="button" onclick="openChatWithCarrierFromUi('${cid}','${cname}')"><i class="fas fa-comments"></i> Chat</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.awardBidById = function (carrierId) {
+            const cid = decodeURIComponent(String(carrierId || ''));
+            const b = bids.find(x => String(x.carrierId) === String(cid));
+            if (b) awardBid(b);
+        };
+        window.rejectBidById = function (carrierId) {
+            const cid = decodeURIComponent(String(carrierId || ''));
+            const b = bids.find(x => String(x.carrierId) === String(cid));
+            if (b) rejectBid(b);
+        };
+        window.openChatWithCarrierFromUi = function (carrierId, carrierName) {
+            const cid = decodeURIComponent(String(carrierId || ''));
+            const name = decodeURIComponent(String(carrierName || ''));
+            openChatWithCarrier(cid, name);
+        };
+
+        async function loadBids() {
+            const db = window.AlphaBrokrage.firebaseDb;
+            const snap = await db.ref('bids/' + loadId).once('value');
+            const raw = snap.val() || {};
+            const out = Object.entries(raw).map(([cid, v]) => {
+                const o = v || {};
+                return {
+                    carrierId: String(o.carrierId || cid),
+                    carrierName: o.carrierName || o.companyName || 'Carrier',
+                    carrierFirebaseUid: o.carrierFirebaseUid || '',
+                    carrierEmail: o.carrierEmail || o.email || '',
+                    amount: Number(o.amount || o.price || 0) || 0,
+                    message: o.message || '',
+                    status: o.status || 'sent',
+                    createdAt: o.createdAt || o.timestamp || ''
+                };
+            }).filter(b => ['sent', 'seen', 'new', ''].includes(String(b.status || '').toLowerCase()) || String(b.status || '').toLowerCase() === 'revised');
+
+            out.sort((a, b) => (a.amount || 0) - (b.amount || 0));
+            bids = out;
+
+            await Promise.allSettled(bids.map(async (b) => {
+                b._stats = await fetchCarrierStats(b.carrierId);
+            }));
+        }
+
+        async function init() {
+            if (!loadId) { showError('Missing loadId'); return; }
+            const auth = getSupplierAuth();
+            if (!auth) { window.location.href = 'login.html'; return; }
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) { showError('Database not ready'); return; }
+
+            document.getElementById('btnBack').href = 'load-details.html?id=' + encodeURIComponent(loadId);
+
+            try {
+                await ensureAuthReady();
+                const snap = await db.ref('loads/' + loadId).once('value');
+                const load = snap.val();
+                if (!load || !canAccessLoad(load, auth)) { showError('Load not found'); return; }
+                loadData = { ...(load || {}), loadId };
+
+                const pill = getStatusPill(loadData);
+                document.getElementById('statusPill').innerHTML = `<i class="fas ${pill.icon}"></i> ${pill.text}`;
+                document.getElementById('subtitle').textContent = 'Compare bids • ' + getLoadRoute(loadData);
+                document.getElementById('routeText').textContent = getLoadRoute(loadData);
+                document.getElementById('currentPricePill').innerHTML = `<i class="fas fa-tag"></i> Price: ${formatCurrency(getBasePrice(loadData))}`;
+
+                await loadBids();
+                renderBids();
+            } catch (e) {
+                console.error(e);
+                showError('Failed to load bids');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            const overlay = document.getElementById('confirmModalOverlay');
+            const closeBtn = document.getElementById('confirmModalClose');
+            const cancelBtn = document.getElementById('confirmModalCancel');
+            if (closeBtn) closeBtn.addEventListener('click', () => { if (overlay) overlay.classList.remove('show'); });
+            if (cancelBtn) cancelBtn.addEventListener('click', () => { if (overlay) overlay.classList.remove('show'); });
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+        });
+    </script>
+</body>
+</html>

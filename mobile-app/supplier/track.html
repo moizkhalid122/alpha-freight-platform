@@ -308,6 +308,7 @@
             <div class="stat-row">
                 <span id="statSpeed">Speed: —</span>
                 <span id="statHeading">Heading: —</span>
+                <span id="statEta">ETA: —</span>
                 <span id="statLast">Last: —</span>
             </div>
         </div>
@@ -432,6 +433,35 @@
             return null;
         }
 
+        let activeRoute = { delivery: null, pickup: null };
+        let activeLoadMeta = { deliveryAt: null };
+
+        function computeSpeedMph(data) {
+            if (!data) return 0;
+            if (data.speedMph != null && !isNaN(parseFloat(data.speedMph))) return parseFloat(data.speedMph);
+            if (data.speedKmh != null && !isNaN(parseFloat(data.speedKmh))) return parseFloat(data.speedKmh) * 0.621371;
+            const raw = parseFloat(data.speed || 0) || 0;
+            if (raw <= 0) return 0;
+            if (raw > 35) return raw * 0.621371;
+            return raw * 2.236936;
+        }
+
+        function computeEtaText(driverPos, speedMph) {
+            if (!activeRoute || !activeRoute.delivery || !driverPos || typeof google === 'undefined' || !google.maps || !google.maps.geometry) return '—';
+            const from = new google.maps.LatLng(driverPos.lat, driverPos.lng);
+            const to = new google.maps.LatLng(activeRoute.delivery.lat, activeRoute.delivery.lng);
+            const distM = google.maps.geometry.spherical.computeDistanceBetween(from, to);
+            const miles = distM / 1609.34;
+            const mph = speedMph > 5 ? speedMph : 45;
+            const hours = miles / mph;
+            const mins = Math.max(1, Math.round(hours * 60));
+            if (!isFinite(mins)) return '—';
+            if (mins < 60) return `${mins}m`;
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return `${h}h ${m}m`;
+        }
+
         function updateCarrierOnMap(data, carrierName) {
             const lat = data.latitude || data.lat;
             const lng = data.longitude || data.lng;
@@ -460,12 +490,33 @@
 
             map.panTo(pos);
             map.setZoom(14);
-            document.getElementById('statSpeed').textContent = `Speed: ${(data.speed || 0) > 0 ? (data.speed * 2.237).toFixed(0) + ' mph' : '—'}`;
+            const speedMph = computeSpeedMph(data);
+            document.getElementById('statSpeed').textContent = `Speed: ${speedMph > 0 ? speedMph.toFixed(0) + ' mph' : '—'}`;
             document.getElementById('statHeading').textContent = data.heading ? `Heading: ${Math.round(data.heading)}°` : 'Heading: —';
             const ts = data.timestamp || data.updatedAt;
-            document.getElementById('statLast').textContent = ts ? 'Last: ' + new Date(ts).toLocaleTimeString() : 'Last: —';
-            document.getElementById('statusText').textContent = `Tracking ${carrierName || 'carrier'}`;
-            document.getElementById('statusDot').classList.add('active');
+            const lastTs = ts ? new Date(ts).getTime() : 0;
+            document.getElementById('statLast').textContent = lastTs ? 'Last: ' + new Date(lastTs).toLocaleTimeString() : 'Last: —';
+            document.getElementById('statEta').textContent = 'ETA: ' + computeEtaText(pos, speedMph);
+
+            const now = Date.now();
+            const ageMs = lastTs ? (now - lastTs) : 0;
+            const stale = lastTs && ageMs > 5 * 60 * 1000;
+            const overdue = activeLoadMeta && activeLoadMeta.deliveryAt && now > activeLoadMeta.deliveryAt;
+            const parts = [];
+            parts.push(`Tracking ${carrierName || 'carrier'}`);
+            if (stale) parts.push('Location stale');
+            if (overdue) parts.push('Delivery overdue');
+            document.getElementById('statusText').textContent = parts.join(' • ');
+            const dot = document.getElementById('statusDot');
+            dot.classList.add('active');
+            if (stale) dot.style.background = '#f59e0b'; else dot.style.background = '#10b981';
+            if (overdue) dot.style.background = '#ef4444';
+        }
+
+        function parseDeliveryAt(load) {
+            const v = load.deliveryDate || load.delivery_date || load.deliveryTime || load.delivery_time || load.deliveryBy || '';
+            const t = v ? new Date(v).getTime() : 0;
+            return isFinite(t) ? t : 0;
         }
 
         async function showRoute(load) {
@@ -525,6 +576,9 @@
                 map.setCenter(path[0]);
                 map.setZoom(10);
             }
+
+            activeRoute = { pickup: pickupCoords || null, delivery: deliveryCoords || null };
+            activeLoadMeta = { deliveryAt: parseDeliveryAt(load) };
         }
 
         function trackCarrier(loadId, carrierId, carrierName) {

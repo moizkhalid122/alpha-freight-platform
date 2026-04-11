@@ -214,6 +214,44 @@
             cursor: not-allowed;
         }
 
+        .wizard {
+            margin: 0 1.25rem 1.25rem;
+            padding: 0.9rem 1rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.72);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+        }
+        .wizard-top { display:flex; align-items:center; justify-content:flex-start; gap:0.75rem; margin-bottom:0.65rem; }
+        .wizard-step { font-weight: 900; letter-spacing: -0.02em; color: var(--text-dark); font-size: 0.95rem; }
+        .wizard-sub { font-size: 0.82rem; color: var(--text-medium); }
+        .wizard-bar { height: 8px; border-radius: 999px; background: var(--border); overflow:hidden; }
+        .wizard-bar > div { height: 100%; width: 0%; background: linear-gradient(90deg, rgba(37,99,235,0.55), var(--primary)); border-radius: 999px; transition: width 0.25s; }
+
+        .step { display: none; }
+        .step.active { display: block; }
+        .step-actions { display:flex; gap: 0.75rem; margin-top: 1rem; }
+        .step-actions .submit-btn {
+            width: auto;
+            margin: 0;
+            flex: 1;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.24);
+        }
+        .step-actions .step-secondary { margin: 0; }
+        .step-secondary {
+            flex: 1;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            min-height: 52px;
+        }
+        .step-secondary:active { transform: scale(0.98); }
+
         /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
         /* Responsive */
         @media (min-width: 768px) {
@@ -245,9 +283,20 @@
         </div>
     </div>
 
+    <div class="wizard" id="wizard">
+        <div class="wizard-top">
+            <div>
+                <div class="wizard-step" id="wizStepTitle">Step 1 of 3</div>
+                <div class="wizard-sub" id="wizStepSub">Personal details</div>
+            </div>
+        </div>
+        <div class="wizard-bar"><div id="wizBar"></div></div>
+    </div>
+
     <!-- Profile Form -->
     <form id="profileForm" onsubmit="saveProfile(event)">
         <!-- Personal Information -->
+        <div class="step active" id="step1">
         <div class="form-card">
             <div class="section-divider">
                 <i class="fas fa-user"></i>
@@ -293,9 +342,15 @@
                     Include country code (e.g., +44 for UK)
                 </div>
             </div>
+
+            <div class="step-actions">
+                <button class="submit-btn" type="button" id="next1"><i class="fas fa-arrow-right"></i><span>Next</span></button>
+            </div>
+        </div>
         </div>
 
         <!-- Company Information -->
+        <div class="step" id="step2">
         <div class="form-card">
             <div class="section-divider">
                 <i class="fas fa-building"></i>
@@ -387,11 +442,63 @@
                 </label>
                 <textarea class="form-input" id="companyDescription" placeholder="Describe your company and services" rows="4" style="resize: vertical; min-height: 100px;"></textarea>
             </div>
+
+            <div class="step-actions">
+                <button class="step-secondary" type="button" id="back2"><i class="fas fa-arrow-left"></i> Back</button>
+                <button class="submit-btn" type="button" id="next2"><i class="fas fa-arrow-right"></i><span>Next</span></button>
+            </div>
+        </div>
+        </div>
+
+        <div class="step" id="step3">
+        <div class="form-card">
+            <div class="section-divider">
+                <i class="fas fa-user-check"></i>
+                Verification Documents
+            </div>
+
+            <div class="form-help" id="kycStatusText" style="margin-top:-0.25rem;">
+                <i class="fas fa-shield-halved"></i>
+                Upload documents to get verified by admin
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="form-label">
+                    Driver License
+                    <span class="optional">(Upload)</span>
+                </label>
+                <input type="file" class="form-input" id="docDriverLicense" accept="image/*,application/pdf">
+                <div class="form-help" id="docDriverLicenseHelp"><i class="fas fa-paperclip"></i> JPG/PNG/PDF</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Vehicle Registration
+                    <span class="optional">(Upload)</span>
+                </label>
+                <input type="file" class="form-input" id="docVehicleReg" accept="image/*,application/pdf">
+                <div class="form-help" id="docVehicleRegHelp"><i class="fas fa-paperclip"></i> JPG/PNG/PDF</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Insurance Certificate
+                    <span class="optional">(Upload)</span>
+                </label>
+                <input type="file" class="form-input" id="docInsurance" accept="image/*,application/pdf">
+                <div class="form-help" id="docInsuranceHelp"><i class="fas fa-paperclip"></i> JPG/PNG/PDF</div>
+            </div>
+
+            <div class="step-actions">
+                <button class="step-secondary" type="button" id="back3"><i class="fas fa-arrow-left"></i> Back</button>
+                <button class="submit-btn" type="button" id="finishBtn"><i class="fas fa-save"></i><span>Finish & Save</span></button>
+            </div>
+        </div>
         </div>
     </form>
 
     <!-- Submit Button -->
-    <button class="submit-btn" id="submitBtn" onclick="saveProfile()">
+    <button class="submit-btn" id="submitBtn" onclick="saveProfile()" style="display:none;">
         <i class="fas fa-save"></i>
         <span>Save Changes</span>
     </button>
@@ -423,6 +530,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <!-- Firebase Init -->
@@ -443,6 +551,104 @@
 
         function showSuccess(message) {
             alertSystem.show('success', message);
+        }
+
+        const WIZ_KEY = 'ab.carrier.editprofile.step.v1';
+
+        function setWizardUI(stepIndex, stepsTotal) {
+            const title = document.getElementById('wizStepTitle');
+            const sub = document.getElementById('wizStepSub');
+            const bar = document.getElementById('wizBar');
+            const labels = ['Personal details', 'Business details', 'Verification'];
+            if (title) title.textContent = `Step ${stepIndex + 1} of ${stepsTotal}`;
+            if (sub) sub.textContent = labels[stepIndex] || '';
+            if (bar) bar.style.width = `${Math.round(((stepIndex + 1) / stepsTotal) * 100)}%`;
+        }
+
+        function showStep(stepIndex) {
+            const steps = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3')].filter(Boolean);
+            const total = steps.length || 3;
+            steps.forEach((el, i) => {
+                if (!el) return;
+                if (i === stepIndex) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            setWizardUI(stepIndex, total);
+            try { sessionStorage.setItem(WIZ_KEY, String(stepIndex)); } catch (e) {}
+            try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+        }
+
+        function getSavedStep() {
+            try {
+                const raw = sessionStorage.getItem(WIZ_KEY);
+                const n = raw ? parseInt(raw, 10) : 0;
+                return Number.isFinite(n) ? Math.max(0, Math.min(2, n)) : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function isFilled(id) {
+            const el = document.getElementById(id);
+            if (!el) return false;
+            const v = String(el.value || '').trim();
+            return v.length > 0;
+        }
+
+        function validateStep(stepIndex) {
+            if (stepIndex === 0) {
+                if (!isFilled('firstName') || !isFilled('lastName') || !isFilled('phone')) {
+                    showError('Please complete: First name, Last name, Phone');
+                    return false;
+                }
+            }
+            if (stepIndex === 1) {
+                if (!isFilled('companyName') || !isFilled('companyReg') || !isFilled('fleetSize') || !isFilled('yearsOperation')) {
+                    showError('Please complete: Company name, Registration, Fleet size, Years in operation');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 6500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveCarrierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('carriers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('carriers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
         }
 
         // Get user data
@@ -491,7 +697,11 @@
 
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
-                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const authUid = authSdk && authSdk.currentUser ? String(authSdk.currentUser.uid || '') : '';
+                const fallbackCarrierId = user.carrierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+                const carrierId = await resolveCarrierIdByUid(db, authUid, fallbackCarrierId);
                 const profileRef = db.ref(`carriers/${carrierId}`);
                 const snapshot = await profileRef.once('value');
                 const profileData = snapshot.val();
@@ -534,6 +744,26 @@
                     if (profileData.companyDescription) {
                         document.getElementById('companyDescription').value = profileData.companyDescription || '';
                     }
+                    try {
+                        const statusRaw = String(profileData.status || 'pending').toLowerCase();
+                        const statusLabel = (statusRaw === 'verified' || statusRaw === 'approved' || statusRaw === 'active') ? 'Verified' : 'Pending';
+                        const kycEl = document.getElementById('kycStatusText');
+                        if (kycEl) {
+                            kycEl.innerHTML = `<i class="fas fa-shield-halved"></i> Verification status: <strong>${statusLabel}</strong>`;
+                        }
+                    } catch (e) {}
+                    try {
+                        const docs = profileData.verificationDocs || {};
+                        if (docs.driverLicense && docs.driverLicense.url) {
+                            document.getElementById('docDriverLicenseHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.driverLicense.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                        }
+                        if (docs.vehicleRegistration && docs.vehicleRegistration.url) {
+                            document.getElementById('docVehicleRegHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.vehicleRegistration.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                        }
+                        if (docs.insurance && docs.insurance.url) {
+                            document.getElementById('docInsuranceHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.insurance.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                        }
+                    } catch (e) {}
                 }
             } catch (error) {
                 console.error('Error loading from Firebase:', error);
@@ -610,6 +840,12 @@
             // Validate form
             if (!validateForm()) {
                 showError('Please fill all required fields correctly');
+                try {
+                    const missingStep = (!document.getElementById('firstName').value.trim() || !document.getElementById('lastName').value.trim() || !document.getElementById('phone').value.trim())
+                        ? 0
+                        : 1;
+                    showStep(missingStep);
+                } catch (e) {}
                 return;
             }
 
@@ -633,12 +869,69 @@
             };
 
             // Disable button
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+            const submitBtn = document.getElementById('finishBtn') || document.getElementById('submitBtn');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+            }
 
             try {
-                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const ok = await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!ok || !authSdk || !authSdk.currentUser) {
+                    showError('Session expired. Please login again.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml || '<i class="fas fa-save"></i><span>Save Changes</span>';
+                    }
+                    return;
+                }
+                const db = window.AlphaBrokrage.firebaseDb;
+                const authUid = String(authSdk.currentUser.uid || '');
+                const fallbackCarrierId = user.carrierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+                const carrierId = await resolveCarrierIdByUid(db, authUid, fallbackCarrierId);
+
+                let existingDocs = {};
+                try {
+                    const snap = await db.ref(`carriers/${carrierId}/verificationDocs`).once('value');
+                    if (snap.exists()) existingDocs = snap.val() || {};
+                } catch (e) {}
+
+                const storage = (typeof firebase !== 'undefined' && firebase.storage) ? firebase.storage() : null;
+                const newDocs = {};
+
+                async function uploadDoc(inputId, docKey) {
+                    const input = document.getElementById(inputId);
+                    const file = input && input.files && input.files[0] ? input.files[0] : null;
+                    if (!file || !storage) return;
+                    const ts = Date.now();
+                    const safeName = String(file.name || '').replace(/[^\w.\-]+/g, '_').slice(0, 80) || (docKey + '_' + ts);
+                    const ref = storage.ref().child(`kyc/carriers/${carrierId}/${docKey}_${ts}_${safeName}`);
+                    await ref.put(file);
+                    const url = await ref.getDownloadURL();
+                    newDocs[docKey] = { url, name: file.name || null, type: file.type || null, size: file.size || null, uploadedAt: new Date().toISOString() };
+                }
+
+                try {
+                    await uploadDoc('docDriverLicense', 'driverLicense');
+                    await uploadDoc('docVehicleReg', 'vehicleRegistration');
+                    await uploadDoc('docInsurance', 'insurance');
+                } catch (e) {
+                    showError('Failed to upload document(s). Please try again.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml || '<i class="fas fa-save"></i><span>Save Changes</span>';
+                    }
+                    return;
+                }
+
+                if (Object.keys(newDocs).length) {
+                    profileData.verificationDocs = Object.assign({}, existingDocs, newDocs);
+                    profileData.kycSubmittedAt = profileData.kycSubmittedAt || new Date().toISOString();
+                    profileData.kycUpdatedAt = new Date().toISOString();
+                    profileData.kycStatus = 'submitted';
+                }
 
                 // Update localStorage
                 const updatedUser = {
@@ -650,27 +943,47 @@
                 localStorage.setItem('lastCarrierProfile', JSON.stringify(updatedUser));
 
                 // Save to Firebase
-                const db = window.AlphaBrokrage.firebaseDb;
                 await db.ref(`carriers/${carrierId}`).update(profileData);
 
                 showSuccess('Profile updated successfully!');
 
                 // Redirect after delay
                 setTimeout(() => {
-                    window.location.href = 'profile.html';
+                    window.location.href = 'dashboard.html';
                 }, 1500);
 
             } catch (error) {
                 console.error('Error saving profile:', error);
                 showError('Failed to save profile. Please try again.');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-save"></i><span>Save Changes</span>';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml || '<i class="fas fa-save"></i><span>Save Changes</span>';
+                }
             }
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadProfileData();
+            setTimeout(() => {
+                const n1 = (!isFilled('firstName') || !isFilled('lastName') || !isFilled('phone')) ? 0
+                    : (!isFilled('companyName') || !isFilled('companyReg') || !isFilled('fleetSize') || !isFilled('yearsOperation')) ? 1
+                    : 2;
+                const start = Math.max(n1, getSavedStep());
+                showStep(start);
+
+                const next1 = document.getElementById('next1');
+                const next2 = document.getElementById('next2');
+                const back2 = document.getElementById('back2');
+                const back3 = document.getElementById('back3');
+                const finish = document.getElementById('finishBtn');
+
+                if (next1) next1.onclick = () => { if (validateStep(0)) showStep(1); };
+                if (next2) next2.onclick = () => { if (validateStep(1)) showStep(2); };
+                if (back2) back2.onclick = () => showStep(0);
+                if (back3) back3.onclick = () => showStep(1);
+                if (finish) finish.onclick = () => saveProfile();
+            }, 350);
         });
     </script>
 </body>

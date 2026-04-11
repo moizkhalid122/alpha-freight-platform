@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Quotes Inbox - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+            --page-pad: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .title{
+            font-size: 1.2rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .sub{
+            margin-top: 6px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .icon-btn{
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            display:grid;
+            place-items:center;
+            color: rgba(15,23,42,0.86);
+            box-shadow: 0 12px 28px rgba(15,23,42,0.10);
+            cursor:pointer;
+            flex-shrink:0;
+        }
+        .icon-btn:active { transform: scale(0.98); }
+
+        .stats{
+            margin-top: 12px;
+            display:grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .stat{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 18px;
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            padding: 12px 10px;
+            overflow:hidden;
+            position: relative;
+        }
+        .stat::before{
+            content:"";
+            position:absolute;
+            top:0; left:0; right:0;
+            height:2px;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.55;
+        }
+        .stat-k{ font-size: 0.68rem; font-weight: 900; color: rgba(71,85,105,0.90); text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat-v{ margin-top: 4px; font-size: 1.05rem; font-weight: 950; letter-spacing: -0.03em; }
+
+        .content{ padding: 0 var(--page-pad) 18px; }
+
+        .filter-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 8px;
+            overflow-x:auto;
+            padding-bottom: 2px;
+        }
+        .filter-btn{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 950;
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            white-space: nowrap;
+        }
+        .filter-btn.active{
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            border-color: rgba(99,91,255,0.65);
+            color: #fff;
+            box-shadow: 0 16px 34px rgba(99,91,255,0.22);
+        }
+        .filter-btn:active{ transform: scale(0.98); }
+
+        .list{ margin-top: 12px; }
+        .card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 14px 14px 12px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow:hidden;
+        }
+        .card::before{
+            content:"";
+            position:absolute;
+            left:0;
+            top: 14px;
+            bottom: 14px;
+            width: 4px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.78));
+            border-radius: 0 3px 3px 0;
+            opacity: 0.9;
+        }
+        .card-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            padding-left: 8px;
+        }
+        .route{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 0.96rem;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .meta{
+            margin-top: 4px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 800;
+            font-size: 0.82rem;
+        }
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-weight: 950;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(15, 23, 42, 0.04);
+            color: rgba(15, 23, 42, 0.86);
+            flex-shrink:0;
+        }
+        .pill.success{ background: rgba(5,150,105,0.10); border-color: rgba(5,150,105,0.18); color: var(--success); }
+        .pill.warning{ background: rgba(217,119,6,0.10); border-color: rgba(217,119,6,0.18); color: var(--warning); }
+        .pill.danger{ background: rgba(220,38,38,0.10); border-color: rgba(220,38,38,0.18); color: var(--error); }
+
+        .msg{
+            margin-top: 10px;
+            padding-left: 8px;
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: rgba(71,85,105,0.92);
+            white-space: pre-line;
+        }
+        .row2{
+            margin-top: 10px;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-left: 8px;
+            flex-wrap: wrap;
+        }
+        .amt{ font-weight: 950; letter-spacing: -0.02em; font-size: 1.02rem; }
+        .mini-actions{
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-weight: 950;
+            font-size: 0.82rem;
+            cursor:pointer;
+            text-decoration:none;
+        }
+        .btn-mini.primary{
+            background: rgba(99,91,255,0.12);
+            border-color: rgba(99,91,255,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-mini.success{
+            background: rgba(5,150,105,0.10);
+            border-color: rgba(5,150,105,0.18);
+            color: rgba(5,150,105,0.98);
+        }
+        .btn-mini.danger{
+            background: rgba(220,38,38,0.10);
+            border-color: rgba(220,38,38,0.18);
+            color: rgba(220,38,38,0.95);
+        }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .empty{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 20px 14px;
+            text-align:center;
+            color: rgba(71,85,105,0.92);
+        }
+        .empty i{ font-size: 2rem; color: rgba(71,85,105,0.65); margin-bottom: 10px; }
+        .empty h3{ margin: 0 0 4px; font-size: 1rem; font-weight: 950; color: rgba(15,23,42,0.90); }
+        .empty p{ margin: 0; font-weight: 800; font-size: 0.86rem; }
+
+        .modal-overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.62);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+        .modal-overlay.show{ display:flex; }
+        .modal-sheet{
+            width: 100%;
+            max-width: 520px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.12);
+            border-radius: 26px;
+            box-shadow: 0 24px 72px rgba(15, 23, 42, 0.30);
+            overflow: hidden;
+            transform: translateY(18px);
+            opacity: 0;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+        }
+        .modal-overlay.show .modal-sheet{ transform: translateY(0); opacity: 1; }
+        .modal-head{
+            padding: 16px 16px 10px;
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+        }
+        .modal-title{ font-weight: 1000; letter-spacing: -0.03em; font-size: 1.05rem; }
+        .modal-sub{ margin-top: 4px; font-size: 0.88rem; font-weight: 800; color: rgba(71,85,105,0.92); }
+        .modal-close{
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            display:grid;
+            place-items:center;
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+        }
+        .modal-close:active{ transform: scale(0.98); }
+        .modal-body{ padding: 0 16px 14px; }
+        .confirm-list{ display:grid; gap: 8px; }
+        .confirm-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap: 10px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(241,245,249,0.75);
+            border-radius: 18px;
+            padding: 12px 12px;
+        }
+        .confirm-item .k{ font-size: 0.70rem; font-weight: 950; color: rgba(71,85,105,0.92); text-transform: uppercase; letter-spacing: 0.06em; }
+        .confirm-item .v{ font-size: 0.98rem; font-weight: 1000; letter-spacing: -0.02em; color: rgba(15,23,42,0.92); text-align:right; }
+        .confirm-note{
+            margin-top: 10px;
+            padding: 12px 12px;
+            border-radius: 18px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            color: rgba(71,85,105,0.95);
+            font-weight: 850;
+            font-size: 0.88rem;
+            white-space: pre-line;
+        }
+        .modal-actions{
+            padding: 12px 16px 16px;
+            display:flex;
+            gap: 10px;
+            border-top: 1px solid rgba(15,23,42,0.10);
+            background: rgba(241,245,249,0.65);
+        }
+        .btn-sheet{
+            flex: 1;
+            border-radius: 16px;
+            padding: 12px 12px;
+            font-weight: 1000;
+            border: none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+            cursor:pointer;
+        }
+        .btn-sheet.cancel{ background: rgba(255,255,255,0.96); color: rgba(15,23,42,0.92); border: 2px solid rgba(15,23,42,0.12); }
+        .btn-sheet.accept{ background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92)); color: #fff; box-shadow: 0 14px 34px rgba(99,91,255,0.22); }
+        .btn-sheet.danger{ background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 12px 28px rgba(220,38,38,0.22); }
+        .btn-sheet:active{ transform: scale(0.99); }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="title">Quotes / Bids Inbox</h1>
+                    <div class="sub">Incoming offers from carriers for your loads</div>
+                </div>
+                <button type="button" class="icon-btn" id="refreshBtn" aria-label="Refresh">
+                    <i class="fas fa-rotate-right"></i>
+                </button>
+            </div>
+            <div class="stats" aria-label="Stats">
+                <div class="stat">
+                    <div class="stat-k">New</div>
+                    <div class="stat-v" id="statNew">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-k">Accepted</div>
+                    <div class="stat-v" id="statAccepted">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-k">Avg</div>
+                    <div class="stat-v" id="statAvg">£0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="filter-row" role="tablist" aria-label="Offer filters">
+            <button type="button" class="filter-btn active" data-filter="all">All</button>
+            <button type="button" class="filter-btn" data-filter="new">New</button>
+            <button type="button" class="filter-btn" data-filter="accepted">Accepted</button>
+            <button type="button" class="filter-btn" data-filter="rejected">Rejected</button>
+        </div>
+
+        <div class="list" id="offerList">
+            <div class="empty">
+                <i class="fas fa-inbox"></i>
+                <h3>Loading…</h3>
+                <p>Please wait</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModalOverlay" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="confirmModalTitle">Confirm</div>
+                    <div class="modal-sub" id="confirmModalSub">Please review</div>
+                </div>
+                <button class="modal-close" type="button" id="confirmModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-list" id="confirmModalList"></div>
+                <div class="confirm-note" id="confirmModalNote" style="display:none;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="confirmModalCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet accept" type="button" id="confirmModalOk"><i class="fas fa-check"></i> Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+        function showSuccess(msg) { alertSystem.show('success', msg); }
+
+        function confirmModal(opts) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmModalOverlay');
+                const titleEl = document.getElementById('confirmModalTitle');
+                const subEl = document.getElementById('confirmModalSub');
+                const listEl = document.getElementById('confirmModalList');
+                const noteEl = document.getElementById('confirmModalNote');
+                const closeBtn = document.getElementById('confirmModalClose');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+                const okBtn = document.getElementById('confirmModalOk');
+                if (!overlay || !titleEl || !listEl || !cancelBtn || !okBtn) { resolve(false); return; }
+
+                const o = opts || {};
+                const items = Array.isArray(o.items) ? o.items : [];
+                titleEl.textContent = String(o.title || 'Confirm');
+                if (subEl) subEl.textContent = String(o.subtitle || 'Please review');
+                listEl.innerHTML = items.map(it => {
+                    const k = escapeHtml(it && it.k ? it.k : '');
+                    const v = escapeHtml(it && it.v !== undefined ? it.v : '');
+                    return `<div class="confirm-item"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+                }).join('');
+
+                const note = String(o.note || '').trim();
+                if (noteEl) {
+                    if (note) {
+                        noteEl.style.display = '';
+                        noteEl.textContent = note;
+                    } else {
+                        noteEl.style.display = 'none';
+                        noteEl.textContent = '';
+                    }
+                }
+
+                okBtn.classList.remove('accept', 'danger');
+                okBtn.classList.add(o.variant === 'danger' ? 'danger' : 'accept');
+                okBtn.innerHTML = `<i class="fas ${o.variant === 'danger' ? 'fa-triangle-exclamation' : 'fa-check'}"></i> ${escapeHtml(o.confirmText || 'Confirm')}`;
+                cancelBtn.innerHTML = `<i class="fas fa-arrow-left"></i> ${escapeHtml(o.cancelText || 'Cancel')}`;
+
+                function close(val) {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    overlay.onclick = null;
+                    cancelBtn.onclick = null;
+                    okBtn.onclick = null;
+                    if (closeBtn) closeBtn.onclick = null;
+                    document.removeEventListener('keydown', onKey);
+                    resolve(val);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') close(false);
+                }
+                document.addEventListener('keydown', onKey);
+
+                overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+                cancelBtn.onclick = () => close(false);
+                okBtn.onclick = () => close(true);
+                if (closeBtn) closeBtn.onclick = () => close(false);
+
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            });
+        }
+
+        let allOffers = [];
+        let currentFilter = 'all';
+        let loadsById = {};
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth');
+            return auth ? JSON.parse(auth) : null;
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveSupplierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('suppliers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
+        }
+
+        function escapeHtml(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatCurrency(val) {
+            const n = Number(val || 0);
+            const safe = Number.isFinite(n) ? n : 0;
+            return '£' + safe.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatWhen(tsOrIso) {
+            if (!tsOrIso) return '-';
+            const d = typeof tsOrIso === 'number' ? new Date(tsOrIso) : new Date(String(tsOrIso));
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+
+        function getLoadRoute(load) {
+            const pickup = load?.pickupLocation || load?.pickup_location || 'N/A';
+            const delivery = load?.deliveryLocation || load?.delivery_location || 'N/A';
+            return pickup + ' → ' + delivery;
+        }
+
+        function getOfferStatus(offer) {
+            const s = String(offer.status || '').toLowerCase();
+            if (s === 'accepted') return 'accepted';
+            if (s === 'rejected') return 'rejected';
+            if (offer.seen) return 'seen';
+            return 'new';
+        }
+
+        async function loadOffers() {
+            const user = getUserData();
+            const list = document.getElementById('offerList');
+            list.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><h3>Loading…</h3><p>Please wait</p></div>';
+
+            if (!user) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3><p>Login to view bids</p></div>';
+                return;
+            }
+
+            const db = window.AlphaBrokrage.firebaseDb;
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!db || !ok || !authSdk || !authSdk.currentUser) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-wifi"></i><h3>Not connected</h3><p>Please login again</p></div>';
+                return;
+            }
+
+            const authUid = String(authSdk.currentUser.uid || '');
+            const authEmail = String(authSdk.currentUser.email || user.email || '');
+            const fallbackSupplierId = user.supplierId || user.id || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const supplierId = await resolveSupplierIdByUid(db, authUid, fallbackSupplierId);
+
+            const map = {};
+            async function mergeQuery(q) {
+                const snap = await q.once('value');
+                if (!snap.exists()) return;
+                snap.forEach((ch) => { map[ch.key] = ch.val() || {}; });
+            }
+
+            const jobs = [mergeQuery(db.ref('loads').orderByChild('supplierFirebaseUid').equalTo(authUid))];
+            if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierEmail').equalTo(authEmail)));
+            if (supplierId) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierId').equalTo(supplierId)));
+            await Promise.allSettled(jobs);
+
+            const loads = Object.entries(map).map(([loadId, load]) => ({ loadId, load: load || {} }));
+            loads.sort((a, b) => new Date(b.load?.createdAt || 0) - new Date(a.load?.createdAt || 0));
+            const recentLoads = loads.slice(0, 40);
+            loadsById = {};
+            recentLoads.forEach(x => { loadsById[x.loadId] = x.load; });
+
+            const offerRows = [];
+            const offerFetches = [];
+
+            recentLoads.forEach(({ loadId }) => {
+                const bidsRef = db.ref('bids/' + loadId);
+                const quotesRef = db.ref('quotes/' + loadId);
+                offerFetches.push(
+                    bidsRef.once('value').then((snap) => ({ type: 'bid', loadId, snap })).catch(() => ({ type: 'bid', loadId, snap: null })),
+                    quotesRef.once('value').then((snap) => ({ type: 'quote', loadId, snap })).catch(() => ({ type: 'quote', loadId, snap: null }))
+                );
+            });
+
+            const results = await Promise.allSettled(offerFetches);
+            results.forEach((r) => {
+                if (r.status !== 'fulfilled') return;
+                const { type, loadId, snap } = r.value || {};
+                if (!snap || !snap.exists || !snap.exists()) return;
+                snap.forEach((ch) => {
+                    const v = ch.val() || {};
+                    offerRows.push({
+                        id: ch.key,
+                        type,
+                        loadId,
+                        carrierId: v.carrierId || v.carrier_id || '',
+                        carrierName: v.carrierName || v.carrier_name || 'Carrier',
+                        carrierFirebaseUid: v.carrierFirebaseUid || v.carrierUid || '',
+                        carrierEmail: v.carrierEmail || v.email || '',
+                        amount: v.amount || v.price || v.bidAmount || v.quoteAmount || 0,
+                        message: v.message || v.note || v.notes || '',
+                        status: v.status || '',
+                        seen: !!v.seen,
+                        createdAt: v.createdAt || v.timestamp || v.time || 0
+                    });
+                });
+            });
+
+            offerRows.sort((a, b) => {
+                const da = typeof a.createdAt === 'number' ? a.createdAt : new Date(a.createdAt || 0).getTime();
+                const db2 = typeof b.createdAt === 'number' ? b.createdAt : new Date(b.createdAt || 0).getTime();
+                return db2 - da;
+            });
+
+            allOffers = offerRows;
+            updateStats();
+            render();
+
+            const mark = allOffers.filter(o => o.type === 'bid' && !o.seen && getOfferStatus(o) === 'new').slice(0, 40);
+            const updates = {};
+            mark.forEach(o => {
+                const base = (o.type === 'bid' ? 'bids' : 'quotes') + '/' + o.loadId + '/' + o.id;
+                updates[base + '/seen'] = true;
+                updates[base + '/seenAt'] = new Date().toISOString();
+                updates[base + '/status'] = 'seen';
+                const carrierKey = String(o.carrierId || o.id || '');
+                if (carrierKey) {
+                    updates['carrierBids/' + carrierKey + '/' + o.loadId + '/seen'] = true;
+                    updates['carrierBids/' + carrierKey + '/' + o.loadId + '/status'] = 'seen';
+                    updates['carrierBids/' + carrierKey + '/' + o.loadId + '/updatedAt'] = new Date().toISOString();
+                }
+            });
+            if (Object.keys(updates).length) {
+                try { await db.ref().update(updates); } catch (e) {}
+            }
+        }
+
+        function updateStats() {
+            const newCount = allOffers.filter(o => getOfferStatus(o) === 'new').length;
+            const acceptedCount = allOffers.filter(o => getOfferStatus(o) === 'accepted').length;
+            const priced = allOffers.map(o => Number(o.amount || 0)).filter(n => Number.isFinite(n) && n > 0);
+            const avg = priced.length ? (priced.reduce((s, x) => s + x, 0) / priced.length) : 0;
+
+            document.getElementById('statNew').textContent = String(newCount);
+            document.getElementById('statAccepted').textContent = String(acceptedCount);
+            document.getElementById('statAvg').textContent = formatCurrency(avg);
+        }
+
+        function render() {
+            const list = document.getElementById('offerList');
+            let items = allOffers;
+            if (currentFilter !== 'all') {
+                items = allOffers.filter(o => getOfferStatus(o) === currentFilter);
+            }
+
+            if (!items.length) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><h3>No offers</h3><p>Carrier bids and quotes will appear here</p></div>';
+                return;
+            }
+
+            list.innerHTML = items.slice(0, 80).map(o => {
+                const load = loadsById[o.loadId] || {};
+                const route = getLoadRoute(load);
+                const when = formatWhen(o.createdAt);
+                const st = getOfferStatus(o);
+                const pillClass = st === 'accepted' ? 'success' : (st === 'rejected' ? 'danger' : 'warning');
+                const pillText = st === 'accepted' ? 'Accepted' : (st === 'rejected' ? 'Rejected' : (st === 'new' ? 'New' : 'Seen'));
+                const amount = formatCurrency(o.amount);
+                const msg = String(o.message || '').trim();
+                const msgBlock = msg ? `<div class="msg">${escapeHtml(msg)}</div>` : '';
+                const detailsHref = `load-details.html?loadId=${encodeURIComponent(o.loadId)}`;
+                return `
+                    <div class="card">
+                        <div class="card-head">
+                            <div style="min-width:0;">
+                                <p class="route">${escapeHtml(route)}</p>
+                                <div class="meta">${escapeHtml(o.carrierName)} • ${escapeHtml(when)} • ${escapeHtml(o.type.toUpperCase())}</div>
+                            </div>
+                            <span class="pill ${pillClass}"><i class="fas fa-circle"></i>${pillText}</span>
+                        </div>
+                        ${msgBlock}
+                        <div class="row2">
+                            <div class="amt">${escapeHtml(amount)}</div>
+                            <div class="mini-actions">
+                                <button type="button" class="btn-mini success" data-act="accept" data-load="${escapeHtml(o.loadId)}" data-type="${escapeHtml(o.type)}" data-id="${escapeHtml(o.id)}"><i class="fas fa-check"></i> Accept</button>
+                                <button type="button" class="btn-mini danger" data-act="reject" data-load="${escapeHtml(o.loadId)}" data-type="${escapeHtml(o.type)}" data-id="${escapeHtml(o.id)}"><i class="fas fa-xmark"></i> Reject</button>
+                                <button type="button" class="btn-mini primary" data-act="message" data-load="${escapeHtml(o.loadId)}" data-carrier="${escapeHtml(o.carrierId)}" data-carrier-name="${escapeHtml(o.carrierName)}"><i class="fas fa-comments"></i> Message</button>
+                                <a class="btn-mini" href="${escapeHtml(detailsHref)}"><i class="fas fa-eye"></i> Load</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('button[data-act]').forEach(btn => {
+                const act = btn.dataset.act || '';
+                btn.addEventListener('click', async () => {
+                    if (act === 'message') {
+                        const carrierId = btn.dataset.carrier || '';
+                        const carrierName = btn.dataset.carrierName || 'Carrier';
+                            const loadId = btn.dataset.load || '';
+                        if (!carrierId) {
+                            showError('Carrier not found');
+                            return;
+                        }
+                            localStorage.setItem('ab.messages.openCarrier', JSON.stringify({ carrierId, carrierName, loadId }));
+                        window.location.href = 'messages.html';
+                        return;
+                    }
+
+                    const loadId = btn.dataset.load || '';
+                    const type = btn.dataset.type || '';
+                    const offerId = btn.dataset.id || '';
+                    if (!loadId || !type || !offerId) return;
+
+                    if (act === 'accept') await acceptOffer(loadId, type, offerId).catch(() => showError('Failed to accept'));
+                    if (act === 'reject') await rejectOffer(loadId, type, offerId).catch(() => showError('Failed to reject'));
+                });
+            });
+        }
+
+        async function acceptOffer(loadId, type, offerId) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) throw new Error('no-db');
+            const offer = allOffers.find(o => o.loadId === loadId && o.type === type && o.id === offerId);
+            if (!offer) throw new Error('no-offer');
+
+            const load = loadsById[loadId] || {};
+            if (type === 'bid') {
+                const prevRaw = load.agreedPrice ?? load.price ?? load.budget ?? load.maxBudget ?? load.minBudget ?? 0;
+                const prev = Number(prevRaw || 0) || 0;
+                const next = Number(offer.amount || 0) || 0;
+                const delta = Math.round((next - prev) * 100) / 100;
+                const ok = await confirmModal({
+                    title: 'Confirm Accept Bid',
+                    subtitle: 'This will accept the load and notify the carrier',
+                    items: [
+                        { k: 'Route', v: getLoadRoute(load) },
+                        { k: 'Old Price', v: formatCurrency(prev) },
+                        { k: 'Accepted Price', v: `${formatCurrency(next)}${Number.isFinite(delta) && delta !== 0 ? ` (${delta > 0 ? '+' : ''}${formatCurrency(delta)})` : ''}` }
+                    ],
+                    note: 'After accept: carrier payout updates and load becomes assigned.',
+                    confirmText: 'Accept',
+                    cancelText: 'Cancel'
+                });
+                if (!ok) return;
+            }
+
+            const base = (type === 'bid' ? 'bids' : 'quotes') + '/' + loadId + '/' + offerId;
+            const updates = {};
+            updates[base + '/status'] = 'accepted';
+            updates[base + '/respondedAt'] = new Date().toISOString();
+            updates['loads/' + loadId + '/status'] = 'accepted';
+            if (offer.carrierId) updates['loads/' + loadId + '/carrierId'] = offer.carrierId;
+            if (offer.carrierName) updates['loads/' + loadId + '/carrierName'] = offer.carrierName;
+            if (offer.carrierFirebaseUid) updates['loads/' + loadId + '/carrierFirebaseUid'] = offer.carrierFirebaseUid;
+            if (offer.carrierEmail) updates['loads/' + loadId + '/carrierEmail'] = offer.carrierEmail;
+            updates['loads/' + loadId + '/acceptedAt'] = new Date().toISOString();
+            updates['loads/' + loadId + '/acceptedOffer'] = { type, offerId, amount: offer.amount || 0 };
+            if (type === 'bid') {
+                updates['loads/' + loadId + '/agreedPrice'] = Number(offer.amount || 0) || 0;
+                updates['loads/' + loadId + '/agreedAt'] = new Date().toISOString();
+                updates['loads/' + loadId + '/agreedFrom'] = 'bid';
+                const carrierKey = String(offer.carrierId || offerId || '');
+                if (carrierKey) {
+                    updates['carrierBids/' + carrierKey + '/' + loadId + '/status'] = 'accepted';
+                    updates['carrierBids/' + carrierKey + '/' + loadId + '/seen'] = true;
+                    updates['carrierBids/' + carrierKey + '/' + loadId + '/updatedAt'] = new Date().toISOString();
+                }
+            }
+
+            try {
+                await db.ref().update(updates);
+            } catch (e) {
+                const msg = String((e && e.message) ? e.message : e || '');
+                console.error('Accept failed:', e);
+                showError(msg || 'Failed to accept');
+                throw e;
+            }
+
+            try {
+                if (type === 'bid') {
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    const senderUid = authSdk && authSdk.currentUser && authSdk.currentUser.uid ? String(authSdk.currentUser.uid) : '';
+                    const carrierId = String(offer.carrierId || offerId || '');
+                    if (senderUid && carrierId) {
+                        const route = getLoadRoute(load);
+                        await db.ref('notificationQueue').push({
+                            senderUid,
+                            toUserId: carrierId,
+                            toUserType: 'carrier',
+                            title: 'Bid Accepted',
+                            message: `Your bid ${formatCurrency(offer.amount || 0)} was accepted • ${route}`,
+                            type: 'bid_accepted',
+                            data: {
+                                type: 'bid_accepted',
+                                loadId: String(loadId),
+                                url: '/mobile-app/carrier/my-bids.html',
+                                icon: '/image-removebg-preview - 2026-03-04T141043.516.png'
+                            },
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            showSuccess('Offer accepted');
+            await loadOffers();
+        }
+
+        async function rejectOffer(loadId, type, offerId) {
+            const db = window.AlphaBrokrage.firebaseDb;
+            if (!db) throw new Error('no-db');
+            const base = (type === 'bid' ? 'bids' : 'quotes') + '/' + loadId + '/' + offerId;
+            const offer = allOffers.find(o => o.loadId === loadId && o.type === type && o.id === offerId);
+            if (type === 'bid') {
+                const load = loadsById[loadId] || {};
+                const ok = await confirmModal({
+                    title: 'Confirm Reject Bid',
+                    subtitle: 'This will mark the bid rejected',
+                    items: [
+                        { k: 'Route', v: getLoadRoute(load) },
+                        { k: 'Carrier', v: String((offer && offer.carrierName) || 'Carrier') },
+                        { k: 'Bid', v: formatCurrency((offer && offer.amount) || 0) }
+                    ],
+                    note: 'After reject: load will not be assigned to this carrier.',
+                    confirmText: 'Reject',
+                    cancelText: 'Cancel',
+                    variant: 'danger'
+                });
+                if (!ok) return;
+            }
+            const updates = {};
+            updates[base + '/status'] = 'rejected';
+            updates[base + '/respondedAt'] = new Date().toISOString();
+            if (type === 'bid') {
+                const carrierKey = String((offer && offer.carrierId) || offerId || '');
+                if (carrierKey) {
+                    updates['carrierBids/' + carrierKey + '/' + loadId + '/status'] = 'rejected';
+                    updates['carrierBids/' + carrierKey + '/' + loadId + '/seen'] = true;
+                    updates['carrierBids/' + carrierKey + '/' + loadId + '/updatedAt'] = new Date().toISOString();
+                }
+            }
+            try {
+                await db.ref().update(updates);
+            } catch (e) {
+                const msg = String((e && e.message) ? e.message : e || '');
+                console.error('Reject failed:', e);
+                showError(msg || 'Failed to reject');
+                throw e;
+            }
+
+            try {
+                if (type === 'bid') {
+                    const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                    const senderUid = authSdk && authSdk.currentUser && authSdk.currentUser.uid ? String(authSdk.currentUser.uid) : '';
+                    const carrierId = String(((offer && offer.carrierId) ? offer.carrierId : '') || offerId || '');
+                    const load = loadsById[loadId] || {};
+                    if (senderUid && carrierId) {
+                        const route = getLoadRoute(load);
+                        await db.ref('notificationQueue').push({
+                            senderUid,
+                            toUserId: carrierId,
+                            toUserType: 'carrier',
+                            title: 'Bid Rejected',
+                            message: `Your bid was rejected • ${route}`,
+                            type: 'bid_rejected',
+                            data: {
+                                type: 'bid_rejected',
+                                loadId: String(loadId),
+                                url: '/mobile-app/carrier/my-bids.html',
+                                icon: '/image-removebg-preview - 2026-03-04T141043.516.png'
+                            },
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            showSuccess('Offer rejected');
+            await loadOffers();
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter || 'all';
+                render();
+            });
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => loadOffers().catch(() => showError('Could not refresh')));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOffers().catch(() => showError('Failed to load offers'));
+        });
+    </script>
+</body>
+</html>

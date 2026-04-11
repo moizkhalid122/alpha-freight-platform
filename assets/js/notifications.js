@@ -169,21 +169,25 @@ async function initFCM() {
 function getCurrentUser() {
     const carrierAuth = JSON.parse(localStorage.getItem('carrierAuth') || '{}');
     const supplierAuth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
+    const lastCarrier = JSON.parse(localStorage.getItem('lastCarrierProfile') || '{}');
+    const lastSupplier = JSON.parse(localStorage.getItem('lastSupplierProfile') || '{}');
     const path = (window.location.pathname || '').toLowerCase();
 
     // Current page se decide karo - supplier page pe supplier, carrier page pe carrier
-    if (path.includes('/supplier/') && supplierAuth.supplierId) {
-        return { type: 'supplier', id: supplierAuth.supplierId, auth: supplierAuth };
+    const supId = supplierAuth.supplierId || supplierAuth.id || lastSupplier.supplierId || lastSupplier.id;
+    const carId = carrierAuth.carrierId || carrierAuth.id || lastCarrier.carrierId || lastCarrier.id;
+    if (path.includes('/supplier/') && supId) {
+        return { type: 'supplier', id: supId, auth: supplierAuth.supplierId ? supplierAuth : lastSupplier };
     }
-    if (path.includes('/carrier/') && carrierAuth.carrierId) {
-        return { type: 'carrier', id: carrierAuth.carrierId, auth: carrierAuth };
+    if (path.includes('/carrier/') && carId) {
+        return { type: 'carrier', id: carId, auth: carrierAuth.carrierId ? carrierAuth : lastCarrier };
     }
     // Fallback: pehle supplier, phir carrier
-    if (supplierAuth.supplierId) {
-        return { type: 'supplier', id: supplierAuth.supplierId, auth: supplierAuth };
+    if (supId) {
+        return { type: 'supplier', id: supId, auth: supplierAuth.supplierId ? supplierAuth : lastSupplier };
     }
-    if (carrierAuth.carrierId) {
-        return { type: 'carrier', id: carrierAuth.carrierId, auth: carrierAuth };
+    if (carId) {
+        return { type: 'carrier', id: carId, auth: carrierAuth.carrierId ? carrierAuth : lastCarrier };
     }
     return null;
 }
@@ -218,6 +222,9 @@ async function saveFCMToken(token) {
                         });
                     });
                 }
+                if (!auth.currentUser && typeof auth.signInAnonymously === 'function') {
+                    try { await auth.signInAnonymously(); } catch (e) {}
+                }
             }
         } catch (e) {}
 
@@ -237,7 +244,33 @@ async function saveFCMToken(token) {
                 updatedAt: new Date().toISOString(),
                 userType: user.type
             });
+            try { localStorage.setItem('lastFcmToken', token); } catch (e) {}
         } catch (e) {
+            try {
+                if (typeof firebase !== 'undefined' && typeof firebase.auth === 'function') {
+                    const auth = firebase.auth();
+                    const uid = auth && auth.currentUser && auth.currentUser.uid ? String(auth.currentUser.uid) : '';
+                    if (uid) {
+                        const profRef = user.type === 'carrier' ? 'carriers' : 'suppliers';
+                        const snap = await db.ref(profRef).orderByChild('firebaseUid').equalTo(uid).limitToFirst(1).once('value');
+                        if (snap.exists()) {
+                            let key = '';
+                            snap.forEach((ch) => { if (!key) key = ch.key; });
+                            if (key) {
+                                const fixedRef = user.type === 'carrier' ? `carriers/${key}/fcmToken` : `suppliers/${key}/fcmToken`;
+                                await db.ref(fixedRef).set({
+                                    token: token,
+                                    updatedAt: new Date().toISOString(),
+                                    userType: user.type
+                                });
+                                try { localStorage.setItem('lastFcmToken', token); } catch (e) {}
+                                console.log(`FCM token saved for ${user.type} (resolved id)`);
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch (e3) {}
             try {
                 localStorage.setItem('pendingFcmToken', JSON.stringify({ token, userType: user.type, userId: user.id, at: Date.now() }));
             } catch (e2) {}
@@ -399,7 +432,28 @@ async function createNotification(type, title, message, data = {}, targetUserId 
                 // Don't throw error - just use local storage fallback
             });
 
-            // Additionally write to role-based path to trigger Cloud Functions push
+            try {
+                let senderUid = '';
+                try {
+                    if (typeof firebase !== 'undefined' && typeof firebase.auth === 'function') {
+                        const auth = firebase.auth();
+                        senderUid = auth && auth.currentUser && auth.currentUser.uid ? String(auth.currentUser.uid) : '';
+                    }
+                } catch (e0) {}
+                if (senderUid) {
+                    await db.ref('notificationQueue').push({
+                        senderUid,
+                        toUserId: userId,
+                        toUserType: userType,
+                        title,
+                        message,
+                        type,
+                        data,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            } catch (e1) {}
+
             try {
                 if (userType === 'supplier') {
                     await db.ref(`notifications/suppliers/${userId}`).push({
@@ -455,18 +509,16 @@ async function getUnreadCount() {
             return localNotifications.filter(n => !n.read && n.user_id === user.id && n.user_type === user.type).length;
         }
         
-        // Try to read notifications - handle permission errors gracefully
+        const listRef = user.type === 'carrier'
+            ? `notifications/carriers/${user.id}`
+            : `notifications/suppliers/${user.id}`;
+
         let snapshot;
         try {
-            snapshot = await db.ref('notifications')
-                .orderByChild('user_id')
-                .equalTo(user.id)
-                .once('value');
+            snapshot = await db.ref(listRef).limitToLast(250).once('value');
         } catch (error) {
-            // If permission denied, try alternative approach
             if (error.code === 'PERMISSION_DENIED' || error.message?.includes('permission')) {
-                console.warn('Permission denied for notifications - using local storage fallback');
-                // Fallback: use local storage to track notifications
+                console.warn('Permission denied for notifications list - using local storage fallback');
                 const localNotifications = JSON.parse(localStorage.getItem('localNotifications') || '[]');
                 return localNotifications.filter(n => !n.read && n.user_id === user.id).length;
             }
@@ -476,10 +528,8 @@ async function getUnreadCount() {
         let count = 0;
         if (snapshot.exists()) {
             snapshot.forEach((child) => {
-                const notification = child.val();
-                if (notification && !notification.read && notification.user_type === user.type) {
-                    count++;
-                }
+                const n = child.val() || {};
+                if (!n.read) count++;
             });
         }
 
@@ -516,6 +566,8 @@ async function updateNotificationBadge() {
 // Mark notification as read
 async function markAsRead(notificationId) {
     try {
+        const user = getCurrentUser();
+        if (!user || !notificationId) return;
         // Check if Firebase is initialized and get database
         let db;
         try {
@@ -533,7 +585,10 @@ async function markAsRead(notificationId) {
             updateNotificationBadge();
             return;
         }
-        await db.ref(`notifications/${notificationId}/read`).set(true);
+        const listRef = user.type === 'carrier'
+            ? `notifications/carriers/${user.id}/${notificationId}/read`
+            : `notifications/suppliers/${user.id}/${notificationId}/read`;
+        await db.ref(listRef).set(true);
         updateNotificationBadge();
     } catch (error) {
         console.error('Error marking as read:', error);
@@ -565,22 +620,16 @@ async function markAllAsRead() {
             updateNotificationBadge();
             return;
         }
-        const snapshot = await db.ref('notifications')
-            .orderByChild('user_id')
-            .equalTo(user.id)
-            .once('value');
-
+        const listRef = user.type === 'carrier'
+            ? `notifications/carriers/${user.id}`
+            : `notifications/suppliers/${user.id}`;
+        const snapshot = await db.ref(listRef).limitToLast(400).once('value');
         const updates = {};
         snapshot.forEach((child) => {
-            const notification = child.val();
-            if (!notification.read && notification.user_type === user.type) {
-                updates[`notifications/${child.key}/read`] = true;
-            }
+            const n = child.val() || {};
+            if (!n.read) updates[`${listRef}/${child.key}/read`] = true;
         });
-
-        if (Object.keys(updates).length > 0) {
-            await db.ref().update(updates);
-        }
+        if (Object.keys(updates).length > 0) await db.ref().update(updates);
 
         // Also mark local notifications as read
         const localNotifications = JSON.parse(localStorage.getItem('localNotifications') || '[]');
@@ -852,6 +901,7 @@ function setupRealtimeNotifications() {
 // Export for use in other scripts
 window.NotificationManager = {
     init: initFCM,
+    enablePush: initFCM,
     create: createNotification,
     getUnreadCount: getUnreadCount,
     updateBadge: updateNotificationBadge,

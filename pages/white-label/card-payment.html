@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment - White Label</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root{
+            --text: rgba(15,23,42,0.92);
+            --muted: rgba(15,23,42,0.72);
+            --muted2: rgba(15,23,42,0.56);
+            --glass: rgba(255,255,255,0.72);
+            --glass2: rgba(255,255,255,0.82);
+            --border: rgba(255,255,255,0.86);
+            --shadow: 0 34px 110px rgba(2,6,23,0.16);
+            --shadow2: 0 22px 60px rgba(2,6,23,0.14);
+            --success: rgba(16,185,129,1);
+        }
+        *{ margin:0; padding:0; box-sizing:border-box; }
+        html, body { height: 100%; }
+        body{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background:
+                radial-gradient(circle at 16% 14%, rgba(37,99,235,0.12) 0%, rgba(37,99,235,0) 44%),
+                radial-gradient(circle at 86% 34%, rgba(139,92,246,0.10) 0%, rgba(139,92,246,0) 48%),
+                radial-gradient(circle at 46% 92%, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0) 50%),
+                linear-gradient(180deg, #f7fbff 0%, #eff7ff 34%, #f8fbff 100%);
+            color: var(--text);
+            padding: 56px 18px;
+            overflow-x: hidden;
+        }
+        .topbar{
+            max-width: 1120px;
+            margin: 0 auto 18px;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            text-decoration:none;
+            color: var(--text);
+            font-weight: 950;
+            letter-spacing: -0.02em;
+        }
+        .brand img{
+            height: 34px;
+            width: auto;
+            display:block;
+            filter: drop-shadow(0 10px 22px rgba(15,23,42,0.10));
+        }
+        .back{
+            display:inline-flex;
+            align-items:center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            font-weight: 850;
+        }
+        .shell{
+            max-width: 1120px;
+            margin: 0 auto;
+            display:grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 18px;
+        }
+        .panel{
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            overflow:hidden;
+        }
+        .panel.pad{ padding: 22px; }
+        .hero{
+            padding: 22px;
+            background:
+                radial-gradient(circle at 18% 26%, rgba(37,99,235,0.18) 0%, rgba(37,99,235,0) 56%),
+                radial-gradient(circle at 78% 28%, rgba(139,92,246,0.16) 0%, rgba(139,92,246,0) 54%),
+                radial-gradient(circle at 50% 92%, rgba(16,185,129,0.10) 0%, rgba(16,185,129,0) 54%),
+                rgba(255,255,255,0.62);
+            border-bottom: 1px solid rgba(255,255,255,0.78);
+        }
+        .kicker{
+            display:inline-flex;
+            align-items:center;
+            gap: 10px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            color: rgba(15,23,42,0.78);
+        }
+        h1{
+            margin-top: 12px;
+            font-size: 1.75rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+        }
+        .sub{
+            margin-top: 10px;
+            color: var(--muted);
+            font-weight: 650;
+            line-height: 1.5;
+        }
+        .grid2{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .field label{
+            display:block;
+            margin-bottom: 8px;
+            font-weight: 800;
+            color: rgba(15,23,42,0.72);
+            font-size: 0.9rem;
+        }
+        .input{
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.85);
+            border-radius: 16px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.62);
+            color: rgba(15,23,42,0.82);
+            font-weight: 650;
+            outline: none;
+            transition: box-shadow 200ms ease, background 200ms ease, border-color 200ms ease;
+        }
+        .input:focus{
+            border-color: rgba(255,255,255,0.98);
+            background: rgba(255,255,255,0.72);
+            box-shadow: 0 0 0 7px rgba(255,255,255,0.26);
+        }
+        .input.invalid{
+            border-color: rgba(239,68,68,0.65);
+            box-shadow: 0 0 0 6px rgba(239,68,68,0.10);
+        }
+        .card-box{
+            border: 1px solid rgba(255,255,255,0.85);
+            border-radius: 16px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.62);
+            box-shadow: var(--shadow2);
+        }
+        .card-box.invalid{
+            border-color: rgba(239,68,68,0.55);
+            box-shadow: 0 0 0 6px rgba(239,68,68,0.10);
+        }
+        .form-alert{
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(239,68,68,0.10);
+            border: 1px solid rgba(239,68,68,0.22);
+            color: rgba(185,28,28,0.98);
+            font-weight: 850;
+            display: none;
+        }
+        .error{
+            margin-top: 10px;
+            min-height: 18px;
+            color: rgba(239,68,68,0.95);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .pay{
+            margin-top: 14px;
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 13px 16px;
+            font-weight: 950;
+            cursor: pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 10px;
+            color: #fff;
+            background: linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.94));
+            box-shadow: 0 22px 60px rgba(2,6,23,0.18);
+            transition: transform 180ms ease;
+        }
+        .pay:active{ transform: scale(0.99); }
+        .pay:disabled{ opacity: 0.6; cursor: not-allowed; }
+        .summary{
+            display:grid;
+            gap: 12px;
+        }
+        .sum-card{
+            padding: 18px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.66);
+            border: 1px solid rgba(255,255,255,0.82);
+            box-shadow: var(--shadow2);
+        }
+        .sum-title{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 1.1rem;
+            color: rgba(15,23,42,0.92);
+        }
+        .row{
+            display:flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+            color: var(--muted);
+            font-weight: 650;
+        }
+        .row strong{ color: rgba(15,23,42,0.92); }
+        .total{
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.78);
+            display:flex;
+            justify-content: space-between;
+            align-items:flex-end;
+            gap: 12px;
+        }
+        .total .l{ font-weight: 900; color: rgba(15,23,42,0.86); }
+        .total .r{ font-weight: 950; letter-spacing: -0.02em; font-size: 1.35rem; color: rgba(15,23,42,0.92); }
+        .badge{
+            margin-top: 12px;
+            display:flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: rgba(15,23,42,0.70);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .badge span{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.78);
+        }
+        @media (max-width: 980px){
+            .shell{ grid-template-columns: 1fr; }
+        }
+        @media (max-width: 520px){
+            .grid2{ grid-template-columns: 1fr; }
+            .panel.pad{ padding: 18px; }
+        }
+        @media (prefers-reduced-motion: reduce){
+            *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="../white-label.html">
+            <img src="../../image-removebg-preview - 2026-04-11T040053.052.png" alt="Alpha Freight">
+        </a>
+        <a class="back" id="backLink" href="../white-label.html#pricing"><i class="fas fa-arrow-left"></i>Back</a>
+    </div>
+
+    <div class="shell">
+        <div class="panel">
+            <div class="hero">
+                <div class="kicker"><i class="fas fa-lock"></i> Secure Checkout</div>
+                <h1>Card payment</h1>
+                <div class="sub">Your payment is encrypted and processed securely. We never store card details.</div>
+            </div>
+            <div class="panel pad">
+                <div class="grid2">
+                    <div class="field">
+                        <label for="fullName">Full name</label>
+                        <input class="input" id="fullName" type="text" placeholder="John Doe" autocomplete="name" required>
+                    </div>
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input class="input" id="email" type="email" placeholder="you@company.com" autocomplete="email" required>
+                    </div>
+                </div>
+                <div class="field" style="margin-top: 12px;">
+                    <label>Card details</label>
+                    <div class="card-box" id="cardBox">
+                        <div id="card-element"></div>
+                    </div>
+                    <div class="error" id="card-errors"></div>
+                </div>
+
+                <div class="form-alert" id="formAlert" role="alert"></div>
+
+                <button class="pay" id="payBtn" type="button">
+                    Pay <span id="payAmount">£0</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="badge">
+                    <span><i class="fas fa-shield-halved"></i> Stripe-ready</span>
+                    <span><i class="fas fa-lock"></i> Encrypted</span>
+                    <span><i class="fas fa-check-circle"></i> PCI compliant</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel pad">
+            <div class="summary">
+                <div class="sum-card">
+                    <div class="sum-title" id="planName">Plan</div>
+                    <div class="row"><span>Setup</span><strong id="setupFee">£0</strong></div>
+                    <div class="row"><span>First month</span><strong id="firstMonth">£0</strong></div>
+                    <div class="total">
+                        <div class="l">Total today</div>
+                        <div class="r" id="totalAmount">£0</div>
+                    </div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-title">Next</div>
+                    <div class="row"><span>Billing</span><strong>Monthly</strong></div>
+                    <div class="row"><span>Support</span><strong>Priority</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const urlPlan = (params.get('plan') || 'pro').toLowerCase();
+        const planKey = ['starter', 'pro', 'enterprise'].includes(urlPlan) ? urlPlan : 'pro';
+        const plans = {
+            starter: { setup: 3000, monthly: 299, name: 'Starter Plan' },
+            pro: { setup: 5000, monthly: 599, name: 'Pro Plan' },
+            enterprise: { setup: 10000, monthly: 999, name: 'Enterprise Plan' }
+        };
+        const plan = plans[planKey];
+        const total = plan.setup + plan.monthly;
+
+        document.getElementById('planName').textContent = plan.name;
+        document.getElementById('setupFee').textContent = `£${plan.setup.toLocaleString()}`;
+        document.getElementById('firstMonth').textContent = `£${plan.monthly}`;
+        document.getElementById('totalAmount').textContent = `£${total.toLocaleString()}`;
+        document.getElementById('payAmount').textContent = `£${total.toLocaleString()}`;
+
+        const backLink = document.getElementById('backLink');
+        const src = (params.get('src') || '').toLowerCase();
+        if (backLink && src === 'pricing') backLink.href = '../white-label.html#pricing';
+
+        const STRIPE_PUBLISHABLE_KEY = window.STRIPE_PUBLISHABLE_KEY || 'pk_live_51Snef8JwsGcenL627huErNXtqNGF92AGxEgXTWOa5WSDNmCS0r7VfdLv9XihRl7xZ0cJVEzRxRQaQUsaHkd3La9g00LKykDcYb';
+        const stripeReady = typeof STRIPE_PUBLISHABLE_KEY === 'string' && STRIPE_PUBLISHABLE_KEY.startsWith('pk_');
+        const payBtn = document.getElementById('payBtn');
+        const errorEl = document.getElementById('card-errors');
+        const payBtnOriginal = payBtn ? payBtn.innerHTML : '';
+
+        let stripe = null;
+        let elements = null;
+        let cardEl = null;
+        let cardComplete = false;
+        const fullNameEl = document.getElementById('fullName');
+        const emailEl = document.getElementById('email');
+        const cardBox = document.getElementById('cardBox');
+        const formAlert = document.getElementById('formAlert');
+
+        const setAlert = (message) => {
+            if (!formAlert) return;
+            formAlert.textContent = message || '';
+            formAlert.style.display = message ? 'block' : 'none';
+        };
+
+        const setInvalid = (el, invalid) => {
+            if (!el) return;
+            el.classList.toggle('invalid', !!invalid);
+        };
+
+        if (stripeReady) {
+            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+            elements = stripe.elements();
+            cardEl = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                        '::placeholder': { color: '#64748b' }
+                    },
+                    invalid: { color: '#ef4444' }
+                }
+            });
+            cardEl.mount('#card-element');
+            cardEl.on('change', (event) => {
+                if (!errorEl) return;
+                errorEl.textContent = event.error ? event.error.message : '';
+                cardComplete = !!event.complete;
+                setInvalid(cardBox, !!event.error);
+            });
+        } else {
+            if (errorEl) errorEl.textContent = 'Payment is not configured yet. Please contact support.';
+            if (payBtn) payBtn.disabled = true;
+        }
+
+        const CLOUD_BACKEND_URL = window.CLOUD_BACKEND_URL || 'https://alpha-freight-server.onrender.com';
+        const STRIPE_BACKEND_ENDPOINT = CLOUD_BACKEND_URL
+            ? `${CLOUD_BACKEND_URL}/api/create-payment-intent`
+            : `${window.location.protocol}//${window.location.hostname}:3000/api/create-payment-intent`;
+
+        const showSuccess = (message) => {
+            let successEl = document.getElementById('successMessage');
+            if (!successEl) {
+                successEl = document.createElement('div');
+                successEl.id = 'successMessage';
+                successEl.style.cssText = 'margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.24); color: rgba(5,150,105,0.98); font-weight: 850;';
+                const anchor = document.getElementById('payBtn');
+                if (anchor && anchor.parentElement) {
+                    anchor.insertAdjacentElement('afterend', successEl);
+                }
+            }
+            successEl.textContent = message;
+        };
+
+        if (payBtn) {
+            payBtn.addEventListener('click', async () => {
+                if (!stripe || !cardEl) return;
+                if (errorEl) errorEl.textContent = '';
+                setAlert('');
+                setInvalid(fullNameEl, false);
+                setInvalid(emailEl, false);
+                setInvalid(cardBox, false);
+
+                const name = (fullNameEl?.value || '').trim();
+                const email = (emailEl?.value || '').trim();
+                const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+                let ok = true;
+                if (!name) { ok = false; setInvalid(fullNameEl, true); }
+                if (!email || !emailOk) { ok = false; setInvalid(emailEl, true); }
+                if (!cardComplete) { ok = false; setInvalid(cardBox, true); }
+
+                if (!ok) {
+                    setAlert('Please fill all required fields (name, email, and card details).');
+                    const target = document.querySelector('.input.invalid') || document.querySelector('.card-box.invalid') || formAlert;
+                    if (target && typeof target.scrollIntoView === 'function') {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
+
+                payBtn.disabled = true;
+                payBtn.innerHTML = 'Processing… <i class="fas fa-arrow-right"></i>';
+
+                try {
+                    const intentResponse = await fetch(STRIPE_BACKEND_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: total * 100,
+                            currency: 'gbp',
+                            paymentFor: 'white_label_setup',
+                            paymentType: planKey
+                        })
+                    });
+
+                    const contentType = intentResponse.headers.get('content-type') || '';
+                    let intentResult = null;
+                    if (contentType.includes('application/json')) {
+                        intentResult = await intentResponse.json();
+                    } else {
+                        await intentResponse.text();
+                        throw new Error('Payment server is not connected. Please run the backend API and try again.');
+                    }
+                    if (!intentResponse.ok || !intentResult?.clientSecret) {
+                        const backendMsg = intentResult?.error?.message || intentResult?.error || '';
+                        throw new Error(backendMsg || 'Failed to create payment intent');
+                    }
+
+                    const billingName = document.getElementById('fullName')?.value || '';
+                    const billingEmail = document.getElementById('email')?.value || '';
+
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(intentResult.clientSecret, {
+                        payment_method: {
+                            card: cardEl,
+                            billing_details: {
+                                name: billingName,
+                                email: billingEmail
+                            }
+                        }
+                    });
+
+                    if (error) throw new Error(error.message);
+                    if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+                        throw new Error('Payment not completed');
+                    }
+
+                    showSuccess('Payment successful! Redirecting…');
+                    setTimeout(() => {
+                        window.location.href = 'client-dashboard.html';
+                    }, 1200);
+                } catch (err) {
+                    const msg = err?.message || 'Payment failed. Please try again.';
+                    if (errorEl) errorEl.textContent = msg.includes('Failed to fetch')
+                        ? 'Payment server is not reachable. Please start the API server and try again.'
+                        : msg;
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = payBtnOriginal;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

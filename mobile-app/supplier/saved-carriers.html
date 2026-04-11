@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Saved Carriers - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+            --page-pad: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .title{
+            font-size: 1.2rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .sub{
+            margin-top: 6px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .btn-primary{
+            border: 0;
+            border-radius: 16px;
+            padding: 10px 12px;
+            font-weight: 950;
+            letter-spacing: -0.01em;
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            box-shadow: 0 18px 40px rgba(99,91,255,0.22);
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+        }
+        .btn-primary:active{ transform: scale(0.98); }
+
+        .quick-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .quick-row::-webkit-scrollbar{ display:none; }
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            cursor:pointer;
+        }
+        .chip i { color: var(--primary); }
+        .chip:active{ transform: scale(0.98); }
+
+        .content{ padding: 0 var(--page-pad) 18px; }
+
+        .filter-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 8px;
+            overflow-x:auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .filter-row::-webkit-scrollbar{ display:none; }
+        .filter-btn{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            white-space: nowrap;
+        }
+        .filter-btn.active{
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            border-color: rgba(99,91,255,0.65);
+            color: #fff;
+            box-shadow: 0 16px 34px rgba(99,91,255,0.22);
+        }
+        .filter-btn:active{ transform: scale(0.98); }
+
+        .card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 14px 14px 12px;
+            margin-top: 10px;
+            overflow:hidden;
+            position: relative;
+        }
+        .card::before{
+            content:"";
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            height:2px;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.55;
+        }
+        .row{
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+        }
+        .row:last-child{ border-bottom: 0; padding-bottom: 2px; }
+        .row-left{ min-width:0; }
+        .row-title{ font-weight: 950; letter-spacing: -0.02em; font-size: 0.92rem; }
+        .row-sub{ margin-top: 2px; color: rgba(71,85,105,0.92); font-weight: 800; font-size: 0.78rem; white-space: nowrap; overflow:hidden; text-overflow: ellipsis; max-width: 240px; }
+
+        .switch{
+            position: relative;
+            width: 50px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+        .switch input{
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider{
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            background: rgba(15,23,42,0.14);
+            border: 1px solid rgba(15,23,42,0.10);
+            transition: 0.2s var(--ease);
+            border-radius: 999px;
+        }
+        .slider::before{
+            content:"";
+            position:absolute;
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.18);
+            transition: 0.2s var(--ease);
+        }
+        .switch input:checked + .slider{
+            background: rgba(99,91,255,0.35);
+            border-color: rgba(99,91,255,0.45);
+        }
+        .switch input:checked + .slider::before{
+            transform: translate(20px, -50%);
+        }
+
+        .search{
+            display:flex;
+            gap: 10px;
+            align-items:center;
+            margin-top: 10px;
+        }
+        .input{
+            flex: 1;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.12);
+            background: rgba(241,245,249,0.65);
+            padding: 12px 12px;
+            font-weight: 800;
+            color: rgba(15,23,42,0.90);
+            outline:none;
+        }
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-weight: 950;
+            font-size: 0.82rem;
+            cursor:pointer;
+            text-decoration:none;
+            flex-shrink:0;
+        }
+        .btn-mini.primary{
+            background: rgba(99,91,255,0.12);
+            border-color: rgba(99,91,255,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-mini.danger{
+            background: rgba(220,38,38,0.10);
+            border-color: rgba(220,38,38,0.18);
+            color: rgba(220,38,38,0.95);
+        }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .list{ margin-top: 10px; }
+        .item{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 14px 14px 12px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow:hidden;
+        }
+        .item::before{
+            content:"";
+            position:absolute;
+            left:0;
+            top: 14px;
+            bottom: 14px;
+            width: 4px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.78));
+            border-radius: 0 3px 3px 0;
+            opacity: 0.9;
+        }
+        .item-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .name{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 0.98rem;
+            padding-left: 8px;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .meta{
+            margin-top: 4px;
+            padding-left: 8px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 800;
+            font-size: 0.82rem;
+        }
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-weight: 950;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(15, 23, 42, 0.04);
+            color: rgba(15, 23, 42, 0.86);
+            flex-shrink:0;
+        }
+        .pill.success{ background: rgba(5,150,105,0.10); border-color: rgba(5,150,105,0.18); color: var(--success); }
+        .pill.danger{ background: rgba(220,38,38,0.10); border-color: rgba(220,38,38,0.18); color: var(--error); }
+        .pill.primary{ background: rgba(99,91,255,0.12); border-color: rgba(99,91,255,0.22); color: rgba(79,70,229,0.98); }
+
+        .actions{
+            margin-top: 10px;
+            padding-left: 8px;
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .empty{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 20px 14px;
+            text-align:center;
+            color: rgba(71,85,105,0.92);
+            margin-top: 10px;
+        }
+        .empty i{ font-size: 2rem; color: rgba(71,85,105,0.65); margin-bottom: 10px; }
+        .empty h3{ margin: 0 0 4px; font-size: 1rem; font-weight: 950; color: rgba(15,23,42,0.90); }
+        .empty p{ margin: 0; font-weight: 800; font-size: 0.86rem; }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="title">Saved Carriers</h1>
+                    <div class="sub">Favorites, blocklist, invite carrier</div>
+                </div>
+                <button type="button" class="btn btn-primary btn-primary" id="addBtn">
+                    <i class="fas fa-user-plus"></i><span>Add</span>
+                </button>
+            </div>
+            <div class="quick-row" aria-label="Quick links">
+                <a class="chip" href="top-carriers.html"><i class="fas fa-trophy"></i><span>Top Carriers</span></a>
+                <a class="chip" href="settings.html"><i class="fas fa-gear"></i><span>Settings</span></a>
+                <a class="chip" href="messages.html"><i class="fas fa-comments"></i><span>Chat</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="row">
+                <div class="row-left">
+                    <div class="row-title">Auto-assign to preferred first</div>
+                    <div class="row-sub">New loads invite preferred carriers before others</div>
+                </div>
+                <label class="switch" aria-label="Auto assign preferred">
+                    <input type="checkbox" id="autoAssignToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="search">
+                <input id="searchInput" class="input" placeholder="Search by carrier id or email" />
+                <button type="button" class="btn-mini primary" id="searchBtn"><i class="fas fa-magnifying-glass"></i></button>
+            </div>
+        </div>
+
+        <div class="filter-row" role="tablist" aria-label="Lists">
+            <button type="button" class="filter-btn active" data-tab="preferred">Preferred</button>
+            <button type="button" class="filter-btn" data-tab="blocked">Blocklist</button>
+        </div>
+
+        <div class="list" id="listArea"></div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+        function showSuccess(msg) { alertSystem.show('success', msg); }
+
+        function safeJsonParse(s, fallback) { try { return JSON.parse(s); } catch (e) { return fallback; } }
+        function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+        function getUserData() {
+            const raw = localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile');
+            return raw ? safeJsonParse(raw, null) : null;
+        }
+
+        function supplierKey() {
+            const u = getUserData();
+            return String((u && (u.supplierId || u.id || u.email)) || 'guest');
+        }
+
+        function listKey(kind) {
+            return 'ab.preferredNetwork.supplier.' + supplierKey() + '.' + kind;
+        }
+
+        function prefKey(name) {
+            return 'ab.supplier.settings.' + supplierKey() + '.' + name;
+        }
+
+        function readList(kind) {
+            const raw = localStorage.getItem(listKey(kind));
+            const arr = safeJsonParse(raw || '[]', []);
+            return Array.isArray(arr) ? arr : [];
+        }
+
+        function writeList(kind, arr) {
+            localStorage.setItem(listKey(kind), JSON.stringify(arr || []));
+        }
+
+        function readToggle(name, fallbackOn) {
+            const raw = localStorage.getItem(prefKey(name));
+            if (raw === null || raw === undefined || raw === '') return !!fallbackOn;
+            return raw === '1';
+        }
+
+        function writeToggle(name, on) {
+            localStorage.setItem(prefKey(name), on ? '1' : '0');
+        }
+
+        function sanitizeFirebaseKey(key) {
+            return String(key || '').trim().replace(/[#.$\[\]]/g, '_');
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!(window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser);
+        }
+
+        async function fetchCarrierProfile(idOrEmail) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return { key: sanitizeFirebaseKey(idOrEmail), profile: null };
+
+            const id = String(idOrEmail || '').trim();
+            if (!id) return { key: '', profile: null };
+
+            const candidates = [];
+            candidates.push(id);
+            const sanitized = sanitizeFirebaseKey(id);
+            if (sanitized && sanitized !== id) candidates.push(sanitized);
+
+            for (const cand of candidates) {
+                try {
+                    const snap = await db.ref('carriers/' + cand).once('value');
+                    if (snap.exists()) {
+                        const p = snap.val() || {};
+                        if (!p.carrierId) p.carrierId = cand;
+                        return { key: cand, profile: p };
+                    }
+                } catch (e) {}
+            }
+
+            if (id.includes('@')) {
+                try {
+                    const snap = await db.ref('carriers').orderByChild('email').equalTo(id).limitToFirst(1).once('value');
+                    if (snap.exists()) {
+                        let out = null;
+                        snap.forEach((child) => {
+                            if (out) return true;
+                            const p = child.val() || {};
+                            out = { key: child.key, profile: { ...p, carrierId: p.carrierId || child.key } };
+                            return true;
+                        });
+                        if (out) return out;
+                    }
+                } catch (e) {}
+            }
+
+            return { key: sanitized, profile: null };
+        }
+
+        function normalizeCarrierEntry(key, profile) {
+            const p = profile || {};
+            const carrierId = String(p.carrierId || key || '').trim();
+            const name = String(p.companyName || p.company || p.displayName || p.name || p.contactName || carrierId || 'Carrier').trim();
+            const email = String(p.email || '').trim();
+            const phone = String(p.phone || p.mobile || '').trim();
+            return {
+                carrierId,
+                carrierName: name,
+                email,
+                phone,
+                updatedAt: new Date().toISOString(),
+                addedAt: new Date().toISOString(),
+                favorite: true
+            };
+        }
+
+        async function sendInviteMessage(carrierId, carrierName, text) {
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!db) return false;
+
+            const user = getUserData();
+            if (!user) return false;
+            const supplierId = String(user.supplierId || user.id || user.email?.replace('@', '_').replace(/\./g, '_') || '');
+            const supplierName = String(user.companyName || user.company || user.email || 'Supplier');
+
+            const messageData = {
+                supplierId: supplierId,
+                supplierName: supplierName,
+                supplierEmail: user.email || '',
+                supplierUid: (window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser) ? window.AlphaBrokrage.firebaseAuth.currentUser.uid : '',
+                carrierId: carrierId,
+                carrierName: carrierName || 'Carrier',
+                message: String(text || ''),
+                senderType: 'supplier',
+                senderId: supplierId,
+                senderUid: (window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser) ? window.AlphaBrokrage.firebaseAuth.currentUser.uid : '',
+                recipientType: 'carrier',
+                recipientId: carrierId,
+                read: false,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await db.ref('messages').push(messageData);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        let tab = 'preferred';
+        let preferred = [];
+        let blocked = [];
+
+        function inList(arr, carrierId) {
+            const id = String(carrierId || '').toLowerCase();
+            return arr.some(x => String(x.carrierId || '').toLowerCase() === id);
+        }
+
+        function upsert(arr, entry) {
+            const id = String(entry.carrierId || '').toLowerCase();
+            const i = arr.findIndex(x => String(x.carrierId || '').toLowerCase() === id);
+            if (i >= 0) {
+                const prev = arr[i] || {};
+                arr[i] = { ...prev, ...entry, addedAt: prev.addedAt || entry.addedAt || new Date().toISOString() };
+                return arr;
+            }
+            return [entry, ...arr];
+        }
+
+        function removeFrom(arr, carrierId) {
+            const id = String(carrierId || '').toLowerCase();
+            return arr.filter(x => String(x.carrierId || '').toLowerCase() !== id);
+        }
+
+        function render() {
+            const list = document.getElementById('listArea');
+            const items = tab === 'blocked' ? blocked : preferred;
+
+            if (!items.length) {
+                list.innerHTML = tab === 'blocked'
+                    ? '<div class="empty"><i class="fas fa-ban"></i><h3>No blocked carriers</h3><p>Block carriers you do not want to work with</p></div>'
+                    : '<div class="empty"><i class="fas fa-star"></i><h3>No preferred carriers</h3><p>Add favorite carriers to invite them first</p></div>';
+                return;
+            }
+
+            list.innerHTML = items.slice(0, 80).map(c => {
+                const carrierId = String(c.carrierId || '');
+                const nm = String(c.carrierName || carrierId || 'Carrier');
+                const small = [c.email ? c.email : '', c.phone ? c.phone : ''].filter(Boolean).join(' • ');
+
+                const pill = tab === 'blocked'
+                    ? '<span class="pill danger"><i class="fas fa-circle"></i>Blocked</span>'
+                    : '<span class="pill success"><i class="fas fa-circle"></i>Preferred</span>';
+
+                const profileHref = 'carrier-profile.html?id=' + encodeURIComponent(carrierId);
+                const msgPayload = JSON.stringify({ carrierId: carrierId, carrierName: nm });
+
+                const btnFav = tab === 'blocked'
+                    ? ''
+                    : `<button type="button" class="btn-mini" data-act="fav" data-id="${escapeHtml(carrierId)}"><i class="fas fa-star"></i> Favorite</button>`;
+
+                const btnMove = tab === 'blocked'
+                    ? `<button type="button" class="btn-mini primary" data-act="unblock" data-id="${escapeHtml(carrierId)}"><i class="fas fa-unlock"></i> Unblock</button>`
+                    : `<button type="button" class="btn-mini danger" data-act="block" data-id="${escapeHtml(carrierId)}"><i class="fas fa-ban"></i> Block</button>`;
+
+                const btnInvite = tab === 'blocked'
+                    ? ''
+                    : `<button type="button" class="btn-mini primary" data-act="invite" data-id="${escapeHtml(carrierId)}" data-name="${escapeHtml(nm)}"><i class="fas fa-paper-plane"></i> Invite</button>`;
+
+                return `
+                    <div class="item">
+                        <div class="item-head">
+                            <div style="min-width:0;">
+                                <p class="name">${escapeHtml(nm)}</p>
+                                <div class="meta">${escapeHtml(carrierId)}${small ? ' • ' + escapeHtml(small) : ''}</div>
+                            </div>
+                            ${pill}
+                        </div>
+                        <div class="actions">
+                            <a class="btn-mini" href="${escapeHtml(profileHref)}"><i class="fas fa-id-card"></i> View</a>
+                            <button type="button" class="btn-mini" data-act="message" data-payload="${escapeHtml(msgPayload)}"><i class="fas fa-comments"></i> Message</button>
+                            ${btnInvite}
+                            ${btnMove}
+                            ${btnFav}
+                            <button type="button" class="btn-mini danger" data-act="remove" data-id="${escapeHtml(carrierId)}"><i class="fas fa-trash"></i> Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('button[data-act]').forEach(btn => {
+                const act = btn.dataset.act || '';
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id || '';
+                    if (act === 'message') {
+                        try {
+                            const raw = btn.dataset.payload || '';
+                            const v = JSON.parse(raw);
+                            localStorage.setItem('ab.messages.openCarrier', JSON.stringify(v));
+                            window.location.href = 'messages.html';
+                        } catch (e) {
+                            showError('Could not open chat');
+                        }
+                        return;
+                    }
+                    if (act === 'invite') {
+                        const name = btn.dataset.name || 'Carrier';
+                        const note = prompt('Invite message (optional):', 'Hi! You are invited to join my preferred carrier network on Alpha Freight.');
+                        if (note === null) return;
+                        const ok = await ensureAuthReady();
+                        if (!ok) { showError('Please login again'); return; }
+                        const sent = await sendInviteMessage(String(id), String(name), String(note || '').trim() || 'You are invited to join my preferred carrier network on Alpha Freight.');
+                        if (sent) showSuccess('Invite sent');
+                        else showError('Invite failed');
+                        return;
+                    }
+                    if (act === 'block') {
+                        if (!id) return;
+                        if (!confirm('Block this carrier?')) return;
+                        const entry = preferred.find(x => String(x.carrierId) === String(id));
+                        preferred = removeFrom(preferred, id);
+                        blocked = upsert(blocked, { ...(entry || { carrierId: id, carrierName: id }), updatedAt: new Date().toISOString() });
+                        writeList('preferred', preferred);
+                        writeList('blocked', blocked);
+                        render();
+                        showSuccess('Blocked');
+                        return;
+                    }
+                    if (act === 'unblock') {
+                        if (!id) return;
+                        blocked = removeFrom(blocked, id);
+                        writeList('blocked', blocked);
+                        render();
+                        showSuccess('Unblocked');
+                        return;
+                    }
+                    if (act === 'fav') {
+                        if (!id) return;
+                        preferred = preferred.map(x => String(x.carrierId) === String(id) ? { ...x, favorite: true, updatedAt: new Date().toISOString() } : x);
+                        writeList('preferred', preferred);
+                        render();
+                        showSuccess('Marked favorite');
+                        return;
+                    }
+                    if (act === 'remove') {
+                        if (!id) return;
+                        if (!confirm('Remove this carrier from list?')) return;
+                        if (tab === 'blocked') {
+                            blocked = removeFrom(blocked, id);
+                            writeList('blocked', blocked);
+                        } else {
+                            preferred = removeFrom(preferred, id);
+                            writeList('preferred', preferred);
+                        }
+                        render();
+                        showSuccess('Removed');
+                    }
+                });
+            });
+        }
+
+        async function addCarrierFlow(idOrEmail, addTo) {
+            const raw = String(idOrEmail || '').trim();
+            if (!raw) return;
+
+            const ok = await ensureAuthReady();
+            if (!ok) {
+                showError('Please login again');
+                return;
+            }
+
+            const { key, profile } = await fetchCarrierProfile(raw);
+            const entry = normalizeCarrierEntry(key, profile);
+
+            if (!entry.carrierId) {
+                showError('Carrier not found');
+                return;
+            }
+
+            if (addTo === 'blocked') {
+                preferred = removeFrom(preferred, entry.carrierId);
+                blocked = upsert(blocked, { ...entry, favorite: false });
+                writeList('preferred', preferred);
+                writeList('blocked', blocked);
+                tab = 'blocked';
+                setActiveTab();
+                render();
+                showSuccess('Added to blocklist');
+                return;
+            }
+
+            if (inList(blocked, entry.carrierId)) {
+                showError('This carrier is blocked. Unblock first.');
+                return;
+            }
+
+            preferred = upsert(preferred, { ...entry, favorite: true });
+            writeList('preferred', preferred);
+            tab = 'preferred';
+            setActiveTab();
+            render();
+            showSuccess('Added to preferred');
+        }
+
+        function setActiveTab() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`.filter-btn[data-tab="${tab}"]`);
+            if (btn) btn.classList.add('active');
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                tab = btn.dataset.tab || 'preferred';
+                setActiveTab();
+                render();
+            });
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const q = String(document.getElementById('searchInput').value || '').trim();
+            if (!q) return;
+            const mode = tab === 'blocked' ? 'blocked' : 'preferred';
+            addCarrierFlow(q, mode).catch(() => showError('Could not add carrier'));
+        });
+
+        document.getElementById('searchInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        document.getElementById('addBtn').addEventListener('click', () => {
+            const q = prompt('Enter carrier id or email:');
+            if (q === null) return;
+            const mode = tab === 'blocked' ? 'blocked' : 'preferred';
+            addCarrierFlow(q, mode).catch(() => showError('Could not add carrier'));
+        });
+
+        document.getElementById('autoAssignToggle').addEventListener('change', (e) => {
+            writeToggle('autoAssignPreferred', !!e.target.checked);
+            showSuccess(e.target.checked ? 'Auto-assign enabled' : 'Auto-assign disabled');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            preferred = readList('preferred');
+            blocked = readList('blocked');
+            const t = document.getElementById('autoAssignToggle');
+            if (t) t.checked = readToggle('autoAssignPreferred', true);
+            setActiveTab();
+            render();
+        });
+    </script>
+</body>
+</html>

@@ -344,6 +344,15 @@
             return company || name || u.email || u.id || 'User';
         }
 
+        function countDocs(u) {
+            try {
+                const docs = (u && u.verificationDocs) ? u.verificationDocs : {};
+                return Object.keys(docs || {}).filter(k => docs && docs[k] && docs[k].url).length;
+            } catch (e) {
+                return 0;
+            }
+        }
+
         function applyCounts() {
             const carrierPending = pending.filter(p => p.userType === 'carrier').length;
             const supplierPending = pending.filter(p => p.userType === 'supplier').length;
@@ -371,11 +380,13 @@
                 const typeLabel = u.userType === 'carrier' ? 'Carrier' : 'Supplier';
                 const email = u.email || '—';
                 const id = u.id || '';
+                const docsCount = countDocs(u);
+                const docsText = docsCount ? ` • Docs: ${docsCount}` : '';
                 return `
                     <div class="row-item">
                         <div class="row-left">
                             <div class="row-title">${escapeHtml(name)} • ${escapeHtml(typeLabel)}</div>
-                            <div class="row-sub">${escapeHtml(email)} • ${escapeHtml(String(id).slice(0, 10) || '—')}</div>
+                            <div class="row-sub">${escapeHtml(email)} • ${escapeHtml(String(id).slice(0, 10) || '—')}${escapeHtml(docsText)}</div>
                         </div>
                         <div class="actions">
                             <button class="btn btn-approve" type="button" onclick="approveUser('${escapeHtml(id)}','${escapeHtml(u.userType)}', this)">Approve</button>
@@ -393,7 +404,9 @@
                 await db.ref(path).update({
                     status: 'active',
                     approvedAt: new Date().toISOString(),
-                    verifiedAt: new Date().toISOString()
+                    verifiedAt: new Date().toISOString(),
+                    kycStatus: 'approved',
+                    kycApprovedAt: new Date().toISOString()
                 });
                 pending = pending.filter(x => !(x.userType === userType && String(x.id) === String(userId)));
                 render();

@@ -150,6 +150,7 @@
         const alertSystem = new AlertSystem();
         const params = new URLSearchParams(location.search);
         const loadId = params.get('id') || params.get('loadId') || '';
+        let loadData = null;
 
         function getSupplierAuth() {
             try { return JSON.parse(localStorage.getItem('supplierAuth') || '{}'); } catch { return {}; }
@@ -164,6 +165,23 @@
             if (!supplierId) return false;
             const loadSupplierId = load.supplierId || load.postedBy || supplierKeyFromEmail(load.supplierEmail);
             return loadSupplierId === supplierId || load.supplierEmail === auth.email;
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
         }
 
         function buildSubtitle(load) {
@@ -192,22 +210,26 @@
             const pod = (load && (load.pod || {})) || {};
             const receiverName = pod.receiverName || load.podReceiverName || '';
             const submittedAt = pod.submittedAt || load.podUploadedAt || '';
+            const podStatus = String(pod.status || load.podStatus || (pod.submittedAt ? 'submitted' : '')).toLowerCase();
             const lat = pod.gps && pod.gps.lat != null ? pod.gps.lat : null;
             const lng = pod.gps && pod.gps.lng != null ? pod.gps.lng : null;
             const acc = pod.gps && pod.gps.accuracy != null ? pod.gps.accuracy : null;
             const photo = pod.photoDataUrl || load.podUrl || '';
             const sigUrl = pod.signatureDataUrl || '';
+            const extra = Array.isArray(pod.attachments) ? pod.attachments : [];
             const hasPhoto = !!photo;
             const hasSig = !!sigUrl;
+            const pillText = podStatus === 'verified' ? 'Verified' : podStatus === 'rejected' ? 'Rejected' : (hasPhoto && hasSig ? 'Submitted' : 'Partial');
+            const pillKind = podStatus === 'verified' ? 'good' : podStatus === 'rejected' ? 'bad' : (hasPhoto && hasSig ? 'good' : 'bad');
 
             document.getElementById('subtitle').textContent = buildSubtitle(load);
             document.getElementById('contentArea').innerHTML = `
                 <div class="card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="fw-bold">Proof of Delivery</div>
-                        <div class="pill ${hasPhoto && hasSig ? 'good' : 'bad'}">
-                            <i class="fas ${hasPhoto && hasSig ? 'fa-check' : 'fa-info-circle'}"></i>
-                            ${hasPhoto && hasSig ? 'Verified' : 'Partial'}
+                        <div class="pill ${pillKind}">
+                            <i class="fas ${pillKind === 'good' ? 'fa-check' : 'fa-info-circle'}"></i>
+                            ${pillText}
                         </div>
                     </div>
                     <div class="grid2">
@@ -224,6 +246,8 @@
                         <div class="field-label">Location</div>
                         <div class="muted">${lat != null && lng != null ? (lat.toFixed(6) + ', ' + lng.toFixed(6) + (acc != null ? (' (±' + Math.round(acc) + 'm)') : '')) : 'N/A'}</div>
                     </div>
+                    ${podStatus === 'rejected' && pod.rejectReason ? `<div class="mt-3"><div class="field-label">Rejected Reason</div><div class="muted">${String(pod.rejectReason).replace(/</g,'&lt;')}</div></div>` : ''}
+                    ${podStatus === 'verified' && pod.verifiedAt ? `<div class="mt-3"><div class="field-label">Verified</div><div class="muted">${new Date(pod.verifiedAt).toLocaleString('en-GB')}</div></div>` : ''}
                 </div>
                 ${hasPhoto ? `
                 <div class="card">
@@ -237,12 +261,105 @@
                     <img class="thumb" src="${sigUrl}" alt="Signature">
                 </div>
                 ` : ''}
+                ${extra.length ? `
+                <div class="card">
+                    <div class="fw-bold mb-2">Additional Documents</div>
+                    <div class="muted mb-3">${extra.length} attachment(s)</div>
+                    <div class="grid2">
+                        ${extra.map((a) => `<img class="thumb" src="${String(a && a.dataUrl ? a.dataUrl : '').replace(/\"/g,'&quot;')}" alt="Attachment">`).join('')}
+                    </div>
+                </div>
+                ` : ''}
                 <div class="card">
                     <div class="btn-row">
-                        <a class="btn-action secondary" href="load-details.html?id=${encodeURIComponent(loadId)}"><i class="fas fa-arrow-left"></i> Back</a>
+                        <button class="btn-action secondary" type="button" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button class="btn-action" type="button" style="background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92)); color:#fff; box-shadow: 0 14px 34px rgba(99,91,255,0.22);" onclick="verifyPOD()" ${podStatus === 'verified' ? 'disabled' : ''}><i class="fas fa-check"></i> Verify</button>
+                        <button class="btn-action" type="button" style="background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color:#fff; box-shadow: 0 14px 34px rgba(220, 38, 38, 0.20);" onclick="rejectPOD()" ${podStatus === 'rejected' ? 'disabled' : ''}><i class="fas fa-times"></i> Reject</button>
+                    </div>
+                    <div class="muted mt-2">Verify confirms delivery proof. Reject asks carrier to resubmit.</div>
+                </div>
+                <div class="card">
+                    <div class="btn-row">
+                        <a class="btn-action secondary" href="load-details.html?id=${encodeURIComponent(loadId)}"><i class="fas fa-file-lines"></i> Load Details</a>
                     </div>
                 </div>
             `;
+        }
+
+        function goBack() {
+            window.location.href = 'load-details.html?id=' + encodeURIComponent(loadId);
+        }
+
+        function carrierKeyFromEmail(email) {
+            return String(email || '').replace(/@/g, '_').replace(/\./g, '_');
+        }
+
+        async function verifyPOD() {
+            if (!loadData) return;
+            const ok = window.confirm('Verify POD? This will notify the carrier.');
+            if (!ok) return;
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return; }
+                const senderUid = String(authSdk.currentUser.uid || '');
+                const now = new Date().toISOString();
+                const carrierId = String(loadData.carrierId || loadData.assignedCarrier || carrierKeyFromEmail(loadData.carrierEmail || '')).trim();
+                await db.ref('loads/' + loadId + '/pod').update({ status: 'verified', verifiedAt: now, verifiedByRole: 'supplier', rejectReason: '' });
+                await db.ref('loads/' + loadId).update({ podStatus: 'verified' });
+                if (carrierId) {
+                    await db.ref('notificationQueue').push({
+                        senderUid,
+                        toUserId: carrierId,
+                        toUserType: 'carrier',
+                        title: 'POD Verified',
+                        message: 'Supplier verified your POD',
+                        type: 'pod_verified',
+                        data: { type: 'pod_verified', loadId: String(loadId), url: '/mobile-app/carrier/pod.html?id=' + encodeURIComponent(loadId) + '&mode=view', icon: '/image-removebg-preview - 2026-03-04T141043.516.png' },
+                        createdAt: now
+                    });
+                }
+                alertSystem.show('success', 'POD verified');
+                await init();
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('error', 'Failed to verify POD');
+            }
+        }
+
+        async function rejectPOD() {
+            if (!loadData) return;
+            const reason = window.prompt('Reject reason (required):', '');
+            if (!reason || String(reason).trim().length < 3) { alertSystem.show('error', 'Reject reason required'); return; }
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) { window.location.href = 'login.html'; return; }
+                const senderUid = String(authSdk.currentUser.uid || '');
+                const now = new Date().toISOString();
+                const carrierId = String(loadData.carrierId || loadData.assignedCarrier || carrierKeyFromEmail(loadData.carrierEmail || '')).trim();
+                await db.ref('loads/' + loadId + '/pod').update({ status: 'rejected', rejectedAt: now, rejectedByRole: 'supplier', rejectReason: String(reason).trim() });
+                await db.ref('loads/' + loadId).update({ podStatus: 'rejected' });
+                if (carrierId) {
+                    await db.ref('notificationQueue').push({
+                        senderUid,
+                        toUserId: carrierId,
+                        toUserType: 'carrier',
+                        title: 'POD Rejected',
+                        message: 'Supplier rejected POD. Please resubmit.',
+                        type: 'pod_rejected',
+                        data: { type: 'pod_rejected', loadId: String(loadId), url: '/mobile-app/carrier/pod.html?id=' + encodeURIComponent(loadId), icon: '/image-removebg-preview - 2026-03-04T141043.516.png' },
+                        createdAt: now
+                    });
+                }
+                alertSystem.show('success', 'POD rejected');
+                await init();
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('error', 'Failed to reject POD');
+            }
         }
 
         async function init() {
@@ -263,6 +380,7 @@
                     renderNotFound();
                     return;
                 }
+                loadData = { ...(load || {}), loadId, id: loadId };
 
                 const hasPod = !!(load.hasPOD || load.podUrl || (load.pod && (load.pod.photoDataUrl || load.pod.signatureDataUrl)));
                 if (!hasPod) {
@@ -282,4 +400,3 @@
     </script>
 </body>
 </html>
-

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -19,57 +19,62 @@
     <script src="../../assets/js/app-resume-fix.js"></script>
     <style>
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
             --warning: #d97706;
             --text-dark: #0f172a;
             --text-medium: #475569;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
-            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 14px 34px rgba(15,23,42,0.10);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             color: var(--text-dark);
             line-height: 1.55;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
         body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1rem 1.25rem 1.1rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.25rem;
+            background: transparent;
+            color: rgba(15,23,42,0.92);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            opacity: 0.7;
-        }
+        .page-header::after { display:none; }
         .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
-        .page-subtitle { font-size: 0.82rem; opacity: 0.92; margin-top: 0.2rem; }
+        .page-subtitle { font-size: 0.82rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; margin-top: 0.2rem; }
         .card {
             background: var(--card-bg);
-            margin: 0 1.25rem 1rem;
+            margin: 0 var(--page-pad) 12px;
             padding: 1.25rem;
             border-radius: var(--radius);
             border: 1px solid var(--border);
@@ -84,16 +89,17 @@
             width: 68px;
             height: 68px;
             border-radius: 18px;
-            background: linear-gradient(145deg, rgba(29,78,216,0.12), rgba(30,58,138,0.12));
-            border: 1px solid rgba(29,78,216,0.22);
+            background: linear-gradient(145deg, rgba(99,91,255,0.95) 0%, rgba(6,182,212,0.85) 100%);
+            border: 1px solid rgba(15,23,42,0.10);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
             font-weight: 900;
-            color: var(--primary);
+            color: #fff;
             font-size: 1.25rem;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.35);
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .name { font-weight: 900; letter-spacing: -0.02em; font-size: 1.05rem; }
@@ -106,24 +112,23 @@
             margin-top: 1rem;
         }
         .stat {
-            background: rgba(241, 245, 249, 0.9);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.78);
+            border: 1px solid rgba(15,23,42,0.10);
             border-radius: var(--radius-sm);
             padding: 0.9rem;
         }
         .stat .k { font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.06em; color: var(--text-medium); text-transform: uppercase; }
         .stat .v { font-size: 1.05rem; font-weight: 900; margin-top: 0.25rem; }
-        .rowline { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-top: 1px solid var(--border); }
+        .rowline { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-top: 1px solid rgba(15,23,42,0.10); }
         .rowline:first-child { border-top: 0; padding-top: 0; }
         .rowline .k { color: var(--text-medium); font-weight: 800; }
         .rowline .v { font-weight: 800; color: var(--text-dark); text-align: right; }
-        .btn-row { display: flex; gap: 0.75rem; }
+        .btn-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .btn-action {
-            flex: 1;
             padding: 0.875rem 1rem;
             border-radius: 12px;
             font-size: 0.95rem;
-            font-weight: 700;
+            font-weight: 900;
             border: none;
             cursor: pointer;
             display: inline-flex;
@@ -131,8 +136,9 @@
             justify-content: center;
             gap: 0.55rem;
             text-decoration: none;
+            min-height: 52px;
         }
-        .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
+        .btn-action.secondary { background: rgba(255,255,255,0.92); color: rgba(15,23,42,0.86); border: 1px solid rgba(15,23,42,0.10); box-shadow: 0 10px 22px rgba(15,23,42,0.08); }
         .muted { color: var(--text-medium); font-size: 0.9rem; }
         @media (min-width: 768px) { body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); } }
     </style>
@@ -317,6 +323,28 @@
 
         function safe(v) { return v == null ? '' : String(v); }
 
+        function maskEmail(email) {
+            const e = String(email || '').trim();
+            const at = e.indexOf('@');
+            if (at <= 0) return e;
+            const local = e.slice(0, at);
+            const domain = e.slice(at);
+            const keep = Math.min(4, Math.max(1, local.length));
+            const stars = local.length <= keep ? 6 : Math.max(6, local.length - keep);
+            return local.slice(0, keep) + '*'.repeat(stars) + domain;
+        }
+
+        function maskPhone(phone) {
+            const p = String(phone || '').trim();
+            if (!p) return p;
+            const normalized = p.replace(/\s+/g, '');
+            const prefixLen = normalized.startsWith('+447') ? 4 : (normalized.startsWith('+44') ? 3 : (normalized.startsWith('+') ? 3 : 2));
+            const prefix = normalized.slice(0, prefixLen);
+            const last = normalized.length > prefixLen ? normalized.slice(-1) : '';
+            const stars = Math.max(5, Math.min(9, Math.max(0, normalized.length - prefixLen - (last ? 1 : 0))));
+            return prefix + '*'.repeat(stars) + last;
+        }
+
         function render(profile, stats) {
             const displayName = (profile && (profile.companyName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email)) || 'Carrier';
             const photoUrl = profile && (profile.profilePhoto || profile.photoUrl || profile.avatarUrl || profile.photoURL);
@@ -325,7 +353,9 @@
             const ratingText = stats && stats.ratingCount ? `${stats.rating}/5 (${stats.ratingCount})` : 'New';
             const stars = stats && stats.ratingCount ? buildStars(stats.rating) : '☆☆☆☆☆';
 
-            document.getElementById('subtitle').textContent = safe(profile && (profile.email || profile.phone)) || 'Carrier';
+            const maskedEmail = profile && profile.email ? maskEmail(profile.email) : '';
+            const maskedPhone = profile && profile.phone ? maskPhone(profile.phone) : '';
+            document.getElementById('subtitle').textContent = safe(maskedEmail || maskedPhone) || 'Carrier';
 
             document.getElementById('contentArea').innerHTML = `
                 <div class="card">
@@ -350,8 +380,8 @@
                 <div class="card">
                     <div class="rowline"><div class="k">Company</div><div class="v">${safe(profile && profile.companyName) || '—'}</div></div>
                     <div class="rowline"><div class="k">Name</div><div class="v">${safe((profile && `${profile.firstName || ''} ${profile.lastName || ''}`.trim())) || '—'}</div></div>
-                    <div class="rowline"><div class="k">Email</div><div class="v">${safe(profile && profile.email) || '—'}</div></div>
-                    <div class="rowline"><div class="k">Phone</div><div class="v">${safe(profile && profile.phone) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Email</div><div class="v">${safe(maskedEmail) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Phone</div><div class="v">${safe(maskedPhone) || '—'}</div></div>
                     <div class="rowline"><div class="k">Address</div><div class="v">${safe(address) || '—'}</div></div>
                 </div>
 

@@ -1,12 +1,23 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "loads": {
-      ".read": true,
-      ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || newData.child('supplierFirebaseUid').val() === auth.uid || newData.child('carrierFirebaseUid').val() === auth.uid)",
-      ".indexOn": ["supplierId", "carrierId", "status"],
+      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (query.orderByChild == 'supplierFirebaseUid' && query.equalTo == auth.uid) || (query.orderByChild == 'carrierFirebaseUid' && query.equalTo == auth.uid) || (query.orderByChild == 'supplierEmail' && query.equalTo == auth.token.email) || (query.orderByChild == 'carrierEmail' && query.equalTo == auth.token.email) || (query.orderByChild == 'supplierId' && root.child('suppliers').child(query.equalTo).child('firebaseUid').val() == auth.uid) || (query.orderByChild == 'carrierId' && root.child('carriers').child(query.equalTo).child('firebaseUid').val() == auth.uid))",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".indexOn": ["supplierId", "carrierId", "supplierFirebaseUid", "carrierFirebaseUid", "supplierEmail", "carrierEmail", "status", "createdAt"],
       "$loadId": {
-        ".read": true,
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || newData.child('supplierFirebaseUid').val() === auth.uid || newData.child('carrierFirebaseUid').val() === auth.uid)"
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('supplierFirebaseUid').val() === auth.uid || data.child('carrierFirebaseUid').val() === auth.uid || data.child('supplierEmail').val() === auth.token.email || data.child('carrierEmail').val() === auth.token.email || root.child('suppliers').child(data.child('supplierId').val()).child('firebaseUid').val() === auth.uid || root.child('carriers').child(data.child('carrierId').val()).child('firebaseUid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (newData.child('supplierFirebaseUid').val() === auth.uid && (data.child('supplierFirebaseUid').val() === auth.uid || !data.child('supplierFirebaseUid').exists())) || (newData.child('carrierFirebaseUid').val() === auth.uid && (data.child('carrierFirebaseUid').val() === auth.uid || !data.child('carrierFirebaseUid').exists())) || root.child('suppliers').child(newData.child('supplierId').val()).child('firebaseUid').val() === auth.uid || root.child('carriers').child(newData.child('carrierId').val()).child('firebaseUid').val() === auth.uid)"
+      }
+    },
+    "marketLoads": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".indexOn": ["status", "createdAt"],
+      "$loadId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
       }
     },
     "vehicles": {
@@ -22,21 +33,29 @@
       }
     },
     "suppliers": {
-      ".read": "auth != null || (query.orderByChild == 'email' && query.limitToFirst <= 1 && query.equalTo != null)",
-      ".write": "auth != null",
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".indexOn": ["email", "firebaseUid"],
       "$supplierId": {
         ".read": "auth != null",
-        ".write": "auth != null"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('firebaseUid').val() === auth.uid || (!data.exists() && newData.child('firebaseUid').val() === auth.uid))",
+        "fcmToken": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid || root.child('suppliers').child($supplierId).child('email').val() === auth.token.email)",
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid || root.child('suppliers').child($supplierId).child('email').val() === auth.token.email)"
+        }
       }
     },
     "carriers": {
-      ".read": "auth != null || (query.orderByChild == 'email' && query.limitToFirst <= 1 && query.equalTo != null)",
-      ".write": "auth != null",
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".indexOn": ["email", "firebaseUid"],
       "$carrierId": {
         ".read": "auth != null",
-        ".write": "auth != null"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('firebaseUid').val() === auth.uid || (!data.exists() && newData.child('firebaseUid').val() === auth.uid))",
+        "fcmToken": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid || root.child('carriers').child($carrierId).child('email').val() === auth.token.email)",
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid || root.child('carriers').child($carrierId).child('email').val() === auth.token.email)"
+        }
       }
     },
     "appeals": {
@@ -60,22 +79,64 @@
         ".write": "auth != null && (newData.child('carrierUid').val() === auth.uid || newData.child('supplierUid').val() === auth.uid || newData.child('senderUid').val() === auth.uid)"
       }
     },
+    "bids": {
+      "$loadId": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('loads').child($loadId).child('supplierFirebaseUid').val() === auth.uid || root.child('loads').child($loadId).child('carrierFirebaseUid').val() === auth.uid || root.child('loads').child($loadId).child('supplierEmail').val() === auth.token.email || root.child('loads').child($loadId).child('carrierEmail').val() === auth.token.email || root.child('suppliers').child(root.child('loads').child($loadId).child('supplierId').val()).child('firebaseUid').val() === auth.uid)",
+        "$bidId": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('carrierFirebaseUid').val() === auth.uid || data.child('carrierEmail').val() === auth.token.email || root.child('loads').child($loadId).child('supplierFirebaseUid').val() === auth.uid || root.child('loads').child($loadId).child('supplierEmail').val() === auth.token.email || root.child('suppliers').child(root.child('loads').child($loadId).child('supplierId').val()).child('firebaseUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || ((!data.exists() && newData.child('carrierFirebaseUid').val() === auth.uid) || (data.exists() && data.child('carrierFirebaseUid').val() === auth.uid) || (data.exists() && data.child('carrierEmail').val() === auth.token.email)) || root.child('loads').child($loadId).child('supplierFirebaseUid').val() === auth.uid || root.child('loads').child($loadId).child('supplierEmail').val() === auth.token.email || root.child('suppliers').child(root.child('loads').child($loadId).child('supplierId').val()).child('firebaseUid').val() === auth.uid)"
+        }
+      }
+    },
+    "carrierBids": {
+      ".indexOn": ["updatedAt"],
+      "$carrierId": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || $carrierId === auth.uid || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid || root.child('carriers').child($carrierId).child('email').val() === auth.token.email)",
+        "$loadId": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || $carrierId === auth.uid || data.child('carrierFirebaseUid').val() === auth.uid || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid || root.child('carriers').child($carrierId).child('email').val() === auth.token.email)",
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || $carrierId === auth.uid || ((!data.exists() && newData.child('carrierFirebaseUid').val() === auth.uid) || (data.exists() && data.child('carrierFirebaseUid').val() === auth.uid)) || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid || root.child('carriers').child($carrierId).child('email').val() === auth.token.email || (data.exists() && (root.child('loads').child($loadId).child('supplierFirebaseUid').val() === auth.uid || root.child('loads').child($loadId).child('supplierEmail').val() === auth.token.email || root.child('suppliers').child(root.child('loads').child($loadId).child('supplierId').val()).child('firebaseUid').val() === auth.uid) && newData.child('carrierFirebaseUid').val() === data.child('carrierFirebaseUid').val()))"
+        }
+      }
+    },
     "notifications": {
-      ".read": "auth != null",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "carriers": {
+        "$carrierId": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+          ".write": false,
+          "$notifId": {
+            ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid && data.exists()))"
+          }
+        }
+      },
+      "suppliers": {
+        "$supplierId": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid)",
+          ".write": false,
+          "$notifId": {
+            ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid)",
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid && data.exists()))"
+          }
+        }
+      }
+    },
+    "notificationQueue": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".write": "auth != null",
-      ".indexOn": ["user_id", "user_type", "read"],
-      "$notificationId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+      "$eventId": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".write": "auth != null && (!data.exists() && newData.child('senderUid').val() === auth.uid)"
       }
     },
     "refunds": {
-      ".read": "auth != null",
-      ".write": "auth != null",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".indexOn": ["loadId", "status", "createdAt"],
       "$refundId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('supplierFirebaseUid').val() === auth.uid || root.child('suppliers').child(data.child('supplierId').val()).child('firebaseUid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && (newData.child('supplierFirebaseUid').val() === auth.uid || root.child('suppliers').child(newData.child('supplierId').val()).child('firebaseUid').val() === auth.uid)) || (data.child('supplierFirebaseUid').val() === auth.uid && data.child('status').val() === 'pending' && newData.child('status').val() === 'pending'))"
       }
     },
     "chargebacks": {
@@ -88,14 +149,14 @@
       }
     },
     "walletLedger": {
-      ".read": "auth != null",
-      ".write": "auth != null",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$carrierId": {
-        ".read": "auth != null",
-        ".write": "auth != null",
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
         "$entryId": {
-          ".read": "auth != null",
-          ".write": "auth != null"
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+          ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
         }
       }
     },
@@ -126,11 +187,11 @@
       "comments": { ".read": "auth != null", ".write": "auth != null" }
     },
     "payments": {
-      ".read": "auth != null",
-      ".write": "auth != null",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$paymentId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('supplierFirebaseUid').val() === auth.uid || data.child('carrierFirebaseUid').val() === auth.uid || root.child('suppliers').child(data.child('supplierId').val()).child('firebaseUid').val() === auth.uid || root.child('carriers').child(data.child('carrierId').val()).child('firebaseUid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && (newData.child('supplierFirebaseUid').val() === auth.uid || root.child('suppliers').child(newData.child('supplierId').val()).child('firebaseUid').val() === auth.uid)))"
       }
     },
     "withdrawals": {
@@ -150,11 +211,31 @@
       }
     },
     "carrierBankDetails": {
-      ".read": "auth != null",
-      ".write": "auth != null",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$carrierId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)"
+      }
+    },
+    "withdrawRequests": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$carrierId": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+        "$withdrawalId": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('carriers').child($carrierId).child('firebaseUid').val() === auth.uid && newData.child('carrierId').val() === $carrierId && newData.child('carrierFirebaseUid').val() === auth.uid))"
+        }
+      }
+    },
+    "withdrawAudit": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$withdrawalId": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && newData.child('createdByUid').val() === auth.uid))"
       }
     },
     "carrierWithdrawals": {
@@ -179,11 +260,11 @@
       }
     },
     "admins": {
-      ".read": "auth != null",
-      ".write": "auth != null",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$uid": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || $uid == auth.uid)",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
       }
     }
   }

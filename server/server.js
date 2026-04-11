@@ -18,8 +18,6 @@ if (!STRIPE_SECRET_KEY) {
   console.error('⚠️  Please set STRIPE_SECRET_KEY in your environment variables (e.g., Render dashboard).');
 } else {
   console.log('✅ Using STRIPE_SECRET_KEY from environment variable');
-  // Debug: Log first 20 chars of key (for verification, not full key)
-  console.log('🔑 Stripe Key (first 20 chars):', STRIPE_SECRET_KEY.substring(0, 20) + '...');
 }
 const stripe = STRIPE_SECRET_KEY ? require('stripe')(STRIPE_SECRET_KEY) : null;
 

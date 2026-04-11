@@ -62,10 +62,9 @@ router.post('/payments/create-intent', async (req, res) => {
         }
         
         // Create PaymentIntent
-        const paymentIntent = await stripe.paymentIntents.create({
+        const paymentIntentParams = {
             amount: paymentAmount,
             currency: currency,
-            customer: customerId,
             metadata: {
                 tenantId: tenantId || '',
                 planType: planType || '',
@@ -74,7 +73,12 @@ router.post('/payments/create-intent', async (req, res) => {
             automatic_payment_methods: {
                 enabled: true
             }
-        });
+        };
+        if (customerId) {
+            paymentIntentParams.customer = customerId;
+        }
+
+        const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
         
         res.json({
             success: true,

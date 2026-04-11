@@ -48,7 +48,7 @@ const apiRequest = async (endpoint, options = {}) => {
         // Token expired or invalid
         localStorage.removeItem('authToken');
         sessionStorage.removeItem('authToken');
-        window.location.href = 'signup.html';
+        window.location.href = 'login.html';
         throw new Error('Authentication required');
     }
     

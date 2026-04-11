@@ -339,6 +339,34 @@
                 box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
             }
         }
+
+        #profileCompleteBanner{
+            margin: 0.9rem 1.25rem 0 !important;
+            padding: 0.85rem 0.9rem !important;
+            border-radius: 18px !important;
+            gap: 0.9rem !important;
+        }
+        #profileCompleteBanner > div{ align-items: center !important; }
+        #profileCompleteBanner > div > div:first-child{
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 14px !important;
+        }
+        #profileCompleteBannerText{
+            white-space: normal !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            line-height: 1.25 !important;
+        }
+        #profileCompleteBanner a{
+            padding: 0.55rem 0.95rem !important;
+            border-radius: 14px !important;
+            font-size: 0.8rem !important;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body class="has-bottom-nav">
@@ -532,6 +560,19 @@
                 <div class="menu-item-content">
                     <div class="menu-item-title">Bank Account</div>
                     <div class="menu-item-subtitle">Manage payment details</div>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </a>
+
+        <a href="my-bids.html" class="menu-item">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <div class="menu-item-content">
+                    <div class="menu-item-title">My Bids</div>
+                    <div class="menu-item-subtitle">Sent, seen, accepted, rejected</div>
                 </div>
             </div>
             <i class="fas fa-chevron-right menu-item-arrow"></i>
@@ -773,6 +814,14 @@
         }
 
         function getNetCarrierAmount(load) {
+            if (load && load.acceptedOffer && String(load.acceptedOffer.type || '').toLowerCase() === 'bid' && load.acceptedOffer.amount !== undefined && load.acceptedOffer.amount !== null && load.acceptedOffer.amount !== '') {
+                const v = parseFloat(load.acceptedOffer.amount);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
+            if (load && load.agreedPrice !== undefined && load.agreedPrice !== null && load.agreedPrice !== '') {
+                const v = parseFloat(load.agreedPrice);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
             if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
                 const v = parseFloat(load.carrierNetAmount);
                 if (!isNaN(v)) return v;

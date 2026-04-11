@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Load Templates - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+            --page-pad: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .title{
+            font-size: 1.2rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .sub{
+            margin-top: 6px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .btn-primary{
+            border: 0;
+            border-radius: 16px;
+            padding: 10px 12px;
+            font-weight: 950;
+            letter-spacing: -0.01em;
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            box-shadow: 0 18px 40px rgba(99,91,255,0.22);
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+        }
+        .btn-primary:active{ transform: scale(0.98); }
+
+        .content{ padding: 0 var(--page-pad) 18px; }
+
+        .action-row{
+            display:flex;
+            gap: 10px;
+            overflow-x:auto;
+            margin-top: 12px;
+            padding-bottom: 2px;
+        }
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+        }
+        .chip i { color: var(--primary); }
+        .chip:active{ transform: scale(0.98); }
+
+        .section-title{
+            margin-top: 16px;
+            font-size: 1rem;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .muted{ color: rgba(71,85,105,0.92); font-weight: 800; font-size: 0.86rem; }
+
+        .list{ margin-top: 10px; }
+        .card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 14px 14px 12px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow:hidden;
+        }
+        .card::before{
+            content:"";
+            position:absolute;
+            left:0;
+            top: 14px;
+            bottom: 14px;
+            width: 4px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.78));
+            border-radius: 0 3px 3px 0;
+            opacity: 0.9;
+        }
+        .card-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            padding-left: 8px;
+        }
+        .name{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 0.98rem;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .route{
+            margin-top: 4px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 800;
+            font-size: 0.82rem;
+        }
+        .meta{
+            margin-top: 8px;
+            padding-left: 8px;
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tag{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.84);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-weight: 900;
+            font-size: 0.74rem;
+        }
+        .card-actions{
+            margin-top: 10px;
+            padding-left: 8px;
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-weight: 950;
+            font-size: 0.82rem;
+            cursor:pointer;
+        }
+        .btn-mini.primary{
+            background: rgba(99,91,255,0.12);
+            border-color: rgba(99,91,255,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-mini.danger{
+            background: rgba(220,38,38,0.10);
+            border-color: rgba(220,38,38,0.18);
+            color: rgba(220,38,38,0.95);
+        }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .empty{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 20px 14px;
+            text-align:center;
+            color: rgba(71,85,105,0.92);
+        }
+        .empty i{ font-size: 2rem; color: rgba(71,85,105,0.65); margin-bottom: 10px; }
+        .empty h3{ margin: 0 0 4px; font-size: 1rem; font-weight: 950; color: rgba(15,23,42,0.90); }
+        .empty p{ margin: 0; font-weight: 800; font-size: 0.86rem; }
+
+        .overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(8px);
+            display:none;
+            align-items:flex-end;
+            justify-content:center;
+            padding: 18px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+            z-index: 2000;
+        }
+        .overlay.show{ display:flex; }
+        .sheet{
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+            overflow:hidden;
+        }
+        .sheet-head{
+            padding: 14px 14px 12px;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+        }
+        .sheet-title{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 1rem;
+            margin: 0;
+        }
+        .sheet-body{
+            padding: 12px 14px 14px;
+            max-height: min(72vh, 640px);
+            overflow:auto;
+        }
+        .grid{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .field{
+            display:flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .field label{
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: rgba(71,85,105,0.92);
+        }
+        .input, .select, .textarea{
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(15,23,42,0.12);
+            background: rgba(241,245,249,0.65);
+            padding: 10px 12px;
+            font-weight: 800;
+            color: rgba(15,23,42,0.90);
+            outline: none;
+        }
+        .textarea{ min-height: 90px; resize: vertical; }
+        .sheet-actions{
+            display:flex;
+            gap: 10px;
+            padding: 12px 14px 14px;
+            border-top: 1px solid rgba(15,23,42,0.08);
+            background: rgba(255,255,255,0.92);
+        }
+        .btn-wide{
+            flex:1;
+            border-radius: 16px;
+            padding: 12px 12px;
+            font-weight: 950;
+            border: 1px solid rgba(15,23,42,0.12);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.90);
+            cursor:pointer;
+        }
+        .btn-wide.primary{
+            border: 0;
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            color: #fff;
+            box-shadow: 0 18px 40px rgba(99,91,255,0.22);
+        }
+        .btn-wide:active{ transform: scale(0.99); }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="title">Load Templates</h1>
+                    <div class="sub">Save frequent routes and reuse in seconds</div>
+                </div>
+                <button type="button" class="btn btn-primary btn-primary" id="newTemplateBtn">
+                    <i class="fas fa-plus"></i><span>New</span>
+                </button>
+            </div>
+            <div class="action-row" aria-label="Template actions">
+                <button type="button" class="chip" id="createFromDraftBtn" style="display:none;">
+                    <i class="fas fa-wand-magic-sparkles"></i><span>Create from Draft</span>
+                </button>
+                <button type="button" class="chip" id="goPostLoadBtn">
+                    <i class="fas fa-plus-circle"></i><span>Post a Load</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section-title">
+            <div>Your Templates</div>
+            <div class="muted" id="templateCount">0</div>
+        </div>
+        <div class="list" id="templateList">
+            <div class="empty">
+                <i class="fas fa-layer-group"></i>
+                <h3>No templates yet</h3>
+                <p>Create a template to reuse route, vehicle and budget</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="editorOverlay" aria-hidden="true">
+        <div class="sheet" role="dialog" aria-modal="true" aria-label="Template editor">
+            <div class="sheet-head">
+                <h2 class="sheet-title" id="editorTitle">New Template</h2>
+                <button type="button" class="btn-mini" id="editorCloseBtn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="sheet-body">
+                <div class="field" style="margin-bottom:10px;">
+                    <label for="tplName">Template name</label>
+                    <input id="tplName" class="input" placeholder="e.g., London → Manchester (Van)" />
+                </div>
+
+                <div class="grid" style="margin-bottom:10px;">
+                    <div class="field">
+                        <label for="tplPickup">Pickup</label>
+                        <input id="tplPickup" class="input" placeholder="e.g., London, UK" />
+                    </div>
+                    <div class="field">
+                        <label for="tplDelivery">Delivery</label>
+                        <input id="tplDelivery" class="input" placeholder="e.g., Manchester, UK" />
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-bottom:10px;">
+                    <div class="field">
+                        <label for="tplVehicle">Vehicle</label>
+                        <select id="tplVehicle" class="select">
+                            <option value="">Any</option>
+                            <option value="van">Van</option>
+                            <option value="luton">Luton</option>
+                            <option value="7.5t">7.5T</option>
+                            <option value="18t">18T</option>
+                            <option value="artic">Artic</option>
+                            <option value="flatbed">Flatbed</option>
+                            <option value="curtainside">Curtainside</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="tplCargoType">Cargo type</label>
+                        <select id="tplCargoType" class="select">
+                            <option value="">Any</option>
+                            <option value="general">General</option>
+                            <option value="fragile">Fragile</option>
+                            <option value="food">Food</option>
+                            <option value="construction">Construction</option>
+                            <option value="machinery">Machinery</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="furniture">Furniture</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-bottom:10px;">
+                    <div class="field">
+                        <label for="tplWeight">Weight (kg)</label>
+                        <input id="tplWeight" class="input" inputmode="numeric" placeholder="e.g., 1200" />
+                    </div>
+                    <div class="field">
+                        <label for="tplUrgency">Urgency</label>
+                        <select id="tplUrgency" class="select">
+                            <option value="">Auto</option>
+                            <option value="standard">Standard</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="same-day">Same day</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-bottom:10px;">
+                    <div class="field">
+                        <label for="tplMinBudget">Min budget (£)</label>
+                        <input id="tplMinBudget" class="input" inputmode="numeric" placeholder="e.g., 650" />
+                    </div>
+                    <div class="field">
+                        <label for="tplMaxBudget">Max budget (£)</label>
+                        <input id="tplMaxBudget" class="input" inputmode="numeric" placeholder="e.g., 780" />
+                    </div>
+                </div>
+
+                <div class="field" style="margin-bottom:10px;">
+                    <label for="tplTitle">Load title</label>
+                    <input id="tplTitle" class="input" placeholder="e.g., Urgent pallet delivery" />
+                </div>
+
+                <div class="field">
+                    <label for="tplNotes">Notes</label>
+                    <textarea id="tplNotes" class="textarea" placeholder="Optional notes to reuse"></textarea>
+                </div>
+            </div>
+            <div class="sheet-actions">
+                <button type="button" class="btn-wide" id="editorCancelBtn">Cancel</button>
+                <button type="button" class="btn-wide primary" id="editorSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        function safeJsonParse(s, fallback) {
+            try { return JSON.parse(s); } catch (e) { return fallback; }
+        }
+        function nowIso() { return new Date().toISOString(); }
+        function genId() { return 'tpl_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16); }
+        function escapeHtml(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function getUserData() {
+            const auth = localStorage.getItem('supplierAuth');
+            return auth ? safeJsonParse(auth, null) : null;
+        }
+
+        function getSupplierKey() {
+            const user = getUserData();
+            if (!user) return 'guest';
+            return String(user.supplierId || user.id || user.email || 'guest');
+        }
+
+        function storageKey() {
+            return 'ab.loadTemplates.supplier.' + getSupplierKey();
+        }
+
+        function readTemplates() {
+            const raw = localStorage.getItem(storageKey());
+            const list = safeJsonParse(raw || '[]', []);
+            return Array.isArray(list) ? list : [];
+        }
+
+        function writeTemplates(list) {
+            localStorage.setItem(storageKey(), JSON.stringify(list || []));
+        }
+
+        let templates = [];
+        let editingId = '';
+
+        function openEditor(tpl) {
+            const isEdit = !!tpl;
+            editingId = isEdit ? String(tpl.id || '') : '';
+            document.getElementById('editorTitle').textContent = isEdit ? 'Edit Template' : 'New Template';
+
+            document.getElementById('tplName').value = tpl?.name || '';
+            document.getElementById('tplPickup').value = tpl?.pickupLocation || '';
+            document.getElementById('tplDelivery').value = tpl?.deliveryLocation || '';
+            document.getElementById('tplVehicle').value = tpl?.vehicleType || '';
+            document.getElementById('tplCargoType').value = tpl?.cargoType || '';
+            document.getElementById('tplWeight').value = tpl?.cargoWeight || '';
+            document.getElementById('tplUrgency').value = tpl?.urgency || '';
+            document.getElementById('tplMinBudget').value = tpl?.minBudget || '';
+            document.getElementById('tplMaxBudget').value = tpl?.maxBudget || '';
+            document.getElementById('tplTitle').value = tpl?.loadTitle || '';
+            document.getElementById('tplNotes').value = tpl?.notes || '';
+
+            const overlay = document.getElementById('editorOverlay');
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeEditor() {
+            const overlay = document.getElementById('editorOverlay');
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            editingId = '';
+        }
+
+        function normalizeBudget(v) {
+            const n = Number(String(v || '').replace(/[^\d.]/g, ''));
+            return Number.isFinite(n) && n > 0 ? String(Math.round(n)) : '';
+        }
+
+        function normalizeWeight(v) {
+            const n = Number(String(v || '').replace(/[^\d.]/g, ''));
+            return Number.isFinite(n) && n > 0 ? String(Math.round(n)) : '';
+        }
+
+        function saveEditor() {
+            const name = String(document.getElementById('tplName').value || '').trim();
+            const pickupLocation = String(document.getElementById('tplPickup').value || '').trim();
+            const deliveryLocation = String(document.getElementById('tplDelivery').value || '').trim();
+            const vehicleType = String(document.getElementById('tplVehicle').value || '').trim();
+            const cargoType = String(document.getElementById('tplCargoType').value || '').trim();
+            const cargoWeight = normalizeWeight(document.getElementById('tplWeight').value);
+            const urgency = String(document.getElementById('tplUrgency').value || '').trim();
+            const minBudget = normalizeBudget(document.getElementById('tplMinBudget').value);
+            const maxBudget = normalizeBudget(document.getElementById('tplMaxBudget').value);
+            const loadTitle = String(document.getElementById('tplTitle').value || '').trim();
+            const notes = String(document.getElementById('tplNotes').value || '').trim();
+
+            if (!name) {
+                alert('Please enter template name');
+                return;
+            }
+            if (!pickupLocation || !deliveryLocation) {
+                alert('Please enter pickup and delivery');
+                return;
+            }
+
+            const base = {
+                id: editingId || genId(),
+                name,
+                pickupLocation,
+                deliveryLocation,
+                vehicleType,
+                cargoType,
+                cargoWeight,
+                urgency,
+                minBudget,
+                maxBudget,
+                loadTitle,
+                notes
+            };
+
+            if (editingId) {
+                templates = templates.map(t => t.id === editingId ? { ...t, ...base, updatedAt: nowIso() } : t);
+            } else {
+                templates = [{ ...base, createdAt: nowIso(), updatedAt: nowIso() }, ...templates];
+            }
+
+            writeTemplates(templates);
+            closeEditor();
+            render();
+        }
+
+        function applyTemplate(id) {
+            const tpl = templates.find(t => String(t.id) === String(id));
+            if (!tpl) return;
+            localStorage.setItem('ab.loadTemplate.apply', JSON.stringify(tpl));
+            window.location.href = 'post-load.html';
+        }
+
+        function deleteTemplate(id) {
+            const tpl = templates.find(t => String(t.id) === String(id));
+            if (!tpl) return;
+            const ok = window.confirm('Delete "' + (tpl.name || 'template') + '"?');
+            if (!ok) return;
+            templates = templates.filter(t => String(t.id) !== String(id));
+            writeTemplates(templates);
+            render();
+        }
+
+        function formatUpdatedAt(tpl) {
+            const iso = tpl.updatedAt || tpl.createdAt || '';
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+
+        function render() {
+            const list = document.getElementById('templateList');
+            document.getElementById('templateCount').textContent = String(templates.length);
+
+            if (!templates.length) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-layer-group"></i><h3>No templates yet</h3><p>Create a template to reuse route, vehicle and budget</p></div>';
+                return;
+            }
+
+            list.innerHTML = templates.slice(0, 60).map(t => {
+                const route = `${t.pickupLocation || 'N/A'} → ${t.deliveryLocation || 'N/A'}`;
+                const tags = [];
+                if (t.vehicleType) tags.push(t.vehicleType);
+                if (t.cargoType) tags.push(t.cargoType);
+                if (t.cargoWeight) tags.push(`${t.cargoWeight}kg`);
+                if (t.minBudget || t.maxBudget) tags.push(`£${t.minBudget || '0'}–£${t.maxBudget || t.minBudget || '0'}`);
+                if (t.urgency) tags.push(t.urgency);
+                const updated = formatUpdatedAt(t);
+                if (updated) tags.push('Updated ' + updated);
+
+                return `
+                    <div class="card">
+                        <div class="card-head">
+                            <div style="min-width:0;">
+                                <p class="name">${escapeHtml(t.name || 'Template')}</p>
+                                <div class="route">${escapeHtml(route)}</div>
+                            </div>
+                        </div>
+                        <div class="meta">
+                            ${tags.slice(0, 5).map(x => `<span class="tag">${escapeHtml(x)}</span>`).join('')}
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" class="btn-mini primary" data-act="apply" data-id="${escapeHtml(t.id)}"><i class="fas fa-bolt"></i> Apply</button>
+                            <button type="button" class="btn-mini" data-act="edit" data-id="${escapeHtml(t.id)}"><i class="fas fa-pen"></i> Edit</button>
+                            <button type="button" class="btn-mini danger" data-act="delete" data-id="${escapeHtml(t.id)}"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('button[data-act]').forEach(btn => {
+                const act = btn.dataset.act || '';
+                const id = btn.dataset.id || '';
+                btn.addEventListener('click', () => {
+                    if (act === 'apply') applyTemplate(id);
+                    else if (act === 'edit') {
+                        const tpl = templates.find(t => String(t.id) === String(id));
+                        openEditor(tpl);
+                    } else if (act === 'delete') deleteTemplate(id);
+                });
+            });
+        }
+
+        function createFromDraft() {
+            const raw = localStorage.getItem('loadDraft');
+            if (!raw) return;
+            const d = safeJsonParse(raw, null);
+            if (!d) return;
+
+            const pickupLocation = String(d.pickupLocation || '').trim();
+            const deliveryLocation = String(d.deliveryLocation || '').trim();
+            if (!pickupLocation || !deliveryLocation) {
+                alert('Draft has no pickup/delivery');
+                return;
+            }
+
+            const tpl = {
+                id: '',
+                name: String(d.loadTitle || `${pickupLocation} → ${deliveryLocation}`).trim() || 'Template',
+                pickupLocation,
+                deliveryLocation,
+                vehicleType: String(d.vehicleType || '').trim(),
+                cargoType: String(d.cargoType || '').trim(),
+                cargoWeight: String(d.cargoWeight || '').trim(),
+                urgency: String(d.urgency || '').trim(),
+                minBudget: String(d.minBudget || '').trim(),
+                maxBudget: String(d.maxBudget || '').trim(),
+                loadTitle: String(d.loadTitle || '').trim(),
+                notes: String(d.additionalNotes || d.specialInstructions || '').trim()
+            };
+            openEditor(tpl);
+        }
+
+        document.getElementById('newTemplateBtn').addEventListener('click', () => openEditor(null));
+        document.getElementById('editorCloseBtn').addEventListener('click', closeEditor);
+        document.getElementById('editorCancelBtn').addEventListener('click', closeEditor);
+        document.getElementById('editorSaveBtn').addEventListener('click', saveEditor);
+        document.getElementById('editorOverlay').addEventListener('click', (e) => { if (e.target && e.target.id === 'editorOverlay') closeEditor(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeEditor(); });
+
+        document.getElementById('goPostLoadBtn').addEventListener('click', () => { window.location.href = 'post-load.html'; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            templates = readTemplates();
+            render();
+            const hasDraft = !!localStorage.getItem('loadDraft');
+            const btn = document.getElementById('createFromDraftBtn');
+            if (btn) {
+                btn.style.display = hasDraft ? '' : 'none';
+                btn.addEventListener('click', createFromDraft);
+            }
+        });
+    </script>
+</body>
+</html>

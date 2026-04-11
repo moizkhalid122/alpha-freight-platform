@@ -5,6 +5,17 @@
 (function () {
   var loadTime = Date.now();
   var isBottomZero = /Infinix|XOS|TECNO|itel/i.test(navigator.userAgent);
+  var noReloadPath = /\/pod\.html(\?|$)/i.test(String(window.location && window.location.pathname ? window.location.pathname : ''));
+
+  function isReloadDisabled() {
+    try {
+      if (noReloadPath) return true;
+      if (window && window.__AB_DISABLE_RESUME_RELOAD__) return true;
+      var el = document && document.documentElement;
+      if (el && el.getAttribute && (el.getAttribute('data-no-resume-reload') === '1' || el.getAttribute('data-no-resume-reload') === 'true')) return true;
+    } catch (e) {}
+    return false;
+  }
 
   if (isBottomZero) {
     document.documentElement.classList.add('footer-bottom-zero');
@@ -36,6 +47,7 @@
   }
 
   function doReload() {
+    if (isReloadDisabled()) return;
     window.location.reload();
   }
 

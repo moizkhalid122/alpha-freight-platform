@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#F8FAFC">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -524,9 +524,128 @@
                 margin-bottom: 0.5rem;
             }
         }
+
+        :root {
+            --primary: #06b6d4;
+            --primary-dark: #0891b2;
+            --primary-light: #8be8ff;
+            --gold: #c9a227;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #ffffff;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --max-w: 420px;
+            --content-top: 92px;
+            --content-side: 20px;
+            --logo-shift-y: -10px;
+        }
+
+        body.auth-clean {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+        }
+
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); }
+        * { scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .auth-clean .alert::before{ display:none !important; }
+        .auth-clean .alert-title{ display:none !important; }
+        .auth-clean .alert-icon{ display:none !important; }
+        .auth-clean .alert{
+            padding: 12px 14px !important;
+            border-left: 0 !important;
+            background: #fff !important;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.10) !important;
+            border: 1px solid rgba(15, 23, 42, 0.10) !important;
+            align-items: center !important;
+        }
+        .auth-clean .alert-message{
+            font-size: 0.9rem !important;
+            font-weight: 800 !important;
+            color: rgba(15,23,42,0.92) !important;
+        }
+        .auth-clean .alert-close{
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 12px !important;
+            opacity: 0.65 !important;
+        }
+
+        .login-container {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: calc(var(--content-top) + env(safe-area-inset-top, 0px)) var(--content-side) 1.5rem;
+        }
+
+        .auth-header{ padding: 0 0 1.25rem; text-align: left; }
+        .brand-logo{
+            margin-top: 0;
+            width: 210px;
+            max-width: 78vw;
+            height: auto;
+            object-fit: contain;
+            display:block;
+            margin-left: auto;
+            margin-right: auto;
+            transform: translateY(var(--logo-shift-y));
+        }
+        .auth-title{
+            margin-top: 12px;
+            font-size: 1.75rem;
+            font-weight: 1000;
+            letter-spacing: -0.03em;
+            color: rgba(15,23,42,0.92);
+        }
+        .auth-subtitle{
+            margin-top: 6px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(100,116,139,0.9);
+        }
+
+        .welcome-section { display: none; }
+
+        .form-card { background: transparent; border-radius: 0; padding: 0; box-shadow: none; border: 0; }
+        .form-section-title { display: none; }
+        .form-label { font-size: 0.875rem; font-weight: 700; color: var(--text-dark); }
+        .form-input {
+            padding: 0.85rem 1rem;
+            border: 1.5px solid rgba(15,23,42,0.22);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--text-dark);
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            min-height: 48px;
+        }
+        .form-input:focus{
+            outline:none;
+            border-color: rgba(15,23,42,0.45);
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.14);
+        }
+        .forgot-password { color: var(--primary-dark); font-weight: 800; }
+
+        .btn-primary{
+            font-weight: 800;
+            color: rgba(15,23,42,0.92);
+            background: #89E8FF;
+            border-radius: 10px;
+            box-shadow: none;
+        }
+        .google-signin-btn{
+            border: 1px solid rgba(15,23,42,0.18);
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
     </style>
 </head>
-<body>
+<body class="auth-clean">
     <!-- Mobile App Container -->
     <div class="app-container">
         <!-- Scroll Container -->
@@ -555,7 +674,13 @@
                 </div>
 
                 <!-- Login Form -->
-                <form id="loginForm">
+                <div class="auth-header">
+                    <img class="brand-logo" src="/assets/img/brand/logo.png" alt="Alpha Freight">
+                    <div class="auth-title">Welcome back</div>
+                    <div class="auth-subtitle">Sign in to your carrier account</div>
+                </div>
+
+                <form id="loginForm" novalidate>
                     <div class="form-card">
                         <h3 class="form-section-title">
                             <i class="fas fa-sign-in-alt"></i>
@@ -720,6 +845,11 @@
                 if (!authSdk || !db) {
                     throw new Error('Login service unavailable');
                 }
+                try {
+                    if (typeof authSdk.setPersistence === 'function') {
+                        await authSdk.setPersistence(rememberMe ? 'local' : 'session');
+                    }
+                } catch (e) {}
 
                 let legacyLookupPromise = null;
                 try {
@@ -772,7 +902,10 @@
                 const carrierAuth = {
                     ...carrier,
                     isLoggedIn: true,
-                    loginTime: new Date().toISOString()
+                    loginTime: new Date().toISOString(),
+                    rememberMe: rememberMe,
+                    rememberUntil: rememberMe ? (Date.now() + 30 * 24 * 60 * 60 * 1000) : 0,
+                    userType: 'carrier'
                 };
 
                 // Save to localStorage
@@ -781,13 +914,17 @@
 
                 if (rememberMe) {
                     localStorage.setItem('rememberCarrier', 'true');
+                } else {
+                    try { localStorage.removeItem('rememberCarrier'); } catch (e) {}
                 }
 
                 showSuccess('Sign in successful! Redirecting...');
 
                 // Redirect to dashboard after 1 second
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    const name = (carrierAuth && (carrierAuth.firstName || carrierAuth.name || carrierAuth.companyName || carrierAuth.email)) ? String(carrierAuth.firstName || carrierAuth.name || carrierAuth.companyName || carrierAuth.email) : '';
+                    const next = carrierAuth && carrierAuth.profileComplete === false ? '/mobile-app/carrier/edit-profile.html' : '/mobile-app/carrier/dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                 }, 1000);
 
             } catch (error) {
@@ -830,7 +967,11 @@
                                 localStorage.setItem('lastCarrierProfile', JSON.stringify(carrierAuth));
                                 if (rememberMe) localStorage.setItem('rememberCarrier', 'true');
                                 showSuccess('Sign in successful! Redirecting...');
-                                setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                                setTimeout(() => {
+                                    const name = (carrierAuth && (carrierAuth.firstName || carrierAuth.name || carrierAuth.companyName || carrierAuth.email)) ? String(carrierAuth.firstName || carrierAuth.name || carrierAuth.companyName || carrierAuth.email) : '';
+                                    const next = carrierAuth && carrierAuth.profileComplete === false ? '/mobile-app/carrier/edit-profile.html' : '/mobile-app/carrier/dashboard.html';
+                                    window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
+                                }, 800);
                                 return;
                             }
                             showError('Wrong password.', { title: 'Login Failed' });
@@ -850,6 +991,110 @@
                 submitBtn.disabled = false;
             }
         });
+
+        function hasRememberedCarrierSession() {
+            try {
+                const raw = localStorage.getItem('carrierAuth');
+                if (!raw) return false;
+                const auth = JSON.parse(raw);
+                let until = auth && auth.rememberUntil ? Number(auth.rememberUntil) : 0;
+                const remembered = !!(auth && auth.rememberMe) || localStorage.getItem('rememberCarrier') === 'true';
+                if (!remembered) return false;
+                if (!until || !Number.isFinite(until)) {
+                    const loginTs = auth && auth.loginTime ? Date.parse(auth.loginTime) : 0;
+                    if (loginTs && Number.isFinite(loginTs)) until = loginTs + 30 * 24 * 60 * 60 * 1000;
+                }
+                if (!until || !Number.isFinite(until)) return false;
+                if (Date.now() > until) return false;
+                return !!(auth && auth.isLoggedIn);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+        }
+
+        async function attemptAutoLogin() {
+            try {
+                const rememberBox = document.getElementById('rememberMe');
+                if (rememberBox) rememberBox.checked = hasRememberedCarrierSession();
+            } catch (e) {}
+
+            if (!hasRememberedCarrierSession()) return;
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!authSdk || !db) return;
+
+            try {
+                if (typeof authSdk.setPersistence === 'function') {
+                    await authSdk.setPersistence('local');
+                }
+            } catch (e) {}
+
+            await ensureAuthReady();
+            if (!authSdk.currentUser || !authSdk.currentUser.uid) return;
+            const uid = String(authSdk.currentUser.uid);
+
+            let carrier = null;
+            try {
+                const cachedRaw = localStorage.getItem('carrierAuth') || localStorage.getItem('lastCarrierProfile');
+                if (cachedRaw) {
+                    const cached = JSON.parse(cachedRaw);
+                    if (cached && cached.firebaseUid === uid) carrier = cached;
+                }
+            } catch (e) {}
+
+            if (!carrier) {
+                try {
+                    const snap = await db.ref('carriers').orderByChild('firebaseUid').equalTo(uid).limitToFirst(1).once('value');
+                    if (snap && snap.exists()) {
+                        snap.forEach((child) => {
+                            const c = child.val() || {};
+                            if (!c.carrierId) c.carrierId = child.key;
+                            carrier = c;
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            if (!carrier) return;
+            try { showSuccess('Signing you in...'); } catch (e) {}
+
+            const carrierAuth = {
+                ...carrier,
+                isLoggedIn: true,
+                loginTime: new Date().toISOString(),
+                rememberMe: true,
+                rememberUntil: Date.now() + 30 * 24 * 60 * 60 * 1000,
+                userType: 'carrier'
+            };
+            try {
+                localStorage.setItem('carrierAuth', JSON.stringify(carrierAuth));
+                localStorage.setItem('lastCarrierProfile', JSON.stringify(carrierAuth));
+                localStorage.setItem('rememberCarrier', 'true');
+            } catch (e) {}
+
+            const name = (carrierAuth && (carrierAuth.firstName || carrierAuth.name || carrierAuth.companyName || carrierAuth.email)) ? String(carrierAuth.firstName || carrierAuth.name || carrierAuth.companyName || carrierAuth.email) : '';
+            const next = carrierAuth && carrierAuth.profileComplete === false ? '/mobile-app/carrier/edit-profile.html' : '/mobile-app/carrier/dashboard.html';
+            window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
+        }
+
+        try { attemptAutoLogin().catch(function () {}); } catch (e) {}
 
         // Google Sign In
         const GOOGLE_CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';

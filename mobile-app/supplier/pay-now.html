@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -22,38 +22,40 @@
     <style>
         /* —— Premium theme (matches supplier dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
             --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.26); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
         html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             /* footer from supplier-bottom-nav.css */
             color: var(--text-dark);
@@ -61,38 +63,39 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1.5rem 1.25rem 1.75rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+            background: transparent;
+            color: rgba(15,23,42,0.92);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
-        }
+        .page-header::after { display:none; }
 
-        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .page-subtitle { font-size: 0.8125rem; opacity: 0.92; margin-top: 0.2rem; }
+        .page-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; text-shadow: none; }
+        .page-subtitle { font-size: 0.8125rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; margin-top: 0.2rem; }
 
         .summary-card {
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 1.5rem;
-            margin: 0 1.25rem 1.5rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-card);
+            margin: 0 var(--page-pad) 12px;
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
             position: relative;
             overflow: hidden;
         }
@@ -102,8 +105,8 @@
             left: 0;
             top: 12px;
             bottom: 12px;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            width: 3px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.75));
             border-radius: 0 2px 2px 0;
             opacity: 0.9;
         }
@@ -118,12 +121,12 @@
         }
 
         .summary-total {
-            border-top: 2px solid var(--border);
+            border-top: 1px solid rgba(15,23,42,0.10);
             margin-top: 0.75rem;
             padding-top: 1rem;
             font-size: 1.25rem;
             font-weight: 900;
-            color: var(--primary);
+            color: rgba(79,70,229,0.98);
             letter-spacing: -0.02em;
         }
 
@@ -131,22 +134,22 @@
             font-size: 0.9375rem;
             font-weight: 800;
             letter-spacing: -0.02em;
-            margin: 0 1.25rem 1rem;
+            margin: 12px var(--page-pad) 10px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        .section-title i { color: var(--primary); }
+        .section-title i { color: rgba(99,91,255,0.95); }
 
         .option-card {
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 1.25rem;
-            margin: 0 1.25rem 1rem;
-            border: 1px solid var(--border);
+            margin: 0 var(--page-pad) 12px;
+            border: 1px solid rgba(15,23,42,0.10);
             cursor: pointer;
             transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease);
-            box-shadow: var(--shadow-card);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
             position: relative;
             overflow: hidden;
         }
@@ -157,12 +160,12 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            opacity: 0.6;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.45;
         }
 
-        .option-card:active { transform: scale(0.99); box-shadow: var(--shadow-sm); }
-        .option-card.selected { border-color: var(--primary); box-shadow: 0 8px 28px rgba(29, 78, 216, 0.12); }
+        .option-card:active { transform: scale(0.99); box-shadow: 0 10px 22px rgba(15,23,42,0.08); }
+        .option-card.selected { border-color: rgba(99,91,255,0.25); box-shadow: 0 14px 34px rgba(99, 91, 255, 0.14); }
 
         .option-card-header {
             display: flex;
@@ -174,13 +177,13 @@
             width: 48px;
             height: 48px;
             border-radius: var(--radius-sm);
-            background: linear-gradient(145deg, rgba(29, 78, 216, 0.12) 0%, rgba(29, 78, 216, 0.06) 100%);
+            background: rgba(99,91,255,0.14);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            color: var(--primary);
-            box-shadow: 0 2px 10px rgba(29, 78, 216, 0.12);
+            color: rgba(79,70,229,0.98);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
         }
 
         .option-title { font-size: 1rem; font-weight: 800; }
@@ -190,9 +193,9 @@
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 1.25rem;
-            margin: 0 1.25rem 1rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-card);
+            margin: 0 var(--page-pad) 12px;
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
         }
 
         .bank-row {
@@ -207,8 +210,8 @@
 
         .confirm-btn {
             display: block;
-            width: calc(100% - 2.5rem);
-            margin: 1rem 1.25rem;
+            width: calc(100% - (var(--page-pad) * 2));
+            margin: 10px var(--page-pad) 12px;
             padding: 1rem;
             background: linear-gradient(145deg, #10b981 0%, var(--success) 100%);
             color: white;
@@ -217,18 +220,18 @@
             font-size: 1rem;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.3);
+            box-shadow: 0 14px 34px rgba(5, 150, 105, 0.22);
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
         }
 
-        .confirm-btn:active { transform: scale(0.98); box-shadow: 0 4px 16px rgba(5, 150, 105, 0.25); }
+        .confirm-btn:active { transform: scale(0.99); box-shadow: 0 10px 28px rgba(5, 150, 105, 0.18); }
 
         .pay-card-btn {
             display: block;
-            width: calc(100% - 2.5rem);
-            margin: 1rem 1.25rem;
+            width: 100%;
+            margin: 10px 0 0;
             padding: 1rem;
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: var(--radius-sm);
@@ -236,11 +239,11 @@
             font-weight: 800;
             cursor: pointer;
             text-align: center;
-            box-shadow: 0 8px 24px rgba(29, 78, 216, 0.35);
+            box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22);
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
         }
 
-        .pay-card-btn:active { transform: scale(0.98); box-shadow: 0 4px 16px rgba(29, 78, 216, 0.3); }
+        .pay-card-btn:active { transform: scale(0.99); box-shadow: 0 10px 28px rgba(99, 91, 255, 0.18); }
 
         /* Official Apple Pay button styling - black background */
         .apple-pay-btn {
@@ -302,6 +305,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="../../assets/js/firebase-init.js"></script>
     <script src="../../assets/js/alerts.js"></script>
 
@@ -443,7 +447,7 @@
                     </button>
                 </div>
 
-                <div class="section-title" style="margin-top:1.5rem;"><i class="fas fa-file-invoice"></i> Not ready to pay?</div>
+                <div class="section-title" style="margin-top:12px;"><i class="fas fa-file-invoice"></i> Not ready to pay?</div>
                 <div class="option-card" id="payLetterOption" onclick="addToPayLetter()">
                     <div class="option-card-header">
                         <div class="option-icon"><i class="fas fa-file-invoice-dollar"></i></div>
@@ -452,7 +456,7 @@
                             <div class="option-desc">Add to Pay Letter and pay when ready</div>
                         </div>
                     </div>
-                    <button class="pay-card-btn" style="margin-top:1rem;background:var(--text-medium);" onclick="event.stopPropagation(); addToPayLetter();">
+                    <button class="pay-card-btn" style="background: rgba(15,23,42,0.86);" onclick="event.stopPropagation(); addToPayLetter();">
                         <i class="fas fa-plus"></i> Add to Pay Letter
                     </button>
                 </div>

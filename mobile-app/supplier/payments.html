@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -26,39 +26,40 @@
     <style>
         /* —— Premium theme (matches supplier dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
-            --gold: #c9a227;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --success: #059669;
             --error: #dc2626;
             --warning: #d97706;
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
-            --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.22); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
         html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             /* footer from supplier-bottom-nav.css */
             color: var(--text-dark);
@@ -66,45 +67,107 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
-        .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1.5rem 1.25rem 1.75rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            overflow: hidden;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
         }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .page-title { font-size: 1.2rem; font-weight: 950; letter-spacing: -0.03em; margin: 0; line-height: 1.2; }
+        .page-subtitle { margin-top: 6px; font-size: 0.88rem; color: rgba(71,85,105,0.92); font-weight: 700; }
+        .icon-btn{
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            display:grid;
+            place-items:center;
+            color: rgba(15,23,42,0.86);
+            box-shadow: 0 12px 28px rgba(15,23,42,0.10);
+            cursor:pointer;
+            flex-shrink:0;
+        }
+        .icon-btn:active { transform: scale(0.98); }
 
-        .page-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.375rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .page-subtitle { font-size: 0.875rem; opacity: 0.92; }
+        .quick-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .quick-row::-webkit-scrollbar{ display:none; }
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            cursor:pointer;
+        }
+        .chip i { color: var(--primary); }
+        .chip:active{ transform: scale(0.98); }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
-            padding: 0 1.25rem;
-            margin-bottom: 1.5rem;
+            margin-top: 12px;
         }
 
         .stat-card {
-            background: var(--card-bg);
+            background: rgba(255,255,255,0.92);
             border-radius: var(--radius);
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-card);
+            padding: 14px 12px;
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
             position: relative;
             overflow: hidden;
         }
@@ -115,29 +178,32 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            opacity: 0.6;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.55;
         }
 
-        .stat-label { font-size: 0.8125rem; color: var(--text-medium); margin-bottom: 0.375rem; font-weight: 600; }
-        .stat-value { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; color: var(--text-dark); }
+        .stat-label { font-size: 0.72rem; color: rgba(71,85,105,0.90); margin-bottom: 0.25rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat-value { font-size: 1.25rem; font-weight: 950; letter-spacing: -0.03em; color: var(--text-dark); }
 
         .filter-row {
             display: flex;
             gap: 0.5rem;
-            padding: 0 1.25rem;
             margin-bottom: 1rem;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
+        .filter-row::-webkit-scrollbar{ display:none; }
 
         .filter-btn {
             padding: 0.5rem 1rem;
             border-radius: 999px;
-            border: 2px solid var(--border);
-            background: var(--card-bg);
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
             font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--text-dark);
+            font-weight: 950;
+            color: rgba(15,23,42,0.86);
             cursor: pointer;
             white-space: nowrap;
             transition: transform 0.3s var(--ease), background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease);
@@ -145,15 +211,16 @@
         }
 
         .filter-btn.active {
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
-            border-color: var(--primary);
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            border-color: rgba(99,91,255,0.65);
             color: white;
-            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+            box-shadow: 0 16px 34px rgba(99,91,255,0.22);
         }
 
         .filter-btn:active { transform: scale(0.96); }
 
-        .payments-section { padding: 0 1.25rem; }
+        .content { padding: 0 var(--page-pad) 18px; }
+        .payments-section { padding: 0; }
 
         .section-title {
             font-size: 1rem;
@@ -168,11 +235,11 @@
         .section-title i { color: var(--primary); }
 
         .payment-card {
-            background: var(--card-bg);
+            background: rgba(255,255,255,0.92);
             border-radius: var(--radius);
-            padding: 1.25rem;
+            padding: 14px 14px 12px;
             margin-bottom: 0.875rem;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(15,23,42,0.10);
             box-shadow: var(--shadow-card);
             position: relative;
             overflow: hidden;
@@ -184,7 +251,7 @@
             top: 12px;
             bottom: 12px;
             width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.78));
             border-radius: 0 2px 2px 0;
             opacity: 0.9;
         }
@@ -225,10 +292,10 @@
         .empty-state {
             text-align: center;
             padding: 2.5rem 1.5rem;
-            background: var(--card-bg);
+            background: rgba(255,255,255,0.92);
             border-radius: var(--radius);
-            margin: 0 1.25rem;
-            border: 1px solid var(--border);
+            margin: 0;
+            border: 1px solid rgba(15,23,42,0.10);
             box-shadow: var(--shadow-sm);
         }
 
@@ -242,45 +309,63 @@
     </style>
 </head>
 <body class="has-bottom-nav">
-    <div class="page-header">
-        <h1 class="page-title">Payments</h1>
-        <p class="page-subtitle">Track and manage your payment transactions</p>
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="page-title">Payments</h1>
+                    <p class="page-subtitle">Track and manage your payment transactions</p>
+                </div>
+                <button type="button" class="icon-btn" id="refreshBtn" aria-label="Refresh">
+                    <i class="fas fa-rotate-right"></i>
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Paid (This Month)</div>
+                    <div class="stat-value" id="monthlySpent">£0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Amount</div>
+                    <div class="stat-value" id="pendingAmount">£0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completed</div>
+                    <div class="stat-value" id="completedCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg per Load</div>
+                    <div class="stat-value" id="avgAmount">£0</div>
+                </div>
+            </div>
+
+            <div class="quick-row" aria-label="Quick links">
+                <a class="chip" href="invoice-center.html"><i class="fas fa-file-invoice-dollar"></i><span>Invoice Center</span></a>
+                <a class="chip" href="pay-letter.html"><i class="fas fa-file-invoice"></i><span>Pay Letter</span></a>
+                <a class="chip" href="my-loads.html"><i class="fas fa-boxes"></i><span>My Loads</span></a>
+            </div>
+        </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Total Spent (This Month)</div>
-            <div class="stat-value" id="monthlySpent">£0</div>
+    <div class="content">
+        <div class="filter-row">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="failed">Failed</button>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Pending Amount</div>
-            <div class="stat-value" id="pendingAmount">£0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Completed Payments</div>
-            <div class="stat-value" id="completedCount">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Avg per Load</div>
-            <div class="stat-value" id="avgAmount">£0</div>
-        </div>
-    </div>
 
-    <div class="filter-row">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="completed">Completed</button>
-        <button class="filter-btn" data-filter="pending">Pending</button>
-    </div>
-
-    <div class="payments-section">
-        <h3 class="section-title">
-            <i class="fas fa-receipt"></i>
-            Payment History
-        </h3>
-        <div id="paymentsList">
-            <div class="empty-state">
-                <i class="fas fa-spinner fa-spin"></i>
-                <h3>Loading...</h3>
+        <div class="payments-section">
+            <h3 class="section-title">
+                <i class="fas fa-receipt"></i>
+                Payment History
+            </h3>
+            <div id="paymentsList">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Loading...</h3>
+                </div>
             </div>
         </div>
     </div>
@@ -310,6 +395,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="../../assets/js/firebase-init.js"></script>
     <script src="../../assets/js/alerts.js"></script>
 
@@ -325,8 +411,50 @@
             return auth ? JSON.parse(auth) : null;
         }
 
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveSupplierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('suppliers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
+        }
+
         function formatCurrency(val) {
-            return '£' + parseFloat(val || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            const n = Number(val || 0);
+            const safe = Number.isFinite(n) ? n : 0;
+            return '£' + safe.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         function formatDate(str) {
@@ -342,7 +470,7 @@
             return 'pending';
         }
 
-        function loadPayments() {
+        async function loadPayments() {
             const user = getUserData();
             const container = document.getElementById('paymentsList');
 
@@ -351,7 +479,6 @@
                 return;
             }
 
-            const supplierId = user.supplierId || user.email?.replace(/@/g, '_').replace(/\./g, '_');
             const db = window.AlphaBrokrage.firebaseDb;
 
             if (!db) {
@@ -359,55 +486,73 @@
                 return;
             }
 
-            db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value', (snap) => {
-                allPayments = [];
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!ok || !authSdk || !authSdk.currentUser) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3><p>Session expired. Please login again.</p></div>';
+                return;
+            }
 
-                if (snap.exists()) {
-                    snap.forEach((child) => {
-                        const load = child.val();
-                        const loadId = child.key;
+            const authUid = String(authSdk.currentUser.uid || '');
+            const authEmail = String(authSdk.currentUser.email || user.email || '');
+            const fallbackSupplierId = user.supplierId || user.email?.replace(/@/g, '_').replace(/\./g, '_');
+            const supplierId = await resolveSupplierIdByUid(db, authUid, fallbackSupplierId);
 
-                        const ps = load.paymentStatus || {};
-                        const showPaidOrTracked = ps.completed || ps.status || ps.method || ps.paymentIntentId;
-                        if (showPaidOrTracked || load.carrierId || load.carrierName || ['posted', 'available', 'pending', 'completed', 'delivered', 'active', 'accepted', 'in_transit', 'in-transit'].includes((load.status || '').toLowerCase())) {
-                            const amount = parseFloat(load.price || load.budget || load.maxBudget || load.minBudget || 0);
+            const map = {};
+            async function mergeQuery(q) {
+                const snap = await q.once('value');
+                if (!snap.exists()) return;
+                snap.forEach((ch) => { map[ch.key] = ch.val() || {}; });
+            }
 
-                            let commission = 0, rate = 0.05;
-                            if (load.supplierCommission !== undefined) {
-                                commission = parseFloat(load.supplierCommission) || 0;
-                            } else {
-                                if (amount > 5000) rate = 0.03;
-                                else if (amount > 1000) rate = 0.04;
-                                commission = amount * rate;
-                            }
+            const jobs = [
+                mergeQuery(db.ref('loads').orderByChild('supplierFirebaseUid').equalTo(authUid))
+            ];
+            if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierEmail').equalTo(authEmail)));
+            if (supplierId) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierId').equalTo(supplierId)));
+            await Promise.allSettled(jobs);
 
-                            const totalAmount = amount + commission;
-                            const status = getPaymentStatus(load);
+            allPayments = [];
+            Object.entries(map).forEach(([loadId, load]) => {
+                const ps = load.paymentStatus || {};
+                const showPaidOrTracked = ps.completed || ps.status || ps.method || ps.paymentIntentId;
+                if (showPaidOrTracked || load.carrierId || load.carrierName || ['posted', 'available', 'pending', 'completed', 'delivered', 'active', 'accepted', 'in_transit', 'in-transit'].includes((load.status || '').toLowerCase())) {
+                    const amount = parseFloat(load.price || load.budget || load.maxBudget || load.minBudget || 0);
 
-                            allPayments.push({
-                                id: loadId,
-                                amount,
-                                commission,
-                                totalAmount,
-                                status,
-                                route: `${load.pickupLocation || load.pickup_location || 'N/A'} → ${load.deliveryLocation || load.delivery_location || 'N/A'}`,
-                                carrierName: load.carrierName || load.carrier_name || 'Carrier',
-                                completedAt: load.completedAt || load.deliveryDate || load.updatedAt || load.createdAt,
-                                createdAt: load.createdAt || load.created_at
-                            });
-                        }
+                    let commission = 0, rate = 0.05;
+                    if (load.supplierCommission !== undefined) {
+                        commission = parseFloat(load.supplierCommission) || 0;
+                    } else {
+                        if (amount > 5000) rate = 0.03;
+                        else if (amount > 1000) rate = 0.04;
+                        commission = amount * rate;
+                    }
+
+                    const totalAmount = amount + commission;
+                    const status = getPaymentStatus(load);
+
+                    allPayments.push({
+                        id: loadId,
+                        amount,
+                        commission,
+                        totalAmount,
+                        status,
+                        route: `${load.pickupLocation || load.pickup_location || 'N/A'} → ${load.deliveryLocation || load.delivery_location || 'N/A'}`,
+                        carrierName: load.carrierName || load.carrier_name || 'Carrier',
+                        completedAt: load.completedAt || load.deliveryDate || load.updatedAt || load.createdAt,
+                        createdAt: load.createdAt || load.created_at
                     });
                 }
-
-                allPayments.sort((a, b) => {
-                    const da = new Date(a.completedAt || a.createdAt || 0);
-                    const db = new Date(b.completedAt || b.createdAt || 0);
-                    return db - da;
-                });
-
-                updateStats();
-                renderPayments();
             });
+
+            allPayments.sort((a, b) => {
+                const da = new Date(a.completedAt || a.createdAt || 0);
+                const db2 = new Date(b.completedAt || b.createdAt || 0);
+                return db2 - da;
+            });
+
+            updateStats();
+            renderPayments();
         }
 
         function updateStats() {
@@ -473,6 +618,9 @@
                 renderPayments();
             });
         });
+
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) refreshBtn.addEventListener('click', () => loadPayments().catch(() => showError('Could not refresh')));
 
         document.addEventListener('DOMContentLoaded', loadPayments);
     </script>

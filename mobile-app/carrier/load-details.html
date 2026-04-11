@@ -189,6 +189,94 @@
         .btn-action.secondary { background: var(--card-bg); color: var(--primary); border: 2px solid var(--primary); }
         .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-sheet {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 24px 72px rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+            transform: translateY(18px);
+            opacity: 0;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+        }
+        .modal-overlay.show .modal-sheet { transform: translateY(0); opacity: 1; }
+        .modal-head {
+            padding: 1rem 1rem 0.65rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .modal-title { font-weight: 900; letter-spacing: -0.02em; font-size: 1.05rem; }
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .modal-body { padding: 0 1rem 0.95rem; display: grid; gap: 0.8rem; }
+        .field {
+            padding: 0.9rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+        .field .label { font-size: 0.72rem; font-weight: 800; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.06em; }
+        .field .value { margin-top: 0.4rem; }
+        .field select, .field input, .field textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 0.85rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            font-weight: 800;
+        }
+        .field textarea { min-height: 96px; resize: vertical; }
+        .modal-actions {
+            display: flex;
+            gap: 0.65rem;
+            padding: 0.85rem 1rem 1rem;
+            border-top: 1px solid var(--border);
+            background: rgba(241, 245, 249, 0.65);
+        }
+        .btn-sheet {
+            flex: 1;
+            border-radius: 12px;
+            padding: 0.8rem 0.9rem;
+            font-weight: 900;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .btn-sheet.cancel { background: #fff; color: var(--text-dark); border: 2px solid var(--border); }
+        .btn-sheet.danger { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 10px 22px rgba(220, 38, 38, 0.24); }
+        .btn-sheet:disabled { opacity: 0.65; cursor: not-allowed; }
+        .thumb { width: 100%; border-radius: 14px; border: 1px solid var(--border); display:block; }
+
         .empty-state { text-align: center; padding: 3rem 1.5rem; margin: 0 1.25rem; }
         .empty-state i { font-size: 3rem; color: var(--text-medium); margin-bottom: 1rem; }
         .empty-state h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
@@ -216,6 +304,52 @@
     <div id="contentArea">
         <div class="loading">
             <div class="spinner"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="disputeModal" aria-hidden="true">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="disputeModalTitle">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="disputeModalTitle">Open Dispute</div>
+                    <div style="font-size:0.85rem;color:var(--text-medium);margin-top:0.15rem;">Add details and optional evidence photo</div>
+                </div>
+                <button class="modal-close" type="button" id="disputeModalClose" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <div class="label">Type</div>
+                    <div class="value">
+                        <select id="dpType">
+                            <option value="pod_dispute">POD Dispute</option>
+                            <option value="damage">Damage</option>
+                            <option value="missing_items">Missing Items</option>
+                            <option value="late_delivery">Late Delivery</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="label">Details</div>
+                    <div class="value">
+                        <textarea id="dpMsg" placeholder="Write full details..."></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="label">Evidence Photo (optional)</div>
+                    <div class="value">
+                        <input id="dpFile" type="file" accept="image/*">
+                        <div class="muted" id="dpFileMeta" style="margin-top:0.5rem;"></div>
+                        <div id="dpPreviewWrap" style="display:none;margin-top:0.75rem;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-sheet cancel" type="button" id="dpCancel"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <button class="btn-sheet danger" type="button" id="dpSubmit"><i class="fas fa-flag"></i> Submit</button>
+            </div>
         </div>
     </div>
 
@@ -283,6 +417,14 @@
         }
 
         function getNetCarrierAmount(load) {
+            if (load && load.acceptedOffer && String(load.acceptedOffer.type || '').toLowerCase() === 'bid' && load.acceptedOffer.amount !== undefined && load.acceptedOffer.amount !== null && load.acceptedOffer.amount !== '') {
+                const v = parseFloat(load.acceptedOffer.amount);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
+            if (load && load.agreedPrice !== undefined && load.agreedPrice !== null && load.agreedPrice !== '') {
+                const v = parseFloat(load.agreedPrice);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
             const originalBudget = load && (load.budget || (load.minBudget && load.maxBudget ? (parseFloat(load.minBudget) + parseFloat(load.maxBudget)) / 2 : load.maxBudget || load.minBudget || load.price || 0));
             const original = parseFloat(originalBudget) || 0;
             const commissionRate = getCarrierCommissionRate(original);
@@ -371,27 +513,31 @@
 
         async function createDbNotification(userId, userType, title, message, data) {
             try {
-                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
-                if (!db || !userId || !userType) return null;
-                const payload = {
-                    user_id: userId,
-                    user_type: userType,
-                    type: (data && data.type) ? data.type : 'system',
-                    title: title,
-                    message: message,
-                    data: data || {},
-                    read: false,
-                    created_at: new Date().toISOString()
-                };
-                const ref = db.ref('notifications').push();
-                await ref.set(payload).catch(() => {});
+                if (!userId || !userType) return null;
+                const type = (data && data.type) ? data.type : 'system';
+
                 try {
-                    if (userType === 'supplier') {
-                        await db.ref(`notifications/suppliers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
-                    } else if (userType === 'carrier') {
-                        await db.ref(`notifications/carriers/${userId}`).push({ title, message, type: payload.type, data: payload.data, read: false, createdAt: new Date().toISOString() }).catch(() => {});
+                    if (typeof NotificationManager !== 'undefined' && NotificationManager.create) {
+                        return await NotificationManager.create(type, title, message, data || {}, userId, userType);
                     }
                 } catch (e) {}
+
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                if (!db) return null;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const senderUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
+                if (!senderUid) return null;
+                const ref = db.ref('notificationQueue').push();
+                await ref.set({
+                    senderUid,
+                    toUserId: userId,
+                    toUserType: userType,
+                    title,
+                    message,
+                    type,
+                    data: data || {},
+                    createdAt: new Date().toISOString()
+                }).catch(() => {});
                 return ref.key || null;
             } catch (e) {
                 return null;
@@ -411,6 +557,9 @@
                 await ensureAuthReady();
                 const authUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : '';
                 if (!authUid) { window.location.href = 'login.html'; return; }
+                const user = getUser() || {};
+                const myCarrierId = user.carrierId || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+                const isMyCarrier = (loadData.carrierId && myCarrierId && loadData.carrierId === myCarrierId) || (loadData.carrierEmail && user.email && loadData.carrierEmail === user.email) || (!loadData.carrierId && myCarrierId);
                 const req = loadData.cancellationRequest || {};
                 const fee = (req && typeof req.proposedFee === 'number')
                     ? loadData.cancellationRequest.proposedFee
@@ -420,7 +569,7 @@
                     alertSystem.show('error', 'Cancellation fee is not paid yet.');
                     return;
                 }
-                await db.ref('loads/' + loadId).update({
+                const updates = {
                     status: 'cancelled',
                     cancelledAt: new Date().toISOString(),
                     cancelledByRole: 'supplier',
@@ -435,7 +584,12 @@
                         approvedAt: new Date().toISOString(),
                         approvedByRole: 'carrier'
                     }
-                });
+                };
+                if (isMyCarrier) {
+                    if (loadData.carrierFirebaseUid !== authUid) updates.carrierFirebaseUid = authUid;
+                    if (!loadData.carrierId && myCarrierId) updates.carrierId = myCarrierId;
+                }
+                await db.ref('loads/' + loadId).update(updates);
                 try {
                     const supplierId = getSupplierIdFromLoad(loadData);
                     if (supplierId) {
@@ -465,11 +619,14 @@
                 await ensureAuthReady();
                 const authUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : '';
                 if (!authUid) { window.location.href = 'login.html'; return; }
+                const user = getUser() || {};
+                const myCarrierId = user.carrierId || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+                const isMyCarrier = (loadData.carrierId && myCarrierId && loadData.carrierId === myCarrierId) || (loadData.carrierEmail && user.email && loadData.carrierEmail === user.email) || (!loadData.carrierId && myCarrierId);
                 const req = loadData.cancellationRequest || {};
                 const fee = (req && typeof req.proposedFee === 'number') ? req.proposedFee : calculateCancelFee(loadData);
                 const feePaid = fee <= 0 || req.feePaid === true || !!req.feePaymentId || !!req.feePaymentIntentId;
                 const refundDueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-                await db.ref('loads/' + loadId).update({
+                const updates = {
                     cancellationStatus: 'rejected',
                     cancellationRequest: {
                         ...(loadData.cancellationRequest || {}),
@@ -484,7 +641,12 @@
                         dueAt: refundDueAt,
                         createdAt: new Date().toISOString()
                     } : null
-                });
+                };
+                if (isMyCarrier) {
+                    if (loadData.carrierFirebaseUid !== authUid) updates.carrierFirebaseUid = authUid;
+                    if (!loadData.carrierId && myCarrierId) updates.carrierId = myCarrierId;
+                }
+                await db.ref('loads/' + loadId).update(updates);
                 try {
                     const supplierId = getSupplierIdFromLoad(loadData);
                     if (supplierId) {
@@ -517,6 +679,9 @@
                 await ensureAuthReady();
                 const authUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : '';
                 if (!authUid) { window.location.href = 'login.html'; return; }
+                const user = getUser() || {};
+                const myCarrierId = user.carrierId || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+                const isMyCarrier = (loadData.carrierId && myCarrierId && loadData.carrierId === myCarrierId) || (loadData.carrierEmail && user.email && loadData.carrierEmail === user.email) || (!loadData.carrierId && myCarrierId);
                 const loadRef = db.ref('loads/' + loadId);
                 const updates = {
                     rescheduleRequest: { ...req, status: 'approved', approvedAt: new Date().toISOString(), approvedByRole: 'carrier' },
@@ -524,6 +689,10 @@
                 };
                 if (req.newPickupDate) updates.pickupDate = req.newPickupDate;
                 if (req.newDeliveryDate) updates.deliveryDate = req.newDeliveryDate;
+                if (isMyCarrier) {
+                    if (loadData.carrierFirebaseUid !== authUid) updates.carrierFirebaseUid = authUid;
+                    if (!loadData.carrierId && myCarrierId) updates.carrierId = myCarrierId;
+                }
                 await loadRef.update(updates);
                 const historyRef = loadRef.child('rescheduleHistory').push();
                 await historyRef.set({
@@ -553,10 +722,18 @@
                 await ensureAuthReady();
                 const authUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? authSdk.currentUser.uid : '';
                 if (!authUid) { window.location.href = 'login.html'; return; }
-                await db.ref('loads/' + loadId).update({
+                const user = getUser() || {};
+                const myCarrierId = user.carrierId || (user.email || '').replace(/@/g, '_').replace(/\./g, '_');
+                const isMyCarrier = (loadData.carrierId && myCarrierId && loadData.carrierId === myCarrierId) || (loadData.carrierEmail && user.email && loadData.carrierEmail === user.email) || (!loadData.carrierId && myCarrierId);
+                const updates = {
                     rescheduleRequest: { ...req, status: 'rejected', rejectedAt: new Date().toISOString(), rejectedByRole: 'carrier', rejectionReason: String(reason || '') },
                     rescheduleStatus: 'rejected'
-                });
+                };
+                if (isMyCarrier) {
+                    if (loadData.carrierFirebaseUid !== authUid) updates.carrierFirebaseUid = authUid;
+                    if (!loadData.carrierId && myCarrierId) updates.carrierId = myCarrierId;
+                }
+                await db.ref('loads/' + loadId).update(updates);
                 alertSystem.show('success', 'Reschedule rejected');
                 await loadDetails();
             } catch (e) {
@@ -591,14 +768,55 @@
             return (load.carrierId === cid || load.assignedCarrier === cid || load.carrierEmail === user.email);
         }
 
+        function supplierKeyFromEmail(email) {
+            return String(email || '').replace(/@/g, '_').replace(/\./g, '_');
+        }
+
+        async function compressImageToJpeg(file, opts) {
+            const maxSize = opts && opts.maxSize ? opts.maxSize : 1280;
+            const quality = opts && opts.quality ? opts.quality : 0.75;
+            const dataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('read_failed'));
+                reader.readAsDataURL(file);
+            });
+            const img = await new Promise((resolve, reject) => {
+                const i = new Image();
+                i.onload = () => resolve(i);
+                i.onerror = () => reject(new Error('invalid_image'));
+                i.src = dataUrl;
+            });
+            const w = img.width || 1;
+            const h = img.height || 1;
+            const scale = Math.min(1, maxSize / Math.max(w, h));
+            const outW = Math.max(1, Math.round(w * scale));
+            const outH = Math.max(1, Math.round(h * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = outW;
+            canvas.height = outH;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, outW, outH);
+            ctx.drawImage(img, 0, 0, outW, outH);
+            return canvas.toDataURL('image/jpeg', quality);
+        }
+
         function buildActionsHtml(load) {
             const status = (load.status || '').toLowerCase();
             const lid = load.loadId || load.id || loadId;
             const hasPOD = !!(load && (load.hasPOD || load.podUrl || (load.pod && (load.pod.photoDataUrl || load.pod.signatureDataUrl))));
+            const disputeOpen = !!(load && load.dispute && String(load.dispute.status || '').toLowerCase() === 'open');
             if (status === 'accepted' || status === 'active') {
                 return `
                     <button type="button" class="btn-action success" onclick="updateStatus('picked-up')">
                         <i class="fas fa-box"></i> Mark Picked Up
+                    </button>
+                    <a href="share-location.html?loadId=${encodeURIComponent(loadId)}" class="btn-action secondary">
+                        <i class="fas fa-location-dot"></i> Share Location
+                    </a>
+                    <button type="button" class="btn-action danger" onclick="openDisputeModal()" ${disputeOpen ? 'disabled' : ''}>
+                        <i class="fas fa-flag"></i> Dispute
                     </button>
                 `;
             }
@@ -607,6 +825,12 @@
                     <button type="button" class="btn-action success" onclick="updateStatus('in-transit')">
                         <i class="fas fa-truck"></i> Start Transit
                     </button>
+                    <a href="share-location.html?loadId=${encodeURIComponent(loadId)}" class="btn-action secondary">
+                        <i class="fas fa-location-dot"></i> Share Location
+                    </a>
+                    <button type="button" class="btn-action danger" onclick="openDisputeModal()" ${disputeOpen ? 'disabled' : ''}>
+                        <i class="fas fa-flag"></i> Dispute
+                    </button>
                 `;
             }
             if (status.includes('transit')) {
@@ -614,6 +838,12 @@
                     <a href="pod.html?id=${encodeURIComponent(loadId)}&mode=complete" class="btn-action success">
                         <i class="fas fa-clipboard-check"></i> Deliver & POD
                     </a>
+                    <a href="share-location.html?loadId=${encodeURIComponent(loadId)}" class="btn-action secondary">
+                        <i class="fas fa-location-dot"></i> Share Location
+                    </a>
+                    <button type="button" class="btn-action danger" onclick="openDisputeModal()" ${disputeOpen ? 'disabled' : ''}>
+                        <i class="fas fa-flag"></i> Dispute
+                    </button>
                 `;
             }
             if (status === 'completed' || status === 'delivered') {
@@ -630,9 +860,100 @@
                     <a href="receipt.html?id=${lid}&mode=payout" class="btn-action secondary">
                         <i class="fas fa-file-invoice-dollar"></i> Payout
                     </a>
+                    <button type="button" class="btn-action danger" onclick="openDisputeModal()" ${disputeOpen ? 'disabled' : ''}>
+                        <i class="fas fa-flag"></i> Dispute
+                    </button>
                 `;
             }
             return '';
+        }
+
+        function openDisputeModal() {
+            const overlay = document.getElementById('disputeModal');
+            if (!overlay) return;
+            const msg = document.getElementById('dpMsg');
+            const meta = document.getElementById('dpFileMeta');
+            const prev = document.getElementById('dpPreviewWrap');
+            const input = document.getElementById('dpFile');
+            if (msg) msg.value = '';
+            if (meta) meta.textContent = '';
+            if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; }
+            if (input) input.value = '';
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeDisputeModal() {
+            const overlay = document.getElementById('disputeModal');
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        async function submitDispute() {
+            if (!loadData) return;
+            const type = String((document.getElementById('dpType') || {}).value || '').trim() || 'other';
+            const msg = String((document.getElementById('dpMsg') || {}).value || '').trim();
+            if (msg.length < 10) { alertSystem.show('error', 'Please add more details'); return; }
+            const input = document.getElementById('dpFile');
+            const file = input && input.files && input.files[0] ? input.files[0] : null;
+            let evidenceDataUrl = '';
+            let evidenceType = '';
+            if (file) {
+                evidenceType = 'image/jpeg';
+                evidenceDataUrl = await compressImageToJpeg(file, { maxSize: 1280, quality: 0.72 });
+            }
+
+            const user = getUser() || {};
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            await ensureAuthReady();
+            const carrierUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
+            if (!carrierUid) {
+                alertSystem.show('error', 'Session expired. Please login again.');
+                setTimeout(() => { window.location.href = 'login.html'; }, 800);
+                return;
+            }
+
+            const carrierId = user.carrierId || user.id || (user.email ? String(user.email).replace(/@/g, '_').replace(/\./g, '_') : '');
+            const now = new Date().toISOString();
+            const dispute = {
+                status: 'open',
+                type,
+                message: msg,
+                evidenceDataUrl: evidenceDataUrl || '',
+                evidenceType: evidenceType || '',
+                createdAt: now,
+                createdByRole: 'carrier',
+                carrierId: carrierId || (loadData.carrierId || ''),
+                carrierFirebaseUid: carrierUid
+            };
+
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                await db.ref('loads/' + loadId).update({
+                    disputeStatus: 'open',
+                    dispute,
+                    carrierFirebaseUid: carrierUid
+                });
+                try {
+                    const supplierId = String(loadData.supplierId || supplierKeyFromEmail(loadData.supplierEmail || '')).trim();
+                    if (supplierId) {
+                        await createDbNotification(
+                            supplierId,
+                            'supplier',
+                            'Dispute Opened',
+                            'Carrier opened a dispute on this load',
+                            { type: 'dispute_opened', loadId: String(loadId), url: '/mobile-app/supplier/load-details.html?id=' + encodeURIComponent(loadId) }
+                        );
+                    }
+                } catch (e) {}
+                alertSystem.show('success', 'Dispute submitted');
+                closeDisputeModal();
+                await loadDetails();
+            } catch (e) {
+                console.error(e);
+                alertSystem.show('error', 'Failed to submit dispute');
+            }
         }
 
         function buildRequestsHtml(load) {
@@ -715,7 +1036,7 @@
 
         function renderContent(load) {
             const content = document.getElementById('contentArea');
-            if (!load || !isMyLoad(load)) {
+            if (!load) {
                 content.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
@@ -728,6 +1049,8 @@
             }
 
             loadData = load;
+            const user = getUser();
+            const mine = user ? isMyLoad(load) : false;
             const lid = load.loadId || load.id || loadId;
             document.getElementById('loadIdDisplay').textContent = 'Load #' + (lid + '').substring(0, 8);
 
@@ -742,8 +1065,17 @@
             const weight = load.cargoWeight ? load.cargoWeight + ' tonnes' : 'N/A';
             const distance = load.distance ? load.distance + ' miles' : 'N/A';
 
-            const actionsHtml = buildActionsHtml(load);
-            const reqHtml = buildRequestsHtml(load);
+            const assigned = !!(load.carrierId || load.assignedCarrier || load.carrierEmail);
+            const accessNote = !user
+                ? `<div class="req-card"><div class="req-title"><span>Sign in required</span><span class="pill warn"><i class="fas fa-lock"></i> Limited</span></div><div class="req-sub">You can view details, but sign in to accept or update a load.</div><div class="req-actions"><a href="login.html" class="btn-action success"><i class="fas fa-sign-in-alt"></i> Login</a><a href="loads.html" class="btn-action secondary"><i class="fas fa-clipboard-list"></i> Back to Loads</a></div></div>`
+                : (!mine && assigned)
+                    ? `<div class="req-card"><div class="req-title"><span>Not assigned to you</span><span class="pill danger"><i class="fas fa-user-lock"></i> Locked</span></div><div class="req-sub">This load is assigned to another carrier.</div><div class="req-actions"><a href="loads.html" class="btn-action secondary"><i class="fas fa-clipboard-list"></i> Back to Loads</a></div></div>`
+                    : (!mine && !assigned)
+                        ? `<div class="req-card"><div class="req-title"><span>Available load</span><span class="pill warn"><i class="fas fa-bolt"></i> Market</span></div><div class="req-sub">You can bid or accept from the Available Loads list.</div><div class="req-actions"><a href="loads.html" class="btn-action success"><i class="fas fa-tag"></i> Go to Bid</a></div></div>`
+                        : '';
+
+            const actionsHtml = mine ? buildActionsHtml(load) : '';
+            const reqHtml = mine ? buildRequestsHtml(load) : '';
 
             content.innerHTML = `
                 <div class="details-card">
@@ -798,6 +1130,7 @@
                     </div>
                 </div>
                 ${buildTimelineHtml(load)}
+                ${accessNote || ''}
                 ${reqHtml || ''}
                 ${actionsHtml ? `<div class="actions-section"><div class="action-btns">${actionsHtml}</div></div>` : ''}
             `;
@@ -841,11 +1174,14 @@
                     if (newStatus === 'picked-up') { title = 'Load Picked Up'; message = 'Your load has been picked up: ' + route; }
                     else if (newStatus === 'in-transit') { title = 'Load In Transit'; message = 'Your load is now in transit: ' + route; }
                     else if (newStatus === 'completed') { title = 'Load Delivered!'; message = 'Your load has been delivered: ' + route; }
-                    await db.ref('notifications/suppliers/' + supplierId).push({
-                        title, message,
-                        type: newStatus === 'completed' ? 'load_completed' : 'load_status_update',
-                        loadId, read: false, createdAt: new Date().toISOString()
-                    });
+                    const type = newStatus === 'completed' ? 'load_completed' : 'load_status_update';
+                    await createDbNotification(
+                        supplierId,
+                        'supplier',
+                        title,
+                        message,
+                        { type, loadId, url: '/mobile-app/supplier/load-details.html?id=' + encodeURIComponent(loadId) }
+                    );
                 }
 
                 alertSystem.show('success', 'Status updated to ' + newStatus.replace('-', ' '));
@@ -865,29 +1201,80 @@
             }
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
-                const snap = await db.ref('loads/' + loadId).once('value');
-                const load = snap.val();
+                let load = null;
+                try {
+                    const snap = await db.ref('loads/' + loadId).once('value');
+                    load = snap.val() || null;
+                } catch (e) {
+                    load = null;
+                }
+                if (!load) {
+                    try {
+                        const ms = await db.ref('marketLoads/' + loadId).once('value');
+                        load = ms.val() || null;
+                    } catch (e) {
+                        load = null;
+                    }
+                }
                 if (load) {
                     load.loadId = loadId;
                     load.id = loadId;
                     renderContent(load);
-                } else {
-                    renderContent(null);
+                    return;
                 }
+                renderContent(null);
             } catch (e) {
                 console.error(e);
+                try {
+                    const db = window.AlphaBrokrage.firebaseDb;
+                    const ms = await db.ref('marketLoads/' + loadId).once('value');
+                    const load = ms.val() || null;
+                    if (load) {
+                        load.loadId = loadId;
+                        load.id = loadId;
+                        renderContent(load);
+                        return;
+                    }
+                } catch (e2) {}
                 document.getElementById('contentArea').innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
                         <h3>Error</h3>
                         <p>Failed to load details. Please try again.</p>
-                        <a href="my-loads.html" class="btn-action secondary" style="margin-top:1rem;display:inline-flex;">Back to My Loads</a>
+                        <a href="loads.html" class="btn-action secondary" style="margin-top:1rem;display:inline-flex;">Back to Loads</a>
                     </div>
                 `;
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadDetails);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDetails();
+            const overlay = document.getElementById('disputeModal');
+            const closeBtn = document.getElementById('disputeModalClose');
+            const cancelBtn = document.getElementById('dpCancel');
+            const submitBtn = document.getElementById('dpSubmit');
+            const input = document.getElementById('dpFile');
+            const meta = document.getElementById('dpFileMeta');
+            const prev = document.getElementById('dpPreviewWrap');
+            if (closeBtn) closeBtn.addEventListener('click', closeDisputeModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeDisputeModal);
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDisputeModal(); });
+            if (submitBtn) submitBtn.addEventListener('click', submitDispute);
+            if (input && meta) {
+                input.addEventListener('change', async () => {
+                    const f = input.files && input.files[0];
+                    if (!f) { meta.textContent = ''; if (prev) { prev.style.display='none'; prev.innerHTML=''; } return; }
+                    meta.textContent = `${f.name} • ${Math.round((f.size || 0) / 1024)} KB`;
+                    if (prev) {
+                        try {
+                            const dataUrl = await compressImageToJpeg(f, { maxSize: 920, quality: 0.7 });
+                            prev.style.display = '';
+                            prev.innerHTML = `<img class="thumb" src="${String(dataUrl).replace(/\"/g,'&quot;')}" alt="Evidence">`;
+                        } catch (e) {}
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

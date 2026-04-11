@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#FFFFFF">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -34,9 +34,13 @@
     
     <style>
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #06b6d4;
+            --primary-dark: #0891b2;
+            --primary-light: #8be8ff;
+            --content-top: 64px;
+            --content-side: 20px;
+            --max-w: 420px;
+            --logo-shift-y: 0px;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
@@ -44,7 +48,7 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
+            --bg-main: #ffffff;
             --card-bg: #ffffff;
             --border: #e2e8f0;
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
@@ -64,7 +68,7 @@
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: #ffffff;
             min-height: 100vh;
             color: var(--text-dark);
             line-height: 1.6;
@@ -87,14 +91,14 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(29, 78, 216, 0.25);
+            background: rgba(15, 23, 42, 0.16);
             border-radius: 10px;
             transition: background 0.3s ease;
         }
 
-        ::-webkit-scrollbar-thumb:hover { background: rgba(29, 78, 216, 0.4); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.24); }
 
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
 
         html {
             scroll-behavior: smooth;
@@ -104,7 +108,7 @@
         .app-container {
             max-width: 100%;
             margin: 0 auto;
-            background: var(--bg-main);
+            background: #ffffff;
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
@@ -112,21 +116,14 @@
 
         /* Container */
         .signup-container {
-            max-width: 100%;
-            padding: 0 1rem 1.5rem;
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: calc(var(--content-top) + env(safe-area-inset-top, 0px)) var(--content-side) 1.5rem;
         }
 
         /* Welcome Section */
         .welcome-section {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: white;
-            padding: calc(0.9rem + env(safe-area-inset-top, 0px)) 1.5rem 2.25rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.5s var(--ease);
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            display: none;
         }
         .welcome-section::after {
             content: '';
@@ -196,12 +193,12 @@
 
         /* Form Card */
         .form-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-card);
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
             margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
+            border: 0;
             animation: slideInUp 0.4s var(--ease);
             position: relative;
             overflow: hidden;
@@ -213,18 +210,12 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            opacity: 0.6;
+            background: transparent;
+            opacity: 0;
         }
 
         .form-section-title {
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            display: none;
         }
 
         .form-section-title i {
@@ -247,11 +238,11 @@
 
         .form-input {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.85rem 1rem;
             font-size: 1rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-main);
+            border: 1.5px solid rgba(15,23,42,0.22);
+            border-radius: 10px;
+            background: #fff;
             color: var(--text-dark);
             transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease);
             min-height: 48px;
@@ -259,10 +250,10 @@
 
         .form-input:focus {
             outline: none;
-            border-color: var(--primary);
-            background: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
-            transform: translateY(-1px);
+            border-color: rgba(15,23,42,0.45);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.14);
+            transform: none;
         }
 
         .form-input::placeholder {
@@ -271,11 +262,11 @@
 
         .form-select {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.85rem 1rem;
             font-size: 1rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-main);
+            border: 1.5px solid rgba(15,23,42,0.22);
+            border-radius: 10px;
+            background: #fff;
             color: var(--text-dark);
             min-height: 48px;
             appearance: none;
@@ -443,10 +434,10 @@
             padding: 1rem;
             font-size: 1rem;
             font-weight: 800;
-            color: white;
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            color: rgba(15,23,42,0.92);
+            background: #89E8FF;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 10px;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
             min-height: 52px;
@@ -455,12 +446,12 @@
             justify-content: center;
             gap: 0.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 8px 24px rgba(29, 78, 216, 0.35);
+            box-shadow: none;
         }
 
         .btn-primary:active {
             transform: scale(0.98);
-            box-shadow: 0 4px 16px rgba(29, 78, 216, 0.3);
+            box-shadow: none;
         }
 
         .btn-primary:disabled {
@@ -487,9 +478,9 @@
             font-size: 0.9375rem;
             font-weight: 700;
             color: var(--text-dark);
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
+            background: #fff;
+            border: 1px solid rgba(15,23,42,0.18);
+            border-radius: 10px;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
             min-height: 52px;
@@ -498,12 +489,12 @@
             justify-content: center;
             gap: 0.75rem;
             margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: none;
         }
 
         .google-signin-btn:active {
             transform: scale(0.98);
-            background: var(--bg-main);
+            background: rgba(2,6,23,0.02);
         }
 
         .google-signin-btn svg {
@@ -526,7 +517,7 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: var(--border);
+            background: rgba(15,23,42,0.12);
         }
 
         /* Error Message */
@@ -550,11 +541,11 @@
         /* Login Link */
         .login-link {
             text-align: center;
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: var(--shadow-sm);
+            margin-top: 1.25rem;
+            padding: 0.75rem 0;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
         }
 
         .login-link-text {
@@ -563,9 +554,9 @@
         }
 
         .login-link-text a {
-            color: var(--primary);
+            color: var(--primary-dark);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 800;
         }
 
         /* Animations */
@@ -595,8 +586,8 @@
         .spinner {
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
+            border: 3px solid rgba(15,23,42,0.20);
+            border-top-color: rgba(15,23,42,0.85);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -616,13 +607,7 @@
 
         /* Progress Indicator */
         .progress-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--border);
-            z-index: 1001;
+            display: none;
         }
 
         .progress-bar {
@@ -667,23 +652,62 @@
 
         /* Responsive */
         @media (min-width: 768px) {
-            .app-container {
-                max-width: 500px;
-                margin: 0 auto;
-                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-            }
+            .signup-container { padding: calc(84px + env(safe-area-inset-top, 0px)) 2rem 2rem; }
+        }
 
-            .signup-container {
-                padding: 2rem;
-            }
+        .auth-clean .alert::before{ display:none !important; }
+        .auth-clean .alert-title{ display:none !important; }
+        .auth-clean .alert-icon{ display:none !important; }
+        .auth-clean .alert{
+            padding: 12px 14px !important;
+            border-left: 0 !important;
+            background: #fff !important;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.10) !important;
+            border: 1px solid rgba(15, 23, 42, 0.10) !important;
+            align-items: center !important;
+        }
+        .auth-clean .alert-message{
+            font-size: 0.9rem !important;
+            font-weight: 800 !important;
+            color: rgba(15,23,42,0.92) !important;
+        }
+        .auth-clean .alert-close{
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 12px !important;
+            opacity: 0.65 !important;
+        }
+
+        .auth-header{ padding: 0 0 1.25rem; text-align: left; }
+        .brand-logo{
+            width: 190px;
+            max-width: 78vw;
+            max-height: 56px;
+            height: auto;
+            object-fit: contain;
+            display:block;
+            margin-left: auto;
+            margin-right: auto;
+            transform: translateY(var(--logo-shift-y));
+        }
+        .auth-title{
+            margin-top: 12px;
+            font-size: 1.75rem;
+            font-weight: 1000;
+            letter-spacing: -0.03em;
+            color: rgba(15,23,42,0.96);
+            text-align: left;
+        }
+        .auth-subtitle{
+            margin-top: 6px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(100,116,139,0.9);
+            text-align: left;
         }
     </style>
 </head>
-<body>
-    <!-- Progress Indicator -->
-    <div class="progress-indicator">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
+<body class="auth-clean">
 
     <!-- Mobile App Container -->
     <div class="app-container">
@@ -691,35 +715,13 @@
         <div class="scroll-container">
             <!-- Main Container -->
             <div class="signup-container">
-                <!-- Welcome Section -->
-                <div class="welcome-section">
-                    <div style="position: relative; z-index: 1;">
-                        <h1 class="welcome-title">Join Alpha Freight</h1>
-                        <p class="welcome-subtitle">Post loads and connect with verified carriers</p>
-                    </div>
-                    
-                    <div class="benefits-list">
-                        <div class="benefit-item">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Free registration</span>
-                        </div>
-                        <div class="benefit-item">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Instant carrier access</span>
-                        </div>
-                        <div class="benefit-item">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Real-time tracking</span>
-                        </div>
-                        <div class="benefit-item">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Secure payments</span>
-                        </div>
-                    </div>
+                <div class="auth-header">
+                    <img class="brand-logo" src="/assets/img/brand/logo.png" alt="Alpha Freight">
+                    <div class="auth-title">Create your account</div>
+                    <div class="auth-subtitle">Please enter your details</div>
                 </div>
 
-                <!-- Registration Form -->
-                <form id="signupForm">
+                <form id="signupForm" novalidate>
                     <!-- Personal Details -->
                     <div class="form-card">
                         <h3 class="form-section-title">
@@ -755,47 +757,6 @@
                                 <input type="tel" class="form-input phone-input" id="phone" placeholder="7123 456789" required>
                             </div>
                             <div class="error-message">Please enter a valid phone number</div>
-                        </div>
-                    </div>
-
-                    <!-- Business Details -->
-                    <div class="form-card">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-building"></i>
-                            Business Details
-                        </h3>
-
-                        <div class="form-group">
-                            <label class="form-label" for="companyName">Company Name</label>
-                            <input type="text" class="form-input" id="companyName" placeholder="Your company name" required>
-                            <div class="error-message">Please enter your company name</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="businessType">Business Type</label>
-                            <select class="form-select" id="businessType" required>
-                                <option value="">Select business type</option>
-                                <option value="Manufacturing">Manufacturing</option>
-                                <option value="Retail">Retail</option>
-                                <option value="Wholesale">Wholesale</option>
-                                <option value="E-commerce">E-commerce</option>
-                                <option value="Distribution">Distribution</option>
-                                <option value="Logistics">Logistics</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <div class="error-message">Please select business type</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="yearsOperation">Years in Operation</label>
-                            <select class="form-select" id="yearsOperation" required>
-                                <option value="">Select years</option>
-                                <option value="0-1">0-1 years</option>
-                                <option value="2-5">2-5 years</option>
-                                <option value="6-10">6-10 years</option>
-                                <option value="10+">10+ years</option>
-                            </select>
-                            <div class="error-message">Please select years in operation</div>
                         </div>
                     </div>
 
@@ -941,14 +902,8 @@
         // Initialize alerts
         const alertSystem = new AlertSystem();
 
-        // Helper functions
-        function showError(message) {
-            alertSystem.show('error', message);
-        }
-
-        function showSuccess(message) {
-            alertSystem.show('success', message);
-        }
+        function showError(message) { alertSystem.error(message, { title: '' }); }
+        function showSuccess(message) { alertSystem.success(message, { title: '' }); }
 
         // Password Toggle
         function togglePassword(inputId) {
@@ -1039,27 +994,6 @@
                 isValid = false;
             }
 
-            // Company Name
-            const companyName = document.getElementById('companyName').value.trim();
-            if (!companyName) {
-                document.getElementById('companyName').closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
-            // Business Type
-            const businessType = document.getElementById('businessType').value;
-            if (!businessType) {
-                document.getElementById('businessType').closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
-            // Years Operation
-            const yearsOperation = document.getElementById('yearsOperation').value;
-            if (!yearsOperation) {
-                document.getElementById('yearsOperation').closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
             // Password
             const password = document.getElementById('password').value;
             const isPasswordValid = checkPasswordStrength(password);
@@ -1088,11 +1022,13 @@
 
         // Progress Bar on Scroll
         function updateProgressBar() {
+            const bar = document.getElementById('progressBar');
+            if (!bar) return;
             const windowHeight = window.innerHeight;
             const documentHeight = document.documentElement.scrollHeight;
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
-            document.getElementById('progressBar').style.width = scrollPercent + '%';
+            bar.style.width = scrollPercent + '%';
         }
         window.addEventListener('scroll', updateProgressBar);
 
@@ -1101,7 +1037,6 @@
             e.preventDefault();
 
             if (!validateForm()) {
-                showError('Please fill all required fields correctly');
                 return;
             }
 
@@ -1124,12 +1059,8 @@
                     lastName: document.getElementById('lastName').value.trim(),
                     email: document.getElementById('email').value.trim().toLowerCase(),
                     phone: '+44' + document.getElementById('phone').value.replace(/\s/g, ''),
-                    companyName: document.getElementById('companyName').value.trim(),
-                    businessType: document.getElementById('businessType').value,
-                    yearsOperation: document.getElementById('yearsOperation').value,
-                    marketing: document.getElementById('marketing').checked,
                     userType: 'supplier',
-                    status: 'pending_verification',
+                    status: 'pending',
                     profileComplete: false,
                     createdAt: new Date().toISOString()
                 };
@@ -1169,7 +1100,7 @@
                 // Redirect to dashboard after 1.5 seconds
                 setTimeout(() => {
                     loadingOverlay.classList.remove('show');
-                    window.location.href = 'dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?role=supplier&next=' + encodeURIComponent('/mobile-app/supplier/edit-profile.html');
                 }, 1500);
 
             } catch (error) {
@@ -1239,12 +1170,8 @@
                         firstName: (firebaseUser.displayName || '').split(' ')[0] || '',
                         lastName: (firebaseUser.displayName || '').split(' ').slice(1).join(' ') || '',
                         phone: '',
-                        companyName: '',
-                        businessType: '',
-                        yearsOperation: '',
-                        marketing: false,
                         userType: 'supplier',
-                        status: 'pending_verification',
+                        status: 'pending',
                         profileComplete: false,
                         createdAt: new Date().toISOString(),
                         isLoggedIn: false
@@ -1262,7 +1189,7 @@
 
                 showSuccess('Signing in...');
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?role=supplier&next=' + encodeURIComponent('/mobile-app/supplier/edit-profile.html');
                 }, 800);
             } catch (e) {
                 console.error(e);

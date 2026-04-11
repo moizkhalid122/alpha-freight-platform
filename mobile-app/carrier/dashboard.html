@@ -605,7 +605,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <div class="header-icon-btn" onclick="window.location.href='messages.html'">
+                <div class="header-icon-btn" onclick="window.location.href='notifications.html'">
                     <i class="fas fa-bell"></i>
                     <span class="notification-badge" id="notificationBadge" style="display: none;">3</span>
                 </div>
@@ -742,6 +742,25 @@
         </a>
     </nav>
 
+    <div id="dashTourSpot" style="position: fixed; border-radius: 18px; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.95), 0 24px 60px rgba(0,0,0,0.35); background: rgba(255,255,255,0.06); z-index: 10001; pointer-events: none; display: none;"></div>
+    <div id="dashTourOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); z-index: 10000; display: none; align-items: flex-end; justify-content: center; padding: 18px 16px 22px;" aria-hidden="true">
+        <div style="width: 100%; max-width: 420px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 16px 16px 14px; box-shadow: 0 18px 55px rgba(0,0,0,0.35);" role="dialog" aria-modal="true" aria-label="App Tour">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;">
+                <div id="dashTourSteps" style="font-size:0.8rem; opacity:0.85; letter-spacing:0.02em;">Step 1/5</div>
+                <button type="button" id="dashTourSkip" style="background:transparent; border:0; color:rgba(255,255,255,0.9); font-weight:800; font-size:0.85rem; padding:8px 10px; border-radius:12px; cursor:pointer;">Skip</button>
+            </div>
+            <div id="dashTourTitle" style="font-size:1.05rem; font-weight:900; letter-spacing:-0.02em; margin-bottom:6px; color:#fff;"></div>
+            <div id="dashTourBody" style="font-size:0.92rem; line-height:1.45; opacity:0.92; margin-bottom:14px; color:rgba(255,255,255,0.92);"></div>
+            <div style="display:flex; gap:10px; align-items:center; justify-content:space-between;">
+                <div style="display:flex; gap:10px;">
+                    <button type="button" id="dashTourBack" style="border:1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.95); font-weight:900; border-radius:14px; padding:12px 14px; font-size:0.92rem; cursor:pointer;">Back</button>
+                    <button type="button" id="dashTourNext" style="border:0; background:#2563EB; color:#fff; font-weight:900; border-radius:14px; padding:12px 14px; font-size:0.92rem; cursor:pointer;">Next</button>
+                </div>
+                <div id="dashTourDots" style="display:flex; gap:6px; align-items:center;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -829,6 +848,14 @@
         }
 
         function getNetCarrierAmount(load) {
+            if (load && load.acceptedOffer && String(load.acceptedOffer.type || '').toLowerCase() === 'bid' && load.acceptedOffer.amount !== undefined && load.acceptedOffer.amount !== null && load.acceptedOffer.amount !== '') {
+                const v = parseFloat(load.acceptedOffer.amount);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
+            if (load && load.agreedPrice !== undefined && load.agreedPrice !== null && load.agreedPrice !== '') {
+                const v = parseFloat(load.agreedPrice);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
             if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
                 const v = parseFloat(load.carrierNetAmount);
                 if (!isNaN(v)) return v;
@@ -851,6 +878,18 @@
                     if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
                 });
             });
+        }
+
+        async function ensureAuthOrAnon() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk) return null;
+            if (authSdk.currentUser) return authSdk.currentUser;
+            try {
+                const cred = await authSdk.signInAnonymously();
+                return cred && cred.user ? cred.user : null;
+            } catch (e) {
+                return null;
+            }
         }
 
         function computeCarrierProfileMissing(profile) {
@@ -960,33 +999,37 @@
 
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
-                const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
                 
                 // Show fast-loading skeletons immediately
                 setDashboardLoading(true);
 
-                // Fast query: use indexed carrierId (avoid downloading full loads node)
-                let carrierLoads = [];
-                try {
-                    const snap = await db.ref('loads').orderByChild('carrierId').equalTo(carrierId).limitToLast(400).once('value');
-                    const raw = snap.val() || {};
-                    carrierLoads = Object.entries(raw).map(([id, load]) => ({ ...(load || {}), loadId: (load && load.loadId) ? load.loadId : id }));
-                } catch (e) {
-                    carrierLoads = [];
+                await ensureAuthReady();
+                if (!authSdk || !authSdk.currentUser) {
+                    await ensureAuthOrAnon();
                 }
 
-                // Fallback: small recent slice + client filter (covers older data shapes)
-                if (!carrierLoads.length) {
-                    const snap = await db.ref('loads').orderByKey().limitToLast(300).once('value');
-                    const raw = snap.val() || {};
-                    carrierLoads = Object.entries(raw)
-                        .map(([id, load]) => ({ ...(load || {}), loadId: (load && load.loadId) ? load.loadId : id }))
-                        .filter(load => {
-                            return load.carrierId === carrierId ||
-                                   load.assignedCarrier === carrierId ||
-                                   (user.email && load.carrierEmail === user.email);
-                        });
+                const authUser = (authSdk && authSdk.currentUser) ? authSdk.currentUser : null;
+                const authUid = authUser ? String(authUser.uid || '') : '';
+                const authEmail = authUser ? String(authUser.email || '') : '';
+
+                const map = {};
+                const jobs = [];
+                if (authUid) {
+                    jobs.push(
+                        db.ref('loads').orderByChild('carrierFirebaseUid').equalTo(authUid).limitToLast(400).once('value')
+                            .then((snap) => { const raw = snap.val() || {}; Object.entries(raw).forEach(([id, v]) => { map[id] = v || {}; }); })
+                    );
                 }
+                if (authEmail) {
+                    jobs.push(
+                        db.ref('loads').orderByChild('carrierEmail').equalTo(authEmail).limitToLast(400).once('value')
+                            .then((snap) => { const raw = snap.val() || {}; Object.entries(raw).forEach(([id, v]) => { map[id] = v || {}; }); })
+                    );
+                }
+                await Promise.allSettled(jobs);
+
+                const carrierLoads = Object.entries(map).map(([id, load]) => ({ ...(load || {}), loadId: (load && load.loadId) ? load.loadId : id }));
 
                 // Calculate stats
                 const totalLoads = carrierLoads.length;
@@ -1015,7 +1058,12 @@
 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                alertSystem.show('error', 'Failed to load dashboard data');
+                const msg = String(error && error.message ? error.message : '').toLowerCase();
+                if (msg.includes('permission') || msg.includes('denied')) {
+                    alertSystem.show('error', 'Dashboard permission denied. Please login again.');
+                } else {
+                    alertSystem.show('error', 'Failed to load dashboard data');
+                }
                 setDashboardLoading(false);
             }
         }
@@ -1147,6 +1195,15 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const authUser = checkAuth();
+            if (authUser && authUser.profileComplete === false) {
+                window.location.href = 'edit-profile.html';
+                return;
+            }
             loadUserData();
             checkAndShowProfileBanner();
             loadDashboardStats();
@@ -1155,6 +1212,107 @@
                 initNativePush().catch(function() {});
                 if (typeof initFCM === 'function') initFCM().catch(function() {});
             }
+
+            (function () {
+                var KEY = 'ab.mobile.onboarding.carrier.dashboard.v1.done';
+                var overlay = document.getElementById('dashTourOverlay');
+                var spot = document.getElementById('dashTourSpot');
+                var stepsEl = document.getElementById('dashTourSteps');
+                var titleEl = document.getElementById('dashTourTitle');
+                var bodyEl = document.getElementById('dashTourBody');
+                var btnSkip = document.getElementById('dashTourSkip');
+                var btnBack = document.getElementById('dashTourBack');
+                var btnNext = document.getElementById('dashTourNext');
+                var dotsWrap = document.getElementById('dashTourDots');
+                if (!overlay || !spot || !stepsEl || !titleEl || !bodyEl || !btnSkip || !btnBack || !btnNext || !dotsWrap) return;
+
+                function hasDone() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+                function setDone() { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
+
+                function q(sel) { try { return document.querySelector(sel); } catch (e) { return null; } }
+                var steps = [
+                    { title: 'Welcome', body: 'This is your Carrier dashboard. Key actions are here.', target: null },
+                    { title: 'Find Loads', body: 'Tap Find Loads to see available jobs near you.', target: '.header-actions .header-btn:last-child' },
+                    { title: 'Share Location', body: 'Share location for live tracking and better matching.', target: '.header-actions .header-btn:first-child' },
+                    { title: 'Stats', body: 'Track your active loads and earnings at a glance.', target: '#statsGrid' },
+                    { title: 'Wallet & Messages', body: 'Wallet shows payout ledger and withdrawals. Messages for chat.', target: '.quick-actions' }
+                ];
+
+                var index = 0;
+                var open = false;
+
+                function buildDots() {
+                    dotsWrap.innerHTML = '';
+                    for (var i = 0; i < steps.length; i++) {
+                        var d = document.createElement('div');
+                        d.style.width = '8px';
+                        d.style.height = '8px';
+                        d.style.borderRadius = '99px';
+                        d.style.background = i === index ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.25)';
+                        dotsWrap.appendChild(d);
+                    }
+                }
+
+                function positionSpot() {
+                    if (!open) return;
+                    var step = steps[index] || {};
+                    var sel = step.target;
+                    if (!sel) { spot.style.display = 'none'; return; }
+                    var el = q(sel);
+                    if (!el) { spot.style.display = 'none'; return; }
+                    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+                    var r = el.getBoundingClientRect();
+                    var pad = 8;
+                    var top = Math.max(10, r.top - pad);
+                    var left = Math.max(10, r.left - pad);
+                    var w = Math.min(window.innerWidth - 20, r.width + pad * 2);
+                    var h = r.height + pad * 2;
+                    spot.style.top = top + 'px';
+                    spot.style.left = left + 'px';
+                    spot.style.width = w + 'px';
+                    spot.style.height = h + 'px';
+                    spot.style.display = 'block';
+                }
+
+                function render() {
+                    var step = steps[index] || {};
+                    stepsEl.textContent = 'Step ' + (index + 1) + '/' + steps.length;
+                    titleEl.textContent = step.title || '';
+                    bodyEl.textContent = step.body || '';
+                    btnBack.disabled = index === 0;
+                    btnBack.style.opacity = btnBack.disabled ? '0.55' : '1';
+                    btnNext.textContent = index === steps.length - 1 ? 'Finish' : 'Next';
+                    buildDots();
+                    positionSpot();
+                }
+
+                function show() {
+                    open = true;
+                    overlay.style.display = 'flex';
+                    overlay.setAttribute('aria-hidden', 'false');
+                    index = 0;
+                    render();
+                }
+
+                function hide(done) {
+                    open = false;
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden', 'true');
+                    spot.style.display = 'none';
+                    if (done) setDone();
+                }
+
+                function next() { if (index >= steps.length - 1) { hide(true); return; } index += 1; render(); }
+                function back() { if (index <= 0) return; index -= 1; render(); }
+
+                btnSkip.addEventListener('click', function () { hide(true); });
+                btnBack.addEventListener('click', back);
+                btnNext.addEventListener('click', next);
+                overlay.addEventListener('click', function (e) { if (e && e.target === overlay) hide(true); });
+                window.addEventListener('resize', positionSpot);
+
+                setTimeout(function () { if (!hasDone()) show(); }, 900);
+            })();
         });
     </script>
 </body>

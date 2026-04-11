@@ -27,10 +27,11 @@ try {
 
     messaging.onBackgroundMessage((payload) => {
         const notificationTitle = payload.notification?.title || 'Alpha Freight';
+        const icon = payload.notification?.icon || payload.data?.icon || '/image-removebg-preview - 2025-10-29T055946.105.png';
         const notificationOptions = {
             body: payload.notification?.body || payload.data?.body || 'You have a new notification',
-            icon: '/image-removebg-preview - 2025-10-29T055946.105.png',
-            badge: '/image-removebg-preview - 2025-10-29T055946.105.png',
+            icon: icon,
+            badge: icon,
             tag: (payload.data?.type || 'notification') + '_' + Date.now(),
             data: payload.data || {},
             requireInteraction: true,
@@ -43,16 +44,22 @@ try {
         event.notification.close();
         const data = event.notification.data || {};
 
-        let url = '/mobile-app/carrier/dashboard.html';
-        if (data && data.userType === 'supplier') url = '/mobile-app/supplier/dashboard.html';
+        let url = '';
+        if (data && data.url) {
+            url = String(data.url);
+        }
+        if (!url) {
+            url = '/mobile-app/carrier/dashboard.html';
+            if (data && data.userType === 'supplier') url = '/mobile-app/supplier/dashboard.html';
+        }
 
-        if (data.type === 'new_load') {
+        if (!data.url && data.type === 'new_load') {
             url = '/mobile-app/carrier/loads.html';
-        } else if (data.type === 'load_accepted') {
+        } else if (!data.url && data.type === 'load_accepted') {
             url = '/mobile-app/supplier/my-loads.html';
-        } else if (data.type === 'message') {
+        } else if (!data.url && data.type === 'message') {
             url = (data.userType === 'supplier') ? '/mobile-app/supplier/messages.html' : '/mobile-app/carrier/messages.html';
-        } else if (data.type === 'deposit' || data.type === 'withdrawal') {
+        } else if (!data.url && (data.type === 'deposit' || data.type === 'withdrawal')) {
             url = '/mobile-app/carrier/wallet.html';
         }
 
@@ -60,10 +67,10 @@ try {
             self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
                 for (const client of clientsArr) {
                     try {
-                        if (client.url.includes(url) && 'focus' in client) return client.focus();
+                        if (url && client.url.includes(url) && 'focus' in client) return client.focus();
                     } catch (e) {}
                 }
-                if (self.clients.openWindow) return self.clients.openWindow(url);
+                if (self.clients.openWindow) return self.clients.openWindow(url || '/mobile-app/index.html');
             })
         );
     });

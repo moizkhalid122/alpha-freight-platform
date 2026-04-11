@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F8FAFC">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
@@ -26,9 +26,13 @@
     
     <style>
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #06b6d4;
+            --primary-dark: #0891b2;
+            --primary-light: #8be8ff;
+            --content-top: 92px;
+            --content-side: 20px;
+            --max-w: 420px;
+            --logo-shift-y: -10px;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
@@ -36,7 +40,7 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
+            --bg-main: #ffffff;
             --card-bg: #ffffff;
             --border: #e2e8f0;
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
@@ -53,70 +57,98 @@
         }
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: #ffffff;
             min-height: 100vh;
             min-height: 100dvh;
             color: var(--text-dark);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
         }
+
+        .auth-clean .alert::before{ display:none !important; }
+        .auth-clean .alert-title{ display:none !important; }
+        .auth-clean .alert-icon{ display:none !important; }
+        .auth-clean .alert{
+            padding: 12px 14px !important;
+            border-left: 0 !important;
+            background: #fff !important;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.10) !important;
+            border: 1px solid rgba(15, 23, 42, 0.10) !important;
+            align-items: center !important;
+        }
+        .auth-clean .alert-message{
+            font-size: 0.9rem !important;
+            font-weight: 800 !important;
+            color: rgba(15,23,42,0.92) !important;
+        }
+        .auth-clean .alert-close{
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 12px !important;
+            opacity: 0.65 !important;
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s ease; }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
-        .app-container { max-width: 100%; margin: 0 auto; background: var(--bg-main); min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
-        .scroll-container { padding-bottom: 2rem; min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: env(safe-area-inset-top, 0); }
-        .login-container { max-width: 100%; padding: 0 1rem 1.5rem; padding-top: 0; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s ease; }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+        .app-container { max-width: 100%; margin: 0 auto; background: #ffffff; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
+        .scroll-container { padding-bottom: 2rem; min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 0; }
+        .login-container { max-width: var(--max-w); margin: 0 auto; padding: calc(var(--content-top) + env(safe-area-inset-top, 0px)) var(--content-side) 1.5rem; }
+        #loginForm { margin-top: 0; }
 
-        .welcome-section {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: white;
-            padding: calc(1.15rem + env(safe-area-inset-top, 0px)) 1rem 1.75rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
-        }
-        .welcome-section::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.75;
-        }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .welcome-title { font-size: 1.5rem; font-weight: 800; color: white; margin-bottom: 0.35rem; position: relative; z-index: 1; }
-        .welcome-subtitle { font-size: 0.875rem; color: rgba(255,255,255,0.9); margin-bottom: 0; position: relative; z-index: 1; }
-        .benefits-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .auth-header{
+            padding: 0 0 1.25rem;
             text-align: left;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 1rem;
-            border-radius: 14px;
-            margin-top: 1rem;
-            position: relative;
-            z-index: 1;
         }
-        .benefit-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: white; }
-        .benefit-item i { color: rgba(255,255,255,0.9); font-size: 1rem; width: 20px; }
+        .back-btn{
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            border: 0;
+            background: rgba(2,6,23,0.06);
+            color: rgba(15,23,42,0.92);
+            display:grid;
+            place-items:center;
+            text-decoration:none;
+            position: sticky;
+            top: calc(10px + env(safe-area-inset-top, 0px));
+            display: none;
+        }
+        .back-btn:active{ transform: scale(0.98); }
+        .brand-logo{
+            margin-top: 0;
+            width: 210px;
+            max-width: 78vw;
+            height: auto;
+            object-fit: contain;
+            display:block;
+            margin-left: auto;
+            margin-right: auto;
+            transform: translateY(var(--logo-shift-y));
+        }
+        .auth-title{
+            margin-top: 12px;
+            font-size: 1.75rem;
+            font-weight: 1000;
+            letter-spacing: -0.03em;
+            color: rgba(15,23,42,0.92);
+            text-align: left;
+        }
+        .auth-subtitle{
+            margin-top: 6px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(100,116,139,0.9);
+            text-align: left;
+        }
 
         .form-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-card);
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            margin-bottom: 1.25rem;
+            border: 0;
             position: relative;
             overflow: hidden;
         }
@@ -127,38 +159,32 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            opacity: 0.6;
+            background: transparent;
+            opacity: 0;
         }
         .form-section-title {
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            display: none;
         }
-        .form-section-title i { color: var(--primary); font-size: 1.125rem; }
+        .form-section-title i { color: var(--primary-dark); font-size: 1.125rem; }
         .form-group { margin-bottom: 1.25rem; }
         .form-label { display: block; font-size: 0.875rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem; }
         .form-input {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.85rem 1rem;
             font-size: 1rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-main);
+            border: 1.5px solid rgba(15,23,42,0.22);
+            border-radius: 10px;
+            background: #fff;
             color: var(--text-dark);
             transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease);
             min-height: 48px;
         }
         .form-input:focus {
             outline: none;
-            border-color: var(--primary);
-            background: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
-            transform: translateY(-1px);
+            border-color: rgba(15,23,42,0.45);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.14);
+            transform: none;
         }
         .form-input::placeholder { color: var(--text-light); }
         .password-input-wrapper { position: relative; }
@@ -183,17 +209,17 @@
         .remember-me { display: flex; align-items: center; gap: 0.5rem; }
         .remember-me input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
         .remember-me label { font-size: 0.875rem; color: var(--text-dark); cursor: pointer; }
-        .forgot-password { font-size: 0.875rem; color: var(--primary); text-decoration: none; font-weight: 500; }
+        .forgot-password { font-size: 0.875rem; color: var(--primary-dark); text-decoration: none; font-weight: 800; }
 
         .btn-primary {
             width: 100%;
             padding: 1rem;
             font-size: 1rem;
             font-weight: 800;
-            color: white;
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            color: rgba(15,23,42,0.92);
+            background: #89E8FF;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 10px;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
             min-height: 52px;
@@ -202,17 +228,17 @@
             justify-content: center;
             gap: 0.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 8px 24px rgba(29, 78, 216, 0.35);
+            box-shadow: none;
         }
-        .btn-primary:active { transform: scale(0.98); box-shadow: 0 4px 16px rgba(29, 78, 216, 0.3); }
+        .btn-primary:active { transform: scale(0.98); box-shadow: none; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-primary .spinner { display: none; }
         .btn-primary.loading .spinner { display: block; }
         .btn-primary.loading .btn-text { display: none; }
         .spinner {
             width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            border: 3px solid rgba(15,23,42,0.20);
+            border-top-color: rgba(15,23,42,0.85);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -225,8 +251,8 @@
             font-weight: 700;
             color: var(--text-dark);
             background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
+            border: 1px solid rgba(15,23,42,0.18);
+            border-radius: 10px;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
             min-height: 52px;
@@ -235,53 +261,44 @@
             justify-content: center;
             gap: 0.75rem;
             margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: none;
         }
-        .google-signin-btn:active { transform: scale(0.98); background: var(--bg-main); }
+        .google-signin-btn:active { transform: scale(0.98); background: rgba(2,6,23,0.02); }
         .google-signin-btn svg { width: 20px; height: 20px; }
-        .divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; color: var(--text-medium); font-size: 0.875rem; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .divider { display: flex; align-items: center; gap: 1rem; margin: 1.25rem 0; color: var(--text-medium); font-size: 0.875rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(15,23,42,0.12); }
         .error-message { display: none; font-size: 0.8125rem; color: var(--error); margin-top: 0.5rem; }
         .form-group.error .error-message { display: block; }
         .form-group.error .form-input { border-color: var(--error); }
-        .signup-link { text-align: center; margin-top: 1.5rem; padding: 1.5rem; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow-sm); }
+        .signup-link { text-align: center; margin-top: 1.25rem; padding: 0.75rem 0; background: transparent; border-radius: 0; box-shadow: none; }
         .signup-link-text { font-size: 0.9375rem; color: var(--text-medium); }
-        .signup-link-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .signup-link-text a { color: var(--primary-dark); text-decoration: none; font-weight: 800; }
         @media (min-width: 768px) {
-            .app-container { max-width: 500px; margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.1); }
             .login-container { padding: 1.5rem 2rem 2rem; }
-            .welcome-section { padding: 2rem 1.5rem; padding-top: 2rem; }
-            .welcome-title { font-size: 1.75rem; }
-            .welcome-subtitle { font-size: 0.9375rem; margin-bottom: 0.5rem; }
         }
     </style>
 </head>
-<body>
+<body class="auth-clean">
     <div class="app-container">
         <div class="scroll-container">
             <div class="login-container">
-                <div class="welcome-section">
-                    <h1 class="welcome-title">Supplier Sign In</h1>
-                    <p class="welcome-subtitle">Sign in to your Alpha Freight supplier account</p>
-                    <div class="benefits-list">
-                        <div class="benefit-item"><i class="fas fa-check-circle"></i><span>Post & manage loads</span></div>
-                        <div class="benefit-item"><i class="fas fa-check-circle"></i><span>Track carriers</span></div>
-                        <div class="benefit-item"><i class="fas fa-check-circle"></i><span>Manage payments</span></div>
-                    </div>
+                <div class="auth-header">
+                    <img class="brand-logo" src="/assets/img/brand/logo.png" alt="Alpha Freight">
+                    <div class="auth-title">Welcome back</div>
+                    <div class="auth-subtitle">Please enter your details</div>
                 </div>
 
-                <form id="loginForm">
+                <form id="loginForm" novalidate>
                     <div class="form-card">
-                        <h3 class="form-section-title"><i class="fas fa-sign-in-alt"></i> Sign In</h3>
                         <div class="form-group">
                             <label class="form-label" for="email">Email Address</label>
-                            <input type="email" class="form-input" id="email" placeholder="your.email@example.com" required>
+                            <input type="email" class="form-input" id="email" placeholder="your.email@example.com">
                             <div class="error-message">Please enter a valid email address</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="password">Password</label>
                             <div class="password-input-wrapper">
-                                <input type="password" class="form-input" id="password" placeholder="Enter your password" required>
+                                <input type="password" class="form-input" id="password" placeholder="Enter your password">
                                 <button type="button" class="password-toggle" onclick="togglePassword()">
                                     <i class="fas fa-eye" id="passwordToggleIcon"></i>
                                 </button>
@@ -291,9 +308,9 @@
                         <div class="form-options">
                             <div class="remember-me">
                                 <input type="checkbox" id="rememberMe">
-                                <label for="rememberMe">Remember me</label>
+                                <label for="rememberMe">Remember for 30 days</label>
                             </div>
-                            <a href="#" class="forgot-password" onclick="handleForgotPassword()">Forgot Password?</a>
+                            <a href="#" class="forgot-password" onclick="handleForgotPassword()">Forgot password</a>
                         </div>
                         <button type="submit" class="btn-primary" id="submitBtn">
                             <div class="spinner"></div>
@@ -344,8 +361,8 @@
     <script src="../../assets/js/alerts.js"></script>
     <script>
         const alertSystem = new AlertSystem();
-        function showError(msg, opts) { alertSystem.error(msg, opts || {}); }
-        function showSuccess(msg, opts) { alertSystem.success(msg, opts || {}); }
+        function showError(msg, opts) { alertSystem.error(msg, { title: '', ...(opts || {}) }); }
+        function showSuccess(msg, opts) { alertSystem.success(msg, { title: '', ...(opts || {}) }); }
 
         async function sha256Hex(text) {
             const enc = new TextEncoder();
@@ -363,6 +380,15 @@
                 const raw = localStorage.getItem('supplierAuth');
                 if (!raw) return false;
                 const auth = JSON.parse(raw);
+                let until = auth && auth.rememberUntil ? Number(auth.rememberUntil) : 0;
+                const remembered = !!(auth && auth.rememberMe) || localStorage.getItem('rememberSupplier') === 'true';
+                if (!remembered) return false;
+                if (!until || !Number.isFinite(until)) {
+                    const loginTs = auth && auth.loginTime ? Date.parse(auth.loginTime) : 0;
+                    if (loginTs && Number.isFinite(loginTs)) until = loginTs + 30 * 24 * 60 * 60 * 1000;
+                }
+                if (!until || !Number.isFinite(until)) return false;
+                if (Date.now() > until) return false;
                 return !!(auth && auth.isLoggedIn && auth.userType === 'supplier');
             } catch (e) {
                 return false;
@@ -416,8 +442,7 @@
                 if (pin === null) return;
                 const ok = await verifyPin(pin);
                 if (!ok) { showError('Wrong PIN.', { title: 'Invalid PIN' }); return; }
-
-                window.location.href = 'dashboard.html';
+                await attemptAutoLogin(true);
             } catch (e) {}
         }
 
@@ -435,41 +460,61 @@
             }
         }
 
+        function clearFieldErrors() {
+            document.querySelectorAll('.form-group').forEach(g => {
+                g.classList.remove('error');
+                const em = g.querySelector('.error-message');
+                if (em && em.dataset && em.dataset.defaultText) em.textContent = em.dataset.defaultText;
+            });
+        }
+
+        function setFieldError(inputId, message) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const group = input.closest('.form-group');
+            if (!group) return;
+            group.classList.add('error');
+            const em = group.querySelector('.error-message');
+            if (em) {
+                if (!em.dataset.defaultText) em.dataset.defaultText = em.textContent || '';
+                em.textContent = message || em.textContent;
+            }
+        }
+
         function validateForm() {
-            document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            clearFieldErrors();
+            const email = (document.getElementById('email').value || '').trim();
+            const password = (document.getElementById('password').value || '');
 
             if (!email && !password) {
-                showError('Please enter your email and password.', { title: 'Required' });
-                document.getElementById('email').closest('.form-group').classList.add('error');
-                document.getElementById('password').closest('.form-group').classList.add('error');
+                setFieldError('email', 'Please enter your email address.');
+                setFieldError('password', 'Please enter your password.');
                 return false;
             }
             if (!email) {
-                showError('Please enter your email.', { title: 'Required' });
-                document.getElementById('email').closest('.form-group').classList.add('error');
+                setFieldError('email', 'Please enter your email address.');
                 return false;
             }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showError('Please enter a valid email address.', { title: 'Invalid Email' });
-                document.getElementById('email').closest('.form-group').classList.add('error');
+                setFieldError('email', 'Please enter a valid email address.');
                 return false;
             }
             if (!password) {
-                showError('Please enter your password.', { title: 'Required' });
-                document.getElementById('password').closest('.form-group').classList.add('error');
+                setFieldError('password', 'Please enter your password.');
                 return false;
             }
             if (password.length < 6) {
-                showError('Password must be at least 6 characters.', { title: 'Invalid Password' });
-                document.getElementById('password').closest('.form-group').classList.add('error');
+                setFieldError('password', 'Password must be at least 6 characters.');
                 return false;
             }
             return true;
         }
 
         async function finishLogin(matched, rememberMe, emailUsed, passwordUsed) {
+            const rememberDays = 30;
+            const rememberUntil = rememberMe ? (Date.now() + rememberDays * 24 * 60 * 60 * 1000) : 0;
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const uid = authSdk && authSdk.currentUser && authSdk.currentUser.uid ? String(authSdk.currentUser.uid) : '';
             const authData = {
                 email: matched.email,
                 firstName: matched.firstName || (matched.contactName && matched.contactName.split(' ')[0]) || '',
@@ -479,26 +524,93 @@
                 businessName: matched.businessName || '',
                 phone: matched.phone || '',
                 supplierId: matched.supplierId || matched.id || '',
+                firebaseUid: matched.firebaseUid || uid || '',
                 country: matched.country || '',
                 profileComplete: matched.profileComplete || false,
                 isLoggedIn: true,
                 loginTime: new Date().toISOString(),
                 rememberMe: rememberMe,
+                rememberUntil: rememberUntil,
                 userType: 'supplier'
             };
             localStorage.setItem('supplierAuth', JSON.stringify(authData));
+            try { localStorage.setItem('lastSupplierProfile', JSON.stringify(authData)); } catch (e) {}
+            try { if (rememberMe) localStorage.setItem('rememberSupplier', 'true'); else localStorage.removeItem('rememberSupplier'); } catch (e) {}
             try { localStorage.setItem('ab.portal.lastRole', 'supplier'); } catch (e) {}
 
             // PIN lock uses localStorage only; nothing extra to save here.
 
             showSuccess('Welcome back! Redirecting...');
-            setTimeout(function () { window.location.href = 'dashboard.html'; }, 200);
+            const name = authData.firstName || authData.contactName || '';
+            const next = authData.profileComplete === false ? '/mobile-app/supplier/edit-profile.html' : '/mobile-app/supplier/dashboard.html';
+            setTimeout(function () {
+                window.location.href = '/mobile-app/welcome.html?mode=back&role=supplier&name=' + encodeURIComponent(String(name || '')) + '&next=' + encodeURIComponent(next);
+            }, 200);
         }
 
         // Gate dashboard access with PIN (if enabled)
         document.addEventListener('DOMContentLoaded', function () {
-            tryPinGate();
+            (async function () {
+                try {
+                    const rememberBox = document.getElementById('rememberMe');
+                    if (rememberBox) rememberBox.checked = hasRememberedSupplierSession() || localStorage.getItem('rememberSupplier') === 'true';
+                } catch (e) {}
+                try { await applyPreferredAuthPersistence(); } catch (e) {}
+                tryPinGate();
+                try { await attemptAutoLogin(false); } catch (e) {}
+            })();
         });
+
+        async function applyPreferredAuthPersistence() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.setPersistence !== 'function') return;
+            const wantsRemember = hasRememberedSupplierSession() || localStorage.getItem('rememberSupplier') === 'true';
+            try {
+                await authSdk.setPersistence(wantsRemember ? 'local' : 'session');
+            } catch (e) {}
+        }
+
+        async function attemptAutoLogin(fromPin) {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            if (!authSdk || !db) return;
+            if (!hasRememberedSupplierSession() && localStorage.getItem('rememberSupplier') !== 'true') return;
+
+            await ensureAuthReady();
+            const user = authSdk.currentUser;
+            if (!user || !user.uid) return;
+            const uid = String(user.uid);
+
+            let matched = null;
+            try {
+                const cachedRaw = localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile');
+                if (cachedRaw) {
+                    const cached = JSON.parse(cachedRaw);
+                    if (cached && cached.firebaseUid === uid) matched = cached;
+                }
+            } catch (e) {}
+
+            if (!matched) {
+                try {
+                    const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(uid).limitToFirst(1).once('value');
+                    if (snap && snap.exists()) {
+                        snap.forEach(function (child) {
+                            const supplier = child.val() || {};
+                            if (!supplier.supplierId) supplier.supplierId = child.key;
+                            if (!supplier.id) supplier.id = child.key;
+                            matched = supplier;
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            if (!matched) return;
+            try {
+                if (!fromPin && isPinEnabled()) return;
+            } catch (e) {}
+            try { showSuccess('Signing you in...'); } catch (e) {}
+            await finishLogin(matched, true, '', '');
+        }
 
         async function loginWithCredentials(email, password, rememberMe, fromBiometric) {
             const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
@@ -522,6 +634,11 @@
             }
 
             try {
+                try {
+                    if (typeof authSdk.setPersistence === 'function') {
+                        await authSdk.setPersistence(rememberMe ? 'local' : 'session');
+                    }
+                } catch (e) {}
                 const authPromise = authSdk.signInWithEmailAndPassword(email, password);
                 const timeoutPromise = new Promise(function (_, reject) {
                     setTimeout(function () { reject(new Error('timeout')); }, 12000);

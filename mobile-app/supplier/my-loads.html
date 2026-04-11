@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -36,9 +36,10 @@
     <style>
         /* —— Premium theme (matches dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
@@ -46,22 +47,23 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
             --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             color: var(--text-dark);
             line-height: 1.55;
@@ -70,33 +72,34 @@
             -moz-osx-font-smoothing: grayscale;
             /* footer from supplier-bottom-nav.css */
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
 
         /* Page Header – premium navy + gold */
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1.5rem 1.25rem 1.75rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+            background: transparent;
+            color: var(--text-dark);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
-        }
+        .page-header::after { display: none; }
 
         .header-content { position: relative; z-index: 1; }
         .page-title {
@@ -104,12 +107,12 @@
             font-weight: 800;
             letter-spacing: -0.03em;
             margin-bottom: 0.375rem;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-shadow: none;
         }
-        .page-subtitle { font-size: 0.875rem; opacity: 0.92; }
+        .page-subtitle { font-size: 0.875rem; opacity: 1; color: rgba(100,116,139,0.92); font-weight: 700; }
 
         /* Filters – premium chips */
-        .filters-section { padding: 0 1.25rem; margin-bottom: 1.25rem; }
+        .filters-section { padding: 0 var(--page-pad); margin-bottom: 12px; }
         .filters-row {
             display: flex;
             gap: 0.75rem;
@@ -121,37 +124,37 @@
         .filters-row::-webkit-scrollbar { display: none; }
 
         .filter-chip {
-            background: var(--card-bg);
-            border: 2px solid var(--border);
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
             border-radius: 999px;
             padding: 0.625rem 1.25rem;
             font-size: 0.875rem;
-            font-weight: 600;
+            font-weight: 900;
             color: var(--text-dark);
             cursor: pointer;
             transition: transform 0.3s var(--ease), background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease);
             white-space: nowrap;
             flex-shrink: 0;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
         }
         .filter-chip.active {
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
-            border-color: var(--primary);
+            background: var(--primary);
+            border-color: rgba(99,91,255,0.18);
             color: #fff;
-            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+            box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22);
         }
         .filter-chip:active { transform: scale(0.96); }
 
         /* Loads List – premium cards */
-        .loads-section { padding: 0 1.25rem; margin-bottom: 2rem; }
+        .loads-section { padding: 0 var(--page-pad); margin-bottom: 2rem; }
 
         .load-card {
-            background: var(--card-bg);
+            background: rgba(255,255,255,0.92);
             border-radius: var(--radius);
             padding: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--border);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            border: 1px solid rgba(15,23,42,0.10);
             transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
             cursor: pointer;
             position: relative;
@@ -163,8 +166,8 @@
             left: 0;
             top: 12px;
             bottom: 12px;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            width: 3px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.75));
             border-radius: 0 2px 2px 0;
         }
         .load-card:active {
@@ -196,11 +199,11 @@
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
-        .load-status.available { background: rgba(29, 78, 216, 0.12); color: var(--primary); }
+        .load-status.available { background: rgba(99, 91, 255, 0.14); color: rgba(79,70,229,0.98); }
         .load-status.active { background: rgba(5, 150, 105, 0.12); color: var(--success); }
-        .load-status.in-transit { background: rgba(217, 119, 6, 0.12); color: var(--warning); }
+        .load-status.in-transit { background: rgba(245, 158, 11, 0.14); color: rgba(217, 119, 6, 0.98); }
         .load-status.completed { background: rgba(5, 150, 105, 0.12); color: var(--success); }
-        .load-status.pending { background: rgba(217, 119, 6, 0.12); color: var(--warning); }
+        .load-status.pending { background: rgba(245, 158, 11, 0.14); color: rgba(217, 119, 6, 0.98); }
         .load-status.cancelled { background: rgba(220, 38, 38, 0.12); color: var(--error); }
 
         .load-details {
@@ -231,14 +234,175 @@
             border-top: 1px solid var(--border);
         }
 
+        .ai-tools{
+            display:flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-ai{
+            flex: 1;
+            min-height: 44px;
+            border-radius: 999px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            color: rgba(15,23,42,0.86);
+            font-weight: 900;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+        }
+        .btn-ai i{ color: rgba(99,91,255,0.95); }
+        .btn-ai.primary{
+            border: 0;
+            background: rgba(99,91,255,0.10);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-ai:active{ transform: scale(0.99); }
+
+        .ai-overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 18px 16px 22px;
+        }
+        .ai-sheet{
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.18);
+            padding: 14px 14px 12px;
+            max-height: calc(82vh - env(safe-area-inset-bottom, 0px));
+            overflow: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(15,23,42,0.18) rgba(15,23,42,0.06);
+        }
+        .ai-sheet::-webkit-scrollbar{ width: 8px; }
+        .ai-sheet::-webkit-scrollbar-track{ background: rgba(15,23,42,0.06); border-radius: 999px; }
+        .ai-sheet::-webkit-scrollbar-thumb{
+            background: rgba(15,23,42,0.18);
+            border-radius: 999px;
+            border: 2px solid rgba(15,23,42,0.06);
+        }
+        .ai-sheet::-webkit-scrollbar-thumb:hover{ background: rgba(15,23,42,0.26); }
+        .ai-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .ai-title{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+        }
+        .ai-title i{
+            width: 34px;
+            height: 34px;
+            border-radius: 14px;
+            display:grid;
+            place-items:center;
+            background: rgba(99,91,255,0.14);
+            color: rgba(79,70,229,0.98);
+        }
+        .ai-close{
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.82);
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+        }
+        .ai-close:active{ transform: scale(0.99); }
+        .ai-box{
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+        }
+        .ai-h{
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            font-size: 0.92rem;
+        }
+        .ai-p{
+            margin-top: 6px;
+            font-weight: 800;
+            color: rgba(100,116,139,0.92);
+            font-size: 0.84rem;
+            line-height: 1.35;
+        }
+        .ai-actions{
+            margin-top: 12px;
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .ai-btn{
+            min-height: 46px;
+            border-radius: 14px;
+            font-weight: 1000;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+        }
+        .ai-btn.primary{
+            border: 0;
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 12px 28px rgba(99,91,255,0.22);
+        }
+        .ai-btn:active{ transform: scale(0.99); }
+        .ai-select, .ai-textarea{
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px 12px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(15,23,42,0.22);
+            background: rgba(255,255,255,0.96);
+            outline: none;
+            font-weight: 800;
+            color: rgba(15,23,42,0.90);
+        }
+        .ai-textarea{ min-height: 140px; resize: vertical; }
+        .ai-select:focus, .ai-textarea:focus{
+            border-color: rgba(15,23,42,0.45);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14);
+        }
+
         .btn-action {
             flex: 1;
             padding: 0.75rem;
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            background: var(--primary);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
-            font-weight: 700;
+            font-weight: 900;
             font-size: 0.875rem;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
@@ -246,14 +410,14 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+            box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22);
         }
-        .btn-action:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25); }
+        .btn-action:active { transform: scale(0.98); box-shadow: 0 10px 28px rgba(99, 91, 255, 0.18); }
         .btn-action.secondary {
-            background: var(--card-bg);
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            box-shadow: var(--shadow-sm);
+            background: rgba(255,255,255,0.92);
+            color: rgba(15,23,42,0.86);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
         }
         .btn-action.success {
             background: linear-gradient(145deg, #10b981 0%, var(--success) 100%);
@@ -269,11 +433,11 @@
         .empty-state {
             text-align: center;
             padding: 3rem 1.5rem;
-            background: var(--card-bg);
+            background: rgba(255,255,255,0.92);
             border-radius: var(--radius);
-            margin: 0 1.25rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            margin: 0 var(--page-pad);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
         }
         .empty-state i { font-size: 2.75rem; color: var(--text-light); margin-bottom: 1rem; }
         .empty-state h3 { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem; }
@@ -281,16 +445,16 @@
         .empty-state .btn {
             margin-top: 1rem;
             padding: 0.75rem 1.5rem;
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            background: var(--primary);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
-            font-weight: 700;
+            font-weight: 900;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+            box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22);
             transition: transform 0.3s var(--ease);
         }
         .empty-state .btn:active { transform: scale(0.98); }
@@ -370,9 +534,20 @@
         </a>
     </nav>
 
+    <div class="ai-overlay" id="myLoadsAiOverlay" aria-hidden="true">
+        <div class="ai-sheet" role="dialog" aria-modal="true" aria-label="AI Tools">
+            <div class="ai-head">
+                <div class="ai-title"><i class="fas fa-wand-magic-sparkles"></i><span id="myLoadsAiTitle">AI</span></div>
+                <button type="button" class="ai-close" id="myLoadsAiClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div id="myLoadsAiBody"></div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <!-- Firebase Init -->
@@ -430,6 +605,46 @@
             const supplierAuth = localStorage.getItem('supplierAuth');
             if (!supplierAuth) return null;
             return JSON.parse(supplierAuth);
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!authSdk.currentUser;
+        }
+
+        async function resolveSupplierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('suppliers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
         }
 
         // Get status badge class
@@ -511,29 +726,41 @@
                 const db = window.AlphaBrokrage.firebaseDb;
                 let supplierLoads = [];
 
-                // 2. Fast query - only this supplier's loads
-                try {
-                    const snapshot = await db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value');
-                    const val = snapshot.val() || {};
-                    supplierLoads = Object.entries(val).map(([id, load]) => ({
-                        ...load,
-                        loadId: id,
-                        id: id
-                    }));
-                } catch (qErr) {
-                    const loadsRef = db.ref('loads');
-                    const snapshot = await loadsRef.once('value');
-                    const allLoadsData = snapshot.val() || {};
-                    supplierLoads = Object.entries(allLoadsData).map(([id, load]) => ({
-                        ...load,
-                        loadId: id,
-                        id: id
-                    })).filter(load => {
-                        return load.supplierId === supplierId ||
-                               load.supplierEmail === user.email ||
-                               load.postedBy === supplierId;
+                const ok = await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!ok || !authSdk || !authSdk.currentUser) {
+                    document.getElementById('loadsSection').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <h3>Please Sign In</h3>
+                            <p>Session expired. Please login again.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const authUid = String(authSdk.currentUser.uid || '');
+                const authEmail = String(authSdk.currentUser.email || user.email || '');
+                const resolvedSupplierId = await resolveSupplierIdByUid(db, authUid, supplierId);
+
+                const map = {};
+                async function mergeQuery(q) {
+                    const snap = await q.once('value');
+                    if (!snap.exists()) return;
+                    snap.forEach((ch) => {
+                        const v = ch.val() || {};
+                        map[ch.key] = { ...v, loadId: ch.key, id: ch.key };
                     });
                 }
+
+                const jobs = [
+                    mergeQuery(db.ref('loads').orderByChild('supplierFirebaseUid').equalTo(authUid))
+                ];
+                if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierEmail').equalTo(authEmail)));
+                if (resolvedSupplierId) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierId').equalTo(resolvedSupplierId)));
+                await Promise.allSettled(jobs);
+
+                supplierLoads = Object.values(map);
 
                 supplierLoads.sort((a, b) => {
                     const dateA = new Date(a.createdAt || a.created_at || 0);
@@ -698,9 +925,235 @@
                         <div class="load-actions" onclick="event.stopPropagation()">
                             ${actionsHTML}
                         </div>
+                        <div class="ai-tools" onclick="event.stopPropagation()">
+                            <button class="btn-ai primary" onclick="openAiStatusExplain('${loadId}')"><i class="fas fa-wand-magic-sparkles"></i>AI Explain</button>
+                            <button class="btn-ai" onclick="openAiDisputeHelper('${loadId}')"><i class="fas fa-file-signature"></i>AI Dispute</button>
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        let myLoadsAiCopyText = '';
+        let myLoadsAiCurrentLoadId = '';
+
+        function getLoadById(loadId) {
+            const id = String(loadId || '');
+            if (!id) return null;
+            return (allLoads || []).find(l => String(l.loadId || l.id || '') === id) || null;
+        }
+
+        function normalizeStatusKey(status) {
+            const s = String(status || '').toLowerCase().replace(/_/g, '-');
+            if (s === 'delivered') return 'completed';
+            if (s === 'in-transit') return 'in-transit';
+            if (s === 'intransit') return 'in-transit';
+            if (s === 'picked-up') return 'in-transit';
+            if (s === 'accepted') return 'active';
+            return s || 'unknown';
+        }
+
+        function openMyLoadsAi(title, html, { copyText } = {}) {
+            const overlay = document.getElementById('myLoadsAiOverlay');
+            const head = document.getElementById('myLoadsAiTitle');
+            const body = document.getElementById('myLoadsAiBody');
+            if (!overlay || !head || !body) return;
+            head.textContent = title || 'AI';
+            body.innerHTML = html || '';
+            myLoadsAiCopyText = String(copyText || '');
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+            setTimeout(() => {
+                try { document.getElementById('myLoadsAiClose')?.focus(); } catch (e) {}
+            }, 0);
+        }
+
+        function closeMyLoadsAi() {
+            const overlay = document.getElementById('myLoadsAiOverlay');
+            if (!overlay) return;
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+            myLoadsAiCopyText = '';
+            myLoadsAiCurrentLoadId = '';
+        }
+
+        async function copyToClipboard(text) {
+            const t = String(text || '');
+            if (!t) return false;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(t);
+                    return true;
+                }
+            } catch (e) {}
+            try {
+                const el = document.createElement('textarea');
+                el.value = t;
+                el.style.position = 'fixed';
+                el.style.left = '-9999px';
+                document.body.appendChild(el);
+                el.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(el);
+                return !!ok;
+            } catch (e) {}
+            return false;
+        }
+
+        function getStatusExplain(statusKey) {
+            const m = {
+                available: {
+                    meaning: 'Your load is posted and waiting for a carrier to accept.',
+                    next: 'Review your price and details. If you need it fast, increase budget or mark urgent.',
+                    msg: 'Hi, please confirm if you can accept this load and your earliest pickup time. Thanks.'
+                },
+                pending: {
+                    meaning: 'Your load is pending (not yet accepted or still being reviewed).',
+                    next: 'Wait for carrier acceptance. You can update details or cancel if needed.',
+                    msg: 'Hi, any update on accepting this load? Please confirm pickup time if possible.'
+                },
+                active: {
+                    meaning: 'A carrier has accepted the load and it is active.',
+                    next: 'Confirm pickup details and keep an eye on tracking updates.',
+                    msg: 'Hi, please confirm pickup address and time for this load. Thank you.'
+                },
+                'in-transit': {
+                    meaning: 'The load is in transit (picked up and on the way).',
+                    next: 'Ensure delivery site is ready. If delayed, request an ETA update.',
+                    msg: 'Hi, can you share the latest ETA for delivery? Thanks.'
+                },
+                completed: {
+                    meaning: 'The delivery is completed.',
+                    next: 'Confirm POD/documents and proceed with payment if required.',
+                    msg: 'Hi, please share POD/invoice so we can close this load. Thanks.'
+                },
+                cancelled: {
+                    meaning: 'This load is cancelled.',
+                    next: 'If you still need shipment, repost with updated details. If cancelled by carrier, raise a dispute.',
+                    msg: 'Hi, I would like to understand the reason for cancellation and discuss next steps.'
+                },
+                unknown: {
+                    meaning: 'Status is not recognized.',
+                    next: 'Open the load to see full details and latest updates.',
+                    msg: 'Hi, please confirm the latest status update for this load.'
+                }
+            };
+            return m[statusKey] || m.unknown;
+        }
+
+        function openAiStatusExplain(loadId) {
+            myLoadsAiCurrentLoadId = String(loadId || '');
+            const load = getLoadById(loadId) || {};
+            const statusKey = normalizeStatusKey(load.status);
+            const info = getStatusExplain(statusKey);
+            const loadIdText = load.formattedLoadId || (loadId ? `LOAD-${String(loadId).slice(0, 8).toUpperCase()}` : 'LOAD');
+            const pickup = load.pickupLocation || load.from || 'Pickup';
+            const delivery = load.deliveryLocation || load.to || 'Delivery';
+            const html = `
+                <div class="ai-box">
+                    <div class="ai-h">Status: ${getStatusText(load.status || statusKey)}</div>
+                    <div class="ai-p">${info.meaning}</div>
+                </div>
+                <div style="height:10px;"></div>
+                <div class="ai-box">
+                    <div class="ai-h">Next Step</div>
+                    <div class="ai-p">${info.next}</div>
+                </div>
+                <div style="height:10px;"></div>
+                <div class="ai-box">
+                    <div class="ai-h">Message Template</div>
+                    <div class="ai-p">${loadIdText} • ${pickup} → ${delivery}</div>
+                    <div class="ai-p" id="myLoadsAiMsgPreview"></div>
+                    <div class="ai-actions">
+                        <button type="button" class="ai-btn" id="myLoadsAiCopyBtn"><i class="fas fa-copy"></i>Copy</button>
+                        <button type="button" class="ai-btn primary" onclick="viewLoad('${String(loadId || '').replace(/'/g, '\\\\\'')}')"><i class="fas fa-eye"></i>Open Load</button>
+                    </div>
+                </div>
+            `;
+            const msg = `${info.msg} (${loadIdText})`;
+            openMyLoadsAi('AI Status Explainer', html, { copyText: msg });
+            try {
+                const prev = document.getElementById('myLoadsAiMsgPreview');
+                if (prev) prev.textContent = msg;
+                const copyBtn = document.getElementById('myLoadsAiCopyBtn');
+                if (copyBtn) copyBtn.onclick = async function () {
+                    const ok = await copyToClipboard(myLoadsAiCopyText);
+                    if (ok) showSuccess('Copied to clipboard');
+                    else showError('Copy failed');
+                };
+            } catch (e) {}
+        }
+
+        function generateDisputeDraft(load, type, extra) {
+            const user = getUserData() || {};
+            const supplierName = (user && (user.contactName || user.firstName || user.email)) ? String(user.contactName || user.firstName || user.email) : 'Supplier';
+            const loadId = String(load.loadId || load.id || '');
+            const loadIdText = load.formattedLoadId || (loadId ? `LOAD-${loadId.slice(0, 8).toUpperCase()}` : 'LOAD');
+            const pickup = load.pickupLocation || load.from || 'N/A';
+            const delivery = load.deliveryLocation || load.to || 'N/A';
+            const status = getStatusText(load.status || '');
+            const price = formatCurrency(getSupplierTotalCost(load));
+            const base = `Hello Alpha Freight Support,\n\nI would like to raise a dispute for the following load:\n- Load: ${loadIdText}\n- Route: ${pickup} → ${delivery}\n- Status: ${status}\n- Amount: ${price}\n\nIssue:\n`;
+            const tail = `\n\nRequested resolution:\n${type === 'Refund request' ? 'Please process a refund or advise next steps.' : 'Please review and advise next steps.'}\n\nThanks,\n${supplierName}`;
+            const details = extra ? `- ${extra}\n` : '';
+            if (type === 'Cancellation dispute') {
+                return base + `The load was cancelled and I need clarification and resolution.\n${details}` + tail;
+            }
+            if (type === 'Refund request') {
+                return base + `I am requesting a refund due to service/delivery issue.\n${details}` + tail;
+            }
+            return base + `Please review this issue.\n${details}` + tail;
+        }
+
+        function openAiDisputeHelper(loadId) {
+            myLoadsAiCurrentLoadId = String(loadId || '');
+            const load = getLoadById(loadId) || {};
+            const loadIdText = load.formattedLoadId || (loadId ? `LOAD-${String(loadId).slice(0, 8).toUpperCase()}` : 'LOAD');
+            const html = `
+                <div class="ai-box">
+                    <div class="ai-h">AI Dispute Helper</div>
+                    <div class="ai-p">Select dispute type and generate a professional cancellation/refund draft for ${loadIdText}.</div>
+                    <select class="ai-select" id="aiDisputeType">
+                        <option value="Cancellation dispute">Cancellation dispute</option>
+                        <option value="Refund request">Refund request</option>
+                    </select>
+                    <select class="ai-select" id="aiDisputeReason">
+                        <option value="">Reason (optional)</option>
+                        <option value="Carrier cancelled last minute">Carrier cancelled last minute</option>
+                        <option value="Late pickup/delivery">Late pickup/delivery</option>
+                        <option value="Damaged goods">Damaged goods</option>
+                        <option value="Service not delivered">Service not delivered</option>
+                        <option value="Overcharged / wrong amount">Overcharged / wrong amount</option>
+                    </select>
+                    <textarea class="ai-textarea" id="aiDisputeDraft" placeholder="Draft will appear here…"></textarea>
+                    <div class="ai-actions">
+                        <button type="button" class="ai-btn" id="aiDisputeCopy"><i class="fas fa-copy"></i>Copy</button>
+                        <button type="button" class="ai-btn primary" id="aiDisputeGen"><i class="fas fa-sparkles"></i>Generate</button>
+                    </div>
+                </div>
+            `;
+            openMyLoadsAi('AI Dispute Helper', html);
+            try {
+                const typeEl = document.getElementById('aiDisputeType');
+                const reasonEl = document.getElementById('aiDisputeReason');
+                const draftEl = document.getElementById('aiDisputeDraft');
+                const genBtn = document.getElementById('aiDisputeGen');
+                const copyBtn = document.getElementById('aiDisputeCopy');
+                function gen() {
+                    const type = typeEl ? typeEl.value : 'Cancellation dispute';
+                    const reason = reasonEl ? reasonEl.value : '';
+                    const draft = generateDisputeDraft(load, type, reason);
+                    if (draftEl) draftEl.value = draft;
+                    myLoadsAiCopyText = draft;
+                }
+                if (genBtn) genBtn.onclick = gen;
+                gen();
+                if (copyBtn) copyBtn.onclick = async function () {
+                    const ok = await copyToClipboard(myLoadsAiCopyText || (draftEl ? draftEl.value : ''));
+                    if (ok) showSuccess('Copied to clipboard');
+                    else showError('Copy failed');
+                };
+            } catch (e) {}
         }
 
         // View load details
@@ -745,6 +1198,11 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('myLoadsAiOverlay');
+            const closeBtn = document.getElementById('myLoadsAiClose');
+            if (closeBtn) closeBtn.addEventListener('click', closeMyLoadsAi);
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMyLoadsAi(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMyLoadsAi(); });
             loadMyLoads();
         });
     </script>

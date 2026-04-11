@@ -620,6 +620,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <!-- Firebase Init -->
     <script src="../../assets/js/firebase-init.js"></script>
@@ -659,6 +660,14 @@
         }
 
         function getNetCarrierAmount(load) {
+            if (load && load.acceptedOffer && String(load.acceptedOffer.type || '').toLowerCase() === 'bid' && load.acceptedOffer.amount !== undefined && load.acceptedOffer.amount !== null && load.acceptedOffer.amount !== '') {
+                const v = parseFloat(load.acceptedOffer.amount);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
+            if (load && load.agreedPrice !== undefined && load.agreedPrice !== null && load.agreedPrice !== '') {
+                const v = parseFloat(load.agreedPrice);
+                if (!isNaN(v)) return Math.round(v * 100) / 100;
+            }
             if (load && load.carrierNetAmount !== undefined && load.carrierNetAmount !== null && load.carrierNetAmount !== '') {
                 const v = parseFloat(load.carrierNetAmount);
                 if (!isNaN(v)) return v;
@@ -683,12 +692,60 @@
 
         // Get user data
         function getUserData() {
-            const carrierAuth = localStorage.getItem('carrierAuth');
-            if (!carrierAuth) return null;
-            return JSON.parse(carrierAuth);
+            try {
+                const raw = localStorage.getItem('carrierAuth') || localStorage.getItem('lastCarrierProfile');
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) {
+                return null;
+            }
         }
 
-        // Load wallet data – show bank & history first (localStorage), then fast loads query for balance
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!authSdk.currentUser;
+        }
+
+        function sanitizeKey(key) {
+            return String(key || '').replace(/[.#$\[\]\/]/g, '_');
+        }
+
+        async function resolveCarrierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('carriers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('carriers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
+        }
+
+        // Load wallet data – show bank & history first, compute balance from completed loads + withdrawals
         async function loadWalletData() {
             const user = getUserData();
             if (!user) {
@@ -696,45 +753,61 @@
                 return;
             }
 
-            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
-            const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
-            const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
+            const authOk = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authOk || !authSdk || !authSdk.currentUser) {
+                showError('Session expired. Please login again.');
+                setTimeout(() => { window.location.href = 'login.html'; }, 800);
+                return;
+            }
 
-            // Show bank details and withdrawal history immediately (no Firebase)
+            const carrierIdFallback = user.carrierId || user.id || sanitizeKey(user.email || '');
+
+            // Show bank details and withdrawal history immediately
             loadBankDetails();
             loadWithdrawalHistory();
 
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
+                const authUid = String(authSdk.currentUser.uid || '');
+                const authEmail = String(authSdk.currentUser.email || user.email || '');
 
-                let allLoads = {};
-                try {
-                    const myLoadsRef = db.ref('loads').orderByChild('carrierId').equalTo(carrierId);
-                    const snap = await myLoadsRef.once('value');
-                    allLoads = snap.val() || {};
-                } catch (e) {
-                    const snap = await db.ref('loads').orderByKey().limitToLast(200).once('value');
-                    const raw = snap.val() || {};
-                    Object.entries(raw).forEach(([id, load]) => {
-                        if ((load.carrierId === carrierId || load.assignedCarrier === carrierId || load.carrierEmail === user.email) &&
-                            (load.status || '').toLowerCase() === 'completed') {
-                            allLoads[id] = { ...load, loadId: id };
-                        }
-                    });
+                const resolvedCarrierId = await resolveCarrierIdByUid(db, authUid, carrierIdFallback);
+                const candidateCarrierIds = Array.from(new Set([resolvedCarrierId, carrierIdFallback].filter(Boolean).map(String)));
+
+                const loadsMap = {};
+                async function mergeQuery(q) {
+                    const snap = await q.once('value');
+                    if (!snap.exists()) return;
+                    snap.forEach((ch) => { loadsMap[ch.key] = ch.val() || {}; });
                 }
+                const jobs = [mergeQuery(db.ref('loads').orderByChild('carrierFirebaseUid').equalTo(authUid))];
+                if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('carrierEmail').equalTo(authEmail)));
+                for (const cid of candidateCarrierIds) jobs.push(mergeQuery(db.ref('loads').orderByChild('carrierId').equalTo(cid)));
+                await Promise.allSettled(jobs);
 
-                const completedLoads = Object.entries(allLoads).map(([id, load]) => ({ ...load, loadId: id }))
-                    .filter(load => (load.carrierId === carrierId || load.assignedCarrier === carrierId || load.carrierEmail === user.email) &&
-                        (load.status || '').toLowerCase() === 'completed');
-
+                const completedLoads = Object.entries(loadsMap)
+                    .map(([id, load]) => ({ ...(load || {}), loadId: id }))
+                    .filter(load => {
+                        const st = String(load.status || '').toLowerCase();
+                        return st === 'completed' || st === 'delivered';
+                    });
                 const totalEarnings = completedLoads.reduce((sum, load) => sum + getNetCarrierAmount(load), 0);
 
+                const withdrawals = [];
+                for (const cid of candidateCarrierIds) {
+                    try {
+                        const wrSnap = await db.ref(`withdrawRequests/${cid}`).limitToLast(600).once('value');
+                        if (wrSnap.exists()) {
+                            wrSnap.forEach((ch) => withdrawals.push({ id: ch.key, ...(ch.val() || {}) }));
+                        }
+                    } catch (e) {}
+                }
                 const totalWithdrawn = withdrawals
-                    .filter(w => w.status === 'completed' || w.status === 'approved')
+                    .filter(w => ['processed', 'paid', 'completed'].includes(String(w.status || '').toLowerCase()))
                     .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
-
                 const pendingWithdrawals = withdrawals
-                    .filter(w => w.status === 'pending')
+                    .filter(w => ['pending', 'approved'].includes(String(w.status || '').toLowerCase()))
                     .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
 
                 const availableBalance = Math.max(0, totalEarnings - totalWithdrawn - pendingWithdrawals);
@@ -750,33 +823,39 @@
         }
 
         // Load bank details
-        function loadBankDetails() {
+        async function loadBankDetails() {
             const user = getUserData();
             if (!user) return;
 
-            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
-            const walletKey = `walletSetup_${carrierId}`;
-            const walletData = localStorage.getItem(walletKey);
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!ok || !authSdk || !authSdk.currentUser) return;
+            const carrierIdFallback = user.carrierId || user.id || sanitizeKey(user.email || '');
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const authUid = String(authSdk.currentUser.uid || '');
+                const carrierId = await resolveCarrierIdByUid(db, authUid, carrierIdFallback);
+                const snap = await db.ref(`carrierBankDetails/${carrierId}`).once('value');
+                const bank = snap.val() || null;
+                if (bank) {
+                    document.getElementById('bankName').textContent = bank.bankName || '-';
+                    document.getElementById('accountName').textContent = bank.accountName || bank.accountHolderName || '-';
+                    document.getElementById('accountNumber').textContent = bank.accountNumber ? '****' + String(bank.accountNumber).slice(-4) : '-';
+                    document.getElementById('sortCode').textContent = bank.sortCode || '-';
+                    return;
+                }
+            } catch (e) {}
 
-            if (walletData) {
-                const bank = JSON.parse(walletData);
-                document.getElementById('bankName').textContent = bank.bankName || '-';
-                document.getElementById('accountName').textContent = bank.accountName || '-';
-                document.getElementById('accountNumber').textContent = bank.accountNumber ? '****' + bank.accountNumber.slice(-4) : '-';
-                document.getElementById('sortCode').textContent = bank.sortCode || '-';
-            } else {
-                // Show add bank details message
-                document.getElementById('bankCard').innerHTML = `
-                    <div style="text-align: center; padding: 2rem;">
-                        <i class="fas fa-university" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1rem;"></i>
-                        <h3 style="font-size: 1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem;">No Bank Details</h3>
-                        <p style="font-size: 0.875rem; color: var(--text-medium); margin-bottom: 1rem;">Please add your bank details to withdraw funds</p>
-                        <button class="bank-edit-btn" onclick="editBankDetails()" style="background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-weight: 600;">
-                            <i class="fas fa-plus"></i> Add Bank Details
-                        </button>
-                    </div>
-                `;
-            }
+            document.getElementById('bankCard').innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-university" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1rem;"></i>
+                    <h3 style="font-size: 1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem;">No Bank Details</h3>
+                    <p style="font-size: 0.875rem; color: var(--text-medium); margin-bottom: 1rem;">Please add your bank details to withdraw funds</p>
+                    <button class="bank-edit-btn" onclick="editBankDetails()" style="background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-weight: 600;">
+                        <i class="fas fa-plus"></i> Add Bank Details
+                    </button>
+                </div>
+            `;
         }
 
         // Edit bank details
@@ -855,11 +934,17 @@
             }
 
             // Check bank details
-            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
-            const walletKey = `walletSetup_${carrierId}`;
-            const walletData = localStorage.getItem(walletKey);
-
-            if (!walletData) {
+            const carrierIdFallback = user.carrierId || user.id || sanitizeKey(user.email || '');
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const ok = await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!ok || !authSdk || !authSdk.currentUser) throw new Error('auth');
+                const authUid = String(authSdk.currentUser.uid || '');
+                const carrierId = await resolveCarrierIdByUid(db, authUid, carrierIdFallback);
+                const snap = await db.ref(`carrierBankDetails/${carrierId}`).once('value');
+                if (!snap.exists()) throw new Error('no_bank');
+            } catch (e) {
                 showError('Please add bank details first');
                 setTimeout(() => {
                     editBankDetails();
@@ -890,13 +975,7 @@
                 return;
             }
 
-            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
-            const walletKey = `walletSetup_${carrierId}`;
-            const walletData = localStorage.getItem(walletKey);
-            if (!walletData) {
-                showError('Please add bank details first');
-                return;
-            }
+            const carrierIdFallback = user.carrierId || user.id || sanitizeKey(user.email || '');
 
             const submitBtn = document.getElementById('submitBtn');
             const amountInput = document.getElementById('withdrawalAmount');
@@ -904,26 +983,48 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>';
 
             try {
-                const withdrawal = {
-                    id: 'withdrawal_' + Date.now(),
+                const db = window.AlphaBrokrage.firebaseDb;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                const ok = await ensureAuthReady();
+                if (!ok || !authSdk || !authSdk.currentUser) throw new Error('auth');
+                const carrierUid = String(authSdk.currentUser.uid || '');
+                const carrierId = await resolveCarrierIdByUid(db, carrierUid, carrierIdFallback);
+                const bankSnap = await db.ref(`carrierBankDetails/${carrierId}`).once('value');
+                if (!bankSnap.exists()) {
+                    showError('Please add bank details first');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Request Withdrawal</span>';
+                    return;
+                }
+                const bank = bankSnap.val() || {};
+                const nowIso = new Date().toISOString();
+                const withdrawalId = 'wd_' + Date.now();
+                const request = {
+                    id: withdrawalId,
                     carrierId: carrierId,
-                    carrierEmail: user.email,
+                    carrierFirebaseUid: carrierUid || null,
+                    carrierEmail: user.email || null,
                     amount: withdrawalAmount,
                     status: 'pending',
-                    requestedAt: new Date().toISOString(),
-                    timestamp: Date.now(),
-                    bankDetails: JSON.parse(walletData)
+                    requestedAt: nowIso,
+                    bankSnapshot: {
+                        bankName: bank.bankName || null,
+                        accountName: bank.accountName || bank.accountHolderName || null,
+                        accountLast4: bank.accountNumber ? String(bank.accountNumber).slice(-4) : null,
+                        sortCode: bank.sortCode || null
+                    }
                 };
-
-                // Save to localStorage
-                const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
-                const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
-                withdrawals.push(withdrawal);
-                localStorage.setItem(withdrawalsKey, JSON.stringify(withdrawals));
-
-                // Save to Firebase
-                const db = window.AlphaBrokrage.firebaseDb;
-                await db.ref(`carrierWithdrawals/${carrierId}/${withdrawal.id}`).set(withdrawal);
+                await db.ref(`withdrawRequests/${carrierId}/${withdrawalId}`).set(request);
+                await db.ref(`withdrawAudit/${withdrawalId}`).set({
+                    withdrawalId,
+                    carrierId,
+                    createdByUid: carrierUid || null,
+                    createdByRole: 'carrier',
+                    createdAt: nowIso,
+                    events: {
+                        created: { at: nowIso, byRole: 'carrier' }
+                    }
+                }).catch(() => {});
 
                 showSuccess('Withdrawal request submitted successfully!');
 
@@ -949,20 +1050,25 @@
         }
 
         // Load withdrawal history
-        function loadWithdrawalHistory() {
+        async function loadWithdrawalHistory() {
             const user = getUserData();
             if (!user) return;
 
-            const carrierId = user.carrierId || user.email?.replace('@', '_').replace('.', '_');
-            const withdrawalsKey = `carrierWithdrawals_${carrierId}`;
-            const withdrawals = JSON.parse(localStorage.getItem(withdrawalsKey) || '[]');
-
-            // Sort by date (newest first)
-            withdrawals.sort((a, b) => {
-                const dateA = new Date(a.requestedAt || a.timestamp || 0);
-                const dateB = new Date(b.requestedAt || b.timestamp || 0);
-                return dateB - dateA;
-            });
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!ok || !authSdk || !authSdk.currentUser) return;
+            const carrierIdFallback = user.carrierId || user.id || sanitizeKey(user.email || '');
+            let withdrawals = [];
+            try {
+                const db = window.AlphaBrokrage.firebaseDb;
+                const authUid = String(authSdk.currentUser.uid || '');
+                const carrierId = await resolveCarrierIdByUid(db, authUid, carrierIdFallback);
+                const snap = await db.ref(`withdrawRequests/${carrierId}`).limitToLast(250).once('value');
+                if (snap.exists()) {
+                    snap.forEach((ch) => withdrawals.push({ id: ch.key, ...(ch.val() || {}) }));
+                }
+            } catch (e) {}
+            withdrawals.sort((a, b) => new Date(b.requestedAt || 0) - new Date(a.requestedAt || 0));
 
             const historyContainer = document.getElementById('withdrawalHistory');
 
@@ -979,9 +1085,10 @@
 
             historyContainer.innerHTML = withdrawals.map(withdrawal => {
                 const status = (withdrawal.status || 'pending').toLowerCase();
-                const statusClass = status === 'completed' || status === 'approved' ? 'completed' : 
+                const statusClass = status === 'processed' || status === 'paid' || status === 'completed' || status === 'approved' ? 'completed' : 
                                    status === 'rejected' || status === 'cancelled' ? 'rejected' : 'pending';
                 const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+                const bankName = (withdrawal.bankSnapshot && withdrawal.bankSnapshot.bankName) ? withdrawal.bankSnapshot.bankName : '';
 
                 return `
                     <div class="history-item">
@@ -990,10 +1097,10 @@
                             <div class="history-status ${statusClass}">${statusText}</div>
                         </div>
                         <div class="history-details">
-                            ${withdrawal.bankDetails?.bankName ? `To: ${withdrawal.bankDetails.bankName}` : 'Bank Transfer'}
+                            ${bankName ? `To: ${bankName}` : 'Bank Transfer'}
                         </div>
                         <div class="history-date">
-                            ${formatDate(withdrawal.requestedAt || withdrawal.timestamp)}
+                            ${formatDate(withdrawal.requestedAt)}
                         </div>
                     </div>
                 `;

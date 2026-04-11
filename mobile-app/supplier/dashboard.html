@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- PWA Meta Tags - system nav bar (back, home, recents) + status bar BLACK -->
-    <meta name="theme-color" content="#000000">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Alpha Freight">
     
     <title>Supplier Dashboard - Alpha Freight</title>
@@ -36,7 +36,7 @@
     <style>
         /* Critical footer – system bar ke bilkul upar (bottom offset), gap na ho */
         body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
-        .bottom-nav { position: fixed !important; left: 0 !important; right: 0 !important; width: 100% !important; margin: 0 !important; bottom: env(safe-area-inset-bottom, 48px) !important; background: #fff !important; display: flex !important; justify-content: space-around !important; align-items: center !important; padding: 10px 0 !important; box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important; border-top: 1px solid #eee !important; box-sizing: border-box !important; z-index: 1000 !important; }
+        .bottom-nav { position: fixed !important; left: 0 !important; right: 0 !important; width: 100% !important; margin: 0 !important; bottom: env(safe-area-inset-bottom, 48px) !important; background: #fff !important; display: flex !important; justify-content: space-around !important; align-items: center !important; padding: 10px 0 !important; box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important; border-top: 1px solid #eee !important; box-sizing: border-box !important; z-index: 1000 !important; border-radius: 22px 22px 0 0 !important; overflow: hidden !important; }
         .bottom-nav-item { flex: 1 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; font-size: 14px !important; color: #666 !important; text-decoration: none !important; }
         .bottom-nav-item i { font-size: 18px !important; margin-bottom: 2px !important; }
         .bottom-nav-item.active { color: var(--primary, #1d4ed8) !important; font-weight: 700 !important; }
@@ -278,30 +278,6 @@
             font-size: 1.5rem;
         }
 
-        /* Floating Action Button (FAB) */
-        .fab-btn {
-            position: fixed;
-            bottom: calc(90px + env(safe-area-inset-bottom));
-            right: 1.25rem;
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            box-shadow: 0 10px 25px rgba(99, 91, 255, 0.35);
-            z-index: 999;
-            text-decoration: none;
-            transition: all 0.3s var(--transition-smooth);
-        }
-
-        .fab-btn:active {
-            transform: scale(0.85) rotate(45deg);
-        }
-
         /* Section Headings */
         .section-header {
             display: flex;
@@ -489,7 +465,7 @@
         }
 
         /* Loading */
-        .loading { display: flex; flex-direction: column; width: 100%; }
+        .loading { display: flex; flex-direction: column; width: 100%; align-items: center; justify-content: center; }
         .spinner {
             width: 40px;
             height: 40px;
@@ -523,12 +499,656 @@
         .quick-actions .action-btn:nth-child(1) i { font-size: 1.3rem; }
         .quick-actions .action-btn:nth-child(1) span { font-size: 0.85rem; }
 
+        .vip-dashboard{ background: #F6F7FB; --page-pad: 18px; }
+
+        .vip-dashboard .dashboard-header{
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+
+        .vip-dashboard .dashboard-header::before{ display:none; }
+
+        .vip-dashboard .header-content{ display:none; }
+
+        .vip-dashboard .header-top{ margin-bottom: 12px; }
+        .vip-dashboard .user-info{
+            display:flex;
+            flex-direction:column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .vip-dashboard .user-avatar{
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            color: rgba(15,23,42,0.85);
+        }
+
+        .vip-dashboard .welcome-text{ display:none; }
+
+        .vip-dashboard .vip-greet{
+            display:flex;
+            align-items:baseline;
+            gap: 6px;
+            font-size: 1.05rem;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            line-height: 1.15;
+            min-width: 0;
+        }
+        .vip-dashboard .vip-greet #userName{
+            font-weight: 1000;
+            display:inline-block;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .vip-dashboard .user-name{
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: rgba(100,116,139,0.9);
+        }
+
+        .vip-dashboard .header-icon-btn{
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            color: rgba(15,23,42,0.85);
+        }
+
+        .vip-dashboard .vip-loc{
+            display:flex;
+            align-items:center;
+            gap: 6px;
+            margin-top: 2px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: rgba(100,116,139,0.92);
+        }
+
+        .vip-dashboard .vip-search{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            width: 100%;
+            border-radius: 18px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+            margin-top: 12px;
+        }
+
+        .vip-dashboard .vip-search i{ color: rgba(100,116,139,0.85); }
+
+        .vip-dashboard .vip-search input{
+            width: 100%;
+            border: 0;
+            outline: none;
+            background: transparent;
+            font-weight: 800;
+            color: rgba(15,23,42,0.9);
+        }
+
+        .vip-dashboard .vip-search input::placeholder{ color: rgba(100,116,139,0.75); font-weight: 800; }
+
+        .vip-dashboard .legacy-overview{ display:none !important; }
+        .vip-dashboard .legacy-actions{ display:none !important; }
+        .vip-dashboard .overview-header{
+            margin: 0 var(--page-pad) 10px !important;
+            padding: 0 !important;
+        }
+        .vip-dashboard .vip-actions-header{
+            margin: 16px var(--page-pad) 10px !important;
+            padding: 0 !important;
+        }
+
+        .vip-dashboard .vip-carousel{
+            margin: 12px 0 0;
+            padding: 0 var(--page-pad) 12px;
+            display:flex;
+            gap: 12px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            scroll-padding-left: var(--page-pad);
+            scroll-padding-right: var(--page-pad);
+            align-items: stretch;
+        }
+        .vip-dashboard .vip-carousel::-webkit-scrollbar{ display:none; }
+
+        .vip-dashboard .vip-slide{
+            flex: 0 0 auto;
+            width: clamp(300px, calc(100% - 76px), 420px);
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            height: 100%;
+        }
+
+        .vip-dashboard #trackingHost{ margin: 0; }
+        .vip-dashboard #trackingHost > .tracking-card{ height: 100%; }
+        .vip-dashboard #trackingHost > .loading{ min-height: 168px; }
+
+        .vip-dashboard .vip-slide-card{
+            position: relative;
+            border-radius: 22px;
+            padding: 14px 14px 14px;
+            padding-right: 92px;
+            border: 1px solid rgba(15,23,42,0.06);
+            box-shadow: 0 18px 46px rgba(15,23,42,0.10);
+            overflow:hidden;
+            min-height: 168px;
+            background: rgba(255,255,255,0.92);
+        }
+        .vip-dashboard .vip-slide-card.is-top-carrier{
+            background-image: url("/assets/img/dashboard/top-carrier-bg.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: 56% 42%;
+        }
+        .vip-dashboard .vip-slide-card.is-top-carrier::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background: rgba(246,247,251,0.72);
+            z-index: 0;
+            pointer-events:none;
+        }
+
+        .vip-dashboard .vip-slide-card.is-top-carrier::before{
+            display:none;
+        }
+        .vip-dashboard .vip-slide-card.is-top-carrier .illu{
+            display:none;
+        }
+
+        .vip-dashboard .vip-slide-card.is-active-loads{
+            background-image: url("/assets/img/dashboard/active-loads-bg.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: 56% 42%;
+        }
+        .vip-dashboard .vip-slide-card.is-active-loads::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background: rgba(246,247,251,0.72);
+            z-index: 0;
+            pointer-events:none;
+        }
+        .vip-dashboard .vip-slide-card.is-active-loads .illu{
+            display:none;
+        }
+
+        .vip-dashboard .vip-slide-card.is-total-spent{
+            background-image: url("/assets/img/dashboard/total-spent-bg.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: 56% 42%;
+        }
+        .vip-dashboard .vip-slide-card.is-total-spent::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background: rgba(246,247,251,0.72);
+            z-index: 0;
+            pointer-events:none;
+        }
+        .vip-dashboard .vip-slide-card.is-total-spent .illu{
+            display:none;
+        }
+
+        .vip-dashboard .vip-slide-card::before{
+            content:"";
+            position:absolute;
+            inset:-40px -40px auto auto;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%);
+            transform: rotate(12deg);
+            z-index: 0;
+            pointer-events:none;
+        }
+        .vip-dashboard .vip-slide-card > *{ position: relative; z-index: 1; }
+
+        .vip-dashboard .vip-slide-card .k{
+            font-size: 0.76rem;
+            font-weight: 900;
+            color: rgba(15,23,42,0.70);
+        }
+        .vip-dashboard .vip-slide-card .v{
+            font-size: 1.05rem;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            margin-top: 2px;
+        }
+        .vip-dashboard .vip-slide-card .row{
+            margin-top: 10px;
+            display:flex;
+            align-items:flex-start;
+            gap: 8px;
+            color: rgba(15,23,42,0.88);
+            font-weight: 900;
+            font-size: 0.88rem;
+        }
+        .vip-dashboard .vip-slide-card .row i{ color: rgba(15,23,42,0.55); margin-top: 1px; }
+        .vip-dashboard .vip-slide-card .row > div{ min-width:0; }
+        .vip-dashboard .vip-slide-card .row > div > div:last-child{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .vip-dashboard .vip-slide-card .badge{
+            position:absolute;
+            right: 16px;
+            top: 16px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.55);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+            font-weight: 1000;
+            color: rgba(15,23,42,0.82);
+        }
+        .vip-dashboard .vip-slide-card .illu{
+            position:absolute;
+            right: -10px;
+            bottom: -18px;
+            font-size: 7rem;
+            color: rgba(15,23,42,0.12);
+            transform: rotate(-12deg);
+            pointer-events:none;
+        }
+
+        .vip-dashboard .vip-actions{
+            margin: 12px var(--page-pad) 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .vip-dashboard .vip-action{
+            position: relative;
+            border-radius: 20px;
+            padding: 14px 14px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            cursor: pointer;
+            text-align: left;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 68px;
+        }
+
+        .vip-dashboard .vip-action:active{ transform: scale(0.99); }
+
+        .vip-dashboard .vip-action .t{
+            font-size: 0.95rem;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            line-height: 1.1;
+        }
+
+        .vip-dashboard .vip-action .s{
+            margin-top: 3px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: rgba(100,116,139,0.9);
+        }
+
+        .vip-dashboard .vip-action .ico{
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            color: rgba(15,23,42,0.9);
+            background: rgba(15,23,42,0.06);
+        }
+
+        .vip-dashboard .vip-action .ico.primary{ background: rgba(99,102,241,0.14); color: rgba(79,70,229,0.95); }
+        .vip-dashboard .vip-action .ico.cyan{ background: rgba(6,182,212,0.14); color: rgba(8,145,178,0.95); }
+        .vip-dashboard .vip-action .ico.amber{ background: rgba(245,158,11,0.14); color: rgba(217,119,6,0.95); }
+        .vip-dashboard .vip-action .ico.green{ background: rgba(16,185,129,0.14); color: rgba(5,150,105,0.95); }
+
+        .vip-dashboard .vip-banner{
+            margin: 12px var(--page-pad) 0;
+            padding: 12px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 12px;
+        }
+
+        .vip-dashboard .vip-banner-left{
+            display:flex;
+            align-items:flex-start;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .vip-dashboard .vip-banner-ico{
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            display:grid;
+            place-items:center;
+            flex: 0 0 auto;
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.82);
+        }
+
+        .vip-dashboard .vip-banner-title{
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            font-size: 0.95rem;
+            line-height: 1.15;
+        }
+
+        .vip-dashboard .vip-banner-sub{
+            margin-top: 4px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: rgba(100,116,139,0.92);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 38ch;
+        }
+
+        .vip-dashboard .vip-banner-cta{
+            text-decoration:none;
+            padding: 10px 12px;
+            border-radius: 16px;
+            font-weight: 1000;
+            font-size: 0.82rem;
+            white-space: nowrap;
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.96);
+            color: rgba(15,23,42,0.92);
+        }
+
+        .vip-dashboard .vip-banner-cta:active{ transform: scale(0.99); }
+
+        .vip-dashboard .vip-banner--pay{
+            background: linear-gradient(180deg, rgba(255, 245, 214, 0.75), rgba(255, 245, 214, 0.42));
+            border-color: rgba(245,158,11,0.25);
+        }
+        .vip-dashboard .vip-banner--pay .vip-banner-ico{
+            background: rgba(245,158,11,0.14);
+            color: rgba(217,119,6,0.95);
+        }
+        .vip-dashboard .vip-banner--pay .vip-banner-cta{
+            background: rgba(245,158,11,0.14);
+            border-color: rgba(245,158,11,0.22);
+            color: rgba(217,119,6,0.98);
+        }
+
+        .vip-dashboard .vip-banner--profile{
+            background: linear-gradient(180deg, rgba(238, 242, 255, 0.95), rgba(238, 242, 255, 0.70));
+            border-color: rgba(99,102,241,0.22);
+        }
+        .vip-dashboard .vip-banner--profile .vip-banner-ico{
+            background: rgba(99,102,241,0.14);
+            color: rgba(79,70,229,0.95);
+        }
+        .vip-dashboard .vip-banner--profile .vip-banner-cta{
+            background: rgba(99,102,241,0.14);
+            border-color: rgba(99,102,241,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+
+        .vip-dashboard .tracking-card{
+            position: relative;
+            border-radius: 22px;
+            padding: 14px 14px 14px;
+            padding-right: 92px;
+            background: linear-gradient(180deg, rgba(160, 153, 255, 0.50), rgba(160, 153, 255, 0.30));
+            border: 1px solid rgba(15,23,42,0.06);
+            box-shadow: 0 18px 46px rgba(15,23,42,0.10);
+            overflow:hidden;
+            min-height: 168px;
+        }
+        .vip-dashboard .tracking-card::before{
+            content:"";
+            position:absolute;
+            inset:-40px -40px auto auto;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%);
+            transform: rotate(12deg);
+            z-index: 0;
+            pointer-events:none;
+        }
+        .vip-dashboard .tracking-card > *{ position: relative; z-index: 1; }
+
+        .vip-dashboard .tracking-k{
+            font-size: 0.76rem;
+            font-weight: 900;
+            color: rgba(15,23,42,0.70);
+        }
+
+        .vip-dashboard .tracking-id{
+            font-size: 1.05rem;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            margin-top: 2px;
+        }
+
+        .vip-dashboard .tracking-grid{
+            margin-top: 10px;
+            display:grid;
+            gap: 10px;
+        }
+
+        .vip-dashboard .tracking-row{
+            display:flex;
+            align-items:flex-start;
+            gap: 8px;
+            color: rgba(15,23,42,0.88);
+            font-weight: 900;
+            font-size: 0.88rem;
+        }
+        .vip-dashboard .tracking-row > div{ min-width:0; }
+        .vip-dashboard .tracking-row > div > div:last-child{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .vip-dashboard .tracking-row i{ color: rgba(15,23,42,0.55); margin-top: 1px; }
+
+        .vip-dashboard .tracking-badge{
+            position:absolute;
+            right: 16px;
+            top: 16px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.55);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+            font-weight: 1000;
+            color: rgba(15,23,42,0.82);
+        }
+
+        .vip-dashboard .tracking-illu{
+            position:absolute;
+            right: -10px;
+            bottom: -18px;
+            font-size: 7rem;
+            color: rgba(15,23,42,0.12);
+            transform: rotate(-12deg);
+            pointer-events:none;
+        }
+
+        .vip-dashboard .quick-actions{ display:none !important; }
+
+        .vip-dashboard .stats-grid{
+            display:grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 12px var(--page-pad) 0 !important;
+            padding: 0 !important;
+            position: static !important;
+        }
+
+        .vip-dashboard .stat-card{
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px !important;
+            border: 0 !important;
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10) !important;
+            background: rgba(255,255,255,0.92);
+            padding: 12px 12px 10px !important;
+        }
+
+        .vip-dashboard .stat-card::before{
+            display:none;
+        }
+
+        .vip-dashboard .stat-card > *{ position: relative; z-index: 1; }
+
+        .vip-dashboard .stat-icon{
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 12px !important;
+            margin-bottom: 10px !important;
+            box-shadow: none !important;
+        }
+
+        .vip-dashboard .stat-label{
+            font-size: 0.76rem !important;
+            font-weight: 900 !important;
+            color: rgba(100,116,139,0.92) !important;
+        }
+
+        .vip-dashboard .stat-value{
+            font-size: 1.4rem !important;
+            font-weight: 1000 !important;
+            color: rgba(15,23,42,0.92) !important;
+            letter-spacing: -0.03em !important;
+        }
+
+        .vip-dashboard .mini-graph{ display:none !important; }
+
+        .vip-dashboard .section-header{
+            margin: 16px var(--page-pad) 10px !important;
+            padding: 0 !important;
+        }
+
+        .vip-dashboard .section-title{
+            font-weight: 1000 !important;
+            letter-spacing: -0.02em;
+        }
+
+        .vip-dashboard .view-all{
+            color: rgba(100,116,139,0.92) !important;
+            font-weight: 900 !important;
+            border: 0 !important;
+        }
+
+        .vip-dashboard .loads-section{
+            padding: 0 var(--page-pad) var(--page-pad) !important;
+            margin: 0 !important;
+            display: grid;
+            gap: 12px;
+        }
+
+        .vip-dashboard .recent-card{
+            position: relative;
+            border-radius: 22px;
+            padding: 14px 14px 14px;
+            padding-right: 92px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            overflow: hidden;
+            cursor: pointer;
+            min-height: 128px;
+        }
+
+        .vip-dashboard .recent-chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 1000;
+            background: rgba(99,102,241,0.14);
+            color: rgba(79,70,229,0.95);
+        }
+
+        .vip-dashboard .recent-title{
+            margin-top: 10px;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            font-size: 0.98rem;
+        }
+
+        .vip-dashboard .recent-sub{
+            margin-top: 4px;
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: rgba(100,116,139,0.9);
+            line-height: 1.25;
+        }
+
+        .vip-dashboard .recent-illu{
+            position:absolute;
+            right: 12px;
+            bottom: -14px;
+            font-size: 5.2rem;
+            color: rgba(15,23,42,0.10);
+            transform: rotate(-10deg);
+            pointer-events:none;
+        }
+
+        .vip-dashboard .bottom-nav{
+            border-top: 1px solid rgba(15,23,42,0.10) !important;
+            box-shadow: 0 -10px 30px rgba(15,23,42,0.10) !important;
+            border-radius: 22px 22px 0 0 !important;
+            overflow: hidden !important;
+        }
+
+        .vip-dashboard .alert-container{ display:none !important; }
+
         @media (min-width: 768px) {
             body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
         }
     </style>
 </head>
-<body class="has-bottom-nav">
+<body class="has-bottom-nav vip-dashboard">
     <!-- Dashboard Header -->
     <div class="dashboard-header">
         <div class="header-top">
@@ -537,66 +1157,102 @@
                     <span id="avatarInitials">S</span>
                 </div>
                 <div class="user-info">
-                    <span class="welcome-text">Supplier Dashboard</span>
-                    <h1 class="user-name" id="userName">Loading...</h1>
+                    <div class="vip-greet">Hey <span id="userName">Loading...</span></div>
+                    <div class="vip-loc">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span id="userLocation">United Kingdom</span>
+                    </div>
                 </div>
             </div>
             <div class="header-right">
-                <div class="header-icon-btn" onclick="enablePushNotifications()" title="Enable push notifications">
+                <div class="header-icon-btn" onclick="window.location.href='notifications.html'" title="Notifications">
                     <i class="fas fa-bell"></i>
                 </div>
             </div>
         </div>
-        <div class="header-content">
-            <div class="header-meta" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-                <div class="status-badge" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.35rem 0.8rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.4rem; color: #10b981; font-size: 0.75rem; font-weight: 700;">
-                    <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></span>
-                    <span id="statusText">Active Supplier</span>
+        <div class="vip-search">
+            <i class="fas fa-search"></i>
+            <input id="dashSearch" type="search" placeholder="Search Shipping" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="section-header overview-header">
+        <h3 class="section-title">Overview</h3>
+    </div>
+
+    <div class="section-header vip-actions-header">
+        <h3 class="section-title">Quick Actions</h3>
+    </div>
+    <div class="vip-actions">
+        <div class="vip-action" onclick="window.location.href='post-load.html'">
+            <div>
+                <div class="t">Post Load</div>
+                <div class="s">Create shipment</div>
+            </div>
+            <div class="ico cyan"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="vip-action" onclick="window.location.href='my-loads.html'">
+            <div>
+                <div class="t">My Loads</div>
+                <div class="s">Track & manage</div>
+            </div>
+            <div class="ico primary"><i class="fas fa-boxes"></i></div>
+        </div>
+        <div class="vip-action" onclick="window.location.href='pay-letter.html'">
+            <div>
+                <div class="t">Pay Letter</div>
+                <div class="s">Pending payments</div>
+            </div>
+            <div class="ico amber"><i class="fas fa-file-invoice-dollar"></i></div>
+        </div>
+        <div class="vip-action" onclick="window.location.href='messages.html'">
+            <div>
+                <div class="t">Messages</div>
+                <div class="s">Chat with carriers</div>
+            </div>
+            <div class="ico green"><i class="fas fa-comments"></i></div>
+        </div>
+    </div>
+
+    <div style="display:none;">
+        <span id="statusText">Active Supplier</span>
+    </div>
+
+    <div class="vip-carousel" aria-label="Highlights">
+        <div class="vip-slide">
+            <div id="trackingHost">
+                <div class="loading">
+                    <div class="spinner"></div>
                 </div>
             </div>
-            <div class="header-actions" style="display: flex; gap: 0.75rem;">
-                <button class="header-btn" onclick="window.location.href='post-load.html'" style="flex: 1; background: var(--primary); color: white; border: none; padding: 0.85rem; border-radius: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 20px rgba(99, 91, 255, 0.25); font-size: 0.9rem;">
-                    <i class="fas fa-plus-circle"></i>
-                    Post Load
-                </button>
-                <button class="header-btn" onclick="window.location.href='my-loads.html'" style="flex: 1; background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 0.85rem; border-radius: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; backdrop-filter: blur(10px); font-size: 0.9rem;">
-                    <i class="fas fa-boxes"></i>
-                    My Loads
-                </button>
+        </div>
+        <div class="vip-slide">
+            <div class="vip-slide-card is-top-carrier" onclick="window.location.href='my-loads.html'">
+                <div class="k">Top Carrier</div>
+                <div class="v" id="topCarrierName">—</div>
+                <div class="row"><i class="fas fa-boxes"></i><div><div class="k">Loads</div><div id="topCarrierCount">0</div></div></div>
+                <div class="badge">Top</div>
+            </div>
+        </div>
+        <div class="vip-slide">
+            <div class="vip-slide-card is-active-loads" onclick="window.location.href='my-loads.html'">
+                <div class="k">Active Loads</div>
+                <div class="v" id="kpiActiveLoads">0</div>
+                <div class="row"><i class="fas fa-circle-dot"></i><div><div class="k">In Progress</div><div id="kpiActiveLabel">Active</div></div></div>
+                <div class="badge">Now</div>
+            </div>
+        </div>
+        <div class="vip-slide">
+            <div class="vip-slide-card is-total-spent" onclick="window.location.href='my-loads.html'">
+                <div class="k">Total Spent</div>
+                <div class="v" id="kpiTotalSpent">£0</div>
+                <div class="row"><i class="fas fa-receipt"></i><div><div class="k">Completed</div><div id="kpiCompletedLoads">0</div></div></div>
+                <div class="badge">Stats</div>
             </div>
         </div>
     </div>
 
-    <!-- Floating Action Button (FAB) -->
-    <a href="post-load.html" class="fab-btn">
-        <i class="fas fa-plus"></i>
-    </a>
-
-    <!-- Pay Letter Reminder Banner -->
-    <div class="pay-letter-reminder" id="payLetterReminder" style="display: none; margin: 1.1rem 1.25rem 0; background: #fffbeb; border: 1px solid #fcd34d; padding: 0.75rem 0.85rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
-        <div class="reminder-content" style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem;">
-            <i class="fas fa-exclamation-circle" style="color: #f59e0b; font-size: 1.2rem;"></i>
-            <div>
-                <strong>Pay Letter:</strong> <span id="payLetterCount">0</span> pending payment(s)
-            </div>
-        </div>
-        <a href="pay-letter.html" style="background: #f59e0b; color: white; text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 12px; font-weight: 800; font-size: 0.78rem;">Pay Now</a>
-    </div>
-
-    <div id="profileCompleteBanner" style="display:none; margin: 1.1rem 1.25rem 0; background: #eef2ff; border: 1px solid #c7d2fe; padding: 0.85rem 0.9rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 0.85rem;">
-        <div style="display:flex; align-items:flex-start; gap:0.7rem; min-width:0;">
-            <div style="width: 34px; height: 34px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); display:grid; place-items:center; color:#4f46e5; flex-shrink:0;">
-                <i class="fas fa-user-check"></i>
-            </div>
-            <div style="min-width:0;">
-                <div style="font-weight: 900; font-size: 0.9rem; color:#111827; line-height:1.2;">Complete your profile</div>
-                <div id="profileCompleteBannerText" style="margin-top: 0.25rem; font-size: 0.78rem; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Finish setup to unlock full features</div>
-            </div>
-        </div>
-        <a href="edit-profile.html" style="background: #4f46e5; color: white; text-decoration: none; padding: 0.5rem 0.85rem; border-radius: 12px; font-weight: 900; font-size: 0.78rem; flex-shrink:0;">Complete</a>
-    </div>
-
-    <div class="section-header" style="margin-top: 2rem;">
+    <div class="section-header legacy-overview" style="margin-top: 2rem;">
         <h3 class="section-title">Overview</h3>
     </div>
 
@@ -659,10 +1315,10 @@
         </div>
     </div>
 
-    <div class="section-header">
+    <div class="section-header legacy-actions">
         <h3 class="section-title">Quick Actions</h3>
     </div>
-    <div class="quick-actions">
+    <div class="quick-actions legacy-actions">
         <div class="action-btn" onclick="window.location.href='pay-letter.html'">
             <i class="fas fa-file-invoice-dollar" style="color: #f59e0b;"></i>
             <span>Pay Letter</span>
@@ -682,8 +1338,8 @@
     </div>
 
     <div class="section-header">
-        <h3 class="section-title">Recent Loads</h3>
-        <a href="my-loads.html" class="view-all">View All</a>
+        <h3 class="section-title">Recent Shipping</h3>
+        <a href="complete-loads.html" class="view-all">See all</a>
     </div>
     <div class="loads-section" id="loadsSection">
         <div class="loading">
@@ -714,6 +1370,25 @@
             <span>Profile</span>
         </a>
     </nav>
+
+    <div id="dashTourSpot" style="position: fixed; border-radius: 18px; box-shadow: 0 0 0 4px rgba(15,23,42,0.55), 0 24px 60px rgba(0,0,0,0.25); background: rgba(255,255,255,0.08); z-index: 10001; pointer-events: none; display: none;"></div>
+    <div id="dashTourOverlay" style="position: fixed; inset: 0; background: rgba(15,23,42,0.55); backdrop-filter: blur(6px); z-index: 10000; display: none; align-items: flex-end; justify-content: center; padding: 18px 16px 22px;" aria-hidden="true">
+        <div style="width: 100%; max-width: 420px; background: rgba(255,255,255,0.96); border: 1px solid rgba(15,23,42,0.10); border-radius: 20px; padding: 16px 16px 14px; box-shadow: 0 18px 55px rgba(0,0,0,0.22);" role="dialog" aria-modal="true" aria-label="App Tour">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;">
+                <div id="dashTourSteps" style="font-size:0.8rem; opacity:0.9; letter-spacing:0.02em; color: rgba(15,23,42,0.78); font-weight:900;">Step 1/5</div>
+                <button type="button" id="dashTourSkip" style="background:rgba(15,23,42,0.06); border:1px solid rgba(15,23,42,0.10); color:rgba(15,23,42,0.82); font-weight:900; font-size:0.85rem; padding:8px 10px; border-radius:12px; cursor:pointer;">Skip</button>
+            </div>
+            <div id="dashTourTitle" style="font-size:1.05rem; font-weight:1000; letter-spacing:-0.02em; margin-bottom:6px; color:rgba(15,23,42,0.92);"></div>
+            <div id="dashTourBody" style="font-size:0.92rem; line-height:1.45; opacity:0.92; margin-bottom:14px; color:rgba(71,85,105,0.95);"></div>
+            <div style="display:flex; gap:10px; align-items:center; justify-content:space-between;">
+                <div style="display:flex; gap:10px;">
+                    <button type="button" id="dashTourBack" style="border:1px solid rgba(15,23,42,0.10); background: rgba(15,23,42,0.06); color: rgba(15,23,42,0.86); font-weight:1000; border-radius:14px; padding:12px 14px; font-size:0.92rem; cursor:pointer;">Back</button>
+                    <button type="button" id="dashTourNext" style="border:0; background: var(--primary); color:#fff; font-weight:1000; border-radius:14px; padding:12px 14px; font-size:0.92rem; cursor:pointer; box-shadow: 0 12px 28px rgba(99,91,255,0.22);">Next</button>
+                </div>
+                <div id="dashTourDots" style="display:flex; gap:6px; align-items:center;"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -760,9 +1435,14 @@
             const user = checkAuth();
             const nameEl = document.getElementById('userName');
             if (!user) {
-                nameEl.textContent = 'Guest Supplier';
-                nameEl.title = '';
-                document.getElementById('avatarInitials').textContent = 'G';
+                if (nameEl) {
+                    nameEl.textContent = 'Guest Supplier';
+                    nameEl.title = '';
+                }
+                const locEl = document.getElementById('userLocation');
+                if (locEl) locEl.textContent = 'United Kingdom';
+                const av = document.getElementById('avatarInitials');
+                if (av) av.textContent = 'G';
                 return;
             }
 
@@ -770,13 +1450,23 @@
             const companyName = user.companyName || '';
             const displayName = companyName || fullName;
 
-            nameEl.textContent = displayName;
-            nameEl.title = displayName;
-            document.getElementById('avatarInitials').textContent = getInitials(displayName);
+            if (nameEl) {
+                nameEl.textContent = displayName;
+                nameEl.title = displayName;
+            }
+            const locEl = document.getElementById('userLocation');
+            if (locEl) {
+                const city = user.city || '';
+                const country = user.country || '';
+                locEl.textContent = String([city, country].filter(Boolean).join(', ') || (country || 'United Kingdom'));
+            }
+            const av = document.getElementById('avatarInitials');
+            if (av) av.textContent = getInitials(displayName);
 
             // Update status
             const status = (user.status || 'pending').toLowerCase();
             const statusTextEl = document.getElementById('statusText');
+            if (!statusTextEl) return;
             if (status === 'verified' || status === 'approved') {
                 statusTextEl.textContent = 'Verified Supplier';
             } else {
@@ -788,6 +1478,11 @@
         function formatCurrency(amount) {
             const num = parseFloat(amount) || 0;
             return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function escapeHtml(value) {
+            const s = String(value ?? '');
+            return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] || c));
         }
 
         // Load dashboard stats - cache for instant display, then refresh
@@ -842,6 +1537,56 @@
             document.getElementById('pendingLoads').textContent = pendingLoads;
             document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
             loadRecentLoads(supplierLoads);
+
+            const kpiActiveEl = document.getElementById('kpiActiveLoads');
+            if (kpiActiveEl) kpiActiveEl.textContent = String(activeLoads);
+            const kpiSpentEl = document.getElementById('kpiTotalSpent');
+            if (kpiSpentEl) kpiSpentEl.textContent = formatCurrency(totalSpent);
+            const kpiCompletedEl = document.getElementById('kpiCompletedLoads');
+            if (kpiCompletedEl) kpiCompletedEl.textContent = String(completedLoads.length);
+            updateTopCarrier(supplierLoads);
+        }
+
+        function getCarrierDisplayName(load) {
+            const v = load || {};
+            const candidates = [
+                v.carrierCompanyName,
+                v.assignedCarrierCompanyName,
+                v.acceptedCarrierCompanyName,
+                v.carrierName,
+                v.assignedCarrierName,
+                v.acceptedCarrierName,
+                v.carrier,
+                v.assignedCarrier
+            ];
+            for (let i = 0; i < candidates.length; i++) {
+                const c = candidates[i];
+                if (typeof c === 'string' && c.trim()) return c.trim();
+                if (c && typeof c === 'object') {
+                    const n = c.companyName || c.name || '';
+                    if (String(n || '').trim()) return String(n).trim();
+                }
+            }
+            return '';
+        }
+
+        function updateTopCarrier(loads) {
+            const nameEl = document.getElementById('topCarrierName');
+            const countEl = document.getElementById('topCarrierCount');
+            if (!nameEl || !countEl) return;
+            const map = new Map();
+            (Array.isArray(loads) ? loads : []).forEach((l) => {
+                const n = getCarrierDisplayName(l);
+                if (!n) return;
+                map.set(n, (map.get(n) || 0) + 1);
+            });
+            let bestName = '';
+            let bestCount = 0;
+            map.forEach((c, n) => {
+                if (c > bestCount) { bestCount = c; bestName = n; }
+            });
+            nameEl.textContent = bestName || 'No carrier yet';
+            countEl.textContent = String(bestCount || 0);
         }
 
         async function ensureAuthReady() {
@@ -952,38 +1697,46 @@
 
             try {
                 const db = window.AlphaBrokrage.firebaseDb;
-                let supplierLoads = [];
+                await ensureAuthReady();
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                if (!authSdk || !authSdk.currentUser) {
+                    alertSystem.show('error', 'Session expired. Please login again.');
+                    return;
+                }
 
-                const snapshot = await db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value');
-                const val = snapshot.val();
-                supplierLoads = val ? Object.values(val) : [];
+                const authUid = String(authSdk.currentUser.uid || '');
+                const authEmail = String(authSdk.currentUser.email || user.email || '');
 
+                const map = {};
+                async function mergeQuery(q) {
+                    const snap = await q.once('value');
+                    if (!snap.exists()) return;
+                    snap.forEach((ch) => { map[ch.key] = ch.val() || {}; });
+                }
+
+                const jobs = [
+                    mergeQuery(db.ref('loads').orderByChild('supplierFirebaseUid').equalTo(authUid))
+                ];
+                if (authEmail) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierEmail').equalTo(authEmail)));
+                if (supplierId) jobs.push(mergeQuery(db.ref('loads').orderByChild('supplierId').equalTo(supplierId)));
+                await Promise.allSettled(jobs);
+
+                const supplierLoads = Object.values(map);
                 setSupplierLoadsCache(supplierId, supplierLoads);
                 applyStatsToUI(supplierLoads);
-
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                // Fallback if index fails
-                try {
-                    const db = window.AlphaBrokrage.firebaseDb;
-                    const snapshot = await db.ref('loads').once('value');
-                    const allLoads = snapshot.val() || {};
-                    const supplierLoads = Object.values(allLoads).filter(load => 
-                        load.supplierId === supplierId || load.supplierEmail === user.email
-                    );
-                    setSupplierLoadsCache(supplierId, supplierLoads);
-                    applyStatsToUI(supplierLoads);
-                } catch (e) {
-                    alertSystem.show('error', 'Failed to load dashboard data');
-                }
+                alertSystem.show('error', 'Failed to load dashboard data');
             }
         }
 
         // Load recent loads
         function loadRecentLoads(loads) {
             const loadsSection = document.getElementById('loadsSection');
+            const trackingHost = document.getElementById('trackingHost');
             
             if (loads.length === 0) {
+                if (trackingHost) trackingHost.innerHTML = '';
                 loadsSection.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-inbox"></i>
@@ -994,57 +1747,42 @@
                 return;
             }
 
-            const recentLoads = loads
-                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-                .slice(0, 5);
+            const sorted = loads.slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            const activeStatuses = ['active', 'accepted', 'in-transit', 'in_transit', 'picked-up', 'picked_up'];
+            const current = sorted.find(l => activeStatuses.includes(String(l.status || '').toLowerCase())) || sorted[0];
 
-            loadsSection.innerHTML = recentLoads.map((load, index) => {
-                const status = (load.status || 'available').toLowerCase();
-                let statusClass = 'available';
-                if (['active', 'accepted', 'in-transit', 'picked-up'].includes(status)) statusClass = 'active';
-                else if (status === 'pending') statusClass = 'pending';
-                else if (['completed', 'delivered'].includes(status)) statusClass = 'completed';
-                
-                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+            const currentId = current.loadId ? ('#' + String(current.loadId).substring(0, 8)) : '—';
+            const currentLoc = current.deliveryLocation || current.pickupLocation || '—';
+            const currentStatus = String(current.status || 'In Transit').replace(/_/g, '-').toLowerCase();
+            const statusLabel = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).replace(/-/g, ' ');
 
+            if (trackingHost) {
+                trackingHost.innerHTML = `
+                    <div class="tracking-card" onclick="viewLoad('${escapeHtml(current.loadId || '')}')">
+                        <div class="tracking-k">Current Tracking</div>
+                        <div class="tracking-id">${escapeHtml(currentId)}</div>
+                        <div class="tracking-badge">${escapeHtml(statusLabel)}</div>
+                        <div class="tracking-grid">
+                            <div class="tracking-row"><i class="fas fa-map-marker-alt"></i><div><div class="tracking-k">Current Location</div><div>${escapeHtml(currentLoc)}</div></div></div>
+                            <div class="tracking-row"><i class="fas fa-circle-dot"></i><div><div class="tracking-k">Status</div><div>${escapeHtml(statusLabel)}</div></div></div>
+                        </div>
+                        <i class="fas fa-box tracking-illu"></i>
+                    </div>
+                `;
+            }
+
+            const recent = sorted.filter(l => l !== current).slice(0, 2);
+            loadsSection.innerHTML = recent.map((load) => {
+                const id = load.loadId ? ('#' + String(load.loadId).substring(0, 8)) : '—';
+                const st = String(load.status || 'In Transit').replace(/_/g, '-').toLowerCase();
+                const label = st.charAt(0).toUpperCase() + st.slice(1).replace(/-/g, ' ');
+                const dateText = formatDate(load.deliveryDate || load.pickupDate || load.createdAt);
                 return `
-                    <div class="load-card" onclick="viewLoad('${load.loadId || ''}')" style="animation-delay: ${0.1 * index}s">
-                        <div class="load-header">
-                            <div class="load-id">
-                                <span style="opacity: 0.5; font-weight: 500;">ID:</span> #${load.loadId?.substring(0, 8) || 'N/A'}
-                            </div>
-                            <div class="load-status ${statusClass}">${statusLabel}</div>
-                        </div>
-                        <div class="load-route">
-                            <div class="route-point">
-                                <div class="route-point-label">Pickup</div>
-                                <div class="route-point-value">${load.pickupLocation || 'N/A'}</div>
-                            </div>
-                            <div class="route-visual" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                <div style="width: 8px; height: 8px; border: 2px solid var(--primary); border-radius: 50%;"></div>
-                                <div style="width: 2px; height: 20px; background: linear-gradient(to bottom, var(--primary), transparent); opacity: 0.3;"></div>
-                                <i class="fas fa-chevron-down" style="font-size: 10px; color: var(--primary); opacity: 0.5;"></i>
-                            </div>
-                            <div class="route-point">
-                                <div class="route-point-label">Delivery</div>
-                                <div class="route-point-value">${load.deliveryLocation || 'N/A'}</div>
-                            </div>
-                        </div>
-                        <div class="load-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                            <div class="load-meta" style="display: flex; gap: 1rem;">
-                                <div class="meta-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-light); font-weight: 600;">
-                                    <i class="far fa-calendar-alt"></i>
-                                    ${formatDate(load.pickupDate)}
-                                </div>
-                                <div class="meta-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-light); font-weight: 600;">
-                                    <i class="fas fa-weight-hanging"></i>
-                                    ${load.weight || 'N/A'}
-                                </div>
-                            </div>
-                            <div class="load-price" style="font-size: 1.15rem; font-weight: 800; color: var(--text-dark);">
-                                ${formatCurrency(load.price || load.budget || 0)}
-                            </div>
-                        </div>
+                    <div class="recent-card" onclick="viewLoad('${escapeHtml(load.loadId || '')}')">
+                        <div class="recent-chip">${escapeHtml(label)}</div>
+                        <div class="recent-title">${escapeHtml(id)}</div>
+                        <div class="recent-sub">Delivery Date<br>${escapeHtml(dateText)}</div>
+                        <i class="fas fa-box-open recent-illu"></i>
                     </div>
                 `;
             }).join('');
@@ -1156,23 +1894,7 @@
                 const latest = list[list.length - 1];
                 const title = latest.title || 'New notification';
                 const msg = latest.message || 'You have ' + list.length + ' unread notification(s).';
-                if (typeof window.showInfo === 'function') {
-                    window.showInfo(msg, { title: title, duration: 8000 });
-                } else if (typeof window.AlertSystem !== 'undefined') {
-                    window.AlertSystem.show(msg, 'info', { title: title, duration: 8000 });
-                }
-                try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.frequency.value = 800;
-                    osc.type = 'sine';
-                    gain.gain.value = 0.3;
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.3);
-                } catch (e) {}
+                return;
             }).catch(function() {});
         }
 
@@ -1234,17 +1956,141 @@
                 window.location.href = 'login.html';
                 return;
             }
+            const authUser = checkAuth();
+            if (authUser && authUser.profileComplete === false) {
+                window.location.href = 'edit-profile.html';
+                return;
+            }
+
+            (function () {
+                try {
+                    function insertAfter(node, ref) {
+                        if (!node || !ref || !ref.parentNode) return;
+                        ref.parentNode.insertBefore(node, ref.nextSibling);
+                    }
+                    const overviewHeader = document.querySelector('.overview-header');
+                    const stats = document.getElementById('statsGrid');
+                    if (overviewHeader && stats) insertAfter(stats, overviewHeader);
+
+                    const vipActions = document.querySelector('.vip-actions');
+                    const pay = document.getElementById('payLetterReminder');
+                    const prof = document.getElementById('profileCompleteBanner');
+                    if (vipActions) {
+                        if (pay) insertAfter(pay, vipActions);
+                        if (prof) insertAfter(prof, pay && pay.parentNode === vipActions.parentNode ? pay : vipActions);
+                    }
+                } catch (e) {}
+            })();
+
             loadUserData();
-            checkAndShowProfileBanner();
             loadDashboardStats();
-            loadPayLetterReminder();
-            setTimeout(loadAndShowUnreadNotifications, 1500);
             const user = checkAuth();
             if (user && user.supplierId) {
                 // Auto-enable push in background – no banner shown
                 initNativePush().catch(function() {});
                 if (typeof initFCM === 'function') initFCM().catch(function() {});
             }
+
+            (function () {
+                var KEY = 'ab.mobile.onboarding.supplier.dashboard.v1.done';
+                var overlay = document.getElementById('dashTourOverlay');
+                var spot = document.getElementById('dashTourSpot');
+                var stepsEl = document.getElementById('dashTourSteps');
+                var titleEl = document.getElementById('dashTourTitle');
+                var bodyEl = document.getElementById('dashTourBody');
+                var btnSkip = document.getElementById('dashTourSkip');
+                var btnBack = document.getElementById('dashTourBack');
+                var btnNext = document.getElementById('dashTourNext');
+                var dotsWrap = document.getElementById('dashTourDots');
+                if (!overlay || !spot || !stepsEl || !titleEl || !bodyEl || !btnSkip || !btnBack || !btnNext || !dotsWrap) return;
+
+                function hasDone() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+                function setDone() { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
+
+                function q(sel) { try { return document.querySelector(sel); } catch (e) { return null; } }
+                var steps = [
+                    { title: 'Welcome', body: 'This is your Supplier dashboard. Everything important is here.', target: null },
+                    { title: 'Post a Load', body: 'Tap Post Load to create a new shipment in seconds.', target: '.vip-actions .vip-action' },
+                    { title: 'Overview', body: 'These stats show active/pending/completed and your spend.', target: '#statsGrid' },
+                    { title: 'Quick Actions', body: 'Payments, tracking, and messages are one tap away.', target: '.vip-actions' },
+                    { title: 'Notifications', body: 'Use the bell icon to see updates, approvals, and refunds.', target: '.header-icon-btn' }
+                ];
+
+                var index = 0;
+                var open = false;
+
+                function buildDots() {
+                    dotsWrap.innerHTML = '';
+                    for (var i = 0; i < steps.length; i++) {
+                        var d = document.createElement('div');
+                        d.style.width = '8px';
+                        d.style.height = '8px';
+                        d.style.borderRadius = '99px';
+                        d.style.background = i === index ? 'rgba(99,91,255,0.95)' : 'rgba(15,23,42,0.18)';
+                        dotsWrap.appendChild(d);
+                    }
+                }
+
+                function positionSpot() {
+                    if (!open) return;
+                    var step = steps[index] || {};
+                    var sel = step.target;
+                    if (!sel) { spot.style.display = 'none'; return; }
+                    var el = q(sel);
+                    if (!el) { spot.style.display = 'none'; return; }
+                    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+                    var r = el.getBoundingClientRect();
+                    var pad = 8;
+                    var top = Math.max(10, r.top - pad);
+                    var left = Math.max(10, r.left - pad);
+                    var w = Math.min(window.innerWidth - 20, r.width + pad * 2);
+                    var h = r.height + pad * 2;
+                    spot.style.top = top + 'px';
+                    spot.style.left = left + 'px';
+                    spot.style.width = w + 'px';
+                    spot.style.height = h + 'px';
+                    spot.style.display = 'block';
+                }
+
+                function render() {
+                    var step = steps[index] || {};
+                    stepsEl.textContent = 'Step ' + (index + 1) + '/' + steps.length;
+                    titleEl.textContent = step.title || '';
+                    bodyEl.textContent = step.body || '';
+                    btnBack.disabled = index === 0;
+                    btnBack.style.opacity = btnBack.disabled ? '0.55' : '1';
+                    btnNext.textContent = index === steps.length - 1 ? 'Finish' : 'Next';
+                    buildDots();
+                    positionSpot();
+                }
+
+                function show() {
+                    open = true;
+                    overlay.style.display = 'flex';
+                    overlay.setAttribute('aria-hidden', 'false');
+                    index = 0;
+                    render();
+                }
+
+                function hide(done) {
+                    open = false;
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden', 'true');
+                    spot.style.display = 'none';
+                    if (done) setDone();
+                }
+
+                function next() { if (index >= steps.length - 1) { hide(true); return; } index += 1; render(); }
+                function back() { if (index <= 0) return; index -= 1; render(); }
+
+                btnSkip.addEventListener('click', function () { hide(true); });
+                btnBack.addEventListener('click', back);
+                btnNext.addEventListener('click', next);
+                overlay.addEventListener('click', function (e) { if (e && e.target === overlay) hide(true); });
+                window.addEventListener('resize', positionSpot);
+
+                setTimeout(function () { if (!hasDone()) show(); }, 900);
+            })();
         });
     </script>
 </body>

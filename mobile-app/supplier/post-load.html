@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#F6F7FB">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -36,9 +36,10 @@
     <style>
         /* —— Premium theme (matches dashboard) —— */
         :root {
-            --primary: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --primary-light: #60a5fa;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
             --gold: #c9a227;
             --success: #059669;
             --error: #dc2626;
@@ -46,22 +47,23 @@
             --text-dark: #0f172a;
             --text-medium: #475569;
             --text-light: #94a3b8;
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
             --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
             --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
+            --page-pad: 18px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 18%, #f8fafc 100%);
+            background: var(--bg-main);
             min-height: 100vh;
             color: var(--text-dark);
             line-height: 1.55;
@@ -70,74 +72,112 @@
             -moz-osx-font-smoothing: grayscale;
             /* footer from supplier-bottom-nav.css */
         }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.10), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(29, 78, 216, 0.25); border-radius: 10px; transition: background 0.3s var(--ease); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(29, 78, 216, 0.25) transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
 
         /* Page Header – premium navy + gold accent */
         .page-header {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 48%, #1e3a8a 100%);
-            color: #fff;
-            padding: 1.5rem 1.25rem 1.75rem;
-            border-radius: 0 0 36px 36px;
-            margin-bottom: 1.5rem;
+            background: transparent;
+            color: var(--text-dark);
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+            border-radius: 0;
+            margin-bottom: 12px;
             position: relative;
-            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+            box-shadow: none;
         }
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 36px 36px;
-            opacity: 0.7;
-        }
+        .page-header::after { display: none; }
 
         .header-content { position: relative; z-index: 1; }
+        .page-title-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+            min-width: 0;
+        }
+        .page-chip{
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 1000;
+            font-size: 0.82rem;
+            color: rgba(15,23,42,0.82);
+            display:flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .page-chip i{ color: rgba(99,91,255,0.95); }
 
         .page-title {
             font-size: 1.5rem;
             font-weight: 800;
             letter-spacing: -0.03em;
-            margin-bottom: 0.375rem;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin: 0;
+            text-shadow: none;
+            min-width: 0;
         }
 
         .page-subtitle {
             font-size: 0.875rem;
-            opacity: 0.92;
+            opacity: 1;
+            color: rgba(100,116,139,0.92);
+            font-weight: 700;
         }
 
         /* Form Card – premium */
         .form-card {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 1.5rem;
-            margin: 0 1.25rem 1.5rem;
+            padding: 1.25rem;
+            margin: 0 var(--page-pad) 12px;
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border);
             position: relative;
             overflow: hidden;
         }
         .form-card::before {
-            content: '';
-            position: absolute;
+            content:"";
+            position:absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            opacity: 0.6;
+            background: linear-gradient(90deg, rgba(99,91,255,0.55), rgba(6,182,212,0.35), rgba(99,91,255,0));
+            opacity: 0.45;
         }
+        .form-card::after{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(99,91,255,0.10), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .form-card > *{ position: relative; z-index: 1; }
 
         .form-section-title {
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 900;
             color: var(--text-dark);
             margin-bottom: 1.25rem;
             display: flex;
@@ -166,11 +206,11 @@
 
         .form-input {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.85rem 1rem;
             font-size: 1rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-main);
+            border: 1.5px solid rgba(15,23,42,0.22);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.96);
             color: var(--text-dark);
             transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
             min-height: 48px;
@@ -178,20 +218,20 @@
 
         .form-input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
-            background: var(--card-bg);
+            border-color: rgba(15,23,42,0.45);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14);
+            background: rgba(255,255,255,0.96);
         }
 
         .form-input::placeholder { color: var(--text-light); }
 
         .form-select {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.85rem 1rem;
             font-size: 1rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-main);
+            border: 1.5px solid rgba(15,23,42,0.22);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.96);
             color: var(--text-dark);
             min-height: 48px;
             appearance: none;
@@ -204,9 +244,9 @@
 
         .form-select:focus {
             outline: none;
-            border-color: var(--primary);
-            background-color: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+            border-color: rgba(15,23,42,0.45);
+            background-color: rgba(255,255,255,0.96);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14);
         }
 
         textarea.form-input { min-height: 100px; resize: vertical; }
@@ -253,11 +293,11 @@
 
         /* Commission Info */
         .commission-info {
-            background: linear-gradient(135deg, rgba(29, 78, 216, 0.06) 0%, rgba(5, 150, 105, 0.06) 100%);
-            border-radius: var(--radius-sm);
-            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(99, 91, 255, 0.10) 0%, rgba(6, 182, 212, 0.08) 100%);
+            border-radius: 16px;
+            padding: 1rem;
             margin-top: 1rem;
-            border: 1px solid rgba(29, 78, 216, 0.12);
+            border: 1px solid rgba(15,23,42,0.10);
             display: none;
         }
 
@@ -290,7 +330,56 @@
         }
 
         .commission-value.primary {
-            color: var(--primary);
+            color: var(--primary-dark);
+        }
+
+        .ai-price-btn{
+            width: 100%;
+            min-height: 48px;
+            border-radius: 14px;
+            font-weight: 1000;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(99,91,255,0.10);
+            color: rgba(79,70,229,0.98);
+            cursor: pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+        }
+        .ai-price-btn:active{ transform: scale(0.99); }
+
+        .ai-price-box{
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            display:none;
+        }
+        .ai-price-box.show{ display:block; }
+        .ai-price-top{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 10px;
+        }
+        .ai-price-title{
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+        }
+        .ai-price-range{
+            font-weight: 1000;
+            color: rgba(79,70,229,0.98);
+        }
+        .ai-price-why{
+            margin-top: 6px;
+            font-weight: 800;
+            color: rgba(100,116,139,0.92);
+            font-size: 0.84rem;
+            line-height: 1.35;
         }
 
         .commission-value.success {
@@ -301,15 +390,15 @@
 
         /* Submit Button – premium */
         .submit-btn {
-            width: calc(100% - 2.5rem);
-            margin: 0 1.25rem 1.5rem;
+            width: 100%;
+            margin: 0;
             padding: 1rem;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 900;
             color: #fff;
-            background: linear-gradient(145deg, #2563eb 0%, var(--primary) 100%);
+            background: var(--primary);
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 12px;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
             min-height: 54px;
@@ -317,12 +406,12 @@
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
-            box-shadow: 0 8px 24px rgba(29, 78, 216, 0.35);
+            box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22);
         }
 
         .submit-btn:active {
             transform: scale(0.98);
-            box-shadow: 0 4px 16px rgba(29, 78, 216, 0.3);
+            box-shadow: 0 10px 28px rgba(99, 91, 255, 0.18);
         }
 
         .submit-btn:disabled {
@@ -331,15 +420,15 @@
         }
 
         .save-draft-btn {
-            width: calc(100% - 2.5rem);
-            margin: 0 1.25rem 1rem;
-            padding: 0.875rem;
+            width: 100%;
+            margin: 0;
+            padding: 0.85rem;
             font-size: 0.9375rem;
-            font-weight: 600;
+            font-weight: 900;
             color: var(--text-dark);
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 12px;
             cursor: pointer;
             transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
             min-height: 48px;
@@ -347,12 +436,199 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 10px 25px rgba(15,23,42,0.08);
         }
 
         .save-draft-btn:active {
             transform: scale(0.98);
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+        }
+
+        .action-bar{
+            margin: 8px var(--page-pad) 12px;
+            padding: 12px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 10px;
+        }
+
+        .ai-assist-overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 18px 16px 22px;
+        }
+        .ai-assist-sheet{
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.18);
+            padding: 14px 14px 12px;
+            max-height: calc(82vh - env(safe-area-inset-bottom, 0px));
+            overflow: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(15,23,42,0.18) rgba(15,23,42,0.06);
+        }
+        .ai-assist-sheet::-webkit-scrollbar{ width: 8px; }
+        .ai-assist-sheet::-webkit-scrollbar-track{ background: rgba(15,23,42,0.06); border-radius: 999px; }
+        .ai-assist-sheet::-webkit-scrollbar-thumb{
+            background: rgba(15,23,42,0.18);
+            border-radius: 999px;
+            border: 2px solid rgba(15,23,42,0.06);
+        }
+        .ai-assist-sheet::-webkit-scrollbar-thumb:hover{ background: rgba(15,23,42,0.26); }
+        .ai-assist-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .ai-assist-title{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+        }
+        .ai-assist-title i{
+            width: 34px;
+            height: 34px;
+            border-radius: 14px;
+            display:grid;
+            place-items:center;
+            background: rgba(99,91,255,0.14);
+            color: rgba(79,70,229,0.98);
+        }
+        .ai-assist-close{
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.82);
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+        }
+        .ai-assist-close:active{ transform: scale(0.99); }
+        .ai-assist-hint{
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: rgba(100,116,139,0.92);
+            margin-bottom: 10px;
+        }
+        .ai-assist-input{
+            width: 100%;
+            min-height: 110px;
+            resize: vertical;
+            padding: 12px 12px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(15,23,42,0.22);
+            background: rgba(255,255,255,0.96);
+            outline: none;
+            font-weight: 700;
+            color: rgba(15,23,42,0.90);
+        }
+        .ai-assist-input:focus{
+            border-color: rgba(15,23,42,0.45);
+            box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.14);
+        }
+        .ai-assist-actions{
+            margin-top: 12px;
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .ai-assist-actions.row2{ grid-template-columns: 1fr; }
+        .ai-assist-btn{
+            min-height: 48px;
+            border-radius: 14px;
+            font-weight: 1000;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.86);
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 8px;
+        }
+        .ai-assist-btn.primary{
+            border: 0;
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 12px 28px rgba(99,91,255,0.22);
+        }
+        .ai-assist-btn:active{ transform: scale(0.99); }
+        .ai-assist-result{
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.92);
+            display:none;
+        }
+        .ai-assist-result.show{ display:block; }
+        .ai-issue{
+            display:flex;
+            gap: 10px;
+            align-items:flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+        }
+        .ai-issue:last-child{ border-bottom: 0; }
+        .ai-dot{
+            width: 10px;
+            height: 10px;
+            border-radius: 99px;
+            margin-top: 5px;
+            flex: 0 0 auto;
+        }
+        .ai-dot.err{ background: rgba(220,38,38,0.9); }
+        .ai-dot.warn{ background: rgba(245,158,11,0.9); }
+        .ai-dot.info{ background: rgba(99,91,255,0.85); }
+        .ai-issue-title{
+            font-weight: 1000;
+            letter-spacing: -0.02em;
+            color: rgba(15,23,42,0.92);
+            font-size: 0.92rem;
+            line-height: 1.15;
+        }
+        .ai-issue-body{
+            margin-top: 2px;
+            font-weight: 800;
+            color: rgba(100,116,139,0.92);
+            font-size: 0.84rem;
+        }
+        .ai-fixbar{
+            margin-top: 10px;
+            display:flex;
+            gap: 10px;
+            justify-content: stretch;
+        }
+        .ai-fixbar .ai-assist-btn{ min-height: 44px; }
+        #aiAssistFix{
+            min-height: 46px;
+            border-radius: 14px;
+            font-weight: 1000;
+            box-shadow: 0 12px 28px rgba(99,91,255,0.22);
+            width: 100%;
+            justify-content: center;
         }
 
         /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
@@ -365,7 +641,13 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1 class="page-title">Post a Load</h1>
+            <div class="page-title-row">
+                <h1 class="page-title">Post a Load</h1>
+                <div class="page-chip" id="aiAssistBtn" role="button" tabindex="0" aria-label="AI Assist">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    AI Assist
+                </div>
+            </div>
             <p class="page-subtitle">Fill in the details to post your load</p>
         </div>
     </div>
@@ -581,6 +863,20 @@
             </div>
 
             <div class="form-group">
+                <button type="button" class="ai-price-btn" id="aiPriceSuggestBtn">
+                    <i class="fas fa-sparkles"></i>
+                    AI Suggest Price
+                </button>
+                <div class="ai-price-box" id="aiPriceBox">
+                    <div class="ai-price-top">
+                        <div class="ai-price-title">Suggested Range</div>
+                        <div class="ai-price-range" id="aiPriceRange">£0–£0</div>
+                    </div>
+                    <div class="ai-price-why" id="aiPriceWhy"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">
                     Payment Method
                     <span class="required">*</span>
@@ -662,18 +958,41 @@
             </div>
         </div>
 
-        <!-- Save Draft Button -->
-        <button type="button" class="save-draft-btn" id="saveDraftBtn" onclick="saveDraft()">
-            <i class="fas fa-save"></i>
-            Save Draft
-        </button>
-
-        <!-- Submit Button -->
-        <button type="submit" class="submit-btn" id="submitBtn">
-            <i class="fas fa-paper-plane"></i>
-            <span>Post Load</span>
-        </button>
+        <div class="action-bar">
+            <button type="button" class="save-draft-btn" id="saveDraftBtn" onclick="saveDraft()">
+                <i class="fas fa-save"></i>
+                Save Draft
+            </button>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-paper-plane"></i>
+                <span>Post Load</span>
+            </button>
+        </div>
     </form>
+
+    <div class="ai-assist-overlay" id="aiAssistOverlay" aria-hidden="true">
+        <div class="ai-assist-sheet" role="dialog" aria-modal="true" aria-label="AI Assist">
+            <div class="ai-assist-head">
+                <div class="ai-assist-title"><i class="fas fa-wand-magic-sparkles"></i><span>AI Assist</span></div>
+                <button type="button" class="ai-assist-close" id="aiAssistClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="ai-assist-hint">Write your load details in one line. Example: “Electronics London → Manchester tomorrow, 7.5T, 1200kg”.</div>
+            <textarea class="ai-assist-input" id="aiAssistText" placeholder="Type your load details…"></textarea>
+            <div class="ai-assist-actions">
+                <button type="button" class="ai-assist-btn" id="aiAssistApply"><i class="fas fa-bolt"></i>Fill Form</button>
+                <button type="button" class="ai-assist-btn primary" id="aiAssistSuggest"><i class="fas fa-sparkles"></i>Suggest</button>
+            </div>
+            <div class="ai-assist-actions row2">
+                <button type="button" class="ai-assist-btn" id="aiAssistCheck"><i class="fas fa-list-check"></i>Check My Load</button>
+            </div>
+            <div class="ai-assist-result" id="aiAssistResult">
+                <div id="aiAssistIssues"></div>
+                <div class="ai-fixbar" id="aiAssistFixbar" style="display:none;">
+                    <button type="button" class="ai-assist-btn primary" id="aiAssistFix"><i class="fas fa-wand-magic-sparkles"></i>Fix it</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav" aria-label="Main navigation">
@@ -723,6 +1042,460 @@
 
         function showSuccess(message) {
             alertSystem.show('success', message);
+        }
+
+        function openAiAssist() {
+            const overlay = document.getElementById('aiAssistOverlay');
+            const txt = document.getElementById('aiAssistText');
+            if (!overlay) return;
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+            if (txt) setTimeout(() => { try { txt.focus(); } catch (e) {} }, 0);
+        }
+
+        function closeAiAssist() {
+            const overlay = document.getElementById('aiAssistOverlay');
+            if (!overlay) return;
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function toISODate(d) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function addDays(base, days) {
+            const d = new Date(base.getTime());
+            d.setDate(d.getDate() + days);
+            return d;
+        }
+
+        function parseDateFromText(text) {
+            const t = String(text || '');
+            const now = new Date();
+            if (/\btomorrow\b/i.test(t)) return toISODate(addDays(now, 1));
+            if (/\btoday\b/i.test(t)) return toISODate(now);
+            const iso = t.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
+            if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+            const dmY = t.match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/);
+            if (dmY) {
+                const day = parseInt(dmY[1], 10);
+                const month = parseInt(dmY[2], 10);
+                let year = dmY[3] ? parseInt(dmY[3], 10) : now.getFullYear();
+                if (year < 100) year = 2000 + year;
+                const d = new Date(year, month - 1, day);
+                if (!dmY[3] && d < addDays(now, -1)) d.setFullYear(year + 1);
+                return toISODate(d);
+            }
+            return '';
+        }
+
+        function guessUrgency(text) {
+            const t = String(text || '').toLowerCase();
+            if (t.includes('same day') || t.includes('same-day') || t.includes('sameday')) return 'same-day';
+            if (t.includes('urgent') || t.includes('asap') || t.includes('immediately')) return 'urgent';
+            return '';
+        }
+
+        function guessCargoType(text) {
+            const t = String(text || '').toLowerCase();
+            if (t.includes('electronics')) return 'electronics';
+            if (t.includes('furniture')) return 'furniture';
+            if (t.includes('machinery') || t.includes('machine')) return 'machinery';
+            if (t.includes('refrigerated') || t.includes('chilled') || t.includes('frozen')) return 'refrigerated';
+            if (t.includes('hazard') || t.includes('hazardous') || t.includes('adr')) return 'hazardous';
+            if (t.includes('fragile') || t.includes('glass')) return 'fragile';
+            if (t.includes('liquid')) return 'liquid';
+            return 'general';
+        }
+
+        function guessVehicleType(text) {
+            const t = String(text || '').toLowerCase();
+            if (t.includes('curtainside') || t.includes('curtain side')) return 'curtainside';
+            if (t.includes('flatbed') || t.includes('flat bed')) return 'flatbed';
+            if (t.includes('artic') || t.includes('44t') || t.includes('44 t')) return 'artic';
+            if (t.includes('18t') || t.includes('18 t')) return 'large-truck';
+            if (t.includes('7.5t') || t.includes('7.5 t') || t.includes('7t') || t.includes('7 t')) return 'medium-truck';
+            if (t.includes('3.5t') || t.includes('3.5 t') || t.includes('small truck')) return 'small-truck';
+            if (t.includes('van')) return 'van';
+            if (t.includes('truck')) return 'small-truck';
+            return '';
+        }
+
+        function guessLocations(text) {
+            const t = String(text || '');
+            const arrow = t.match(/([A-Za-z][^,\n→\-]{2,}?)\s*(?:->|→)\s*([A-Za-z][^,\n]{2,})/);
+            if (arrow) return { pickup: arrow[1].trim(), delivery: arrow[2].trim() };
+            const ft = t.match(/\bfrom\s+(.+?)\s+(?:to|->|→)\s+(.+?)(?:[,.;\n]|$)/i);
+            if (ft) return { pickup: String(ft[1]).trim(), delivery: String(ft[2]).trim() };
+            return { pickup: '', delivery: '' };
+        }
+
+        function guessWeightKg(text) {
+            const t = String(text || '').toLowerCase();
+            const kg = t.match(/\b(\d+(?:\.\d+)?)\s*(?:kg|kgs)\b/);
+            if (kg) return String(parseFloat(kg[1]) || '');
+            const ton = t.match(/\b(\d+(?:\.\d+)?)\s*(?:t|ton|tons)\b/);
+            if (ton) return String(Math.round((parseFloat(ton[1]) || 0) * 1000));
+            return '';
+        }
+
+        function setValueIfEmpty(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return false;
+            const v = String(value || '').trim();
+            if (!v) return false;
+            if (String(el.value || '').trim()) return false;
+            el.value = v;
+            return true;
+        }
+
+        function setValueForce(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return false;
+            const v = String(value || '').trim();
+            if (!v) return false;
+            el.value = v;
+            return true;
+        }
+
+        function setCheckedIfFalse(id, val) {
+            const el = document.getElementById(id);
+            if (!el) return false;
+            if (!val) return false;
+            if (el.checked) return false;
+            el.checked = true;
+            return true;
+        }
+
+        function buildTitle(cargoType, pickup, delivery) {
+            const nice = {
+                general: 'General Cargo',
+                fragile: 'Fragile Goods',
+                hazardous: 'Hazardous Cargo',
+                refrigerated: 'Refrigerated Cargo',
+                liquid: 'Liquid Cargo',
+                machinery: 'Machinery',
+                electronics: 'Electronics',
+                furniture: 'Furniture'
+            };
+            const ct = nice[cargoType] || 'Cargo';
+            if (pickup && delivery) return `${ct} ${pickup} → ${delivery}`;
+            if (pickup) return `${ct} pickup ${pickup}`;
+            return `${ct} load`;
+        }
+
+        function aiSuggestAndFill(forceTitleUrgency) {
+            const text = (document.getElementById('aiAssistText')?.value || '').trim();
+            if (!text) {
+                showError('Write a short load description first.');
+                return;
+            }
+
+            const loc = guessLocations(text);
+            const pickupDate = parseDateFromText(text);
+            const urgency = guessUrgency(text);
+            const cargoType = guessCargoType(text);
+            const vehicleType = guessVehicleType(text);
+            const weightKg = guessWeightKg(text);
+
+            let changed = 0;
+            changed += setValueIfEmpty('pickupLocation', loc.pickup) ? 1 : 0;
+            changed += setValueIfEmpty('deliveryLocation', loc.delivery) ? 1 : 0;
+            changed += setValueIfEmpty('pickupDate', pickupDate) ? 1 : 0;
+            changed += setValueIfEmpty('deliveryDate', pickupDate) ? 1 : 0;
+            changed += setValueIfEmpty('cargoType', cargoType) ? 1 : 0;
+            changed += setValueIfEmpty('vehicleType', vehicleType) ? 1 : 0;
+            changed += setValueIfEmpty('cargoWeight', weightKg) ? 1 : 0;
+            changed += setCheckedIfFalse('refrigerated', /refrigerated|chilled|frozen/i.test(text) || cargoType === 'refrigerated') ? 1 : 0;
+            changed += setCheckedIfFalse('adr', /adr|hazard|hazardous/i.test(text) || cargoType === 'hazardous') ? 1 : 0;
+
+            const title = buildTitle(cargoType, loc.pickup, loc.delivery);
+            if (forceTitleUrgency) {
+                changed += setValueForce('loadTitle', title) ? 1 : 0;
+                if (urgency) changed += setValueForce('urgency', urgency) ? 1 : 0;
+            } else {
+                changed += setValueIfEmpty('loadTitle', title) ? 1 : 0;
+                if (urgency) changed += setValueIfEmpty('urgency', urgency) ? 1 : 0;
+            }
+
+            changed += setValueIfEmpty('additionalNotes', text) ? 1 : 0;
+            calculateSupplierCommission();
+            closeAiAssist();
+            if (changed > 0) showSuccess('AI Assist filled your form.');
+            else showError('Nothing to fill. Add pickup → delivery, date, and cargo type.');
+        }
+
+        function getFormValue(id) {
+            const el = document.getElementById(id);
+            return el ? String(el.value || '').trim() : '';
+        }
+
+        function getCheckbox(id) {
+            const el = document.getElementById(id);
+            return !!(el && el.checked);
+        }
+
+        function parseISODate(v) {
+            const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!m) return null;
+            const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+            if (Number.isNaN(d.getTime())) return null;
+            return d;
+        }
+
+        function validateLoadChecklist() {
+            const issues = [];
+            const fixes = [];
+            const today = new Date();
+            const todayIso = toISODate(today);
+
+            const loadTitle = getFormValue('loadTitle');
+            const pickup = getFormValue('pickupLocation');
+            const delivery = getFormValue('deliveryLocation');
+            const pickupDate = getFormValue('pickupDate');
+            const deliveryDate = getFormValue('deliveryDate');
+            const pickupTime = getFormValue('pickupTime');
+            const deliveryTime = getFormValue('deliveryTime');
+            const urgency = getFormValue('urgency');
+            const cargoType = getFormValue('cargoType');
+            const vehicleType = getFormValue('vehicleType');
+            const cargoWeight = getFormValue('cargoWeight');
+            const minBudget = getFormValue('minBudget');
+            const maxBudget = getFormValue('maxBudget');
+
+            if (!loadTitle) issues.push({ level: 'err', title: 'Missing title', body: 'Load Title is required.' });
+            if (!pickup) issues.push({ level: 'err', title: 'Missing pickup location', body: 'Pickup Location is required.' });
+            if (!delivery) issues.push({ level: 'err', title: 'Missing delivery location', body: 'Delivery Location is required.' });
+            if (pickup && delivery && pickup.toLowerCase() === delivery.toLowerCase()) issues.push({ level: 'warn', title: 'Pickup and delivery look same', body: 'Check locations, they are identical.' });
+
+            if (!pickupDate) issues.push({ level: 'err', title: 'Missing pickup date', body: 'Pickup Date is required.' });
+            if (!deliveryDate) {
+                issues.push({ level: 'warn', title: 'Missing delivery date', body: 'Delivery Date is empty. Use same day or next day.' });
+                if (pickupDate) fixes.push(() => { const el = document.getElementById('deliveryDate'); if (el && !el.value) el.value = pickupDate; });
+            }
+
+            if (!pickupTime) {
+                issues.push({ level: 'info', title: 'Pickup time missing', body: 'Default pickup time can be 09:00.' });
+                fixes.push(() => { const el = document.getElementById('pickupTime'); if (el && !el.value) el.value = '09:00'; });
+            }
+            if (!deliveryTime) {
+                issues.push({ level: 'info', title: 'Delivery time missing', body: 'Default delivery time can be 17:00.' });
+                fixes.push(() => { const el = document.getElementById('deliveryTime'); if (el && !el.value) el.value = '17:00'; });
+            }
+
+            const pD = parseISODate(pickupDate);
+            const dD = parseISODate(deliveryDate);
+            const tD = parseISODate(todayIso);
+            if (pD && tD && pD < tD) issues.push({ level: 'warn', title: 'Pickup date is in the past', body: 'Choose today or future date.' });
+            if (pD && dD && dD < pD) {
+                issues.push({ level: 'err', title: 'Delivery date before pickup date', body: 'Delivery date should be same or after pickup date.' });
+                fixes.push(() => { const el = document.getElementById('deliveryDate'); if (el && pickupDate) el.value = pickupDate; });
+            }
+
+            if (urgency === 'same-day' && pickupDate && pickupDate !== todayIso) {
+                issues.push({ level: 'warn', title: 'Same Day selected', body: 'Same Day usually means pickup is today.' });
+                fixes.push(() => { const el = document.getElementById('urgency'); if (el && el.value === 'same-day') el.value = 'urgent'; });
+            }
+
+            if (!cargoType) {
+                issues.push({ level: 'warn', title: 'Cargo type missing', body: 'Select a cargo type to help carriers.' });
+                fixes.push(() => { const el = document.getElementById('cargoType'); if (el && !el.value) el.value = 'general'; });
+            }
+            if (!vehicleType) issues.push({ level: 'warn', title: 'Vehicle type missing', body: 'Select vehicle type so carriers can accept.' });
+
+            if (!cargoWeight) issues.push({ level: 'info', title: 'Weight missing', body: 'Adding weight improves pricing and acceptance.' });
+            const w = parseFloat(cargoWeight || '0');
+            if (cargoWeight && (Number.isNaN(w) || w <= 0)) issues.push({ level: 'warn', title: 'Weight looks wrong', body: 'Weight should be a positive number.' });
+            if (cargoWeight && !Number.isNaN(w) && w > 44000) issues.push({ level: 'warn', title: 'Weight is very high', body: 'Check if weight unit is correct (kg).' });
+
+            const minB = parseFloat(minBudget || '0');
+            const maxB = parseFloat(maxBudget || '0');
+            if (!minBudget && !maxBudget) issues.push({ level: 'warn', title: 'Budget missing', body: 'Add budget so carriers can quote faster.' });
+            if (minBudget && maxBudget && !Number.isNaN(minB) && !Number.isNaN(maxB) && minB > maxB) {
+                issues.push({ level: 'err', title: 'Budget range mismatch', body: 'Min Budget is higher than Max Budget.' });
+                fixes.push(() => {
+                    const minEl = document.getElementById('minBudget');
+                    const maxEl = document.getElementById('maxBudget');
+                    if (!minEl || !maxEl) return;
+                    const a = parseFloat(minEl.value || '0');
+                    const b = parseFloat(maxEl.value || '0');
+                    if (!Number.isNaN(a) && !Number.isNaN(b) && a > b) { minEl.value = String(b); maxEl.value = String(a); }
+                });
+            }
+
+            if (!getCheckbox('loadAgreementAccepted')) issues.push({ level: 'err', title: 'Agreement not accepted', body: 'Please accept Load Posting Agreement.' });
+            if (!getCheckbox('termsAccepted')) issues.push({ level: 'err', title: 'Terms not accepted', body: 'Please accept Terms of Service & Privacy Policy.' });
+
+            return { issues, fixes };
+        }
+
+        function renderChecklist() {
+            const res = document.getElementById('aiAssistResult');
+            const list = document.getElementById('aiAssistIssues');
+            const fixbar = document.getElementById('aiAssistFixbar');
+            if (!res || !list || !fixbar) return;
+            const { issues, fixes } = validateLoadChecklist();
+            list.innerHTML = '';
+            if (issues.length === 0) {
+                res.classList.add('show');
+                list.innerHTML = '<div class="ai-issue"><span class="ai-dot info"></span><div><div class="ai-issue-title">Looks good</div><div class="ai-issue-body">No issues found. You can post this load.</div></div></div>';
+                fixbar.style.display = 'none';
+                return;
+            }
+            issues.forEach((it) => {
+                const row = document.createElement('div');
+                row.className = 'ai-issue';
+                const dot = document.createElement('span');
+                dot.className = 'ai-dot ' + (it.level || 'info');
+                const wrap = document.createElement('div');
+                const t = document.createElement('div');
+                t.className = 'ai-issue-title';
+                t.textContent = it.title || 'Issue';
+                const b = document.createElement('div');
+                b.className = 'ai-issue-body';
+                b.textContent = it.body || '';
+                wrap.appendChild(t);
+                wrap.appendChild(b);
+                row.appendChild(dot);
+                row.appendChild(wrap);
+                list.appendChild(row);
+            });
+            res.classList.add('show');
+            fixbar.style.display = fixes.length > 0 ? 'flex' : 'none';
+        }
+
+        function applyChecklistFixes() {
+            const { fixes } = validateLoadChecklist();
+            if (!fixes || fixes.length === 0) return;
+            try { fixes.forEach((fn) => { try { fn(); } catch (e) {} }); } catch (e) {}
+            calculateSupplierCommission();
+            renderChecklist();
+            showSuccess('Fixes applied.');
+        }
+
+        function normalizeCity(value) {
+            const s = String(value || '').trim().toLowerCase();
+            if (!s) return '';
+            const first = s.split(',')[0].trim();
+            return first.replace(/\s+/g, ' ');
+        }
+
+        function haversineKm(a, b) {
+            const R = 6371;
+            const toRad = (deg) => (deg * Math.PI) / 180;
+            const dLat = toRad(b.lat - a.lat);
+            const dLon = toRad(b.lon - a.lon);
+            const lat1 = toRad(a.lat);
+            const lat2 = toRad(b.lat);
+            const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * (Math.sin(dLon / 2) ** 2);
+            return 2 * R * Math.asin(Math.min(1, Math.sqrt(x)));
+        }
+
+        function estimateDistanceKm(pickup, delivery) {
+            const city = {
+                london: { lat: 51.5074, lon: -0.1278 },
+                manchester: { lat: 53.4808, lon: -2.2426 },
+                birmingham: { lat: 52.4862, lon: -1.8904 },
+                leeds: { lat: 53.8008, lon: -1.5491 },
+                liverpool: { lat: 53.4084, lon: -2.9916 },
+                bristol: { lat: 51.4545, lon: -2.5879 },
+                sheffield: { lat: 53.3811, lon: -1.4701 },
+                nottingham: { lat: 52.9548, lon: -1.1581 },
+                glasgow: { lat: 55.8642, lon: -4.2518 },
+                edinburgh: { lat: 55.9533, lon: -3.1883 },
+                cardiff: { lat: 51.4816, lon: -3.1791 },
+                belfast: { lat: 54.5973, lon: -5.9301 }
+            };
+            const p = normalizeCity(pickup);
+            const d = normalizeCity(delivery);
+            if (p && d && p === d) return 5;
+            const a = city[p] || null;
+            const b = city[d] || null;
+            if (a && b) return Math.max(5, haversineKm(a, b));
+            if (p && d) return 200;
+            return 0;
+        }
+
+        function roundTo(value, step) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return 0;
+            return Math.round(n / step) * step;
+        }
+
+        function formatGBP(value) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return '£0';
+            return '£' + Math.round(n).toLocaleString('en-GB');
+        }
+
+        function aiPriceSuggest() {
+            const pickup = getFormValue('pickupLocation');
+            const delivery = getFormValue('deliveryLocation');
+            const urgency = getFormValue('urgency') || 'normal';
+            const vehicleType = getFormValue('vehicleType') || 'small-truck';
+            const weightStr = getFormValue('cargoWeight');
+            const weightKg = weightStr ? parseFloat(weightStr) : 0;
+
+            if (!pickup || !delivery) {
+                showError('Enter pickup and delivery locations first.');
+                return;
+            }
+
+            const distKm = estimateDistanceKm(pickup, delivery);
+            if (!distKm) {
+                showError('Unable to estimate distance. Please check locations.');
+                return;
+            }
+
+            const perKm = {
+                van: 1.2,
+                'small-truck': 1.6,
+                'medium-truck': 2.0,
+                'large-truck': 2.6,
+                artic: 3.3,
+                flatbed: 2.8,
+                curtainside: 2.7
+            }[vehicleType] || 1.8;
+
+            const urgencyMult = urgency === 'same-day' ? 1.25 : (urgency === 'urgent' ? 1.10 : 1.0);
+
+            let weightMult = 1.0;
+            let weightLabel = 'unknown weight';
+            if (Number.isFinite(weightKg) && weightKg > 0) {
+                weightLabel = `${Math.round(weightKg)}kg`;
+                if (weightKg > 18000) weightMult = 1.5;
+                else if (weightKg > 8000) weightMult = 1.35;
+                else if (weightKg > 3000) weightMult = 1.2;
+                else if (weightKg > 1000) weightMult = 1.1;
+            }
+
+            const base = distKm * perKm;
+            const mid = base * urgencyMult * weightMult;
+            const min = roundTo(mid * 0.9, 5);
+            const max = roundTo(mid * 1.1, 5);
+
+            const minEl = document.getElementById('minBudget');
+            const maxEl = document.getElementById('maxBudget');
+            if (minEl) minEl.value = String(min);
+            if (maxEl) maxEl.value = String(max);
+            calculateSupplierCommission();
+
+            const box = document.getElementById('aiPriceBox');
+            const rangeEl = document.getElementById('aiPriceRange');
+            const whyEl = document.getElementById('aiPriceWhy');
+            if (rangeEl) rangeEl.textContent = `${formatGBP(min)}–${formatGBP(max)}`;
+            if (whyEl) {
+                const kmTxt = `${Math.round(distKm)} km`;
+                const vTxt = vehicleType.replace('-', ' ');
+                const uTxt = urgency.replace('-', ' ');
+                whyEl.textContent = `Why: ~${kmTxt} • ${vTxt} • ${uTxt} • ${weightLabel}`;
+            }
+            if (box) box.classList.add('show');
+            showSuccess('Price suggestion applied to budget.');
         }
 
         // Check authentication
@@ -842,6 +1615,176 @@
                 updatePaymentPlanUI();
             } catch (error) {
                 console.error('Error loading draft:', error);
+            }
+        }
+
+        function applyTemplateFromStorage() {
+            const raw = localStorage.getItem('ab.loadTemplate.apply');
+            if (!raw) return;
+            let tpl = null;
+            try { tpl = JSON.parse(raw); } catch (e) { tpl = null; }
+            localStorage.removeItem('ab.loadTemplate.apply');
+            if (!tpl) return;
+
+            const setIfPresent = (id, value) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const v = value === undefined || value === null ? '' : String(value);
+                if (v.trim() !== '') el.value = v;
+            };
+
+            setIfPresent('loadTitle', tpl.loadTitle || tpl.title || '');
+            setIfPresent('urgency', tpl.urgency || '');
+            setIfPresent('pickupLocation', tpl.pickupLocation || tpl.pickup || '');
+            setIfPresent('deliveryLocation', tpl.deliveryLocation || tpl.delivery || '');
+            setIfPresent('vehicleType', tpl.vehicleType || '');
+            setIfPresent('cargoType', tpl.cargoType || '');
+            setIfPresent('cargoWeight', tpl.cargoWeight || '');
+            setIfPresent('minBudget', tpl.minBudget || '');
+            setIfPresent('maxBudget', tpl.maxBudget || '');
+
+            const notes = String(tpl.notes || '').trim();
+            if (notes) {
+                const add = document.getElementById('additionalNotes');
+                if (add && !String(add.value || '').trim()) add.value = notes;
+            }
+
+            calculateSupplierCommission();
+            updatePaymentPlanUI();
+            showSuccess('Template applied.');
+        }
+
+        function applyAddressBookFromStorage() {
+            const raw = localStorage.getItem('ab.addressBook.apply');
+            if (!raw) return;
+            let data = null;
+            try { data = JSON.parse(raw); } catch (e) { data = null; }
+            localStorage.removeItem('ab.addressBook.apply');
+            if (!data || !data.item) return;
+
+            const mode = String(data.mode || '').toLowerCase();
+            const it = data.item || {};
+            const address = String(it.address || '').trim();
+            const label = String(it.label || '').trim();
+            const notes = String(it.notes || '').trim();
+            const phone = String(it.phone || '').trim();
+            const contact = String(it.contact || '').trim();
+
+            const pickupEl = document.getElementById('pickupLocation');
+            const deliveryEl = document.getElementById('deliveryLocation');
+            const addEl = document.getElementById('additionalNotes');
+
+            const metaParts = [];
+            if (label) metaParts.push(label);
+            if (contact) metaParts.push('Contact: ' + contact);
+            if (phone) metaParts.push('Phone: ' + phone);
+            if (notes) metaParts.push('Notes: ' + notes);
+            const meta = metaParts.join(' | ');
+
+            if (mode === 'pickup') {
+                if (pickupEl && !String(pickupEl.value || '').trim() && address) pickupEl.value = address;
+            } else if (mode === 'delivery') {
+                if (deliveryEl && !String(deliveryEl.value || '').trim() && address) deliveryEl.value = address;
+            }
+
+            if (addEl && meta && !String(addEl.value || '').trim()) addEl.value = meta;
+            showSuccess('Address applied.');
+        }
+
+        function getSupplierKeyFromAuth(auth) {
+            const a = auth || {};
+            return String(a.supplierId || a.id || a.email || '').trim() || 'guest';
+        }
+
+        function readPreferredNetwork(auth) {
+            const key = getSupplierKeyFromAuth(auth);
+            const preferredKey = 'ab.preferredNetwork.supplier.' + key + '.preferred';
+            const blockedKey = 'ab.preferredNetwork.supplier.' + key + '.blocked';
+            let preferred = [];
+            let blocked = [];
+            try { preferred = JSON.parse(localStorage.getItem(preferredKey) || '[]') || []; } catch (e) { preferred = []; }
+            try { blocked = JSON.parse(localStorage.getItem(blockedKey) || '[]') || []; } catch (e) { blocked = []; }
+            if (!Array.isArray(preferred)) preferred = [];
+            if (!Array.isArray(blocked)) blocked = [];
+            return { preferred, blocked };
+        }
+
+        function readAutoAssignPreferred(auth) {
+            const key = getSupplierKeyFromAuth(auth);
+            const k = 'ab.supplier.settings.' + key + '.autoAssignPreferred';
+            const v = localStorage.getItem(k);
+            if (v === null || v === undefined || v === '') return true;
+            return v === '1';
+        }
+
+        function sanitizeFirebaseKey(key) {
+            return String(key || '').trim().replace(/[#.$\[\]]/g, '_');
+        }
+
+        async function autoInvitePreferredCarriers(db, auth, loadId, loadData) {
+            if (!db || !auth || !loadId || !loadData) return;
+            if (!readAutoAssignPreferred(auth)) return;
+
+            const { preferred, blocked } = readPreferredNetwork(auth);
+            if (!preferred.length) return;
+
+            const blockedIds = new Set(blocked.map(x => String((x && x.carrierId) || '').toLowerCase()).filter(Boolean));
+            const target = preferred
+                .map(x => ({ carrierId: String((x && x.carrierId) || '').trim(), carrierName: String((x && x.carrierName) || '').trim() }))
+                .filter(x => x.carrierId && !blockedIds.has(x.carrierId.toLowerCase()))
+                .slice(0, 8);
+
+            if (!target.length) return;
+
+            const supplierId = String(auth.supplierId || auth.id || auth.email?.replace(/@/g, '_').replace(/\./g, '_') || '');
+            const route = String(loadData.pickupLocation || 'N/A') + ' → ' + String(loadData.deliveryLocation || 'N/A');
+            const budget = Number(loadData.budget || loadData.price || 0);
+            const amt = Number.isFinite(budget) && budget > 0 ? ('£' + budget.toLocaleString('en-GB', { maximumFractionDigits: 0 })) : '';
+            const formatted = 'LOAD-' + String(loadId).substring(0, 8).toUpperCase();
+
+            const updates = {};
+            target.forEach(t => {
+                const cid = sanitizeFirebaseKey(t.carrierId);
+                const base = 'loadInvites/' + String(loadId) + '/' + cid;
+                updates[base] = {
+                    carrierId: t.carrierId,
+                    carrierName: t.carrierName || 'Carrier',
+                    supplierId: supplierId || null,
+                    loadId: loadId,
+                    createdAt: new Date().toISOString(),
+                    status: 'invited'
+                };
+            });
+
+            try { await db.ref().update(updates); } catch (e) {}
+
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const supplierUid = (authSdk && authSdk.currentUser && authSdk.currentUser.uid) ? String(authSdk.currentUser.uid) : '';
+            const supplierName = String(auth.companyName || auth.company || auth.email || 'Supplier');
+            const title = String(loadData.loadTitle || 'New Load');
+
+            for (const t of target) {
+                const text = `New load invite: ${title}\n${route}\n${amt ? 'Budget: ' + amt + '\n' : ''}Ref: ${formatted}`;
+                try {
+                    await db.ref('messages').push({
+                        supplierId: supplierId,
+                        supplierName: supplierName,
+                        supplierEmail: auth.email || '',
+                        supplierUid: supplierUid,
+                        carrierId: t.carrierId,
+                        carrierName: t.carrierName || 'Carrier',
+                        message: text,
+                        senderType: 'supplier',
+                        senderId: supplierId,
+                        senderUid: supplierUid,
+                        recipientType: 'carrier',
+                        recipientId: t.carrierId,
+                        read: false,
+                        timestamp: Date.now(),
+                        createdAt: new Date().toISOString(),
+                        meta: { type: 'load_invite', loadId: loadId, ref: formatted }
+                    });
+                } catch (e) {}
             }
         }
 
@@ -989,6 +1932,10 @@
                     }
                 } catch (e) { /* ignore */ }
 
+                try {
+                    await autoInvitePreferredCarriers(db, auth, loadId, loadData);
+                } catch (e) {}
+
                 const paymentFor = loadData.loadTitle || 'Load Payment';
                 if (plan === 'cod') {
                     setTimeout(() => { window.location.href = 'my-loads.html'; }, 1200);
@@ -1017,9 +1964,38 @@
 
             // Load draft if available
             loadDraft();
+            applyTemplateFromStorage();
+            applyAddressBookFromStorage();
             const planEl = document.getElementById('paymentPlan');
             if (planEl) planEl.addEventListener('change', updatePaymentPlanUI);
             updatePaymentPlanUI();
+
+            const btn = document.getElementById('aiAssistBtn');
+            const overlay = document.getElementById('aiAssistOverlay');
+            const closeBtn = document.getElementById('aiAssistClose');
+            const applyBtn = document.getElementById('aiAssistApply');
+            const suggestBtn = document.getElementById('aiAssistSuggest');
+            const checkBtn = document.getElementById('aiAssistCheck');
+            const fixBtn = document.getElementById('aiAssistFix');
+            const priceBtn = document.getElementById('aiPriceSuggestBtn');
+
+            if (btn) {
+                btn.addEventListener('click', openAiAssist);
+                btn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openAiAssist();
+                    }
+                });
+            }
+            if (closeBtn) closeBtn.addEventListener('click', closeAiAssist);
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAiAssist(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAiAssist(); });
+            if (applyBtn) applyBtn.addEventListener('click', () => aiSuggestAndFill(false));
+            if (suggestBtn) suggestBtn.addEventListener('click', () => aiSuggestAndFill(true));
+            if (checkBtn) checkBtn.addEventListener('click', renderChecklist);
+            if (fixBtn) fixBtn.addEventListener('click', applyChecklistFixes);
+            if (priceBtn) priceBtn.addEventListener('click', aiPriceSuggest);
         });
     </script>
 </body>

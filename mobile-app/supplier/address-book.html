@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Alpha Freight">
+
+    <title>Address Book - Alpha Freight</title>
+
+    <link rel="icon" type="image/png" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+    <link rel="apple-touch-icon" href="../../image-removebg-preview - 2026-03-04T141043.516.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    <script src="../../assets/js/app-resume-fix.js"></script>
+
+    <style>
+        :root {
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --primary-light: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --bg-main: #F6F7FB;
+            --card-bg: rgba(255,255,255,0.92);
+            --border: rgba(15,23,42,0.10);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 14px 44px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.03);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 22px;
+            --radius-sm: 14px;
+            --page-pad: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 520px at 14% 8%, rgba(99, 91, 255, 0.12), rgba(246,247,251,0) 62%),
+                radial-gradient(900px 520px at 88% 22%, rgba(6, 182, 212, 0.10), rgba(246,247,251,0) 62%);
+            pointer-events:none;
+            z-index: 0;
+        }
+        body > *{ position: relative; z-index: 1; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
+
+        .header {
+            padding: calc(18px + env(safe-area-inset-top, 0px)) var(--page-pad) 12px;
+        }
+        .header-card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 28px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            padding: 16px 14px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::before{
+            content:"";
+            position:absolute;
+            inset:-120px -120px auto auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(99,91,255,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(12deg);
+            pointer-events:none;
+        }
+        .header-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .title{
+            font-size: 1.2rem;
+            font-weight: 950;
+            letter-spacing: -0.03em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .sub{
+            margin-top: 6px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .btn-primary{
+            border: 0;
+            border-radius: 16px;
+            padding: 10px 12px;
+            font-weight: 950;
+            letter-spacing: -0.01em;
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            box-shadow: 0 18px 40px rgba(99,91,255,0.22);
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+        }
+        .btn-primary:active{ transform: scale(0.98); }
+
+        .quick-row{
+            margin-top: 12px;
+            display:flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .quick-row::-webkit-scrollbar{ display:none; }
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+            font-weight: 900;
+            color: rgba(15,23,42,0.86);
+            text-decoration:none;
+            cursor:pointer;
+        }
+        .chip i { color: var(--primary); }
+        .chip:active{ transform: scale(0.98); }
+
+        .content{ padding: 0 var(--page-pad) 18px; }
+        .section-title{
+            margin-top: 16px;
+            font-size: 1rem;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .muted{ color: rgba(71,85,105,0.92); font-weight: 800; font-size: 0.86rem; }
+
+        .list{ margin-top: 10px; }
+        .card{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 14px 14px 12px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow:hidden;
+        }
+        .card::before{
+            content:"";
+            position:absolute;
+            left:0;
+            top: 14px;
+            bottom: 14px;
+            width: 4px;
+            background: linear-gradient(180deg, rgba(99,91,255,0.95), rgba(6,182,212,0.78));
+            border-radius: 0 3px 3px 0;
+            opacity: 0.9;
+        }
+        .head{
+            display:flex;
+            align-items:flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            padding-left: 8px;
+        }
+        .name{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 0.98rem;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .meta{
+            margin-top: 4px;
+            padding-left: 8px;
+            color: rgba(71,85,105,0.92);
+            font-weight: 800;
+            font-size: 0.82rem;
+            white-space: pre-line;
+        }
+        .tags{
+            margin-top: 10px;
+            padding-left: 8px;
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tag{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.84);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-weight: 900;
+            font-size: 0.74rem;
+        }
+        .actions{
+            margin-top: 10px;
+            padding-left: 8px;
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-mini{
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(15,23,42,0.04);
+            color: rgba(15,23,42,0.86);
+            border-radius: 14px;
+            padding: 8px 10px;
+            font-weight: 950;
+            font-size: 0.82rem;
+            cursor:pointer;
+        }
+        .btn-mini.primary{
+            background: rgba(99,91,255,0.12);
+            border-color: rgba(99,91,255,0.22);
+            color: rgba(79,70,229,0.98);
+        }
+        .btn-mini.danger{
+            background: rgba(220,38,38,0.10);
+            border-color: rgba(220,38,38,0.18);
+            color: rgba(220,38,38,0.95);
+        }
+        .btn-mini:active{ transform: scale(0.98); }
+
+        .empty{
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: var(--shadow-card);
+            padding: 20px 14px;
+            text-align:center;
+            color: rgba(71,85,105,0.92);
+        }
+        .empty i{ font-size: 2rem; color: rgba(71,85,105,0.65); margin-bottom: 10px; }
+        .empty h3{ margin: 0 0 4px; font-size: 1rem; font-weight: 950; color: rgba(15,23,42,0.90); }
+        .empty p{ margin: 0; font-weight: 800; font-size: 0.86rem; }
+
+        .overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(8px);
+            display:none;
+            align-items:flex-end;
+            justify-content:center;
+            padding: 18px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+            z-index: 2000;
+        }
+        .overlay.show{ display:flex; }
+        .sheet{
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 22px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+            overflow:hidden;
+        }
+        .sheet-head{
+            padding: 14px 14px 12px;
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+        }
+        .sheet-title{
+            font-weight: 950;
+            letter-spacing: -0.02em;
+            font-size: 1rem;
+            margin: 0;
+        }
+        .sheet-body{
+            padding: 12px 14px 14px;
+            max-height: min(72vh, 640px);
+            overflow:auto;
+        }
+        .field{
+            display:flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .field label{
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: rgba(71,85,105,0.92);
+        }
+        .input, .select, .textarea{
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(15,23,42,0.12);
+            background: rgba(241,245,249,0.65);
+            padding: 10px 12px;
+            font-weight: 800;
+            color: rgba(15,23,42,0.90);
+            outline: none;
+        }
+        .textarea{ min-height: 88px; resize: vertical; }
+        .grid{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .sheet-actions{
+            display:flex;
+            gap: 10px;
+            padding: 12px 14px 14px;
+            border-top: 1px solid rgba(15,23,42,0.08);
+            background: rgba(255,255,255,0.92);
+        }
+        .btn-wide{
+            flex:1;
+            border-radius: 16px;
+            padding: 12px 12px;
+            font-weight: 950;
+            border: 1px solid rgba(15,23,42,0.12);
+            background: rgba(15,23,42,0.06);
+            color: rgba(15,23,42,0.90);
+            cursor:pointer;
+        }
+        .btn-wide.primary{
+            border: 0;
+            background: linear-gradient(145deg, rgba(99,91,255,0.98), rgba(139,92,246,0.92));
+            color: #fff;
+            box-shadow: 0 18px 40px rgba(99,91,255,0.22);
+        }
+        .btn-wide:active{ transform: scale(0.99); }
+
+        @media (min-width: 768px) {
+            body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <div class="header">
+        <div class="header-card">
+            <div class="header-row">
+                <div style="min-width:0;">
+                    <h1 class="title">Address Book</h1>
+                    <div class="sub">Save frequent pickup & delivery locations</div>
+                </div>
+                <button type="button" class="btn btn-primary btn-primary" id="newBtn">
+                    <i class="fas fa-plus"></i><span>New</span>
+                </button>
+            </div>
+            <div class="quick-row" aria-label="Quick links">
+                <a class="chip" href="post-load.html"><i class="fas fa-plus-circle"></i><span>Post a Load</span></a>
+                <a class="chip" href="load-templates.html"><i class="fas fa-layer-group"></i><span>Templates</span></a>
+                <a class="chip" href="settings.html"><i class="fas fa-gear"></i><span>Settings</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section-title">
+            <div>Saved Addresses</div>
+            <div class="muted" id="countText">0</div>
+        </div>
+        <div class="list" id="listArea"></div>
+    </div>
+
+    <div class="overlay" id="editorOverlay" aria-hidden="true">
+        <div class="sheet" role="dialog" aria-modal="true" aria-label="Address editor">
+            <div class="sheet-head">
+                <h2 class="sheet-title" id="editorTitle">New Address</h2>
+                <button type="button" class="btn-mini" id="closeBtn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="sheet-body">
+                <div class="field">
+                    <label for="abLabel">Label</label>
+                    <input id="abLabel" class="input" placeholder="e.g., Main Warehouse" />
+                </div>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="abType">Type</label>
+                        <select id="abType" class="select">
+                            <option value="pickup">Pickup</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="abPhone">Phone</label>
+                        <input id="abPhone" class="input" inputmode="tel" placeholder="Optional" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="abAddress">Address</label>
+                    <textarea id="abAddress" class="textarea" placeholder="Full address"></textarea>
+                </div>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="abContact">Contact</label>
+                        <input id="abContact" class="input" placeholder="Optional" />
+                    </div>
+                    <div class="field">
+                        <label for="abNotes">Notes</label>
+                        <input id="abNotes" class="input" placeholder="Gate code, timings, etc." />
+                    </div>
+                </div>
+            </div>
+            <div class="sheet-actions">
+                <button type="button" class="btn-wide" id="cancelBtn">Cancel</button>
+                <button type="button" class="btn-wide primary" id="saveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="post-load.html" class="bottom-nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Post</span>
+        </a>
+        <a href="my-loads.html" class="bottom-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Loads</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="../../assets/js/alerts.js"></script>
+
+    <script>
+        const alertSystem = new AlertSystem();
+        function showError(msg) { alertSystem.show('error', msg); }
+        function showSuccess(msg) { alertSystem.show('success', msg); }
+
+        function safeJsonParse(s, fallback) { try { return JSON.parse(s); } catch (e) { return fallback; } }
+        function genId() { return 'ab_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16); }
+        function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+        function getUserData() {
+            const raw = localStorage.getItem('supplierAuth') || localStorage.getItem('lastSupplierProfile');
+            return raw ? safeJsonParse(raw, null) : null;
+        }
+
+        function supplierKey() {
+            const u = getUserData();
+            return String((u && (u.supplierId || u.id || u.email)) || 'guest');
+        }
+
+        function storageKey() {
+            return 'ab.addressBook.supplier.' + supplierKey();
+        }
+
+        function readAll() {
+            const raw = localStorage.getItem(storageKey());
+            const list = safeJsonParse(raw || '[]', []);
+            return Array.isArray(list) ? list : [];
+        }
+
+        function writeAll(list) {
+            localStorage.setItem(storageKey(), JSON.stringify(list || []));
+        }
+
+        let items = [];
+        let editingId = '';
+
+        function openEditor(item) {
+            editingId = item ? String(item.id || '') : '';
+            document.getElementById('editorTitle').textContent = item ? 'Edit Address' : 'New Address';
+            document.getElementById('abLabel').value = item?.label || '';
+            document.getElementById('abType').value = item?.type || 'pickup';
+            document.getElementById('abPhone').value = item?.phone || '';
+            document.getElementById('abAddress').value = item?.address || '';
+            document.getElementById('abContact').value = item?.contact || '';
+            document.getElementById('abNotes').value = item?.notes || '';
+
+            const ov = document.getElementById('editorOverlay');
+            ov.classList.add('show');
+            ov.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeEditor() {
+            const ov = document.getElementById('editorOverlay');
+            ov.classList.remove('show');
+            ov.setAttribute('aria-hidden', 'true');
+            editingId = '';
+        }
+
+        function saveEditor() {
+            const label = String(document.getElementById('abLabel').value || '').trim();
+            const type = String(document.getElementById('abType').value || 'pickup').trim();
+            const phone = String(document.getElementById('abPhone').value || '').trim();
+            const address = String(document.getElementById('abAddress').value || '').trim();
+            const contact = String(document.getElementById('abContact').value || '').trim();
+            const notes = String(document.getElementById('abNotes').value || '').trim();
+
+            if (!label) { showError('Please enter a label'); return; }
+            if (!address) { showError('Please enter address'); return; }
+
+            const base = { id: editingId || genId(), label, type, phone, address, contact, notes, updatedAt: new Date().toISOString() };
+            if (editingId) {
+                items = items.map(x => String(x.id) === editingId ? { ...x, ...base } : x);
+            } else {
+                items = [{ ...base, createdAt: new Date().toISOString() }, ...items];
+            }
+
+            writeAll(items);
+            closeEditor();
+            render();
+            showSuccess('Saved');
+        }
+
+        function removeItem(id) {
+            const it = items.find(x => String(x.id) === String(id));
+            if (!it) return;
+            if (!confirm('Delete "' + (it.label || 'address') + '"?')) return;
+            items = items.filter(x => String(x.id) !== String(id));
+            writeAll(items);
+            render();
+            showSuccess('Deleted');
+        }
+
+        function useAddress(id, mode) {
+            const it = items.find(x => String(x.id) === String(id));
+            if (!it) return;
+            localStorage.setItem('ab.addressBook.apply', JSON.stringify({ mode, item: it }));
+            window.location.href = 'post-load.html';
+        }
+
+        function typeLabel(t) {
+            if (t === 'delivery') return 'Delivery';
+            if (t === 'both') return 'Both';
+            return 'Pickup';
+        }
+
+        function render() {
+            const list = document.getElementById('listArea');
+            document.getElementById('countText').textContent = String(items.length);
+
+            if (!items.length) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-address-book"></i><h3>No addresses</h3><p>Add pickup and delivery locations</p></div>';
+                return;
+            }
+
+            list.innerHTML = items.slice(0, 80).map(it => {
+                const info = [
+                    it.contact ? 'Contact: ' + it.contact : '',
+                    it.phone ? 'Phone: ' + it.phone : '',
+                    it.notes ? 'Notes: ' + it.notes : ''
+                ].filter(Boolean).join('\n');
+
+                const tag1 = `<span class="tag">${escapeHtml(typeLabel(it.type))}</span>`;
+                const tag2 = it.phone ? `<span class="tag">${escapeHtml(it.phone)}</span>` : '';
+
+                return `
+                    <div class="card">
+                        <div class="head">
+                            <div style="min-width:0;">
+                                <p class="name">${escapeHtml(it.label)}</p>
+                            </div>
+                            <button type="button" class="btn-mini" data-act="edit" data-id="${escapeHtml(it.id)}"><i class="fas fa-pen"></i></button>
+                        </div>
+                        <div class="meta">${escapeHtml(it.address)}${info ? '<br><br>' + escapeHtml(info) : ''}</div>
+                        <div class="tags">${tag1}${tag2}</div>
+                        <div class="actions">
+                            <button type="button" class="btn-mini primary" data-act="use-pickup" data-id="${escapeHtml(it.id)}"><i class="fas fa-arrow-up"></i> Use as Pickup</button>
+                            <button type="button" class="btn-mini primary" data-act="use-delivery" data-id="${escapeHtml(it.id)}"><i class="fas fa-arrow-down"></i> Use as Delivery</button>
+                            <button type="button" class="btn-mini danger" data-act="delete" data-id="${escapeHtml(it.id)}"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('button[data-act]').forEach(btn => {
+                const act = btn.dataset.act || '';
+                const id = btn.dataset.id || '';
+                btn.addEventListener('click', () => {
+                    if (act === 'edit') {
+                        const it = items.find(x => String(x.id) === String(id));
+                        openEditor(it);
+                    } else if (act === 'delete') {
+                        removeItem(id);
+                    } else if (act === 'use-pickup') {
+                        useAddress(id, 'pickup');
+                    } else if (act === 'use-delivery') {
+                        useAddress(id, 'delivery');
+                    }
+                });
+            });
+        }
+
+        document.getElementById('newBtn').addEventListener('click', () => openEditor(null));
+        document.getElementById('closeBtn').addEventListener('click', closeEditor);
+        document.getElementById('cancelBtn').addEventListener('click', closeEditor);
+        document.getElementById('saveBtn').addEventListener('click', saveEditor);
+        document.getElementById('editorOverlay').addEventListener('click', (e) => { if (e.target && e.target.id === 'editorOverlay') closeEditor(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeEditor(); });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            items = readAll();
+            render();
+        });
+    </script>
+</body>
+</html>

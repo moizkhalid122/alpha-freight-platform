@@ -73,12 +73,6 @@
                 return;
             }
             if (auth.currentUser) {
-                try {
-                    const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
-                    if (db && auth.currentUser && auth.currentUser.uid) {
-                        db.ref('admins/' + auth.currentUser.uid).set(true).catch(() => {});
-                    }
-                } catch (e) {}
                 resolve(true);
                 return;
             }
@@ -98,12 +92,6 @@
                     done = true;
                     clearTimeout(timer);
                     try { if (typeof unsub === 'function') unsub(); } catch (e) {}
-                    try {
-                        const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
-                        if (db && auth.currentUser && auth.currentUser.uid) {
-                            db.ref('admins/' + auth.currentUser.uid).set(true).catch(() => {});
-                        }
-                    } catch (e) {}
                     resolve(!!auth.currentUser);
                 });
             }
