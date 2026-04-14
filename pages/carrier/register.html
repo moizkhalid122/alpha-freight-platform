@@ -1718,79 +1718,6 @@
                             <div class="error-message">Please enter a valid email address</div>
                         </div>
 
-                        <div class="form-group">
-                            <div class="input-wrapper phone-input-wrapper">
-                                <div class="country-selector">
-                                    <span class="country-flag">🇬🇧</span>
-                                    <span class="country-code">+44</span>
-                </div>
-                                <input type="tel" class="form-input phone-input" id="phone" required placeholder=" ">
-                                <label class="floating-label phone-floating-label" for="phone">Phone Number</label>
-                                <i class="fas fa-check-circle validation-icon"></i>
-                                <span class="phone-verified-badge">
-                                    <i class="fas fa-shield-alt"></i> Verified
-                                    </span>
-                        </div>
-                            <div class="error-message">Please enter a valid phone number</div>
-                    </div>
-    </div>
-
-                    <!-- Section 2: Business Details -->
-                    <div class="glass-card">
-                        <h3 class="section-title">
-                            <i class="fas fa-building"></i>
-                            Business Details
-                        </h3>
-
-                        <div class="form-group">
-                            <div class="input-wrapper">
-                                <input type="text" class="form-input" id="companyName" required placeholder=" ">
-                                <label class="floating-label" for="companyName">Company Name</label>
-                                <span class="tooltip">
-                                    <i class="fas fa-info-circle tooltip-icon"></i>
-                                    <span class="tooltip-text">As registered with Companies House</span>
-                                </span>
-                                <i class="fas fa-check-circle validation-icon"></i>
-                </div>
-                            <div class="error-message">Please enter your company name</div>
-            </div>
-
-                        <div class="form-group">
-                            <div class="input-wrapper">
-                                <input type="text" class="form-input" id="companyReg">
-                                <label class="floating-label" for="companyReg">Company Registration Number (Optional)</label>
-                                <i class="fas fa-check-circle validation-icon"></i>
-        </div>
-    </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <div class="input-wrapper">
-                                    <select class="form-input" id="fleetSize" required style="padding-top: 1.25rem;">
-                                        <option value="">Fleet Size</option>
-                                        <option value="1-5">1-5 vehicles</option>
-                                        <option value="6-20">6-20 vehicles</option>
-                                        <option value="21+">21+ vehicles</option>
-                                    </select>
-                                    <label class="floating-label" for="fleetSize" style="transform: translateY(-28px) scale(0.85);">Fleet Size</label>
-            </div>
-                </div>
-
-                            <div class="form-group">
-                                <div class="input-wrapper">
-                                    <select class="form-input" id="yearsOperation" required style="padding-top: 1.25rem;">
-                                        <option value="">Years in Operation</option>
-                                        <option value="0-1">0-1 years</option>
-                                        <option value="2-5">2-5 years</option>
-                                        <option value="6-10">6-10 years</option>
-                                        <option value="10+">10+ years</option>
-                                    </select>
-                                    <label class="floating-label" for="yearsOperation" style="transform: translateY(-28px) scale(0.85);">Years in Operation</label>
-                </div>
-            </div>
-        </div>
-    </div>
-
                     <!-- Section 3: Security -->
                     <div class="glass-card">
                         <h3 class="section-title">
@@ -2203,13 +2130,11 @@
                 firstName: document.getElementById('firstName').value.trim(),
                 lastName: document.getElementById('lastName').value.trim(),
                 email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                companyName: document.getElementById('companyName').value.trim(),
-                companyReg: document.getElementById('companyReg').value.trim(),
-                fleetSize: document.getElementById('fleetSize').value,
-                yearsOperation: document.getElementById('yearsOperation').value,
                 createdAt: new Date().toISOString(),
                 marketingOptIn: document.getElementById('marketing').checked,
+                profileComplete: false,
+                status: 'pending_verification',
+                userType: 'carrier',
                 source: 'manual-form'
             };
 
@@ -2597,13 +2522,17 @@
         });
 
         // Phone Formatting
-        document.getElementById('phone').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                value = value.match(/.{1,4}/g).join(' ');
-            }
-            e.target.value = value;
-        });
+        (function () {
+            const phoneEl = document.getElementById('phone');
+            if (!phoneEl) return;
+            phoneEl.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    value = value.match(/.{1,4}/g).join(' ');
+                }
+                e.target.value = value;
+            });
+        })();
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
