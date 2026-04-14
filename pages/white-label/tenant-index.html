@@ -1,726 +1,1793 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Swift Logistics - Your Trusted Freight Partner</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="MULTI-TENANT-ROUTING.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tenant Home</title>
     <style>
-        :root {
-            --tenant-primary: #0066cc;
-            --tenant-primary-dark: #0052a3;
-            --text-dark: #1f2937;
-            --text-medium: #4b5563;
-            --bg-white: #ffffff;
-            --bg-gray: #f9fafb;
-            --border-gray: #e5e7eb;
-            --success: #10b981;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        html { visibility: hidden; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-white);
-            color: var(--text-dark);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #ffffff;
+            color: #0f172a;
         }
-
-        .header {
-            background: white;
-            border-bottom: 1px solid var(--border-gray);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 80px;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--tenant-primary);
-            text-decoration: none;
-        }
-
-        .header-nav {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .header-nav-link {
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-
-        .header-nav-link:hover {
-            color: var(--tenant-primary);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: var(--tenant-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--tenant-primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--tenant-primary);
-            color: var(--tenant-primary);
-        }
-
-        .btn-outline:hover {
-            background: var(--tenant-primary);
-            color: white;
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, var(--tenant-primary) 0%, var(--tenant-primary-dark) 100%);
-            color: white;
-            padding: 6rem 2rem;
-            text-align: center;
-        }
-
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.95;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .hero-btn {
-            background: white;
-            color: var(--tenant-primary);
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .hero-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .hero-btn.secondary {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        /* Trust Badges */
-        .trust-section {
-            padding: 3rem 2rem;
-            background: white;
-            text-align: center;
-        }
-
-        .trust-text {
-            font-size: 0.875rem;
-            color: var(--text-medium);
-            margin-bottom: 2rem;
-            font-weight: 600;
-        }
-
-        .company-logos {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 3rem;
-            flex-wrap: wrap;
-            opacity: 0.6;
-        }
-
-        .company-logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-medium);
-        }
-
-        /* Features Section */
-        .features {
-            padding: 4rem 2rem;
-            background: var(--bg-gray);
-        }
-
-        .features-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.125rem;
-            color: var(--text-medium);
-            margin-bottom: 3rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: rgba(0, 102, 204, 0.1);
-            color: var(--tenant-primary);
+        .loader {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 1.5rem;
-        }
-
-        .feature-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-text {
-            color: var(--text-medium);
-            font-size: 0.9375rem;
-        }
-
-        /* Stats Section */
-        .stats {
-            padding: 4rem 2rem;
-            background: white;
-        }
-
-        .stats-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-
-        .stat-card {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--tenant-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            color: var(--text-medium);
-            font-weight: 500;
-        }
-
-        /* How It Works */
-        .how-it-works {
-            padding: 4rem 2rem;
-            background: var(--bg-gray);
-        }
-
-        .how-it-works-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-        }
-
-        .step-card {
-            text-align: center;
-        }
-
-        .step-number {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--tenant-primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 auto 1rem;
-        }
-
-        .step-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .step-text {
-            color: var(--text-medium);
-            font-size: 0.9375rem;
-        }
-
-        /* Testimonials */
-        .testimonials {
-            padding: 4rem 2rem;
-            background: white;
-        }
-
-        .testimonials-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-
-        .testimonial-card {
-            background: var(--bg-gray);
-            border-radius: 16px;
             padding: 2rem;
         }
-
-        .testimonial-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+        .card {
+            width: min(520px, 100%);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.08);
+            background: #ffffff;
         }
-
-        .testimonial-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--tenant-primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
+        .title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0 0 0.75rem;
         }
-
-        .testimonial-info h4 {
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .testimonial-info p {
-            font-size: 0.875rem;
-            color: var(--text-medium);
-        }
-
-        .testimonial-rating {
-            color: #fbbf24;
-            margin-bottom: 1rem;
-        }
-
-        .testimonial-text {
-            color: var(--text-dark);
+        .subtitle {
+            margin: 0;
+            color: #475569;
             line-height: 1.6;
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--text-dark);
-            color: white;
-            padding: 3rem 2rem 1.5rem;
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 3rem;
-        }
-
-        .footer-section h3 {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.75rem;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 0.9375rem;
-            transition: color 0.2s ease;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .social-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .social-icon:hover {
-            background: var(--tenant-primary);
-        }
-
-        .footer-bottom {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
-        }
-
-        @media (max-width: 968px) {
-            .features-grid,
-            .stats-grid,
-            .steps-grid,
-            .testimonials-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-container {
-                grid-template-columns: 1fr;
-            }
+            font-size: 0.95rem;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <a href="tenant-index.html" class="logo tenant-logo">Swift Logistics</a>
-            <nav>
-                <ul class="header-nav">
-                    <li><a href="tenant-index.html" class="header-nav-link">Home</a></li>
-                    <li><a href="tenant-loads.html" class="header-nav-link">Loads</a></li>
-                    <li><a href="tenant-carriers.html" class="header-nav-link">Carriers</a></li>
-                    <li><a href="tenant-tracking.html" class="header-nav-link">Tracking</a></li>
-                    <li><a href="#" class="header-nav-link">Contact</a></li>
-                    <li><a href="#" class="btn btn-outline">Login</a></li>
-                    <li><a href="#" class="btn btn-primary">Sign Up</a></li>
-                </ul>
-            </nav>
+    <div class="loader">
+        <div class="card">
+            <h1 class="title">Loading tenant homepage…</h1>
+            <p class="subtitle">This page uses the exact same layout as the main homepage, but applies the tenant’s custom branding only here.</p>
         </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-container">
-            <h1 id="heroTitle">Swift Logistics - Your Trusted Freight Partner</h1>
-            <p id="heroSubtitle">Connect with verified carriers across the UK</p>
-            <div class="hero-actions">
-                <a href="#" class="hero-btn">Post a Load</a>
-                <a href="tenant-carriers.html" class="hero-btn secondary">Find Carriers</a>
-                <a href="tenant-tracking.html" class="hero-btn secondary">Track Shipment</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trust Badges -->
-    <section class="trust-section">
-        <div class="trust-text">Trusted by 500+ businesses</div>
-        <div class="company-logos">
-            <div class="company-logo">DHL</div>
-            <div class="company-logo">FedEx</div>
-            <div class="company-logo">UPS</div>
-            <div class="company-logo">TNT</div>
-            <div class="company-logo">DPD</div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <div class="features-container">
-            <h2 class="section-title">Why Choose Us?</h2>
-            <p class="section-subtitle">Everything you need to manage your freight operations</p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h3 class="feature-title">AI Load Matching</h3>
-                    <p class="feature-text">Smart algorithms match loads instantly</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-map-marked-alt"></i>
-                    </div>
-                    <h3 class="feature-title">Real-Time Tracking</h3>
-                    <p class="feature-text">Live GPS tracking for every shipment</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-pound-sign"></i>
-                    </div>
-                    <h3 class="feature-title">7-Day Payouts</h3>
-                    <p class="feature-text">Get paid faster than industry standard</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="stats-container">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">50K+</div>
-                    <div class="stat-label">loads delivered</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">5K+</div>
-                    <div class="stat-label">verified carriers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">98%</div>
-                    <div class="stat-label">on-time delivery</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="how-it-works">
-        <div class="how-it-works-container">
-            <h2 class="section-title">How It Works</h2>
-            <p class="section-subtitle">Get started in 4 simple steps</p>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3 class="step-title">Post your load</h3>
-                    <p class="step-text">Enter load details and requirements</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3 class="step-title">Get matched</h3>
-                    <p class="step-text">AI matches you with verified carriers</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3 class="step-title">Track in real-time</h3>
-                    <p class="step-text">Monitor your shipment with GPS tracking</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h3 class="step-title">Get paid</h3>
-                    <p class="step-text">Receive payment within 7 days</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section class="testimonials">
-        <div class="testimonials-container">
-            <h2 class="section-title">What Our Customers Say</h2>
-            <p class="section-subtitle">Trusted by businesses across the UK</p>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar">JS</div>
-                        <div class="testimonial-info">
-                            <h4>John Smith</h4>
-                            <p>ABC Logistics Ltd</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-rating">★★★★★</div>
-                    <p class="testimonial-text">
-                        "Swift Logistics has transformed our freight operations. The platform is intuitive, 
-                        and we've found reliable carriers for all our shipments. Highly recommended!"
-                    </p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar">MJ</div>
-                        <div class="testimonial-info">
-                            <h4>Sarah Johnson</h4>
-                            <p>Premier Distribution</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-rating">★★★★★</div>
-                    <p class="testimonial-text">
-                        "The real-time tracking feature is a game-changer. We always know where our shipments 
-                        are, and the 7-day payout is faster than any other platform we've used."
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3 id="footerCompanyName">Swift Logistics</h3>
-                <p style="color: rgba(255, 255, 255, 0.7); margin-top: 1rem;">
-                    Connecting shippers with trusted carriers across the UK.
-                </p>
-                <div class="social-icons">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h3>Platform</h3>
-                <ul class="footer-links">
-                    <li><a href="tenant-loads.html">Find Loads</a></li>
-                    <li><a href="tenant-carriers.html">Carriers</a></li>
-                    <li><a href="tenant-tracking.html">Tracking</a></li>
-                    <li><a href="#">Pricing</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Company</h3>
-                <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Support</a></li>
-                    <li><a href="#">Blog</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Legal</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Cookie Policy</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; <span id="currentYear">2026</span> <span id="footerCompanyNameBottom">Swift Logistics</span>. All rights reserved.</p>
-        </div>
-    </footer>
+    </div>
 
     <script>
-        // Multi-tenant initialization
-        async function initTenant() {
-            // Load tenant config from MULTI-TENANT-ROUTING.js
-            if (typeof loadTenantConfig === 'function') {
-                const tenantInfo = detectTenantFromURL();
-                if (tenantInfo) {
-                    const config = await loadTenantConfig(tenantInfo.tenantId);
-                    if (config) {
-                        applyTenantStyles(config);
-                    }
-                }
-            }
+        (function () {
+            const INDEX_URL = '/index.html';
+            setTimeout(() => {
+                try { document.documentElement.style.visibility = 'visible'; } catch (e) {}
+            }, 2500);
+            const BRANDING_BOOTSTRAP = `
+    <script>
+      (function () {
+        function shouldSkipTenantBranding() {
+          try {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('wlPreview') === '1';
+          } catch (e) {
+            return false;
+          }
         }
 
-        // Set current year
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        function detectTenant() {
+          try {
+            const params = new URLSearchParams(window.location.search);
+            const qpTenantId = params.get('tenantId') || params.get('tenant') || '';
+            const qpDomain = params.get('domain') || '';
+            if (qpTenantId || qpDomain) return { tenantId: qpTenantId || null, domain: qpDomain || null };
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', initTenant);
+            const hostname = window.location.hostname;
+            if (!hostname) return { tenantId: null, domain: null };
+
+            const parts = hostname.split('.');
+            if (parts.length >= 3 && parts[parts.length - 2] === 'alphafreightuk') {
+              const sub = parts[0];
+              if (sub && !['www', 'app', 'admin', 'api'].includes(sub)) return { tenantId: sub, domain: null };
+            }
+
+            if (parts.length === 2 || (parts.length === 3 && parts[0] === 'www')) {
+              const domain = parts[0] === 'www' ? parts.slice(1).join('.') : hostname;
+              return { tenantId: null, domain };
+            }
+
+            return { tenantId: null, domain: null };
+          } catch (e) {
+            return { tenantId: null, domain: null };
+          }
+        }
+
+        function shiftColor(hex, amount) {
+          const rgb = hexToRgb(hex);
+          if (!rgb) return hex;
+          const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+          const newL = clamp01(hsl.l + amount);
+          const out = hslToRgb(hsl.h, hsl.s, newL);
+          return rgbToHex(out.r, out.g, out.b);
+        }
+        function clamp01(n) { return Math.max(0, Math.min(1, n)); }
+        function clamp255(n) { return Math.max(0, Math.min(255, Math.round(n))); }
+        function hexToRgb(hex) {
+          const normalized = (hex || '').replace('#', '').trim();
+          if (normalized.length === 3) {
+            const r = parseInt(normalized[0] + normalized[0], 16);
+            const g = parseInt(normalized[1] + normalized[1], 16);
+            const b = parseInt(normalized[2] + normalized[2], 16);
+            return { r, g, b };
+          }
+          if (normalized.length !== 6) return null;
+          const r = parseInt(normalized.slice(0, 2), 16);
+          const g = parseInt(normalized.slice(2, 4), 16);
+          const b = parseInt(normalized.slice(4, 6), 16);
+          if ([r, g, b].some(n => Number.isNaN(n))) return null;
+          return { r, g, b };
+        }
+        function rgbToHex(r, g, b) {
+          const toHex = (n) => clamp255(n).toString(16).padStart(2, '0');
+          return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+        function rgbToHsl(r, g, b) {
+          const rn = r / 255, gn = g / 255, bn = b / 255;
+          const max = Math.max(rn, gn, bn);
+          const min = Math.min(rn, gn, bn);
+          const d = max - min;
+          let h = 0, s = 0;
+          const l = (max + min) / 2;
+          if (d !== 0) {
+            s = d / (1 - Math.abs(2 * l - 1));
+            switch (max) {
+              case rn: h = ((gn - bn) / d) % 6; break;
+              case gn: h = (bn - rn) / d + 2; break;
+              case bn: h = (rn - gn) / d + 4; break;
+            }
+            h = h * 60;
+            if (h < 0) h += 360;
+          }
+          return { h, s, l };
+        }
+        function hslToRgb(h, s, l) {
+          const c = (1 - Math.abs(2 * l - 1)) * s;
+          const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+          const m = l - c / 2;
+          let r1 = 0, g1 = 0, b1 = 0;
+          if (h >= 0 && h < 60) { r1 = c; g1 = x; b1 = 0; }
+          else if (h >= 60 && h < 120) { r1 = x; g1 = c; b1 = 0; }
+          else if (h >= 120 && h < 180) { r1 = 0; g1 = c; b1 = x; }
+          else if (h >= 180 && h < 240) { r1 = 0; g1 = x; b1 = c; }
+          else if (h >= 240 && h < 300) { r1 = x; g1 = 0; b1 = c; }
+          else { r1 = c; g1 = 0; b1 = x; }
+          return { r: (r1 + m) * 255, g: (g1 + m) * 255, b: (b1 + m) * 255 };
+        }
+
+        function ensureMeta(selector, attr, value) {
+          let el = document.querySelector(selector);
+          if (!el) {
+            el = document.createElement('meta');
+            const prop = selector.match(/property="([^"]+)"/)?.[1];
+            const name = selector.match(/name="([^"]+)"/)?.[1];
+            if (prop) el.setAttribute('property', prop);
+            if (name) el.setAttribute('name', name);
+            document.head.appendChild(el);
+          }
+          el.setAttribute(attr, value);
+        }
+
+        function applyTenantBranding(config) {
+          if (!config) return;
+
+          const root = document.documentElement;
+          const primary = config.colors?.primary || '#1e3a8a';
+          const secondary = config.colors?.secondary || '#635bff';
+          const success = config.colors?.success || '#10b981';
+          const danger = config.colors?.danger || '#ef4444';
+
+          root.style.setProperty('--primary', primary);
+          root.style.setProperty('--primary-dark', shiftColor(primary, -0.14));
+          root.style.setProperty('--primary-light', shiftColor(primary, 0.22));
+          root.style.setProperty('--accent', secondary);
+          root.style.setProperty('--accent-hover', shiftColor(secondary, -0.10));
+          root.style.setProperty('--success', success);
+          root.style.setProperty('--danger', danger);
+
+          if (config.colors?.bg) root.style.setProperty('--bg-white', config.colors.bg);
+          if (config.colors?.cardBg) root.style.setProperty('--bg-gray', config.colors.cardBg);
+          if (config.colors?.textPrimary) root.style.setProperty('--text-dark', config.colors.textPrimary);
+          if (config.colors?.textSecondary) root.style.setProperty('--text-medium', config.colors.textSecondary);
+
+          const title = (config.general?.siteTitle || '').trim();
+          document.title = title || (config.companyName ? (config.companyName + ' - Freight Platform') : document.title);
+
+          const desc = (config.general?.metaDescription || config.general?.tagline || '').trim();
+          if (desc) {
+            ensureMeta('meta[name="description"]', 'content', desc);
+            ensureMeta('meta[property="og:description"]', 'content', desc);
+            ensureMeta('meta[name="twitter:description"]', 'content', desc);
+          }
+
+          if (config.companyName || config.general?.productName) {
+            const t = (config.general?.productName || config.companyName || '').trim();
+            if (t) {
+              ensureMeta('meta[property="og:title"]', 'content', t);
+              ensureMeta('meta[name="twitter:title"]', 'content', t);
+            }
+          }
+
+          if (config.logo?.ogImage) {
+            ensureMeta('meta[property="og:image"]', 'content', config.logo.ogImage);
+            ensureMeta('meta[name="twitter:image"]', 'content', config.logo.ogImage);
+          }
+
+          if (config.logo?.favicon) {
+            const icons = Array.from(document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'));
+            icons.forEach(l => l.setAttribute('href', config.logo.favicon));
+          }
+
+          const headerLogoImg = document.querySelector('.header-logo img');
+          if (headerLogoImg && config.logo?.full) {
+            headerLogoImg.src = config.logo.full;
+            headerLogoImg.alt = config.companyName || headerLogoImg.alt || 'Logo';
+          }
+
+          const footerLogoImg = document.querySelector('.footer-brand-logo img');
+          if (footerLogoImg && config.logo?.full) {
+            footerLogoImg.src = config.logo.full;
+            footerLogoImg.alt = config.companyName || footerLogoImg.alt || 'Logo';
+          }
+
+          if (config.general?.productName) {
+            const heroAccent = document.querySelector('.hero-title-accent');
+            if (heroAccent) heroAccent.textContent = config.general.productName;
+          }
+
+          if (config.general?.tagline) {
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            if (heroSubtitle) heroSubtitle.textContent = config.general.tagline;
+          }
+
+          if (config.logo?.heroImage) {
+            const heroImg = document.querySelector('.hero-graphic img');
+            if (heroImg) heroImg.src = config.logo.heroImage;
+          }
+
+          const primaryBtn = document.querySelector('.btn-primary-custom');
+          if (primaryBtn) {
+            const label = (config.general?.primaryCtaLabel || '').trim();
+            const url = (config.general?.primaryCtaUrl || '').trim();
+            if (label) {
+              const textNode = Array.from(primaryBtn.childNodes).find(n => n.nodeType === 3 && n.textContent.trim());
+              if (textNode) textNode.textContent = label + ' ';
+            }
+            if (url) primaryBtn.setAttribute('href', url);
+          }
+
+          const secondaryBtn = document.querySelector('.btn-secondary-custom');
+          if (secondaryBtn) {
+            const label = (config.general?.secondaryCtaLabel || '').trim();
+            const url = (config.general?.secondaryCtaUrl || '').trim();
+            if (label) {
+              const textNode = Array.from(secondaryBtn.childNodes).find(n => n.nodeType === 3 && n.textContent.trim());
+              if (textNode) textNode.textContent = label + ' ';
+            }
+            if (url) secondaryBtn.setAttribute('href', url);
+          }
+
+          const footerText = (config.general?.footerDescription || '').trim();
+          if (footerText) {
+            const footerPara = document.querySelector('.footer-brand p');
+            if (footerPara) footerPara.textContent = footerText;
+          }
+
+          const footerSocial = document.querySelector('.footer-social');
+          if (footerSocial) {
+            const setSocial = (key, iconClass, href) => {
+              const trimmed = (href || '').trim();
+              const existing = footerSocial.querySelector('a[data-wl-social="' + key + '"]');
+              if (!trimmed) { if (existing) existing.remove(); return; }
+              if (existing) { existing.setAttribute('href', trimmed); return; }
+              const a = document.createElement('a');
+              a.setAttribute('data-wl-social', key);
+              a.setAttribute('href', trimmed);
+              a.setAttribute('target', '_blank');
+              a.setAttribute('rel', 'noopener noreferrer');
+              const i = document.createElement('i');
+              i.className = iconClass;
+              a.appendChild(i);
+              footerSocial.appendChild(a);
+            };
+            setSocial('linkedin', 'fab fa-linkedin', config.general?.socialLinkedIn);
+            setSocial('facebook', 'fab fa-facebook', config.general?.socialFacebook);
+            setSocial('x', 'fab fa-x-twitter', config.general?.socialX);
+          }
+
+          if (config.fonts?.googleFontsUrl) {
+            const existing = document.getElementById('wl-google-fonts');
+            if (existing) existing.remove();
+            const link = document.createElement('link');
+            link.id = 'wl-google-fonts';
+            link.rel = 'stylesheet';
+            link.href = config.fonts.googleFontsUrl;
+            document.head.appendChild(link);
+          }
+
+          if (config.fonts?.primary) {
+            document.body.style.fontFamily = config.fonts.primary + ', Inter, system-ui, sans-serif';
+          }
+
+          if (config.fonts?.heading) {
+            const id = 'wl-tenant-heading-font';
+            let styleTag = document.getElementById(id);
+            if (!styleTag) {
+              styleTag = document.createElement('style');
+              styleTag.id = id;
+              document.head.appendChild(styleTag);
+            }
+            styleTag.textContent = 'h1,h2,h3,h4,h5,h6{font-family:' + config.fonts.heading + \", 'Plus Jakarta Sans', Inter, system-ui, sans-serif;}\";
+          }
+
+          const css = (config.advanced?.customCSS || '').trim();
+          if (css) {
+            const id = 'wl-tenant-custom-css';
+            let styleTag = document.getElementById(id);
+            if (!styleTag) {
+              styleTag = document.createElement('style');
+              styleTag.id = id;
+              document.head.appendChild(styleTag);
+            }
+            styleTag.textContent = css;
+          }
+
+          const js = (config.advanced?.customJS || '').trim();
+          if (js) {
+            const id = 'wl-tenant-custom-js';
+            const old = document.getElementById(id);
+            if (old) old.remove();
+            const script = document.createElement('script');
+            script.id = id;
+            script.type = 'text/javascript';
+            script.textContent = js;
+            document.body.appendChild(script);
+          }
+        }
+
+        function mergeConfigs(base, draft) {
+          const merged = JSON.parse(JSON.stringify(base || {}));
+          const d = draft || {};
+          merged.companyName = d.companyName || merged.companyName;
+          merged.general = Object.assign({}, merged.general || {}, d.general || {});
+          merged.colors = Object.assign({}, merged.colors || {}, d.colors || {});
+          merged.fonts = Object.assign({}, merged.fonts || {}, d.fonts || {});
+          merged.logo = Object.assign({}, merged.logo || {}, d.logo || {});
+          merged.advanced = Object.assign({}, merged.advanced || {}, d.advanced || {});
+          return merged;
+        }
+
+        function ensureCustomizeButton() {
+          if (document.getElementById('wlTenantCustomizeBtn')) return;
+          const btn = document.createElement('button');
+          btn.id = 'wlTenantCustomizeBtn';
+          btn.type = 'button';
+          btn.textContent = 'Customize';
+          btn.style.position = 'fixed';
+          btn.style.right = '18px';
+          btn.style.top = '50%';
+          btn.style.transform = 'translateY(-50%)';
+          btn.style.zIndex = '99999';
+          btn.style.border = 'none';
+          btn.style.borderRadius = '999px';
+          btn.style.padding = '0.9rem 1.1rem';
+          btn.style.fontWeight = '900';
+          btn.style.cursor = 'pointer';
+          btn.style.color = '#ffffff';
+          btn.style.background = 'linear-gradient(135deg,var(--primary,#635bff) 0%,var(--primary-light,#8b5cf6) 100%)';
+          btn.style.boxShadow = '0 14px 34px rgba(99,91,255,0.35)';
+          btn.style.display = 'none';
+          btn.style.alignItems = 'center';
+          btn.style.gap = '0.6rem';
+          btn.addEventListener('click', () => {
+            const drawer = document.getElementById('wlTenantCustomizerDrawer');
+            const backdrop = document.getElementById('wlTenantCustomizerBackdrop');
+            if (drawer && backdrop) {
+              drawer.classList.add('open');
+              backdrop.classList.add('open');
+            }
+          });
+          document.body.appendChild(btn);
+        }
+
+        function setCustomizeButtonVisible(visible) {
+          const btn = document.getElementById('wlTenantCustomizeBtn');
+          if (!btn) return;
+          btn.style.display = visible ? 'inline-flex' : 'none';
+        }
+
+        function closeCustomizerDrawer() {
+          const drawer = document.getElementById('wlTenantCustomizerDrawer');
+          const backdrop = document.getElementById('wlTenantCustomizerBackdrop');
+          if (drawer) drawer.classList.remove('open');
+          if (backdrop) backdrop.classList.remove('open');
+        }
+
+        function createCustomizerUI(state) {
+          if (document.getElementById('wlTenantCustomizerDrawer')) return;
+
+          const styleId = 'wlTenantCustomizerStyle';
+          if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent =
+              '.wl-tenant-customizer-backdrop{position:fixed;inset:0;z-index:99998;background:rgba(15,23,42,0.12);opacity:0;pointer-events:none;transition:opacity .2s ease;}' +
+              '.wl-tenant-customizer-backdrop.open{opacity:1;pointer-events:auto;}' +
+              '.wl-tenant-customizer-drawer{position:fixed;top:0;right:0;height:100vh;width:min(460px,92vw);z-index:100000;background:#ffffff;border-left:1px solid rgba(226,232,240,0.92);box-shadow:-18px 0 60px rgba(2,6,23,0.18);transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;}' +
+              '.wl-tenant-customizer-drawer.open{transform:translateX(0);}' +
+              '.wl-tenant-customizer-header{padding:1.1rem 1.1rem 0.9rem;border-bottom:1px solid rgba(226,232,240,0.92);display:flex;align-items:center;justify-content:space-between;gap:1rem;}' +
+              '.wl-tenant-customizer-title{margin:0;font-size:1.05rem;font-weight:900;color:#0f172a;}' +
+              '.wl-tenant-customizer-close{width:40px;height:40px;border-radius:12px;cursor:pointer;border:1px solid rgba(226,232,240,0.92);background:rgba(248,250,252,0.9);display:inline-flex;align-items:center;justify-content:center;color:#475569;}' +
+              '.wl-tenant-customizer-body{padding:1rem 1.1rem 1.1rem;overflow:auto;}' +
+              '.wl-tenant-field{margin-bottom:0.9rem;}' +
+              '.wl-tenant-label{display:block;font-size:.85rem;font-weight:800;color:#334155;margin-bottom:.35rem;}' +
+              '.wl-tenant-input{width:100%;border:1px solid rgba(226,232,240,0.92);border-radius:12px;padding:0.75rem 0.9rem;font-size:.95rem;outline:none;background:#fff;color:#0f172a;}' +
+              '.wl-tenant-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}' +
+              '.wl-tenant-actions{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.5rem;}' +
+              '.wl-tenant-btn{border-radius:12px;padding:0.75rem 1rem;font-weight:900;cursor:pointer;border:1px solid rgba(226,232,240,0.92);background:#fff;color:#334155;}' +
+              '.wl-tenant-btn.primary{border:none;color:#fff;background:linear-gradient(135deg,var(--primary,#635bff) 0%,var(--primary-light,#8b5cf6) 100%);}';
+            document.head.appendChild(style);
+          }
+
+          const backdrop = document.createElement('div');
+          backdrop.id = 'wlTenantCustomizerBackdrop';
+          backdrop.className = 'wl-tenant-customizer-backdrop';
+          backdrop.addEventListener('click', () => closeCustomizerDrawer());
+
+          const drawer = document.createElement('aside');
+          drawer.id = 'wlTenantCustomizerDrawer';
+          drawer.className = 'wl-tenant-customizer-drawer';
+
+          const header = document.createElement('div');
+          header.className = 'wl-tenant-customizer-header';
+          header.innerHTML = '<h2 class="wl-tenant-customizer-title">Customizer</h2><button class="wl-tenant-customizer-close" type="button" aria-label="Close">✕</button>';
+          header.querySelector('button')?.addEventListener('click', () => closeCustomizerDrawer());
+
+          const body = document.createElement('div');
+          body.className = 'wl-tenant-customizer-body';
+          body.innerHTML =
+            '<div class="wl-tenant-field"><label class="wl-tenant-label">Business Name</label><input class="wl-tenant-input" id="wlTBusinessName" type="text" placeholder="Your Company" /></div>' +
+            '<div class="wl-tenant-field"><label class="wl-tenant-label">Product Name</label><input class="wl-tenant-input" id="wlTProductName" type="text" placeholder="Your Platform" /></div>' +
+            '<div class="wl-tenant-field"><label class="wl-tenant-label">Tagline</label><input class="wl-tenant-input" id="wlTTagline" type="text" placeholder="Your tagline" /></div>' +
+            '<div class="wl-tenant-row">' +
+              '<div class="wl-tenant-field"><label class="wl-tenant-label">Primary Color</label><input class="wl-tenant-input" id="wlTPrimaryColor" type="color" style="height:48px;padding:0.4rem" /></div>' +
+              '<div class="wl-tenant-field"><label class="wl-tenant-label">Secondary Color</label><input class="wl-tenant-input" id="wlTSecondaryColor" type="color" style="height:48px;padding:0.4rem" /></div>' +
+            '</div>' +
+            '<div class="wl-tenant-row">' +
+              '<div class="wl-tenant-field"><label class="wl-tenant-label">CTA Label</label><input class="wl-tenant-input" id="wlTCtaLabel" type="text" placeholder="Get Started" /></div>' +
+              '<div class="wl-tenant-field"><label class="wl-tenant-label">CTA URL</label><input class="wl-tenant-input" id="wlTCtaUrl" type="url" placeholder="https://yourdomain.com/signup" /></div>' +
+            '</div>' +
+            '<div class="wl-tenant-actions">' +
+              '<button class="wl-tenant-btn primary" type="button" id="wlTSaveDraft">Save</button>' +
+              '<button class="wl-tenant-btn" type="button" id="wlTResetDraft">Reset</button>' +
+            '</div>';
+
+          drawer.appendChild(header);
+          drawer.appendChild(body);
+          document.body.appendChild(backdrop);
+          document.body.appendChild(drawer);
+
+          const getValue = (id) => document.getElementById(id)?.value || '';
+          const setValue = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+
+          const hydrate = () => {
+            const current = mergeConfigs(state.baseConfig, state.draft);
+            setValue('wlTBusinessName', current.general?.businessName || current.companyName || '');
+            setValue('wlTProductName', current.general?.productName || '');
+            setValue('wlTTagline', current.general?.tagline || '');
+            setValue('wlTPrimaryColor', current.colors?.primary || '#635bff');
+            setValue('wlTSecondaryColor', current.colors?.secondary || '#7c3aed');
+            setValue('wlTCtaLabel', current.general?.primaryCtaLabel || '');
+            setValue('wlTCtaUrl', current.general?.primaryCtaUrl || '');
+          };
+
+          const applyDraft = () => {
+            const merged = mergeConfigs(state.baseConfig, state.draft);
+            applyTenantBranding(merged);
+          };
+
+          const updateDraft = (path, value) => {
+            const parts = path.split('.');
+            let ref = state.draft;
+            for (let i = 0; i < parts.length - 1; i++) {
+              const k = parts[i];
+              if (!ref[k] || typeof ref[k] !== 'object') ref[k] = {};
+              ref = ref[k];
+            }
+            ref[parts[parts.length - 1]] = value;
+            applyDraft();
+          };
+
+          const bind = (id, path) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', () => updateDraft(path, getValue(id)));
+            el.addEventListener('change', () => updateDraft(path, getValue(id)));
+          };
+
+          bind('wlTBusinessName', 'general.businessName');
+          bind('wlTProductName', 'general.productName');
+          bind('wlTTagline', 'general.tagline');
+          bind('wlTPrimaryColor', 'colors.primary');
+          bind('wlTSecondaryColor', 'colors.secondary');
+          bind('wlTCtaLabel', 'general.primaryCtaLabel');
+          bind('wlTCtaUrl', 'general.primaryCtaUrl');
+
+          document.getElementById('wlTSaveDraft')?.addEventListener('click', () => {
+            try {
+              localStorage.setItem(state.storageKey, JSON.stringify(state.draft || {}));
+              closeCustomizerDrawer();
+            } catch (e) {}
+          });
+
+          document.getElementById('wlTResetDraft')?.addEventListener('click', () => {
+            try {
+              localStorage.removeItem(state.storageKey);
+              state.draft = {};
+              hydrate();
+              applyTenantBranding(state.baseConfig);
+              closeCustomizerDrawer();
+            } catch (e) {}
+          });
+
+          hydrate();
+        }
+
+        function ensureHeroModeToggle(tenantKey) {
+          if (document.getElementById('wlHeroModeToggle')) return;
+          const container = document.createElement('div');
+          container.id = 'wlHeroModeToggle';
+          container.style.position = 'absolute';
+          container.style.right = '18px';
+          container.style.top = '18px';
+          container.style.zIndex = '99999';
+          container.style.display = 'inline-flex';
+          container.style.alignItems = 'center';
+          container.style.gap = '0.4rem';
+          container.style.padding = '0.35rem';
+          container.style.borderRadius = '999px';
+          container.style.background = 'rgba(255,255,255,0.92)';
+          container.style.border = '1px solid rgba(226,232,240,0.92)';
+          container.style.boxShadow = '0 10px 24px rgba(2,6,23,0.10)';
+          container.style.backdropFilter = 'blur(10px)';
+
+          const makeBtn = (label) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = label;
+            b.style.border = 'none';
+            b.style.borderRadius = '999px';
+            b.style.padding = '0.55rem 0.9rem';
+            b.style.fontWeight = '900';
+            b.style.cursor = 'pointer';
+            b.style.background = 'transparent';
+            b.style.color = '#475569';
+            return b;
+          };
+
+          const editBtn = makeBtn('Edit');
+          const previewBtn = makeBtn('Preview');
+
+          const storageKey = 'wlTenantMode:' + (tenantKey || 'local');
+          const setActive = (mode) => {
+            const styleBtn = (btn, active) => {
+              btn.style.background = active ? 'linear-gradient(135deg,var(--primary,#635bff) 0%,var(--primary-light,#8b5cf6) 100%)' : 'transparent';
+              btn.style.color = active ? '#ffffff' : '#475569';
+              btn.style.boxShadow = active ? '0 10px 22px rgba(99,91,255,0.25)' : 'none';
+            };
+            styleBtn(editBtn, mode === 'edit');
+            styleBtn(previewBtn, mode === 'preview');
+          };
+
+          function setEditModeEnabled(enabled) {
+            const root = document.documentElement;
+            root.classList.toggle('wl-edit-mode', !!enabled);
+
+            const styleId = 'wlEditModeStyle';
+            if (enabled && !document.getElementById(styleId)) {
+              const s = document.createElement('style');
+              s.id = styleId;
+              s.textContent =
+                '.wl-edit-mode [data-wl-editable=\"1\"]{outline:2px dashed rgba(99,91,255,0.45);outline-offset:4px;cursor:text;}' +
+                '.wl-edit-mode [data-wl-editable=\"1\"]:hover{outline-color:rgba(99,91,255,0.85);}' +
+                '.wl-edit-mode [data-wl-editable=\"1\"]:focus{outline-color:rgba(99,91,255,1);}' +
+                '.wl-edit-mode a[data-wl-editable=\"1\"],.wl-edit-mode button[data-wl-editable=\"1\"]{cursor:text;}' +
+                '.wl-edit-mode [data-wl-selected=\"1\"]{outline:3px solid rgba(99,91,255,0.85);outline-offset:6px;}' +
+                '.wl-edit-mode img{outline:2px dashed rgba(99,91,255,0.35);outline-offset:6px;}' +
+                '.wl-edit-mode img:hover{outline-color:rgba(99,91,255,0.75);}' +
+                '.wl-inline-editor-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,0.06);opacity:0;pointer-events:none;transition:opacity .2s ease;}' +
+                '.wl-inline-editor-backdrop.open{opacity:1;pointer-events:auto;}' +
+                '.wl-inline-editor{position:fixed;top:0;right:0;height:100vh;width:min(430px,92vw);z-index:100001;border-left:1px solid rgba(226,232,240,0.92);background:#ffffff;box-shadow:-18px 0 60px rgba(2,6,23,0.18);padding:1rem;transform:translateX(100%);transition:transform .25s cubic-bezier(.22,1,.36,1);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;font-family:system-ui,-apple-system,BlinkMacSystemFont,\\'Segoe UI\\',sans-serif;}' +
+                '.wl-inline-editor::-webkit-scrollbar{width:0;height:0;display:none;}' +
+                '.wl-inline-editor.open{transform:translateX(0);}' +
+                '.wl-inline-editor-title{position:sticky;top:0;background:#ffffff;padding:0.25rem 0 0.85rem;z-index:1;border-bottom:1px solid rgba(226,232,240,0.9);margin-bottom:0.85rem;display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem;}' +
+                '.wl-inline-editor-title strong{font-size:1.02rem;font-weight:950;letter-spacing:-0.02em;color:#0f172a;display:block;line-height:1.2;}' +
+                '.wl-inline-editor-meta{margin-top:0.25rem;font-size:0.82rem;font-weight:700;color:#64748b;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
+                '.wl-inline-editor-close{width:36px;height:36px;border-radius:12px;border:1px solid rgba(226,232,240,0.92);background:rgba(248,250,252,0.9);cursor:pointer;font-weight:900;color:#475569;}' +
+                '.wl-inline-editor-close:hover{border-color:rgba(99,91,255,0.35);color:#0f172a;}' +
+                '.wl-inline-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}' +
+                '.wl-inline-editor-field label{display:block;font-size:0.82rem;font-weight:800;color:#334155;margin-bottom:0.35rem;}' +
+                '.wl-inline-editor-input{width:100%;border:1px solid rgba(226,232,240,0.92);border-radius:12px;padding:0.65rem 0.8rem;font-size:0.92rem;outline:none;background:#fff;color:#0f172a;transition:border-color .15s ease, box-shadow .15s ease;}' +
+                '.wl-inline-editor-input:focus{border-color:rgba(99,91,255,0.6);box-shadow:0 0 0 4px rgba(99,91,255,0.16);}' +
+                '.wl-inline-editor input[type=\"range\"].wl-inline-editor-input{padding:0.45rem 0.5rem;accent-color:var(--primary,#635bff);}' +
+                '.wl-inline-editor-actions{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.9rem;}' +
+                '.wl-inline-editor-btn{border-radius:12px;padding:0.65rem 0.85rem;font-weight:900;cursor:pointer;border:1px solid rgba(226,232,240,0.92);background:#fff;color:#334155;display:inline-flex;align-items:center;gap:0.5rem;transition:transform .05s ease,border-color .15s ease,box-shadow .15s ease;}' +
+                '.wl-inline-editor-btn:hover{border-color:rgba(99,91,255,0.35);box-shadow:0 10px 24px rgba(2,6,23,0.10);}' +
+                '.wl-inline-editor-btn:active{transform:translateY(1px);}' +
+                '.wl-inline-editor-btn.primary{border:none;color:#fff;background:linear-gradient(135deg,var(--primary,#635bff) 0%,var(--primary-light,#8b5cf6) 100%);}';
+              document.head.appendChild(s);
+            }
+
+            const blocked = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'SVG', 'PATH']);
+            const excludeSelectors = ['#wlHeroModeToggle', '#wlTenantCustomizeBtn', '#wlTenantCustomizerDrawer', '#wlTenantCustomizerBackdrop'];
+
+            const isExcluded = (el) => {
+              return excludeSelectors.some((sel) => el.closest(sel));
+            };
+
+            const markEditable = (el, editable) => {
+              if (editable) {
+                el.setAttribute('contenteditable', 'true');
+                el.setAttribute('spellcheck', 'true');
+                el.setAttribute('data-wl-editable', '1');
+              } else {
+                el.removeAttribute('contenteditable');
+                el.removeAttribute('spellcheck');
+                el.removeAttribute('data-wl-editable');
+              }
+            };
+
+            const selectable = Array.from(document.body.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,a,button,li,strong,em'));
+            selectable.forEach((el) => {
+              if (!el || blocked.has(el.tagName)) return;
+              if (isExcluded(el)) return;
+              if (!el.textContent || !el.textContent.trim()) return;
+              markEditable(el, enabled);
+            });
+
+            if (enabled) {
+              const preventNavKey = 'wlEditPreventNavBound';
+              if (!window[preventNavKey]) {
+                window[preventNavKey] = true;
+                document.addEventListener('click', (e) => {
+                  if (!document.documentElement.classList.contains('wl-edit-mode')) return;
+                  const a = e.target && e.target.closest ? e.target.closest('a') : null;
+                  if (!a) return;
+                  if (isExcluded(a)) return;
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  a.focus();
+                }, true);
+              }
+
+              const selectionKey = 'wlEditSelectionBound';
+              if (!window[selectionKey]) {
+                window[selectionKey] = true;
+                document.addEventListener('selectionchange', () => {
+                  try {
+                    if (!document.documentElement.classList.contains('wl-edit-mode')) return;
+                    const sel = window.getSelection && window.getSelection();
+                    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+                    const range = sel.getRangeAt(0);
+                    const node = range.commonAncestorContainer;
+                    const element = node && node.nodeType === 1 ? node : (node && node.parentElement ? node.parentElement : null);
+                    if (!element || !element.closest) return;
+                    const editable = element.closest('[data-wl-editable="1"]');
+                    if (!editable) return;
+                    if (isExcluded(editable)) return;
+                    const selector = buildSelector(editable);
+                    if (!selector) return;
+                    window.wlInlineSelection = { selector: selector, range: range.cloneRange() };
+                  } catch (e) {
+                  }
+                });
+
+                document.addEventListener('mouseup', () => {
+                  try {
+                    if (!document.documentElement.classList.contains('wl-edit-mode')) return;
+                    const sel = window.getSelection && window.getSelection();
+                    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+                    const range = sel.getRangeAt(0);
+                    const node = range.commonAncestorContainer;
+                    const element = node && node.nodeType === 1 ? node : (node && node.parentElement ? node.parentElement : null);
+                    if (!element || !element.closest) return;
+                    const editable = element.closest('[data-wl-editable="1"]');
+                    if (!editable) return;
+                    if (isExcluded(editable)) return;
+                    const selector = buildSelector(editable);
+                    if (!selector) return;
+                    window.wlInlineSelection = { selector: selector, range: range.cloneRange() };
+                    window.wlSuppressInlineClickUntil = Date.now() + 500;
+                    openInlineEditorFor(editable);
+                  } catch (e) {
+                  }
+                });
+              }
+            }
+          }
+
+          function getInlineEditStorageKey() {
+            return 'wlTenantInlineEdits:' + (tenantKey || 'local');
+          }
+
+          function loadInlineEdits() {
+            try {
+              return JSON.parse(localStorage.getItem(getInlineEditStorageKey()) || '{}') || {};
+            } catch (e) {
+              return {};
+            }
+          }
+
+          function saveInlineEdits(edits) {
+            try {
+              localStorage.setItem(getInlineEditStorageKey(), JSON.stringify(edits || {}));
+            } catch (e) {}
+          }
+
+          function buildSelector(el) {
+            const parts = [];
+            let node = el;
+            while (node && node.nodeType === 1 && node !== document.body && node !== document.documentElement) {
+              const tag = node.tagName.toLowerCase();
+              const parent = node.parentElement;
+              if (!parent) break;
+              const siblings = Array.from(parent.children).filter((c) => c.tagName === node.tagName);
+              const idx = siblings.indexOf(node) + 1;
+              parts.unshift(tag + ':nth-of-type(' + idx + ')');
+              node = parent;
+            }
+            return parts.length ? 'body>' + parts.join('>') : '';
+          }
+
+          function applyInlineEditsToDocument() {
+            const edits = loadInlineEdits();
+            Object.keys(edits).forEach((selector) => {
+              const el = selector === '__page__' ? document.body : (selector ? document.querySelector(selector) : null);
+              if (!el) return;
+              const cfg = edits[selector] || {};
+              if (cfg.wlHtml && selector !== '__page__') {
+                try {
+                  el.innerHTML = cfg.wlHtml;
+                } catch (e) {
+                }
+              }
+              if (cfg.style) {
+                Object.keys(cfg.style).forEach((k) => {
+                  el.style[k] = cfg.style[k];
+                });
+              }
+              const moveX = typeof cfg.wlMoveX === 'number' ? cfg.wlMoveX : 0;
+              const moveY = typeof cfg.wlMoveY === 'number' ? cfg.wlMoveY : 0;
+              const rotateDeg = typeof cfg.wlRotateDeg === 'number' ? cfg.wlRotateDeg : 0;
+              const scalePct = typeof cfg.wlScalePct === 'number' ? cfg.wlScalePct : 100;
+
+              try {
+                el.style.translate = moveX + 'px ' + moveY + 'px';
+                el.style.rotate = rotateDeg + 'deg';
+                el.style.scale = String(scalePct / 100);
+              } catch (e) {
+              }
+
+              if (typeof cfg.wlZIndex === 'number') {
+                el.style.zIndex = String(cfg.wlZIndex);
+              }
+
+              const shadows = [];
+              if (cfg.wlShadowColor && typeof cfg.wlShadowBlur === 'number') {
+                const y = typeof cfg.wlShadowY === 'number' ? cfg.wlShadowY : 12;
+                const blur = cfg.wlShadowBlur;
+                const spread = typeof cfg.wlShadowSpread === 'number' ? cfg.wlShadowSpread : 0;
+                if (blur > 0 || y !== 0 || spread !== 0) {
+                  shadows.push('0 ' + y + 'px ' + blur + 'px ' + spread + 'px ' + cfg.wlShadowColor);
+                }
+              }
+
+              if (cfg.wlHighlightColor && typeof cfg.wlHighlightPx === 'number' && cfg.wlHighlightPx > 0) {
+                shadows.push('inset 0 -' + cfg.wlHighlightPx + 'px 0 ' + cfg.wlHighlightColor);
+              }
+
+              if (shadows.length) {
+                el.style.boxShadow = shadows.join(', ');
+              } else if (cfg.wlHighlightPx === 0 && cfg.wlShadowBlur === 0) {
+                if (!cfg.style || cfg.style.boxShadow === undefined) {
+                  el.style.boxShadow = '';
+                }
+              }
+
+              if (cfg.iconClass) {
+                let icon = el.querySelector(':scope > i[data-wl-icon="1"]');
+                if (!icon) {
+                  icon = document.createElement('i');
+                  icon.setAttribute('data-wl-icon', '1');
+                  icon.style.marginRight = '0.5rem';
+                  icon.style.fontStyle = 'normal';
+                  icon.style.fontWeight = '900';
+                  el.insertBefore(icon, el.firstChild);
+                }
+                icon.textContent = cfg.iconClass;
+                if (cfg.wlIconColor) icon.style.color = cfg.wlIconColor;
+                if (typeof cfg.wlIconSizePx === 'number') icon.style.fontSize = cfg.wlIconSizePx + 'px';
+                if (cfg.wlIconPosition === 'right') {
+                  icon.style.marginRight = '';
+                  icon.style.marginLeft = '0.5rem';
+                  if (icon.parentElement === el) {
+                    el.appendChild(icon);
+                  }
+                } else {
+                  icon.style.marginLeft = '';
+                  icon.style.marginRight = '0.5rem';
+                  if (icon.parentElement === el) {
+                    el.insertBefore(icon, el.firstChild);
+                  }
+                }
+              }
+
+              if (selector === '__page__') {
+                if (cfg.wlThemePrimary) document.documentElement.style.setProperty('--primary', cfg.wlThemePrimary);
+                if (cfg.wlThemeSecondary) document.documentElement.style.setProperty('--accent', cfg.wlThemeSecondary);
+              }
+            });
+          }
+
+          function ensureInlineEditor() {
+            if (document.getElementById('wlInlineEditor')) return;
+            const backdrop = document.createElement('div');
+            backdrop.id = 'wlInlineEditorBackdrop';
+            backdrop.className = 'wl-inline-editor-backdrop';
+            const editor = document.createElement('div');
+            editor.id = 'wlInlineEditor';
+            editor.className = 'wl-inline-editor';
+            editor.innerHTML =
+              '<div class="wl-inline-editor-title">' +
+                '<div>' +
+                  '<strong>Element Settings</strong>' +
+                  '<div class="wl-inline-editor-meta" id="wlInlineEditorMeta">Click any element to edit</div>' +
+                '</div>' +
+                '<button class="wl-inline-editor-close" type="button" id="wlInlineEditorClose">✕</button>' +
+              '</div>' +
+              '<div class="wl-inline-editor-grid">' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>🎨 Background</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineBg" type="color" value="#ffffff" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>🎨 Text</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineText" type="color" value="#0f172a" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field" style="grid-column:1/-1">' +
+                  '<label>🅱 Bold</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineBold">' +
+                    '<option value="normal">Normal</option>' +
+                    '<option value="bold">Bold</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>𝑰 Italic</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineItalic">' +
+                    '<option value="normal">Normal</option>' +
+                    '<option value="italic">Italic</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>U Underline</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineUnderline">' +
+                    '<option value="none">None</option>' +
+                    '<option value="underline">Underline</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Font Size</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineFontSize" type="range" min="10" max="84" value="16" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Line Height</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineLineHeight" type="range" min="10" max="28" value="16" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Letter Spacing</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineLetterSpacing" type="range" min="-2" max="8" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Align</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineTextAlign">' +
+                    '<option value="">Auto</option>' +
+                    '<option value="left">Left</option>' +
+                    '<option value="center">Center</option>' +
+                    '<option value="right">Right</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field" style="grid-column:1/-1">' +
+                  '<label>Transform</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineTextTransform">' +
+                    '<option value="">None</option>' +
+                    '<option value="uppercase">UPPERCASE</option>' +
+                    '<option value="lowercase">lowercase</option>' +
+                    '<option value="capitalize">Capitalize</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>↔ Move X</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineMoveX" type="range" min="-120" max="120" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>↕ Move Y</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineMoveY" type="range" min="-120" max="120" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>⟳ Rotate</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineRotate" type="range" min="-30" max="30" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>⤢ Scale</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineScale" type="range" min="50" max="150" value="100" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Opacity</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineOpacity" type="range" min="0" max="100" value="100" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Z-Index</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineZ" type="range" min="0" max="1000" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field" style="grid-column:1/-1">' +
+                  '<label>Display</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineDisplay">' +
+                    '<option value="">Auto</option>' +
+                    '<option value="block">Block</option>' +
+                    '<option value="inline-block">Inline Block</option>' +
+                    '<option value="flex">Flex</option>' +
+                    '<option value="none">Hide</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Flex Dir</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineFlexDir">' +
+                    '<option value="">Auto</option>' +
+                    '<option value="row">Row</option>' +
+                    '<option value="column">Column</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Gap</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineGap" type="range" min="0" max="60" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Justify</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineJustify">' +
+                    '<option value="">Auto</option>' +
+                    '<option value="flex-start">Start</option>' +
+                    '<option value="center">Center</option>' +
+                    '<option value="flex-end">End</option>' +
+                    '<option value="space-between">Between</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Align</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineAlignItems">' +
+                    '<option value="">Auto</option>' +
+                    '<option value="stretch">Stretch</option>' +
+                    '<option value="flex-start">Start</option>' +
+                    '<option value="center">Center</option>' +
+                    '<option value="flex-end">End</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Border Width</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineBorderW" type="range" min="0" max="12" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Border Color</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineBorderC" type="color" value="#e2e8f0" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Border Style</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineBorderS">' +
+                    '<option value="solid">Solid</option>' +
+                    '<option value="dashed">Dashed</option>' +
+                    '<option value="dotted">Dotted</option>' +
+                    '<option value="none">None</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Radius</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineRadius" type="range" min="0" max="48" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Padding</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlinePadding" type="range" min="0" max="80" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Margin</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineMargin" type="range" min="0" max="80" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Shadow Color</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineShadowColor" type="color" value="#000000" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Shadow Blur</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineShadowBlur" type="range" min="0" max="60" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Shadow Y</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineShadowY" type="range" min="-20" max="40" value="12" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Shadow Spread</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineShadowSpread" type="range" min="-20" max="40" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>🖍 Text Highlight</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineHighlightColor" type="color" value="#fff3a3" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>🖍 Thickness</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineHighlightPx" type="range" min="0" max="28" value="0" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field" style="grid-column:1/-1">' +
+                  '<label>★ Icon</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineIcon">' +
+                    '<option value="">No icon</option>' +
+                    '<option value="★">Star</option>' +
+                    '<option value="✓">Check</option>' +
+                    '<option value="⚡">Bolt</option>' +
+                    '<option value="☎">Phone</option>' +
+                    '<option value="✉">Email</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Icon Color</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineIconColor" type="color" value="#0f172a" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Icon Size</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineIconSize" type="range" min="10" max="42" value="16" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field" style="grid-column:1/-1">' +
+                  '<label>Icon Position</label>' +
+                  '<select class="wl-inline-editor-input" id="wlInlineIconPos">' +
+                    '<option value="left">Left</option>' +
+                    '<option value="right">Right</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="wl-inline-editor-field" style="grid-column:1/-1">' +
+                  '<label>🌈 Page Background</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlinePageBg" type="color" value="#ffffff" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Theme Primary</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineThemePrimary" type="color" value="#635bff" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+                '<div class="wl-inline-editor-field">' +
+                  '<label>Theme Accent</label>' +
+                  '<input class="wl-inline-editor-input" id="wlInlineThemeSecondary" type="color" value="#7c3aed" style="height:44px;padding:0.35rem" />' +
+                '</div>' +
+              '</div>' +
+              '<div class="wl-inline-editor-actions">' +
+                '<button class="wl-inline-editor-btn" type="button" id="wlInlineBgImageBtn">🖼 Background Image</button>' +
+                '<button class="wl-inline-editor-btn" type="button" id="wlInlinePageBgImageBtn">🖼 Page BG</button>' +
+                '<button class="wl-inline-editor-btn" type="button" id="wlInlineClearBtn">Reset</button>' +
+                '<button class="wl-inline-editor-btn" type="button" id="wlInlineResetAllBtn">Reset All</button>' +
+                '<button class="wl-inline-editor-btn primary" type="button" id="wlInlineSaveBtn">Save</button>' +
+              '</div>' +
+              '<input id="wlInlineBgImage" type="file" accept="image/*" style="display:none" />' +
+              '<input id="wlInlinePageBgImage" type="file" accept="image/*" style="display:none" />';
+            document.body.appendChild(backdrop);
+            document.body.appendChild(editor);
+
+            const close = () => {
+              editor.classList.remove('open');
+              backdrop.classList.remove('open');
+            };
+            document.getElementById('wlInlineEditorClose')?.addEventListener('click', close);
+            backdrop.addEventListener('click', close);
+            document.addEventListener('keydown', (e) => {
+              if (e.key !== 'Escape') return;
+              close();
+            });
+
+            editor.addEventListener('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+
+          function openInlineEditorFor(el) {
+            ensureInlineEditor();
+            const editor = document.getElementById('wlInlineEditor');
+            const backdrop = document.getElementById('wlInlineEditorBackdrop');
+            if (!editor) return;
+
+            try {
+              document.querySelectorAll('[data-wl-selected="1"]').forEach((n) => n.removeAttribute('data-wl-selected'));
+            } catch (e) {
+            }
+            try {
+              el.setAttribute('data-wl-selected', '1');
+            } catch (e) {
+            }
+
+            const selector = buildSelector(el);
+            if (!selector) return;
+
+            editor.setAttribute('data-wl-selector', selector);
+            const edits = loadInlineEdits();
+            const cfg = edits[selector] || { style: {} };
+            const pageCfg = edits['__page__'] || { style: {} };
+
+            const meta = document.getElementById('wlInlineEditorMeta');
+            if (meta) {
+              const tag = (el.tagName || '').toLowerCase();
+              const cls = (el.className && String(el.className).trim()) ? String(el.className).trim().split(/\s+/).slice(0, 3).join('.') : '';
+              meta.textContent = cls ? (tag + '.' + cls) : tag;
+            }
+
+            const bg = document.getElementById('wlInlineBg');
+            const text = document.getElementById('wlInlineText');
+            const icon = document.getElementById('wlInlineIcon');
+            const bold = document.getElementById('wlInlineBold');
+            const italic = document.getElementById('wlInlineItalic');
+            const underline = document.getElementById('wlInlineUnderline');
+            const fontSize = document.getElementById('wlInlineFontSize');
+            const lineHeight = document.getElementById('wlInlineLineHeight');
+            const letterSpacing = document.getElementById('wlInlineLetterSpacing');
+            const textAlign = document.getElementById('wlInlineTextAlign');
+            const textTransform = document.getElementById('wlInlineTextTransform');
+            const moveX = document.getElementById('wlInlineMoveX');
+            const moveY = document.getElementById('wlInlineMoveY');
+            const rotate = document.getElementById('wlInlineRotate');
+            const scale = document.getElementById('wlInlineScale');
+            const opacity = document.getElementById('wlInlineOpacity');
+            const zIndex = document.getElementById('wlInlineZ');
+            const display = document.getElementById('wlInlineDisplay');
+            const flexDir = document.getElementById('wlInlineFlexDir');
+            const gap = document.getElementById('wlInlineGap');
+            const justify = document.getElementById('wlInlineJustify');
+            const alignItems = document.getElementById('wlInlineAlignItems');
+            const borderW = document.getElementById('wlInlineBorderW');
+            const borderC = document.getElementById('wlInlineBorderC');
+            const borderS = document.getElementById('wlInlineBorderS');
+            const radius = document.getElementById('wlInlineRadius');
+            const padding = document.getElementById('wlInlinePadding');
+            const margin = document.getElementById('wlInlineMargin');
+            const shadowColor = document.getElementById('wlInlineShadowColor');
+            const shadowBlur = document.getElementById('wlInlineShadowBlur');
+            const shadowY = document.getElementById('wlInlineShadowY');
+            const shadowSpread = document.getElementById('wlInlineShadowSpread');
+            const highlightColor = document.getElementById('wlInlineHighlightColor');
+            const highlightPx = document.getElementById('wlInlineHighlightPx');
+            const pageBg = document.getElementById('wlInlinePageBg');
+            const iconColor = document.getElementById('wlInlineIconColor');
+            const iconSize = document.getElementById('wlInlineIconSize');
+            const iconPos = document.getElementById('wlInlineIconPos');
+            const themePrimary = document.getElementById('wlInlineThemePrimary');
+            const themeSecondary = document.getElementById('wlInlineThemeSecondary');
+
+            const getComputedColor = (prop, fallback) => {
+              try {
+                const v = window.getComputedStyle(el)[prop];
+                if (!v) return fallback;
+                const nums = (v.match(/[0-9]+/g) || []).map((n) => parseInt(n, 10));
+                if (nums.length < 3) return fallback;
+                const r = nums[0].toString(16).padStart(2, '0');
+                const g = nums[1].toString(16).padStart(2, '0');
+                const b = nums[2].toString(16).padStart(2, '0');
+                return '#' + r + g + b;
+              } catch (e) {
+                return fallback;
+              }
+            };
+
+            if (bg) bg.value = cfg.style?.backgroundColor || getComputedColor('backgroundColor', '#ffffff');
+            if (text) text.value = cfg.style?.color || getComputedColor('color', '#0f172a');
+            if (icon) icon.value = cfg.iconClass || '';
+            if (bold) bold.value = (cfg.style?.fontWeight && String(cfg.style.fontWeight) !== '') ? (String(cfg.style.fontWeight) === '900' || String(cfg.style.fontWeight) === 'bold' ? 'bold' : 'normal') : 'normal';
+            if (italic) italic.value = cfg.style?.fontStyle || 'normal';
+            if (underline) underline.value = cfg.style?.textDecorationLine || 'none';
+            if (fontSize) fontSize.value = cfg.style?.fontSize ? String(parseInt(cfg.style.fontSize, 10) || 16) : '16';
+            if (lineHeight) lineHeight.value = cfg.style?.lineHeight ? String(Math.round((parseFloat(cfg.style.lineHeight) || 1.6) * 10)) : '16';
+            if (letterSpacing) letterSpacing.value = cfg.style?.letterSpacing ? String(parseInt(cfg.style.letterSpacing, 10) || 0) : '0';
+            if (textAlign) textAlign.value = cfg.style?.textAlign || '';
+            if (textTransform) textTransform.value = cfg.style?.textTransform || '';
+            if (moveX) moveX.value = typeof cfg.wlMoveX === 'number' ? String(cfg.wlMoveX) : '0';
+            if (moveY) moveY.value = typeof cfg.wlMoveY === 'number' ? String(cfg.wlMoveY) : '0';
+            if (rotate) rotate.value = typeof cfg.wlRotateDeg === 'number' ? String(cfg.wlRotateDeg) : '0';
+            if (scale) scale.value = typeof cfg.wlScalePct === 'number' ? String(cfg.wlScalePct) : '100';
+            if (opacity) opacity.value = cfg.style?.opacity ? String(Math.round((parseFloat(cfg.style.opacity) || 1) * 100)) : '100';
+            if (zIndex) zIndex.value = typeof cfg.wlZIndex === 'number' ? String(cfg.wlZIndex) : '0';
+            if (display) display.value = cfg.style?.display || '';
+            if (flexDir) flexDir.value = cfg.style?.flexDirection || '';
+            if (gap) gap.value = cfg.style?.gap ? String(parseInt(cfg.style.gap, 10) || 0) : '0';
+            if (justify) justify.value = cfg.style?.justifyContent || '';
+            if (alignItems) alignItems.value = cfg.style?.alignItems || '';
+            if (borderW) borderW.value = cfg.style?.borderWidth ? String(parseInt(cfg.style.borderWidth, 10) || 0) : '0';
+            if (borderC) borderC.value = cfg.style?.borderColor || '#e2e8f0';
+            if (borderS) borderS.value = cfg.style?.borderStyle || 'solid';
+            if (radius) radius.value = cfg.style?.borderRadius ? String(parseInt(cfg.style.borderRadius, 10) || 0) : '0';
+            if (padding) padding.value = cfg.style?.padding ? String(parseInt(cfg.style.padding, 10) || 0) : '0';
+            if (margin) margin.value = cfg.style?.margin ? String(parseInt(cfg.style.margin, 10) || 0) : '0';
+            if (shadowColor) shadowColor.value = cfg.wlShadowColor || '#000000';
+            if (shadowBlur) shadowBlur.value = typeof cfg.wlShadowBlur === 'number' ? String(cfg.wlShadowBlur) : '0';
+            if (shadowY) shadowY.value = typeof cfg.wlShadowY === 'number' ? String(cfg.wlShadowY) : '12';
+            if (shadowSpread) shadowSpread.value = typeof cfg.wlShadowSpread === 'number' ? String(cfg.wlShadowSpread) : '0';
+            if (highlightColor) highlightColor.value = cfg.wlHighlightColor || '#fff3a3';
+            if (highlightPx) highlightPx.value = typeof cfg.wlHighlightPx === 'number' ? String(cfg.wlHighlightPx) : '0';
+            if (pageBg) {
+              const bodyComputed = window.getComputedStyle(document.body);
+              pageBg.value = pageCfg.style?.backgroundColor || (bodyComputed && bodyComputed.backgroundColor ? (function () {
+                const v = bodyComputed.backgroundColor;
+                const nums = (v.match(/[0-9]+/g) || []).map((n) => parseInt(n, 10));
+                if (nums.length < 3) return '#ffffff';
+                return '#' + nums[0].toString(16).padStart(2, '0') + nums[1].toString(16).padStart(2, '0') + nums[2].toString(16).padStart(2, '0');
+              })() : '#ffffff');
+            }
+            if (iconColor) iconColor.value = cfg.wlIconColor || '#0f172a';
+            if (iconSize) iconSize.value = typeof cfg.wlIconSizePx === 'number' ? String(cfg.wlIconSizePx) : '16';
+            if (iconPos) iconPos.value = cfg.wlIconPosition || 'left';
+            if (themePrimary) themePrimary.value = pageCfg.wlThemePrimary || '#635bff';
+            if (themeSecondary) themeSecondary.value = pageCfg.wlThemeSecondary || '#7c3aed';
+
+            const applySelectedTextColorIfAny = (color) => {
+              try {
+                const liveSel = window.getSelection && window.getSelection();
+                const hasLiveRange = !!(liveSel && liveSel.rangeCount > 0 && !liveSel.isCollapsed);
+                const liveRange = hasLiveRange ? liveSel.getRangeAt(0) : null;
+
+                const stored = window.wlInlineSelection;
+                const storedRange = stored && stored.range && !stored.range.collapsed ? stored.range : null;
+
+                let range = null;
+                const isRangeInside = (r) => {
+                  try {
+                    return !!(r &&
+                      el.contains(r.commonAncestorContainer) &&
+                      el.contains(r.startContainer) &&
+                      el.contains(r.endContainer) &&
+                      !r.collapsed);
+                  } catch (e) {
+                    return false;
+                  }
+                };
+
+                if (storedRange && stored && stored.selector === selector && isRangeInside(storedRange)) {
+                  range = storedRange.cloneRange();
+                } else if (liveRange && isRangeInside(liveRange)) {
+                  range = liveRange.cloneRange();
+                } else {
+                  return false;
+                }
+
+                const liveEdits = loadInlineEdits();
+                const current = liveEdits[selector] || { style: {} };
+
+                try {
+                  const selection = window.getSelection && window.getSelection();
+                  if (selection) {
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                  }
+                } catch (e) {
+                }
+
+                const span = document.createElement('span');
+                span.style.color = color;
+                span.setAttribute('data-wl-inline', '1');
+
+                let applied = false;
+                try {
+                  const r = range.cloneRange();
+                  r.surroundContents(span);
+                  applied = true;
+                } catch (e) {
+                  try {
+                    const r = range.cloneRange();
+                    const frag = r.extractContents();
+                    span.appendChild(frag);
+                    r.insertNode(span);
+                    applied = true;
+                  } catch (e2) {
+                    applied = false;
+                  }
+                }
+
+                if (!applied) return false;
+
+                el.normalize();
+
+                current.wlHtml = el.innerHTML;
+                liveEdits[selector] = current;
+                saveInlineEdits(liveEdits);
+                applyInlineEditsToDocument();
+                try {
+                  window.wlInlineSelection = null;
+                } catch (e) {
+                }
+                try {
+                  const selection = window.getSelection && window.getSelection();
+                  if (selection) selection.removeAllRanges();
+                } catch (e) {
+                }
+                return true;
+              } catch (e) {
+                return false;
+              }
+            };
+
+            const updateStyleKey = (key, value) => {
+              const liveEdits = loadInlineEdits();
+              const current = liveEdits[selector] || { style: {} };
+              current.style = current.style || {};
+              if (value === '' || value === null || value === undefined) {
+                delete current.style[key];
+              } else {
+                current.style[key] = value;
+              }
+              liveEdits[selector] = current;
+              saveInlineEdits(liveEdits);
+              applyInlineEditsToDocument();
+            };
+
+            const updateCfgKey = (key, value) => {
+              const liveEdits = loadInlineEdits();
+              const current = liveEdits[selector] || { style: {} };
+              if (value === null || value === undefined) {
+                delete current[key];
+              } else {
+                current[key] = value;
+              }
+              liveEdits[selector] = current;
+              saveInlineEdits(liveEdits);
+              applyInlineEditsToDocument();
+            };
+
+            if (bg) {
+              bg.oninput = () => updateStyleKey('backgroundColor', bg.value);
+              bg.onchange = () => updateStyleKey('backgroundColor', bg.value);
+            }
+            if (text) {
+              text.oninput = () => {
+                if (!applySelectedTextColorIfAny(text.value)) updateStyleKey('color', text.value);
+              };
+              text.onchange = text.oninput;
+            }
+            if (italic) {
+              italic.onchange = () => updateStyleKey('fontStyle', italic.value === 'italic' ? 'italic' : '');
+            }
+            if (underline) {
+              underline.onchange = () => updateStyleKey('textDecorationLine', underline.value === 'underline' ? 'underline' : '');
+            }
+            if (fontSize) {
+              fontSize.oninput = () => updateStyleKey('fontSize', (parseInt(fontSize.value, 10) || 16) + 'px');
+              fontSize.onchange = fontSize.oninput;
+            }
+            if (lineHeight) {
+              lineHeight.oninput = () => updateStyleKey('lineHeight', String((parseInt(lineHeight.value, 10) || 16) / 10));
+              lineHeight.onchange = lineHeight.oninput;
+            }
+            if (letterSpacing) {
+              letterSpacing.oninput = () => updateStyleKey('letterSpacing', (parseInt(letterSpacing.value, 10) || 0) + 'px');
+              letterSpacing.onchange = letterSpacing.oninput;
+            }
+            if (textAlign) {
+              textAlign.onchange = () => updateStyleKey('textAlign', textAlign.value || '');
+            }
+            if (textTransform) {
+              textTransform.onchange = () => updateStyleKey('textTransform', textTransform.value || '');
+            }
+            if (icon) {
+              icon.onchange = () => {
+                const v = icon.value || '';
+                const liveEdits = loadInlineEdits();
+                const current = liveEdits[selector] || { style: {} };
+                if (!v) delete current.iconClass;
+                else current.iconClass = v;
+                liveEdits[selector] = current;
+                saveInlineEdits(liveEdits);
+                applyInlineEditsToDocument();
+              };
+            }
+            if (bold) {
+              bold.onchange = () => {
+                updateStyleKey('fontWeight', bold.value === 'bold' ? '900' : '');
+              };
+            }
+            if (moveX) {
+              moveX.oninput = () => updateCfgKey('wlMoveX', parseInt(moveX.value, 10) || 0);
+              moveX.onchange = () => updateCfgKey('wlMoveX', parseInt(moveX.value, 10) || 0);
+            }
+            if (moveY) {
+              moveY.oninput = () => updateCfgKey('wlMoveY', parseInt(moveY.value, 10) || 0);
+              moveY.onchange = () => updateCfgKey('wlMoveY', parseInt(moveY.value, 10) || 0);
+            }
+            if (rotate) {
+              rotate.oninput = () => updateCfgKey('wlRotateDeg', parseInt(rotate.value, 10) || 0);
+              rotate.onchange = rotate.oninput;
+            }
+            if (scale) {
+              scale.oninput = () => updateCfgKey('wlScalePct', parseInt(scale.value, 10) || 100);
+              scale.onchange = scale.oninput;
+            }
+            if (opacity) {
+              opacity.oninput = () => updateStyleKey('opacity', String((parseInt(opacity.value, 10) || 100) / 100));
+              opacity.onchange = opacity.oninput;
+            }
+            if (zIndex) {
+              zIndex.oninput = () => updateCfgKey('wlZIndex', parseInt(zIndex.value, 10) || 0);
+              zIndex.onchange = zIndex.oninput;
+            }
+            if (display) {
+              display.onchange = () => updateStyleKey('display', display.value || '');
+            }
+            if (flexDir) {
+              flexDir.onchange = () => updateStyleKey('flexDirection', flexDir.value || '');
+            }
+            if (gap) {
+              gap.oninput = () => updateStyleKey('gap', (parseInt(gap.value, 10) || 0) + 'px');
+              gap.onchange = gap.oninput;
+            }
+            if (justify) {
+              justify.onchange = () => updateStyleKey('justifyContent', justify.value || '');
+            }
+            if (alignItems) {
+              alignItems.onchange = () => updateStyleKey('alignItems', alignItems.value || '');
+            }
+            if (borderW) {
+              borderW.oninput = () => updateStyleKey('borderWidth', (parseInt(borderW.value, 10) || 0) + 'px');
+              borderW.onchange = borderW.oninput;
+            }
+            if (borderC) {
+              borderC.oninput = () => updateStyleKey('borderColor', borderC.value);
+              borderC.onchange = borderC.oninput;
+            }
+            if (borderS) {
+              borderS.onchange = () => updateStyleKey('borderStyle', borderS.value || 'solid');
+            }
+            if (radius) {
+              radius.oninput = () => updateStyleKey('borderRadius', (parseInt(radius.value, 10) || 0) + 'px');
+              radius.onchange = radius.oninput;
+            }
+            if (padding) {
+              padding.oninput = () => updateStyleKey('padding', (parseInt(padding.value, 10) || 0) + 'px');
+              padding.onchange = padding.oninput;
+            }
+            if (margin) {
+              margin.oninput = () => updateStyleKey('margin', (parseInt(margin.value, 10) || 0) + 'px');
+              margin.onchange = margin.oninput;
+            }
+            if (shadowColor) {
+              shadowColor.oninput = () => updateCfgKey('wlShadowColor', shadowColor.value);
+              shadowColor.onchange = shadowColor.oninput;
+            }
+            if (shadowBlur) {
+              shadowBlur.oninput = () => updateCfgKey('wlShadowBlur', parseInt(shadowBlur.value, 10) || 0);
+              shadowBlur.onchange = shadowBlur.oninput;
+            }
+            if (shadowY) {
+              shadowY.oninput = () => updateCfgKey('wlShadowY', parseInt(shadowY.value, 10) || 0);
+              shadowY.onchange = shadowY.oninput;
+            }
+            if (shadowSpread) {
+              shadowSpread.oninput = () => updateCfgKey('wlShadowSpread', parseInt(shadowSpread.value, 10) || 0);
+              shadowSpread.onchange = shadowSpread.oninput;
+            }
+            if (highlightColor) {
+              highlightColor.oninput = () => updateCfgKey('wlHighlightColor', highlightColor.value);
+              highlightColor.onchange = () => updateCfgKey('wlHighlightColor', highlightColor.value);
+            }
+            if (highlightPx) {
+              highlightPx.oninput = () => updateCfgKey('wlHighlightPx', parseInt(highlightPx.value, 10) || 0);
+              highlightPx.onchange = () => updateCfgKey('wlHighlightPx', parseInt(highlightPx.value, 10) || 0);
+            }
+            if (pageBg) {
+              pageBg.oninput = () => {
+                const liveEdits = loadInlineEdits();
+                const current = liveEdits['__page__'] || { style: {} };
+                current.style = current.style || {};
+                current.style.backgroundColor = pageBg.value;
+                liveEdits['__page__'] = current;
+                saveInlineEdits(liveEdits);
+                applyInlineEditsToDocument();
+              };
+              pageBg.onchange = pageBg.oninput;
+            }
+            if (iconColor) {
+              iconColor.oninput = () => updateCfgKey('wlIconColor', iconColor.value);
+              iconColor.onchange = iconColor.oninput;
+            }
+            if (iconSize) {
+              iconSize.oninput = () => updateCfgKey('wlIconSizePx', parseInt(iconSize.value, 10) || 16);
+              iconSize.onchange = iconSize.oninput;
+            }
+            if (iconPos) {
+              iconPos.onchange = () => updateCfgKey('wlIconPosition', iconPos.value || 'left');
+            }
+            if (themePrimary) {
+              themePrimary.oninput = () => {
+                const liveEdits = loadInlineEdits();
+                const current = liveEdits['__page__'] || { style: {} };
+                current.wlThemePrimary = themePrimary.value;
+                liveEdits['__page__'] = current;
+                saveInlineEdits(liveEdits);
+                applyInlineEditsToDocument();
+              };
+              themePrimary.onchange = themePrimary.oninput;
+            }
+            if (themeSecondary) {
+              themeSecondary.oninput = () => {
+                const liveEdits = loadInlineEdits();
+                const current = liveEdits['__page__'] || { style: {} };
+                current.wlThemeSecondary = themeSecondary.value;
+                liveEdits['__page__'] = current;
+                saveInlineEdits(liveEdits);
+                applyInlineEditsToDocument();
+              };
+              themeSecondary.onchange = themeSecondary.oninput;
+            }
+
+            document.getElementById('wlInlineBgImageBtn')?.addEventListener('click', () => {
+              document.getElementById('wlInlineBgImage')?.click();
+            });
+            document.getElementById('wlInlinePageBgImageBtn')?.addEventListener('click', () => {
+              document.getElementById('wlInlinePageBgImage')?.click();
+            });
+
+            const fileInput = document.getElementById('wlInlineBgImage');
+            if (fileInput) {
+              fileInput.onchange = () => {
+                const file = fileInput.files && fileInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const liveEdits = loadInlineEdits();
+                  const current = liveEdits[selector] || { style: {} };
+                  current.style = current.style || {};
+                  current.style.backgroundImage = 'url(' + e.target.result + ')';
+                  current.style.backgroundSize = 'cover';
+                  current.style.backgroundPosition = 'center';
+                  current.style.backgroundRepeat = 'no-repeat';
+                  liveEdits[selector] = current;
+                  saveInlineEdits(liveEdits);
+                  applyInlineEditsToDocument();
+                };
+                reader.readAsDataURL(file);
+              };
+            }
+
+            const pageFileInput = document.getElementById('wlInlinePageBgImage');
+            if (pageFileInput) {
+              pageFileInput.onchange = () => {
+                const file = pageFileInput.files && pageFileInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const liveEdits = loadInlineEdits();
+                  const current = liveEdits['__page__'] || { style: {} };
+                  current.style = current.style || {};
+                  current.style.backgroundImage = 'url(' + e.target.result + ')';
+                  current.style.backgroundSize = 'cover';
+                  current.style.backgroundPosition = 'center';
+                  current.style.backgroundRepeat = 'no-repeat';
+                  liveEdits['__page__'] = current;
+                  saveInlineEdits(liveEdits);
+                  applyInlineEditsToDocument();
+                };
+                reader.readAsDataURL(file);
+              };
+            }
+
+            document.getElementById('wlInlineClearBtn')?.addEventListener('click', () => {
+              const liveEdits = loadInlineEdits();
+              delete liveEdits[selector];
+              saveInlineEdits(liveEdits);
+              el.style.backgroundColor = '';
+              el.style.color = '';
+              el.style.backgroundImage = '';
+              el.style.backgroundSize = '';
+              el.style.backgroundPosition = '';
+              el.style.backgroundRepeat = '';
+              el.style.fontWeight = '';
+              try { el.style.translate = ''; } catch (e) {}
+              el.style.boxShadow = '';
+              const existingIcon = el.querySelector(':scope > i[data-wl-icon="1"]');
+              if (existingIcon) existingIcon.remove();
+            });
+
+            document.getElementById('wlInlineResetAllBtn')?.addEventListener('click', () => {
+              try {
+                localStorage.removeItem(getInlineEditStorageKey());
+              } catch (e) {}
+              applyInlineEditsToDocument();
+            });
+
+            document.getElementById('wlInlineSaveBtn')?.addEventListener('click', () => {
+              editor.classList.remove('open');
+            });
+
+            if (backdrop) backdrop.classList.add('open');
+            editor.classList.add('open');
+          }
+
+          const applyMode = (mode) => {
+            try { localStorage.setItem(storageKey, mode); } catch (e) {}
+            if (mode === 'edit') {
+              setCustomizeButtonVisible(true);
+              const drawer = document.getElementById('wlTenantCustomizerDrawer');
+              const backdrop = document.getElementById('wlTenantCustomizerBackdrop');
+              if (drawer && backdrop) {
+                drawer.classList.add('open');
+                backdrop.classList.add('open');
+              }
+              setEditModeEnabled(true);
+              applyInlineEditsToDocument();
+              const inlineKey = 'wlInlineEditClickBound';
+              if (!window[inlineKey]) {
+                window[inlineKey] = true;
+                document.addEventListener('click', (e) => {
+                  if (!document.documentElement.classList.contains('wl-edit-mode')) return;
+                  try {
+                    const until = window.wlSuppressInlineClickUntil || 0;
+                    if (until && Date.now() < until) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return;
+                    }
+                    const sel = window.getSelection && window.getSelection();
+                    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+                      return;
+                    }
+                  } catch (e2) {
+                  }
+                  const target = e.target && e.target.closest ? e.target.closest('*') : null;
+                  if (!target) return;
+                  const excluded = ['#wlHeroModeToggle', '#wlTenantCustomizeBtn', '#wlTenantCustomizerDrawer', '#wlTenantCustomizerBackdrop', '#wlInlineEditor'];
+                  if (excluded.some((sel) => target.closest(sel))) return;
+                  const editablePick = target.closest('[data-wl-editable="1"]');
+                  const pick = editablePick || target.closest('button,a,img,section,div,article,header,footer') || target;
+                  if (!pick || pick === document.body || pick === document.documentElement) return;
+                  openInlineEditorFor(pick);
+                }, true);
+              }
+              try {
+                const alertKey = 'wlEditAlertShown:' + (tenantKey || 'local');
+                const shown = localStorage.getItem(alertKey) === '1';
+                if (!shown) {
+                  localStorage.setItem(alertKey, '1');
+                  alert('Edit mode ON ho gaya hai. Ab aap text ko click karke direct edit kar sakte ho.');
+                }
+              } catch (e) {}
+            } else {
+              setCustomizeButtonVisible(false);
+              closeCustomizerDrawer();
+              setEditModeEnabled(false);
+              document.getElementById('wlInlineEditor')?.classList.remove('open');
+              document.getElementById('wlInlineEditorBackdrop')?.classList.remove('open');
+            }
+            setActive(mode);
+          };
+
+          editBtn.addEventListener('click', () => applyMode('edit'));
+          previewBtn.addEventListener('click', () => applyMode('preview'));
+          container.appendChild(editBtn);
+          container.appendChild(previewBtn);
+
+          const heroContainer = document.querySelector('.hero-container');
+          const heroSection = document.querySelector('.hero-section');
+          const anchor = heroContainer || heroSection || document.body;
+          if (anchor === document.body) {
+            container.style.position = 'fixed';
+            container.style.top = '86px';
+            container.style.right = '18px';
+          } else {
+            const parentStyle = window.getComputedStyle(anchor);
+            if (parentStyle.position === 'static') anchor.style.position = 'relative';
+          }
+          anchor.appendChild(container);
+
+          let initial = 'preview';
+          try {
+            const saved = localStorage.getItem(storageKey);
+            if (saved === 'edit' || saved === 'preview') initial = saved;
+          } catch (e) {}
+          applyMode(initial);
+        }
+
+        async function boot() {
+          const params = new URLSearchParams(window.location.search);
+          const hideCustomizer = params.get('hideCustomizer') === '1';
+          if (shouldSkipTenantBranding()) return;
+
+          const t = detectTenant();
+          let config = null;
+
+          if (t.tenantId || t.domain) {
+            const query = t.tenantId ? ('tenantId=' + encodeURIComponent(t.tenantId)) : ('domain=' + encodeURIComponent(t.domain));
+            const url = '/api/white-label/tenant/config?' + query;
+            const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+            if (res.ok) {
+              config = await res.json();
+            }
+          }
+
+          if (!config) {
+            config = {
+              companyName: 'Your Company',
+              general: {},
+              colors: {
+                primary: '#635bff',
+                secondary: '#7c3aed',
+                success: '#10b981',
+                danger: '#ef4444',
+                bg: '#ffffff',
+                cardBg: '#f8fafc',
+                textPrimary: '#0f172a',
+                textSecondary: '#475569'
+              },
+              fonts: {
+                primary: 'Inter',
+                heading: 'Plus Jakarta Sans',
+                googleFontsUrl: ''
+              },
+              logo: {},
+              advanced: {}
+            };
+          }
+
+          applyTenantBranding(config);
+
+          if (!hideCustomizer) {
+            ensureCustomizeButton();
+            const tenantKey = t.tenantId || t.domain || 'local';
+            const storageKey = 'wlTenantCustomizerDraft:' + tenantKey;
+            let draft = {};
+            try {
+              draft = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+            } catch (e) {
+              draft = {};
+            }
+            const state = { baseConfig: config, draft: draft, storageKey: storageKey };
+            const merged = mergeConfigs(config, draft);
+            applyTenantBranding(merged);
+            createCustomizerUI(state);
+            ensureHeroModeToggle(tenantKey);
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+          const params = new URLSearchParams(window.location.search);
+          const hideCustomizer = params.get('hideCustomizer') === '1';
+          if (!hideCustomizer) ensureCustomizeButton();
+          boot().catch(() => {});
+        });
+      })();
+    <\/script>
+            `;
+
+            async function load() {
+                try {
+                    const res = await fetch(INDEX_URL, { cache: 'no-store' });
+                    if (!res.ok) throw new Error('Failed to fetch main index');
+                    let html = await res.text();
+
+                    if (!html.includes('<base') && html.includes('<head>')) {
+                        html = html.replace('<head>', '<head>\n    <base href=\"/\" />');
+                    }
+
+                    if (html.includes('</head>')) {
+                        html = html.replace('</head>', BRANDING_BOOTSTRAP + '\n</head>');
+                    } else {
+                        html = html + BRANDING_BOOTSTRAP;
+                    }
+
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } catch (e) {
+                    document.documentElement.style.visibility = 'visible';
+                }
+            }
+
+            load();
+        })();
     </script>
 </body>
 </html>

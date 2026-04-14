@@ -134,19 +134,31 @@ function saveBranding(clientId, brandingData) {
         logo: {
             full: brandingData.logo?.full || null,
             small: brandingData.logo?.small || null,
-            favicon: brandingData.logo?.favicon || null
+            favicon: brandingData.logo?.favicon || null,
+            loginBg: brandingData.logo?.loginBg || null,
+            emailLogo: brandingData.logo?.emailLogo || null,
+            pdfLogo: brandingData.logo?.pdfLogo || null,
+            heroImage: brandingData.logo?.heroImage || null,
+            ogImage: brandingData.logo?.ogImage || null
         },
         colors: {
             primary: brandingData.colors?.primary || '#635bff',
             secondary: brandingData.colors?.secondary || '#7c3aed',
             success: brandingData.colors?.success || '#10b981',
-            danger: brandingData.colors?.danger || '#ef4444'
+            danger: brandingData.colors?.danger || '#ef4444',
+            bg: brandingData.colors?.bg || '#ffffff',
+            cardBg: brandingData.colors?.cardBg || '#f9fafb',
+            textPrimary: brandingData.colors?.textPrimary || '#1f2937',
+            textSecondary: brandingData.colors?.textSecondary || '#6b7280'
         },
         fonts: {
             primary: brandingData.fonts?.primary || 'Inter',
+            heading: brandingData.fonts?.heading || 'Plus Jakarta Sans',
             googleFontsUrl: brandingData.fonts?.googleFontsUrl || ''
         },
         general: brandingData.general || {},
+        email: brandingData.email || {},
+        advanced: brandingData.advanced || {},
         updatedAt: new Date().toISOString()
     };
     db.clientBranding.set(clientId, branding);

@@ -51,7 +51,7 @@ async function loadTenantConfig(tenantId) {
     try {
         // Backend API call
         // GET /api/tenant/config?tenantId=swift OR ?domain=swiftlogistics.com
-        const response = await fetch(`/api/tenant/config?tenantId=${encodeURIComponent(tenantId)}`, {
+        const response = await fetch(`/api/white-label/tenant/config?tenantId=${encodeURIComponent(tenantId)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -75,18 +75,31 @@ async function loadTenantConfig(tenantId) {
             logo: {
                 full: config.logo?.full || '/default-logo.png',
                 small: config.logo?.small || '/default-logo-small.png',
-                favicon: config.logo?.favicon || '/default-favicon.ico'
+                favicon: config.logo?.favicon || '/default-favicon.ico',
+                loginBg: config.logo?.loginBg || null,
+                emailLogo: config.logo?.emailLogo || null,
+                pdfLogo: config.logo?.pdfLogo || null,
+                heroImage: config.logo?.heroImage || null,
+                ogImage: config.logo?.ogImage || null
             },
             colors: {
                 primary: config.colors?.primary || '#635bff',
                 secondary: config.colors?.secondary || '#7c3aed',
                 success: config.colors?.success || '#10b981',
-                danger: config.colors?.danger || '#ef4444'
+                danger: config.colors?.danger || '#ef4444',
+                bg: config.colors?.bg || '#ffffff',
+                cardBg: config.colors?.cardBg || '#f9fafb',
+                textPrimary: config.colors?.textPrimary || '#1f2937',
+                textSecondary: config.colors?.textSecondary || '#6b7280'
             },
             fonts: {
                 primary: config.fonts?.primary || 'Inter',
+                heading: config.fonts?.heading || 'Plus Jakarta Sans',
                 googleFontsUrl: config.fonts?.googleFontsUrl || ''
             },
+            general: config.general || {},
+            email: config.email || {},
+            advanced: config.advanced || {},
             customDomain: config.customDomain || null,
             status: config.status || 'active' // active, pending, suspended
         };
@@ -112,13 +125,14 @@ function applyTenantStyles(config) {
     root.style.setProperty('--tenant-secondary', config.colors.secondary);
     root.style.setProperty('--tenant-success', config.colors.success);
     root.style.setProperty('--tenant-danger', config.colors.danger);
+    root.style.setProperty('--text-dark', config.colors.textPrimary || '#1f2937');
+    root.style.setProperty('--text-medium', config.colors.textSecondary || '#4b5563');
+    root.style.setProperty('--bg-white', config.colors.bg || '#ffffff');
+    root.style.setProperty('--bg-gray', config.colors.cardBg || '#f9fafb');
     
     // Update document title
-    const currentTitle = document.title;
-    if (!currentTitle.includes('Alpha Freight')) {
-        // Only update if it's a tenant page
-        document.title = `${config.companyName} - Freight Platform`;
-    }
+    const siteTitle = (config.general?.siteTitle || '').trim();
+    document.title = siteTitle || `${config.companyName} - Freight Platform`;
     
     // Update favicon
     let favicon = document.querySelector('link[rel="icon"]');
@@ -136,7 +150,7 @@ function applyTenantStyles(config) {
         metaDescription.name = 'description';
         document.head.appendChild(metaDescription);
     }
-    metaDescription.content = `${config.companyName} - Connect with verified carriers across the UK`;
+    metaDescription.content = (config.general?.metaDescription || config.general?.tagline || `${config.companyName} - Connect with verified carriers across the UK`).trim();
     
     // Update logo elements
     const logoElements = document.querySelectorAll('.tenant-logo, .logo');
@@ -163,6 +177,17 @@ function applyTenantStyles(config) {
         root.style.setProperty('--tenant-font', config.fonts.primary);
         document.body.style.fontFamily = `${config.fonts.primary}, Inter, system-ui, sans-serif`;
     }
+
+    if (config.fonts.heading) {
+        const id = 'wl-tenant-heading-font';
+        let styleTag = document.getElementById(id);
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = id;
+            document.head.appendChild(styleTag);
+        }
+        styleTag.textContent = `h1,h2,h3,h4,h5,h6{font-family:${config.fonts.heading},'Plus Jakarta Sans',Inter,system-ui,sans-serif;}`;
+    }
     
     // Update footer company name
     const footerCompanyNames = document.querySelectorAll('#footerCompanyName, #footerCompanyNameBottom');
@@ -176,6 +201,21 @@ function applyTenantStyles(config) {
     const heroTitle = document.getElementById('heroTitle');
     if (heroTitle) {
         heroTitle.textContent = `${config.companyName} - Your Trusted Freight Partner`;
+    }
+
+    const heroSubtitle = document.getElementById('heroSubtitle');
+    if (heroSubtitle) {
+        heroSubtitle.textContent = (config.general?.tagline || 'Connect with verified carriers across the UK').trim();
+    }
+
+    const socialIcons = document.querySelectorAll('.social-icons a');
+    if (socialIcons.length) {
+        const facebook = (config.general?.socialFacebook || '').trim();
+        const x = (config.general?.socialX || '').trim();
+        const linkedin = (config.general?.socialLinkedIn || '').trim();
+        if (socialIcons[0]) socialIcons[0].href = facebook || '#';
+        if (socialIcons[1]) socialIcons[1].href = x || '#';
+        if (socialIcons[2]) socialIcons[2].href = linkedin || '#';
     }
     
     console.log('Tenant styles applied:', config.companyName);

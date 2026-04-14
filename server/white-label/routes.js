@@ -200,15 +200,34 @@ router.get('/branding', auth.authenticateClient, (req, res) => {
             return res.json({
                 success: true,
                 branding: {
+                    logo: {
+                        full: null,
+                        small: null,
+                        favicon: null,
+                        loginBg: null,
+                        emailLogo: null,
+                        pdfLogo: null,
+                        heroImage: null,
+                        ogImage: null
+                    },
                     colors: {
                         primary: '#635bff',
                         secondary: '#7c3aed',
                         success: '#10b981',
-                        danger: '#ef4444'
+                        danger: '#ef4444',
+                        bg: '#ffffff',
+                        cardBg: '#f9fafb',
+                        textPrimary: '#1f2937',
+                        textSecondary: '#6b7280'
                     },
                     fonts: {
-                        primary: 'Inter'
-                    }
+                        primary: 'Inter',
+                        heading: 'Plus Jakarta Sans',
+                        googleFontsUrl: ''
+                    },
+                    general: {},
+                    email: {},
+                    advanced: {}
                 }
             });
         }
@@ -399,18 +418,31 @@ router.get('/tenant/config', (req, res) => {
             logo: branding?.logo || {
                 full: '/default-logo.png',
                 small: '/default-logo-small.png',
-                favicon: '/default-favicon.ico'
+                favicon: '/default-favicon.ico',
+                loginBg: null,
+                emailLogo: null,
+                pdfLogo: null,
+                heroImage: null,
+                ogImage: null
             },
             colors: branding?.colors || {
                 primary: '#635bff',
                 secondary: '#7c3aed',
                 success: '#10b981',
-                danger: '#ef4444'
+                danger: '#ef4444',
+                bg: '#ffffff',
+                cardBg: '#f9fafb',
+                textPrimary: '#1f2937',
+                textSecondary: '#6b7280'
             },
             fonts: branding?.fonts || {
                 primary: 'Inter',
+                heading: 'Plus Jakarta Sans',
                 googleFontsUrl: ''
-            }
+            },
+            general: branding?.general || {},
+            email: branding?.email || {},
+            advanced: branding?.advanced || {}
         });
     } catch (error) {
         console.error('Tenant config error:', error);

@@ -2032,7 +2032,7 @@
 
         // Google Sign Up - loads GSI on first click for faster page load
         function loadGoogleGSI(callback) {
-            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                 callback();
                 return;
             }
@@ -2051,7 +2051,7 @@
             googleBtn.innerHTML = '<span class="spinner" style="display:inline-block;"></span> <span>Connecting...</span>';
             
             loadGoogleGSI(function() {
-                if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
                 showToast('Google Sign-In loading… Please try again.', 'error');
                     googleBtn.disabled = false;
                     googleBtn.innerHTML = originalText;
@@ -2063,8 +2063,7 @@
 
         function doGoogleSignUp(googleBtn, originalText) {
             const CLIENT_ID = '834712514965-j9od0ea97k00nvkg92214eas912n8n5v.apps.googleusercontent.com';
-            
-            // Debug: Log current origin and page URL
+
             const currentOrigin = window.location.origin;
             const currentPath = window.location.pathname;
             const currentUrl = window.location.href;
@@ -2073,69 +2072,140 @@
             console.log('  Current Path:', currentPath);
             console.log('  Full URL:', currentUrl);
             console.log('  Client ID:', CLIENT_ID);
-            console.log('  Redirect URI (implicit):', currentOrigin + currentPath);
 
-            const tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: 'email profile openid',
-                callback: (response) => {
-                    console.log('🔍 Google OAuth Response:', response);
-                    
-                    if (response && response.access_token) {
-                        console.log('✅ Access token received');
-                        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-                            headers: { 'Authorization': 'Bearer ' + response.access_token }
-                        })
-                        .then(r => r.json())
-                        .then(data => {
-                            console.log('✅ User info received:', data);
-                            handleGoogleSupplierSignIn(data);
-                        })
-                        .catch((error) => {
-                            console.error('❌ Error fetching user info:', error);
-                            showToast('Google sign-in failed. Please try again.', 'error');
-                            googleBtn.disabled = false;
-                            googleBtn.innerHTML = originalText;
-                        });
-                    } else if (response && response.error) {
-                        console.error('❌ Google OAuth Error:', response.error);
-                        let errorMessage = 'Google sign-in failed. ';
-                        if (response.error === 'popup_closed_by_user') {
-                            errorMessage += 'Popup was closed.';
-                        } else if (response.error === 'access_denied') {
-                            errorMessage += 'Access was denied.';
-                        } else if (response.error === 'redirect_uri_mismatch') {
-                            errorMessage += 'Redirect URI mismatch. Please check Google Cloud Console settings.';
-                            console.error('❌ Redirect URI Mismatch!');
-                            console.error('  Expected in Google Cloud Console:', currentOrigin + currentPath);
-                            console.error('  Also try:', currentOrigin);
-                        } else {
-                            errorMessage += response.error_description || response.error;
-                        }
-                        showToast(errorMessage, 'error');
-                        googleBtn.disabled = false;
-                        googleBtn.innerHTML = originalText;
-                    } else {
-                        console.warn('⚠️ No access token or error in response:', response);
-                        googleBtn.disabled = false;
-                        googleBtn.innerHTML = originalText;
-                    }
-                },
-                error_callback: (error) => {
-                    console.error('❌ Google OAuth Error Callback:', error);
-                    showToast('Google sign-in error: ' + (error.message || 'Unknown error'), 'error');
-                    googleBtn.disabled = false;
-                    googleBtn.innerHTML = originalText;
-                }
-            });
-
-            try {
-                tokenClient.requestAccessToken({ prompt: 'consent' });
-            } catch (error) {
-                console.error('❌ Error requesting access token:', error);
-                showToast('Failed to start Google sign-in. Please try again.', 'error');
+            function setBtnDone() {
                 googleBtn.disabled = false;
                 googleBtn.innerHTML = originalText;
+            }
+
+            function base64UrlToUtf8(b64url) {
+                const b64 = String(b64url || '').replace(/-/g, '+').replace(/_/g, '/');
+                const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+                const bin = atob(b64 + pad);
+                let out = '';
+                for (let i = 0; i < bin.length; i++) {
+                    out += '%' + ('00' + bin.charCodeAt(i).toString(16)).slice(-2);
+                }
+                return decodeURIComponent(out);
+            }
+
+            function parseJwtPayload(jwt) {
+                const parts = String(jwt || '').split('.');
+                if (parts.length < 2) return null;
+                try {
+                    return JSON.parse(base64UrlToUtf8(parts[1]));
+                } catch (e) {
+                    try {
+                        return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                    } catch (e2) {
+                        return null;
+                    }
+                }
+            }
+
+            function closeGoogleOverlay() {
+                const ov = document.getElementById('ab-google-overlay');
+                if (ov) ov.remove();
+            }
+
+            function ensureGoogleOverlay() {
+                let ov = document.getElementById('ab-google-overlay');
+                if (ov) return ov;
+
+                ov = document.createElement('div');
+                ov.id = 'ab-google-overlay';
+                ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+                const card = document.createElement('div');
+                card.style.cssText = 'background:#fff;border-radius:14px;max-width:420px;width:100%;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);';
+
+                const title = document.createElement('div');
+                title.textContent = 'Continue with Google';
+                title.style.cssText = 'font-weight:700;font-size:16px;margin:0 0 10px;color:#111;';
+
+                const mount = document.createElement('div');
+                mount.id = 'ab-google-btn-mount';
+                mount.style.cssText = 'display:flex;justify-content:center;';
+
+                const close = document.createElement('button');
+                close.type = 'button';
+                close.textContent = 'Close';
+                close.style.cssText = 'margin-top:14px;width:100%;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer;';
+                close.addEventListener('click', function () {
+                    closeGoogleOverlay();
+                    setBtnDone();
+                });
+
+                card.appendChild(title);
+                card.appendChild(mount);
+                card.appendChild(close);
+                ov.appendChild(card);
+                ov.addEventListener('click', function (e) {
+                    if (e.target === ov) {
+                        closeGoogleOverlay();
+                        setBtnDone();
+                    }
+                });
+
+                document.body.appendChild(ov);
+                return ov;
+            }
+
+            function ensureGoogleIdInitialized() {
+                if (!google || !google.accounts || !google.accounts.id) return false;
+                if (window.__abGoogleIdInitedSupplierReg) return true;
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: function (response) {
+                        try {
+                            const payload = parseJwtPayload(response && response.credential ? response.credential : '');
+                            if (!payload || !payload.email) {
+                                showToast('Google did not return an email address. Please try a different account.', 'error');
+                                closeGoogleOverlay();
+                                setBtnDone();
+                                return;
+                            }
+                            const userData = {
+                                email: payload.email,
+                                name: payload.name || '',
+                                given_name: payload.given_name || '',
+                                family_name: payload.family_name || '',
+                                picture: payload.picture || '',
+                                id: payload.sub || ''
+                            };
+                            closeGoogleOverlay();
+                            setBtnDone();
+                            handleGoogleSupplierSignIn(userData);
+                        } catch (err) {
+                            console.error('Google credential handling failed:', err);
+                            showToast('Google sign-in failed. Please try again.', 'error');
+                            closeGoogleOverlay();
+                            setBtnDone();
+                        }
+                    }
+                });
+                window.__abGoogleIdInitedSupplierReg = true;
+                return true;
+            }
+
+            if (!ensureGoogleIdInitialized()) {
+                showToast('Google Sign-In loading… Please try again.', 'error');
+                setBtnDone();
+                return;
+            }
+
+            const ov = ensureGoogleOverlay();
+            const mount = ov.querySelector('#ab-google-btn-mount');
+            if (mount) {
+                mount.innerHTML = '';
+                try {
+                    google.accounts.id.renderButton(mount, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with' });
+                } catch (e) {
+                    console.error('Google renderButton failed:', e);
+                    showToast('Google sign-in failed to start. Please try again.', 'error');
+                    closeGoogleOverlay();
+                    setBtnDone();
+                }
             }
         }
 
