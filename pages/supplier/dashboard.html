@@ -907,7 +907,16 @@
             background: rgba(255, 255, 255, 0.7);
         }
 
-        .chart-empty i {
+        .chart-empty .empty-img {
+            width: 84px;
+            height: 84px;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 16px 34px rgba(15, 23, 42, 0.14));
+        }
+
+        .chart-empty .empty-fallback {
+            display: none;
             font-size: 1.75rem;
             color: rgba(99, 91, 255, 0.7);
         }
@@ -2092,10 +2101,19 @@
                 if (existing) existing.remove();
                 const empty = document.createElement('div');
                 empty.className = 'chart-empty';
-                empty.innerHTML = '<i class="fas fa-chart-line"></i><div class="title">No data yet</div><div class="desc"></div>';
+                empty.innerHTML = '<img class="empty-img" src="image-removebg-preview - 2026-04-14T151741.725.png" alt=""><i class="fas fa-chart-line empty-fallback" aria-hidden="true"></i><div class="title">No data yet</div><div class="desc"></div>';
                 const desc = empty.querySelector('.desc');
                 if (desc) desc.textContent = message || 'Post your first load to see analytics here.';
                 container.appendChild(empty);
+
+                const img = empty.querySelector('.empty-img');
+                const fallback = empty.querySelector('.empty-fallback');
+                if (img) {
+                    img.addEventListener('error', function () {
+                        img.style.display = 'none';
+                        if (fallback) fallback.style.display = 'block';
+                    });
+                }
             });
         }
 

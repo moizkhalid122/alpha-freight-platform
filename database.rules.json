@@ -38,7 +38,7 @@
       ".indexOn": ["email", "firebaseUid"],
       "$supplierId": {
         ".read": "auth != null",
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('firebaseUid').val() === auth.uid || (!data.exists() && newData.child('firebaseUid').val() === auth.uid))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('firebaseUid').val() === auth.uid || (!data.exists() && newData.child('firebaseUid').val() === auth.uid) || (!data.child('firebaseUid').exists() && newData.child('firebaseUid').val() === auth.uid))",
         "fcmToken": {
           ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid || root.child('suppliers').child($supplierId).child('email').val() === auth.token.email)",
           ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('suppliers').child($supplierId).child('firebaseUid').val() === auth.uid || root.child('suppliers').child($supplierId).child('email').val() === auth.token.email)"

@@ -1513,6 +1513,11 @@
                         return;
                     }
 
+                    const currentUid = (firebase.auth().currentUser && firebase.auth().currentUser.uid) ? firebase.auth().currentUser.uid : '';
+                    if (currentUid) {
+                        profileData.firebaseUid = currentUid;
+                    }
+
                     const supplierRef = db.ref('suppliers/' + supplierId);
                     supplierRef.once('value').then(snapshot => {
                         const existingStatus = snapshot && snapshot.val() && snapshot.val().status;
@@ -1533,7 +1538,8 @@
                     const updatedAuth = Object.assign({}, auth, {
                         profileComplete: true,
                         companyName: profileData.companyName,
-                        status: profileData.status || existingStatus || auth.status
+                        status: profileData.status || existingStatus || auth.status,
+                        firebaseUid: profileData.firebaseUid || auth.firebaseUid
                     });
                     localStorage.setItem('supplierAuth', JSON.stringify(updatedAuth));
 
@@ -1627,10 +1633,15 @@
                 const supplierRef = db.ref('suppliers/' + supplierId);
                 supplierRef.once('value').then(snapshot => {
                     const existingData = snapshot.val() || {};
+                    const currentUid = (firebase.auth().currentUser && firebase.auth().currentUser.uid) ? firebase.auth().currentUser.uid : '';
+                    if (currentUid) {
+                        profileData.firebaseUid = currentUid;
+                    }
 
                     const updateData = {
                         ...existingData,
                         ...profileData,
+                        firebaseUid: existingData.firebaseUid || profileData.firebaseUid,
                         draftData: profileData
                     };
 
@@ -1646,7 +1657,8 @@
                     // Update local auth
                     const updatedAuth = Object.assign({}, auth, {
                         hasDraftData: true,
-                        lastSaved: new Date().toISOString()
+                        lastSaved: new Date().toISOString(),
+                        firebaseUid: updateData.firebaseUid || auth.firebaseUid
                     });
                     localStorage.setItem('supplierAuth', JSON.stringify(updatedAuth));
 
