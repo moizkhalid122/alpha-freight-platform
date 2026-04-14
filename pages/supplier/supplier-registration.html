@@ -362,12 +362,12 @@
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         /* Label Styling - Exact Specifications */
@@ -375,7 +375,7 @@
             font-size: 0.875rem;
             font-weight: 500;
             color: #374151;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             display: block;
         }
 
@@ -1167,6 +1167,24 @@
                                 <input id="email" name="email" type="email" class="input" placeholder="name@company.com" required>
                                 <div class="error-message" id="emailError"></div>
                             </div>
+
+                            <div class="form-group">
+                                <label for="country" class="label-row">Country</label>
+                                <select id="country" name="country" class="select" required>
+                                    <option value="">Select country</option>
+                                    <option value="United Kingdom">United Kingdom</option>
+                                    <option value="Ireland">Ireland</option>
+                                    <option value="United States">United States</option>
+                                    <option value="Germany">Germany</option>
+                                    <option value="France">France</option>
+                                    <option value="Netherlands">Netherlands</option>
+                                    <option value="Belgium">Belgium</option>
+                                    <option value="Spain">Spain</option>
+                                    <option value="Italy">Italy</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="error-message" id="countryError"></div>
+                            </div>
                         </div>
 
                         <!-- Section 5: Account Security -->
@@ -1404,6 +1422,7 @@
     <!-- Firebase placeholder (same project as carrier) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <script>
         (function initFirebase() {
@@ -1420,6 +1439,36 @@
                 firebase.initializeApp(firebaseConfig);
             }
         })();
+
+        var db = (typeof firebase !== 'undefined' && firebase.database) ? firebase.database() : null;
+        var authReady = null;
+
+        function ensureFirebaseAccess() {
+            if (!db || typeof firebase === 'undefined' || !firebase.auth) {
+                return Promise.resolve(false);
+            }
+            if (authReady) return authReady;
+
+            const authSdk = firebase.auth();
+            authReady = new Promise((resolve) => {
+                const unsub = authSdk.onAuthStateChanged((user) => {
+                    if (user) {
+                        try { unsub(); } catch (e) {}
+                        resolve(true);
+                    }
+                });
+
+                authSdk.signInAnonymously().then(() => {
+                    resolve(true);
+                }).catch((err) => {
+                    try { unsub(); } catch (e) {}
+                    console.error('Auth error:', err);
+                    resolve(false);
+                });
+            });
+
+            return authReady;
+        }
 
         const form = document.getElementById('supplierForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -1592,6 +1641,7 @@
                 if (!emailValid) return 'Please enter a valid email.';
                 return '';
             });
+            valid &= validateField('country', v => !v ? 'Please select country.' : '');
 
             // Password validation
             const password = document.getElementById('password').value;
@@ -1688,92 +1738,105 @@
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (!validateForm()) return;
-
-            // Check if Firebase is available
-            if (typeof firebase === 'undefined' || !firebase.database) {
-                showToast('Database service unavailable. Please try again later.', 'error');
-                return;
-            }
-
-            const db = firebase.database();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const emailError = document.getElementById('emailError');
 
             setLoading(true);
 
-            // Check if email already exists
-            db.ref('suppliers').orderByChild('email').equalTo(email).once('value', function(snapshot) {
-                if (snapshot && snapshot.exists()) {
-                    // Email already exists
+            ensureFirebaseAccess().then(function (ok) {
+                if (!ok) {
                     setLoading(false);
-                    emailError.textContent = 'Already account register';
-                    emailError.style.display = 'block';
-                    document.getElementById('email').classList.add('invalid');
-                    showToast('Already account register', 'error');
+                    showToast('Unable to start secure session. Please refresh and try again.', 'error');
                     return;
                 }
 
-                const firstName = (document.getElementById('firstName').value || '').trim();
-                const lastName = (document.getElementById('lastName').value || '').trim();
-                const fullName = (firstName + ' ' + lastName).trim();
-
-                const supplierData = {
-                    email: email,
-                    firstName: firstName,
-                    lastName: lastName,
-                    fullName: fullName,
-                    password: document.getElementById('password').value,
-                    companyName: '',
-                    marketingOptIn: document.getElementById('marketing').checked || false,
-                    profileComplete: false,
-                    status: 'pending_verification',
-                    userType: 'supplier',
-                    registrationDate: new Date().toISOString(),
-                    createdAt: new Date().toISOString(),
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-
-                // Create new supplier account
-                const newSupplierRef = db.ref('suppliers').push();
-                const supplierId = newSupplierRef.key;
-                supplierData.supplierId = supplierId;
-                supplierData.id = supplierId;
-
-                newSupplierRef.set(supplierData, function(error) {
+                const currentUid = (firebase.auth().currentUser && firebase.auth().currentUser.uid) ? firebase.auth().currentUser.uid : '';
+                if (!currentUid) {
                     setLoading(false);
-                    
-                    if (error) {
-                        console.error('Error saving supplier:', error);
-                        showToast('Registration failed. Please try again.', 'error');
+                    showToast('Unable to start secure session. Please refresh and try again.', 'error');
+                    return;
+                }
+
+                // Check if email already exists
+                db.ref('suppliers').orderByChild('email').equalTo(email).once('value', function(snapshot) {
+                    if (snapshot && snapshot.exists()) {
+                        // Email already exists
+                        setLoading(false);
+                        emailError.textContent = 'Already account register';
+                        emailError.style.display = 'block';
+                        document.getElementById('email').classList.add('invalid');
+                        showToast('Already account register', 'error');
                         return;
                     }
 
-                    // Store auth session
-                    localStorage.setItem('supplierAuth', JSON.stringify({
-                        supplierId: supplierId,
-                        id: supplierId,
+                    const firstName = (document.getElementById('firstName').value || '').trim();
+                    const lastName = (document.getElementById('lastName').value || '').trim();
+                    const fullName = (firstName + ' ' + lastName).trim();
+
+                    const supplierData = {
                         email: email,
                         firstName: firstName,
                         lastName: lastName,
                         fullName: fullName,
+                        password: document.getElementById('password').value,
                         companyName: '',
+                        country: (document.getElementById('country').value || '').trim(),
+                        firebaseUid: currentUid,
+                        marketingOptIn: document.getElementById('marketing').checked || false,
                         profileComplete: false,
-                        isLoggedIn: true,
-                        loginTime: new Date().toISOString(),
+                        status: 'pending_verification',
                         userType: 'supplier',
-                        status: 'pending_verification'
-                    }));
-                    localStorage.setItem('ab.portal.lastRole', 'supplier');
+                        registrationDate: new Date().toISOString(),
+                        createdAt: new Date().toISOString(),
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
 
-                    showToast('Account created! Redirecting…', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 150);
+                    // Create new supplier account
+                    const newSupplierRef = db.ref('suppliers').push();
+                    const supplierId = newSupplierRef.key;
+                    supplierData.supplierId = supplierId;
+                    supplierData.id = supplierId;
+
+                    newSupplierRef.set(supplierData, function(error) {
+                        setLoading(false);
+                        
+                        if (error) {
+                            console.error('Error saving supplier:', error);
+                            showToast('Registration failed. Please try again.', 'error');
+                            return;
+                        }
+
+                        // Store auth session
+                        localStorage.setItem('supplierAuth', JSON.stringify({
+                            supplierId: supplierId,
+                            id: supplierId,
+                            email: email,
+                            firstName: firstName,
+                            lastName: lastName,
+                            fullName: fullName,
+                            companyName: '',
+                        country: supplierData.country,
+                            firebaseUid: currentUid,
+                            profileComplete: false,
+                            isLoggedIn: true,
+                            loginTime: new Date().toISOString(),
+                            userType: 'supplier',
+                            status: 'pending_verification'
+                        }));
+                        localStorage.setItem('ab.portal.lastRole', 'supplier');
+
+                        showToast('Account created! Redirecting…', 'success');
+                        setTimeout(() => {
+                            const name = fullName || email || '';
+                            const next = '/pages/supplier/dashboard.html';
+                            window.location.href = '/mobile-app/welcome.html?role=supplier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
+                        }, 150);
+                    });
+                }, function(error) {
+                    setLoading(false);
+                    console.error('Error checking email:', error);
+                    showToast('Registration failed. Please try again.', 'error');
                 });
-            }, function(error) {
-                setLoading(false);
-                console.error('Error checking email:', error);
-                showToast('Registration failed. Please try again.', 'error');
             });
         });
 
@@ -1969,16 +2032,20 @@
             const lastName = userData.family_name || fullName.split(' ').slice(1).join(' ') || '';
             const picture = userData.picture || '';
 
-            // Check if Firebase is available
-            if (typeof firebase === 'undefined' || !firebase.database) {
-                showToast('Database service unavailable. Please try again later.', 'error');
-                return;
-            }
+            ensureFirebaseAccess().then(function (ok) {
+                if (!ok) {
+                    showToast('Unable to start secure session. Please refresh and try again.', 'error');
+                    return;
+                }
 
-            const db = firebase.database();
+                const currentUid = (firebase.auth().currentUser && firebase.auth().currentUser.uid) ? firebase.auth().currentUser.uid : '';
+                if (!currentUid) {
+                    showToast('Unable to start secure session. Please refresh and try again.', 'error');
+                    return;
+                }
 
-            // Check if supplier already exists
-            db.ref('suppliers').orderByChild('email').equalTo(email).once('value', function(snapshot) {
+                // Check if supplier already exists
+                db.ref('suppliers').orderByChild('email').equalTo(email).once('value', function(snapshot) {
                 if (snapshot && snapshot.exists()) {
                     // Existing supplier - log them in
                     const suppliers = snapshot.val();
@@ -1995,6 +2062,7 @@
                         phone: supplier.phone || '',
                         country: supplier.country || '',
                         companyName: supplier.companyName || supplier.company || '',
+                        firebaseUid: supplier.firebaseUid || currentUid,
                         profileComplete: supplier.profileComplete || false,
                         isLoggedIn: true,
                         loginTime: new Date().toISOString(),
@@ -2002,8 +2070,9 @@
                         googleSignIn: true
                     }));
 
-                    // Redirect to dashboard
-                    window.location.href = 'dashboard.html';
+                    const name = ((supplier.firstName || firstName || '') + ' ' + (supplier.lastName || lastName || '')).trim() || (supplier.companyName || supplier.company || email || '');
+                    const next = '/pages/supplier/dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?mode=back&role=supplier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                 } else {
                     // New supplier - create account
                     const supplierId = db.ref('suppliers').push().key;
@@ -2021,6 +2090,8 @@
                         status: 'pending_verification',
                         profileComplete: false,
                         userType: 'supplier',
+                        country: (document.getElementById('country') ? (document.getElementById('country').value || '').trim() : ''),
+                        firebaseUid: currentUid,
                         registrationDate: new Date().toISOString(),
                         createdAt: new Date().toISOString(),
                         timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -2046,15 +2117,19 @@
                             isLoggedIn: true,
                             loginTime: new Date().toISOString(),
                             userType: 'supplier',
+                            firebaseUid: currentUid,
                             googleSignIn: true
                         }));
 
-                        window.location.href = 'dashboard.html';
+                        const name = (fullName || email || '').trim();
+                        const next = '/pages/supplier/dashboard.html';
+                        window.location.href = '/mobile-app/welcome.html?role=supplier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                     });
                 }
-            }, function(error) {
-                console.error('Error checking supplier:', error);
-                showToast('Registration failed. Please try again.', 'error');
+                }, function(error) {
+                    console.error('Error checking supplier:', error);
+                    showToast('Registration failed. Please try again.', 'error');
+                });
             });
         }
     </script>

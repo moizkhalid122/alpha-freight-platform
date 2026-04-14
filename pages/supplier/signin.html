@@ -994,7 +994,9 @@
 
             showToast('Welcome back! Redirecting…', 'success');
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
+                const name = ((authData.firstName || '') + ' ' + (authData.lastName || '')).trim() || (authData.companyName || authData.email || '');
+                const next = '/pages/supplier/dashboard.html';
+                window.location.href = '/mobile-app/welcome.html?mode=back&role=supplier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
             }, 120);
         }
 

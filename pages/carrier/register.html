@@ -1416,6 +1416,173 @@
             box-shadow: 0 10px 30px rgba(99, 91, 255, 0.4);
         }
 
+        .ab-chat-panel {
+            position: fixed;
+            right: 2rem;
+            bottom: 6.75rem;
+            width: 360px;
+            max-width: calc(100vw - 2rem);
+            height: 480px;
+            max-height: calc(100vh - 10rem);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+            z-index: 1000;
+            overflow: hidden;
+            display: none;
+        }
+
+        .ab-chat-panel.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ab-chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 12px 10px;
+            background: linear-gradient(135deg, rgba(99, 91, 255, 0.18) 0%, rgba(99, 91, 255, 0.05) 100%);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .ab-chat-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .ab-chat-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 10px 22px rgba(99, 91, 255, 0.25);
+        }
+
+        .ab-chat-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .ab-chat-close:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .ab-chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow: auto;
+        }
+
+        .ab-chat-row {
+            display: flex;
+            margin: 10px 0;
+        }
+
+        .ab-chat-row.user {
+            justify-content: flex-end;
+        }
+
+        .ab-chat-bubble {
+            max-width: 78%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            line-height: 1.35;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .ab-chat-row.bot .ab-chat-bubble {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-dark);
+        }
+
+        .ab-chat-row.user .ab-chat-bubble {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+        }
+
+        .ab-chat-quick {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .ab-chat-chip {
+            border: 1px solid rgba(99, 91, 255, 0.22);
+            background: rgba(99, 91, 255, 0.08);
+            color: var(--primary);
+            padding: 7px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .ab-chat-chip:hover {
+            transform: translateY(-1px);
+            background: rgba(99, 91, 255, 0.12);
+        }
+
+        .ab-chat-input {
+            padding: 10px 12px 12px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .ab-chat-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ab-chat-text {
+            flex: 1;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .ab-chat-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 14px 28px rgba(99, 91, 255, 0.22);
+        }
+
         /* Tooltip */
         .tooltip {
             position: absolute;
@@ -1831,52 +1998,47 @@
                         Continue with Google
                     </button>
                 </form>
-            </div>
-        </div>
 
-        <!-- Bottom Section -->
-        </div>
+                <div class="faq-section" style="margin-top: 2rem;">
+                    <h3 style="text-align: center; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700;">Frequently Asked Questions</h3>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>How long does verification take?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Our verification process typically takes 24-48 hours. We verify licenses, insurance, and vehicle documentation to ensure platform safety.
+                        </div>
+                    </div>
 
-        <!-- Bottom Section -->
-        <div class="bottom-section">
-            <div class="faq-section">
-                <h3 style="text-align: center; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700;">Frequently Asked Questions</h3>
-                
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(this)">
-                        <span>How long does verification take?</span>
-                        <i class="fas fa-chevron-down faq-icon"></i>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Are there any fees to join?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Registration is completely free. We only charge a small commission on completed loads, with no monthly fees or hidden charges.
+                        </div>
                     </div>
-                    <div class="faq-answer">
-                        Our verification process typically takes 24-48 hours. We verify licenses, insurance, and vehicle documentation to ensure platform safety.
-                    </div>
-                </div>
 
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(this)">
-                        <span>Are there any fees to join?</span>
-                        <i class="fas fa-chevron-down faq-icon"></i>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>What documents do I need?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            You'll need: Operator License, Insurance Certificate, Vehicle Registration Documents, and Driver License. All documents are verified securely.
+                        </div>
                     </div>
-                    <div class="faq-answer">
-                        Registration is completely free. We only charge a small commission on completed loads, with no monthly fees or hidden charges.
-                    </div>
-                </div>
 
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(this)">
-                        <span>What documents do I need?</span>
-                        <i class="fas fa-chevron-down faq-icon"></i>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">View all FAQs →</a>
                     </div>
-                    <div class="faq-answer">
-                        You'll need: Operator License, Insurance Certificate, Vehicle Registration Documents, and Driver License. All documents are verified securely.
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 2rem;">
-                    <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">View all FAQs →</a>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Live Chat Widget -->
@@ -1884,6 +2046,32 @@
         <button class="chat-button" onclick="openChat()" title="Need help? Chat with us">
             <i class="fas fa-comments"></i>
         </button>
+    </div>
+
+    <div id="abChatPanel" class="ab-chat-panel" role="dialog" aria-label="Support chat" aria-hidden="true">
+        <div class="ab-chat-header">
+            <div class="ab-chat-title">
+                <span class="ab-chat-badge"><i class="fas fa-headset"></i></span>
+                <span>Alpha Support</span>
+            </div>
+            <button type="button" class="ab-chat-close" onclick="closeChat()" aria-label="Close chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="ab-chat-messages" id="abChatMessages"></div>
+        <div class="ab-chat-quick">
+            <button type="button" class="ab-chat-chip" onclick="abChatQuick('Verification')">Verification</button>
+            <button type="button" class="ab-chat-chip" onclick="abChatQuick('Documents')">Documents</button>
+            <button type="button" class="ab-chat-chip" onclick="abChatQuick('Pricing')">Pricing</button>
+        </div>
+        <div class="ab-chat-input">
+            <form class="ab-chat-form" id="abChatForm">
+                <input class="ab-chat-text" id="abChatText" type="text" placeholder="Type your message…" autocomplete="off">
+                <button class="ab-chat-send" type="submit" aria-label="Send message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
     </div>
     
     <script>
@@ -2096,7 +2284,9 @@
             }
 
             // Go to carrier dashboard
-                                window.location.href = 'dashboard.html';
+            const name = ((profile.firstName || '') + ' ' + (profile.lastName || '')).trim() || (profile.companyName || profile.email || '');
+            const next = '/pages/carrier/dashboard.html';
+            window.location.href = '/mobile-app/welcome.html?role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                             }
 
         // Form Submission (manual registration)
@@ -2239,8 +2429,121 @@
 
         // Chat Widget
         function openChat() {
-            alert('Chat widget would open here. In production, integrate with your chat service.');
+            const panel = document.getElementById('abChatPanel');
+            if (!panel) return;
+            panel.classList.add('open');
+            panel.setAttribute('aria-hidden', 'false');
+            abChatEnsureSeed();
+            abChatScrollToBottom();
+            const input = document.getElementById('abChatText');
+            if (input) input.focus();
         }
+
+        function closeChat() {
+            const panel = document.getElementById('abChatPanel');
+            if (!panel) return;
+            panel.classList.remove('open');
+            panel.setAttribute('aria-hidden', 'true');
+        }
+
+        function abChatLoad() {
+            try {
+                return JSON.parse(sessionStorage.getItem('abCarrierChat') || '[]') || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function abChatSave(items) {
+            try {
+                sessionStorage.setItem('abCarrierChat', JSON.stringify(items || []));
+            } catch (e) {}
+        }
+
+        function abChatRender() {
+            const box = document.getElementById('abChatMessages');
+            if (!box) return;
+            const items = abChatLoad();
+            box.innerHTML = '';
+            items.forEach(function (m) {
+                const row = document.createElement('div');
+                row.className = 'ab-chat-row ' + (m.role === 'user' ? 'user' : 'bot');
+                const bubble = document.createElement('div');
+                bubble.className = 'ab-chat-bubble';
+                bubble.textContent = m.text || '';
+                row.appendChild(bubble);
+                box.appendChild(row);
+            });
+            abChatScrollToBottom();
+        }
+
+        function abChatAdd(role, text) {
+            const items = abChatLoad();
+            items.push({ role: role, text: String(text || ''), t: Date.now() });
+            abChatSave(items);
+            abChatRender();
+        }
+
+        function abChatScrollToBottom() {
+            const box = document.getElementById('abChatMessages');
+            if (!box) return;
+            box.scrollTop = box.scrollHeight + 1000;
+        }
+
+        function abChatEnsureSeed() {
+            const items = abChatLoad();
+            if (items.length) {
+                abChatRender();
+                return;
+            }
+            abChatAdd('bot', 'Hi! How can we help you today?\n\nYou can ask about verification, documents, or pricing.');
+        }
+
+        function abChatReplyFor(text) {
+            const q = String(text || '').toLowerCase();
+            if (q.includes('verif') || q.includes('approve') || q.includes('time')) {
+                return 'Verification usually takes 24–48 hours. If you already registered, complete your profile on the dashboard and upload documents there.';
+            }
+            if (q.includes('doc') || q.includes('license') || q.includes('insurance')) {
+                return 'Documents needed: Operator License, Insurance Certificate, Vehicle Registration, and Driver License. You can upload them from your dashboard after signup.';
+            }
+            if (q.includes('price') || q.includes('fee') || q.includes('commission')) {
+                return 'Registration is free. We charge a small commission only on completed loads. No monthly fees.';
+            }
+            return 'Got it. Please write a bit more detail (what exactly you need), and we will guide you.';
+        }
+
+        function abChatQuick(topic) {
+            const t = String(topic || '').trim();
+            if (!t) return;
+            openChat();
+            abChatAdd('user', t);
+            setTimeout(function () {
+                abChatAdd('bot', abChatReplyFor(t));
+            }, 450);
+        }
+
+        (function () {
+            const form = document.getElementById('abChatForm');
+            const input = document.getElementById('abChatText');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const text = input ? input.value.trim() : '';
+                    if (!text) return;
+                    if (input) input.value = '';
+                    openChat();
+                    abChatAdd('user', text);
+                    setTimeout(function () {
+                        abChatAdd('bot', abChatReplyFor(text));
+                    }, 550);
+                });
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeChat();
+            });
+        })();
 
         // Load Google GSI on first click for faster page load
         function loadGoogleGSIAndSignIn() {
@@ -2432,10 +2735,13 @@
                     localStorage.setItem('carrierAuth', JSON.stringify(existingProfile));
                     localStorage.setItem('lastCarrierProfile', JSON.stringify(existingProfile));
                     // Go straight to dashboard (no new account created)
-                    window.location.href = 'dashboard.html';
+                    const name = ((existingProfile.firstName || '') + ' ' + (existingProfile.lastName || '')).trim() || (existingProfile.companyName || email || '');
+                    const next = '/pages/carrier/dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                 } else {
-                    // New carrier – ask for company details on dedicated page
-                    window.location.href = 'company-details.html';
+                    const name = ((userData.firstName || '') + ' ' + (userData.lastName || '')).trim() || (email || '');
+                    const next = '/pages/carrier/dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                 }
             } catch (err) {
                 console.error('Post Google sign-in handling failed:', err);

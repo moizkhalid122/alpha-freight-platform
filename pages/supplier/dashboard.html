@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -891,6 +891,37 @@
             position: relative;
             height: 300px;
             width: 100%;
+        }
+
+        .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .chart-empty i {
+            font-size: 1.75rem;
+            color: rgba(99, 91, 255, 0.7);
+        }
+
+        .chart-empty .title {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .chart-empty .desc {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            max-width: 340px;
         }
 
         .chart-container.small {
@@ -2020,6 +2051,86 @@
             }
         }
 
+        function destroyCharts() {
+            try { if (loadsByStatusChart) loadsByStatusChart.destroy(); } catch (e) {}
+            try { if (loadsDistributionChart) loadsDistributionChart.destroy(); } catch (e) {}
+            try { if (monthlyLoadsChart) monthlyLoadsChart.destroy(); } catch (e) {}
+            try { if (spendingTrendChart) spendingTrendChart.destroy(); } catch (e) {}
+            try { if (topRoutesChart) topRoutesChart.destroy(); } catch (e) {}
+            try { if (loadPerformanceChart) loadPerformanceChart.destroy(); } catch (e) {}
+            loadsByStatusChart = null;
+            loadsDistributionChart = null;
+            monthlyLoadsChart = null;
+            spendingTrendChart = null;
+            topRoutesChart = null;
+            loadPerformanceChart = null;
+        }
+
+        function clearChartEmptyStates() {
+            const ids = ['loadsByStatusChart','loadsDistributionChart','monthlyLoadsChart','spendingTrendChart','topRoutesChart','loadPerformanceChart'];
+            ids.forEach(function (id) {
+                const canvas = document.getElementById(id);
+                if (!canvas) return;
+                canvas.style.display = '';
+                const container = canvas.parentElement;
+                if (!container) return;
+                const existing = container.querySelector('.chart-empty');
+                if (existing) existing.remove();
+            });
+        }
+
+        function showChartsEmpty(message) {
+            destroyCharts();
+            const ids = ['loadsByStatusChart','loadsDistributionChart','monthlyLoadsChart','spendingTrendChart','topRoutesChart','loadPerformanceChart'];
+            ids.forEach(function (id) {
+                const canvas = document.getElementById(id);
+                if (!canvas) return;
+                const container = canvas.parentElement;
+                if (!container) return;
+                canvas.style.display = 'none';
+                const existing = container.querySelector('.chart-empty');
+                if (existing) existing.remove();
+                const empty = document.createElement('div');
+                empty.className = 'chart-empty';
+                empty.innerHTML = '<i class="fas fa-chart-line"></i><div class="title">No data yet</div><div class="desc"></div>';
+                const desc = empty.querySelector('.desc');
+                if (desc) desc.textContent = message || 'Post your first load to see analytics here.';
+                container.appendChild(empty);
+            });
+        }
+
+        function isPermissionDenied(error) {
+            const code = error && error.code ? String(error.code) : '';
+            const message = error && error.message ? String(error.message) : '';
+            return code.toUpperCase() === 'PERMISSION_DENIED' || /permission[_\s-]?denied/i.test(message);
+        }
+
+        function setOverviewDefaults() {
+            const setText = function (id, value) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+            const setHtml = function (id, html) {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = html;
+            };
+
+            setText('overviewTotalLoads', '0');
+            setText('overviewActiveLoads', '0');
+            setText('overviewPendingLoads', '0');
+            setText('overviewCompletedLoads', '0');
+            setText('overviewCompletionRate', '0%');
+            setHtml('overviewTotalSpent', '<span data-currency-symbol>£</span>0');
+            setHtml('overviewAvgLoadValue', '<span data-currency-symbol>£</span>0');
+
+            const ratingValueEl = document.getElementById('supplierRatingValue');
+            const ratingStarsEl = document.getElementById('supplierRatingStars');
+            const ratingCountEl = document.getElementById('supplierRatingCount');
+            if (ratingValueEl) ratingValueEl.textContent = '0.0';
+            if (ratingStarsEl) ratingStarsEl.innerHTML = '';
+            if (ratingCountEl) ratingCountEl.textContent = 'No ratings yet';
+        }
+
         // Load Supplier Rating
         function loadSupplierRating() {
             const supplierId = auth.supplierId || auth.id;
@@ -2027,13 +2138,14 @@
                 return;
             }
             
-            // Fetch all completed loads where this supplier was rated
-            db.ref('loads').orderByChild('status').equalTo('completed').once('value', function(snapshot) {
+            // Fetch supplier loads, then filter completed + rated
+            db.ref('loads').orderByChild('supplierId').equalTo(supplierId).once('value', function(snapshot) {
                 var ratings = [];
                 var ratingCount = 0;
                 
                 snapshot.forEach(function(child) {
                     var load = child.val();
+                    if (!load || load.status !== 'completed') return;
                     // Check if this load belongs to this supplier and has a rating
                     if ((load.supplierId === supplierId || load.supplier_id === supplierId) && load.supplierRating) {
                         var rating = parseFloat(load.supplierRating) || 0;
@@ -2084,6 +2196,17 @@
                         ratingCountEl.textContent = 'No ratings yet';
                     }
                 }
+            }, function(error) {
+                if (isPermissionDenied(error)) {
+                    const ratingValueEl = document.getElementById('supplierRatingValue');
+                    const ratingStarsEl = document.getElementById('supplierRatingStars');
+                    const ratingCountEl = document.getElementById('supplierRatingCount');
+                    if (ratingValueEl) ratingValueEl.textContent = '0.0';
+                    if (ratingStarsEl) ratingStarsEl.innerHTML = '';
+                    if (ratingCountEl) ratingCountEl.textContent = 'No ratings yet';
+                    return;
+                }
+                console.error('Error loading supplier rating:', error);
             });
         }
 
@@ -2091,13 +2214,15 @@
         function loadSupplierStats() {
             const supplierId = auth.supplierId || auth.id;
             if (!supplierId) {
+                showChartsEmpty('Please sign in again to load analytics.');
                 hideLoadingOverlay();
                 return;
             }
 
             let dataLoaded = false;
 
-            db.ref('loads').orderByChild('supplierId').equalTo(supplierId).on('value', (snapshot) => {
+            const loadsRef = db.ref('loads').orderByChild('supplierId').equalTo(supplierId);
+            loadsRef.on('value', (snapshot) => {
                 if (dataLoaded) return; // Prevent multiple calls
                 dataLoaded = true;
                 let totalLoads = 0;
@@ -2224,6 +2349,14 @@
                     hideLoadingOverlay();
                 }, 500);
             }, (error) => {
+                if (isPermissionDenied(error)) {
+                    dataLoaded = true;
+                    try { loadsRef.off('value'); } catch (e) {}
+                    setOverviewDefaults();
+                    showChartsEmpty('Post your first load to see analytics here.');
+                    hideLoadingOverlay();
+                    return;
+                }
                 console.error('Error loading supplier stats:', error);
                 hideLoadingOverlay();
             });
@@ -2231,6 +2364,12 @@
 
         // Initialize Charts
         function initializeCharts(data) {
+            if (!data || !data.totalLoads) {
+                showChartsEmpty('Post your first load to see analytics here.');
+                return;
+            }
+            clearChartEmptyStates();
+
             // Chart 1: Loads by Status (Bar Chart)
             const ctx1 = document.getElementById('loadsByStatusChart');
             if (ctx1) {

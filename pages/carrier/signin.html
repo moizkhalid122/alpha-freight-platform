@@ -990,7 +990,9 @@
 
             showToast('Welcome back! Redirecting…', 'success');
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
+                const name = ((authData.firstName || '') + ' ' + (authData.lastName || '')).trim() || (authData.companyName || authData.email || '');
+                const next = '/pages/carrier/dashboard.html';
+                window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
             }, 120);
         }
 

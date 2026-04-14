@@ -586,7 +586,9 @@
                     alert('You are already logged in!');
                 }
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    const name = (auth && ((auth.firstName || '') + ' ' + (auth.lastName || '')).trim()) || (auth && (auth.companyName || auth.email)) || '';
+                    const next = '/pages/carrier/dashboard.html';
+                    window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
                 }, 150);
             }
         });
@@ -616,7 +618,9 @@
             }
 
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
+                const name = ((authData.firstName || '') + ' ' + (authData.lastName || '')).trim() || (authData.companyName || authData.email || '');
+                const next = '/pages/carrier/dashboard.html';
+                window.location.href = '/mobile-app/welcome.html?mode=back&role=carrier&name=' + encodeURIComponent(name) + '&next=' + encodeURIComponent(next);
             }, 150);
         }
 
