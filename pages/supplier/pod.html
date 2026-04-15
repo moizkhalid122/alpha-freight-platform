@@ -752,10 +752,26 @@
         }
 
         .empty-state-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            min-height: 90px;
+        }
+
+        .empty-state-icon i {
             font-size: 4rem;
             color: var(--text-muted);
             opacity: 0.5;
-            margin-bottom: 1rem;
+        }
+
+        .empty-state-icon img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            display: block;
+            opacity: 1;
+            filter: drop-shadow(0 18px 36px rgba(15, 23, 42, 0.16));
         }
 
         .empty-state-text {
@@ -1446,12 +1462,21 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">
-                            <i class="fas fa-file-invoice"></i>
+                            <img id="podEmptyImg" src="image-removebg-preview - 2026-04-15T012204.716.png" alt="">
+                            <i id="podEmptyFallback" class="fas fa-file-invoice" style="display:none;" aria-hidden="true"></i>
                         </div>
                         <p class="empty-state-text">No POD documents found</p>
                         <small class="text-muted">POD documents will appear here once carriers upload them for completed loads.</small>
                     </div>
                 `;
+                const img = document.getElementById('podEmptyImg');
+                const fallback = document.getElementById('podEmptyFallback');
+                if (img) {
+                    img.addEventListener('error', function () {
+                        img.style.display = 'none';
+                        if (fallback) fallback.style.display = 'block';
+                    });
+                }
                 return;
             }
 

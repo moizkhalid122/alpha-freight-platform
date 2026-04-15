@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1334,6 +1334,7 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <script>
         // Firebase Config
@@ -1351,11 +1352,37 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
+        var authReady = null;
+        var payLetterRef = null;
 
         // Check Authentication
         const auth = JSON.parse(localStorage.getItem('supplierAuth') || '{}');
         if (!auth.isLoggedIn) {
             window.location.href = 'login.html';
+        }
+
+        function ensureFirebaseAccess() {
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                return Promise.resolve(false);
+            }
+            if (authReady) return authReady;
+
+            const authSdk = firebase.auth();
+            authReady = new Promise((resolve) => {
+                const unsub = authSdk.onAuthStateChanged((user) => {
+                    if (user) {
+                        try { unsub(); } catch (e) {}
+                        resolve(true);
+                    }
+                });
+
+                authSdk.signInAnonymously().then(() => resolve(true)).catch(() => {
+                    try { unsub(); } catch (e) {}
+                    resolve(false);
+                });
+            });
+
+            return authReady;
         }
 
         // Format Currency
@@ -1656,7 +1683,27 @@
                 return;
             }
 
-            db.ref('payLetterPending').orderByChild('supplierId').equalTo(supplierId).on('value', async (snapshot) => {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            if (loadingSpinner) loadingSpinner.style.display = 'flex';
+
+            ensureFirebaseAccess().then(function (ok) {
+                if (!ok) {
+                    if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    const localOrders = getLocalPendingOrders(supplierId);
+                    if (localOrders.length) {
+                        renderOrders(localOrders);
+                    } else {
+                        showEmptyState();
+                    }
+                    return;
+                }
+
+                if (payLetterRef) {
+                    try { payLetterRef.off('value'); } catch (e) {}
+                }
+
+                payLetterRef = db.ref('payLetterPending').orderByChild('supplierId').equalTo(supplierId);
+                payLetterRef.on('value', async (snapshot) => {
                 const loadingSpinner = document.getElementById('loadingSpinner');
                 const emptyState = document.getElementById('emptyState');
                 const pendingOrdersTable = document.getElementById('pendingOrdersTable');
@@ -1736,15 +1783,16 @@
                 }
 
                 renderOrders(visibleOrders);
-            }, (error) => {
-                console.error('Error loading pending orders:', error);
-                const localOrders = getLocalPendingOrders(supplierId);
-                if (localOrders.length) {
-                    renderOrders(localOrders);
-                } else {
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    showCustomAlert('error', 'Error loading pending orders. Please try again.');
-                }
+                }, (error) => {
+                    console.error('Error loading pending orders:', error);
+                    const localOrders = getLocalPendingOrders(supplierId);
+                    if (localOrders.length) {
+                        renderOrders(localOrders);
+                    } else {
+                        document.getElementById('loadingSpinner').style.display = 'none';
+                        showEmptyState();
+                    }
+                });
             });
         }
 
@@ -2197,7 +2245,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadUserData();
             checkPaymentSentStatus(); // Check if payment was sent
-            loadPendingOrders();
+            ensureFirebaseAccess().then(function () {
+                loadPendingOrders();
+            });
             loadNotifications(); // Load notifications on page load
 
             // Close sidebar on mobile when clicking outside
