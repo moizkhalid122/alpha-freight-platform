@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
     <script src="../../assets/js/app-resume-fix.js"></script>
 
     <style>
@@ -360,12 +361,76 @@
         }
         .btn-wide:active{ transform: scale(0.99); }
 
+        body.theme-templates::before{
+            background:
+                radial-gradient(1000px 540px at 18% 8%, rgba(99, 91, 255, 0.14), rgba(246,247,251,0) 62%),
+                radial-gradient(1000px 540px at 86% 18%, rgba(6, 182, 212, 0.12), rgba(246,247,251,0) 62%),
+                repeating-linear-gradient(135deg, rgba(15,23,42,0.035) 0, rgba(15,23,42,0.035) 1px, rgba(246,247,251,0) 1px, rgba(246,247,251,0) 14px);
+        }
+        body.theme-templates .header-card{
+            border-radius: 18px;
+            padding: 14px 14px 12px;
+            box-shadow: 0 18px 55px rgba(15,23,42,0.10);
+            background:
+                linear-gradient(135deg, rgba(99,91,255,0.10), rgba(6,182,212,0.06)),
+                rgba(255,255,255,0.92);
+        }
+        body.theme-templates .header-card::before{
+            inset:-140px auto auto -140px;
+            width: 340px;
+            height: 340px;
+            background: radial-gradient(circle, rgba(6,182,212,0.12), rgba(246,247,251,0) 70%);
+            transform: rotate(-12deg);
+        }
+        body.theme-templates .btn-primary{
+            border-radius: 999px;
+            padding: 10px 14px;
+            box-shadow: 0 16px 34px rgba(99,91,255,0.18);
+        }
+        body.theme-templates .action-row{
+            margin-top: 12px;
+            padding: 8px;
+            border-radius: 18px;
+            border: 1px solid rgba(15,23,42,0.08);
+            background: rgba(255,255,255,0.70);
+            box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+        }
+        body.theme-templates .chip{
+            border-radius: 16px;
+            background: rgba(15,23,42,0.03);
+            box-shadow: none;
+            border: 1px solid rgba(15,23,42,0.08);
+        }
+        body.theme-templates .card{
+            border-radius: 18px;
+            padding: 14px 14px 14px;
+            background:
+                radial-gradient(520px 240px at 0% 0%, rgba(99,91,255,0.10), rgba(255,255,255,0) 56%),
+                rgba(255,255,255,0.92);
+            box-shadow: 0 18px 48px rgba(15,23,42,0.10);
+        }
+        body.theme-templates .card::before{ opacity: 0; }
+        body.theme-templates .card-head,
+        body.theme-templates .meta,
+        body.theme-templates .card-actions{
+            padding-left: 0;
+        }
+        body.theme-templates .tag{
+            background: rgba(99,91,255,0.10);
+            border-color: rgba(99,91,255,0.16);
+            color: rgba(79,70,229,0.98);
+        }
+        body.theme-templates .btn-mini{
+            border-radius: 999px;
+            padding: 8px 12px;
+        }
+
         @media (min-width: 768px) {
             body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
         }
     </style>
 </head>
-<body class="has-bottom-nav">
+<body class="has-bottom-nav theme-templates">
     <div class="header">
         <div class="header-card">
             <div class="header-row">
@@ -411,7 +476,7 @@
             <div class="sheet-body">
                 <div class="field" style="margin-bottom:10px;">
                     <label for="tplName">Template name</label>
-                    <input id="tplName" class="input" placeholder="e.g., London → Manchester (Van)" />
+                    <input id="tplName" class="input" placeholder="e.g., London â†’ Manchester (Van)" />
                 </div>
 
                 <div class="grid" style="margin-bottom:10px;">
@@ -472,11 +537,11 @@
 
                 <div class="grid" style="margin-bottom:10px;">
                     <div class="field">
-                        <label for="tplMinBudget">Min budget (£)</label>
+                        <label for="tplMinBudget">Min budget (Â£)</label>
                         <input id="tplMinBudget" class="input" inputmode="numeric" placeholder="e.g., 650" />
                     </div>
                     <div class="field">
-                        <label for="tplMaxBudget">Max budget (£)</label>
+                        <label for="tplMaxBudget">Max budget (Â£)</label>
                         <input id="tplMaxBudget" class="input" inputmode="numeric" placeholder="e.g., 780" />
                     </div>
                 </div>
@@ -680,12 +745,12 @@
             }
 
             list.innerHTML = templates.slice(0, 60).map(t => {
-                const route = `${t.pickupLocation || 'N/A'} → ${t.deliveryLocation || 'N/A'}`;
+                const route = `${t.pickupLocation || 'N/A'} â†’ ${t.deliveryLocation || 'N/A'}`;
                 const tags = [];
                 if (t.vehicleType) tags.push(t.vehicleType);
                 if (t.cargoType) tags.push(t.cargoType);
                 if (t.cargoWeight) tags.push(`${t.cargoWeight}kg`);
-                if (t.minBudget || t.maxBudget) tags.push(`£${t.minBudget || '0'}–£${t.maxBudget || t.minBudget || '0'}`);
+                if (t.minBudget || t.maxBudget) tags.push(`Â£${t.minBudget || '0'}â€“Â£${t.maxBudget || t.minBudget || '0'}`);
                 if (t.urgency) tags.push(t.urgency);
                 const updated = formatUpdatedAt(t);
                 if (updated) tags.push('Updated ' + updated);
@@ -738,7 +803,7 @@
 
             const tpl = {
                 id: '',
-                name: String(d.loadTitle || `${pickupLocation} → ${deliveryLocation}`).trim() || 'Template',
+                name: String(d.loadTitle || `${pickupLocation} â†’ ${deliveryLocation}`).trim() || 'Template',
                 pickupLocation,
                 deliveryLocation,
                 vehicleType: String(d.vehicleType || '').trim(),
@@ -775,3 +840,4 @@
     </script>
 </body>
 </html>
+

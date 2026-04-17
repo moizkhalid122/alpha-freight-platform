@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Award Load • Alpha Freight</title>
+    <title>Award Load â€¢ Alpha Freight</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
     <link rel="stylesheet" href="../../assets/css/carrier-premium-theme.css">
     <link rel="stylesheet" href="../../assets/css/carrier-ui-kit.css?v=1">
     <script src="../../assets/js/app-resume-fix.js"></script>
     <style>
-        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
         .page-header { padding: 1rem 1.25rem 1.1rem; }
         .page-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem; }
         .page-subtitle { font-size: 0.875rem; opacity: 0.9; margin: 0; }
@@ -155,19 +156,19 @@
             <div class="d-flex justify-content-between align-items-start gap-3">
                 <div>
                     <div style="font-weight:1000;letter-spacing:-0.02em;">Load</div>
-                    <div class="muted mt-1" id="routeText">—</div>
+                    <div class="muted mt-1" id="routeText">â€”</div>
                 </div>
                 <div class="badge-soft" id="statusPill"><i class="fas fa-hourglass-half"></i> Pending</div>
             </div>
             <div class="mt-3 d-flex gap-2 flex-wrap">
-                <span class="badge-soft" id="currentPricePill"><i class="fas fa-tag"></i> Price: —</span>
-                <span class="badge-soft" id="bidsCountPill"><i class="fas fa-gavel"></i> Bids: —</span>
+                <span class="badge-soft" id="currentPricePill"><i class="fas fa-tag"></i> Price: â€”</span>
+                <span class="badge-soft" id="bidsCountPill"><i class="fas fa-gavel"></i> Bids: â€”</span>
             </div>
         </div>
 
         <div class="bid-grid" id="bidsGrid">
             <div class="card">
-                <div class="muted">Loading bids…</div>
+                <div class="muted">Loading bidsâ€¦</div>
             </div>
         </div>
     </div>
@@ -244,7 +245,7 @@
 
         function formatCurrency(v) {
             const n = Number(v || 0) || 0;
-            return '£' + n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return 'Â£' + n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function getSupplierAuth() {
@@ -282,7 +283,7 @@
         function getLoadRoute(load) {
             const p = load.pickupLocation || load.pickup_location || 'N/A';
             const d = load.deliveryLocation || load.delivery_location || 'N/A';
-            return `${p} → ${d}`;
+            return `${p} â†’ ${d}`;
         }
 
         function getBasePrice(load) {
@@ -362,12 +363,12 @@
 
         async function fetchCarrierStats(carrierId) {
             const db = window.AlphaBrokrage.firebaseDb;
-            if (!db || !carrierId) return { completed: 0, onTimePct: null, vehicle: '—' };
-            let vehicle = '—';
+            if (!db || !carrierId) return { completed: 0, onTimePct: null, vehicle: 'â€”' };
+            let vehicle = 'â€”';
             try {
                 const prof = await db.ref('carriers/' + carrierId).once('value');
                 const v = prof.val() || {};
-                vehicle = v.vehicleType || v.vehicle || v.fleetType || '—';
+                vehicle = v.vehicleType || v.vehicle || v.fleetType || 'â€”';
             } catch (e) {}
 
             try {
@@ -535,11 +536,11 @@
                     authUid,
                     bid.carrierId,
                     'Load Awarded',
-                    `Supplier awarded the load • ${getLoadRoute(loadData)}`,
+                    `Supplier awarded the load â€¢ ${getLoadRoute(loadData)}`,
                     { type: 'bid_accepted', loadId: String(loadId), url: '/mobile-app/carrier/load-details.html?id=' + encodeURIComponent(loadId), icon: '/image-removebg-preview - 2026-03-04T141043.516.png' }
                 );
 
-                await sendAutoChatMessage(auth, bid.carrierId, bid.carrierName || 'Carrier', `Load awarded: #${String(loadId).substring(0, 8)} • ${getLoadRoute(loadData)} • Agreed ${formatCurrency(next)}`);
+                await sendAutoChatMessage(auth, bid.carrierId, bid.carrierName || 'Carrier', `Load awarded: #${String(loadId).substring(0, 8)} â€¢ ${getLoadRoute(loadData)} â€¢ Agreed ${formatCurrency(next)}`);
 
                 showSuccess('Load awarded');
                 openChatWithCarrier(bid.carrierId, bid.carrierName);
@@ -565,7 +566,7 @@
                 items: [
                     { k: 'Carrier', v: bid.carrierName || 'Carrier' },
                     { k: 'Bid', v: formatCurrency(bid.amount || 0) },
-                    { k: 'Route', v: loadData ? getLoadRoute(loadData) : '—' }
+                    { k: 'Route', v: loadData ? getLoadRoute(loadData) : 'â€”' }
                 ],
                 note: 'Rejected bid will not be assigned.',
                 confirmText: 'Reject',
@@ -595,7 +596,7 @@
                     authUid,
                     bid.carrierId,
                     'Bid Rejected',
-                    `Supplier rejected your bid • ${loadData ? getLoadRoute(loadData) : ''}`,
+                    `Supplier rejected your bid â€¢ ${loadData ? getLoadRoute(loadData) : ''}`,
                     { type: 'bid_rejected', loadId: String(loadId), url: '/mobile-app/carrier/my-bids.html', icon: '/image-removebg-preview - 2026-03-04T141043.516.png' }
                 );
 
@@ -619,8 +620,8 @@
                 return;
             }
             grid.innerHTML = bids.map((b) => {
-                const stats = b._stats || { completed: 0, onTimePct: null, vehicle: '—' };
-                const onTimeText = stats.onTimePct == null ? '—' : (stats.onTimePct + '%');
+                const stats = b._stats || { completed: 0, onTimePct: null, vehicle: 'â€”' };
+                const onTimeText = stats.onTimePct == null ? 'â€”' : (stats.onTimePct + '%');
                 const canAct = !isBusy && (String(loadData && loadData.status || '').toLowerCase() === 'available' || String(loadData && loadData.status || '').toLowerCase() === 'pending');
                 const disabled = canAct ? '' : 'disabled';
                 const note = b.message ? `<div class="muted mt-2" style="white-space:pre-line;">${escapeHtml(b.message)}</div>` : '';
@@ -638,7 +639,7 @@
                         <div class="metrics">
                             <div class="metric"><div class="k">Completed</div><div class="v">${stats.completed}</div></div>
                             <div class="metric"><div class="k">On-time</div><div class="v">${onTimeText}</div></div>
-                            <div class="metric"><div class="k">Vehicle</div><div class="v">${escapeHtml(stats.vehicle || '—')}</div></div>
+                            <div class="metric"><div class="k">Vehicle</div><div class="v">${escapeHtml(stats.vehicle || 'â€”')}</div></div>
                         </div>
                         ${note}
                         <div class="actions">
@@ -711,7 +712,7 @@
 
                 const pill = getStatusPill(loadData);
                 document.getElementById('statusPill').innerHTML = `<i class="fas ${pill.icon}"></i> ${pill.text}`;
-                document.getElementById('subtitle').textContent = 'Compare bids • ' + getLoadRoute(loadData);
+                document.getElementById('subtitle').textContent = 'Compare bids â€¢ ' + getLoadRoute(loadData);
                 document.getElementById('routeText').textContent = getLoadRoute(loadData);
                 document.getElementById('currentPricePill').innerHTML = `<i class="fas fa-tag"></i> Price: ${formatCurrency(getBasePrice(loadData))}`;
 
@@ -735,3 +736,4 @@
     </script>
 </body>
 </html>
+

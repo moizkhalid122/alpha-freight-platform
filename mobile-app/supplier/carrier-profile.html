@@ -15,7 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
     <script src="../../assets/js/app-resume-fix.js"></script>
     <style>
         :root {
@@ -59,7 +60,7 @@
             z-index: 0;
         }
         body > *{ position: relative; z-index: 1; }
-        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
         .page-header {
             background: transparent;
             color: rgba(15,23,42,0.92);
@@ -147,7 +148,7 @@
     <div class="page-header">
         <div class="header-content">
             <h1 class="page-title">Carrier Profile</h1>
-            <p class="page-subtitle" id="subtitle">Loading…</p>
+            <p class="page-subtitle" id="subtitle">Loadingâ€¦</p>
         </div>
     </div>
 
@@ -155,7 +156,7 @@
         <div class="card">
             <div class="d-flex align-items-center gap-3">
                 <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
-                <div class="muted">Loading carrier…</div>
+                <div class="muted">Loading carrierâ€¦</div>
             </div>
         </div>
     </div>
@@ -189,7 +190,7 @@
         function buildStars(rating) {
             const r = Math.max(0, Math.min(5, Math.round((parseFloat(rating) || 0) * 2) / 2));
             let stars = '';
-            for (let i = 1; i <= 5; i++) stars += i <= Math.round(r) ? '★' : '☆';
+            for (let i = 1; i <= 5; i++) stars += i <= Math.round(r) ? 'â˜…' : 'â˜†';
             return stars;
         }
 
@@ -351,7 +352,7 @@
             const addressParts = [profile && profile.address, profile && profile.city, profile && profile.postcode, profile && profile.country].filter(Boolean);
             const address = addressParts.join(', ');
             const ratingText = stats && stats.ratingCount ? `${stats.rating}/5 (${stats.ratingCount})` : 'New';
-            const stars = stats && stats.ratingCount ? buildStars(stats.rating) : '☆☆☆☆☆';
+            const stars = stats && stats.ratingCount ? buildStars(stats.rating) : 'â˜†â˜†â˜†â˜†â˜†';
 
             const maskedEmail = profile && profile.email ? maskEmail(profile.email) : '';
             const maskedPhone = profile && profile.phone ? maskPhone(profile.phone) : '';
@@ -373,16 +374,16 @@
                         <div class="stat"><div class="k">Total Loads</div><div class="v">${stats ? stats.total : 0}</div></div>
                         <div class="stat"><div class="k">Completed</div><div class="v">${stats ? stats.completed : 0}</div></div>
                         <div class="stat"><div class="k">Active</div><div class="v">${stats ? stats.active : 0}</div></div>
-                        <div class="stat"><div class="k">Rating</div><div class="v">${stats && stats.ratingCount ? stats.rating : '—'}</div></div>
+                        <div class="stat"><div class="k">Rating</div><div class="v">${stats && stats.ratingCount ? stats.rating : 'â€”'}</div></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="rowline"><div class="k">Company</div><div class="v">${safe(profile && profile.companyName) || '—'}</div></div>
-                    <div class="rowline"><div class="k">Name</div><div class="v">${safe((profile && `${profile.firstName || ''} ${profile.lastName || ''}`.trim())) || '—'}</div></div>
-                    <div class="rowline"><div class="k">Email</div><div class="v">${safe(maskedEmail) || '—'}</div></div>
-                    <div class="rowline"><div class="k">Phone</div><div class="v">${safe(maskedPhone) || '—'}</div></div>
-                    <div class="rowline"><div class="k">Address</div><div class="v">${safe(address) || '—'}</div></div>
+                    <div class="rowline"><div class="k">Company</div><div class="v">${safe(profile && profile.companyName) || 'â€”'}</div></div>
+                    <div class="rowline"><div class="k">Name</div><div class="v">${safe((profile && `${profile.firstName || ''} ${profile.lastName || ''}`.trim())) || 'â€”'}</div></div>
+                    <div class="rowline"><div class="k">Email</div><div class="v">${safe(maskedEmail) || 'â€”'}</div></div>
+                    <div class="rowline"><div class="k">Phone</div><div class="v">${safe(maskedPhone) || 'â€”'}</div></div>
+                    <div class="rowline"><div class="k">Address</div><div class="v">${safe(address) || 'â€”'}</div></div>
                 </div>
 
                 <div class="card">
@@ -428,3 +429,4 @@
     </script>
 </body>
 </html>
+

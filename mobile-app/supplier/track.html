@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
@@ -20,12 +20,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Shared responsive bottom nav -->
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
     <script src="../../assets/js/app-resume-fix.js"></script>
     <script src="../../assets/js/google-maps-config.js"></script>
     
     <style>
-        /* —— Premium theme (matches supplier dashboard) —— */
+        /* â€”â€” Premium theme (matches supplier dashboard) â€”â€” */
         :root {
             --primary: #1d4ed8;
             --primary-dark: #1e3a8a;
@@ -263,7 +264,7 @@
 
         .load-meta span { margin-right: 1rem; }
 
-        /* Bottom nav: supplier-bottom-nav.css – same size as dashboard */
+        /* Bottom nav: supplier-bottom-nav.css â€“ same size as dashboard */
         .empty-state {
             text-align: center;
             padding: 2.5rem 1.5rem;
@@ -306,10 +307,10 @@
         <div>
             <div class="status-text" id="statusText">Connecting...</div>
             <div class="stat-row">
-                <span id="statSpeed">Speed: —</span>
-                <span id="statHeading">Heading: —</span>
-                <span id="statEta">ETA: —</span>
-                <span id="statLast">Last: —</span>
+                <span id="statSpeed">Speed: â€”</span>
+                <span id="statHeading">Heading: â€”</span>
+                <span id="statEta">ETA: â€”</span>
+                <span id="statLast">Last: â€”</span>
             </div>
         </div>
     </div>
@@ -447,7 +448,7 @@
         }
 
         function computeEtaText(driverPos, speedMph) {
-            if (!activeRoute || !activeRoute.delivery || !driverPos || typeof google === 'undefined' || !google.maps || !google.maps.geometry) return '—';
+            if (!activeRoute || !activeRoute.delivery || !driverPos || typeof google === 'undefined' || !google.maps || !google.maps.geometry) return 'â€”';
             const from = new google.maps.LatLng(driverPos.lat, driverPos.lng);
             const to = new google.maps.LatLng(activeRoute.delivery.lat, activeRoute.delivery.lng);
             const distM = google.maps.geometry.spherical.computeDistanceBetween(from, to);
@@ -455,7 +456,7 @@
             const mph = speedMph > 5 ? speedMph : 45;
             const hours = miles / mph;
             const mins = Math.max(1, Math.round(hours * 60));
-            if (!isFinite(mins)) return '—';
+            if (!isFinite(mins)) return 'â€”';
             if (mins < 60) return `${mins}m`;
             const h = Math.floor(mins / 60);
             const m = mins % 60;
@@ -491,11 +492,11 @@
             map.panTo(pos);
             map.setZoom(14);
             const speedMph = computeSpeedMph(data);
-            document.getElementById('statSpeed').textContent = `Speed: ${speedMph > 0 ? speedMph.toFixed(0) + ' mph' : '—'}`;
-            document.getElementById('statHeading').textContent = data.heading ? `Heading: ${Math.round(data.heading)}°` : 'Heading: —';
+            document.getElementById('statSpeed').textContent = `Speed: ${speedMph > 0 ? speedMph.toFixed(0) + ' mph' : 'â€”'}`;
+            document.getElementById('statHeading').textContent = data.heading ? `Heading: ${Math.round(data.heading)}Â°` : 'Heading: â€”';
             const ts = data.timestamp || data.updatedAt;
             const lastTs = ts ? new Date(ts).getTime() : 0;
-            document.getElementById('statLast').textContent = lastTs ? 'Last: ' + new Date(lastTs).toLocaleTimeString() : 'Last: —';
+            document.getElementById('statLast').textContent = lastTs ? 'Last: ' + new Date(lastTs).toLocaleTimeString() : 'Last: â€”';
             document.getElementById('statEta').textContent = 'ETA: ' + computeEtaText(pos, speedMph);
 
             const now = Date.now();
@@ -506,7 +507,7 @@
             parts.push(`Tracking ${carrierName || 'carrier'}`);
             if (stale) parts.push('Location stale');
             if (overdue) parts.push('Delivery overdue');
-            document.getElementById('statusText').textContent = parts.join(' • ');
+            document.getElementById('statusText').textContent = parts.join(' â€¢ ');
             const dot = document.getElementById('statusDot');
             dot.classList.add('active');
             if (stale) dot.style.background = '#f59e0b'; else dot.style.background = '#10b981';
@@ -693,7 +694,7 @@
                     const isSelected = loadIdParam === l.id || (selectedLoad && selectedLoad.loadId === l.id);
 
                     return `<div class="load-item${isSelected ? ' active' : ''}" data-load-id="${l.id}" data-carrier-id="${cid}" data-carrier-name="${cname}">
-                        <div class="load-route"><i class="fas fa-route"></i> ${pickup} → ${delivery}</div>
+                        <div class="load-route"><i class="fas fa-route"></i> ${pickup} â†’ ${delivery}</div>
                         <div class="load-meta"><span>${l.carrierName || l.carrier_name || 'Carrier'}</span><span>${statusText}</span></div>
                     </div>`;
                 }).join('');
@@ -724,3 +725,4 @@
     </script>
 </body>
 </html>
+

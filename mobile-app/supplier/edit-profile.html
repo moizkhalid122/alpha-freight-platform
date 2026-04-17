@@ -17,7 +17,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
     <style>
         :root {
             --primary: #1d4ed8;
@@ -518,10 +520,10 @@
                 try {
                     const docs = merged.verificationDocs || {};
                     if (docs.companyRegistration && docs.companyRegistration.url) {
-                        document.getElementById('docCompanyRegHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.companyRegistration.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                        document.getElementById('docCompanyRegHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded â€¢ <a href="${String(docs.companyRegistration.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
                     }
                     if (docs.proofOfAddress && docs.proofOfAddress.url) {
-                        document.getElementById('docProofAddressHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded • <a href="${String(docs.proofOfAddress.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
+                        document.getElementById('docProofAddressHelp').innerHTML = `<i class="fas fa-circle-check"></i> Uploaded â€¢ <a href="${String(docs.proofOfAddress.url).replace(/\"/g, '&quot;')}" target="_blank" rel="noopener">View</a>`;
                     }
                 } catch (e) {}
 
@@ -581,7 +583,7 @@
                         : 2;
                     showStep(step);
                 } catch (e) {}
-                alertSystem.show('error', 'Please complete: ' + requiredMissing.slice(0, 4).join(', ') + (requiredMissing.length > 4 ? '…' : ''));
+                alertSystem.show('error', 'Please complete: ' + requiredMissing.slice(0, 4).join(', ') + (requiredMissing.length > 4 ? 'â€¦' : ''));
                 return;
             }
 
@@ -591,49 +593,106 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
             try {
-                let existingDocs = {};
-                try {
-                    const ds = await db.ref('suppliers/' + supplierId + '/verificationDocs').once('value');
-                    if (ds.exists()) existingDocs = ds.val() || {};
-                } catch (e) {}
+                const docsConfig = [
+                    { inputId: 'docCompanyReg', docKey: 'companyRegistration' },
+                    { inputId: 'docProofAddress', docKey: 'proofOfAddress' }
+                ];
 
-                const storage = (typeof firebase !== 'undefined' && firebase.storage) ? firebase.storage() : null;
-                const newDocs = {};
-
-                async function uploadDoc(inputId, docKey) {
-                    const input = document.getElementById(inputId);
+                const selectedDocs = docsConfig.map((d) => {
+                    const input = document.getElementById(d.inputId);
                     const file = input && input.files && input.files[0] ? input.files[0] : null;
-                    if (!file || !storage) return;
-                    const ts = Date.now();
-                    const safeName = String(file.name || '').replace(/[^\w.\-]+/g, '_').slice(0, 80) || (docKey + '_' + ts);
-                    const ref = storage.ref().child(`kyc/suppliers/${supplierId}/${docKey}_${ts}_${safeName}`);
-                    await ref.put(file);
-                    const url = await ref.getDownloadURL();
-                    newDocs[docKey] = { url, name: file.name || null, type: file.type || null, size: file.size || null, uploadedAt: new Date().toISOString() };
+                    return { ...d, file };
+                }).filter(d => !!d.file);
+
+                const storage = selectedDocs.length && (typeof firebase !== 'undefined' && firebase.storage) ? firebase.storage() : null;
+
+                function readAsDataUrl(file) {
+                    return new Promise((resolve, reject) => {
+                        const r = new FileReader();
+                        r.onload = () => resolve(String(r.result || ''));
+                        r.onerror = () => reject(new Error('read_failed'));
+                        r.readAsDataURL(file);
+                    });
                 }
 
-                try {
-                    await uploadDoc('docCompanyReg', 'companyRegistration');
-                    await uploadDoc('docProofAddress', 'proofOfAddress');
-                } catch (e) {
-                    alertSystem.show('error', 'Failed to upload document(s). Please try again.');
-                    btn.disabled = false;
-                    btn.innerHTML = originalBtnHtml || '<i class="fas fa-save"></i> Finish & Save';
-                    return;
+                function canvasToBlob(canvas, type, quality) {
+                    return new Promise((resolve) => {
+                        if (canvas && typeof canvas.toBlob === 'function') {
+                            canvas.toBlob((b) => resolve(b), type, quality);
+                        } else {
+                            resolve(null);
+                        }
+                    });
                 }
 
-                if (Object.keys(newDocs).length) {
-                    payload.verificationDocs = Object.assign({}, existingDocs, newDocs);
-                    payload.kycSubmittedAt = payload.kycSubmittedAt || new Date().toISOString();
-                    payload.kycUpdatedAt = new Date().toISOString();
-                    payload.kycStatus = 'submitted';
+                async function compressIfNeeded(file) {
+                    const type = String(file.type || '').toLowerCase();
+                    if (!type.startsWith('image/')) return file;
+                    if (file.size && file.size <= 650 * 1024) return file;
+
+                    const dataUrl = await readAsDataUrl(file);
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                        img.onload = () => resolve();
+                        img.onerror = () => reject(new Error('image_load_failed'));
+                        img.src = dataUrl;
+                    });
+
+                    const maxSide = 1600;
+                    const w = img.naturalWidth || img.width || 0;
+                    const h = img.naturalHeight || img.height || 0;
+                    if (!w || !h) return file;
+
+                    let nw = w;
+                    let nh = h;
+                    const ratio = Math.min(1, maxSide / Math.max(w, h));
+                    nw = Math.max(1, Math.round(w * ratio));
+                    nh = Math.max(1, Math.round(h * ratio));
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = nw;
+                    canvas.height = nh;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return file;
+                    ctx.drawImage(img, 0, 0, nw, nh);
+
+                    const blob = await canvasToBlob(canvas, 'image/jpeg', 0.82);
+                    if (!blob) return file;
+                    const newName = String(file.name || 'document').replace(/\.[a-z0-9]+$/i, '') + '.jpg';
+                    try {
+                        return new File([blob], newName, { type: 'image/jpeg' });
+                    } catch (e) {
+                        blob.name = newName;
+                        return blob;
+                    }
+                }
+
+                if (selectedDocs.length) {
+                    try {
+                        const uq = window.AlphaBrokrage && window.AlphaBrokrage.uploadQueue;
+                        if (uq && typeof uq.enqueueSupplierDocs === 'function') {
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                            await uq.enqueueSupplierDocs({
+                                supplierId,
+                                authUid,
+                                docs: selectedDocs.map(d => ({ docKey: d.docKey, file: d.file }))
+                            });
+                            payload.kycQueuedAt = new Date().toISOString();
+                            payload.kycUpdatedAt = payload.kycQueuedAt;
+                            payload.kycStatus = 'queued';
+                        }
+                    } catch (e) {}
                 }
 
                 await db.ref('suppliers/' + supplierId).update(payload);
                 const updated = { ...user, ...payload };
                 localStorage.setItem('supplierAuth', JSON.stringify(updated));
                 localStorage.setItem('lastSupplierProfile', JSON.stringify(updated));
-                alertSystem.show('success', 'Profile updated');
+                alertSystem.show('success', selectedDocs.length ? 'Saved. Documents uploading in background.' : 'Profile updated');
+                try {
+                    const uq = window.AlphaBrokrage && window.AlphaBrokrage.uploadQueue;
+                    if (uq && typeof uq.process === 'function') uq.process().catch(function() {});
+                } catch (e) {}
                 setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
             } catch (e) {
                 alertSystem.show('error', 'Failed to save. Please try again.');
@@ -668,3 +727,4 @@
     </script>
 </body>
 </html>
+

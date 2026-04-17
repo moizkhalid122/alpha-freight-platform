@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
     <script src="../../assets/js/app-resume-fix.js"></script>
 
     <style>
@@ -433,7 +434,7 @@
                 </div>
                 <div class="stat">
                     <div class="stat-k">Avg</div>
-                    <div class="stat-v" id="statAvg">£0</div>
+                    <div class="stat-v" id="statAvg">Â£0</div>
                 </div>
             </div>
         </div>
@@ -450,7 +451,7 @@
         <div class="list" id="offerList">
             <div class="empty">
                 <i class="fas fa-inbox"></i>
-                <h3>Loading…</h3>
+                <h3>Loadingâ€¦</h3>
                 <p>Please wait</p>
             </div>
         </div>
@@ -631,7 +632,7 @@
         function formatCurrency(val) {
             const n = Number(val || 0);
             const safe = Number.isFinite(n) ? n : 0;
-            return '£' + safe.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            return 'Â£' + safe.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         function formatWhen(tsOrIso) {
@@ -644,7 +645,7 @@
         function getLoadRoute(load) {
             const pickup = load?.pickupLocation || load?.pickup_location || 'N/A';
             const delivery = load?.deliveryLocation || load?.delivery_location || 'N/A';
-            return pickup + ' → ' + delivery;
+            return pickup + ' â†’ ' + delivery;
         }
 
         function getOfferStatus(offer) {
@@ -658,7 +659,7 @@
         async function loadOffers() {
             const user = getUserData();
             const list = document.getElementById('offerList');
-            list.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><h3>Loading…</h3><p>Please wait</p></div>';
+            list.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><h3>Loadingâ€¦</h3><p>Please wait</p></div>';
 
             if (!user) {
                 list.innerHTML = '<div class="empty"><i class="fas fa-sign-in-alt"></i><h3>Sign in required</h3><p>Login to view bids</p></div>';
@@ -800,7 +801,7 @@
                         <div class="card-head">
                             <div style="min-width:0;">
                                 <p class="route">${escapeHtml(route)}</p>
-                                <div class="meta">${escapeHtml(o.carrierName)} • ${escapeHtml(when)} • ${escapeHtml(o.type.toUpperCase())}</div>
+                                <div class="meta">${escapeHtml(o.carrierName)} â€¢ ${escapeHtml(when)} â€¢ ${escapeHtml(o.type.toUpperCase())}</div>
                             </div>
                             <span class="pill ${pillClass}"><i class="fas fa-circle"></i>${pillText}</span>
                         </div>
@@ -916,7 +917,7 @@
                             toUserId: carrierId,
                             toUserType: 'carrier',
                             title: 'Bid Accepted',
-                            message: `Your bid ${formatCurrency(offer.amount || 0)} was accepted • ${route}`,
+                            message: `Your bid ${formatCurrency(offer.amount || 0)} was accepted â€¢ ${route}`,
                             type: 'bid_accepted',
                             data: {
                                 type: 'bid_accepted',
@@ -989,7 +990,7 @@
                             toUserId: carrierId,
                             toUserType: 'carrier',
                             title: 'Bid Rejected',
-                            message: `Your bid was rejected • ${route}`,
+                            message: `Your bid was rejected â€¢ ${route}`,
                             type: 'bid_rejected',
                             data: {
                                 type: 'bid_rejected',
@@ -1024,3 +1025,4 @@
     </script>
 </body>
 </html>
+

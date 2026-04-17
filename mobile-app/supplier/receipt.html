@@ -15,7 +15,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
+    <script src="../../assets/js/app-resume-fix.js"></script>
 
     <style>
         :root {
@@ -41,7 +43,7 @@
             color: var(--text-dark);
         }
 
-        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 48px)) !important; }
+        body.has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
 
         .header {
             background: linear-gradient(180deg, #0f172a 0%, #1e293b 52%, #1e3a8a 100%);
@@ -368,7 +370,7 @@
 
         function formatCurrency(amount) {
             const num = parseFloat(amount) || 0;
-            return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return 'Â£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function formatDate(value) {
@@ -726,7 +728,7 @@
 
             const pickup = load.pickupLocation || load.pickup_location || '-';
             const delivery = load.deliveryLocation || load.delivery_location || '-';
-            const route = `${pickup} → ${delivery}`;
+            const route = `${pickup} â†’ ${delivery}`;
             const paidAt = (load.paymentStatus && (load.paymentStatus.paidAt || load.paymentStatus.completedAt)) || load.paidAt || (payment && payment.createdAt) || load.updatedAt || load.createdAt;
             const method = (load.paymentStatus && load.paymentStatus.method) || (payment && payment.method) || '-';
             const intent = (load.paymentStatus && load.paymentStatus.paymentIntentId) || (payment && payment.paymentIntentId) || '-';
@@ -746,8 +748,8 @@
             const qrUrl = getQrUrl(qrData, 220);
             const docRefLabel = pageMode === 'invoice' ? (invoiceNumber || paymentRef) : paymentRef;
             const subRefText = pageMode === 'invoice'
-              ? (invoiceNumber ? ` • Invoice #${escapeHtml(String(invoiceNumber))}` : (paymentRef ? ` • Invoice #${escapeHtml(String(paymentRef).slice(0, 10))}` : ''))
-              : (paymentRef ? ` • Receipt #${escapeHtml(String(paymentRef).slice(0, 10))}` : '');
+              ? (invoiceNumber ? ` â€¢ Invoice #${escapeHtml(String(invoiceNumber))}` : (paymentRef ? ` â€¢ Invoice #${escapeHtml(String(paymentRef).slice(0, 10))}` : ''))
+              : (paymentRef ? ` â€¢ Receipt #${escapeHtml(String(paymentRef).slice(0, 10))}` : '');
 
             content.innerHTML = `
                 <div class="brand">
@@ -932,3 +934,4 @@
     </script>
 </body>
 </html>
+

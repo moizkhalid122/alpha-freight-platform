@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
@@ -30,11 +30,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Shared responsive bottom nav -->
-    <link rel="stylesheet" href="../../assets/css/supplier-bottom-nav.css?v=4">
+    
+    <link rel="stylesheet" href="../../assets/css/supplier-ultra-premium.css?v=1">
     <script src="../../assets/js/app-resume-fix.js"></script>
     
     <style>
-        /* —— Premium theme (matches dashboard) —— */
+        /* â€”â€” Premium theme (matches dashboard) â€”â€” */
         :root {
             --primary: #635bff;
             --primary-dark: #4f46e5;
@@ -54,12 +55,13 @@
             --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
             --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-press: cubic-bezier(0.2, 0.8, 0.2, 1);
             --radius: 22px;
             --radius-sm: 14px;
             --page-pad: 18px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -89,7 +91,7 @@
         ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.16); border-radius: 10px; transition: background 0.3s var(--ease); }
         * { scrollbar-width: thin; scrollbar-color: rgba(15, 23, 42, 0.16) transparent; }
 
-        /* Page Header – premium navy + gold accent */
+        /* Page Header â€“ premium navy + gold accent */
         .page-header {
             background: transparent;
             color: var(--text-dark);
@@ -142,7 +144,7 @@
             font-weight: 700;
         }
 
-        /* Form Card – premium */
+        /* Form Card â€“ premium */
         .form-card {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -263,11 +265,13 @@
             cursor: pointer;
             padding: 0.75rem;
             border-radius: 12px;
-            transition: background 0.2s;
+            transition: background 0.16s var(--ease-press), transform 0.16s var(--ease-press);
+            touch-action: manipulation;
         }
 
         .custom-checkbox:active {
             background: var(--bg-main);
+            transform: scale(0.99);
         }
 
         .checkbox-input {
@@ -347,6 +351,8 @@
             justify-content:center;
             gap: 8px;
             box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+            transition: transform 0.16s var(--ease-press), background-color 0.16s var(--ease-press), border-color 0.16s var(--ease-press);
+            touch-action: manipulation;
         }
         .ai-price-btn:active{ transform: scale(0.99); }
 
@@ -388,7 +394,7 @@
             font-weight: 700;
         }
 
-        /* Submit Button – premium */
+        /* Submit Button â€“ premium */
         .submit-btn {
             width: 100%;
             margin: 0;
@@ -400,18 +406,20 @@
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            transition: transform 0.16s var(--ease-press), box-shadow 0.16s var(--ease-press), filter 0.16s var(--ease-press);
             min-height: 54px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
             box-shadow: 0 14px 34px rgba(99, 91, 255, 0.22);
+            touch-action: manipulation;
         }
 
         .submit-btn:active {
             transform: scale(0.98);
             box-shadow: 0 10px 28px rgba(99, 91, 255, 0.18);
+            filter: brightness(0.98);
         }
 
         .submit-btn:disabled {
@@ -430,18 +438,20 @@
             border: 1px solid rgba(15,23,42,0.10);
             border-radius: 12px;
             cursor: pointer;
-            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            transition: transform 0.16s var(--ease-press), box-shadow 0.16s var(--ease-press), background-color 0.16s var(--ease-press), border-color 0.16s var(--ease-press);
             min-height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+            touch-action: manipulation;
         }
 
         .save-draft-btn:active {
             transform: scale(0.98);
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+            background: rgba(255,255,255,0.96);
         }
 
         .action-bar{
@@ -567,6 +577,8 @@
             align-items:center;
             justify-content:center;
             gap: 8px;
+            transition: transform 0.16s var(--ease-press), background 0.16s var(--ease-press), border-color 0.16s var(--ease-press);
+            touch-action: manipulation;
         }
         .ai-assist-btn.primary{
             border: 0;
@@ -575,6 +587,23 @@
             box-shadow: 0 12px 28px rgba(99,91,255,0.22);
         }
         .ai-assist-btn:active{ transform: scale(0.99); }
+
+        .bottom-nav .bottom-nav-item{
+            transition: transform 0.16s var(--ease-press);
+            touch-action: manipulation;
+        }
+        .bottom-nav .bottom-nav-item:active{ transform: scale(0.98); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .custom-checkbox,
+            .ai-price-btn,
+            .submit-btn,
+            .save-draft-btn,
+            .ai-assist-btn,
+            .bottom-nav .bottom-nav-item{
+                transition: none;
+            }
+        }
         .ai-assist-result{
             margin-top: 12px;
             padding: 12px;
@@ -631,7 +660,7 @@
             justify-content: center;
         }
 
-        /* Bottom nav: supplier-bottom-nav.css – same as dashboard */
+        /* Bottom nav: supplier-bottom-nav.css â€“ same as dashboard */
         @media (min-width: 768px) {
             body { max-width: 440px; margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.12); }
         }
@@ -666,7 +695,7 @@
                     Load Title
                     <span class="required">*</span>
                 </label>
-                <input type="text" class="form-input" id="loadTitle" placeholder="e.g., Electronics delivery London → Manchester" required>
+                <input type="text" class="form-input" id="loadTitle" placeholder="e.g., Electronics delivery London â†’ Manchester" required>
             </div>
 
             <div class="form-group">
@@ -777,12 +806,12 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Volume (m³)</label>
+                <label class="form-label">Volume (mÂ³)</label>
                 <input type="number" class="form-input" id="cargoVolume" placeholder="e.g., 10" step="0.01" min="0">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Cargo Value (£)</label>
+                <label class="form-label">Cargo Value (Â£)</label>
                 <input type="number" class="form-input" id="cargoValue" placeholder="e.g., 5000" step="0.01" min="0">
             </div>
 
@@ -853,12 +882,12 @@
             </h3>
 
             <div class="form-group">
-                <label class="form-label">Minimum Budget (£)</label>
+                <label class="form-label">Minimum Budget (Â£)</label>
                 <input type="number" class="form-input" id="minBudget" placeholder="e.g., 200" step="0.01" min="0" oninput="calculateSupplierCommission()">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Maximum Budget (£)</label>
+                <label class="form-label">Maximum Budget (Â£)</label>
                 <input type="number" class="form-input" id="maxBudget" placeholder="e.g., 500" step="0.01" min="0" oninput="calculateSupplierCommission()">
             </div>
 
@@ -870,7 +899,7 @@
                 <div class="ai-price-box" id="aiPriceBox">
                     <div class="ai-price-top">
                         <div class="ai-price-title">Suggested Range</div>
-                        <div class="ai-price-range" id="aiPriceRange">£0–£0</div>
+                        <div class="ai-price-range" id="aiPriceRange">Â£0â€“Â£0</div>
                     </div>
                     <div class="ai-price-why" id="aiPriceWhy"></div>
                 </div>
@@ -901,12 +930,12 @@
             </div>
 
             <div class="form-group" id="depositGroup" style="display:none;">
-                <label class="form-label">Deposit Amount (£)</label>
+                <label class="form-label">Deposit Amount (Â£)</label>
                 <input type="number" class="form-input" id="depositAmount" placeholder="e.g., 200" step="0.01" min="0">
             </div>
 
             <div class="form-group" id="codGroup" style="display:none;">
-                <label class="form-label">COD Amount (£)</label>
+                <label class="form-label">COD Amount (Â£)</label>
                 <input type="number" class="form-input" id="codAmount" placeholder="Auto" step="0.01" min="0">
             </div>
 
@@ -914,7 +943,7 @@
             <div class="commission-info" id="commissionInfo">
                 <div class="commission-row">
                     <span class="commission-label">Platform Commission:</span>
-                    <span class="commission-value primary" id="commissionAmount">£0.00</span>
+                    <span class="commission-value primary" id="commissionAmount">Â£0.00</span>
                 </div>
                 <div class="commission-row">
                     <span class="commission-label">Commission Rate:</span>
@@ -922,7 +951,7 @@
                 </div>
                 <div class="commission-row">
                     <span class="commission-label">Amount You'll Pay:</span>
-                    <span class="commission-value success" id="finalAmount">£0.00</span>
+                    <span class="commission-value success" id="finalAmount">Â£0.00</span>
                 </div>
             </div>
         </div>
@@ -976,8 +1005,8 @@
                 <div class="ai-assist-title"><i class="fas fa-wand-magic-sparkles"></i><span>AI Assist</span></div>
                 <button type="button" class="ai-assist-close" id="aiAssistClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
             </div>
-            <div class="ai-assist-hint">Write your load details in one line. Example: “Electronics London → Manchester tomorrow, 7.5T, 1200kg”.</div>
-            <textarea class="ai-assist-input" id="aiAssistText" placeholder="Type your load details…"></textarea>
+            <div class="ai-assist-hint">Write your load details in one line. Example: â€œElectronics London â†’ Manchester tomorrow, 7.5T, 1200kgâ€.</div>
+            <textarea class="ai-assist-input" id="aiAssistText" placeholder="Type your load detailsâ€¦"></textarea>
             <div class="ai-assist-actions">
                 <button type="button" class="ai-assist-btn" id="aiAssistApply"><i class="fas fa-bolt"></i>Fill Form</button>
                 <button type="button" class="ai-assist-btn primary" id="aiAssistSuggest"><i class="fas fa-sparkles"></i>Suggest</button>
@@ -1127,9 +1156,9 @@
 
         function guessLocations(text) {
             const t = String(text || '');
-            const arrow = t.match(/([A-Za-z][^,\n→\-]{2,}?)\s*(?:->|→)\s*([A-Za-z][^,\n]{2,})/);
+            const arrow = t.match(/([A-Za-z][^,\nâ†’\-]{2,}?)\s*(?:->|â†’)\s*([A-Za-z][^,\n]{2,})/);
             if (arrow) return { pickup: arrow[1].trim(), delivery: arrow[2].trim() };
-            const ft = t.match(/\bfrom\s+(.+?)\s+(?:to|->|→)\s+(.+?)(?:[,.;\n]|$)/i);
+            const ft = t.match(/\bfrom\s+(.+?)\s+(?:to|->|â†’)\s+(.+?)(?:[,.;\n]|$)/i);
             if (ft) return { pickup: String(ft[1]).trim(), delivery: String(ft[2]).trim() };
             return { pickup: '', delivery: '' };
         }
@@ -1183,7 +1212,7 @@
                 furniture: 'Furniture'
             };
             const ct = nice[cargoType] || 'Cargo';
-            if (pickup && delivery) return `${ct} ${pickup} → ${delivery}`;
+            if (pickup && delivery) return `${ct} ${pickup} â†’ ${delivery}`;
             if (pickup) return `${ct} pickup ${pickup}`;
             return `${ct} load`;
         }
@@ -1226,7 +1255,7 @@
             calculateSupplierCommission();
             closeAiAssist();
             if (changed > 0) showSuccess('AI Assist filled your form.');
-            else showError('Nothing to fill. Add pickup → delivery, date, and cargo type.');
+            else showError('Nothing to fill. Add pickup â†’ delivery, date, and cargo type.');
         }
 
         function getFormValue(id) {
@@ -1428,8 +1457,8 @@
 
         function formatGBP(value) {
             const n = Number(value);
-            if (!Number.isFinite(n)) return '£0';
-            return '£' + Math.round(n).toLocaleString('en-GB');
+            if (!Number.isFinite(n)) return 'Â£0';
+            return 'Â£' + Math.round(n).toLocaleString('en-GB');
         }
 
         function aiPriceSuggest() {
@@ -1487,12 +1516,12 @@
             const box = document.getElementById('aiPriceBox');
             const rangeEl = document.getElementById('aiPriceRange');
             const whyEl = document.getElementById('aiPriceWhy');
-            if (rangeEl) rangeEl.textContent = `${formatGBP(min)}–${formatGBP(max)}`;
+            if (rangeEl) rangeEl.textContent = `${formatGBP(min)}â€“${formatGBP(max)}`;
             if (whyEl) {
                 const kmTxt = `${Math.round(distKm)} km`;
                 const vTxt = vehicleType.replace('-', ' ');
                 const uTxt = urgency.replace('-', ' ');
-                whyEl.textContent = `Why: ~${kmTxt} • ${vTxt} • ${uTxt} • ${weightLabel}`;
+                whyEl.textContent = `Why: ~${kmTxt} â€¢ ${vTxt} â€¢ ${uTxt} â€¢ ${weightLabel}`;
             }
             if (box) box.classList.add('show');
             showSuccess('Price suggestion applied to budget.');
@@ -1506,6 +1535,19 @@
                 return null;
             }
             return JSON.parse(supplierAuth);
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return;
+            if (authSdk.currentUser) return;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 6500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (!done) { done = true; clearTimeout(timer); try { unsub(); } catch(e){}; resolve(); }
+                });
+            });
         }
 
         // Calculate supplier commission
@@ -1531,9 +1573,9 @@
             const totalAmount = budget + supplierCommission;
 
             // Update display
-            document.getElementById('commissionAmount').textContent = '£' + supplierCommission.toFixed(2);
+            document.getElementById('commissionAmount').textContent = 'Â£' + supplierCommission.toFixed(2);
             document.getElementById('commissionRate').textContent = (supplierCommissionRate * 100).toFixed(0) + '%';
-            document.getElementById('finalAmount').textContent = '£' + totalAmount.toFixed(2);
+            document.getElementById('finalAmount').textContent = 'Â£' + totalAmount.toFixed(2);
             document.getElementById('commissionInfo').classList.add('show');
         }
 
@@ -1737,9 +1779,9 @@
             if (!target.length) return;
 
             const supplierId = String(auth.supplierId || auth.id || auth.email?.replace(/@/g, '_').replace(/\./g, '_') || '');
-            const route = String(loadData.pickupLocation || 'N/A') + ' → ' + String(loadData.deliveryLocation || 'N/A');
+            const route = String(loadData.pickupLocation || 'N/A') + ' â†’ ' + String(loadData.deliveryLocation || 'N/A');
             const budget = Number(loadData.budget || loadData.price || 0);
-            const amt = Number.isFinite(budget) && budget > 0 ? ('£' + budget.toLocaleString('en-GB', { maximumFractionDigits: 0 })) : '';
+            const amt = Number.isFinite(budget) && budget > 0 ? ('Â£' + budget.toLocaleString('en-GB', { maximumFractionDigits: 0 })) : '';
             const formatted = 'LOAD-' + String(loadId).substring(0, 8).toUpperCase();
 
             const updates = {};
@@ -1907,9 +1949,17 @@
                 }
 
                 // Save to Firebase
-                const db = window.AlphaBrokrage.firebaseDb;
-                const loadRef = db.ref('loads').push(loadData);
-                const loadId = loadRef.key;
+                const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+                const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+                await ensureAuthReady();
+                const fbUser = authSdk && authSdk.currentUser ? authSdk.currentUser : null;
+                if (!db) throw new Error('db_unavailable');
+                if (!fbUser || !fbUser.uid) throw new Error('auth_required');
+                loadData.supplierFirebaseUid = String(fbUser.uid);
+
+                const loadRef = await db.ref('loads').push(loadData);
+                const loadId = loadRef && loadRef.key ? loadRef.key : '';
+                if (!loadId) throw new Error('load_id_missing');
 
                 // Update load with formatted ID
                 await db.ref(`loads/${loadId}`).update({
@@ -1950,7 +2000,15 @@
 
             } catch (error) {
                 console.error('Error posting load:', error);
-                showError('Failed to post load. Please try again.');
+                const msg = String(error && (error.code || error.message) || '');
+                const lower = msg.toLowerCase();
+                if (msg === 'auth_required' || lower.includes('permission') || lower.includes('auth')) {
+                    showError('Session expired. Please login again and try posting the load.');
+                } else if (msg === 'db_unavailable') {
+                    showError('Service unavailable. Please try again in a moment.');
+                } else {
+                    showError('Failed to post load. Please try again.');
+                }
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Post Load</span>';
             }
@@ -2000,3 +2058,4 @@
     </script>
 </body>
 </html>
+
