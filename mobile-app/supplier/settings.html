@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
@@ -220,6 +220,98 @@
         }
         .btn-mini:active{ transform: scale(0.98); }
 
+        .overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 2000;
+        }
+        .overlay.show{ display: flex; }
+        .spinner{
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            border: 2px solid rgba(15,23,42,0.18);
+            border-top-color: rgba(99,91,255,0.85);
+            display: inline-block;
+            animation: spin 700ms linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .modal-card{
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15,23,42,0.12);
+            box-shadow: 0 24px 70px rgba(15,23,42,0.18);
+            border-radius: 22px;
+            overflow: hidden;
+        }
+        .modal-head{
+            padding: 14px 14px 10px;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 10px;
+        }
+        .modal-title{
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+        }
+        .modal-body{
+            padding: 14px;
+        }
+        .modal-body p{
+            margin: 0 0 10px;
+            color: rgba(15,23,42,0.86);
+            font-weight: 750;
+            font-size: 0.9rem;
+        }
+        .danger-note{
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: rgba(220,38,38,0.08);
+            border: 1px solid rgba(220,38,38,0.14);
+            color: rgba(185,28,28,0.98);
+            font-weight: 800;
+            font-size: 0.86rem;
+            margin-bottom: 12px;
+        }
+        .modal-actions{
+            padding: 12px 14px 14px;
+            border-top: 1px solid rgba(15,23,42,0.08);
+            display:flex;
+            gap: 10px;
+        }
+        .modal-actions .btn-mini{ flex: 1; }
+        .modal-actions .btn-mini[disabled]{
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .modal-input{
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.14);
+            background: rgba(241,245,249,0.75);
+            padding: 12px 12px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            outline: none;
+        }
+        .modal-input:focus{
+            border-color: rgba(99,91,255,0.35);
+            box-shadow: 0 0 0 3px rgba(99,91,255,0.12);
+        }
+
         .switch{
             position: relative;
             width: 50px;
@@ -403,6 +495,34 @@
                 </div>
                 <button type="button" class="btn-mini danger" id="logoutBtn">Sign out</button>
             </div>
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <div class="setting-title">Delete account</div>
+                    <div class="setting-sub">Request account & data deletion</div>
+                </div>
+                <button type="button" class="btn-mini danger" id="deleteAccountBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="deleteOverlay" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div style="min-width:0;">
+                    <h3 class="modal-title" id="deleteTitle">Delete account</h3>
+                    <div class="sub" style="margin-top:6px;">This will permanently delete your account</div>
+                </div>
+                <button type="button" class="btn-mini" id="deleteCloseBtn"><i class="fas fa-xmark"></i> Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="danger-note">Type DELETE to confirm. This cannot be undone.</div>
+                <p id="deleteMeta"></p>
+                <input class="modal-input" id="deleteConfirmInput" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="Type DELETE">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-mini" id="deleteCancelBtn">Cancel</button>
+                <button type="button" class="btn-mini danger" id="deleteConfirmBtn">Confirm delete</button>
+            </div>
         </div>
     </div>
 
@@ -429,12 +549,37 @@
         </a>
     </nav>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../../assets/js/firebase-init.js"></script>
     <script src="../../assets/js/alerts.js"></script>
 
     <script>
         const alertSystem = new AlertSystem();
         function showError(msg) { alertSystem.show('error', msg); }
         function showSuccess(msg) { alertSystem.show('success', msg); }
+        function showInfo(msg) { alertSystem.show('info', msg); }
+        let deleteBusy = false;
+
+        function setDeleteBusy(isBusy, label) {
+            deleteBusy = !!isBusy;
+            const overlay = document.getElementById('deleteOverlay');
+            const input = document.getElementById('deleteConfirmInput');
+            const closeBtn = document.getElementById('deleteCloseBtn');
+            const cancelBtn = document.getElementById('deleteCancelBtn');
+            const confirmBtn = document.getElementById('deleteConfirmBtn');
+            if (overlay && !overlay.classList.contains('show')) return;
+            if (input) input.disabled = deleteBusy;
+            if (closeBtn) closeBtn.disabled = deleteBusy;
+            if (cancelBtn) cancelBtn.disabled = deleteBusy;
+            if (confirmBtn) {
+                confirmBtn.disabled = deleteBusy;
+                confirmBtn.innerHTML = deleteBusy
+                    ? '<span style="display:inline-flex;align-items:center;justify-content:center;gap:10px;"><span class="spinner"></span><span>' + String(label || 'Working...') + '</span></span>'
+                    : 'Confirm delete';
+            }
+        }
 
         function safeJsonParse(s, fallback) {
             try { return JSON.parse(s); } catch (e) { return fallback; }
@@ -501,6 +646,130 @@
             setTimeout(() => { window.location.href = 'login.html'; }, 600);
         }
 
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!(window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser);
+        }
+
+        async function resolveSupplierIdByUid(db, authUid, fallbackId) {
+            if (!db || !authUid) return fallbackId || '';
+            if (fallbackId) {
+                try {
+                    const snap = await db.ref('suppliers/' + String(fallbackId)).once('value');
+                    if (snap.exists()) {
+                        const v = snap.val() || {};
+                        if (v.firebaseUid && String(v.firebaseUid) === String(authUid)) return String(fallbackId);
+                    }
+                } catch (e) {}
+            }
+            try {
+                const snap = await db.ref('suppliers').orderByChild('firebaseUid').equalTo(String(authUid)).limitToFirst(1).once('value');
+                if (snap.exists()) {
+                    let out = '';
+                    snap.forEach((ch) => { if (!out) out = ch.key; });
+                    if (out) return out;
+                }
+            } catch (e) {}
+            return fallbackId || '';
+        }
+
+        function openDeletionEmailFallback(payload) {
+            const email = 'support@alphafreightuk.com';
+            const subject = 'Account deletion request';
+            const lines = [
+                'Please delete my Alpha Freight account and associated data.',
+                '',
+                'Details:',
+                'Role: Supplier',
+                'Supplier ID: ' + (payload.supplierId || 'N/A'),
+                'Email: ' + (payload.email || 'N/A'),
+                'Phone: ' + (payload.phone || 'N/A')
+            ];
+            const body = lines.join('\n');
+            const href = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+            window.location.href = href;
+        }
+
+        async function requestAccountDeletion() {
+            const u = getUserData() || {};
+            const fallbackSupplierId = String(u.supplierId || u.id || '').trim();
+            const overlay = document.getElementById('deleteOverlay');
+            const input = document.getElementById('deleteConfirmInput');
+            const meta = document.getElementById('deleteMeta');
+            const email = String(u.email || '').trim();
+            const phone = String(u.phone || u.phoneNumber || '').trim();
+            if (meta) meta.textContent = 'Supplier ID: ' + (fallbackSupplierId || 'N/A') + (email ? ' • ' + email : '') + (phone ? ' • ' + phone : '');
+            if (input) input.value = '';
+            if (overlay) overlay.classList.add('show');
+            setDeleteBusy(false);
+            if (input) setTimeout(() => { try { input.focus(); } catch (e) {} }, 50);
+        }
+
+        async function performAccountDeletion() {
+            const u = getUserData() || {};
+            const fallbackSupplierId = String(u.supplierId || u.id || '').trim();
+            const input = document.getElementById('deleteConfirmInput');
+            const typed = input ? String(input.value || '').trim().toUpperCase() : '';
+            if (typed !== 'DELETE') { showError('Type DELETE to confirm'); return; }
+            if (deleteBusy) return;
+            setDeleteBusy(true, 'Deleting...');
+
+            const ok = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const db = window.AlphaBrokrage && window.AlphaBrokrage.firebaseDb;
+            const authUid = authSdk && authSdk.currentUser ? String(authSdk.currentUser.uid || '') : '';
+            const supplierId = await resolveSupplierIdByUid(db, authUid, fallbackSupplierId);
+
+            const payload = {
+                supplierId: supplierId || fallbackSupplierId || '',
+                email: String(u.email || (authSdk && authSdk.currentUser && authSdk.currentUser.email) || ''),
+                phone: String(u.phone || u.phoneNumber || ''),
+                firebaseUid: authUid,
+                createdAt: new Date().toISOString(),
+                status: 'requested',
+                source: 'mobile-app/supplier/settings'
+            };
+
+            try {
+                if (!ok || !authSdk || !authSdk.currentUser) throw new Error('Auth not ready');
+                const token = await authSdk.currentUser.getIdToken(true);
+                const BASE = 'https://us-central1-alpha-brokerage.cloudfunctions.net';
+                const resp = await fetch(BASE + '/deleteAccountPublic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ role: 'supplier' })
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok || !data || !data.ok) throw new Error('Delete failed');
+                showSuccess('Account deleted');
+            } catch (e) {
+                setDeleteBusy(true, 'Opening email...');
+                setTimeout(() => openDeletionEmailFallback(payload), 120);
+                return;
+            }
+
+            try { if (authSdk && typeof authSdk.signOut === 'function') await authSdk.signOut(); } catch (e) {}
+            try { localStorage.removeItem('supplierAuth'); } catch (e) {}
+            try { localStorage.removeItem('lastSupplierProfile'); } catch (e) {}
+            setTimeout(() => { window.location.href = 'signup.html'; }, 900);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const reduce = document.getElementById('reduceMotionToggle');
             const remember = document.getElementById('rememberFiltersToggle');
@@ -528,14 +797,29 @@
             const templatesBtn = document.getElementById('clearTemplatesBtn');
             const supportBtn = document.getElementById('clearSupportBtn');
             const logoutBtn = document.getElementById('logoutBtn');
+            const delBtn = document.getElementById('deleteAccountBtn');
+            const delOverlay = document.getElementById('deleteOverlay');
+            const delClose = document.getElementById('deleteCloseBtn');
+            const delCancel = document.getElementById('deleteCancelBtn');
+            const delConfirm = document.getElementById('deleteConfirmBtn');
 
             if (resetBtn) resetBtn.addEventListener('click', resetTour);
             if (draftsBtn) draftsBtn.addEventListener('click', clearDrafts);
             if (templatesBtn) templatesBtn.addEventListener('click', clearTemplates);
             if (supportBtn) supportBtn.addEventListener('click', clearSupportState);
             if (logoutBtn) logoutBtn.addEventListener('click', logout);
+            if (delBtn) delBtn.addEventListener('click', () => requestAccountDeletion().catch(() => showError('Could not open delete')));
+
+            function closeDelete() {
+                if (deleteBusy) return;
+                if (delOverlay) delOverlay.classList.remove('show');
+            }
+
+            if (delClose) delClose.addEventListener('click', closeDelete);
+            if (delCancel) delCancel.addEventListener('click', closeDelete);
+            if (delOverlay) delOverlay.addEventListener('click', (e) => { if (e && e.target === delOverlay) closeDelete(); });
+            if (delConfirm) delConfirm.addEventListener('click', () => performAccountDeletion().catch(() => showError('Delete failed')));
         });
     </script>
 </body>
 </html>
-

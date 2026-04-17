@@ -235,6 +235,97 @@
             color: white;
         }
 
+        .overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 2000;
+        }
+        .overlay.show{ display: flex; }
+        .spinner{
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            border: 2px solid rgba(15,23,42,0.18);
+            border-top-color: rgba(99,91,255,0.85);
+            display: inline-block;
+            animation: spin 700ms linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .modal-card{
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 70px rgba(15,23,42,0.18);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .modal-head{
+            padding: 14px 14px 10px;
+            border-bottom: 1px solid var(--border);
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap: 10px;
+        }
+        .modal-title{
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+        .modal-body{
+            padding: 14px;
+        }
+        .modal-body p{
+            margin: 0 0 10px;
+            color: var(--text-medium);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .danger-note{
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(220,38,38,0.08);
+            border: 1px solid rgba(220,38,38,0.14);
+            color: rgba(185,28,28,0.98);
+            font-weight: 700;
+            font-size: 0.86rem;
+            margin-bottom: 12px;
+        }
+        .modal-actions{
+            padding: 12px 14px 14px;
+            border-top: 1px solid var(--border);
+            display:flex;
+            gap: 10px;
+        }
+        .modal-actions .action-btn{ flex: 1; }
+        .modal-actions .action-btn[disabled]{
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .modal-input{
+            width: 100%;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: rgba(241,245,249,0.75);
+            padding: 12px 12px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            outline: none;
+        }
+        .modal-input:focus{
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,91,255,0.12);
+        }
+
         /* Info Text */
         .info-text {
             font-size: 0.8125rem;
@@ -452,7 +543,28 @@
                         <div class="setting-subtitle">Permanently delete your account</div>
                     </div>
                 </div>
-                <button class="action-btn danger" onclick="deleteAccount()">Delete</button>
+                <button class="action-btn danger" id="deleteAccountBtn" type="button">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="deleteOverlay" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div style="min-width:0;">
+                    <h3 class="modal-title" id="deleteTitle">Delete account</h3>
+                    <div class="page-subtitle" style="margin:6px 0 0;color:var(--text-medium);">This will permanently delete your account</div>
+                </div>
+                <button type="button" class="action-btn" id="deleteCloseBtn">Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="danger-note">Type DELETE to confirm. This cannot be undone.</div>
+                <p id="deleteMeta"></p>
+                <input class="modal-input" id="deleteConfirmInput" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="Type DELETE">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="action-btn" id="deleteCancelBtn">Cancel</button>
+                <button type="button" class="action-btn danger" id="deleteConfirmBtn">Confirm delete</button>
             </div>
         </div>
     </div>
@@ -568,11 +680,72 @@
             alertSystem.show('success', message);
         }
 
+        function showInfo(message) {
+            alertSystem.show('info', message);
+        }
+
+        let deleteBusy = false;
+
+        function setDeleteBusy(isBusy, label) {
+            deleteBusy = !!isBusy;
+            const overlay = document.getElementById('deleteOverlay');
+            const input = document.getElementById('deleteConfirmInput');
+            const closeBtn = document.getElementById('deleteCloseBtn');
+            const cancelBtn = document.getElementById('deleteCancelBtn');
+            const confirmBtn = document.getElementById('deleteConfirmBtn');
+            if (overlay && !overlay.classList.contains('show')) return;
+            if (input) input.disabled = deleteBusy;
+            if (closeBtn) closeBtn.disabled = deleteBusy;
+            if (cancelBtn) cancelBtn.disabled = deleteBusy;
+            if (confirmBtn) {
+                confirmBtn.disabled = deleteBusy;
+                confirmBtn.innerHTML = deleteBusy
+                    ? '<span style="display:inline-flex;align-items:center;justify-content:center;gap:10px;"><span class="spinner"></span><span>' + String(label || 'Working...') + '</span></span>'
+                    : 'Confirm delete';
+            }
+        }
+
         // Get user data
         function getUserData() {
             const carrierAuth = localStorage.getItem('carrierAuth');
             if (!carrierAuth) return null;
             return JSON.parse(carrierAuth);
+        }
+
+        async function ensureAuthReady() {
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            if (!authSdk || typeof authSdk.onAuthStateChanged !== 'function') return false;
+            if (authSdk.currentUser) return true;
+            await new Promise((resolve) => {
+                let done = false;
+                const timer = setTimeout(() => { if (!done) { done = true; resolve(); } }, 3500);
+                const unsub = authSdk.onAuthStateChanged(() => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    try { unsub(); } catch (e) {}
+                    resolve();
+                });
+            });
+            return !!(window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth && window.AlphaBrokrage.firebaseAuth.currentUser);
+        }
+
+        function openDeletionEmailFallback(payload) {
+            setDeleteBusy(true, 'Opening email...');
+            const email = 'support@alphafreightuk.com';
+            const subject = 'Account deletion request';
+            const lines = [
+                'Please delete my Alpha Freight account and associated data.',
+                '',
+                'Details:',
+                'Role: Carrier',
+                'Carrier ID: ' + (payload.carrierId || 'N/A'),
+                'Email: ' + (payload.email || 'N/A'),
+                'Phone: ' + (payload.phone || 'N/A')
+            ];
+            const body = lines.join('\n');
+            const href = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+            setTimeout(() => { window.location.href = href; }, 120);
         }
 
         // Go back
@@ -738,33 +911,91 @@
             showSuccess('Data downloaded successfully!');
         }
 
-        // Delete account
         function deleteAccount() {
-            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            const user = getUserData() || {};
+            const overlay = document.getElementById('deleteOverlay');
+            const input = document.getElementById('deleteConfirmInput');
+            const meta = document.getElementById('deleteMeta');
+            const carrierId = String(user.carrierId || user.id || '').trim();
+            const email = String(user.email || '').trim();
+            const phone = String(user.phone || user.phoneNumber || '').trim();
+            if (meta) meta.textContent = 'Carrier ID: ' + (carrierId || 'N/A') + (email ? ' • ' + email : '') + (phone ? ' • ' + phone : '');
+            if (input) input.value = '';
+            if (overlay) overlay.classList.add('show');
+            setDeleteBusy(false);
+            if (input) setTimeout(() => { try { input.focus(); } catch (e) {} }, 50);
+        }
+
+        async function performAccountDeletion() {
+            const user = getUserData() || {};
+            const carrierId = String(user.carrierId || user.id || '').trim();
+            const input = document.getElementById('deleteConfirmInput');
+            const typed = input ? String(input.value || '').trim().toUpperCase() : '';
+            if (typed !== 'DELETE') { showError('Type DELETE to confirm'); return; }
+            if (deleteBusy) return;
+            setDeleteBusy(true, 'Deleting...');
+
+            const authOk = await ensureAuthReady();
+            const authSdk = window.AlphaBrokrage && window.AlphaBrokrage.firebaseAuth;
+            const authUid = authSdk && authSdk.currentUser ? String(authSdk.currentUser.uid || '') : '';
+
+            const payload = {
+                carrierId: carrierId || '',
+                email: String(user.email || (authSdk && authSdk.currentUser && authSdk.currentUser.email) || ''),
+                phone: String(user.phone || user.phoneNumber || ''),
+                firebaseUid: authUid,
+                createdAt: new Date().toISOString(),
+                status: 'requested',
+                source: 'mobile-app/carrier/settings'
+            };
+
+            try {
+                if (!authOk || !authSdk || !authSdk.currentUser) throw new Error('Auth not ready');
+                const token = await authSdk.currentUser.getIdToken(true);
+                const BASE = 'https://us-central1-alpha-brokerage.cloudfunctions.net';
+                const resp = await fetch(BASE + '/deleteAccountPublic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ role: 'carrier' })
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok || !data || !data.ok) throw new Error('Delete failed');
+                showSuccess('Account deleted');
+            } catch (e) {
+                openDeletionEmailFallback(payload);
                 return;
             }
 
-            if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) {
-                return;
-            }
-
-            const user = getUserData();
-            if (!user) return;
-
-            // Clear localStorage
-            localStorage.removeItem('carrierAuth');
-            localStorage.removeItem('lastCarrierProfile');
-
-            showSuccess('Account deleted. Redirecting...');
-
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1500);
+            try { if (authSdk && typeof authSdk.signOut === 'function') await authSdk.signOut(); } catch (e) {}
+            try { localStorage.removeItem('carrierAuth'); } catch (e) {}
+            try { localStorage.removeItem('lastCarrierProfile'); } catch (e) {}
+            setTimeout(() => { window.location.href = 'signup.html'; }, 900);
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadSettings();
+
+            const delBtn = document.getElementById('deleteAccountBtn');
+            const delOverlay = document.getElementById('deleteOverlay');
+            const delClose = document.getElementById('deleteCloseBtn');
+            const delCancel = document.getElementById('deleteCancelBtn');
+            const delConfirm = document.getElementById('deleteConfirmBtn');
+
+            if (delBtn) delBtn.addEventListener('click', () => deleteAccount());
+
+            function closeDelete() {
+                if (deleteBusy) return;
+                if (delOverlay) delOverlay.classList.remove('show');
+            }
+
+            if (delClose) delClose.addEventListener('click', closeDelete);
+            if (delCancel) delCancel.addEventListener('click', closeDelete);
+            if (delOverlay) delOverlay.addEventListener('click', (e) => { if (e && e.target === delOverlay) closeDelete(); });
+            if (delConfirm) delConfirm.addEventListener('click', () => performAccountDeletion().catch(() => showError('Delete failed')));
         });
     </script>
 </body>
