@@ -1631,8 +1631,22 @@
 
         // Initialize Map
         function initMap() {
-            const apiKey = window.GOOGLE_MAPS_API_KEY || '';
-            if (apiKey) {
+            const apiKeyRaw = window.GOOGLE_MAPS_API_KEY || '';
+            const apiKey = String(apiKeyRaw || '').trim();
+            const placeholder = !apiKey || apiKey === 'YOUR_API_KEY_HERE' || apiKey.toLowerCase().includes('your_api_key');
+            if (!placeholder) {
+                window.gm_authFailure = function() {
+                    googleEnabled = false;
+                    googleMarker = null;
+                    try { map = null; } catch (e) {}
+                    const el = document.getElementById('map');
+                    if (el) el.innerHTML = '';
+                    map = L.map('map').setView([51.5074, -0.1278], 6);
+                    currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(map);
+                };
                 const script = document.createElement('script');
                 script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey + '&libraries=geometry';
                 script.async = true;
@@ -1644,6 +1658,13 @@
                         zoom: 6,
                         mapTypeId: google.maps.MapTypeId.ROADMAP
                     });
+                    setTimeout(() => {
+                        try {
+                            const el = document.getElementById('map');
+                            const hasErr = !!(el && el.querySelector && el.querySelector('.gm-err-container, .gm-err-content'));
+                            if (hasErr) window.gm_authFailure();
+                        } catch (e) {}
+                    }, 700);
                 };
                 script.onerror = function() {
                     googleEnabled = false;
