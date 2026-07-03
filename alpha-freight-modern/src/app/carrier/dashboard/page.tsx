@@ -581,26 +581,10 @@ export default function CarrierDashboard() {
                   </div>
                 </div>
 
-                <div className="relative h-48 w-full min-w-0 max-w-full overflow-hidden sm:h-56 lg:h-64 xl:h-72" style={{ contain: "layout paint" }}>
-                  {chartsReady && isMobileView ? (
-                    <div className="flex h-full items-end gap-1.5 px-1 pb-1">
-                      {chartData.map((point, index) => {
-                        const maxAmount = Math.max(...chartData.map((d) => d.amount || 0), 1);
-                        const heightPct = Math.max(8, Math.round(((point.amount || 0) / maxAmount) * 100));
-                        return (
-                          <div key={`${point.day}-${index}`} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-                            <div
-                              className="w-full rounded-t-md bg-blue-600/90"
-                              style={{ height: `${heightPct}%` }}
-                            />
-                            <span className="truncate text-[9px] font-semibold text-slate-400">{point.day}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : chartsReady ? (
-                  <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={isMobileView ? 100 : 1}>
-                    <AreaChart data={chartData}>
+                <div className="relative h-48 w-full min-w-0 max-w-full overflow-hidden sm:h-56 lg:h-64 xl:h-72" style={{ contain: "layout paint", isolation: "isolate" }}>
+                  {chartsReady ? (
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={isMobileView ? 50 : 1}>
+                    <AreaChart data={chartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="carrierRevenueGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563EB" stopOpacity={0.12}/>
@@ -615,7 +599,7 @@ export default function CarrierDashboard() {
                         tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600 }}
                         dy={10}
                       />
-                      <YAxis hide domain={['auto', 'auto']} />
+                      <YAxis hide domain={[0, (dataMax: number) => Math.max(dataMax * 1.15, 50)]} />
                       <Tooltip 
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
@@ -634,12 +618,12 @@ export default function CarrierDashboard() {
                         type="monotone" 
                         dataKey="amount" 
                         stroke="#2563EB" 
-                        strokeWidth={2} 
+                        strokeWidth={isMobileView ? 2.5 : 2} 
                         fill="url(#carrierRevenueGradient)" 
-                        isAnimationActive={!isMobileView}
-                        animationDuration={isMobileView ? 0 : 1200}
+                        isAnimationActive
+                        animationDuration={isMobileView ? 700 : 1200}
                         dot={isMobileView ? false : { r: 4, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}
-                        activeDot={{ r: 5, fill: '#2563EB', strokeWidth: 0 }}
+                        activeDot={{ r: isMobileView ? 4 : 5, fill: '#2563EB', strokeWidth: 0 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
