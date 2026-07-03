@@ -303,7 +303,7 @@ export default function Home() {
       
       <main>
         {/* Hero Section */}
-        <section ref={heroRef} className="relative h-screen w-full overflow-hidden flex flex-col justify-start pt-48">
+        <section ref={heroRef} className="relative min-h-[100dvh] h-[100dvh] max-h-[900px] md:max-h-none md:h-screen w-full overflow-hidden flex flex-col justify-start pt-24 sm:pt-32 md:pt-48">
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -318,7 +318,7 @@ export default function Home() {
           </div>
 
           {/* Grid Lines Overlay */}
-          <div className="absolute inset-0 z-10 pointer-events-none opacity-20">
+          <div className="absolute inset-0 z-10 pointer-events-none opacity-20 hidden md:block">
             <div className="h-full w-px bg-white/20 absolute left-1/4" />
             <div className="h-full w-px bg-white/20 absolute left-1/2" />
             <div className="h-full w-px bg-white/20 absolute left-3/4" />
@@ -339,7 +339,7 @@ export default function Home() {
                 </p>
               </motion.div>
               
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tighter mb-12">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tighter mb-6 sm:mb-8 md:mb-12">
                 Logistics that <br />
                 move with <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40 italic font-serif font-light">precision.</span>
               </h1>
@@ -347,7 +347,7 @@ export default function Home() {
           </div>
 
           {/* Request Consultation Button - Absolute Position Bottom */}
-          <div className="absolute bottom-44 left-0 right-0 z-20 px-6 lg:px-12">
+          <div className="absolute bottom-24 sm:bottom-32 md:bottom-44 left-0 right-0 z-20 px-4 sm:px-6 lg:px-12">
             <div className="max-w-[1800px] mx-auto">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -356,7 +356,7 @@ export default function Home() {
                 className="flex items-center group"
               >
                 <Link
-                  href="/consultation"
+                  href="/contact"
                   className="flex items-center space-x-3 bg-white hover:bg-gray-100 transition-all duration-300 px-5 py-2.5 rounded-full"
                 >
                   <span className="text-black font-medium text-[13px]">Request a Consultation</span>
@@ -371,12 +371,11 @@ export default function Home() {
           </div>
 
           {/* Bottom Info Bar */}
-          <div className="absolute bottom-10 left-0 right-0 z-20 px-6 lg:px-12">
-            <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-end border-t border-white/10 pt-10">
+          <div className="absolute bottom-6 sm:bottom-10 left-0 right-0 z-20 px-4 sm:px-6 lg:px-12">
+            <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/10 pt-6 sm:pt-10">
               <div className="max-w-xl">
-                <p className="text-white/80 text-[13px] font-normal leading-relaxed">
-                  We delivers a smarter, faster, and more reliable way to move goods. Combining <br />
-                  modern trucking, optimized routing, and real-time visibility across every shipment.
+                <p className="text-white/80 text-[12px] sm:text-[13px] font-normal leading-relaxed">
+                  We deliver a smarter, faster, and more reliable way to move goods. Combining modern trucking, optimized routing, and real-time visibility across every shipment.
                 </p>
               </div>
               <div className="hidden md:block">
@@ -391,12 +390,12 @@ export default function Home() {
         </section>
 
         {/* What We Do Section - Directly under Hero */}
-        <section className="py-32 bg-white relative overflow-hidden">
-          <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
+        <section className="py-16 md:py-32 bg-white relative overflow-hidden">
+          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12">
             {/* Top Border Line */}
-            <div className="w-full h-px bg-gray-100 mb-20" />
+            <div className="w-full h-px bg-gray-100 mb-10 md:mb-20" />
             
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-20">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-10 md:gap-20">
               {/* Left Side - Small Label */}
               <div className="lg:w-1/4">
                 <div className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-[0.3em] text-black opacity-40">
@@ -407,11 +406,11 @@ export default function Home() {
 
               {/* Right Side - Content */}
               <div className="lg:w-3/4">
-                <h2 className="text-3xl md:text-5xl font-medium text-black leading-tight tracking-tight mb-24 max-w-4xl">
+                <h2 className="text-2xl sm:text-3xl md:text-5xl font-medium text-black leading-tight tracking-tight mb-10 md:mb-24 max-w-4xl">
                   We empower businesses to move goods smarter, faster, and more sustainably with innovative logistics solutions that drive growth and transform global shipping.
                 </h2>
 
-                <div className="grid md:grid-cols-3 gap-16 mb-20">
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10 md:gap-16 mb-12 md:mb-20">
                   {/* Service 1 */}
                   <div className="space-y-8">
                     <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-lg">
@@ -460,7 +459,7 @@ export default function Home() {
 
                 <div className="flex flex-wrap gap-4">
                   <Link 
-                    href="/learn-more"
+                    href="/about"
                     className="inline-block px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all"
                   >
                     Learn More
@@ -475,7 +474,7 @@ export default function Home() {
         <section ref={servicesRef} className="bg-black relative min-h-screen flex items-stretch">
           <div className="flex flex-col lg:flex-row w-full">
             {services.map((service, i) => (
-              <div key={i} className="service-card group relative flex-1 min-h-[600px] lg:h-auto overflow-hidden border-r border-white/10 last:border-r-0">
+              <div key={i} className="service-card group relative flex-1 min-h-[420px] sm:min-h-[500px] lg:min-h-[600px] lg:h-auto overflow-hidden border-b lg:border-b-0 lg:border-r border-white/10 last:border-r-0">
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
                   <Image
@@ -489,12 +488,12 @@ export default function Home() {
                 </div>
 
                 {/* Content */}
-                <div className="relative z-10 h-full flex flex-col justify-start p-12 lg:p-16">
-                  <div className="mb-6 flex items-center gap-4">
+                <div className="relative z-10 h-full flex flex-col justify-start p-8 sm:p-12 lg:p-16">
+                  <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
                     <div className="w-10 h-10 shrink-0 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-bold text-white/40">
                       {service.number}
                     </div>
-                    <h3 className="text-3xl font-medium text-white tracking-tight">
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-medium text-white tracking-tight">
                       {service.title}
                     </h3>
                   </div>
@@ -512,15 +511,15 @@ export default function Home() {
         </section>
 
         {/* New Interactive Services Section */}
-        <section className="py-32 bg-white relative overflow-hidden">
-          <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
+        <section className="py-16 md:py-32 bg-white relative overflow-hidden">
+          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12">
             {/* Header with Counter */}
-            <div className="flex justify-between items-end border-b border-gray-100 pb-12 mb-20">
-              <h2 className="text-6xl md:text-8xl font-medium text-black tracking-tight">Services</h2>
-              <span className="text-4xl md:text-7xl font-medium text-black tracking-tight opacity-80">(05)</span>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-gray-100 pb-8 md:pb-12 mb-10 md:mb-20">
+              <h2 className="text-4xl sm:text-5xl md:text-8xl font-medium text-black tracking-tight">Services</h2>
+              <span className="text-2xl sm:text-4xl md:text-7xl font-medium text-black tracking-tight opacity-80">(05)</span>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-20">
+            <div className="flex flex-col lg:flex-row gap-10 md:gap-20">
               {/* Left Side - Interactive List */}
               <div className="lg:w-1/2 space-y-4">
                 {serviceItems.map((item) => (
@@ -529,10 +528,10 @@ export default function Home() {
                     className="flex items-center group cursor-pointer py-2"
                     onMouseEnter={() => setActiveService(item)}
                   >
-                    <span className={`text-xl font-medium mr-12 transition-colors duration-300 ${activeService.id === item.id ? "text-black" : "text-gray-300 group-hover:text-black/50"}`}>
+                    <span className={`text-base sm:text-xl font-medium mr-4 sm:mr-12 transition-colors duration-300 ${activeService.id === item.id ? "text-black" : "text-gray-300 group-hover:text-black/50"}`}>
                       {item.id}
                     </span>
-                    <h3 className={`text-3xl md:text-5xl font-medium transition-all duration-300 ${activeService.id === item.id ? "text-black translate-x-4" : "text-gray-300 group-hover:text-black/50 group-hover:translate-x-2"}`}>
+                    <h3 className={`text-xl sm:text-3xl md:text-5xl font-medium transition-all duration-300 ${activeService.id === item.id ? "text-black translate-x-2 sm:translate-x-4" : "text-gray-300 group-hover:text-black/50 group-hover:translate-x-1 sm:group-hover:translate-x-2"}`}>
                       {item.title}
                     </h3>
                   </div>
@@ -590,19 +589,19 @@ export default function Home() {
         </section>
 
         {/* Newsroom Section */}
-        <section ref={newsRef} className="py-32 bg-white relative overflow-hidden border-b border-gray-100">
-          <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
+        <section ref={newsRef} className="py-16 md:py-32 bg-white relative overflow-hidden border-b border-gray-100">
+          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12">
             {/* Section Header */}
-            <div className="flex justify-between items-start mb-16">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6 mb-10 md:mb-16">
               <div>
                 <div className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-[0.3em] text-black opacity-40 mb-4">
                   <span>+</span>
                   <span>Recent Articles</span>
                 </div>
-                <h2 className="text-6xl md:text-8xl font-medium text-black tracking-tight">Newsroom</h2>
+                <h2 className="text-4xl sm:text-5xl md:text-8xl font-medium text-black tracking-tight">Newsroom</h2>
               </div>
               
-              <div className="flex space-x-4 mt-12">
+              <div className="flex space-x-4 sm:mt-12">
                 <button 
                   onClick={() => scroll("left")}
                   className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300 group"
