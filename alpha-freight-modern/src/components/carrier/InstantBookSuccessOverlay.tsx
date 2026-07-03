@@ -39,7 +39,7 @@ export default function InstantBookSuccessOverlay({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mx-auto flex justify-center">
-          <InstantBookLottie className="h-52 w-52" />
+          <InstantBookLottie className="h-52 w-52" loop />
         </div>
         <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
           Ready, set, go!

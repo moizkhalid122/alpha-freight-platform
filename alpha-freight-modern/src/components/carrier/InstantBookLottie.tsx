@@ -11,7 +11,7 @@ type InstantBookLottieProps = {
 
 export default function InstantBookLottie({
   className = "h-48 w-48",
-  loop = false,
+  loop = true,
 }: InstantBookLottieProps) {
   const [animationData, setAnimationData] = useState<object | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
