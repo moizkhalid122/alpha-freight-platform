@@ -22,6 +22,7 @@ import {
   Loader2,
   MapPin,
   Package,
+  PackagePlus,
   PoundSterling,
   RefreshCcw,
   Route,
@@ -609,6 +610,12 @@ export default function AdminLoadsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link href="/admin/post-load">
+              <Button size="sm">
+                <PackagePlus className="mr-2 h-4 w-4" />
+                Post load
+              </Button>
+            </Link>
             <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={isFetching}>
               {isFetching ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

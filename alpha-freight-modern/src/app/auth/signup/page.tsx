@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -19,12 +19,21 @@ export default function SignupPage() {
     fullName: "",
     email: "",
     password: "",
+    referralCode: "",
   });
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const role = (searchParams.get("role") || "carrier") as "carrier" | "supplier";
-  const referralCode = (searchParams.get("ref") || "").trim().toUpperCase();
+  const referralFromUrl = (searchParams.get("ref") || "").trim().toUpperCase();
+
+  useEffect(() => {
+    if (referralFromUrl) {
+      setFormData((prev) => ({ ...prev, referralCode: referralFromUrl }));
+    }
+  }, [referralFromUrl]);
+
+  const effectiveReferralCode = (formData.referralCode || referralFromUrl).trim().toUpperCase();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,29 +69,29 @@ export default function SignupPage() {
           id: authData.user.id,
           full_name: formData.fullName,
           role: role,
-          referred_by_code: referralCode || null,
+          referred_by_code: effectiveReferralCode || null,
           created_at: new Date().toISOString(),
         },
       ]);
 
       if (profileError) throw profileError;
 
-      if (role === "supplier" && referralCode) {
+      if (role === "supplier" && effectiveReferralCode) {
         await recordSupplierReferralFromSignup({
           referredUserId: authData.user.id,
-          referralCode,
+          referralCode: effectiveReferralCode,
         });
       }
 
-      if (role === "carrier" && referralCode) {
+      if (role === "carrier" && effectiveReferralCode) {
         await recordCarrierReferralFromSignup({
           referredUserId: authData.user.id,
-          referralCode,
+          referralCode: effectiveReferralCode,
         });
       }
 
       const onboardingParams = new URLSearchParams({ role });
-      if (referralCode) onboardingParams.set("ref", referralCode);
+      if (effectiveReferralCode) onboardingParams.set("ref", effectiveReferralCode);
       router.push(`/onboarding?${onboardingParams.toString()}`);
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
@@ -154,6 +163,19 @@ export default function SignupPage() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+        </div>
+
+        <div className={AUTH.field}>
+          <label className={AUTH.label}>Referral code (optional)</label>
+          <input
+            type="text"
+            placeholder={role === "supplier" ? "AF-SUP-XXXXXXXX" : "AF-CAR-XXXXXXXX"}
+            value={formData.referralCode}
+            onChange={(e) =>
+              setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })
+            }
+            className={AUTH.input}
+          />
         </div>
 
         <motion.button whileTap={{ scale: 0.99 }} disabled={isLoading} className={AUTH.btnPrimary}>

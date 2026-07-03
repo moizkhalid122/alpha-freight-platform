@@ -51,6 +51,7 @@ import {
   Truck,
   UserPlus,
   Users,
+  Gift,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -195,9 +196,15 @@ const STATIC_QUICK_ACTIONS: QuickAction[] = [
   },
   {
     label: "Post Load",
-    href: "/admin/loads",
-    note: "Create a load on behalf of supplier",
+    href: "/admin/post-load",
+    note: "Create a live paid load on the marketplace",
     icon: Truck,
+  },
+  {
+    label: "Referral Approvals",
+    href: "/admin/referrals",
+    note: "Approve referred users and release rewards",
+    icon: Gift,
   },
   {
     label: "Generate Report",

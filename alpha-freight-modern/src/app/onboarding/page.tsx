@@ -18,9 +18,12 @@ import {
   BarChart,
   Search,
   User,
-  Clock
+  Clock,
+  Gift
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { recordCarrierReferralFromSignup, validateCarrierReferralCode } from "@/lib/carrier-referrals";
+import { recordSupplierReferralFromSignup, validateSupplierReferralCode } from "@/lib/supplier-referrals";
 import { carrierOnboardingCountryOptions } from "@/lib/country-options";
 import { cn } from "@/lib/utils";
 import {
@@ -118,6 +121,22 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
     description: "This will help us set your default currency and region.",
     options: countryOptions,
     icon: <Globe className="w-5 h-5" />
+  },
+  {
+    id: "referral_code",
+    question: "Were you referred by someone?",
+    description: "Optional. Enter a carrier referral code if someone invited you to Alpha Freight.",
+    type: "form",
+    fields: [
+      {
+        id: "referral_code",
+        label: "Referral code (optional)",
+        type: "text",
+        placeholder: "AF-CAR-XXXXXXXX",
+        required: false,
+      },
+    ],
+    icon: <Gift className="w-5 h-5" />,
   },
   {
     id: "contact_info",
@@ -247,8 +266,23 @@ const getSupplierQuestions = (accountType: string, countryCode?: string): Questi
     icon: <Globe className="w-5 h-5" />
   },
   {
+    id: "referral_code",
+    question: "Were you referred by someone?",
+    description: "Optional. Enter a supplier referral code if someone invited you to Alpha Freight.",
+    type: "form",
+    fields: [
+      {
+        id: "referral_code",
+        label: "Referral code (optional)",
+        type: "text",
+        placeholder: "AF-SUP-XXXXXXXX",
+        required: false,
+      },
+    ],
+    icon: <Gift className="w-5 h-5" />,
+  },
+  {
     id: "contact_info",
-    question: accountType === "individual" ? "Your contact details" : "Your logistics contact",
     description:
       accountType === "individual"
         ? "Keep the shipper profile simple with a short personal contact step."
@@ -492,6 +526,23 @@ function SetupContent() {
   const [companySuggestions, setCompanySuggestions] = useState<CompaniesHouseSuggestion[]>([]);
   const [isCompanySearchLoading, setIsCompanySearchLoading] = useState(false);
   const [companySearchError, setCompanySearchError] = useState<string | null>(null);
+  const [referralValidation, setReferralValidation] = useState<{
+    status: "idle" | "checking" | "valid" | "invalid";
+    referrerName?: string | null;
+  }>({ status: "idle" });
+
+  useEffect(() => {
+    const refFromUrl = (searchParams.get("ref") || "").trim().toUpperCase();
+    if (!refFromUrl) return;
+
+    setAnswers((prev) => ({
+      ...prev,
+      referral_code: {
+        ...(prev.referral_code ?? {}),
+        referral_code: refFromUrl,
+      },
+    }));
+  }, [searchParams]);
 
   // Always show 6 steps by default
   const getQuestions = () => {
@@ -522,6 +573,9 @@ function SetupContent() {
     setCompanySuggestions([]);
     setIsCompanySearchLoading(false);
     setCompanySearchError(null);
+    if (currentQuestionId !== "referral_code") {
+      setReferralValidation({ status: "idle" });
+    }
   }, [answers, currentQuestion.type, currentQuestionId]);
 
   useEffect(() => {
@@ -668,12 +722,33 @@ function SetupContent() {
     proceed();
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formElement = e.currentTarget as HTMLFormElement;
 
     if (!formElement.reportValidity()) {
       return;
+    }
+
+    if (currentQuestionId === "referral_code") {
+      const code = (formValues.referral_code || "").trim();
+      if (code) {
+        setReferralValidation({ status: "checking" });
+        const result =
+          role === "carrier"
+            ? await validateCarrierReferralCode(code)
+            : await validateSupplierReferralCode(code);
+
+        if (!result.valid) {
+          setReferralValidation({ status: "invalid" });
+          return;
+        }
+
+        setReferralValidation({
+          status: "valid",
+          referrerName: result.referrerName,
+        });
+      }
     }
 
     if (currentQuestionId === "company_lookup" && accountType === "company") {
@@ -749,6 +824,25 @@ function SetupContent() {
           .eq('id', user.id);
 
         if (error) throw error;
+
+        const referralInfo = answers.referral_code ?? {};
+        const referralCode = (referralInfo.referral_code || searchParams.get("ref") || "")
+          .trim()
+          .toUpperCase();
+
+        if (referralCode) {
+          if (role === "carrier") {
+            await recordCarrierReferralFromSignup({
+              referredUserId: user.id,
+              referralCode,
+            });
+          } else if (role === "supplier") {
+            await recordSupplierReferralFromSignup({
+              referredUserId: user.id,
+              referralCode,
+            });
+          }
+        }
       }
       setShowSuccess(true);
     } catch (err) {
@@ -816,6 +910,26 @@ function SetupContent() {
                         required={field.required !== false}
                         value={formValues[field.id] ?? ""}
                         onChange={(e) => updateFormValue(field.id, e.target.value)}
+                        onBlur={
+                          currentQuestionId === "referral_code" && field.id === "referral_code"
+                            ? async (event) => {
+                                const code = event.currentTarget.value.trim();
+                                if (!code) {
+                                  setReferralValidation({ status: "idle" });
+                                  return;
+                                }
+                                setReferralValidation({ status: "checking" });
+                                const result =
+                                  role === "carrier"
+                                    ? await validateCarrierReferralCode(code)
+                                    : await validateSupplierReferralCode(code);
+                                setReferralValidation({
+                                  status: result.valid ? "valid" : "invalid",
+                                  referrerName: result.referrerName,
+                                });
+                              }
+                            : undefined
+                        }
                         placeholder={field.placeholder}
                         autoComplete={field.id === "company_name" ? "organization" : "off"}
                         className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/20 transition-all placeholder:text-slate-300"
@@ -875,6 +989,25 @@ function SetupContent() {
                     </div>
                   </div>
                 ))}
+
+                {currentQuestionId === "referral_code" ? (
+                  <div className="px-1">
+                    {referralValidation.status === "checking" ? (
+                      <p className="text-xs font-medium text-slate-500">Checking referral code...</p>
+                    ) : null}
+                    {referralValidation.status === "valid" ? (
+                      <p className="text-xs font-semibold text-emerald-600">
+                        Referral linked to {referralValidation.referrerName}
+                      </p>
+                    ) : null}
+                    {referralValidation.status === "invalid" ? (
+                      <p className="text-xs font-semibold text-rose-600">
+                        Referral code not found. Check the code or continue without one.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 <button 
                   type="submit"
                   disabled={isSubmitting}

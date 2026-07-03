@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
+import { isReferralUserApproved } from "@/lib/referral-approval";
 
 export const REFERRAL_APP_URL = "https://alphafreightuk.com";
 export const CARRIER_REFERRAL_MILESTONE_LOADS = 5;
@@ -39,6 +40,9 @@ type ProfileRow = {
   company_name: string | null;
   referral_code: string | null;
   role: string | null;
+  verification_status?: string | null;
+  is_approved?: boolean | null;
+  status?: string | null;
 };
 
 type ReferralRecord = {
@@ -98,9 +102,11 @@ function resolveEarnedAmount(
   milestoneLoads: number,
   rewardAmount: number,
   storedEarned: number,
-  storedStatus: string
+  storedStatus: string,
+  isApproved: boolean
 ) {
   if (storedEarned > 0 || storedStatus === "rewarded") return storedEarned;
+  if (!isApproved) return 0;
   if (loadsCompleted >= milestoneLoads) return rewardAmount;
   return 0;
 }
@@ -170,6 +176,19 @@ async function findReferrerByCode(referralCode: string): Promise<ProfileRow | nu
   );
 
   return matched || null;
+}
+
+export async function validateCarrierReferralCode(referralCode: string) {
+  const normalized = referralCode.trim().toUpperCase();
+  if (!normalized) return { valid: false as const, referrerName: null };
+
+  const referrer = await findReferrerByCode(normalized);
+  if (!referrer) return { valid: false as const, referrerName: null };
+
+  return {
+    valid: true as const,
+    referrerName: referrer.company_name || referrer.full_name || "Alpha Freight partner",
+  };
 }
 
 export async function recordCarrierReferralFromSignup(params: {
@@ -252,7 +271,7 @@ export async function fetchCarrierReferralDashboard(
   if (referredIds.length > 0) {
     const { data: referredProfiles } = await supabase
       .from("profiles")
-      .select("id, full_name, company_name, referral_code, role")
+      .select("id, full_name, company_name, referral_code, role, verification_status, is_approved, status")
       .in("id", referredIds);
 
     for (const row of (referredProfiles || []) as ProfileRow[]) {
@@ -270,13 +289,16 @@ export async function fetchCarrierReferralDashboard(
     const loadsCompleted = await countCompletedLoadsForCarrier(record.referred_user_id);
     const milestoneLoads = record.milestone_loads || CARRIER_REFERRAL_MILESTONE_LOADS;
     const rewardAmount = Number(record.reward_amount || CARRIER_REFERRAL_BASE_REWARD);
+    const referredProfile = profileMap.get(record.referred_user_id);
+    const isApproved = isReferralUserApproved(referredProfile);
     const displayStatus = resolveDisplayStatus(loadsCompleted, milestoneLoads);
     const earned = resolveEarnedAmount(
       loadsCompleted,
       milestoneLoads,
       rewardAmount,
       Number(record.earned_amount || 0),
-      record.status
+      record.status,
+      isApproved
     );
 
     if (loadsCompleted !== record.loads_completed || record.status !== displayStatus.toLowerCase()) {
@@ -302,7 +324,6 @@ export async function fetchCarrierReferralDashboard(
         .eq("referrer_id", carrierId);
     }
 
-    const referredProfile = profileMap.get(record.referred_user_id);
     const name =
       referredProfile?.company_name ||
       referredProfile?.full_name ||

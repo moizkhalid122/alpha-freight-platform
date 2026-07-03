@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { isAdminPanelEmail } from "@/lib/admin-access";
 import { isAdminServiceConfigured } from "@/lib/supabase-admin";
 
 export type AdminAccessResult =
@@ -63,7 +64,7 @@ export async function verifyAdminApiAccess(request: NextRequest): Promise<AdminA
     return { ok: false, status: 500, error: profileError.message };
   }
 
-  if (String(profile?.role ?? "").toLowerCase() !== "admin") {
+  if (String(profile?.role ?? "").toLowerCase() !== "admin" && !isAdminPanelEmail(user.email)) {
     return {
       ok: false,
       status: 403,

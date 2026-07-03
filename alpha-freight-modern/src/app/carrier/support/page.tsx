@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -71,6 +71,16 @@ function CarrierSupportPageContent() {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [isMobileView, setIsMobileView] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const syncViewport = () => setIsMobileView(media.matches);
+
+    syncViewport();
+    media.addEventListener("change", syncViewport);
+    return () => media.removeEventListener("change", syncViewport);
+  }, []);
 
   const shipment = searchParams.get("shipment");
   const route = searchParams.get("route");
@@ -88,8 +98,8 @@ function CarrierSupportPageContent() {
   }, [search]);
 
   return (
-    <div className="mx-auto max-w-[1280px] space-y-6 p-4 sm:p-6">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+    <div className="relative mx-auto w-full max-w-[1280px] space-y-6 overflow-x-hidden p-4 sm:p-6">
+      <div className="space-y-4">
         <div>
           <div className="mb-1.5 flex items-center gap-2">
             <div className="rounded-md bg-blue-600 p-1.5">
@@ -113,13 +123,12 @@ function CarrierSupportPageContent() {
             className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-[13px] text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-200"
           />
         </div>
-      </motion.div>
+      </div>
 
       {shipment ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`${CARD} border-blue-100 bg-gradient-to-r from-blue-50/80 via-white to-slate-50 p-5 sm:p-6`}
+        <div
+          className={`${CARD} border-blue-100 bg-blue-50/80 p-5 sm:bg-gradient-to-r sm:from-blue-50/80 sm:via-white sm:to-slate-50 sm:p-6`}
+          style={isMobileView ? { contain: "layout paint" } : undefined}
         >
           <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-600">Shipment support</p>
           <div className="mt-2 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -140,7 +149,7 @@ function CarrierSupportPageContent() {
               </a>
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -169,14 +178,12 @@ function CarrierSupportPageContent() {
             href: `tel:${SUPPORT_PHONE.replace(/\s/g, "")}`,
             tone: "bg-emerald-50 text-emerald-600",
           },
-        ].map((channel, i) => (
-          <motion.a
+        ].map((channel) => (
+          <a
             key={channel.title}
             href={channel.href}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
             className={`${CARD} block p-5 sm:p-6`}
+            style={isMobileView ? { contain: "layout paint" } : undefined}
           >
             <div className={`mb-4 inline-flex rounded-lg p-2.5 ${channel.tone}`}>
               <channel.icon className="h-4 w-4" />
@@ -187,16 +194,14 @@ function CarrierSupportPageContent() {
               {channel.action}
               <ArrowRight className="h-3.5 w-3.5" />
             </span>
-          </motion.a>
+          </a>
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
-          className={`${CARD} p-5 sm:p-6`}
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <section
+          className={`${CARD} min-w-0 p-5 sm:p-6`}
+          style={isMobileView ? { contain: "layout paint" } : undefined}
         >
           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Knowledge base</p>
           <h2 className="mt-0.5 text-[15px] font-bold text-slate-900">Frequently asked questions</h2>
@@ -218,7 +223,7 @@ function CarrierSupportPageContent() {
                       />
                     </button>
                     <AnimatePresence initial={false}>
-                      {isOpen ? (
+                      {isOpen && !isMobileView ? (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
@@ -232,6 +237,11 @@ function CarrierSupportPageContent() {
                         </motion.div>
                       ) : null}
                     </AnimatePresence>
+                    {isOpen && isMobileView ? (
+                      <p className="border-t border-slate-100 px-4 py-3 text-[12px] leading-relaxed text-slate-500">
+                        {faq.a}
+                      </p>
+                    ) : null}
                   </div>
                 );
               })
@@ -243,14 +253,12 @@ function CarrierSupportPageContent() {
               </div>
             )}
           </div>
-        </motion.section>
+        </section>
 
-        <div className="space-y-4">
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+        <div className="min-w-0 space-y-4">
+          <section
             className={`${CARD} p-5 sm:p-6`}
+            style={isMobileView ? { contain: "layout paint" } : undefined}
           >
             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Availability</p>
             <h3 className="mt-0.5 text-[15px] font-bold text-slate-900">Support hours</h3>
@@ -269,13 +277,11 @@ function CarrierSupportPageContent() {
                 </p>
               </div>
             </div>
-          </motion.section>
+          </section>
 
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
+          <section
             className={`${CARD} p-5 sm:p-6`}
+            style={isMobileView ? { contain: "layout paint" } : undefined}
           >
             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Shortcuts</p>
             <h3 className="mt-0.5 text-[15px] font-bold text-slate-900">Quick links</h3>
@@ -294,7 +300,7 @@ function CarrierSupportPageContent() {
                 </Link>
               ))}
             </div>
-          </motion.section>
+          </section>
         </div>
       </div>
     </div>

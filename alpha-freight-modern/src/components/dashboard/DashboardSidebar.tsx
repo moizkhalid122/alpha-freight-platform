@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { isAdminPanelEmail } from "@/lib/admin-access";
 import { 
   LogOut, 
   LayoutDashboard, 
@@ -20,7 +21,8 @@ import {
   Clock,
   Gift,
   Sparkles,
-  Newspaper
+  Newspaper,
+  ShieldCheck,
 } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 
@@ -77,11 +79,13 @@ export default function DashboardSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     async function getProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserEmail(user.email ?? null);
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -92,6 +96,8 @@ export default function DashboardSidebar({
     }
     getProfile();
   }, []);
+
+  const showAdminPanel = isAdminPanelEmail(userEmail);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -139,6 +145,35 @@ export default function DashboardSidebar({
             </div>
           </div>
         ))}
+        {showAdminPanel ? (
+          <div>
+            <p className="px-3.5 text-[10px] font-bold text-gray-400 tracking-widest mb-2">
+              ADMIN
+            </p>
+            <div className="space-y-0.5">
+              <Link href="/admin" onClick={onClose}>
+                <div
+                  className={`flex items-center gap-3.5 px-3.5 py-2 rounded-lg transition-all duration-200 group ${
+                    pathname.startsWith("/admin")
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  <span
+                    className={`${
+                      pathname.startsWith("/admin")
+                        ? "text-[#BFFF07]"
+                        : "text-gray-400 group-hover:text-gray-900"
+                    } transition-colors scale-105`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                  </span>
+                  <span className="text-[13px] font-semibold">Admin Panel</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </nav>
 
       <div className="mt-auto px-3.5 py-5 border-t border-gray-50 bg-gray-50/30">

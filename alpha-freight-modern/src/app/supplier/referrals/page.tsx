@@ -15,11 +15,16 @@ import {
   Sparkles,
   TrendingUp,
   Users,
+  Wallet,
 } from "lucide-react";
+import ReferralPayoutModal from "@/components/referrals/ReferralPayoutModal";
+import { getAvailableReferralBalance } from "@/lib/referral-payouts";
 
 import {
   buildReferralSignupLink,
   fetchSupplierReferralDashboard,
+  REFERRAL_MILESTONE_LOADS,
+  REFERRAL_BASE_REWARD,
   type SupplierReferralRow,
   type SupplierReferralStats,
 } from "@/lib/supplier-referrals";
@@ -108,6 +113,14 @@ export default function SupplierReferrals() {
     pendingRewards: 0,
   });
   const [referralList, setReferralList] = useState<SupplierReferralRow[]>([]);
+  const [userId, setUserId] = useState("");
+  const [payoutOpen, setPayoutOpen] = useState(false);
+  const [payoutRefreshKey, setPayoutRefreshKey] = useState(0);
+
+  const availableBalance = useMemo(() => {
+    if (!userId) return 0;
+    return getAvailableReferralBalance(userId, stats.totalEarned);
+  }, [userId, stats.totalEarned, payoutRefreshKey]);
 
   const referralLink = useMemo(() => {
     if (!referralCode) return "";
@@ -125,6 +138,7 @@ export default function SupplierReferrals() {
         } = await supabase.auth.getUser();
 
         if (user) {
+          setUserId(user.id);
           const dashboard = await fetchSupplierReferralDashboard(user.id);
           setReferralCode(dashboard.referralCode);
           setSupplierName(dashboard.supplierName);
@@ -192,17 +206,29 @@ export default function SupplierReferrals() {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900">Invite & earn</h1>
             <p className="mt-0.5 text-[13px] text-slate-500">
-              Refer fellow suppliers and earn platform credits when they complete milestones, {supplierName}.
+              Refer fellow suppliers and earn platform credits when they are admin-approved and complete milestones,{" "}
+              {supplierName}.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void shareInvite()}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-slate-800"
-          >
-            Invite now
-            <Share2 className="h-4 w-4" />
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPayoutOpen(true)}
+              disabled={availableBalance <= 0}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Payout
+              <Wallet className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => void shareInvite()}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-slate-800"
+            >
+              Invite now
+              <Share2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Stats row */}
@@ -211,7 +237,7 @@ export default function SupplierReferrals() {
             { label: "Total referrals", value: String(stats.totalReferrals), sub: `${stats.pendingReferrals} pending` },
             { label: "Active partners", value: String(stats.activeReferrals), sub: "Currently shipping" },
             { label: "Total earned", value: formatMoney(stats.totalEarned), sub: "Lifetime credits" },
-            { label: "Pending rewards", value: formatMoney(stats.pendingRewards), sub: "After milestone" },
+            { label: "Pending rewards", value: formatMoney(stats.pendingRewards), sub: "Awaiting approval" },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -245,7 +271,8 @@ export default function SupplierReferrals() {
               Share Alpha Freight, get {formatMoney(100)} credit
             </h2>
             <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-slate-500">
-              When a referred supplier completes their first 10 shipments, {formatMoney(100)} is added to your account.
+              When a referred supplier is approved by admin and completes their first {REFERRAL_MILESTONE_LOADS}{" "}
+              shipments, {formatMoney(REFERRAL_BASE_REWARD)} is added to your referral balance.
             </p>
 
             <div className="mt-5 space-y-3">
@@ -434,8 +461,12 @@ export default function SupplierReferrals() {
             <div className="mt-4 space-y-3.5">
               {[
                 { step: "1", title: "Share your code", desc: "Send your referral code or link to a supplier partner." },
-                { step: "2", title: "They join Alpha", desc: "Your referral completes onboarding and starts posting loads." },
-                { step: "3", title: "You get rewarded", desc: "Credits are released after their 10-shipment milestone." },
+                { step: "2", title: "They join Alpha", desc: "Your referral completes onboarding and gets verified by admin." },
+                {
+                  step: "3",
+                  title: "You get rewarded",
+                  desc: `Credits are released after admin approval and their ${REFERRAL_MILESTONE_LOADS}-shipment milestone.`,
+                },
               ].map((item) => (
                 <div key={item.step} className="flex gap-3 rounded-lg border border-slate-100 bg-slate-50/40 px-3.5 py-3">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
@@ -465,7 +496,7 @@ export default function SupplierReferrals() {
             </div>
             <ul className="space-y-2.5">
               {[
-                "Instant platform credits on milestone completion",
+                "Instant referral credits after approval + milestone",
                 "Higher rewards as you unlock new tiers",
                 "Priority support for Gold & Platinum members",
                 "Better visibility for your referred partners",
@@ -538,6 +569,15 @@ export default function SupplierReferrals() {
           })}
         </div>
       </motion.section>
+
+      <ReferralPayoutModal
+        open={payoutOpen}
+        onClose={() => setPayoutOpen(false)}
+        userId={userId}
+        role="supplier"
+        totalEarned={stats.totalEarned}
+        onPayoutComplete={() => setPayoutRefreshKey((value) => value + 1)}
+      />
 
       <AnimatePresence>
         {(copied || copiedLink) && (

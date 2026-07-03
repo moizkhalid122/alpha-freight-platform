@@ -11,11 +11,13 @@ import {
   Gauge,
   LayoutDashboard,
   LogOut,
+  PackagePlus,
   Settings,
   ShieldCheck,
   Truck,
   UserPlus,
   UserRoundCheck,
+  Gift,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +40,11 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
         name: "Quick Stats",
         path: "/admin/quick-stats",
         icon: <Gauge className="h-4 w-4" />,
+      },
+      {
+        name: "Referrals",
+        path: "/admin/referrals",
+        icon: <Gift className="h-4 w-4" />,
       },
     ],
   },
@@ -93,6 +100,11 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
         name: "All Loads",
         path: "/admin/loads",
         icon: <ClipboardList className="h-4 w-4" />,
+      },
+      {
+        name: "Post Load",
+        path: "/admin/post-load",
+        icon: <PackagePlus className="h-4 w-4" />,
       },
     ],
   },
