@@ -192,7 +192,19 @@ export default function CarrierDashboard() {
     onRoute: 0,
     idle: 0
   });
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [chartsReady, setChartsReady] = useState(false);
   const optimizeTimeoutsRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const syncViewport = () => setIsMobileView(media.matches);
+
+    syncViewport();
+    setChartsReady(true);
+    media.addEventListener("change", syncViewport);
+    return () => media.removeEventListener("change", syncViewport);
+  }, []);
 
   const clearOptimizeTimeouts = () => {
     optimizeTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
@@ -422,7 +434,7 @@ export default function CarrierDashboard() {
   }
 
   return (
-    <div className="relative w-full space-y-5 p-4 sm:p-6 lg:p-8">
+    <div className="relative w-full max-w-full overflow-x-hidden space-y-5 p-4 sm:p-6 lg:p-8">
       <div className="relative space-y-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -478,7 +490,7 @@ export default function CarrierDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
           <div className={`${CARD} min-h-[92px] p-3 sm:p-4`}>
             <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600"><Boxes className="h-3.5 w-3.5" /></div>
@@ -519,12 +531,7 @@ export default function CarrierDashboard() {
           {/* Optimization Success Banner */}
           <AnimatePresence>
             {isOptimized && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="overflow-hidden rounded-xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 p-4 shadow-sm sm:p-5"
-              >
+              <div className="overflow-hidden rounded-xl border border-emerald-200/80 bg-emerald-50 p-4 shadow-sm sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
@@ -546,14 +553,14 @@ export default function CarrierDashboard() {
                     Dismiss
                   </button>
                 </div>
-              </motion.div>
+              </div>
             )}
           </AnimatePresence>
 
           <div className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_0.75fr] xl:grid-cols-[1.4fr_0.6fr]">
             {/* Chart Area */}
             <div className="relative min-w-0 space-y-4">
-              <div className={`${CARD} overflow-hidden p-4 sm:p-5`}>
+              <div className={`${CARD} isolate overflow-hidden p-4 sm:p-5`}>
 
                 <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
@@ -574,11 +581,28 @@ export default function CarrierDashboard() {
                   </div>
                 </div>
 
-                <div className="h-52 w-full sm:h-56 lg:h-64 xl:h-72">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="relative h-48 w-full min-w-0 max-w-full overflow-hidden sm:h-56 lg:h-64 xl:h-72" style={{ contain: "layout paint" }}>
+                  {chartsReady && isMobileView ? (
+                    <div className="flex h-full items-end gap-1.5 px-1 pb-1">
+                      {chartData.map((point, index) => {
+                        const maxAmount = Math.max(...chartData.map((d) => d.amount || 0), 1);
+                        const heightPct = Math.max(8, Math.round(((point.amount || 0) / maxAmount) * 100));
+                        return (
+                          <div key={`${point.day}-${index}`} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+                            <div
+                              className="w-full rounded-t-md bg-blue-600/90"
+                              style={{ height: `${heightPct}%` }}
+                            />
+                            <span className="truncate text-[9px] font-semibold text-slate-400">{point.day}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : chartsReady ? (
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={isMobileView ? 100 : 1}>
                     <AreaChart data={chartData}>
                       <defs>
-                        <linearGradient id="premiumGradient" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="carrierRevenueGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563EB" stopOpacity={0.12}/>
                           <stop offset="95%" stopColor="#2563EB" stopOpacity={0}/>
                         </linearGradient>
@@ -596,8 +620,8 @@ export default function CarrierDashboard() {
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             return (
-                              <div className="bg-slate-900/95 backdrop-blur shadow-2xl p-3 rounded-xl border border-white/10 text-white">
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{payload[0].payload.day}</p>
+                              <div className="rounded-xl border border-white/10 bg-slate-900 p-3 text-white shadow-2xl">
+                                <p className="mb-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">{payload[0].payload.day}</p>
                                 <p className="text-base font-black text-blue-400">£{payload[0].value}</p>
                               </div>
                             );
@@ -610,14 +634,20 @@ export default function CarrierDashboard() {
                         type="monotone" 
                         dataKey="amount" 
                         stroke="#2563EB" 
-                        strokeWidth={3} 
-                        fill="url(#premiumGradient)" 
-                        animationDuration={2500}
-                        dot={{ r: 4, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}
-                        activeDot={{ r: 6, fill: '#2563EB', strokeWidth: 0 }}
+                        strokeWidth={2} 
+                        fill="url(#carrierRevenueGradient)" 
+                        isAnimationActive={!isMobileView}
+                        animationDuration={isMobileView ? 0 : 1200}
+                        dot={isMobileView ? false : { r: 4, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 5, fill: '#2563EB', strokeWidth: 0 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-slate-50 text-xs font-medium text-slate-400">
+                      Loading chart...
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -641,8 +671,38 @@ export default function CarrierDashboard() {
                   </button>
                 </div>
 
-                <div className="relative h-[240px] overflow-hidden rounded-xl border border-slate-100 bg-slate-100 shadow-inner sm:h-[280px] lg:h-[320px] xl:h-[360px]">
-                  {!MAPBOX_TOKEN ? (
+                <div className="relative h-[240px] overflow-hidden rounded-xl border border-slate-100 bg-slate-100 shadow-inner sm:h-[280px] lg:h-[320px] xl:h-[360px]" style={{ contain: "layout paint" }}>
+                  {isMobileView ? (
+                    <div className="absolute inset-0 flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+                      <div className="mb-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Live fleet</p>
+                          <p className="text-sm font-bold text-slate-900">{vehicles.length} units tracked</p>
+                        </div>
+                        <MapPin className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="flex flex-1 flex-col justify-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-slate-600">On route</span>
+                          <span className="font-bold text-blue-600">{fleetStatus.onRoute}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-slate-600">Idle</span>
+                          <span className="font-bold text-orange-500">{fleetStatus.idle}</span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed text-slate-500">
+                          Full map view opens on tablet and desktop for smoother mobile performance.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => router.push("/carrier/vehicles")}
+                        className="mt-3 w-full rounded-lg bg-blue-600 py-2.5 text-[12px] font-semibold text-white transition hover:bg-blue-700"
+                      >
+                        Manage fleet
+                      </button>
+                    </div>
+                  ) : !MAPBOX_TOKEN ? (
                     <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-50 p-4 text-center">
                       <p className="text-[12px] font-medium text-slate-500">Map unavailable. Add Mapbox token to enable live fleet tracking.</p>
                     </div>
@@ -687,8 +747,8 @@ export default function CarrierDashboard() {
                   </MapComponent>
                   )}
 
-                  {vehicles.length === 0 ? (
-                    <div className="absolute inset-x-3 bottom-3 z-20 rounded-xl border border-slate-200/90 bg-white/95 p-3 shadow-lg backdrop-blur-sm sm:inset-x-auto sm:bottom-4 sm:left-1/2 sm:max-w-sm sm:-translate-x-1/2 sm:p-4">
+                  {!isMobileView && vehicles.length === 0 ? (
+                    <div className="absolute inset-x-3 bottom-3 z-20 rounded-xl border border-slate-200/90 bg-white p-3 shadow-lg sm:inset-x-auto sm:bottom-4 sm:left-1/2 sm:max-w-sm sm:-translate-x-1/2 sm:p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400">
                           <Truck className="h-5 w-5" />
@@ -708,43 +768,40 @@ export default function CarrierDashboard() {
                     </div>
                   ) : null}
                   
+                  {!isMobileView ? (
                   <div className="pointer-events-none absolute left-2 top-2 right-12 z-10 flex flex-col gap-1.5 sm:left-3 sm:top-3 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
                     <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-2">
-                      <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-orange-100 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm sm:px-2.5 sm:py-1.5">
+                      <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-orange-100 bg-white px-2 py-1 shadow-sm sm:px-2.5 sm:py-1.5">
                         <AlertCircle className="h-3 w-3 shrink-0 text-orange-500 sm:h-3.5 sm:w-3.5" />
                         <span className="text-[8px] font-bold uppercase tracking-tight text-slate-800 sm:text-[9px]">M6 delay · 25m</span>
                       </div>
-                      <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-blue-100 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm sm:px-2.5 sm:py-1.5">
+                      <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-blue-100 bg-white px-2 py-1 shadow-sm sm:px-2.5 sm:py-1.5">
                         <ShieldAlert className="h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
                         <span className="text-[8px] font-bold uppercase tracking-tight text-slate-800 sm:text-[9px]">Heavy rain</span>
                       </div>
                     </div>
 
-                    <AnimatePresence>
-                      {isOptimized && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          className="pointer-events-auto flex items-center gap-1.5 self-start rounded-lg border border-emerald-300 bg-emerald-500 px-2.5 py-1 text-white shadow-md sm:px-3 sm:py-1.5"
-                        >
+                    {isOptimized ? (
+                        <div className="pointer-events-auto flex items-center gap-1.5 self-start rounded-lg border border-emerald-300 bg-emerald-500 px-2.5 py-1 text-white shadow-md sm:px-3 sm:py-1.5">
                           <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                           <span className="text-[8px] font-bold uppercase tracking-wide sm:text-[9px]">AI optimized</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        </div>
+                    ) : null}
                   </div>
+                  ) : null}
 
+                  {!isMobileView ? (
                   <div className="absolute bottom-2 left-2 right-2 z-10 flex flex-wrap gap-1.5 sm:bottom-3 sm:left-3 sm:right-auto">
-                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm sm:px-3 sm:py-2">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-2.5 py-1.5 shadow-sm sm:px-3 sm:py-2">
                       <div className="h-2 w-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
                       <span className="text-[9px] font-bold tracking-wide text-slate-800 sm:text-[10px]">{fleetStatus.onRoute} on route</span>
                     </div>
-                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm sm:px-3 sm:py-2">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-2.5 py-1.5 shadow-sm sm:px-3 sm:py-2">
                       <div className="h-2 w-2 rounded-full bg-orange-500" />
                       <span className="text-[9px] font-bold tracking-wide text-slate-800 sm:text-[10px]">{fleetStatus.idle} idle</span>
                     </div>
                   </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -789,6 +846,7 @@ export default function CarrierDashboard() {
                     ))
                   ) : (
                     <div className="py-12 flex flex-col items-center justify-center text-center px-4">
+                      {!isMobileView ? (
                       <div className="relative w-44 h-44 mb-2 opacity-80">
                         <video 
                           src="/no-loads.mp4" 
@@ -799,6 +857,11 @@ export default function CarrierDashboard() {
                           className="w-full h-full object-contain pointer-events-none"
                         />
                       </div>
+                      ) : (
+                      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-slate-400">
+                        <Box className="h-8 w-8" />
+                      </div>
+                      )}
                       <div className="flex flex-col items-center">
                         <div className="w-1 h-1 rounded-full bg-slate-200 mb-3" />
                         <h4 className="text-sm font-bold text-slate-900 tracking-tight mb-1">Marketplace Quiet</h4>
@@ -850,11 +913,9 @@ export default function CarrierDashboard() {
                     <span>{Math.round(carrierStats.xpProgress)}%</span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full border border-white/5 bg-white/10">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${carrierStats.xpProgress}%` }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                      className="h-full bg-gradient-to-r from-blue-300 to-white" 
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-300 to-white transition-[width] duration-700 ease-out"
+                      style={{ width: `${carrierStats.xpProgress}%` }}
                     />
                   </div>
                   <p className="mt-1.5 text-[10px] text-blue-200/80">{carrierStats.loadsToNext} loads to level {carrierStats.level + 1}</p>
@@ -887,11 +948,9 @@ export default function CarrierDashboard() {
                     </div>
                     <p className="text-xl font-bold text-indigo-900">£{fuelProfitStats.fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                     <div className="mt-4 w-full bg-indigo-200/30 h-2 rounded-full overflow-hidden border border-indigo-100/20">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(fuelProfitStats.margin, 100)}%` }}
-                        transition={{ duration: 1.2, delay: 0.8 }}
-                        className="bg-gradient-to-r from-indigo-400 to-indigo-600 h-full shadow-[0_0_10px_rgba(79,70,229,0.3)]" 
+                      <div
+                        className="bg-gradient-to-r from-indigo-400 to-indigo-600 h-full shadow-[0_0_10px_rgba(79,70,229,0.3)] transition-[width] duration-700 ease-out"
+                        style={{ width: `${Math.min(fuelProfitStats.margin, 100)}%` }}
                       />
                     </div>
                     <p className="mt-1 text-[10px] text-indigo-500">{fuelProfitStats.totalMiles} miles total</p>
@@ -980,7 +1039,7 @@ export default function CarrierDashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/50 backdrop-blur-md sm:items-center sm:p-6"
+            className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/60 sm:items-center sm:p-6"
           >
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -1055,11 +1114,9 @@ export default function CarrierDashboard() {
                     </div>
 
                     <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                      <motion.div
-                        className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-500"
-                        initial={{ width: "8%" }}
-                        animate={{ width: `${(optimizationStep / 3) * 100}%` }}
-                        transition={{ duration: 0.45, ease: "easeOut" }}
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-500 transition-[width] duration-300 ease-out"
+                        style={{ width: `${(optimizationStep / 3) * 100}%` }}
                       />
                     </div>
                   </>

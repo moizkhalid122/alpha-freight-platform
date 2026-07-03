@@ -92,13 +92,13 @@ export default function CarrierLayout({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/30 z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 min-w-0 w-full min-h-screen flex flex-col bg-[#FDFDFD] overflow-y-auto">
+      <div className="flex-1 lg:ml-64 min-w-0 w-full min-h-screen flex flex-col bg-[#FDFDFD] overflow-x-hidden overflow-y-auto">
         {children}
       </div>
     </div>
