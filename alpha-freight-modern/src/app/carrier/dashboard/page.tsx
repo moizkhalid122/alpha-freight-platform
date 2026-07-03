@@ -18,7 +18,7 @@ const NavigationControl = dynamic(() => import('react-map-gl/mapbox').then(mod =
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { 
@@ -130,6 +130,73 @@ const CARD =
 
 const formatMoney = (value: number) => `£${value.toLocaleString("en-GB")}`;
 
+type RevenuePeriod = "1W" | "1M" | "3M";
+
+type RevenueLoad = { created_at: string; price: number | string };
+
+type ChartPoint = { day: string; amount: number };
+
+const REVENUE_PERIODS: RevenuePeriod[] = ["1W", "1M", "3M"];
+
+const buildRevenueChartData = (loads: RevenueLoad[], period: RevenuePeriod): ChartPoint[] => {
+  const now = new Date();
+  now.setHours(23, 59, 59, 999);
+
+  const sumInRange = (start: Date, end: Date) =>
+    loads.reduce((sum, load) => {
+      const created = new Date(load.created_at);
+      if (created >= start && created <= end) {
+        return sum + (Number(load.price) || 0);
+      }
+      return sum;
+    }, 0);
+
+  if (period === "1W") {
+    return Array.from({ length: 7 }, (_, index) => {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() - (6 - index));
+      dayStart.setHours(0, 0, 0, 0);
+
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      return {
+        day: dayStart.toLocaleDateString("en-GB", { weekday: "short" }),
+        amount: sumInRange(dayStart, dayEnd),
+      };
+    });
+  }
+
+  if (period === "1M") {
+    return Array.from({ length: 4 }, (_, index) => {
+      const weekEnd = new Date(now);
+      weekEnd.setDate(weekEnd.getDate() - (3 - index) * 7);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const weekStart = new Date(weekEnd);
+      weekStart.setDate(weekStart.getDate() - 6);
+      weekStart.setHours(0, 0, 0, 0);
+
+      return {
+        day: weekStart.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+        amount: sumInRange(weekStart, weekEnd),
+      };
+    });
+  }
+
+  return Array.from({ length: 3 }, (_, index) => {
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - (2 - index), 1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - (2 - index) + 1, 0, 23, 59, 59, 999);
+
+    return {
+      day: monthStart.toLocaleDateString("en-GB", { month: "short" }),
+      amount: sumInRange(monthStart, monthEnd),
+    };
+  });
+};
+
 const ACTIVITY_DOT_COLORS: Record<string, string> = {
   green: "bg-emerald-500",
   blue: "bg-blue-500",
@@ -168,7 +235,8 @@ export default function CarrierDashboard() {
     balance: 0,
     completedLoads: 0
   });
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [revenueLoads, setRevenueLoads] = useState<RevenueLoad[]>([]);
+  const [revenuePeriod, setRevenuePeriod] = useState<RevenuePeriod>("1W");
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [fuelProfitStats, setFuelProfitStats] = useState({
     fuelCost: 0,
@@ -195,6 +263,11 @@ export default function CarrierDashboard() {
   const [isMobileView, setIsMobileView] = useState(false);
   const [chartsReady, setChartsReady] = useState(false);
   const optimizeTimeoutsRef = useRef<number[]>([]);
+
+  const chartData = useMemo(
+    () => buildRevenueChartData(revenueLoads, revenuePeriod),
+    [revenueLoads, revenuePeriod]
+  );
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1023px)");
@@ -369,22 +442,12 @@ export default function CarrierDashboard() {
             setRecentActivity([]);
           }
 
-          // Process data for chart
-          const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-          const groupedData = safeAssignedLoads.reduce((acc: any, load) => {
-            const date = new Date(load.created_at);
-            const dayName = days[date.getDay()];
-            if (!acc[dayName]) acc[dayName] = 0;
-            acc[dayName] += Number(load.price) || 0;
-            return acc;
-          }, {});
-
-          const formattedChartData = days.map(day => ({
-            day,
-            amount: groupedData?.[day] || 0
-          }));
-
-          setChartData(formattedChartData);
+          setRevenueLoads(
+            safeAssignedLoads.map((load) => ({
+              created_at: load.created_at,
+              price: load.price,
+            }))
+          );
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -573,9 +636,19 @@ export default function CarrierDashboard() {
                     </h2>
                   </div>
                   <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
-                    {['1W', '1M', '3M'].map(p => (
-                      <button key={p} type="button" className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${p === '1W' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                        {p}
+                    {REVENUE_PERIODS.map((period) => (
+                      <button
+                        key={period}
+                        type="button"
+                        onClick={() => setRevenuePeriod(period)}
+                        aria-pressed={revenuePeriod === period}
+                        className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
+                          revenuePeriod === period
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700"
+                        }`}
+                      >
+                        {period}
                       </button>
                     ))}
                   </div>
@@ -584,7 +657,7 @@ export default function CarrierDashboard() {
                 <div className="relative h-48 w-full min-w-0 max-w-full overflow-hidden sm:h-56 lg:h-64 xl:h-72" style={{ contain: "layout paint", isolation: "isolate" }}>
                   {chartsReady ? (
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={isMobileView ? 50 : 1}>
-                    <AreaChart data={chartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+                    <AreaChart key={revenuePeriod} data={chartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="carrierRevenueGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563EB" stopOpacity={0.12}/>
@@ -606,7 +679,7 @@ export default function CarrierDashboard() {
                             return (
                               <div className="rounded-xl border border-white/10 bg-slate-900 p-3 text-white shadow-2xl">
                                 <p className="mb-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">{payload[0].payload.day}</p>
-                                <p className="text-base font-black text-blue-400">£{payload[0].value}</p>
+                                <p className="text-base font-black text-blue-400">{formatMoney(Number(payload[0].value) || 0)}</p>
                               </div>
                             );
                           }

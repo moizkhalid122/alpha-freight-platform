@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
 import { MAPBOX_TOKEN } from "@/lib/mapbox";
 import NothingLottie from "@/components/ui/NothingLottie";
+import InstantBookSuccessOverlay from "@/components/carrier/InstantBookSuccessOverlay";
 import {
   Search,
   MapPin,
@@ -206,6 +207,11 @@ export default function AvailableLoadsPage() {
   const [bidLoading, setBidLoading] = useState(false);
   const [bidSuccess, setBidSuccess] = useState(false);
   const [bookLoading, setBookLoading] = useState(false);
+  const [instantBookSuccess, setInstantBookSuccess] = useState<{
+    loadCode: string;
+    routeLabel: string;
+    amountLabel: string;
+  } | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [portalReady, setPortalReady] = useState(false);
@@ -500,8 +506,13 @@ export default function AvailableLoadsPage() {
         throw new Error("Load update blocked. Run carrier-platform-rls-fix.sql in Supabase.");
       }
 
+      setInstantBookSuccess({
+        loadCode: getLoadCode(selectedLoad.id),
+        routeLabel: `${getCity(getLoadOrigin(selectedLoad))} → ${getCity(getLoadDestination(selectedLoad))}`,
+        amountLabel: formatMoney(amount),
+      });
       setSelectedLoad(null);
-      showToast("success", "Load booked instantly. Check My Shipments to begin execution.");
+      setShowBidModal(false);
       void fetchLoads();
     } catch (error) {
       console.error("Instant book error:", error);
@@ -1121,6 +1132,13 @@ export default function AvailableLoadsPage() {
         <AnimatePresence>
           {detailModal}
           {bidModal}
+          <InstantBookSuccessOverlay
+            open={Boolean(instantBookSuccess)}
+            loadCode={instantBookSuccess?.loadCode ?? ""}
+            routeLabel={instantBookSuccess?.routeLabel ?? ""}
+            amountLabel={instantBookSuccess?.amountLabel ?? ""}
+            onClose={() => setInstantBookSuccess(null)}
+          />
         </AnimatePresence>,
         document.body
       )}
