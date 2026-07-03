@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import InstantBookLottie from "./InstantBookLottie";
 
 type InstantBookSuccessOverlayProps = {
@@ -19,27 +19,28 @@ export default function InstantBookSuccessOverlay({
   amountLabel,
   onClose,
 }: InstantBookSuccessOverlayProps) {
+  if (!open) return null;
+
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-900/50 px-4"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ type: "spring", damping: 24, stiffness: 280 }}
-            className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mx-auto flex justify-center">
-              <InstantBookLottie className="h-52 w-52" />
-            </div>
+    <motion.div
+      key="instant-book-success"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-900/50 px-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 8 }}
+        transition={{ type: "spring", damping: 24, stiffness: 280 }}
+        className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mx-auto flex justify-center overflow-hidden">
+          <InstantBookLottie className="h-52 w-52" loop />
+        </div>
             <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
               Ready, set, go!
             </p>
@@ -65,7 +66,5 @@ export default function InstantBookSuccessOverlay({
             </div>
           </motion.div>
         </motion.div>
-      )}
-    </AnimatePresence>
   );
 }

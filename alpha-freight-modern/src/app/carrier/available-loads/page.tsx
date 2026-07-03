@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,6 +9,9 @@ import { supabase } from "@/lib/supabase";
 import { MAPBOX_TOKEN } from "@/lib/mapbox";
 import NothingLottie from "@/components/ui/NothingLottie";
 import InstantBookSuccessOverlay from "@/components/carrier/InstantBookSuccessOverlay";
+import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+import type { MapRef } from "react-map-gl/mapbox";
 import {
   Search,
   MapPin,
@@ -74,9 +77,17 @@ const MapComponent = dynamic(
   () =>
     import("react-map-gl/mapbox").then((mod) => {
       const { Map } = mod;
-      return function MapWrapper(props: Record<string, unknown>) {
-        return <Map {...props}>{props.children as React.ReactNode}</Map>;
-      };
+      const MapWrapper = React.forwardRef<MapRef, React.ComponentProps<typeof Map>>(function MapWrapper(
+        props,
+        ref
+      ) {
+        return (
+          <Map ref={ref} {...props}>
+            {props.children}
+          </Map>
+        );
+      });
+      return MapWrapper;
     }),
   {
     ssr: false,
@@ -222,10 +233,11 @@ export default function AvailableLoadsPage() {
   const [estimatedDuration, setEstimatedDuration] = useState<number | null>(null);
   const [estimatedDistance, setEstimatedDistance] = useState<number | null>(null);
   const [mapViewState, setMapViewState] = useState({
-    longitude: -1.5,
-    latitude: 52.5,
-    zoom: 5,
+    longitude: -2.5,
+    latitude: 54.5,
+    zoom: 5.5,
   });
+  const mapRef = useRef<MapRef>(null);
 
   const showToast = useCallback((type: "success" | "error", text: string) => {
     setToast({ type, text });
@@ -270,14 +282,14 @@ export default function AvailableLoadsPage() {
   }, [fetchLoads]);
 
   useEffect(() => {
-    const hasOverlay = Boolean(selectedLoad || showBidModal);
+    const hasOverlay = Boolean(selectedLoad || showBidModal || instantBookSuccess);
     if (!hasOverlay) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [selectedLoad, showBidModal]);
+  }, [selectedLoad, showBidModal, instantBookSuccess]);
 
   useEffect(() => {
     if (!selectedLoad) {
@@ -330,18 +342,6 @@ export default function AvailableLoadsPage() {
           setRouteData(data.routes[0].geometry);
           setEstimatedDuration(data.routes[0].duration);
           setEstimatedDistance(data.routes[0].distance);
-
-          const minLng = Math.min(originCoords.lng, destCoords.lng);
-          const maxLng = Math.max(originCoords.lng, destCoords.lng);
-          const minLat = Math.min(originCoords.lat, destCoords.lat);
-          const maxLat = Math.max(originCoords.lat, destCoords.lat);
-
-          setMapViewState((prev) => ({
-            ...prev,
-            longitude: (minLng + maxLng) / 2,
-            latitude: (minLat + maxLat) / 2,
-            zoom: 6,
-          }));
         }
       } catch (error) {
         console.error("Route error:", error);
@@ -350,6 +350,20 @@ export default function AvailableLoadsPage() {
 
     void fetchRoute();
   }, [originCoords, destCoords]);
+
+  useEffect(() => {
+    if (!mapRef.current || !originCoords || !destCoords) return;
+
+    const bounds = new mapboxgl.LngLatBounds();
+    bounds.extend([originCoords.lng, originCoords.lat]);
+    bounds.extend([destCoords.lng, destCoords.lat]);
+
+    mapRef.current.fitBounds(bounds, {
+      padding: { top: 88, bottom: 48, left: 48, right: 48 },
+      duration: 700,
+      maxZoom: 8,
+    });
+  }, [originCoords, destCoords, routeData]);
 
   const toggleSaved = (loadId: string, event?: React.MouseEvent) => {
     event?.stopPropagation();
@@ -719,7 +733,7 @@ export default function AvailableLoadsPage() {
 
   const detailModal =
     selectedLoad && !showBidModal ? (
-      <div className={OVERLAY_CLASS} onClick={() => setSelectedLoad(null)}>
+      <div key="load-detail-modal" className={OVERLAY_CLASS} onClick={() => setSelectedLoad(null)}>
         <motion.div
           initial={{ opacity: 0, scale: 0.98, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -728,7 +742,7 @@ export default function AvailableLoadsPage() {
           onClick={(event) => event.stopPropagation()}
         >
           <div className="grid min-h-0 flex-1 lg:grid-cols-2">
-            <div className="relative h-[280px] border-b border-slate-100 bg-slate-50 lg:h-auto lg:border-b-0 lg:border-r">
+            <div className="relative h-[280px] overflow-hidden border-b border-slate-100 bg-slate-50 lg:h-auto lg:border-b-0 lg:border-r">
               <div className="absolute left-4 right-4 top-4 z-10 flex items-center justify-between">
                 <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-sm backdrop-blur">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Route preview</p>
@@ -744,36 +758,57 @@ export default function AvailableLoadsPage() {
               </div>
 
               <MapComponent
+                ref={mapRef}
                 {...mapViewState}
                 onMove={(evt: { viewState: typeof mapViewState }) => setMapViewState(evt.viewState)}
                 style={{ width: "100%", height: "100%" }}
                 mapStyle="mapbox://styles/mapbox/light-v11"
                 mapboxAccessToken={MAPBOX_TOKEN}
+                attributionControl={false}
               >
                 {routeData ? (
                   <MapSource
-                    id="route"
+                    id="selected-load-route"
                     type="geojson"
                     data={{ type: "Feature", geometry: routeData, properties: {} }}
                   >
                     <MapLayer
-                      id="route-layer"
+                      id="selected-load-route-layer"
                       type="line"
-                      paint={{ "line-color": "#0f172a", "line-width": 4, "line-opacity": 0.75 }}
+                      paint={{
+                        "line-color": "#2563eb",
+                        "line-width": 4,
+                        "line-opacity": 0.85,
+                      }}
+                      layout={{ "line-cap": "round", "line-join": "round" }}
                     />
                   </MapSource>
                 ) : null}
                 {originCoords ? (
-                  <MapMarker longitude={originCoords.lng} latitude={originCoords.lat}>
-                    <div className="rounded-full border-2 border-white bg-blue-600 p-1.5 shadow-lg">
-                      <MapPin className="h-3.5 w-3.5 text-white" />
+                  <MapMarker longitude={originCoords.lng} latitude={originCoords.lat} anchor="bottom">
+                    <div className="flex flex-col items-center">
+                      <div className="mb-1 rounded-md border border-white bg-blue-600 px-2 py-0.5 shadow-md">
+                        <span className="whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-white">
+                          Pickup
+                        </span>
+                      </div>
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-blue-600 shadow-lg">
+                        <MapPin className="h-3 w-3 text-white" />
+                      </div>
                     </div>
                   </MapMarker>
                 ) : null}
                 {destCoords ? (
-                  <MapMarker longitude={destCoords.lng} latitude={destCoords.lat}>
-                    <div className="rounded-full border-2 border-white bg-emerald-500 p-1.5 shadow-lg">
-                      <MapPin className="h-3.5 w-3.5 text-white" />
+                  <MapMarker longitude={destCoords.lng} latitude={destCoords.lat} anchor="bottom">
+                    <div className="flex flex-col items-center">
+                      <div className="mb-1 rounded-md border border-white bg-emerald-500 px-2 py-0.5 shadow-md">
+                        <span className="whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-white">
+                          Delivery
+                        </span>
+                      </div>
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-lg">
+                        <MapPin className="h-3 w-3 text-white" />
+                      </div>
                     </div>
                   </MapMarker>
                 ) : null}
@@ -893,7 +928,7 @@ export default function AvailableLoadsPage() {
     ) : null;
 
   const bidModal = showBidModal && selectedLoad ? (
-    <div className={OVERLAY_CLASS} onClick={() => setShowBidModal(false)}>
+    <div key="load-bid-modal" className={OVERLAY_CLASS} onClick={() => setShowBidModal(false)}>
       <motion.div
         initial={{ opacity: 0, scale: 0.98, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -967,6 +1002,7 @@ export default function AvailableLoadsPage() {
         <AnimatePresence>
           {toast && (
             <motion.div
+              key="carrier-loads-toast"
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
@@ -1129,16 +1165,19 @@ export default function AvailableLoadsPage() {
       </div>
 
       {portalReady && createPortal(
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {detailModal}
           {bidModal}
-          <InstantBookSuccessOverlay
-            open={Boolean(instantBookSuccess)}
-            loadCode={instantBookSuccess?.loadCode ?? ""}
-            routeLabel={instantBookSuccess?.routeLabel ?? ""}
-            amountLabel={instantBookSuccess?.amountLabel ?? ""}
-            onClose={() => setInstantBookSuccess(null)}
-          />
+          {instantBookSuccess ? (
+            <InstantBookSuccessOverlay
+              key="instant-book-success"
+              open
+              loadCode={instantBookSuccess.loadCode}
+              routeLabel={instantBookSuccess.routeLabel}
+              amountLabel={instantBookSuccess.amountLabel}
+              onClose={() => setInstantBookSuccess(null)}
+            />
+          ) : null}
         </AnimatePresence>,
         document.body
       )}
