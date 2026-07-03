@@ -7,6 +7,7 @@ import { Menu, X, Bell, Search, Clock, Zap, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FeedSidebar from "@/components/feed/FeedSidebar";
 import ProfileExtrasHydrator from "@/components/platform/ProfileExtrasHydrator";
+import BrandMark from "@/components/BrandMark";
 
 export default function SupplierLayout({
   children,
@@ -100,13 +101,14 @@ export default function SupplierLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header */}
         <header className="h-20 bg-[#FDFDFD]/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 sm:px-8 shrink-0 z-40 sticky top-0">
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+              className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-50 lg:hidden"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="h-5 w-5" />
             </button>
+            <BrandMark href="/" className="lg:hidden" textClassName="text-base font-bold tracking-tight text-gray-900" />
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 group hover:bg-white hover:border-blue-100 transition-all">
               <Search className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
               <input 

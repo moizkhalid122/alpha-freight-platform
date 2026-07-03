@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, X, User, Sparkles, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { sendChatMessage } from "@/lib/api";
 import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration } from "@/lib/chat-ui";
 import AssistantMessageActions from "@/components/chat/AssistantMessageActions";
@@ -44,6 +45,7 @@ const suggestedQuestions = getSuggestedPrompts("general");
 const thinkingStates = getThinkingStates("general");
 
 export default function Chatbot() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -57,6 +59,13 @@ export default function Chatbot() {
   const [sessionMemory, setSessionMemory] = useState<CopilotContextMemory | null>(null);
   const [selectedMode, setSelectedMode] = useState<CopilotMode>("logistics_copilot");
 
+  const hideWidget =
+    pathname.startsWith("/carrier") ||
+    pathname.startsWith("/supplier") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/auth");
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -64,6 +73,18 @@ export default function Chatbot() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isTyping) {
@@ -288,68 +309,77 @@ export default function Chatbot() {
     }
   };
 
+  if (hideWidget) {
+    return null;
+  }
+
   return (
     <>
       {/* Chat Button */}
+      {!isOpen && (
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-2xl shadow-slate-900/30 ring-4 ring-white/80"
+        className="fixed bottom-5 right-4 z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-2xl shadow-slate-900/30 ring-4 ring-white/80 sm:bottom-6 sm:right-6"
+        aria-label="Open Alpha Freight AI"
       >
-        <div className="h-8 w-8 relative">
+        <div className="relative h-8 w-8">
           <Image src="/logo.png" alt="Alpha Freight" fill className="object-contain" />
         </div>
       </motion.button>
+      )}
 
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className="fixed bottom-24 right-6 z-50 flex h-[640px] w-[90vw] max-w-[420px] flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-900/12 ring-1 ring-slate-200/70 md:bottom-6"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.22 }}
+            className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-white md:inset-auto md:bottom-6 md:right-6 md:h-[min(640px,calc(100vh-3rem))] md:w-[min(420px,calc(100vw-2rem))] md:rounded-[28px] md:shadow-2xl md:shadow-slate-900/12 md:ring-1 md:ring-slate-200/70"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                  <Image src="/logo.png" alt="Alpha Freight" fill className="object-contain p-1" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-slate-900">Alpha Freight AI</h3>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                      <Sparkles className="h-3 w-3" />
-                      Beta
-                    </span>
+            <div className="shrink-0 border-b border-slate-200 bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:rounded-t-[28px] md:pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                    <Image src="/logo.png" alt="Alpha Freight" fill className="object-contain p-1" />
                   </div>
-                  <p className="flex items-center gap-2 text-xs text-slate-500">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                    Online now
-                  </p>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-bold text-slate-900">Alpha Freight AI</h3>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                        <Sparkles className="h-3 w-3" />
+                        Beta
+                      </span>
+                    </div>
+                    <p className="flex items-center gap-2 text-xs text-slate-500">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                      Online now
+                    </p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
+                  aria-label="Close chat"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <div className="hidden max-w-[210px] lg:block">
+              <div className="mt-3">
                 <ChatModeSwitcher value={selectedMode} onChange={setSelectedMode} compact />
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-slate-50/70 p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto overscroll-contain bg-gradient-to-b from-slate-50 via-white to-slate-50/70 p-4 space-y-4">
               {sessionMemory && <CopilotMemoryBar memory={sessionMemory} />}
-              <div className="lg:hidden">
-                <ChatModeSwitcher value={selectedMode} onChange={setSelectedMode} compact />
-              </div>
               {messages.map((message) => (
                 (() => {
                   const shouldRenderCard = Boolean(
@@ -459,7 +489,10 @@ export default function Chatbot() {
             </div>
 
             {/* Input */}
-            <form onSubmit={(e) => handleSend(input, e)} className="border-t border-slate-100 p-4 bg-white">
+            <form
+              onSubmit={(e) => handleSend(input, e)}
+              className="shrink-0 border-t border-slate-100 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:rounded-b-[28px]"
+            >
               <div className="flex gap-2">
                 <input
                   value={input}

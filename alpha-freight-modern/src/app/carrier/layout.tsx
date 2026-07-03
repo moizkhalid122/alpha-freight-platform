@@ -7,6 +7,7 @@ import ProfileExtrasHydrator from "@/components/platform/ProfileExtrasHydrator";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FeedSidebar from "@/components/feed/FeedSidebar";
+import BrandMark from "@/components/BrandMark";
 
 export default function CarrierLayout({
   children,
@@ -65,18 +66,9 @@ export default function CarrierLayout({
     <div className="min-h-screen bg-[#FDFDFD] text-gray-900 flex flex-col lg:flex-row">
       <ProfileExtrasHydrator role="carrier" />
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-[#FDFDFD] border-b border-gray-100 sticky top-0 z-[60]">
-
-
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-            </svg>
-          </div>
-          <span className="text-lg font-bold tracking-tight text-gray-900">Alpha Freight</span>
-        </div>
-        <button 
+      <div className="lg:hidden sticky top-0 z-[60] flex items-center justify-between border-b border-gray-100 bg-[#FDFDFD] px-4 py-4 sm:px-6">
+        <BrandMark href="/" textClassName="text-lg font-bold tracking-tight text-gray-900" />
+        <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="p-2 hover:bg-gray-50 rounded-xl transition-colors"
         >
@@ -106,7 +98,7 @@ export default function CarrierLayout({
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 min-h-screen flex flex-col bg-[#FDFDFD]">
+      <div className="flex-1 lg:ml-64 min-w-0 w-full min-h-screen flex flex-col bg-[#FDFDFD] overflow-y-auto">
         {children}
       </div>
     </div>

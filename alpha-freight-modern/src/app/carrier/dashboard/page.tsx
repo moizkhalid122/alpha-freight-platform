@@ -18,7 +18,7 @@ const NavigationControl = dynamic(() => import('react-map-gl/mapbox').then(mod =
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { 
@@ -125,6 +125,35 @@ import { MAPBOX_TOKEN } from "@/lib/mapbox";
 const CARRIER_ACTIVE_STATUSES = ["active", "booked", "assigned", "pending", "in-transit", "loading"];
 const CARRIER_COMPLETED_STATUSES = ["completed", "delivered"];
 
+const CARD =
+  "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:shadow-md";
+
+const formatMoney = (value: number) => `£${value.toLocaleString("en-GB")}`;
+
+const ACTIVITY_DOT_COLORS: Record<string, string> = {
+  green: "bg-emerald-500",
+  blue: "bg-blue-500",
+  orange: "bg-orange-500",
+};
+
+const OPTIMIZATION_STEPS = [
+  {
+    title: "Analyzing live traffic",
+    description: "Pulling motorway data for M6, M25, and your active corridors.",
+    Icon: Search,
+  },
+  {
+    title: "Optimizing fleet routes",
+    description: "Calculating fuel-efficient paths based on your current loads.",
+    Icon: Zap,
+  },
+  {
+    title: "Routes secured",
+    description: "Optimization saved. Estimated fuel savings up to 12% this week.",
+    Icon: CheckCircle2,
+  },
+] as const;
+
 export default function CarrierDashboard() {
   const router = useRouter();
   const [viewState, setViewState] = useState({
@@ -163,19 +192,45 @@ export default function CarrierDashboard() {
     onRoute: 0,
     idle: 0
   });
+  const optimizeTimeoutsRef = useRef<number[]>([]);
+
+  const clearOptimizeTimeouts = () => {
+    optimizeTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    optimizeTimeoutsRef.current = [];
+  };
 
   const handleOptimize = () => {
+    if (optimizing) return;
+
+    clearOptimizeTimeouts();
     setOptimizing(true);
     setOptimizationStep(1);
-    
-    setTimeout(() => setOptimizationStep(2), 1500);
-    setTimeout(() => setOptimizationStep(3), 3000);
-    setTimeout(() => {
-      setOptimizing(false);
-      setOptimizationStep(0);
-      setIsOptimized(true);
-    }, 4500);
+
+    optimizeTimeoutsRef.current.push(
+      window.setTimeout(() => setOptimizationStep(2), 1400),
+      window.setTimeout(() => setOptimizationStep(3), 2800),
+      window.setTimeout(() => {
+        setOptimizing(false);
+        setOptimizationStep(0);
+        setIsOptimized(true);
+        clearOptimizeTimeouts();
+      }, 4200)
+    );
   };
+
+  useEffect(() => {
+    if (!optimizing) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [optimizing]);
+
+  useEffect(() => () => clearOptimizeTimeouts(), []);
 
   useEffect(() => {
     async function getDashboardData() {
@@ -360,267 +415,180 @@ export default function CarrierDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-gray-900">
-      {/* Top Header */}
-      <header className="h-16 border-b border-gray-100 bg-[#FDFDFD] flex items-center justify-between px-8 sticky top-0 z-40">
-
-
-
-        <div className="flex items-center gap-3">
-          <motion.div 
-            whileHover={{ scale: 1.02, y: -1 }}
-            className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-xl border border-gray-100 cursor-pointer transition-all hover:shadow-md hover:border-blue-100"
-          >
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white font-black shadow-lg ${
-              carrierStats.isPremium ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/20' : 'bg-slate-700 shadow-slate-500/10'
-            }`}>
-              {carrierStats.isPremium ? 'P' : 'C'}
-            </div>
-            <span className="text-xs font-bold text-slate-700 tracking-tight">
-              {carrierStats.isPremium ? 'Premium Carrier' : 'Standard Carrier'}
-            </span>
-            <div className={`flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md border ${
-              carrierStats.isPremium ? 'bg-blue-50 border-blue-100/50' : 'bg-slate-50 border-slate-100'
-            }`}>
-              <TrendingUp className={`w-3 h-3 ${carrierStats.isPremium ? 'text-blue-500' : 'text-slate-400'}`} />
-              <span className={`text-[9px] font-black ${carrierStats.isPremium ? 'text-blue-600' : 'text-slate-500'}`}>
-                Lvl {carrierStats.level}
+    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+              <div className={`rounded-md p-1.5 ${carrierStats.isPremium ? "bg-blue-600" : "bg-slate-800"}`}>
+                <LayoutDashboard className="h-3.5 w-3.5 text-white" />
+              </div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Carrier operations
+              </span>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                carrierStats.isPremium
+                  ? "bg-blue-50 text-blue-700 border border-blue-100"
+                  : "bg-slate-100 text-slate-600 border border-slate-200"
+              }`}>
+                {carrierStats.isPremium ? "Premium" : "Standard"} · Lvl {carrierStats.level}
               </span>
             </div>
-          </motion.div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              Welcome back, {userProfile?.full_name?.split(" ")[0] || "Carrier"}
+            </h1>
+            <p className="mt-0.5 text-[13px] text-slate-500">
+              Fleet efficiency at{" "}
+              <span className="font-semibold text-blue-600">
+                {Math.round(80 + carrierStats.level * 2)}%
+              </span>
+              {" "}· {stats.activeLoads} active load{stats.activeLoads === 1 ? "" : "s"}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push("/carrier/available-loads")}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Browse loads
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/carrier/ai-assistant")}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              AI Assistant
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-slate-800"
+            >
+              Get verified
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <motion.div 
-              whileHover={{ scale: 1.05, y: -1 }} 
-              className="cursor-pointer group p-1 rounded-xl hover:bg-slate-50 transition-all"
-              title="Activity"
-            >
-              <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors border border-transparent group-hover:border-blue-100 shadow-sm">
-                <Clock className="w-4 h-4" />
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              whileHover={{ scale: 1.05, y: -1 }} 
-              className="cursor-pointer group p-1 rounded-xl hover:bg-slate-50 transition-all"
-              title="Support"
-            >
-              <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors border border-transparent group-hover:border-blue-100 shadow-sm">
-                <Zap className="w-4 h-4" />
-              </div>
-            </motion.div>
-
-            <motion.button
-                whileHover={{ scale: 1.05, y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push("/carrier/ai-assistant")}
-                className="cursor-pointer group p-1 rounded-xl hover:bg-slate-100 transition-all"
-                title="AI Assistant"
-              >
-                <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm shadow-slate-900/20 group-hover:bg-slate-800 transition-all">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-              </motion.button>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-4">
+          <div className={`${CARD} p-3 sm:p-4`}>
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600"><Boxes className="h-3.5 w-3.5" /></div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total loads</p>
+            </div>
+            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{stats.totalLoads}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">All assigned</p>
           </div>
-          
-          <motion.button 
-            whileHover={{ scale: 1.02, y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            className="bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 border border-slate-800"
-          >
-            Get Verified
-          </motion.button>
+          <div className={`${CARD} p-3 sm:p-4`}>
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-rose-50 p-1.5 text-rose-600"><Zap className="h-3.5 w-3.5" /></div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Active</p>
+            </div>
+            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{stats.activeLoads}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">In progress</p>
+          </div>
+          <div className={`${CARD} p-3 sm:p-4`}>
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-amber-50 p-1.5 text-amber-600"><Wallet className="h-3.5 w-3.5" /></div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Balance</p>
+            </div>
+            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{formatMoney(stats.balance)}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">Total earnings</p>
+          </div>
+          <div className={`${CARD} p-3 sm:p-4`}>
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-emerald-50 p-1.5 text-emerald-600"><CheckCircle2 className="h-3.5 w-3.5" /></div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Completed</p>
+            </div>
+            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{stats.completedLoads}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">Delivered safely</p>
+          </div>
         </div>
-      </header>
+      </motion.div>
 
-      <main className="p-8 max-w-[1400px] mx-auto bg-[#FDFDFD]">
-        {/* Entrance Animation Wrapper */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <div className="mb-10 flex justify-between items-end">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                  Welcome back, {userProfile?.full_name?.split(' ')[0] || 'User'}
-                </h1>
-                <Sparkles className="w-4 h-4 text-blue-500/70 animate-pulse" />
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-gray-500 font-medium">Your fleet is currently performing at</p>
-                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-full border border-blue-100 shadow-sm">
-                  {Math.round(80 + (carrierStats.level * 2))}% efficiency
-                </span>
-              </div>
-            </div>
-            
-            {/* AI Insights Quick View */}
-            <div className="hidden lg:flex gap-3">
-              {insights.map((insight) => (
-                <motion.div 
-                  key={insight.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="bg-white border border-gray-100/50 p-3 rounded-2xl flex items-center gap-3 shadow-sm max-w-[320px] hover:border-blue-100 transition-colors"
-                >
-                  <div className={`shrink-0 p-2.5 rounded-xl border shadow-sm relative overflow-hidden ${
-                    insight.type === 'alert' 
-                      ? 'bg-orange-50/50 border-orange-100/50 text-orange-500' 
-                      : 'bg-blue-50/50 border-blue-100/50 text-blue-500'
-                  }`}>
-                    <div className="absolute inset-0 bg-gradient-to-br from-current/5 to-transparent" />
-                    <div className="relative z-10">{insight.icon}</div>
-                  </div>
-                  <p className="text-[11px] font-semibold text-slate-600 leading-tight tracking-tight">{insight.text}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="space-y-6"
+      >
 
           {/* Optimization Success Banner */}
           <AnimatePresence>
             {isOptimized && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
-                exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between overflow-hidden"
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="overflow-hidden rounded-xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 p-4 shadow-sm sm:p-5"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                    <Zap className="w-5 h-5" />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
+                      <Zap className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-emerald-900">AI route optimization active</p>
+                      <p className="mt-0.5 text-[12px] leading-relaxed text-emerald-700/90">
+                        Your fleet is running on fuel-efficient paths. Estimated savings{" "}
+                        <span className="font-semibold">£420/week</span>.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-black text-emerald-900 leading-none mb-1">AI Route Optimization Active</p>
-                    <p className="text-[11px] font-medium text-emerald-600">Your fleet is now running on the most fuel-efficient paths. Estimated savings: £420/week.</p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsOptimized(false)}
+                    className="shrink-0 self-start rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-50 sm:self-center"
+                  >
+                    Dismiss
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setIsOptimized(false)}
-                  className="text-[10px] font-black text-emerald-700 uppercase tracking-widest hover:text-emerald-900 transition-colors"
-                >
-                  Dismiss
-                </button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            {/* Total Loads */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm group hover:border-indigo-100/50 transition-all duration-300 flex flex-col h-full"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-indigo-50/60 rounded-xl flex items-center justify-center text-indigo-600 group-hover:scale-105 transition-transform duration-500 border border-indigo-100/50 shadow-sm relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
-                  <Boxes className="w-5 h-5 relative z-10" />
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Total Loads</p>
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{stats.totalLoads}</h3>
-              <p className="text-[10px] font-medium text-slate-400 mt-auto">All assigned loads</p>
-            </motion.div>
-
-            {/* Active Loads */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm group hover:border-rose-100/50 transition-all duration-300 flex flex-col h-full"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-rose-50/60 rounded-xl flex items-center justify-center text-rose-600 group-hover:scale-105 transition-transform duration-500 border border-rose-100/50 shadow-sm relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent" />
-                  <Zap className="w-5 h-5 relative z-10" />
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Active Loads</p>
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{stats.activeLoads}</h3>
-              <p className="text-[10px] font-medium text-slate-400 mt-auto">Currently moving</p>
-            </motion.div>
-
-            {/* Balance */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm group hover:border-amber-100/50 transition-all duration-300 flex flex-col h-full"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-amber-50/60 rounded-xl flex items-center justify-center text-amber-600 group-hover:scale-105 transition-transform duration-500 border border-amber-100/50 shadow-sm relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent" />
-                  <Wallet className="w-5 h-5 relative z-10" />
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Balance</p>
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">£{stats.balance}</h3>
-              <p className="text-[10px] font-medium text-slate-400 mt-auto">Total earnings</p>
-            </motion.div>
-
-            {/* Completed */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm group hover:border-sky-100/50 transition-all duration-300 flex flex-col h-full"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-sky-50/60 rounded-xl flex items-center justify-center text-sky-600 group-hover:scale-105 transition-transform duration-500 border border-sky-100/50 shadow-sm relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent" />
-                  <CheckCircle2 className="w-5 h-5 relative z-10" />
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Completed</p>
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{stats.completedLoads}</h3>
-              <p className="text-[10px] font-medium text-slate-400 mt-auto">Delivered safely</p>
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_0.75fr] xl:grid-cols-[1.4fr_0.6fr]">
             {/* Chart Area */}
-            <div className="lg:col-span-8 space-y-6">
+            <div className="min-w-0 space-y-4">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="bg-white border border-gray-100 rounded-[28px] p-7 shadow-sm relative overflow-hidden"
+                className={`${CARD} relative overflow-hidden p-4 sm:p-5`}
               >
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
-                      Revenue Overview
-                      <div className="px-2.5 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-bold rounded-full border border-emerald-100">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Analytics</p>
+                    <h2 className="mt-0.5 flex items-center gap-2 text-[15px] font-bold text-slate-900">
+                      Revenue overview
+                      <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
                         LIVE
-                      </div>
+                      </span>
                     </h2>
-                    <p className="text-slate-400 text-xs font-medium mt-0.5">Weekly payout performance analysis</p>
                   </div>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
                     {['1W', '1M', '3M'].map(p => (
-                      <button key={p} className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all ${p === '1W' ? 'bg-blue-600 text-white' : 'bg-[#FDFDFD] text-slate-400 border border-gray-100 hover:bg-gray-50'}`}>
+                      <button key={p} type="button" className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${p === '1W' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                         {p}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="h-[280px] w-full">
+                <div className="h-52 w-full sm:h-56 lg:h-64 xl:h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs>
@@ -672,40 +640,42 @@ export default function CarrierDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="bg-white border border-gray-100 rounded-[28px] p-7 shadow-sm"
+                className={`${CARD} p-4 sm:p-5`}
               >
-                <div className="flex items-center justify-between mb-8">
+                <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Fleet Operations <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 ml-1 shadow-sm" /></h3>
-                    <p className="text-[11px] font-medium text-gray-500 mt-1">Real-time GPS tracking of {vehicles.length} units</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Fleet</p>
+                    <h3 className="mt-0.5 text-[15px] font-bold text-slate-900">
+                      Fleet operations
+                      <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-blue-500 shadow-sm" />
+                    </h3>
+                    <p className="mt-0.5 text-[11px] text-slate-500">Real-time GPS · {vehicles.length} units</p>
                   </div>
-                  <button className="px-4 py-1.5 bg-gray-50 text-blue-600 text-[10px] font-bold rounded-full border border-gray-100 hover:bg-gray-100 transition-colors">Manage Fleet</button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/carrier/vehicles")}
+                    className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-blue-600 transition hover:bg-slate-100"
+                  >
+                    Manage fleet
+                  </button>
                 </div>
 
-                <div className="h-[400px] bg-[#FDFDFD] rounded-3xl border border-gray-100 relative overflow-hidden group shadow-inner">
-                  {vehicles.length === 0 ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/50 z-20">
-                      <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 text-slate-300">
-                        <Truck className="w-8 h-8" />
-                      </div>
-                      <p className="text-sm font-bold text-slate-900">No Vehicles Registered</p>
-                      <p className="text-[11px] text-slate-500 mt-1 uppercase tracking-widest font-medium">Add units to start real-time tracking</p>
-                      <button className="mt-6 px-6 py-2 bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-                        Add Vehicle
-                      </button>
+                <div className="relative h-[240px] overflow-hidden rounded-xl border border-slate-100 bg-slate-100 shadow-inner sm:h-[280px] lg:h-[320px] xl:h-[360px]">
+                  {!MAPBOX_TOKEN ? (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-50 p-4 text-center">
+                      <p className="text-[12px] font-medium text-slate-500">Map unavailable. Add Mapbox token to enable live fleet tracking.</p>
                     </div>
-                  ) : null}
+                  ) : (
                   <MapComponent
                     {...viewState}
                     onMove={(evt: any) => setViewState(evt.viewState)}
                     mapStyle="mapbox://styles/mapbox/light-v11"
                     mapboxAccessToken={MAPBOX_TOKEN}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: "100%", height: "100%" }}
                     attributionControl={false}
                   >
-                    <NavigationControl position="top-right" />
+                    <NavigationControl position="top-right" showCompass={false} />
                     
-                    {/* Active Units as Markers */}
                     {vehicles.map((vehicle) => (
                       <Marker 
                         key={vehicle.id} 
@@ -714,72 +684,84 @@ export default function CarrierDashboard() {
                         anchor="bottom"
                       >
                         <div className="relative group/marker">
-                          {vehicle.status === 'on-route' && (
-                            <div className={`w-4 h-4 ${isOptimized ? 'bg-emerald-500' : 'bg-blue-600'} rounded-full animate-ping absolute`} />
+                          {vehicle.status === "on-route" && (
+                            <div className={`absolute h-4 w-4 rounded-full animate-ping ${isOptimized ? "bg-emerald-500" : "bg-blue-600"}`} />
                           )}
-                          <div className={`w-4 h-4 ${
-                            vehicle.status === 'on-route' 
-                              ? (isOptimized ? 'bg-emerald-600' : 'bg-blue-700') 
-                              : 'bg-orange-500'
-                          } rounded-full relative border-2 border-white shadow-lg flex items-center justify-center transition-transform hover:scale-125 cursor-pointer`}>
-                            <Truck className="w-2 h-2 text-white" />
+                          <div className={`relative flex h-4 w-4 items-center justify-center rounded-full border-2 border-white shadow-lg transition-transform hover:scale-125 ${
+                            vehicle.status === "on-route"
+                              ? isOptimized ? "bg-emerald-600" : "bg-blue-700"
+                              : "bg-orange-500"
+                          }`}>
+                            <Truck className="h-2 w-2 text-white" />
                           </div>
                           
-                          {/* Tooltip */}
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/marker:opacity-100 transition-opacity pointer-events-none z-50">
-                            <div className="bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-xl whitespace-nowrap">
-                              {vehicle.name || `Unit ${vehicle.id.slice(0,2)}`} • {vehicle.status.toUpperCase()}
+                          <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap opacity-0 transition-opacity group-hover/marker:opacity-100">
+                            <div className="rounded bg-slate-900 px-2 py-1 text-[10px] font-bold text-white shadow-xl">
+                              {vehicle.name || `Unit ${vehicle.id.slice(0, 2)}`} · {vehicle.status.toUpperCase()}
                             </div>
                           </div>
                         </div>
                       </Marker>
                     ))}
                   </MapComponent>
+                  )}
+
+                  {vehicles.length === 0 ? (
+                    <div className="absolute inset-x-3 bottom-3 z-20 rounded-xl border border-slate-200/90 bg-white/95 p-3 shadow-lg backdrop-blur-sm sm:inset-x-auto sm:bottom-4 sm:left-1/2 sm:max-w-sm sm:-translate-x-1/2 sm:p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400">
+                          <Truck className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] font-bold text-slate-900">No vehicles registered</p>
+                          <p className="text-[11px] text-slate-500">Add a unit to start live GPS tracking.</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => router.push("/carrier/vehicles")}
+                        className="mt-3 w-full rounded-lg bg-blue-600 py-2.5 text-[12px] font-semibold text-white transition hover:bg-blue-700"
+                      >
+                        Add vehicle
+                      </button>
+                    </div>
+                  ) : null}
                   
-                  {/* Weather & Traffic Alerts Overlay */}
-                  <div className="absolute top-4 left-4 right-14 flex justify-between items-start z-10 pointer-events-none">
-                    <div className="flex gap-2">
-                      <motion.div 
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        className="px-3 py-1.5 bg-white/95 backdrop-blur shadow-md rounded-xl flex items-center gap-2 border border-orange-100 pointer-events-auto"
-                      >
-                        <AlertCircle className="w-3.5 h-3.5 text-orange-500" />
-                        <span className="text-[9px] font-black text-slate-800 uppercase tracking-tight">TRAFFIC: M6 DELAY (25m)</span>
-                      </motion.div>
-                      <motion.div 
-                        animate={{ y: [0, -2, 0] }}
-                        transition={{ duration: 3, delay: 0.5, repeat: Infinity }}
-                        className="px-3 py-1.5 bg-white/95 backdrop-blur shadow-md rounded-xl flex items-center gap-2 border border-blue-100 pointer-events-auto"
-                      >
-                        <ShieldAlert className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="text-[9px] font-black text-slate-800 uppercase tracking-tight">WEATHER: HEAVY RAIN</span>
-                      </motion.div>
+                  <div className="pointer-events-none absolute left-2 top-2 right-12 z-10 flex flex-col gap-1.5 sm:left-3 sm:top-3 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+                    <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-2">
+                      <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-orange-100 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm sm:px-2.5 sm:py-1.5">
+                        <AlertCircle className="h-3 w-3 shrink-0 text-orange-500 sm:h-3.5 sm:w-3.5" />
+                        <span className="text-[8px] font-bold uppercase tracking-tight text-slate-800 sm:text-[9px]">M6 delay · 25m</span>
+                      </div>
+                      <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-blue-100 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm sm:px-2.5 sm:py-1.5">
+                        <ShieldAlert className="h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
+                        <span className="text-[8px] font-bold uppercase tracking-tight text-slate-800 sm:text-[9px]">Heavy rain</span>
+                      </div>
                     </div>
 
                     <AnimatePresence>
                       {isOptimized && (
-                        <motion.div 
-                          initial={{ x: 20, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          className="px-4 py-2 bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 rounded-xl flex items-center gap-2 border border-emerald-400 pointer-events-auto"
+                        <motion.div
+                          initial={{ opacity: 0, y: -6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          className="pointer-events-auto flex items-center gap-1.5 self-start rounded-lg border border-emerald-300 bg-emerald-500 px-2.5 py-1 text-white shadow-md sm:px-3 sm:py-1.5"
                         >
-                          <Zap className="w-4 h-4" />
-                          <span className="text-[10px] font-black uppercase tracking-widest">AI OPTIMIZED</span>
+                          <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          <span className="text-[8px] font-bold uppercase tracking-wide sm:text-[9px]">AI optimized</span>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
 
-                  {/* Status Overlay */}
-                  <div className="absolute bottom-6 left-6 flex gap-4 z-10">
-                    <div className="px-4 py-2 bg-white/95 backdrop-blur shadow-lg rounded-2xl flex items-center gap-3 border border-gray-100">
-                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
-                      <span className="text-[11px] font-black text-slate-800 tracking-wider">{fleetStatus.onRoute} UNITS ON ROUTE</span>
+                  <div className="absolute bottom-2 left-2 right-2 z-10 flex flex-wrap gap-1.5 sm:bottom-3 sm:left-3 sm:right-auto">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm sm:px-3 sm:py-2">
+                      <div className="h-2 w-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+                      <span className="text-[9px] font-bold tracking-wide text-slate-800 sm:text-[10px]">{fleetStatus.onRoute} on route</span>
                     </div>
-                    <div className="px-4 py-2 bg-white/95 backdrop-blur shadow-lg rounded-2xl flex items-center gap-3 border border-gray-100">
-                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                      <span className="text-[11px] font-black text-slate-800 tracking-wider">{fleetStatus.idle} UNITS IDLE</span>
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm sm:px-3 sm:py-2">
+                      <div className="h-2 w-2 rounded-full bg-orange-500" />
+                      <span className="text-[9px] font-bold tracking-wide text-slate-800 sm:text-[10px]">{fleetStatus.idle} idle</span>
                     </div>
                   </div>
                 </div>
@@ -790,7 +772,7 @@ export default function CarrierDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
-                className="bg-white border border-gray-100 rounded-[28px] p-7 shadow-sm"
+                className={`${CARD} p-4 sm:p-7`}
               >
                 <div className="flex items-center justify-between mb-8">
                   <div>
@@ -854,84 +836,84 @@ export default function CarrierDashboard() {
               </motion.div>
             </div>
 
-            {/* Sidebar Widgets with Glassmorphism */}
-            <div className="lg:col-span-4 space-y-8">
+            {/* Sidebar Widgets */}
+            <div className="min-w-0 space-y-4">
               <motion.div 
-                whileHover={{ y: -2 }}
-                className={`rounded-3xl p-8 shadow-xl text-white relative overflow-hidden group transition-all duration-500 ${
+                whileHover={{ y: -1 }}
+                className={`relative overflow-hidden rounded-xl p-4 sm:p-5 text-white shadow-lg transition-all duration-300 ${
                   carrierStats.isPremium 
-                    ? 'bg-gradient-to-br from-blue-600 to-blue-800 shadow-blue-500/20' 
-                    : 'bg-gradient-to-br from-slate-700 to-slate-900 shadow-slate-500/20'
+                    ? 'bg-gradient-to-br from-blue-600 to-blue-800 shadow-blue-500/15' 
+                    : 'bg-gradient-to-br from-slate-700 to-slate-900 shadow-slate-500/15'
                 }`}
               >
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500">
-                  <LayoutDashboard className="w-32 h-32" />
+                <div className="absolute -right-4 -top-4 opacity-10">
+                  <LayoutDashboard className="h-24 w-24" />
                 </div>
-                <div className="flex justify-between items-start mb-6">
+                <div className="relative mb-4 flex items-start justify-between gap-2">
                   <div>
-                    <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+                    <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
                       {carrierStats.isPremium ? 'Premium Carrier' : 'Standard Carrier'} 
-                      {carrierStats.isPremium && <CheckCircle2 className="w-4 h-4 text-blue-200" />}
+                      {carrierStats.isPremium && <CheckCircle2 className="h-3.5 w-3.5 text-blue-200" />}
                     </h2>
-                    <p className="text-blue-100 text-[10px] font-bold uppercase tracking-wider">Level {carrierStats.level} Partner</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-100/90">Level {carrierStats.level} partner</p>
                   </div>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1">
                     {carrierStats.isPremium && (
-                      <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center border border-white/20" title="Top Rated">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <div className="flex h-6 w-6 items-center justify-center rounded-md border border-white/20 bg-white/10">
+                        <Sparkles className="h-3 w-3 text-amber-300" />
                       </div>
                     )}
-                    <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center border border-white/20" title="On-time King">
-                      <Clock className="w-3.5 h-3.5 text-blue-200" />
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md border border-white/20 bg-white/10">
+                      <Clock className="h-3 w-3 text-blue-200" />
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <div className="flex justify-between text-[10px] font-bold mb-1.5 text-blue-100 uppercase tracking-widest">
-                    <span>Next Level: {carrierStats.level + 1}</span>
+                <div className="relative mb-4">
+                  <div className="mb-1 flex justify-between text-[10px] font-semibold uppercase tracking-wider text-blue-100">
+                    <span>Next level: {carrierStats.level + 1}</span>
                     <span>{Math.round(carrierStats.xpProgress)}%</span>
                   </div>
-                  <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/5">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full border border-white/5 bg-white/10">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${carrierStats.xpProgress}%` }}
                       transition={{ duration: 1.5, ease: "easeOut" }}
-                      className="bg-gradient-to-r from-blue-300 to-white h-full shadow-[0_0_10px_rgba(255,255,255,0.3)]" 
+                      className="h-full bg-gradient-to-r from-blue-300 to-white" 
                     />
                   </div>
-                  <p className="text-[9px] text-blue-200/70 mt-2 font-medium">Complete {carrierStats.loadsToNext} more loads to reach Level {carrierStats.level + 1}</p>
+                  <p className="mt-1.5 text-[10px] text-blue-200/80">{carrierStats.loadsToNext} loads to level {carrierStats.level + 1}</p>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex items-center gap-3 mb-6">
-                  <div className="flex-1">
-                    <p className="text-[10px] text-blue-200 uppercase font-bold tracking-widest mb-1">Carrier ID</p>
-                    <p className="text-sm font-mono font-bold tracking-wider">AF-{userProfile?.id?.slice(0, 8).toUpperCase() || 'LOADING'}</p>
+                <div className="relative mb-4 flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 p-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] font-semibold uppercase tracking-wider text-blue-200">Carrier ID</p>
+                    <p className="truncate font-mono text-xs font-bold">AF-{userProfile?.id?.slice(0, 8).toUpperCase() || 'LOADING'}</p>
                   </div>
-                  <button className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
-                    <Clock className="w-4 h-4" />
-                  </button>
                 </div>
-                <button className="w-full py-3 bg-white text-blue-600 rounded-xl text-sm font-black shadow-lg shadow-black/10 hover:bg-blue-50 transition-colors">
-                  View Analytics
+                <button type="button" className="relative w-full rounded-lg bg-white py-2.5 text-[13px] font-bold text-blue-600 transition hover:bg-blue-50">
+                  View analytics
                 </button>
               </motion.div>
 
               <motion.div 
-                whileHover={{ y: -2 }}
-                className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm"
+                whileHover={{ y: -1 }}
+                className={`${CARD} p-4 sm:p-5`}
               >
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-lg font-bold text-gray-900">Fuel & Profit Calculator</h2>
-                  <Fuel className="w-5 h-5 text-indigo-500" />
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Calculator</p>
+                    <h2 className="mt-0.5 text-[15px] font-bold text-slate-900">Fuel & profit</h2>
+                  </div>
+                  <Fuel className="h-4 w-4 text-indigo-500" />
                 </div>
-                <div className="space-y-6">
-                  <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                    <div className="flex justify-between items-center mb-3">
-                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Estimated Fuel Cost</p>
-                      <span className="text-[10px] font-bold text-slate-400">AVG. £1.42/L</span>
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3.5">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-500">Fuel cost</p>
+                      <span className="text-[10px] font-medium text-slate-400">£1.42/L avg</span>
                     </div>
-                    <p className="text-2xl font-black text-indigo-900 tracking-tight">£{fuelProfitStats.fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    <p className="text-xl font-bold text-indigo-900">£{fuelProfitStats.fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                     <div className="mt-4 w-full bg-indigo-200/30 h-2 rounded-full overflow-hidden border border-indigo-100/20">
                       <motion.div 
                         initial={{ width: 0 }}
@@ -940,24 +922,22 @@ export default function CarrierDashboard() {
                         className="bg-gradient-to-r from-indigo-400 to-indigo-600 h-full shadow-[0_0_10px_rgba(79,70,229,0.3)]" 
                       />
                     </div>
-                    <p className="text-[9px] text-indigo-500 font-medium mt-2 italic">Calculated based on {fuelProfitStats.totalMiles} miles total</p>
+                    <p className="mt-1 text-[10px] text-indigo-500">{fuelProfitStats.totalMiles} miles total</p>
                   </div>
-                  <div className="p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-3 opacity-10">
-                      <TrendingUp className="w-12 h-12 text-emerald-600" />
-                    </div>
-                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">Net Profit Projection</p>
-                    <p className="text-2xl font-black text-emerald-900 tracking-tight">£{fuelProfitStats.netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-600 text-[9px] font-black rounded tracking-tighter">{fuelProfitStats.margin > 20 ? 'HIGH MARGIN' : 'STABLE MARGIN'}</span>
-                      <p className="text-[9px] text-emerald-600 font-bold">{fuelProfitStats.margin.toFixed(1)}% margin projection</p>
+                  <div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-emerald-50/50 p-3.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-500">Net profit</p>
+                    <p className="mt-1 text-xl font-bold text-emerald-900">£{fuelProfitStats.netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600">{fuelProfitStats.margin > 20 ? 'HIGH MARGIN' : 'STABLE'}</span>
+                      <span className="text-[10px] font-medium text-emerald-600">{fuelProfitStats.margin.toFixed(1)}% margin</span>
                     </div>
                   </div>
                 </div>
                 <button 
+                  type="button"
                   onClick={handleOptimize}
                   disabled={optimizing}
-                  className={`w-full mt-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                  className={`mt-4 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-[12px] font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                     isOptimized 
                     ? 'bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-600' 
                     : 'bg-slate-900 text-white shadow-slate-200 hover:bg-slate-800'
@@ -979,67 +959,28 @@ export default function CarrierDashboard() {
                 </button>
               </motion.div>
 
-              <AnimatePresence>
-                {optimizing && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-6"
-                  >
-                    <motion.div 
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.9, opacity: 0 }}
-                      className="bg-white rounded-[32px] p-10 shadow-2xl max-w-sm w-full text-center border border-slate-100"
-                    >
-                      <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 mx-auto mb-8 relative">
-                        <div className="absolute inset-0 bg-blue-500/10 rounded-3xl animate-ping" />
-                        {optimizationStep === 1 && <Search className="w-8 h-8 animate-pulse" />}
-                        {optimizationStep === 2 && <Zap className="w-8 h-8 animate-bounce" />}
-                        {optimizationStep === 3 && <CheckCircle2 className="w-8 h-8 scale-110" />}
-                      </div>
-                      
-                      <h3 className="text-xl font-black text-slate-900 mb-2">
-                        {optimizationStep === 1 && "Analyzing Traffic..."}
-                        {optimizationStep === 2 && "Optimizing Route..."}
-                        {optimizationStep === 3 && "Route Secured!"}
-                      </h3>
-                      <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                        {optimizationStep === 1 && "Fetching real-time data from M6 and M25 motorways."}
-                        {optimizationStep === 2 && "Calculating the most fuel-efficient path for your 40t truck."}
-                        {optimizationStep === 3 && "Route saved! Estimated fuel savings: 12%."}
-                      </p>
-
-                      <div className="mt-8 flex gap-1 justify-center">
-                        <div className={`h-1 rounded-full transition-all duration-500 ${optimizationStep >= 1 ? 'w-8 bg-blue-600' : 'w-2 bg-slate-100'}`} />
-                        <div className={`h-1 rounded-full transition-all duration-500 ${optimizationStep >= 2 ? 'w-8 bg-blue-600' : 'w-2 bg-slate-100'}`} />
-                        <div className={`h-1 rounded-full transition-all duration-500 ${optimizationStep >= 3 ? 'w-8 bg-blue-600' : 'w-2 bg-slate-100'}`} />
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
               <motion.div 
-                whileHover={{ y: -2 }}
-                className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm"
+                whileHover={{ y: -1 }}
+                className={`${CARD} p-4 sm:p-5`}
               >
 
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-lg font-bold text-gray-900">Live Activity</h2>
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Activity</p>
+                    <h2 className="mt-0.5 text-[15px] font-bold text-slate-900">Live activity</h2>
+                  </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
                     <span className="text-[10px] font-bold text-blue-500">LIVE</span>
                   </div>
                 </div>
                 
-                <div className="space-y-6">
-                  <div className="relative pl-6 border-l-2 border-blue-100 space-y-8">
+                <div className="space-y-4">
+                  <div className="relative space-y-5 border-l-2 border-blue-100 pl-5">
                     {recentActivity.length > 0 ? (
                       recentActivity.map((activity, i) => (
                         <div key={i} className="relative">
-                          <div className={`absolute -left-[29px] top-0 w-3 h-3 rounded-full bg-${activity.color}-500 border-2 border-white shadow-sm`} />
+                          <div className={`absolute -left-[29px] top-0 h-3 w-3 rounded-full border-2 border-white shadow-sm ${ACTIVITY_DOT_COLORS[activity.color] || "bg-slate-400"}`} />
                           <p className="text-sm font-bold text-gray-900 leading-none mb-1">{activity.title}</p>
                           <p className="text-xs text-gray-400 font-medium">{activity.time}</p>
                         </div>
@@ -1062,8 +1003,103 @@ export default function CarrierDashboard() {
               </motion.div>
             </div>
           </div>
-        </motion.div>
-      </main>
+      </motion.div>
+
+      <AnimatePresence>
+        {optimizing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/50 backdrop-blur-md sm:items-center sm:p-6"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ type: "spring", damping: 28, stiffness: 320 }}
+              className="w-full max-w-md rounded-t-[28px] border border-slate-200/80 bg-white p-6 shadow-2xl sm:rounded-[28px] sm:p-8"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {(() => {
+                const step = OPTIMIZATION_STEPS[Math.max(0, optimizationStep - 1)];
+                const StepIcon = step?.Icon ?? Search;
+
+                return (
+                  <>
+                    <div className="mb-6 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
+                          <Sparkles className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">AI optimizer</p>
+                          <p className="text-sm font-bold text-slate-900">Step {optimizationStep} of 3</p>
+                        </div>
+                      </div>
+                      <span className="rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-600">
+                        LIVE
+                      </span>
+                    </div>
+
+                    <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 ring-1 ring-blue-100">
+                      <div className="absolute inset-0 rounded-2xl bg-blue-500/10 animate-pulse" />
+                      <StepIcon className="relative h-9 w-9" />
+                    </div>
+
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{step?.title}</h3>
+                      <p className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed text-slate-500">
+                        {step?.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-8 space-y-2">
+                      {OPTIMIZATION_STEPS.map((item, index) => {
+                        const done = optimizationStep > index + 1;
+                        const active = optimizationStep === index + 1;
+                        const ItemIcon = item.Icon;
+
+                        return (
+                          <div
+                            key={item.title}
+                            className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
+                              active
+                                ? "border-blue-200 bg-blue-50/70"
+                                : done
+                                  ? "border-emerald-200 bg-emerald-50/60"
+                                  : "border-slate-100 bg-slate-50/60"
+                            }`}
+                          >
+                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                              active ? "bg-blue-600 text-white" : done ? "bg-emerald-500 text-white" : "bg-white text-slate-400"
+                            }`}>
+                              {done ? <CheckCircle2 className="h-4 w-4" /> : <ItemIcon className="h-4 w-4" />}
+                            </div>
+                            <div className="min-w-0 text-left">
+                              <p className="text-[12px] font-semibold text-slate-900">{item.title}</p>
+                              <p className="truncate text-[11px] text-slate-500">{item.description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                      <motion.div
+                        className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-500"
+                        initial={{ width: "8%" }}
+                        animate={{ width: `${(optimizationStep / 3) * 100}%` }}
+                        transition={{ duration: 0.45, ease: "easeOut" }}
+                      />
+                    </div>
+                  </>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -22,7 +22,7 @@ import {
   Sparkles,
   Newspaper
 } from "lucide-react";
-import Image from "next/image";
+import BrandMark from "@/components/BrandMark";
 
 const sidebarCategories = [
   {
@@ -100,19 +100,8 @@ export default function DashboardSidebar({
 
   return (
     <aside className="h-full w-64 bg-[#FDFDFD] border-r border-gray-100 flex flex-col overflow-y-auto shadow-2xl lg:shadow-none">
-      <div className="px-7 py-6 flex flex-col gap-4 mb-2">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-8 h-8">
-            <Image 
-              src="/logo.png" 
-              alt="Alpha Freight Logo" 
-              fill 
-              className="object-contain"
-              priority
-            />
-          </div>
-          <span className="text-base font-bold tracking-tight text-gray-900">Alpha Freight</span>
-        </Link>
+      <div className="mb-2 flex flex-col gap-4 px-7 py-6">
+        <BrandMark href="/" />
         <div className="h-[1px] w-full bg-gray-100/80" />
       </div>
 
