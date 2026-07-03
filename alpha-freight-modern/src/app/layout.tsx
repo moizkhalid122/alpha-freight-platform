@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
-import SmoothScroll from "@/components/SmoothScroll";
 import Chatbot from "@/components/Chatbot";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { SITE_URL } from "@/lib/sitemap-data";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -42,6 +42,7 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
     >
       <body className="flex flex-col font-sans">
+        <GoogleAnalytics />
         {children}
         <Chatbot />
       </body>
