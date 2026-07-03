@@ -126,7 +126,7 @@ const CARRIER_ACTIVE_STATUSES = ["active", "booked", "assigned", "pending", "in-
 const CARRIER_COMPLETED_STATUSES = ["completed", "delivered"];
 
 const CARD =
-  "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:shadow-md";
+  "relative w-full rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]";
 
 const formatMoney = (value: number) => `£${value.toLocaleString("en-GB")}`;
 
@@ -422,12 +422,8 @@ export default function CarrierDashboard() {
   }
 
   return (
-    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-4"
-      >
+    <div className="relative w-full space-y-5 p-4 sm:p-6 lg:p-8">
+      <div className="relative space-y-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
@@ -482,8 +478,8 @@ export default function CarrierDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-4">
-          <div className={`${CARD} p-3 sm:p-4`}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className={`${CARD} min-h-[92px] p-3 sm:p-4`}>
             <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600"><Boxes className="h-3.5 w-3.5" /></div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total loads</p>
@@ -491,7 +487,7 @@ export default function CarrierDashboard() {
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{stats.totalLoads}</p>
             <p className="mt-0.5 text-[11px] text-slate-500">All assigned</p>
           </div>
-          <div className={`${CARD} p-3 sm:p-4`}>
+          <div className={`${CARD} min-h-[92px] p-3 sm:p-4`}>
             <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-rose-50 p-1.5 text-rose-600"><Zap className="h-3.5 w-3.5" /></div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Active</p>
@@ -499,7 +495,7 @@ export default function CarrierDashboard() {
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{stats.activeLoads}</p>
             <p className="mt-0.5 text-[11px] text-slate-500">In progress</p>
           </div>
-          <div className={`${CARD} p-3 sm:p-4`}>
+          <div className={`${CARD} min-h-[92px] p-3 sm:p-4`}>
             <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-amber-50 p-1.5 text-amber-600"><Wallet className="h-3.5 w-3.5" /></div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Balance</p>
@@ -507,7 +503,7 @@ export default function CarrierDashboard() {
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{formatMoney(stats.balance)}</p>
             <p className="mt-0.5 text-[11px] text-slate-500">Total earnings</p>
           </div>
-          <div className={`${CARD} p-3 sm:p-4`}>
+          <div className={`${CARD} min-h-[92px] p-3 sm:p-4`}>
             <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-emerald-50 p-1.5 text-emerald-600"><CheckCircle2 className="h-3.5 w-3.5" /></div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Completed</p>
@@ -516,14 +512,9 @@ export default function CarrierDashboard() {
             <p className="mt-0.5 text-[11px] text-slate-500">Delivered safely</p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="space-y-6"
-      >
+      <div className="relative space-y-4 sm:space-y-6">
 
           {/* Optimization Success Banner */}
           <AnimatePresence>
@@ -559,15 +550,10 @@ export default function CarrierDashboard() {
             )}
           </AnimatePresence>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_0.75fr] xl:grid-cols-[1.4fr_0.6fr]">
+          <div className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_0.75fr] xl:grid-cols-[1.4fr_0.6fr]">
             {/* Chart Area */}
-            <div className="min-w-0 space-y-4">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className={`${CARD} relative overflow-hidden p-4 sm:p-5`}
-              >
+            <div className="relative min-w-0 space-y-4">
+              <div className={`${CARD} overflow-hidden p-4 sm:p-5`}>
 
                 <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
@@ -633,15 +619,10 @@ export default function CarrierDashboard() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Fleet Operations Card */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className={`${CARD} p-4 sm:p-5`}
-              >
+              <div className={`${CARD} p-4 sm:p-5`}>
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Fleet</p>
@@ -765,15 +746,10 @@ export default function CarrierDashboard() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* AI Load Recommendations Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-                className={`${CARD} p-4 sm:p-7`}
-              >
+              <div className={`${CARD} p-4 sm:p-5 lg:p-6`}>
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -833,14 +809,13 @@ export default function CarrierDashboard() {
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Sidebar Widgets */}
-            <div className="min-w-0 space-y-4">
-              <motion.div 
-                whileHover={{ y: -1 }}
-                className={`relative overflow-hidden rounded-xl p-4 sm:p-5 text-white shadow-lg transition-all duration-300 ${
+            <div className="relative min-w-0 space-y-4">
+              <div
+                className={`relative overflow-hidden rounded-xl p-4 sm:p-5 text-white shadow-lg ${
                   carrierStats.isPremium 
                     ? 'bg-gradient-to-br from-blue-600 to-blue-800 shadow-blue-500/15' 
                     : 'bg-gradient-to-br from-slate-700 to-slate-900 shadow-slate-500/15'
@@ -894,12 +869,9 @@ export default function CarrierDashboard() {
                 <button type="button" className="relative w-full rounded-lg bg-white py-2.5 text-[13px] font-bold text-blue-600 transition hover:bg-blue-50">
                   View analytics
                 </button>
-              </motion.div>
+              </div>
 
-              <motion.div 
-                whileHover={{ y: -1 }}
-                className={`${CARD} p-4 sm:p-5`}
-              >
+              <div className={`${CARD} p-4 sm:p-5`}>
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Calculator</p>
@@ -957,12 +929,9 @@ export default function CarrierDashboard() {
                     'Optimize Route'
                   )}
                 </button>
-              </motion.div>
+              </div>
 
-              <motion.div 
-                whileHover={{ y: -1 }}
-                className={`${CARD} p-4 sm:p-5`}
-              >
+              <div className={`${CARD} p-4 sm:p-5`}>
 
                 <div className="mb-4 flex items-center justify-between">
                   <div>
@@ -1000,10 +969,10 @@ export default function CarrierDashboard() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {optimizing && (
