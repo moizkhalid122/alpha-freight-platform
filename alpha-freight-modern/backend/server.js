@@ -6,15 +6,23 @@ const fs = require('fs');
 const path = require('path');
 const { Ollama } = require('ollama');
 const { createClient } = require('@supabase/supabase-js');
+const {
+  isExternalWebQuestion,
+  buildWebSearchAssistantReply,
+} = require('./web-search');
+const { requireSupabaseAuth, AI_REQUIRE_AUTH } = require('./auth');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const IS_PRODUCTION = NODE_ENV === 'production';
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 const MODEL_NAME = process.env.MODEL_NAME || 'llama3.1';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || 'Xenova/all-MiniLM-L6-v2';
 const SUPABASE_VECTOR_RPC = process.env.SUPABASE_VECTOR_RPC || 'match_kb_chunks';
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY || '';
 const ollama = new Ollama({ host: OLLAMA_URL });
 const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
   ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -28,12 +36,24 @@ let supabaseVectorRpcChecked = false;
 let supabaseVectorRpcError = null;
 
 // Middleware
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Origin not allowed: ${origin}`));
+  },
+  credentials: true,
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '1mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' }));
 
 // Load knowledge base
 const knowledgeBase = [];
@@ -272,6 +292,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'Alpha Freight AI Backend is running!',
+    environment: NODE_ENV,
+    authRequired: AI_REQUIRE_AUTH,
     knowledgeBaseCount: knowledgeBase.length,
     knowledgeChunkCount: knowledgeChunks.length,
     vectorChunks: localVectorIndex.length,
@@ -283,8 +305,13 @@ app.get('/api/health', (req, res) => {
     supabaseVectorRpcChecked,
     supabaseVectorRpcAvailable: Boolean(supabase) && supabaseVectorRpcChecked && !supabaseVectorRpcError,
     supabaseVectorRpcError,
-    ollamaUrl: OLLAMA_URL,
-    model: MODEL_NAME
+    model: MODEL_NAME,
+    webSearchConfigured: Boolean(TAVILY_API_KEY),
+    ...(IS_PRODUCTION
+      ? {}
+      : {
+          ollamaUrl: OLLAMA_URL,
+        }),
   });
 });
 
@@ -726,6 +753,290 @@ function formatConversationMemory(memory) {
   ];
 
   return lines.join('\n');
+}
+
+function formatCarrierContext(carrierContext) {
+  if (!carrierContext || typeof carrierContext !== 'object') {
+    return 'No live carrier account data was provided for this request.';
+  }
+
+  const lines = [`Carrier name: ${carrierContext.carrierName || 'Unknown carrier'}`];
+
+  if (carrierContext.stats) {
+    lines.push(
+      `Account summary: ${carrierContext.stats.activeLoads || 0} active loads, ${carrierContext.stats.inTransitLoads || 0} in transit, ${carrierContext.stats.pendingBids || 0} pending bids, ${carrierContext.stats.availableLoads || 0} marketplace loads available.`
+    );
+  }
+
+  if (carrierContext.wallet) {
+    lines.push(
+      `Wallet: available ${carrierContext.wallet.availableBalance || '£0.00'}, pending ${carrierContext.wallet.pendingBalance || '£0.00'}, lifetime ${carrierContext.wallet.lifetimeEarnings || '£0.00'}.`
+    );
+  }
+
+  if (Array.isArray(carrierContext.myLoads) && carrierContext.myLoads.length) {
+    lines.push('Assigned loads:');
+    carrierContext.myLoads.forEach((load) => {
+      lines.push(
+        `- ${load.code || 'Load'}: ${load.route || 'Route TBC'} | ${load.price || 'Price TBC'} | status ${load.status || 'unknown'}${load.pickup ? ` | pickup ${load.pickup}` : ''}`
+      );
+    });
+  } else {
+    lines.push('Assigned loads: none currently assigned.');
+  }
+
+  if (Array.isArray(carrierContext.availableLoads) && carrierContext.availableLoads.length) {
+    lines.push('Top marketplace loads:');
+    carrierContext.availableLoads.forEach((load) => {
+      lines.push(
+        `- ${load.code || 'Load'}: ${load.route || 'Route TBC'} | ${load.price || 'Price TBC'}${load.equipment ? ` | ${load.equipment}` : ''}${load.highPay ? ' | high pay' : ''}${load.pickup ? ` | pickup ${load.pickup}` : ''}`
+      );
+    });
+  } else {
+    lines.push('Top marketplace loads: none currently listed.');
+  }
+
+  if (Array.isArray(carrierContext.bids) && carrierContext.bids.length) {
+    lines.push('Recent bids:');
+    carrierContext.bids.forEach((bid) => {
+      lines.push(
+        `- ${bid.code || 'Load'}: ${bid.route || 'Route TBC'} | bid ${bid.bidAmount || 'TBC'}${bid.loadPrice ? ` | listed ${bid.loadPrice}` : ''} | status ${bid.status || 'unknown'}`
+      );
+    });
+  } else {
+    lines.push('Recent bids: none submitted yet.');
+  }
+
+  if (carrierContext.fetchedAt) {
+    lines.push(`Data fetched at: ${carrierContext.fetchedAt}`);
+  }
+
+  return lines.join('\n');
+}
+
+function isWalletBalanceQuestion(message = '') {
+  const normalized = String(message || '').toLowerCase();
+  return (
+    /\b(wallet balance|my balance|available balance|how much (?:do i have|money|in my wallet)|what(?:'s| is) my wallet)\b/i.test(normalized) ||
+    (/\b(wallet|balance)\b/i.test(normalized) && /\b(what|how much|show|tell|check|kitna|mera|my)\b/i.test(normalized))
+  );
+}
+
+function isPendingBidsQuestion(message = '') {
+  const normalized = String(message || '').toLowerCase();
+  return (
+    /\b(pending bid|my bids?|bid status|bids pending)\b/i.test(normalized) ||
+    (/\bbids?\b/i.test(normalized) && /\b(pending|status|how many|kitni|show|list|my)\b/i.test(normalized))
+  );
+}
+
+function isMyLoadsQuestion(message = '') {
+  const normalized = String(message || '').toLowerCase();
+  if (/\b(available|best|find|search|marketplace|highest)\b/i.test(normalized)) {
+    return false;
+  }
+
+  return (
+    /\b(my loads?|assigned loads?|active loads?|current loads?)\b/i.test(normalized) ||
+    (/\bloads?\b/i.test(normalized) && /\b(my|assigned|active|current|meri)\b/i.test(normalized))
+  );
+}
+
+function isAvailableLoadsQuestion(message = '') {
+  const normalized = String(message || '').toLowerCase();
+  return (
+    /\b(available loads?|best loads?|high.?pay|marketplace loads?|find loads?)\b/i.test(normalized) ||
+    (/\bloads?\b/i.test(normalized) && /\b(available|best|highest|marketplace|find|show me)\b/i.test(normalized))
+  );
+}
+
+function isDirectCarrierDataQuestion(message = '') {
+  return (
+    isWalletBalanceQuestion(message) ||
+    isPendingBidsQuestion(message) ||
+    isMyLoadsQuestion(message) ||
+    isAvailableLoadsQuestion(message)
+  );
+}
+
+function buildCarrierContextReply({ lowerMessage = '', carrierContext = null, style = 'english' }) {
+  if (!carrierContext || typeof carrierContext !== 'object') {
+    return null;
+  }
+
+  const carrierName = carrierContext.carrierName || 'there';
+
+  if (isWalletBalanceQuestion(lowerMessage)) {
+    const wallet = carrierContext.wallet || {};
+    return {
+      topic: 'wallet',
+      title: '💰 Your Wallet',
+      shortExplanation: pickStyleText(
+        style,
+        `Hi ${carrierName}, here is your current wallet snapshot from your live account:`,
+        `Hi ${carrierName}, yeh aap ka live wallet snapshot hai:`
+      ),
+      keyPoints: [
+        `Available to withdraw: ${wallet.availableBalance || '£0.00'}`,
+        `Pending from active loads: ${wallet.pendingBalance || '£0.00'}`,
+        `Lifetime earnings: ${wallet.lifetimeEarnings || '£0.00'}`,
+      ],
+      nextStep: pickStyleText(
+        style,
+        'Open the Wallet tab to withdraw once payout setup is complete.',
+        'Withdrawal ke liye Wallet tab open karein jab payout setup complete ho.'
+      ),
+    };
+  }
+
+  if (isPendingBidsQuestion(lowerMessage)) {
+    const pendingBids = (carrierContext.bids || []).filter(
+      (bid) => String(bid.status || '').toLowerCase() === 'pending'
+    );
+    const keyPoints = pendingBids.length
+      ? pendingBids.slice(0, 5).map(
+          (bid) =>
+            `${bid.code || 'Load'}: ${bid.route || 'Route TBC'} — bid ${bid.bidAmount || 'TBC'}${bid.loadPrice ? ` (listed ${bid.loadPrice})` : ''}`
+        )
+      : [
+          pickStyleText(
+            style,
+            'You have no pending bids right now.',
+            'Abhi aap ke paas koi pending bid nahi hai.'
+          ),
+        ];
+
+    return {
+      topic: 'bids',
+      title: '🏷️ Your Bids',
+      shortExplanation: pickStyleText(
+        style,
+        `Hi ${carrierName}, you currently have ${carrierContext.stats?.pendingBids ?? pendingBids.length} pending bid(s):`,
+        `Hi ${carrierName}, abhi aap ke paas ${carrierContext.stats?.pendingBids ?? pendingBids.length} pending bid(s) hain:`
+      ),
+      keyPoints,
+      nextStep: pickStyleText(
+        style,
+        'Open My Bids in the app to review or update your offers.',
+        'Offers review ya update karne ke liye app me My Bids open karein.'
+      ),
+    };
+  }
+
+  if (isMyLoadsQuestion(lowerMessage)) {
+    const myLoads = carrierContext.myLoads || [];
+    const keyPoints = myLoads.length
+      ? myLoads.slice(0, 5).map(
+          (load) =>
+            `${load.code || 'Load'}: ${load.route || 'Route TBC'} — ${load.price || 'Price TBC'} (${load.status || 'status unknown'})`
+        )
+      : [
+          pickStyleText(
+            style,
+            'You have no assigned loads right now.',
+            'Abhi aap ke paas koi assigned load nahi hai.'
+          ),
+        ];
+
+    return {
+      topic: 'my_loads',
+      title: '🗂️ Your Loads',
+      shortExplanation: pickStyleText(
+        style,
+        `Hi ${carrierName}, here are your current assigned loads (${carrierContext.stats?.activeLoads ?? myLoads.length} active):`,
+        `Hi ${carrierName}, yeh aap ke current assigned loads hain (${carrierContext.stats?.activeLoads ?? myLoads.length} active):`
+      ),
+      keyPoints,
+      nextStep: pickStyleText(
+        style,
+        'Open My Loads for pickup details, status updates, and navigation.',
+        'Pickup details, status updates aur navigation ke liye My Loads open karein.'
+      ),
+    };
+  }
+
+  if (isAvailableLoadsQuestion(lowerMessage)) {
+    const availableLoads = carrierContext.availableLoads || [];
+    const keyPoints = availableLoads.length
+      ? availableLoads.slice(0, 5).map(
+          (load) =>
+            `${load.code || 'Load'}: ${load.route || 'Route TBC'} — ${load.price || 'Price TBC'}${load.highPay ? ' ⭐ high pay' : ''}${load.equipment ? ` (${load.equipment})` : ''}`
+        )
+      : [
+          pickStyleText(
+            style,
+            'No marketplace loads are listed right now.',
+            'Abhi marketplace par koi load listed nahi hai.'
+          ),
+        ];
+
+    return {
+      topic: 'available_loads',
+      title: '🚚 Available Loads',
+      shortExplanation: pickStyleText(
+        style,
+        `Hi ${carrierName}, here are the top paying loads on the marketplace right now (${carrierContext.stats?.availableLoads ?? availableLoads.length} total):`,
+        `Hi ${carrierName}, yeh abhi marketplace par top paying loads hain (${carrierContext.stats?.availableLoads ?? availableLoads.length} total):`
+      ),
+      keyPoints,
+      nextStep: pickStyleText(
+        style,
+        'Open Available Loads to place a bid on any lane that fits your equipment.',
+        'Apne equipment ke mutabiq kisi bhi lane par bid lagane ke liye Available Loads open karein.'
+      ),
+    };
+  }
+
+  return null;
+}
+
+function buildCarrierContextStructuredReply({
+  lowerMessage = '',
+  carrierContext = null,
+  style = 'english',
+  assistantType = 'carrier',
+}) {
+  const data = buildCarrierContextReply({ lowerMessage, carrierContext, style });
+  if (!data) {
+    return null;
+  }
+
+  const rawText = [
+    data.shortExplanation,
+    ...data.keyPoints.map((point) => `• ${point}`),
+    data.nextStep,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    mode: 'logistics_copilot',
+    displayStyle: 'plain',
+    userIntent: 'Account Data',
+    responseLength: 'short',
+    modeLabel: 'Logistics Copilot',
+    assistantName: 'Alpha Freight Co-Pilot',
+    confidence: 0.95,
+    knowledgeSource: 'live_account',
+    title: data.title,
+    shortExplanation: data.shortExplanation,
+    keyPoints: data.keyPoints,
+    recommendation: '',
+    nextStep: data.nextStep,
+    metrics: [],
+    sections: [],
+    routePreview: null,
+    quickActions: [],
+    suggestedQuestions: [],
+    platformIntent: null,
+    actionRequest: null,
+    memory: {
+      role: assistantType,
+      persona: getPersonaLabel(assistantType, data.topic),
+      activeTopic: data.topic,
+    },
+    rawText,
+  };
 }
 
 const TRUCK_TYPE_PATTERNS = [
@@ -4175,8 +4486,48 @@ const greetingPatterns = [
 ];
 
 // Chat API endpoint - with Ollama integration
-app.post('/api/chat', async (req, res) => {
-  const { message, assistantType = 'general', history = [], mode = null } = req.body;
+app.post('/api/chat', requireSupabaseAuth, async (req, res) => {
+  const {
+    message,
+    assistantType = 'general',
+    history = [],
+    mode = null,
+    carrierContext = null,
+    stream: streamMode = false,
+  } = req.body;
+
+  const emitStream = streamMode
+    ? (event) => {
+        if (!res.headersSent) {
+          res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+          res.setHeader('Cache-Control', 'no-cache, no-transform');
+          res.setHeader('Connection', 'keep-alive');
+          if (typeof res.flushHeaders === 'function') {
+            res.flushHeaders();
+          }
+        }
+        res.write(`${JSON.stringify(event)}\n`);
+      }
+    : null;
+
+  const sendChatReply = (structuredMessage, phase = null) => {
+    const payload = {
+      success: true,
+      message: composeStructuredText(structuredMessage),
+      structuredMessage,
+    };
+
+    if (emitStream) {
+      if (phase) {
+        emitStream({ type: 'phase', phase });
+      }
+      emitStream({ type: 'complete', ...payload });
+      res.end();
+      return;
+    }
+
+    return res.json(payload);
+  };
   
   if (!message) {
     return res.status(400).json({ success: false, error: 'Message is required' });
@@ -4259,11 +4610,43 @@ app.post('/api/chat', async (req, res) => {
       history: conversationHistory,
     });
 
-    return res.json({
-      success: true,
-      message: composeStructuredText(structuredGreeting),
-      structuredMessage: structuredGreeting
+    return sendChatReply(structuredGreeting);
+  }
+
+  if (normalizedAssistantType === 'carrier' && carrierContext) {
+    const carrierDataReply = buildCarrierContextStructuredReply({
+      lowerMessage,
+      carrierContext,
+      style: responseStyle,
+      assistantType: normalizedAssistantType,
     });
+
+    if (carrierDataReply) {
+      return sendChatReply(carrierDataReply);
+    }
+  }
+
+  const needsWebSearch = isExternalWebQuestion(lowerMessage, {
+    skipDirectCarrierData: true,
+    isDirectCarrierDataQuestion: (text) => isDirectCarrierDataQuestion(text),
+  });
+
+  if (needsWebSearch) {
+    try {
+      const webSearchReply = await buildWebSearchAssistantReply({
+        message,
+        lowerMessage,
+        style: responseStyle,
+        ollama,
+        modelName: MODEL_NAME,
+      });
+
+      if (webSearchReply) {
+        return sendChatReply(webSearchReply, 'searching');
+      }
+    } catch (webSearchError) {
+      console.warn('⚠️ Web search failed:', webSearchError.message);
+    }
   }
 
   const focusedFollowUp = buildFocusedFollowUpReply({
@@ -4285,15 +4668,12 @@ app.post('/api/chat', async (req, res) => {
       history: conversationHistory,
     });
 
-    return res.json({
-      success: true,
-      message: composeStructuredText(structuredFollowUp),
-      structuredMessage: structuredFollowUp
-    });
+    return sendChatReply(structuredFollowUp, 'thinking');
   }
 
   const shouldUseFastPath =
-    responseStyle !== 'other_language' && (
+    responseStyle !== 'other_language' &&
+    !needsWebSearch && (
     lowerMessage.includes('how are you') ||
     lowerMessage.includes('thank') ||
     isVagueFollowUp(lowerMessage) ||
@@ -4304,7 +4684,8 @@ app.post('/api/chat', async (req, res) => {
     userIntent === 'Load Search' ||
     (
       ['Tracking', 'Payouts', 'Fuel Cost'].includes(userIntent) &&
-      responseLength !== 'detailed'
+      responseLength !== 'detailed' &&
+      !(normalizedAssistantType === 'carrier' && carrierContext && isDirectCarrierDataQuestion(lowerMessage))
     ) ||
     (
       ['Route Planning', 'Fleet Management', 'Driver Support', 'Earnings', 'Dispatching', 'Shipment Management'].includes(userIntent) &&
@@ -4336,11 +4717,7 @@ app.post('/api/chat', async (req, res) => {
       history: conversationHistory,
     });
 
-    return res.json({
-      success: true,
-      message: composeStructuredText(structuredFastReply),
-      structuredMessage: structuredFastReply
-    });
+    return sendChatReply(structuredFastReply, 'thinking');
   }
   
   try {
@@ -4406,6 +4783,15 @@ ${normalizeSelectedMode(mode) || 'auto'}
 KNOWLEDGE BASE:
 ${relevantInfo}
 
+LIVE CARRIER DATA (from this user's Alpha Freight account — prioritize this for loads, bids, wallet, and earnings questions):
+${formatCarrierContext(carrierContext)}
+
+CARRIER DATA RULES:
+- When the user asks about their loads, bids, wallet, earnings, or available freight, use LIVE CARRIER DATA first.
+- Mention specific load codes, routes, prices, and statuses from LIVE CARRIER DATA when available.
+- Do not invent loads, bids, or wallet balances that are not listed in LIVE CARRIER DATA.
+- If LIVE CARRIER DATA is empty for a category, say that clearly and guide the user to the right screen in the app.
+
 USER QUESTION:
 ${message}`;
 
@@ -4413,6 +4799,51 @@ ${message}`;
 
     // Try Ollama first
     try {
+      if (emitStream) {
+        emitStream({ type: 'phase', phase: 'thinking' });
+
+        let fullText = '';
+        const ollamaStream = await ollama.generate({
+          model: MODEL_NAME,
+          prompt: prompt,
+          stream: true,
+          keep_alive: '30m',
+          options: {
+            temperature: generationConfig.temperature,
+            num_predict: generationConfig.num_predict,
+            repeat_penalty: 1.12
+          }
+        });
+
+        for await (const chunk of ollamaStream) {
+          const piece = chunk.response || '';
+          if (!piece) continue;
+          fullText += piece;
+          emitStream({ type: 'delta', text: piece });
+        }
+
+        const polishedResponse = polishAssistantReply({
+          reply: fullText,
+          lowerMessage,
+          assistantType: normalizedAssistantType,
+          style: responseStyle,
+          history: conversationHistory,
+          topic: serviceIntent || inferredTopic
+        });
+        const structuredReply = buildStructuredAssistantReply({
+          assistantType: normalizedAssistantType,
+          lowerMessage,
+          topic: serviceIntent || inferredTopic,
+          plainReply: polishedResponse,
+          memory: conversationMemory,
+          style: responseStyle,
+          selectedMode: mode,
+          history: conversationHistory,
+        });
+
+        return sendChatReply(structuredReply);
+      }
+
       const ollamaResponse = await withTimeout(
         ollama.generate({
           model: MODEL_NAME,
@@ -4447,11 +4878,7 @@ ${message}`;
         history: conversationHistory,
       });
 
-      res.json({
-        success: true,
-        message: composeStructuredText(structuredReply),
-        structuredMessage: structuredReply
-      });
+      return sendChatReply(structuredReply);
     } catch (ollamaError) {
       console.warn('⚠️ Ollama not available, using fallback responses:', ollamaError.message);
       
@@ -4507,15 +4934,22 @@ ${message}`;
           history: conversationHistory,
       });
 
-      res.json({
-        success: true,
-        message: composeStructuredText(structuredFallbackReply),
-        structuredMessage: structuredFallbackReply
-      });
+      return sendChatReply(structuredFallbackReply, 'thinking');
     }
   } catch (error) {
     console.error('❌ Error in chat endpoint:', error);
-    res.status(500).json({ 
+    if (emitStream) {
+      emitStream({
+        type: 'complete',
+        success: false,
+        error: 'Internal server error',
+        message: 'Sorry, I encountered an error. Please try again later.',
+      });
+      res.end();
+      return;
+    }
+
+    res.status(500).json({
       success: false, 
       error: 'Internal server error',
       message: 'Sorry, I encountered an error. Please try again later.' 
@@ -4529,6 +4963,7 @@ app.listen(PORT, () => {
   console.log(`📍 Server URL: http://localhost:${PORT}`);
   console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
   console.log(`💬 Chat API: http://localhost:${PORT}/api/chat`);
+  console.log(`🔐 Auth required: ${AI_REQUIRE_AUTH ? 'yes' : 'no (dev mode)'}`);
   console.log(`🤖 Ollama URL: ${OLLAMA_URL}`);
   console.log(`🧠 Model: ${MODEL_NAME}`);
   console.log(`\n`);
