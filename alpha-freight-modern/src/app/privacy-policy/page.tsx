@@ -218,13 +218,65 @@ const sections = [
     ),
   },
   {
+    id: "mobile-app",
+    title: "13. Alpha Freight Mobile App",
+    content: (
+      <div className="space-y-5">
+        <p>
+          If you use the Alpha Freight Android app, we may also collect and process the following
+          information to provide load matching, live tracking, payments, account verification, and
+          security features:
+        </p>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <span className="font-semibold text-slate-900">Account and profile data:</span> name,
+            email, phone number, company details, role (carrier or supplier), and verification
+            documents you upload.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-900">Location data:</span> precise location
+            while you use the app and, for active carrier deliveries, background location to share
+            live shipment tracking with the supplier.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-900">Photos and files:</span> identity
+            documents, proof of delivery, and media you choose to upload in the app.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-900">Payment data:</span> payment method and
+            transaction details processed through our payment partners such as Stripe.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-900">Device and app data:</span> device
+            identifiers, push notification tokens, app interactions, crash logs, and security data
+            such as app passcode settings.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-900">Communications:</span> messages,
+            notifications, support requests, and in-app activity related to loads, bids, bookings,
+            and deliveries.
+          </li>
+        </ul>
+        <p>
+          You can control some permissions in your device settings, including location, camera,
+          photos, and notifications. If you disable required permissions, some app features may not
+          work.
+        </p>
+      </div>
+    ),
+  },
+  {
     id: "account-deletion",
-    title: "13. Account and Data Deletion",
+    title: "14. Account and Data Deletion",
     content: (
       <div className="space-y-5">
         <p>
           You can request deletion of your Alpha Freight account and associated personal data at any
-          time.
+          time. Full instructions are on our{" "}
+          <Link href="/account-deletion" className="text-violet-700 hover:underline">
+            account deletion page
+          </Link>
+          .
         </p>
         <div>
           <h3 className="text-base font-semibold text-slate-900">How to request deletion:</h3>
