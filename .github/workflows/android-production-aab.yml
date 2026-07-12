@@ -1,0 +1,57 @@
+name: Build Android Production AAB
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: alpha-freight-mobile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: alpha-freight-mobile/package-lock.json
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production AAB locally (no EAS cloud quota)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_NO_VCS: 1
+          EAS_SKIP_AUTO_FINGERPRINT: 1
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_MAPBOX_TOKEN: ${{ secrets.EXPO_PUBLIC_MAPBOX_TOKEN }}
+          EXPO_PUBLIC_AI_API_URL: ${{ secrets.EXPO_PUBLIC_AI_API_URL }}
+          EXPO_PUBLIC_WEB_API_URL: ${{ secrets.EXPO_PUBLIC_WEB_API_URL }}
+          EXPO_PUBLIC_RENDER_BACKEND_URL: ${{ secrets.EXPO_PUBLIC_RENDER_BACKEND_URL }}
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_GOOGLE_PAY_TEST_ENV: "false"
+          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+          EXPO_PUBLIC_EAS_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_EAS_PROJECT_ID }}
+        run: |
+          eas build --local --profile production --platform android --non-interactive --output ./alpha-freight-production.aab
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-freight-production-aab
+          path: alpha-freight-mobile/alpha-freight-production.aab
+          retention-days: 7
