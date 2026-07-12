@@ -289,3 +289,34 @@ export function buildDynamicSuggestions(context: {
 
   return suggestions.slice(0, 3);
 }
+
+export function buildSupplierDynamicSuggestions(context: {
+  pendingBids?: number;
+  pendingPayments?: number;
+  activeLoads?: number;
+  podReviewCount?: number;
+} | null): string[] {
+  const suggestions: string[] = [];
+
+  if ((context?.pendingPayments || 0) > 0) {
+    suggestions.push("Which loads need payment?");
+  } else {
+    suggestions.push("Help me post a new load");
+  }
+
+  if ((context?.pendingBids || 0) > 0) {
+    suggestions.push("Compare my carrier bids");
+  } else {
+    suggestions.push("Show my active posted loads");
+  }
+
+  if ((context?.podReviewCount || 0) > 0) {
+    suggestions.push("Any POD waiting for review?");
+  } else if ((context?.activeLoads || 0) > 0) {
+    suggestions.push("Give me a dashboard summary");
+  } else {
+    suggestions.push("How does pay now vs pay later work?");
+  }
+
+  return suggestions.slice(0, 3);
+}

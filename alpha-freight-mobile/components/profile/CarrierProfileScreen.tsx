@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -8,24 +10,30 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import FeedAuthorName from "@/components/feed/FeedAuthorName";
 import EditProfileSheet, { EditProfileSheetRef } from "@/components/profile/EditProfileSheet";
 import UkFlag from "@/components/ui/UkFlag";
 import {
   CarrierProfileData,
   formatProfileStatMoney,
+  pickCarrierAvatar,
   signOutCarrier,
+  uploadCarrierAvatar,
 } from "@/lib/carrier-profile";
 import {
   getCachedCarrierProfile,
+  isCarrierProfileCacheStale,
   prefetchCarrierProfile,
   setCachedCarrierProfile,
 } from "@/lib/carrier-profile-cache";
+import { useDeferredFocusRefresh } from "@/lib/use-deferred-focus-refresh";
 import { setCachedCarrierDashboard } from "@/lib/carrier-dashboard-cache";
 import { setCachedCarrierWallet } from "@/lib/carrier-wallet-cache";
 import { setCachedAvailableLoads } from "@/lib/available-loads-cache";
 import { initializePushNotifications } from "@/lib/push-notifications";
+import { isOfficialFeedEmail } from "@/lib/feed-official-accounts";
 import { colors, radius, spacing } from "@/lib/theme";
 
 function ProfileSkeleton() {
@@ -177,6 +185,7 @@ export default function CarrierProfileScreen() {
   const editSheetRef = useRef<EditProfileSheetRef>(null);
   const [data, setData] = useState<CarrierProfileData | null>(() => getCachedCarrierProfile());
   const [signingOut, setSigningOut] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const loadProfile = useCallback(async (force = false) => {
     try {
@@ -191,11 +200,9 @@ export default function CarrierProfileScreen() {
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadProfile(true);
-    }, [loadProfile])
-  );
+  useDeferredFocusRefresh(() => {
+    void loadProfile(isCarrierProfileCacheStale());
+  }, [loadProfile]);
 
   const handleEditPress = useCallback(() => {
     if (!data) return;
@@ -206,6 +213,26 @@ export default function CarrierProfileScreen() {
     setCachedCarrierProfile(profile);
     setData(profile);
   }, []);
+
+  const handleAvatarPress = useCallback(async () => {
+    if (uploadingAvatar) return;
+
+    try {
+      const uri = await pickCarrierAvatar();
+      if (!uri) return;
+
+      setUploadingAvatar(true);
+      await uploadCarrierAvatar(uri);
+      await loadProfile(true);
+    } catch (error) {
+      Alert.alert(
+        "Photo update failed",
+        error instanceof Error ? error.message : "Unable to update profile photo."
+      );
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }, [loadProfile, uploadingAvatar]);
 
   const handleSignOut = useCallback(async () => {
     if (signingOut) return;
@@ -224,6 +251,7 @@ export default function CarrierProfileScreen() {
 
   const showSkeleton = !data;
   const isVerified = data?.verificationStatus === "verified";
+  const isOfficial = isOfficialFeedEmail(data?.email);
 
   return (
     <View style={styles.root}>
@@ -243,16 +271,33 @@ export default function CarrierProfileScreen() {
             <>
               <View style={styles.heroCard}>
                 <View style={styles.heroTop}>
-                  {data.avatarUrl ? (
-                    <Image source={{ uri: data.avatarUrl }} style={styles.avatarImage} />
-                  ) : (
-                    <View style={styles.avatarFallback}>
-                      <Text style={styles.avatarText}>{data.initials}</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.avatarPress, pressed && styles.pressed]}
+                    onPress={() => void handleAvatarPress()}
+                  >
+                    {data.avatarUrl ? (
+                      <Image source={{ uri: data.avatarUrl }} style={styles.avatarImage} />
+                    ) : (
+                      <View style={styles.avatarFallback}>
+                        <Text style={styles.avatarText}>{data.initials}</Text>
+                      </View>
+                    )}
+                    <View style={styles.avatarCamera}>
+                      {uploadingAvatar ? (
+                        <ActivityIndicator size="small" color={colors.white} />
+                      ) : (
+                        <Ionicons name="camera-outline" size={14} color={colors.white} />
+                      )}
                     </View>
-                  )}
+                  </Pressable>
 
                   <View style={styles.heroCopy}>
-                    <Text style={styles.displayName}>{data.displayName}</Text>
+                    <FeedAuthorName
+                      name={data.displayName}
+                      verified={isOfficial || isVerified}
+                      textStyle={styles.displayName}
+                      badgeSize={20}
+                    />
                     {data.fullName.trim().toLowerCase() !== data.displayName.trim().toLowerCase() ? (
                       <Text style={styles.fullName}>{data.fullName}</Text>
                     ) : null}
@@ -442,6 +487,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     alignItems: "center",
   },
+  avatarPress: {
+    position: "relative",
+  },
   avatarImage: {
     width: 72,
     height: 72,
@@ -455,11 +503,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.brand,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.ink,
   },
   avatarText: {
     fontSize: 24,
     fontWeight: "800",
     color: colors.ink,
+  },
+  avatarCamera: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.ink,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: colors.white,
   },
   heroCopy: {
     flex: 1,

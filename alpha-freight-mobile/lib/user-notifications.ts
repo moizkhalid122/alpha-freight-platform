@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { setBadgeCountAsync } from "@/lib/push-notifications";
+import {
+  fetchUnreadFeedNotificationCount,
+  subscribeToFeedNotifications,
+} from "@/lib/feed-notifications";
 
 export type UserNotification = {
   id: string;
@@ -61,18 +65,25 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
 
   if (!user) return 0;
 
-  const { count, error } = await supabase
-    .from("user_notifications")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .is("read_at", null);
+  const [inboxCount, feedCount] = await Promise.all([
+    (async () => {
+      const { count, error } = await supabase
+        .from("user_notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .is("read_at", null);
 
-  if (error) {
-    if (/relation .* does not exist|schema cache/i.test(error.message)) return 0;
-    throw error;
-  }
+      if (error) {
+        if (/relation .* does not exist|schema cache/i.test(error.message)) return 0;
+        throw error;
+      }
 
-  return count ?? 0;
+      return count ?? 0;
+    })(),
+    fetchUnreadFeedNotificationCount(),
+  ]);
+
+  return inboxCount + feedCount;
 }
 
 export async function markNotificationRead(notificationId: string) {
@@ -160,19 +171,26 @@ export function useUnreadNotificationCount() {
   useEffect(() => {
     void refresh();
 
-    let unsubscribe: (() => void) | undefined;
+    let unsubscribeInbox: (() => void) | undefined;
+    let unsubscribeFeed: (() => void) | undefined;
 
     void (async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-      unsubscribe = subscribeToUserNotifications(user.id, () => {
+      unsubscribeInbox = subscribeToUserNotifications(user.id, () => {
+        void refresh();
+      });
+      unsubscribeFeed = subscribeToFeedNotifications(user.id, () => {
         void refresh();
       });
     })();
 
-    return () => unsubscribe?.();
+    return () => {
+      unsubscribeInbox?.();
+      unsubscribeFeed?.();
+    };
   }, [refresh]);
 
   return { count, refresh };

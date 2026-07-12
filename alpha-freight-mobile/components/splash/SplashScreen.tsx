@@ -94,7 +94,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
       <View style={styles.stage}>
         <Animated.View style={[styles.circle, circleStyle]} />
 
-        <View style={styles.centerColumn}>
+        <View style={styles.centerColumn} pointerEvents="none">
           <Animated.View style={[styles.logoWrap, logoStyle]}>
             <Image source={require("@/assets/logo.png")} style={styles.logo} resizeMode="contain" />
           </Animated.View>
@@ -109,14 +109,16 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 }
 
 const LOGO_SIZE = 96;
+const CIRCLE_LEFT = (SCREEN_W - CIRCLE_SIZE) / 2;
+const CIRCLE_TOP = (SCREEN_H - CIRCLE_SIZE) / 2;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: "#000000",
   },
   stage: {
-    ...StyleSheet.absoluteFill,
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -124,13 +126,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
+    width: "100%",
   },
   circle: {
     position: "absolute",
+    left: CIRCLE_LEFT,
+    top: CIRCLE_TOP,
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
     borderRadius: CIRCLE_SIZE / 2,
     backgroundColor: colors.brand,
+    zIndex: 1,
   },
   logoWrap: {
     width: LOGO_SIZE,
@@ -145,11 +151,13 @@ const styles = StyleSheet.create({
   titleWrap: {
     alignItems: "center",
     marginTop: 14,
+    width: "100%",
   },
   titleMain: {
     fontSize: 28,
     fontWeight: "800",
     letterSpacing: -0.6,
-    color: colors.ink,
+    color: colors.white,
+    textAlign: "center",
   },
 });

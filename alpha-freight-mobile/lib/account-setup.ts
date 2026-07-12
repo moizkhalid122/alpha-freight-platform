@@ -117,6 +117,8 @@ export async function saveAccountSetup(draft: AccountSetupDraft): Promise<void> 
     .update({
       company_name: accountType === "company" ? profile?.company_name || fullName : profile?.company_name,
       profile_extras: mergedExtras,
+      verification_status: "review",
+      is_approved: false,
     })
     .eq("id", user.id);
 

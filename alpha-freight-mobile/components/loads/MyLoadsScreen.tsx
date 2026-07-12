@@ -25,6 +25,7 @@ import {
   myLoadToAvailableLoad,
   updateCarrierLoadStatus,
 } from "@/lib/carrier-my-loads";
+import { deliverLoadWithPod } from "@/lib/carrier-pod-upload";
 import {
   getCachedCarrierMyLoads,
   prefetchCarrierMyLoads,
@@ -291,6 +292,17 @@ export default function MyLoadsScreen() {
     }
   }, []);
 
+  const handleDeliverWithPod = useCallback(
+    async (loadId: string, localUri: string, fileName: string) => {
+      const updated = await deliverLoadWithPod(loadId, localUri, fileName);
+      if (updated) {
+        setCachedCarrierMyLoads(updated);
+        setData(updated);
+      }
+    },
+    []
+  );
+
   const showSkeleton = !data;
 
   return (
@@ -422,7 +434,11 @@ export default function MyLoadsScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      <LoadDetailSheet ref={detailSheetRef} onStatusUpdate={handleStatusUpdate} />
+      <LoadDetailSheet
+        ref={detailSheetRef}
+        onStatusUpdate={handleStatusUpdate}
+        onDeliverWithPod={handleDeliverWithPod}
+      />
     </View>
   );
 }

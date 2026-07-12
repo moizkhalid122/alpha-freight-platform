@@ -273,3 +273,28 @@ export async function setBadgeCountAsync(count: number) {
   if (!Notifications) return;
   await Notifications.setBadgeCountAsync(count);
 }
+
+export async function presentLocalNotification(params: {
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+}) {
+  const Notifications = await getNotificationsModule();
+  if (!Notifications) return;
+
+  const granted = await isNotificationPermissionGranted();
+  if (!granted) return;
+
+  await ensureAndroidChannel(Notifications);
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: params.title,
+      body: params.body,
+      data: params.data ?? {},
+      sound: true,
+      ...(Platform.OS === "android" ? { channelId: "default" } : {}),
+    },
+    trigger: null,
+  });
+}

@@ -1,4 +1,5 @@
 import "react-native-reanimated";
+import "@/lib/carrier-gps-tracker";
 import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -19,9 +20,21 @@ import {
   isCarrierVerifiedNotification,
   showVerifiedCelebration,
 } from "@/lib/verified-celebration";
+import { startCarrierRealtimeAlerts, stopCarrierRealtimeAlerts } from "@/lib/carrier-realtime-alerts";
+import { syncCarrierGpsTrackingSession } from "@/lib/carrier-gps-tracker";
+import { startAppNotificationAlerts, stopAppNotificationAlerts } from "@/lib/app-notifications";
+import StripePaymentProvider from "@/components/payments/StripePaymentProvider";
 import VerifiedCelebrationModal from "@/components/notifications/VerifiedCelebrationModal";
+import AuthTransitionHost from "@/components/auth/AuthTransitionHost";
 import { routeAfterSplash } from "@/lib/pin-routing";
+import {
+  smoothFadeScreenOptions,
+  smoothInstantScreenOptions,
+  smoothModalScreenOptions,
+  smoothStackScreenOptions,
+} from "@/lib/navigation-config";
 import { supabase } from "@/lib/supabase";
+import { getUserRole } from "@/lib/user-role";
 
 export const unstable_settings = {
   initialRouteName: "index",
@@ -74,7 +87,39 @@ export default function RootLayout() {
           }
 
           if (typeof route === "string") {
+            if (type === "feed_follow" && typeof content.data?.profileKey === "string") {
+              router.push({
+                pathname: "/feed-profile",
+                params: {
+                  profileKey: String(content.data.profileKey),
+                  name: String(content.data.name || "Profile"),
+                  role: String(content.data.role || "carrier"),
+                  avatarSrc: String(content.data.avatarSrc || ""),
+                  authorId: String(content.data.authorId || ""),
+                  viewerRole: String(content.data.viewerRole || "carrier"),
+                },
+              });
+              return;
+            }
+
+            if (type === "feed_like" || type === "feed_reply") {
+              const postId =
+                typeof content.data?.postId === "string"
+                  ? content.data.postId
+                  : route.replace(/^\/feed-post\//, "");
+              router.push({
+                pathname: "/feed-post/[id]",
+                params: {
+                  id: postId,
+                  viewerRole: String(content.data?.viewerRole || "carrier"),
+                },
+              });
+              return;
+            }
+
             router.push(route as never);
+          } else if (type === "new_load") {
+            router.push("/(main)/loads" as never);
           }
         },
         onReceived: (notification) => {
@@ -91,11 +136,37 @@ export default function RootLayout() {
           void fetchUnreadNotificationCount().then((count) => setBadgeCountAsync(count));
         },
       });
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        void registerPushTokenIfPermitted();
+        startAppNotificationAlerts(session.user.id);
+        void getUserRole(session.user.id).then((role) => {
+          if (role === "carrier") {
+            startCarrierRealtimeAlerts(session.user.id);
+            void syncCarrierGpsTrackingSession();
+          }
+        });
+      }
     })();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         void registerPushTokenIfPermitted();
+        startAppNotificationAlerts(session.user.id);
+        void getUserRole(session.user.id).then((role) => {
+          if (role === "carrier") {
+            startCarrierRealtimeAlerts(session.user.id);
+            void syncCarrierGpsTrackingSession();
+          } else {
+            stopCarrierRealtimeAlerts();
+          }
+        });
+      } else {
+        stopCarrierRealtimeAlerts();
+        stopAppNotificationAlerts();
       }
     });
 
@@ -111,6 +182,16 @@ export default function RootLayout() {
     const appStateSub = AppState.addEventListener("change", (state) => {
       if (state === "active") {
         void registerPushTokenIfPermitted();
+        void (async () => {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (!session?.user) return;
+          const role = await getUserRole(session.user.id);
+          if (role === "carrier") {
+            void syncCarrierGpsTrackingSession();
+          }
+        })();
       }
     });
 
@@ -118,44 +199,56 @@ export default function RootLayout() {
       listenerSub.remove();
       authListener.subscription.unsubscribe();
       appStateSub.remove();
+      stopCarrierRealtimeAlerts();
     };
   }, [router]);
 
   return (
     <GestureHandlerRootView style={styles.root}>
+      <StripePaymentProvider>
       <SafeAreaProvider>
         <BottomSheetModalProvider>
           <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-            <Stack.Screen name="index" options={{ animation: "none" }} />
-            <Stack.Screen name="welcome" options={{ animation: "fade" }} />
-            <Stack.Screen name="login" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="signup" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="account-setup" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="pin-setup" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="pin-unlock" options={{ animation: "fade" }} />
-            <Stack.Screen
-              name="payout-setup"
-              options={{ animation: "slide_from_bottom", presentation: "modal" }}
-            />
-            <Stack.Screen name="my-loads" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="my-bids" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="support" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
+          <Stack screenOptions={smoothStackScreenOptions}>
+            <Stack.Screen name="index" options={smoothInstantScreenOptions} />
+            <Stack.Screen name="welcome" options={smoothFadeScreenOptions} />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="signup" />
+            <Stack.Screen name="account-setup" />
+            <Stack.Screen name="pin-setup" />
+            <Stack.Screen name="pin-unlock" options={smoothFadeScreenOptions} />
+            <Stack.Screen name="payout-setup" options={smoothModalScreenOptions} />
+            <Stack.Screen name="my-loads" />
+            <Stack.Screen name="my-bids" />
+            <Stack.Screen name="support" />
+            <Stack.Screen name="settings" />
             <Stack.Screen
               name="ai-assistant"
               options={{
-                animation: "slide_from_bottom",
-                presentation: "modal",
+                ...smoothModalScreenOptions,
                 gestureEnabled: false,
               }}
             />
-            <Stack.Screen name="referrals" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="notifications" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="(main)" options={{ animation: "none", headerShown: false }} />
-            <Stack.Screen name="dashboard" options={{ animation: "none" }} />
-            <Stack.Screen name="available-loads" options={{ animation: "none" }} />
-            <Stack.Screen name="wallet" options={{ animation: "none" }} />
+            <Stack.Screen name="referrals" />
+            <Stack.Screen name="notifications" />
+            <Stack.Screen name="earnings" />
+            <Stack.Screen name="post-load" />
+            <Stack.Screen name="pay-later" />
+            <Stack.Screen name="feed-post/[id]" />
+            <Stack.Screen name="feed-profile" />
+            <Stack.Screen name="discover" />
+            <Stack.Screen name="create-feed-compose" options={smoothModalScreenOptions} />
+            <Stack.Screen name="create-feed-post" options={smoothModalScreenOptions} />
+            <Stack.Screen name="create-feed-reel" options={smoothModalScreenOptions} />
+            <Stack.Screen name="complete-payment" options={smoothModalScreenOptions} />
+            <Stack.Screen name="supplier-load/[loadId]" />
+            <Stack.Screen name="load-tracking/index" />
+            <Stack.Screen name="load-tracking/[loadId]" />
+            <Stack.Screen name="(main)" options={smoothInstantScreenOptions} />
+            <Stack.Screen name="(supplier-main)" options={smoothInstantScreenOptions} />
+            <Stack.Screen name="dashboard" options={smoothInstantScreenOptions} />
+            <Stack.Screen name="available-loads" options={smoothInstantScreenOptions} />
+            <Stack.Screen name="wallet" options={smoothInstantScreenOptions} />
           </Stack>
 
           {showSplash ? (
@@ -165,8 +258,10 @@ export default function RootLayout() {
           ) : null}
 
           <VerifiedCelebrationModal />
+          <AuthTransitionHost />
         </BottomSheetModalProvider>
       </SafeAreaProvider>
+      </StripePaymentProvider>
     </GestureHandlerRootView>
   );
 }

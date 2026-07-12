@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useGoogleAuthFlow } from "@/lib/use-google-auth-flow";
 import { markWelcomeCompleted } from "@/lib/onboarding";
 import { colors, radius, spacing } from "@/lib/theme";
 
@@ -60,6 +61,7 @@ export default function WelcomeScreen() {
   const listRef = useRef<FlatList<Slide>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeIndexRef = useRef(0);
+  const { finishGoogleAuth } = useGoogleAuthFlow();
 
   const scrollToIndex = useCallback((index: number, animated = true) => {
     listRef.current?.scrollToIndex({ index, animated });
@@ -100,6 +102,13 @@ export default function WelcomeScreen() {
   const goToLogin = () => {
     void markWelcomeCompleted();
     router.push("/login");
+  };
+
+  const handleGoogleSignUp = async () => {
+    await finishGoogleAuth({
+      role: "carrier",
+      mode: "signup",
+    });
   };
 
   const activeSlide = SLIDES[activeIndex];
@@ -168,11 +177,14 @@ export default function WelcomeScreen() {
           </Pressable>
 
           <Pressable
-            style={({ pressed }) => [styles.buttonGoogle, pressed && styles.buttonGooglePressed]}
-            onPress={goToSignup}
+            style={({ pressed }) => [
+              styles.buttonGoogle,
+              pressed && styles.buttonGooglePressed,
+            ]}
+            onPress={() => void handleGoogleSignUp()}
           >
             <Image source={require("@/assets/google-icon.png")} style={styles.googleIcon} />
-            <Text style={styles.buttonGoogleText}>Sign up with Google</Text>
+            <Text style={styles.buttonGoogleText}>Continue with Google</Text>
           </Pressable>
 
           <Pressable
@@ -298,6 +310,9 @@ const styles = StyleSheet.create({
   buttonGooglePressed: {
     backgroundColor: "#F3F4F6",
     transform: [{ scale: 0.985 }],
+  },
+  buttonGoogleDisabled: {
+    opacity: 0.75,
   },
   buttonGhostPressed: {
     backgroundColor: "rgba(255,255,255,0.08)",

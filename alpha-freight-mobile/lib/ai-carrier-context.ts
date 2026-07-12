@@ -2,6 +2,7 @@ import { fetchAvailableLoads } from "@/lib/available-loads";
 import { fetchCarrierBids, getLoadCode } from "@/lib/carrier-bids";
 import { fetchCarrierMyLoads } from "@/lib/carrier-my-loads";
 import { fetchCarrierWallet, formatWalletMoney } from "@/lib/carrier-wallet";
+import { isCacheStale, SCREEN_CACHE_STALE_MS } from "@/lib/cache-stale";
 
 export type AiCarrierLoadSnapshot = {
   code: string;
@@ -46,7 +47,24 @@ function buildRoute(origin?: string | null, destination?: string | null) {
   return `${from} → ${to}`;
 }
 
-export async function fetchAiCarrierContext(): Promise<AiCarrierContext | null> {
+let cachedContext: AiCarrierContext | null = null;
+let cachedAt: number | null = null;
+let inflight: Promise<AiCarrierContext | null> | null = null;
+
+export function getCachedAiCarrierContext() {
+  return cachedContext;
+}
+
+export function isAiCarrierContextStale(maxAgeMs = SCREEN_CACHE_STALE_MS) {
+  if (!cachedContext) return true;
+  return isCacheStale(cachedAt, maxAgeMs);
+}
+
+export async function fetchAiCarrierContext(force = false): Promise<AiCarrierContext | null> {
+  if (!force && cachedContext && !isAiCarrierContextStale()) return cachedContext;
+  if (!force && inflight) return inflight;
+
+  inflight = (async () => {
   const [availableData, myLoadsData, bids, wallet] = await Promise.all([
     fetchAvailableLoads().catch(() => null),
     fetchCarrierMyLoads().catch(() => null),
@@ -126,4 +144,17 @@ export async function fetchAiCarrierContext(): Promise<AiCarrierContext | null> 
     availableLoads,
     bids: bidSnapshots,
   };
+  })()
+    .then((result) => {
+      if (result) {
+        cachedContext = result;
+        cachedAt = Date.now();
+      }
+      return result;
+    })
+    .finally(() => {
+      inflight = null;
+    });
+
+  return inflight;
 }

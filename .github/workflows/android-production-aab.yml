@@ -19,14 +19,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: alpha-freight-mobile/package-lock.json
 
       - name: Setup Expo and EAS
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Prepare EAS config for CI
+        run: cp eas.json.github eas.json
 
       - name: Install dependencies
         run: npm ci

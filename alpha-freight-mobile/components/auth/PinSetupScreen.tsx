@@ -8,21 +8,24 @@ import { routeAfterPinSetup } from "@/lib/pin-routing";
 import {
   PIN_LENGTH,
   clearPinSetupPending,
-  hasPinForUser,
+  hasPinConfiguredForUserWithRetry,
   isPinSetupPending,
   savePinForUser,
 } from "@/lib/pin-lock";
 import { supabase } from "@/lib/supabase";
+import { useEndAuthTransitionOnFocus } from "@/lib/use-end-auth-transition-on-focus";
 import { colors } from "@/lib/theme";
 
 type SetupStep = "create" | "confirm";
 
 export default function PinSetupScreen() {
+  useEndAuthTransitionOnFocus();
   const [step, setStep] = useState<SetupStep>("create");
   const [draftPin, setDraftPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [checkingExisting, setCheckingExisting] = useState(true);
   const [requiredSetup, setRequiredSetup] = useState(true);
 
   useEffect(() => {
@@ -30,11 +33,22 @@ export default function PinSetupScreen() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setCheckingExisting(false);
+        return;
+      }
 
       const pending = await isPinSetupPending();
-      const hasPin = await hasPinForUser(user.id);
+      const hasPin = await hasPinConfiguredForUserWithRetry(user.id);
+
+      if (hasPin) {
+        await clearPinSetupPending();
+        router.replace("/pin-unlock");
+        return;
+      }
+
       setRequiredSetup(pending || !hasPin);
+      setCheckingExisting(false);
     })();
   }, []);
 
@@ -108,6 +122,16 @@ export default function PinSetupScreen() {
     }
     setConfirmPin((current) => current.slice(0, -1));
   }, [saving, step]);
+
+  if (checkingExisting) {
+    return (
+      <PinShell title="Checking passcode" subtitle="One moment…" showBack={false}>
+        <View style={styles.centerBlock}>
+          <ActivityIndicator size="small" color={colors.ink} />
+        </View>
+      </PinShell>
+    );
+  }
 
   return (
     <PinShell

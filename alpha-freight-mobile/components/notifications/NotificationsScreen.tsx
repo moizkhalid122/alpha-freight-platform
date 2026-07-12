@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import LottieView from "lottie-react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -13,16 +13,33 @@ import {
   subscribeToUserNotifications,
   type UserNotification,
 } from "@/lib/user-notifications";
+import {
+  fetchFeedInboxNotifications,
+  markAllFeedNotificationsRead,
+  markFeedNotificationRead,
+  subscribeToFeedNotifications,
+  type FeedInboxNotification,
+} from "@/lib/feed-notifications";
+import { openFeedProfile } from "@/lib/feed-profile-nav";
+import { getUserRole } from "@/lib/user-role";
 import { initializePushNotifications, setBadgeCountAsync } from "@/lib/push-notifications";
 import { supabase } from "@/lib/supabase";
+import { optimizeFeedImageUrl } from "@/lib/feed-image-url";
 import { colors, radius, spacing } from "@/lib/theme";
 import {
   isCarrierVerifiedNotification,
   showVerifiedCelebration,
 } from "@/lib/verified-celebration";
 
+type InboxItem =
+  | { source: "inbox"; item: UserNotification }
+  | { source: "feed"; item: FeedInboxNotification };
+
 function iconForType(type: string): keyof typeof Ionicons.glyphMap {
   if (type === "carrier_verified") return "shield-checkmark-outline";
+  if (type === "feed_follow") return "person-add-outline";
+  if (type === "feed_like") return "heart-outline";
+  if (type === "feed_reply") return "chatbubble-outline";
   return "notifications-outline";
 }
 
@@ -69,6 +86,59 @@ function VerifiedNotificationCard({
   );
 }
 
+function FeedNotificationCard({
+  item,
+  onPress,
+}: {
+  item: FeedInboxNotification;
+  onPress: () => void;
+}) {
+  const unread = !item.readAt;
+  const initials = item.actorName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.card, unread && styles.cardUnread, pressed && styles.pressed]}
+      onPress={onPress}
+    >
+      {item.actorAvatar ? (
+        <Image
+          source={{ uri: optimizeFeedImageUrl(item.actorAvatar, 96) }}
+          style={styles.feedAvatar}
+        />
+      ) : (
+        <View style={[styles.iconWrap, unread && styles.iconWrapUnread]}>
+          <Text style={styles.feedAvatarText}>{initials || "AF"}</Text>
+        </View>
+      )}
+      <View style={styles.cardCopy}>
+        <View style={styles.cardTop}>
+          <Text style={styles.cardTitle}>{item.title}</Text>
+          <Text style={styles.cardTime}>{formatNotificationTime(item.createdAt)}</Text>
+        </View>
+        <Text style={styles.cardBody}>{item.body}</Text>
+      </View>
+      <Ionicons
+        name={
+          item.type === "feed_like"
+            ? "heart"
+            : item.type === "feed_reply"
+              ? "chatbubble"
+              : "person-add"
+        }
+        size={16}
+        color={item.type === "feed_like" ? "#EF4444" : colors.ink}
+      />
+      {unread ? <View style={styles.unreadDot} /> : null}
+    </Pressable>
+  );
+}
+
 function NotificationCard({
   item,
   onPress,
@@ -100,12 +170,35 @@ function NotificationCard({
 
 export default function NotificationsScreen() {
   const [items, setItems] = useState<UserNotification[]>([]);
+  const [feedItems, setFeedItems] = useState<FeedInboxNotification[]>([]);
+  const [viewerRole, setViewerRole] = useState<"carrier" | "supplier">("carrier");
   const [loading, setLoading] = useState(true);
+
+  const mergedItems = useMemo<InboxItem[]>(() => {
+    const inbox = items.map((item) => ({ source: "inbox" as const, item }));
+    const feed = feedItems.map((item) => ({ source: "feed" as const, item }));
+    return [...inbox, ...feed].sort(
+      (a, b) =>
+        new Date(b.item.createdAt).getTime() - new Date(a.item.createdAt).getTime()
+    );
+  }, [feedItems, items]);
 
   const load = useCallback(async () => {
     try {
-      const result = await fetchUserNotifications();
-      setItems(result);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const role =
+        user && (await getUserRole(user.id)) === "supplier" ? "supplier" : "carrier";
+      setViewerRole(role);
+
+      const [inbox, feed] = await Promise.all([
+        fetchUserNotifications(),
+        fetchFeedInboxNotifications(role),
+      ]);
+      setItems(inbox);
+      setFeedItems(feed);
       const unread = await fetchUnreadNotificationCount();
       await setBadgeCountAsync(unread);
     } finally {
@@ -119,20 +212,58 @@ export default function NotificationsScreen() {
   }, [load]);
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
+    let unsubscribeInbox: (() => void) | undefined;
+    let unsubscribeFeed: (() => void) | undefined;
 
     void (async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-      unsubscribe = subscribeToUserNotifications(user.id, () => {
+      unsubscribeInbox = subscribeToUserNotifications(user.id, () => {
+        void load();
+      });
+      unsubscribeFeed = subscribeToFeedNotifications(user.id, () => {
         void load();
       });
     })();
 
-    return () => unsubscribe?.();
+    return () => {
+      unsubscribeInbox?.();
+      unsubscribeFeed?.();
+    };
   }, [load]);
+
+  const handleOpenFeed = useCallback(
+    async (item: FeedInboxNotification) => {
+      if (!item.readAt) {
+        await markFeedNotificationRead(item.id);
+      }
+
+      if ((item.type === "feed_like" || item.type === "feed_reply") && item.postId) {
+        router.push({
+          pathname: "/feed-post/[id]",
+          params: { id: item.postId, viewerRole },
+        });
+        void load();
+        return;
+      }
+
+      if (item.actorProfileKey) {
+        openFeedProfile({
+          profileKey: item.actorProfileKey,
+          name: item.actorName,
+          role: item.actorRole || "carrier",
+          avatarSrc: item.actorAvatar,
+          authorId: item.actorId,
+          viewerRole,
+        });
+      }
+
+      void load();
+    },
+    [load, viewerRole]
+  );
 
   const handleOpen = useCallback(async (item: UserNotification) => {
     if (!item.readAt) {
@@ -166,7 +297,7 @@ export default function NotificationsScreen() {
   }, [load]);
 
   const handleMarkAllRead = useCallback(async () => {
-    await markAllNotificationsRead();
+    await Promise.all([markAllNotificationsRead(), markAllFeedNotificationsRead()]);
     await setBadgeCountAsync(0);
     void load();
   }, [load]);
@@ -190,9 +321,20 @@ export default function NotificationsScreen() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}
           showsVerticalScrollIndicator={false}
         >
-          {items.length ? (
-            items.map((item) =>
-              isCarrierVerifiedNotification(item.type) ? (
+          {mergedItems.length ? (
+            mergedItems.map((entry) => {
+              if (entry.source === "feed") {
+                return (
+                  <FeedNotificationCard
+                    key={`feed-${entry.item.id}`}
+                    item={entry.item}
+                    onPress={() => void handleOpenFeed(entry.item)}
+                  />
+                );
+              }
+
+              const item = entry.item;
+              return isCarrierVerifiedNotification(item.type) ? (
                 <VerifiedNotificationCard
                   key={item.id}
                   item={item}
@@ -200,8 +342,8 @@ export default function NotificationsScreen() {
                 />
               ) : (
                 <NotificationCard key={item.id} item={item} onPress={() => void handleOpen(item)} />
-              )
-            )
+              );
+            })
           ) : (
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
@@ -209,7 +351,7 @@ export default function NotificationsScreen() {
               </View>
               <Text style={styles.emptyTitle}>No notifications yet</Text>
               <Text style={styles.emptySub}>
-                We'll notify you here when your account is verified or when important updates arrive.
+                Follows, likes, verification updates, and load alerts will show up here.
               </Text>
             </View>
           )}
@@ -308,6 +450,17 @@ const styles = StyleSheet.create({
   },
   iconWrapUnread: {
     backgroundColor: colors.brandSoft,
+  },
+  feedAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.inputFill,
+  },
+  feedAvatarText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: colors.ink,
   },
   cardCopy: {
     flex: 1,

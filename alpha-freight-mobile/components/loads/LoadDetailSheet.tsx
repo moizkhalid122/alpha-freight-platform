@@ -16,6 +16,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import LoadRouteMap from "@/components/loads/LoadRouteMap";
 import PlaceBidModal from "@/components/loads/PlaceBidModal";
+import InstantBookSuccessModal from "@/components/loads/InstantBookSuccessModal";
+import PodUploadSheet from "@/components/loads/PodUploadSheet";
 import StatusConfirmModal from "@/components/loads/StatusConfirmModal";
 import { AvailableLoad } from "@/lib/available-loads";
 import {
@@ -23,6 +25,7 @@ import {
   submitCarrierBid,
   type CarrierBid,
 } from "@/lib/carrier-bids";
+import { bookLoadInstantly } from "@/lib/carrier-instant-book";
 import { getAssignedStatusButtons, getLoadStatusMeta } from "@/lib/carrier-my-loads";
 import { callSupport, openMapsNavigation } from "@/lib/load-actions";
 import { formatDistance, formatDuration } from "@/lib/mapbox";
@@ -43,6 +46,8 @@ export type LoadDetailSheetRef = {
 
 type LoadDetailSheetProps = {
   onStatusUpdate?: (loadId: string, nextStatus: string) => Promise<void>;
+  onDeliverWithPod?: (loadId: string, localUri: string, fileName: string) => Promise<void>;
+  onInstantBookComplete?: () => void | Promise<void>;
 };
 
 function DetailRow({
@@ -116,12 +121,20 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
-  ({ onStatusUpdate }, ref) => {
+  ({ onStatusUpdate, onDeliverWithPod, onInstantBookComplete }, ref) => {
     const sheetRef = useRef<BottomSheetModal>(null);
     const [load, setLoad] = useState<AvailableLoad | null>(null);
     const [options, setOptions] = useState<LoadDetailSheetOptions>({ variant: "available" });
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
     const [pendingConfirm, setPendingConfirm] = useState<PendingConfirmation | null>(null);
+    const [showPodUpload, setShowPodUpload] = useState(false);
+    const [showInstantConfirm, setShowInstantConfirm] = useState(false);
+    const [instantBooking, setInstantBooking] = useState(false);
+    const [instantBookSuccess, setInstantBookSuccess] = useState<{
+      loadCode: string;
+      routeLabel: string;
+      amountLabel: string;
+    } | null>(null);
     const [isSaved, setIsSaved] = useState(false);
     const [savingLoad, setSavingLoad] = useState(false);
     const [pendingBid, setPendingBid] = useState<CarrierBid | null>(null);
@@ -179,6 +192,9 @@ const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
       setOptions({ variant: "available" });
       setUpdatingStatus(null);
       setPendingConfirm(null);
+      setShowPodUpload(false);
+      setShowInstantConfirm(false);
+      setInstantBooking(false);
       setIsSaved(false);
       setPendingBid(null);
       setShowBidModal(false);
@@ -208,6 +224,38 @@ const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
       setBidSuccess(false);
       setShowBidModal(true);
     }, [pendingBid]);
+
+    const handleInstantBookPress = useCallback(() => {
+      if (!load || load.price <= 0) {
+        Alert.alert("Cannot book", "This load does not have a listed rate for instant booking.");
+        return;
+      }
+      setShowInstantConfirm(true);
+    }, [load]);
+
+    const handleInstantBookConfirm = useCallback(async () => {
+      if (!load || instantBooking) return;
+
+      setInstantBooking(true);
+      try {
+        const result = await bookLoadInstantly(load.id, load.price);
+        setShowInstantConfirm(false);
+        sheetRef.current?.dismiss();
+        setInstantBookSuccess({
+          loadCode: load.code,
+          routeLabel: `${load.origin} → ${load.destination}`,
+          amountLabel: result.amountLabel,
+        });
+        await onInstantBookComplete?.();
+      } catch (error) {
+        Alert.alert(
+          "Booking failed",
+          error instanceof Error ? error.message : "Could not book this load right now."
+        );
+      } finally {
+        setInstantBooking(false);
+      }
+    }, [instantBooking, load, onInstantBookComplete]);
 
     const handleBidSubmit = useCallback(
       async (amountText: string) => {
@@ -265,7 +313,15 @@ const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
 
     const handleStatusPress = useCallback(
       (nextStatus: string) => {
-        if (!load || !options.loadId || !onStatusUpdate) return;
+        if (!load || !options.loadId) return;
+
+        if (nextStatus === "delivered") {
+          if (!onDeliverWithPod) return;
+          setShowPodUpload(true);
+          return;
+        }
+
+        if (!onStatusUpdate) return;
 
         const confirmation = getStatusConfirmation(nextStatus, load);
         if (!confirmation) {
@@ -275,7 +331,21 @@ const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
 
         setPendingConfirm({ nextStatus, ...confirmation });
       },
-      [executeStatusUpdate, load, onStatusUpdate, options.loadId]
+      [executeStatusUpdate, load, onDeliverWithPod, onStatusUpdate, options.loadId]
+    );
+
+    const handlePodDeliver = useCallback(
+      async (localUri: string, fileName: string) => {
+        if (!options.loadId || !onDeliverWithPod) return;
+        setUpdatingStatus("delivered");
+        try {
+          await onDeliverWithPod(options.loadId, localUri, fileName);
+          setOptions((current) => ({ ...current, status: "delivered" }));
+        } finally {
+          setUpdatingStatus(null);
+        }
+      },
+      [onDeliverWithPod, options.loadId]
     );
 
     const handleConfirmDismiss = useCallback(() => {
@@ -428,21 +498,45 @@ const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
                   </View>
                 ) : null}
 
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.marketplaceBtn,
-                    styles.primaryBtn,
-                    pendingBid && styles.btnDisabled,
-                    pressed && !pendingBid && styles.pressed,
-                  ]}
-                  disabled={!!pendingBid}
-                  onPress={handlePlaceBidPress}
-                >
-                  <Ionicons name="hammer-outline" size={18} color={colors.ink} />
-                  <Text style={styles.marketplaceBtnPrimaryText}>
-                    {pendingBid ? "Bid submitted" : "Place bid"}
-                  </Text>
-                </Pressable>
+                <View style={styles.marketplaceBtnRow}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.marketplaceBtn,
+                      styles.secondaryBtn,
+                      styles.marketplaceHalfBtn,
+                      pendingBid && styles.btnDisabled,
+                      pressed && !pendingBid && styles.pressed,
+                    ]}
+                    disabled={!!pendingBid || instantBooking}
+                    onPress={handlePlaceBidPress}
+                  >
+                    <Ionicons name="hammer-outline" size={18} color={colors.ink} />
+                    <Text style={styles.marketplaceBtnSecondaryText}>
+                      {pendingBid ? "Bid submitted" : "Place bid"}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.marketplaceBtn,
+                      styles.instantBtn,
+                      styles.marketplaceHalfBtn,
+                      instantBooking && styles.btnDisabled,
+                      pressed && !instantBooking && styles.pressed,
+                    ]}
+                    disabled={instantBooking || load.price <= 0}
+                    onPress={handleInstantBookPress}
+                  >
+                    {instantBooking ? (
+                      <ActivityIndicator color={colors.white} />
+                    ) : (
+                      <>
+                        <Ionicons name="flash-outline" size={18} color={colors.white} />
+                        <Text style={styles.instantBtnText}>Book instantly</Text>
+                      </>
+                    )}
+                  </Pressable>
+                </View>
 
                 <Pressable
                   style={({ pressed }) => [
@@ -534,6 +628,49 @@ const LoadDetailSheet = forwardRef<LoadDetailSheetRef, LoadDetailSheetProps>(
           loading={updatingStatus === pendingConfirm.nextStatus}
           onCancel={handleConfirmDismiss}
           onConfirm={() => void executeStatusUpdate(pendingConfirm.nextStatus)}
+        />
+      ) : null}
+
+      {load && showPodUpload ? (
+        <PodUploadSheet
+          visible
+          loadCode={load.code}
+          routeLabel={`${load.origin} → ${load.destination}`}
+          loading={updatingStatus === "delivered"}
+          onCancel={() => {
+            if (updatingStatus) return;
+            setShowPodUpload(false);
+          }}
+          onComplete={() => setShowPodUpload(false)}
+          onDeliver={handlePodDeliver}
+        />
+      ) : null}
+
+      {load && showInstantConfirm ? (
+        <StatusConfirmModal
+          visible
+          title="Book instantly"
+          message={`Confirm instant booking at the listed rate of ${load.priceLabel}. This load will move to My Loads immediately.`}
+          confirmLabel="Book now"
+          loadCode={load.code}
+          routeLabel={`${load.origin} → ${load.destination}`}
+          icon="flash-outline"
+          loading={instantBooking}
+          onCancel={() => {
+            if (instantBooking) return;
+            setShowInstantConfirm(false);
+          }}
+          onConfirm={() => void handleInstantBookConfirm()}
+        />
+      ) : null}
+
+      {instantBookSuccess ? (
+        <InstantBookSuccessModal
+          visible
+          loadCode={instantBookSuccess.loadCode}
+          routeLabel={instantBookSuccess.routeLabel}
+          amountLabel={instantBookSuccess.amountLabel}
+          onClose={() => setInstantBookSuccess(null)}
         />
       ) : null}
       </>
@@ -756,6 +893,23 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: radius.pill,
     paddingVertical: 16,
+  },
+  marketplaceBtnRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  marketplaceHalfBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+  },
+  instantBtn: {
+    backgroundColor: colors.ink,
+  },
+  instantBtnText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: colors.white,
   },
   marketplaceBtnPrimaryText: {
     fontSize: 15,

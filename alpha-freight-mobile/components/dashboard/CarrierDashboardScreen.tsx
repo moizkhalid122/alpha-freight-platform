@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import UkFlag from "@/components/ui/UkFlag";
 import WaveHand from "@/components/ui/WaveHand";
@@ -23,8 +23,10 @@ import {
 } from "@/lib/carrier-dashboard";
 import {
   getCachedCarrierDashboard,
+  isCarrierDashboardCacheStale,
   prefetchCarrierDashboard,
 } from "@/lib/carrier-dashboard-cache";
+import { useDeferredFocusRefresh } from "@/lib/use-deferred-focus-refresh";
 import { callSupport, openMapsNavigation } from "@/lib/load-actions";
 import { colors, radius, spacing } from "@/lib/theme";
 import { useUnreadNotificationCount } from "@/lib/user-notifications";
@@ -72,7 +74,7 @@ type SwipeStatCard = {
   meta: string;
   value: string;
   icon: keyof typeof Ionicons.glyphMap;
-  variant?: "primary" | "light";
+  variant: "primary" | "light";
 };
 
 function StatSwipeCard({
@@ -395,13 +397,23 @@ export default function CarrierDashboardScreen() {
 
   const statCards = useMemo<SwipeStatCard[]>(() => {
     if (!data) return [];
+    const masked = hideBalance ? "••••••" : null;
     return [
       {
         id: "earnings",
         label: "Total earnings",
-        meta: "Completed UK deliveries",
-        value: hideBalance ? "••••••" : formatMoney(data.earnings),
-        icon: "trending-up",
+        meta: "POD verified · withdrawable",
+        value: masked ?? formatMoney(data.earnings),
+        icon: "trending-up-outline",
+        variant: "primary",
+      },
+      {
+        id: "incoming",
+        label: "Incoming",
+        meta: "POD submitted · awaiting review",
+        value: masked ?? formatMoney(data.incomingEarnings ?? 0),
+        icon: "hourglass-outline",
+        variant: "light",
       },
       {
         id: "active",
@@ -409,6 +421,7 @@ export default function CarrierDashboardScreen() {
         meta: "Currently in progress",
         value: String(data.activeLoads),
         icon: "bus-outline",
+        variant: "light",
       },
       {
         id: "completed",
@@ -416,6 +429,7 @@ export default function CarrierDashboardScreen() {
         meta: "All time deliveries",
         value: String(data.completedLoads),
         icon: "checkmark-done-outline",
+        variant: "light",
       },
       {
         id: "open",
@@ -423,6 +437,7 @@ export default function CarrierDashboardScreen() {
         meta: "Available to book now",
         value: String(data.availableLoads),
         icon: "globe-outline",
+        variant: "light",
       },
     ];
   }, [data, hideBalance]);
@@ -441,15 +456,15 @@ export default function CarrierDashboardScreen() {
   }, []);
 
   useEffect(() => {
-    void loadDashboard();
+    if (!getCachedCarrierDashboard()) {
+      void loadDashboard(false);
+    }
   }, [loadDashboard]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadDashboard(true);
-      void refreshUnreadNotifications();
-    }, [loadDashboard, refreshUnreadNotifications])
-  );
+  useDeferredFocusRefresh(() => {
+    void loadDashboard(isCarrierDashboardCacheStale());
+    void refreshUnreadNotifications();
+  }, [loadDashboard, refreshUnreadNotifications]);
 
   const firstName = data?.fullName.split(" ")[0] || "Carrier";
   const showSkeleton = !data;
@@ -574,7 +589,7 @@ export default function CarrierDashboardScreen() {
                 meta={card.meta}
                 value={card.value}
                 icon={card.icon}
-                variant={card.id === "earnings" ? "primary" : "light"}
+                variant={card.variant}
               />
             ))}
           </ScrollView>

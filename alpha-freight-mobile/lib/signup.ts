@@ -50,6 +50,8 @@ export async function completeSignup({
       role,
       referred_by_code: code,
       created_at: new Date().toISOString(),
+      verification_status: "pending",
+      is_approved: false,
     },
   ]);
 

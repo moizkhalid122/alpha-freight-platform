@@ -18,19 +18,29 @@ import SetupShell, { SetupOutlineButton, SetupPrimaryButton } from "@/components
 import { SetupFormField, SetupStaticField, SetupStepHeader } from "@/components/account-setup/SetupFormField";
 import UkFlag from "@/components/ui/UkFlag";
 import { saveAccountSetup, isAccountSetupComplete } from "@/lib/account-setup";
+import { useEndAuthTransitionOnFocus } from "@/lib/use-end-auth-transition-on-focus";
 import { uploadIdentityDocument } from "@/lib/account-setup-upload";
 import {
-  ACCOUNT_USE_OPTIONS,
+  getAccountSetupQuestion2Copy,
+  getAccountTypeCopy,
+  getAccountUseOptions,
+  getDocumentsStepCopy,
+  getIdentityDocuments,
+  getRequirementsCopy,
   ANNUAL_REVENUE_OPTIONS,
-  IDENTITY_DOCUMENTS,
   UK_ADDRESS_SUGGESTIONS,
   type AccountSetupDraft,
   type AccountType,
+  type AppSetupRole,
   type IdentityDocument,
 } from "@/lib/account-setup-types";
 import { clearCachedCarrierProfile } from "@/lib/carrier-profile-cache";
 import { setCachedCarrierDashboard } from "@/lib/carrier-dashboard-cache";
 import { routeAfterAccountSetup } from "@/lib/pin-routing";
+import { clearCachedSupplierProfile } from "@/lib/supplier-profile-cache";
+import { setCachedSupplierDashboard } from "@/lib/supplier-dashboard-cache";
+import { supabase } from "@/lib/supabase";
+import { getUserRole, normalizeAppRole } from "@/lib/user-role";
 import { colors, radius, spacing } from "@/lib/theme";
 
 type SetupStep =
@@ -149,7 +159,10 @@ function SelectRow({
 }
 
 export default function AccountSetupScreen() {
+  useEndAuthTransitionOnFocus();
   const [step, setStep] = useState<SetupStep>("requirements");
+  const [userRole, setUserRole] = useState<AppSetupRole>("carrier");
+  const [roleReady, setRoleReady] = useState(false);
   const [draft, setDraft] = useState<AccountSetupDraft>({
     accountType: null,
     countryCode: "+44",
@@ -176,11 +189,42 @@ export default function AccountSetupScreen() {
 
   useEffect(() => {
     void (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const metaRole = user.user_metadata?.role;
+        const resolvedRole = metaRole ? normalizeAppRole(metaRole) : await getUserRole(user.id);
+        setUserRole(resolvedRole);
+      }
+      setRoleReady(true);
       if (await isAccountSetupComplete()) {
         await routeAfterAccountSetup();
       }
     })();
   }, []);
+
+  const identityDocuments = useMemo(() => getIdentityDocuments(userRole), [userRole]);
+  const accountUseOptions = useMemo(() => getAccountUseOptions(userRole), [userRole]);
+  const accountTypeCopy = useMemo(() => getAccountTypeCopy(userRole), [userRole]);
+  const question2Copy = useMemo(() => getAccountSetupQuestion2Copy(userRole), [userRole]);
+  const requirementsCopy = useMemo(() => getRequirementsCopy(userRole), [userRole]);
+  const documentsStepCopy = useMemo(() => getDocumentsStepCopy(userRole), [userRole]);
+
+  useEffect(() => {
+    setDraft((prev) => {
+      if (!prev.identityDocument) return prev;
+      const allowed = getIdentityDocuments(userRole).some((doc) => doc.id === prev.identityDocument);
+      if (allowed) return prev;
+      return {
+        ...prev,
+        identityDocument: null,
+        identityDocumentLocalUri: null,
+        identityDocumentUrl: null,
+        identityDocumentFileName: null,
+      };
+    });
+  }, [userRole]);
 
   const goBack = useCallback(() => {
     if (step === "address-manual") {
@@ -198,8 +242,8 @@ export default function AccountSetupScreen() {
 
   const selectedDocumentLabel = useMemo(() => {
     if (!draft.identityDocument) return "identity document";
-    return IDENTITY_DOCUMENTS.find((doc) => doc.id === draft.identityDocument)?.label ?? "identity document";
-  }, [draft.identityDocument]);
+    return identityDocuments.find((doc) => doc.id === draft.identityDocument)?.label ?? "identity document";
+  }, [draft.identityDocument, identityDocuments]);
 
   const pickIdentityDocument = useCallback(async (fromCamera: boolean) => {
     setError(null);
@@ -298,8 +342,13 @@ export default function AccountSetupScreen() {
       setSaving(true);
       try {
         await saveAccountSetup(draft);
-        clearCachedCarrierProfile();
-        setCachedCarrierDashboard(null);
+        if (userRole === "supplier") {
+          clearCachedSupplierProfile();
+          setCachedSupplierDashboard(null);
+        } else {
+          clearCachedCarrierProfile();
+          setCachedCarrierDashboard(null);
+        }
         setProcessingDone(true);
         setTimeout(async () => {
           await routeAfterAccountSetup();
@@ -313,7 +362,7 @@ export default function AccountSetupScreen() {
     }, 2200);
 
     return () => clearTimeout(timer);
-  }, [step, processingDone, draft]);
+  }, [step, processingDone, draft, userRole]);
 
   const canConfirmPhone = draft.phone.replace(/\D/g, "").length >= 10;
   const canContinueDocuments = Boolean(draft.identityDocument);
@@ -325,6 +374,16 @@ export default function AccountSetupScreen() {
     draft.houseNumber.trim().length > 0 &&
     draft.city.trim().length > 1 &&
     draft.postcode.trim().length > 3;
+
+  if (!roleReady) {
+    return (
+      <SetupShell showBack={false}>
+        <View style={styles.processingWrap}>
+          <ActivityIndicator size="large" color={colors.ink} />
+        </View>
+      </SetupShell>
+    );
+  }
 
   if (step === "requirements") {
     return (
@@ -347,16 +406,8 @@ export default function AccountSetupScreen() {
           </Text>
 
           <RequirementRow icon={REQUIREMENTS_ID_ICON} title="A valid form of ID">
-            <Text style={styles.requirementBody}>
-              We accept{" "}
-              <Text style={styles.requirementHighlight}>
-                full UK driving licence, passport or residence permit card
-              </Text>
-              . You'll need to present your original documents.
-            </Text>
-            <Text style={styles.requirementNote}>
-              Non-British citizens may need to provide a valid right to reside document.
-            </Text>
+            <Text style={styles.requirementBody}>{requirementsCopy.idBody}</Text>
+            <Text style={styles.requirementNote}>{requirementsCopy.idNote}</Text>
             <Pressable style={({ pressed }) => [styles.requirementLinkRow, pressed && styles.pressed]}>
               <Text style={styles.requirementLink}>View right to reside documents</Text>
               <Ionicons name="chevron-forward" size={12} color={colors.ink} />
@@ -425,20 +476,20 @@ export default function AccountSetupScreen() {
       >
         <SetupStepHeader
           title="Choose your account type"
-          subtitle="Select how you'll operate on Alpha Freight."
+          subtitle={accountTypeCopy.subtitle}
         />
 
         <View style={styles.typeList}>
           <AccountTypeCard
             label="Business"
-            sub="Company, fleet operator or haulage business"
+            sub={accountTypeCopy.businessSub}
             icon="business-outline"
             selected={draft.accountType === "company"}
             onPress={() => setDraft((prev) => ({ ...prev, accountType: "company" }))}
           />
           <AccountTypeCard
             label="Personal"
-            sub="Owner-driver or sole trader"
+            sub={accountTypeCopy.personalSub}
             icon="person-outline"
             selected={draft.accountType === "individual"}
             onPress={() => setDraft((prev) => ({ ...prev, accountType: "individual" }))}
@@ -594,8 +645,8 @@ export default function AccountSetupScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listScroll}>
           <SetupStepHeader
-            title="Get your documents ready"
-            subtitle="Choose your place of issue and prepare your documents."
+            title={documentsStepCopy.title}
+            subtitle={documentsStepCopy.subtitle}
           />
 
           <SetupStaticField label="Place of issue">
@@ -605,12 +656,10 @@ export default function AccountSetupScreen() {
             </View>
           </SetupStaticField>
 
-          <Text style={styles.sectionHeading}>Your proof of identity</Text>
-          <Text style={styles.sectionSub}>
-            Based on your place of issue please choose one of the following documents.
-          </Text>
+          <Text style={styles.sectionHeading}>{documentsStepCopy.sectionHeading}</Text>
+          <Text style={styles.sectionSub}>{documentsStepCopy.sectionSub}</Text>
 
-          {IDENTITY_DOCUMENTS.map((doc) => (
+          {identityDocuments.map((doc) => (
             <Pressable
               key={doc.id}
               style={({ pressed }) => [styles.docRow, pressed && styles.pressedLight]}
@@ -726,7 +775,7 @@ export default function AccountSetupScreen() {
         <SetupStepHeader title="What will your account be used for?" subtitle="You may choose more than one." />
 
         <View style={styles.selectList}>
-          {ACCOUNT_USE_OPTIONS.map((option) => {
+          {accountUseOptions.map((option) => {
             const selected = draft.accountUses.includes(option);
             return (
               <SelectRow
@@ -765,8 +814,8 @@ export default function AccountSetupScreen() {
         }
       >
         <SetupStepHeader
-          title="What's your estimated annual freight revenue?"
-          subtitle="This helps us tailor your carrier experience."
+          title={question2Copy.title}
+          subtitle={question2Copy.subtitle}
         />
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}

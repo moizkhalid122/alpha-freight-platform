@@ -19,7 +19,9 @@ if not exist ".env" (
   echo.
 )
 
-echo Agar loading stuck ho to terminal mein "s" dabao (tunnel mode)
+echo DEV APK ke liye pehle yeh server chalna zaroori hai.
+echo Phone aur PC same WiFi par hon.
+echo Manual URL: http://192.168.1.7:8081
 echo.
-call npx expo start --clear --tunnel
+call npx expo start --dev-client --lan --clear --port 8081
 pause

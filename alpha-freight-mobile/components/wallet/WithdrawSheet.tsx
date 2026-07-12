@@ -37,7 +37,7 @@ export type WithdrawSheetRef = {
 type WithdrawStep = "method" | "amount" | "success";
 
 type WithdrawSheetProps = {
-  onComplete?: (payload: { amount: number; method: PayoutMethod }) => void;
+  onComplete?: (payload: { amount: number; method: PayoutMethod; payoutId?: string }) => void;
 };
 
 function MethodOption({
@@ -81,6 +81,7 @@ const WithdrawSheet = forwardRef<WithdrawSheetRef, WithdrawSheetProps>(({ onComp
   const [amountText, setAmountText] = useState("");
   const [availableBalance, setAvailableBalance] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [slideKey, setSlideKey] = useState(0);
 
   const snapPoints = useMemo(() => ["58%", "78%"], []);
@@ -105,14 +106,15 @@ const WithdrawSheet = forwardRef<WithdrawSheetRef, WithdrawSheetProps>(({ onComp
     setMethod(null);
     setAmountText("");
     setSubmitting(false);
+    setSubmitError(null);
     setSlideKey((key) => key + 1);
   }, []);
 
   useImperativeHandle(ref, () => ({
     open: (balance) => {
+      sheetRef.current?.present();
       resetState();
       setAvailableBalance(balance);
-      requestAnimationFrame(() => sheetRef.current?.present());
     },
     close: () => sheetRef.current?.dismiss(),
   }));
@@ -145,12 +147,17 @@ const WithdrawSheet = forwardRef<WithdrawSheetRef, WithdrawSheetProps>(({ onComp
     if (!method || !canConfirm || submitting) return;
 
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const result = await requestWalletWithdrawal(parsedAmount, method);
-      if (!result.success) return;
+      if (!result.success) {
+        setSubmitError(result.error || "Withdrawal could not be submitted.");
+        setSlideKey((key) => key + 1);
+        return;
+      }
 
       setStep("success");
-      onComplete?.({ amount: parsedAmount, method });
+      onComplete?.({ amount: parsedAmount, method, payoutId: result.payoutId });
 
       setTimeout(() => {
         sheetRef.current?.dismiss();
@@ -247,6 +254,7 @@ const WithdrawSheet = forwardRef<WithdrawSheetRef, WithdrawSheetProps>(({ onComp
                 />
               </View>
               {amountError ? <Text style={styles.errorText}>{amountError}</Text> : null}
+              {submitError ? <Text style={styles.errorText}>{submitError}</Text> : null}
               <Pressable
                 style={styles.maxBtn}
                 onPress={() => setAmountText(availableBalance.toFixed(2))}

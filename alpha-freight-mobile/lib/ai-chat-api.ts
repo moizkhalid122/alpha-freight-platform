@@ -1,7 +1,8 @@
 import { buildAiAssistantReply, type AiAssistantReply } from "@/lib/ai-assistant-responses";
 import type { AiCarrierContext } from "@/lib/ai-carrier-context";
+import type { AiSupplierContext } from "@/lib/ai-supplier-context";
+import type { AiRouteContext } from "@/lib/ai-route-context";
 import { getAiApiBaseUrl } from "@/lib/ai-api-config";
-import { supabase } from "@/lib/supabase";
 
 export type ChatHistoryItem = {
   role: "user" | "assistant";
@@ -17,7 +18,29 @@ type StructuredAssistantReply = {
   nextStep?: string;
   rawText?: string;
   knowledgeSource?: string;
+  quickActions?: Array<{ label?: string; href?: string; action?: string }>;
 };
+
+function mapQuickActions(
+  quickActions?: StructuredAssistantReply["quickActions"]
+): AiAssistantReply["actions"] {
+  if (!quickActions?.length) return undefined;
+
+  return quickActions.slice(0, 3).map((action, index) => {
+    const href = action.href || "";
+    let route: string | undefined;
+
+    if (href.includes("post-load")) route = "/post-load";
+    else if (href.includes("my-bids") || href.includes("bids")) route = "/(supplier-main)/bids";
+    else if (href.includes("my-posts") || href.includes("posts")) route = "/(supplier-main)/posts";
+
+    return {
+      id: `qa-${index}`,
+      label: action.label || "Open",
+      route,
+    };
+  });
+}
 
 type ChatApiResponse = {
   success?: boolean;
@@ -30,6 +53,8 @@ export type SendAiChatOptions = {
   assistantType?: "carrier" | "supplier" | "general";
   history?: ChatHistoryItem[];
   carrierContext?: AiCarrierContext | null;
+  supplierContext?: AiSupplierContext | null;
+  routeContext?: AiRouteContext | null;
   signal?: AbortSignal;
 };
 
@@ -39,42 +64,6 @@ export type AiChatStreamCallbacks = {
 };
 
 const REQUEST_TIMEOUT_MS = 55000;
-
-async function buildAiRequestHeaders(accept: string) {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: accept,
-  };
-
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
-    }
-  } catch {
-    // Session unavailable — backend may reject if auth is required.
-  }
-
-  return headers;
-}
-
-function authFailureReply(message: string): AiAssistantReply {
-  return {
-    title: "Login required",
-    sectionLabel: message,
-    footer: "Please sign in again, then reopen AI assistant.",
-  };
-}
-
-function offlineReply(message: string, userPrompt: string): AiAssistantReply {
-  return {
-    ...buildAiAssistantReply(userPrompt),
-    footer: message,
-  };
-}
 
 function withTimeoutSignal(parent?: AbortSignal) {
   const controller = new AbortController();
@@ -138,6 +127,15 @@ export function mapStructuredReply(
     };
   }
 
+  if (structured.knowledgeSource === "mapbox_routing") {
+    return {
+      title: structured.title || "Route distance",
+      sectionLabel: sectionText || undefined,
+      bullets: dedupedKeyPoints.length ? dedupedKeyPoints : keyPoints,
+      footer: structured.recommendation || structured.nextStep || undefined,
+    };
+  }
+
   if (structured.displayStyle === "plain") {
     const bulletsDuplicateSection =
       Boolean(sectionText) &&
@@ -155,6 +153,7 @@ export function mapStructuredReply(
           ? bulletsFromStructured
           : plainLines.slice(1),
       footer: structured.nextStep || undefined,
+      actions: mapQuickActions(structured.quickActions),
     };
   }
 
@@ -165,6 +164,7 @@ export function mapStructuredReply(
     footer:
       structured.nextStep ||
       (structured.knowledgeSource === "web_search" ? "Updated from live web search" : undefined),
+    actions: mapQuickActions(structured.quickActions),
   };
 }
 
@@ -233,6 +233,8 @@ export async function sendAiChatMessageStream(
     assistantType = "carrier",
     history = [],
     carrierContext = null,
+    supplierContext = null,
+    routeContext = null,
     signal,
     onPhase,
     onDelta,
@@ -240,8 +242,6 @@ export async function sendAiChatMessageStream(
   const timeout = withTimeoutSignal(signal);
 
   try {
-    const headers = await buildAiRequestHeaders("application/x-ndjson");
-
     return await new Promise<AiAssistantReply>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let lastIndex = 0;
@@ -282,9 +282,8 @@ export async function sendAiChatMessageStream(
       };
 
       xhr.open("POST", `${getAiApiBaseUrl()}/api/chat`);
-      Object.entries(headers).forEach(([key, value]) => {
-        xhr.setRequestHeader(key, value);
-      });
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("Accept", "application/x-ndjson");
 
       xhr.onprogress = () => {
         const chunk = xhr.responseText.slice(lastIndex);
@@ -297,18 +296,6 @@ export async function sendAiChatMessageStream(
 
       xhr.onload = () => {
         if (resolved) return;
-
-        if (xhr.status === 401) {
-          finish(authFailureReply("Your session expired. Please log in again."));
-          return;
-        }
-
-        if (xhr.status === 429) {
-          finish(
-            authFailureReply("Too many AI requests. Please wait a minute and try again.")
-          );
-          return;
-        }
 
         if (xhr.status >= 200 && xhr.status < 300) {
           ndjsonBuffer = consumeNdjsonBuffer(`${ndjsonBuffer}\n`, handleEvent);
@@ -347,16 +334,22 @@ export async function sendAiChatMessageStream(
           assistantType,
           history,
           carrierContext,
+          supplierContext,
+          routeContext,
           stream: true,
         })
       );
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      return offlineReply(
-        "AI server is taking longer than usual. Showing a quick offline guide — try again in a moment.",
-        message
-      );
+      return {
+        ...buildAiAssistantReply(
+          message,
+          assistantType === "supplier" ? "supplier" : "carrier"
+        ),
+        footer:
+          "AI server is taking longer than usual. Showing a quick offline guide — try again in a moment.",
+      };
     }
 
     return sendAiChatMessage(message, options);
@@ -364,32 +357,35 @@ export async function sendAiChatMessageStream(
 }
 
 export async function sendAiChatMessage(message: string, options: SendAiChatOptions = {}) {
-  const { assistantType = "carrier", history = [], carrierContext = null, signal } = options;
+  const {
+    assistantType = "carrier",
+    history = [],
+    carrierContext = null,
+    supplierContext = null,
+    routeContext = null,
+    signal,
+  } = options;
   const timeout = withTimeoutSignal(signal);
 
   try {
-    const headers = await buildAiRequestHeaders("application/json");
     const response = await fetch(`${getAiApiBaseUrl()}/api/chat`, {
       method: "POST",
-      headers,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       signal: timeout.signal,
       body: JSON.stringify({
         message,
         assistantType,
         history,
         carrierContext,
+        supplierContext,
+        routeContext,
       }),
     });
 
     const data = (await response.json()) as ChatApiResponse;
-
-    if (response.status === 401) {
-      return authFailureReply(data.message || "Login required to use AI assistant.");
-    }
-
-    if (response.status === 429) {
-      return authFailureReply(data.message || "Too many AI requests. Please wait and try again.");
-    }
 
     if (!response.ok || data.success === false) {
       throw new Error(data.error || data.message || "AI request failed");
@@ -400,16 +396,24 @@ export async function sendAiChatMessage(message: string, options: SendAiChatOpti
     const isTimeout = error instanceof Error && error.name === "AbortError";
 
     if (isTimeout) {
-      return offlineReply(
-        "AI server is taking longer than usual. Showing a quick offline guide — try again in a moment.",
-        message
-      );
+      return {
+        ...buildAiAssistantReply(
+          message,
+          assistantType === "supplier" ? "supplier" : "carrier"
+        ),
+        footer:
+          "AI server is taking longer than usual. Showing a quick offline guide — try again in a moment.",
+      };
     }
 
-    return offlineReply(
-      "Live AI is offline right now. Check your connection or try again shortly.",
-      message
-    );
+    return {
+      ...buildAiAssistantReply(
+        message,
+        assistantType === "supplier" ? "supplier" : "carrier"
+      ),
+      footer:
+        "Live AI is offline right now. Start the backend on port 3003, then reload the app.",
+    };
   } finally {
     timeout.cleanup();
   }

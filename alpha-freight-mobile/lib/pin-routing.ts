@@ -1,7 +1,13 @@
 import { isAccountSetupComplete } from "@/lib/account-setup";
-import { hasPinForUser, isPinSetupPending, markPinSetupPending } from "@/lib/pin-lock";
+import {
+  clearPinSetupPending,
+  hasPinConfiguredForUserWithRetry,
+  isPinSetupPending,
+  markPinSetupPending,
+} from "@/lib/pin-lock";
 import { markPayoutFreshEligible } from "@/lib/payout-reminder-session";
 import { supabase } from "@/lib/supabase";
+import { getUserRole, homeRouteForRole } from "@/lib/user-role";
 import { router } from "expo-router";
 
 async function routeLoggedInUser(userId: string) {
@@ -10,13 +16,16 @@ async function routeLoggedInUser(userId: string) {
     return;
   }
 
-  if (await isPinSetupPending()) {
-    router.replace("/pin-setup");
+  const pinConfigured = await hasPinConfiguredForUserWithRetry(userId);
+
+  if (pinConfigured) {
+    await clearPinSetupPending();
+    router.replace("/pin-unlock");
     return;
   }
 
-  if (await hasPinForUser(userId)) {
-    router.replace("/pin-unlock");
+  if (await isPinSetupPending()) {
+    router.replace("/pin-setup");
     return;
   }
 
@@ -51,16 +60,26 @@ export async function routeAfterSignup() {
 }
 
 async function routeAfterPinComplete(fromFreshPinSetup = false) {
-  if (fromFreshPinSetup) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      await markPayoutFreshEligible(user.id);
-    }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (fromFreshPinSetup && user) {
+    await markPayoutFreshEligible(user.id);
   }
 
-  router.replace("/(main)/home");
+  if (!user) {
+    router.replace("/welcome");
+    return;
+  }
+
+  const role = await getUserRole(user.id);
+  router.replace(homeRouteForRole(role));
+}
+
+export async function routeToRoleHome(userId: string) {
+  const role = await getUserRole(userId);
+  router.replace(homeRouteForRole(role));
 }
 
 export async function routeAfterPinSetup() {

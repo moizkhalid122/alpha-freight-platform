@@ -56,5 +56,6 @@ export async function uploadIdentityDocument(
 
 export function identityDocumentExtrasKey(documentType: IdentityDocument) {
   if (documentType === "driving_licence") return "operatorLicenseUrl";
+  if (documentType === "company_registration") return "companyRegistrationUrl";
   return "identityDocumentUrl";
 }

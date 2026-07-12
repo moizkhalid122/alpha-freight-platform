@@ -10,9 +10,10 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeOut } from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GoogleAuthButton from "@/components/auth/GoogleAuthButton";
+import { useGoogleAuthFlow } from "@/lib/use-google-auth-flow";
 import { markWelcomeCompleted } from "@/lib/onboarding";
 import { routeAfterSignup } from "@/lib/pin-routing";
 import { completeSignup } from "@/lib/signup";
@@ -42,6 +43,7 @@ export default function PremiumSignupScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { finishGoogleAuth } = useGoogleAuthFlow();
 
   const canContinueEmail = email.trim().length > 3 && email.includes("@");
   const canContinueName = fullName.trim().length >= 2;
@@ -104,8 +106,14 @@ export default function PremiumSignupScreen() {
     }
   };
 
-  const handleAppleSignUp = () => {
-    setError("Apple sign up will be available in the next update.");
+  const handleGoogleSignUp = async () => {
+    setError(null);
+    setSuccess(null);
+    await finishGoogleAuth({
+      role,
+      mode: "signup",
+      onError: setError,
+    });
   };
 
   return (
@@ -182,13 +190,11 @@ export default function PremiumSignupScreen() {
 
                   <OrDivider />
 
-                  <Pressable
-                    style={({ pressed }) => [styles.buttonApple, pressed && styles.buttonApplePressed]}
-                    onPress={handleAppleSignUp}
-                  >
-                    <Ionicons name="logo-apple" size={20} color={colors.black} />
-                    <Text style={styles.buttonAppleText}>Sign up with Apple</Text>
-                  </Pressable>
+                  <GoogleAuthButton
+                    label="Continue with Google"
+                    disabled={loading}
+                    onPress={() => void handleGoogleSignUp()}
+                  />
                 </Animated.View>
               ) : null}
 
@@ -467,28 +473,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.mutedLight,
     fontWeight: "500",
-  },
-  buttonApple: {
-    width: "100%",
-    height: 54,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  buttonApplePressed: {
-    backgroundColor: colors.inputFill,
-    transform: [{ scale: 0.985 }],
-  },
-  buttonAppleText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.black,
-    letterSpacing: 0.1,
   },
   loginLink: {
     marginTop: spacing.md,

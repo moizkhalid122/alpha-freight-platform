@@ -26,7 +26,7 @@ import {
 } from "@/lib/notification-permission-session";
 import { colors, radius, spacing } from "@/lib/theme";
 
-const PROMPT_DELAY_MS = 1500;
+const PROMPT_DELAY_MS = 8000;
 
 type NotificationPermissionGateProps = {
   enabled: boolean;

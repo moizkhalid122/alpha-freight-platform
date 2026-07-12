@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { isMissingPodColumnError, isPodBlocked, isPodVerified } from "@/lib/load-pod-verification";
 
 const ACTIVE_STATUSES = ["active", "booked", "assigned", "pending", "in-transit", "loading"];
 const COMPLETED_STATUSES = ["completed", "delivered"];
@@ -19,6 +20,7 @@ export type CarrierDashboardData = {
   initials: string;
   verificationStatus: "verified" | "pending" | "review";
   earnings: number;
+  incomingEarnings: number;
   activeLoads: number;
   completedLoads: number;
   availableLoads: number;
@@ -125,17 +127,50 @@ export async function fetchCarrierDashboard(): Promise<CarrierDashboardData | nu
   const displayName = profile?.full_name || profile?.company_name || "Carrier";
   const verificationStatus = resolveVerificationStatus(profile?.role, extras, profile ?? undefined);
 
-  const { data: assignedLoads } = await supabase
+  const loadSelectWithPod =
+    "id, price, status, created_at, origin, destination, pod_verification_status";
+  const loadSelectFallback = "id, price, status, created_at, origin, destination";
+
+  let loads: Record<string, unknown>[] = [];
+  const primary = await supabase
     .from("loads")
-    .select("id, price, status, created_at, origin, destination")
+    .select(loadSelectWithPod)
     .eq("carrier_id", user.id)
     .order("created_at", { ascending: false })
     .limit(20);
 
-  const loads = assignedLoads || [];
-  const completed = loads.filter((load) => COMPLETED_STATUSES.includes(load.status));
-  const active = loads.filter((load) => ACTIVE_STATUSES.includes(load.status));
-  const earnings = completed.reduce((sum, load) => sum + (Number(load.price) || 0), 0);
+  if (primary.error && isMissingPodColumnError(primary.error.message)) {
+    const fallback = await supabase
+      .from("loads")
+      .select(loadSelectFallback)
+      .eq("carrier_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    loads = (fallback.data ?? []) as Record<string, unknown>[];
+  } else {
+    loads = (primary.data ?? []) as Record<string, unknown>[];
+  }
+
+  const completed = loads.filter((load) =>
+    COMPLETED_STATUSES.includes(String(load.status || "").toLowerCase())
+  );
+  const active = loads.filter((load) =>
+    ACTIVE_STATUSES.includes(String(load.status || "").toLowerCase())
+  );
+
+  let earnings = 0;
+  let incomingEarnings = 0;
+
+  completed.forEach((load) => {
+    const amount = Number(load.price) || 0;
+    if (isPodVerified(load.pod_verification_status as string | null)) {
+      earnings += amount;
+      return;
+    }
+    if (!isPodBlocked(load.pod_verification_status as string | null)) {
+      incomingEarnings += amount;
+    }
+  });
 
   const { count: availableCount } = await supabase
     .from("loads")
@@ -143,18 +178,19 @@ export async function fetchCarrierDashboard(): Promise<CarrierDashboardData | nu
     .eq("status", "active");
 
   const recentActivity: CarrierActivity[] = loads.slice(0, 4).map((load) => {
-    const completedLoad = COMPLETED_STATUSES.includes(load.status);
-    const origin = load.origin || "Origin";
-    const destination = load.destination || "Destination";
+    const status = String(load.status || "").toLowerCase();
+    const completedLoad = COMPLETED_STATUSES.includes(status);
+    const origin = String(load.origin || "Origin");
+    const destination = String(load.destination || "Destination");
     return {
-      id: load.id,
-      title: completedLoad ? "Delivery complete" : `Load ${load.id.slice(0, 6).toUpperCase()}`,
-      subtitle: formatDateLabel(load.created_at),
-      status: load.status,
+      id: String(load.id),
+      title: completedLoad ? "Delivery complete" : `Load ${String(load.id).slice(0, 6).toUpperCase()}`,
+      subtitle: formatDateLabel(String(load.created_at || "")),
+      status,
       origin,
       destination,
       amount: formatMoney(Number(load.price) || 0),
-      positive: completedLoad,
+      positive: completedLoad && isPodVerified(load.pod_verification_status as string | null),
     };
   });
 
@@ -163,6 +199,7 @@ export async function fetchCarrierDashboard(): Promise<CarrierDashboardData | nu
     initials: getInitials(displayName),
     verificationStatus,
     earnings,
+    incomingEarnings,
     activeLoads: active.length,
     completedLoads: completed.length,
     availableLoads: availableCount || 0,

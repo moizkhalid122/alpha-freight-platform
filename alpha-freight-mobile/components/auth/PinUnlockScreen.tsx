@@ -5,10 +5,13 @@ import PinKeypad, { PinDots } from "@/components/auth/PinKeypad";
 import PinShell from "@/components/auth/PinShell";
 import { PIN_LENGTH, verifyPinForUser } from "@/lib/pin-lock";
 import { registerPushTokenIfPermitted } from "@/lib/push-notifications";
+import { routeToRoleHome } from "@/lib/pin-routing";
+import { useEndAuthTransitionOnFocus } from "@/lib/use-end-auth-transition-on-focus";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/lib/theme";
 
 export default function PinUnlockScreen() {
+  useEndAuthTransitionOnFocus();
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -34,7 +37,7 @@ export default function PinUnlockScreen() {
         return;
       }
 
-      router.replace("/(main)/home");
+      await routeToRoleHome(user.id);
       void registerPushTokenIfPermitted();
     } catch {
       setError("Unable to verify passcode.");

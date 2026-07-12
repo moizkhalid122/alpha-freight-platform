@@ -19,6 +19,7 @@ import {
   getCachedAvailableLoads,
   prefetchAvailableLoads,
 } from "@/lib/available-loads-cache";
+import { prefetchCarrierMyLoads } from "@/lib/carrier-my-loads-cache";
 import {
   AvailableLoad,
   AvailableLoadsData,
@@ -140,6 +141,10 @@ export default function AvailableLoadsScreen() {
     detailSheetRef.current?.open(load);
   }, []);
 
+  const handleInstantBookComplete = useCallback(async () => {
+    await Promise.all([loadData(), prefetchCarrierMyLoads()]);
+  }, [loadData]);
+
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.safeTop} edges={["top"]}>
@@ -214,7 +219,10 @@ export default function AvailableLoadsScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      <LoadDetailSheet ref={detailSheetRef} />
+      <LoadDetailSheet
+        ref={detailSheetRef}
+        onInstantBookComplete={handleInstantBookComplete}
+      />
     </View>
   );
 }

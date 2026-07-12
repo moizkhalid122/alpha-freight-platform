@@ -1,3 +1,4 @@
+import * as ImagePicker from "expo-image-picker";
 import { fetchCarrierPayoutDetails, maskAccountNumber } from "@/lib/carrier-payout-setup";
 import { formatMoney, formatProfileStatMoney } from "@/lib/carrier-dashboard";
 import { supabase } from "@/lib/supabase";
@@ -347,6 +348,74 @@ export async function updateCarrierProfile(
 
 export async function signOutCarrier() {
   await supabase.auth.signOut();
+}
+
+export async function pickCarrierAvatar(): Promise<string | null> {
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    throw new Error("Photo library permission is required to update your profile photo.");
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    quality: 0.82,
+    allowsEditing: true,
+    aspect: [1, 1],
+  });
+
+  if (result.canceled || !result.assets?.[0]?.uri) {
+    return null;
+  }
+
+  return result.assets[0].uri;
+}
+
+export async function uploadCarrierAvatar(localUri: string): Promise<string> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Please sign in again.");
+
+  const response = await fetch(localUri);
+  const arrayBuffer = await response.arrayBuffer();
+  const path = `${user.id}/profile-media/avatar-${Date.now()}.jpg`;
+
+  const { error: uploadError } = await supabase.storage.from("pods").upload(path, arrayBuffer, {
+    upsert: true,
+    contentType: "image/jpeg",
+  });
+
+  if (uploadError) throw uploadError;
+
+  const { data: publicData } = supabase.storage.from("pods").getPublicUrl(path);
+  const publicUrl = publicData?.publicUrl;
+  if (!publicUrl) throw new Error("Uploaded image URL could not be generated.");
+
+  const { data: current } = await supabase
+    .from("profiles")
+    .select("profile_extras")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const extras = parseExtras(current?.profile_extras);
+  const mergedExtras = {
+    ...extras,
+    avatarUrl: publicUrl,
+    avatar_url: publicUrl,
+  };
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({
+      avatar_url: publicUrl,
+      profile_extras: mergedExtras,
+    })
+    .eq("id", user.id);
+
+  if (profileError) throw profileError;
+
+  return publicUrl;
 }
 
 export { formatMoney, formatProfileStatMoney };

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Tabs, router, useFocusEffect } from "expo-router";
+import { Tabs, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomTabBar, { TabKey } from "@/components/dashboard/BottomTabBar";
 import { isAccountSetupComplete } from "@/lib/account-setup";
@@ -14,11 +14,17 @@ import { prefetchCarrierProfile } from "@/lib/carrier-profile-cache";
 import { prefetchAvailableLoads } from "@/lib/available-loads-cache";
 import { prefetchCarrierDashboard } from "@/lib/carrier-dashboard-cache";
 import { prefetchCarrierWallet } from "@/lib/carrier-wallet-cache";
+import { prefetchFeedPosts } from "@/lib/feed-cache";
 import { registerPushTokenIfPermitted } from "@/lib/push-notifications";
+import { deferAfterInteractions } from "@/lib/defer-work";
 import { supabase } from "@/lib/supabase";
+import { getUserRole, homeRouteForRole } from "@/lib/user-role";
+import { smoothTabScreenOptions } from "@/lib/navigation-config";
+import { LAUNCH_FEATURES } from "@/lib/launch-config";
 import { colors } from "@/lib/theme";
 
 function routeToTab(routeName: string): TabKey {
+  if (routeName === "feed") return "feed";
   if (routeName === "loads") return "loads";
   if (routeName === "wallet") return "wallet";
   if (routeName === "profile") return "profile";
@@ -30,20 +36,26 @@ function MainTabBar({
   navigation,
 }: {
   state: { index: number; routes: { name: string }[] };
-  navigation: { navigate: (name: string) => void };
+  navigation: { navigate: (name: string) => void; jumpTo?: (name: string) => void };
 }) {
   const activeRoute = state.routes[state.index]?.name ?? "home";
   const active = routeToTab(activeRoute);
 
+  const handleChange = useCallback(
+    (tab: TabKey) => {
+      const routeName = tab === "home" ? "home" : tab;
+      if (navigation.jumpTo) {
+        navigation.jumpTo(routeName);
+        return;
+      }
+      navigation.navigate(routeName);
+    },
+    [navigation]
+  );
+
   return (
     <SafeAreaView edges={["bottom"]} style={styles.tabWrap}>
-      <BottomTabBar
-        active={active}
-        onChange={(tab) => {
-          if (tab === active) return;
-          navigation.navigate(tab === "home" ? "home" : tab);
-        }}
-      />
+      <BottomTabBar active={active} onChange={handleChange} />
     </SafeAreaView>
   );
 }
@@ -55,6 +67,7 @@ export default function MainLayout() {
 
   useEffect(() => {
     let mounted = true;
+    let cancelDeferred = () => {};
 
     void (async () => {
       const {
@@ -75,34 +88,40 @@ export default function MainLayout() {
         return;
       }
 
-      const payout = await prefetchPayoutDetails(true);
-      setPayoutComplete(Boolean(payout?.payoutSetupComplete));
+      const role = await getUserRole(session.user.id);
+      if (role !== "carrier") {
+        setRedirecting(true);
+        router.replace(homeRouteForRole(role));
+        return;
+      }
 
       setAuthReady(true);
       resetPayoutReminderSessionBlock();
-      void prefetchCarrierDashboard();
-      void prefetchAvailableLoads();
-      void prefetchCarrierWallet();
-      void prefetchCarrierProfile();
-      void prefetchCarrierMyLoads();
-      void prefetchCarrierReferrals();
-      void prefetchPayoutDetails();
 
-      void registerPushTokenIfPermitted();
+      void prefetchPayoutDetails(true).then((payout) => {
+        if (mounted) setPayoutComplete(Boolean(payout?.payoutSetupComplete));
+      });
+
+      cancelDeferred = deferAfterInteractions(() => {
+        if (!mounted) return;
+        void prefetchCarrierDashboard();
+        void prefetchAvailableLoads();
+        void prefetchCarrierWallet();
+        void prefetchCarrierProfile();
+        void prefetchCarrierMyLoads();
+        void prefetchCarrierReferrals();
+        if (LAUNCH_FEATURES.socialFeed) {
+          void prefetchFeedPosts();
+        }
+        void registerPushTokenIfPermitted();
+      }, 400);
     })();
 
     return () => {
       mounted = false;
+      cancelDeferred();
     };
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      void prefetchPayoutDetails(true).then((payout) => {
-        setPayoutComplete(Boolean(payout?.payoutSetupComplete));
-      });
-    }, [])
-  );
 
   if (redirecting || !authReady) {
     return <View style={styles.loading} />;
@@ -112,14 +131,10 @@ export default function MainLayout() {
     <View style={styles.root}>
       <Tabs
         tabBar={(props) => <MainTabBar {...props} />}
-        screenOptions={{
-          headerShown: false,
-          animation: "none",
-          lazy: false,
-          freezeOnBlur: true,
-        }}
+        screenOptions={smoothTabScreenOptions}
       >
-        <Tabs.Screen name="home" />
+        <Tabs.Screen name="home" options={{ lazy: false }} />
+        <Tabs.Screen name="feed" options={{ href: LAUNCH_FEATURES.socialFeed ? undefined : null }} />
         <Tabs.Screen name="loads" />
         <Tabs.Screen name="wallet" />
         <Tabs.Screen name="profile" />

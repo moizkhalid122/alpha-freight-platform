@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LayoutAnimation, Platform, Pressable, StyleSheet, Text, UIManager, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ReplyMoreOptionsSheet from "@/components/ai/ReplyMoreOptionsSheet";
+import type { AiQuickAction } from "@/lib/ai-assistant-responses";
 import { colors } from "@/lib/theme";
 
 const COPY_RESET_MS = 1800;
@@ -70,6 +71,7 @@ export type AssistantReplyContent = {
   sectionLabel?: string;
   bullets?: string[];
   footer?: string;
+  actions?: AiQuickAction[];
 };
 
 type ReplySegment = {
@@ -237,6 +239,7 @@ type TypewriterAssistantReplyProps = {
   onCopy: () => void;
   onTyping?: () => void;
   onRegenerate?: () => void;
+  onActionPress?: (action: AiQuickAction) => void;
 };
 
 export default function TypewriterAssistantReply({
@@ -245,6 +248,7 @@ export default function TypewriterAssistantReply({
   onCopy,
   onTyping,
   onRegenerate,
+  onActionPress,
 }: TypewriterAssistantReplyProps) {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const segmentKey = useMemo(
@@ -332,6 +336,21 @@ export default function TypewriterAssistantReply({
         );
       })}
 
+      {showActions && content.actions?.length ? (
+        <View style={styles.quickActionsRow}>
+          {content.actions.map((action) => (
+            <Pressable
+              key={action.id}
+              style={({ pressed }) => [styles.quickActionChip, pressed && styles.quickActionChipPressed]}
+              onPress={() => onActionPress?.(action)}
+            >
+              <Text style={styles.quickActionText}>{action.label}</Text>
+              <Ionicons name="arrow-forward" size={13} color={colors.ink} />
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
       {showActions ? (
         <ReplyActionBar
           feedback={feedback}
@@ -348,6 +367,32 @@ export default function TypewriterAssistantReply({
 const styles = StyleSheet.create({
   block: {
     gap: 8,
+  },
+  quickActionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+  },
+  quickActionChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: colors.brandSoft,
+    borderWidth: 1,
+    borderColor: colors.ink,
+  },
+  quickActionChipPressed: {
+    opacity: 0.88,
+    transform: [{ scale: 0.985 }],
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: colors.ink,
   },
   actionBar: {
     flexDirection: "row",

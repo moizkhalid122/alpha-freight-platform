@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,9 +28,11 @@ import {
 } from "@/lib/carrier-payout-setup-cache";
 import {
   getCachedCarrierWallet,
+  isCarrierWalletCacheStale,
   prefetchCarrierWallet,
   setCachedCarrierWallet,
 } from "@/lib/carrier-wallet-cache";
+import { useDeferredFocusRefresh } from "@/lib/use-deferred-focus-refresh";
 import { colors, radius, spacing } from "@/lib/theme";
 
 function BalanceCard({ card }: { card: WalletBalanceCard }) {
@@ -66,9 +69,11 @@ function ActionButton({
   onPress?: () => void;
 }) {
   return (
-    <Pressable
-      style={({ pressed }) => [styles.actionItem, pressed && styles.pressed]}
+    <TouchableOpacity
+      style={styles.actionItem}
       onPress={onPress}
+      activeOpacity={0.75}
+      hitSlop={8}
     >
       <View style={[styles.actionCircle, primary ? styles.actionCirclePrimary : styles.actionCircleSecondary]}>
         <Ionicons name={icon} size={22} color={colors.ink} />
@@ -76,7 +81,7 @@ function ActionButton({
       <Text style={styles.actionLabel} numberOfLines={2}>
         {label}
       </Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 }
 
@@ -140,11 +145,7 @@ export default function CarrierWalletScreen() {
     const payout = await prefetchPayoutDetails();
     const ready = Boolean(payout?.payoutSetupComplete);
     setPayoutReady(ready);
-    if (!ready) {
-      router.push("/payout-setup");
-      return false;
-    }
-    return true;
+    return ready;
   }, []);
 
   const loadWallet = useCallback(async () => {
@@ -152,7 +153,10 @@ export default function CarrierWalletScreen() {
     if (!hadCache) setLoading(true);
 
     try {
-      const [result, payout] = await Promise.all([prefetchCarrierWallet(), prefetchPayoutDetails()]);
+      const [result, payout] = await Promise.all([
+        prefetchCarrierWallet(hadCache),
+        prefetchPayoutDetails(),
+      ]);
       if (!result) {
         if (!getCachedCarrierWallet()) router.replace("/login");
         return;
@@ -167,46 +171,87 @@ export default function CarrierWalletScreen() {
   }, []);
 
   useEffect(() => {
+    void ensurePayoutSetup();
     void loadWallet();
-  }, [loadWallet]);
+  }, [ensurePayoutSetup, loadWallet]);
+
+  useDeferredFocusRefresh(() => {
+    void prefetchPayoutDetails(false).then((payout) => {
+      setPayoutReady(Boolean(payout?.payoutSetupComplete));
+    });
+    void (async () => {
+      try {
+        const result = await prefetchCarrierWallet(isCarrierWalletCacheStale());
+        if (result) setData(result);
+      } catch {
+        // keep cached snapshot visible
+      }
+    })();
+  }, []);
 
   const pendingActivities = useMemo(
-    () => data?.activities.filter((item) => item.pending) || [],
+    () => data?.activities.filter((item) => item.section === "pending") || [],
     [data]
   );
   const recentActivities = useMemo(
-    () => data?.activities.filter((item) => !item.pending) || [],
+    () => data?.activities.filter((item) => item.section !== "pending") || [],
     [data]
   );
 
-  const handleWithdrawPress = useCallback(async () => {
+  const openWithdrawSheet = useCallback(() => {
     if (!data) return;
-    const ready = payoutReady ?? (await ensurePayoutSetup());
-    if (!ready) return;
     withdrawSheetRef.current?.open(data.availableBalance);
-  }, [data, ensurePayoutSetup, payoutReady]);
+  }, [data]);
+
+  const openPayoutDetailsSheet = useCallback(() => {
+    payoutDetailsRef.current?.open();
+  }, []);
+
+  const handleWithdrawPress = useCallback(() => {
+    if (!data) return;
+    if (payoutReady === false) {
+      router.push("/payout-setup");
+      return;
+    }
+    openWithdrawSheet();
+  }, [data, openWithdrawSheet, payoutReady]);
+
+  const pendingTotal = useMemo(
+    () =>
+      pendingActivities.reduce((sum, item) => {
+        const numeric = Number(item.amount.replace(/[^\d.-]/g, ""));
+        return sum + (Number.isFinite(numeric) ? numeric : 0);
+      }, 0),
+    [pendingActivities]
+  );
 
   const handlePendingPress = useCallback(() => {
     if (!data) return;
     pendingSheetRef.current?.open({
-      total: data.pendingBalance,
-      items: data.activities.filter((item) => item.pending),
+      total: pendingTotal,
+      items: pendingActivities,
     });
-  }, [data]);
+  }, [data, pendingActivities, pendingTotal]);
 
-  const handlePayoutDetailsPress = useCallback(async () => {
-    const ready = payoutReady ?? (await ensurePayoutSetup());
-    if (!ready) return;
-    payoutDetailsRef.current?.open();
-  }, [ensurePayoutSetup, payoutReady]);
+  const handlePayoutDetailsPress = useCallback(() => {
+    if (payoutReady === false) {
+      router.push("/payout-setup");
+      return;
+    }
+    openPayoutDetailsSheet();
+  }, [openPayoutDetailsSheet, payoutReady]);
+
+  const handleEarningsPress = useCallback(() => {
+    router.push("/earnings");
+  }, []);
 
   const handleWithdrawComplete = useCallback(
-    ({ amount, method }: { amount: number; method: PayoutMethod }) => {
+    ({ amount, method, payoutId }: { amount: number; method: PayoutMethod; payoutId?: string }) => {
       setData((current) => {
         if (!current) return current;
 
         const nextAvailable = Math.max(current.availableBalance - amount, 0);
-        const withdrawal = buildWithdrawalActivity(amount, method);
+        const withdrawal = buildWithdrawalActivity(amount, method, payoutId);
         const nextActivities = [
           withdrawal,
           ...current.activities.filter((item) => item.id !== "empty"),
@@ -237,6 +282,7 @@ export default function CarrierWalletScreen() {
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
             <Text style={styles.pageTitle}>Wallet balance</Text>
@@ -250,6 +296,7 @@ export default function CarrierWalletScreen() {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.cardsRow}
+                nestedScrollEnabled
               >
                 {(data?.cards || []).map((card) => (
                   <BalanceCard key={card.id} card={card} />
@@ -258,13 +305,18 @@ export default function CarrierWalletScreen() {
 
               <View style={styles.actionsRow}>
                 <ActionButton
+                  label="Earnings"
+                  icon="bar-chart-outline"
+                  onPress={handleEarningsPress}
+                />
+                <ActionButton
                   label="Withdraw"
                   icon="arrow-down-outline"
                   primary
                   onPress={handleWithdrawPress}
                 />
                 <ActionButton
-                  label="Pending earnings"
+                  label="Pending"
                   icon="time-outline"
                   onPress={handlePendingPress}
                 />
@@ -325,11 +377,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
     paddingBottom: spacing.xl,
   },
   header: {
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
     marginBottom: spacing.lg,
   },
   pageTitle: {

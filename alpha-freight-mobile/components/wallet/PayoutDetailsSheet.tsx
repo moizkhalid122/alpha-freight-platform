@@ -63,10 +63,10 @@ const PayoutDetailsSheet = forwardRef<PayoutDetailsSheetRef>((_, ref) => {
 
   useImperativeHandle(ref, () => ({
     open: () => {
+      sheetRef.current?.present();
       void prefetchPayoutDetails(true).then((result) => {
         if (result) setDetails(result);
       });
-      sheetRef.current?.present();
     },
     close: () => sheetRef.current?.dismiss(),
   }));

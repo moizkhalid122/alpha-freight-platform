@@ -28,11 +28,21 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { buildChatHistory, sendAiChatMessageStream } from "@/lib/ai-chat-api";
+import type { AiAssistantRole, AiQuickAction } from "@/lib/ai-assistant-responses";
 import { useAiVoiceInput } from "@/lib/use-ai-voice-input";
-import { fetchAiCarrierContext } from "@/lib/ai-carrier-context";
+import { fetchAiCarrierContext, getCachedAiCarrierContext, isAiCarrierContextStale } from "@/lib/ai-carrier-context";
+import { fetchAiSupplierContext } from "@/lib/ai-supplier-context";
+import { tryBuildCarrierLocalReply } from "@/lib/ai-carrier-local-reply";
+import {
+  buildSupplierPaymentReminder,
+  enrichSupplierReplyWithActions,
+  tryBuildSupplierLocalReply,
+} from "@/lib/ai-supplier-local-reply";
+import { fetchAiRouteContext, isRouteDistanceQuestion } from "@/lib/ai-route-context";
 import { isWebSearchQuestion } from "@/lib/ai-web-search-detect";
 import {
   buildDynamicSuggestions,
+  buildSupplierDynamicSuggestions,
   deleteAiChatMessage,
   listAiChatConversations,
   loadAiChatConversationMessages,
@@ -41,6 +51,8 @@ import {
   type AiChatConversationSummary,
 } from "@/lib/ai-chat-history";
 import { useKeyboardInset } from "@/lib/use-keyboard-inset";
+import { supabase } from "@/lib/supabase";
+import { getUserRole } from "@/lib/user-role";
 import ChatHistorySheet from "@/components/ai/ChatHistorySheet";
 import TypewriterAssistantReply from "@/components/ai/TypewriterAssistantReply";
 import { colors, radius, shadow, spacing } from "@/lib/theme";
@@ -55,19 +67,28 @@ type ChatMessage = {
   sectionLabel?: string;
   bullets?: string[];
   footer?: string;
+  actions?: AiQuickAction[];
 };
 
-const DEFAULT_SUGGESTIONS = [
+const DEFAULT_CARRIER_SUGGESTIONS = [
   "Show me my best available loads",
   "What is my wallet balance?",
   "UK diesel price today?",
+];
+
+const DEFAULT_SUPPLIER_SUGGESTIONS = [
+  "Help me post a new load",
+  "Show my active posted loads",
+  "How does pay now vs pay later work?",
 ];
 
 function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function WelcomeHero() {
+function WelcomeHero({ role }: { role: AiAssistantRole }) {
+  const isSupplier = role === "supplier";
+
   return (
     <View style={styles.hero}>
       <View style={styles.heroOrb}>
@@ -78,9 +99,13 @@ function WelcomeHero() {
           style={styles.heroOrbLottie}
         />
       </View>
-      <Text style={styles.heroTitle}>Alpha Freight Co-Pilot</Text>
+      <Text style={styles.heroTitle}>
+        {isSupplier ? "Supplier Co-Pilot" : "Alpha Freight Co-Pilot"}
+      </Text>
       <Text style={styles.heroSub}>
-        Your AI assistant for UK loads, bids, wallet, and deliveries.
+        {isSupplier
+          ? "Your AI for posting loads, carrier bids, payments, and shipment tracking."
+          : "Your AI assistant for UK loads, bids, wallet, and deliveries."}
       </Text>
     </View>
   );
@@ -119,13 +144,17 @@ export default function AiAssistantScreen() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [savedConversations, setSavedConversations] = useState<AiChatConversationSummary[]>([]);
   const [activeConversationTitle, setActiveConversationTitle] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
+  const [assistantType, setAssistantType] = useState<AiAssistantRole>("carrier");
+  const [paymentReminder, setPaymentReminder] = useState<ChatMessage | null>(null);
+  const [suggestions, setSuggestions] = useState(DEFAULT_CARRIER_SUGGESTIONS);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const submitPromptRef = useRef<(raw: string) => Promise<void>>(async () => {});
   const [composerHeight, setComposerHeight] = useState(COMPOSER_MIN_HEIGHT);
   const [inputFocused, setInputFocused] = useState(false);
   const conversationIdRef = useRef<string | null>(null);
+  const carrierContextRef = useRef<Awaited<ReturnType<typeof fetchAiCarrierContext>>>(null);
+  const supplierContextRef = useRef<Awaited<ReturnType<typeof fetchAiSupplierContext>>>(null);
 
   const isBusy = loadingMode !== null || streamingMessageId !== null;
   const hasConversation = messages.length > 0 || isBusy;
@@ -148,11 +177,42 @@ export default function AiAssistantScreen() {
     let mounted = true;
 
     void (async () => {
-      const carrierContext = await fetchAiCarrierContext().catch(() => null);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const role = session?.user?.id ? await getUserRole(session.user.id) : "carrier";
+      const type: AiAssistantRole = role === "supplier" ? "supplier" : "carrier";
 
       if (!mounted) return;
 
-      setSuggestions(buildDynamicSuggestions(carrierContext?.stats ?? null));
+      setAssistantType(type);
+
+      if (type === "supplier") {
+        const supplierContext = await fetchAiSupplierContext().catch(() => null);
+        supplierContextRef.current = supplierContext;
+        if (!mounted) return;
+        setSuggestions(buildSupplierDynamicSuggestions(supplierContext?.stats ?? null));
+        const reminder = buildSupplierPaymentReminder(supplierContext);
+        if (reminder) {
+          setPaymentReminder({
+            id: "payment-reminder",
+            role: "assistant",
+            text: "",
+            title: reminder.title,
+            sectionLabel: reminder.sectionLabel,
+            bullets: reminder.bullets,
+            footer: reminder.footer,
+            actions: reminder.actions,
+          });
+        }
+      } else {
+        const carrierContext = await fetchAiCarrierContext().catch(() => null);
+        carrierContextRef.current = carrierContext ?? getCachedAiCarrierContext();
+        if (!mounted) return;
+        setSuggestions(buildDynamicSuggestions(carrierContext?.stats ?? null));
+      }
+
       setIsBootstrapping(false);
     })();
 
@@ -170,6 +230,8 @@ export default function AiAssistantScreen() {
     return null;
   }, [messages]);
 
+  const copilotTitle = assistantType === "supplier" ? "Supplier Co-Pilot" : "Alpha Freight Co-Pilot";
+
   const requestAssistantReply = useCallback(
     async (
       userText: string,
@@ -181,16 +243,59 @@ export default function AiAssistantScreen() {
       }
     ) => {
       const history = buildChatHistory(historyMessages);
-      const carrierContext = searching ? null : await fetchAiCarrierContext();
+      const routeContext =
+        !searching && isRouteDistanceQuestion(userText)
+          ? await fetchAiRouteContext(userText).catch(() => null)
+          : null;
+
+      if (assistantType === "supplier") {
+        let supplierContext = searching ? null : supplierContextRef.current;
+        if (!searching && !supplierContext) {
+          supplierContext = await fetchAiSupplierContext().catch(() => null);
+        }
+        if (supplierContext) supplierContextRef.current = supplierContext;
+
+        const localReply = supplierContext
+          ? tryBuildSupplierLocalReply(userText, supplierContext)
+          : null;
+
+        if (localReply) {
+          return localReply;
+        }
+
+        const reply = await sendAiChatMessageStream(userText, {
+          assistantType: "supplier",
+          history,
+          supplierContext,
+          routeContext,
+          onPhase: streamHandlers.onPhase,
+          onDelta: streamHandlers.onDelta,
+        });
+
+        return enrichSupplierReplyWithActions(reply, userText, supplierContext);
+      }
+
+      let carrierContext = searching ? null : carrierContextRef.current ?? getCachedAiCarrierContext();
+      if (!searching && (!carrierContext || isAiCarrierContextStale())) {
+        carrierContext = await fetchAiCarrierContext().catch(() => carrierContext);
+      }
+      if (carrierContext) carrierContextRef.current = carrierContext;
+
+      const localReply = carrierContext ? tryBuildCarrierLocalReply(userText, carrierContext) : null;
+      if (localReply) {
+        return localReply;
+      }
+
       return sendAiChatMessageStream(userText, {
         assistantType: "carrier",
         history,
         carrierContext,
+        routeContext,
         onPhase: streamHandlers.onPhase,
         onDelta: streamHandlers.onDelta,
       });
     },
-    []
+    [assistantType]
   );
 
   const scrollToEnd = useCallback((force = false) => {
@@ -331,12 +436,7 @@ export default function AiAssistantScreen() {
       isNearBottomRef.current = true;
       scrollToEnd(true);
 
-      const savedUser = await saveAiChatUserMessage(conversationIdRef.current, { text }, "carrier");
-      if (savedUser.conversationId) {
-        setConversationId(savedUser.conversationId);
-        setActiveConversationTitle(text.slice(0, 72));
-      }
-
+      const savePromise = saveAiChatUserMessage(conversationIdRef.current, { text }, assistantType);
       const historyMessages = [...messages, userMessage];
       const streamingId = createId();
       let streamingStarted = false;
@@ -358,7 +458,7 @@ export default function AiAssistantScreen() {
                   id: streamingId,
                   role: "assistant",
                   text: "",
-                  title: "Alpha Freight Co-Pilot",
+                  title: copilotTitle,
                   sectionLabel: streamedText,
                 },
               ]);
@@ -376,6 +476,12 @@ export default function AiAssistantScreen() {
           },
         });
 
+        const savedUser = await savePromise;
+        if (savedUser.conversationId) {
+          setConversationId(savedUser.conversationId);
+          setActiveConversationTitle(text.slice(0, 72));
+        }
+
         const assistantMessage: ChatMessage = {
           id: streamingStarted ? streamingId : createId(),
           role: "assistant",
@@ -384,6 +490,7 @@ export default function AiAssistantScreen() {
           sectionLabel: reply.sectionLabel,
           bullets: reply.bullets,
           footer: reply.footer,
+          actions: reply.actions,
         };
 
         const savedAssistant = await saveAiChatAssistantMessage(
@@ -404,7 +511,7 @@ export default function AiAssistantScreen() {
           setMessages((current) => [...current, assistantMessage]);
         }
 
-        setTypingMessageId(assistantMessage.id);
+        setTypingMessageId(null);
         isNearBottomRef.current = true;
         scrollToEnd(true);
       } finally {
@@ -412,7 +519,7 @@ export default function AiAssistantScreen() {
         setStreamingMessageId(null);
       }
     },
-    [isBusy, messages, requestAssistantReply, scrollToEnd]
+    [assistantType, copilotTitle, isBusy, messages, requestAssistantReply, scrollToEnd]
   );
 
   useEffect(() => {
@@ -463,7 +570,7 @@ export default function AiAssistantScreen() {
                   id: streamingId,
                   role: "assistant",
                   text: "",
-                  title: "Alpha Freight Co-Pilot",
+                  title: copilotTitle,
                   sectionLabel: streamedText,
                 },
               ]);
@@ -489,6 +596,7 @@ export default function AiAssistantScreen() {
           sectionLabel: reply.sectionLabel,
           bullets: reply.bullets,
           footer: reply.footer,
+          actions: reply.actions,
         };
 
         const savedAssistant = await saveAiChatAssistantMessage(
@@ -509,7 +617,7 @@ export default function AiAssistantScreen() {
           setMessages((current) => [...current, assistantMessage]);
         }
 
-        setTypingMessageId(assistantMessage.id);
+        setTypingMessageId(null);
         isNearBottomRef.current = true;
         scrollToEnd(true);
       } finally {
@@ -529,9 +637,14 @@ export default function AiAssistantScreen() {
     setTypingMessageId(null);
     isNearBottomRef.current = true;
 
-    const carrierContext = await fetchAiCarrierContext().catch(() => null);
-    setSuggestions(buildDynamicSuggestions(carrierContext?.stats ?? null));
-  }, [isBusy]);
+    if (assistantType === "supplier") {
+      const supplierContext = await fetchAiSupplierContext().catch(() => null);
+      setSuggestions(buildSupplierDynamicSuggestions(supplierContext?.stats ?? null));
+    } else {
+      const carrierContext = await fetchAiCarrierContext().catch(() => null);
+      setSuggestions(buildDynamicSuggestions(carrierContext?.stats ?? null));
+    }
+  }, [assistantType, isBusy]);
 
   const handleOpenHistory = useCallback(async () => {
     if (isBusy) return;
@@ -539,10 +652,10 @@ export default function AiAssistantScreen() {
     setShowHistorySheet(true);
     setHistoryLoading(true);
 
-    const conversations = await listAiChatConversations("carrier");
+    const conversations = await listAiChatConversations(assistantType);
     setSavedConversations(conversations);
     setHistoryLoading(false);
-  }, [isBusy]);
+  }, [assistantType, isBusy]);
 
   const handleSelectConversation = useCallback(
     async (selectedConversationId: string) => {
@@ -552,7 +665,7 @@ export default function AiAssistantScreen() {
 
       const [messagesForConversation, conversations] = await Promise.all([
         loadAiChatConversationMessages(selectedConversationId),
-        listAiChatConversations("carrier"),
+        listAiChatConversations(assistantType),
       ]);
 
       const selectedConversation = conversations.find(
@@ -572,8 +685,14 @@ export default function AiAssistantScreen() {
         scrollRef.current?.scrollToEnd({ animated: false });
       });
     },
-    []
+    [assistantType]
   );
+
+  const handleQuickAction = useCallback((action: AiQuickAction) => {
+    if (action.route) {
+      router.push(action.route as never);
+    }
+  }, []);
 
   const handleCopy = useCallback(async (message: ChatMessage) => {
     const copyText = [
@@ -675,7 +794,22 @@ export default function AiAssistantScreen() {
             >
             {!hasConversation && !isBootstrapping ? (
               <>
-                <WelcomeHero />
+                <WelcomeHero role={assistantType} />
+                {paymentReminder && assistantType === "supplier" ? (
+                  <View style={styles.reminderCard}>
+                    <TypewriterAssistantReply
+                      content={{
+                        title: paymentReminder.title,
+                        sectionLabel: paymentReminder.sectionLabel,
+                        bullets: paymentReminder.bullets,
+                        footer: paymentReminder.footer,
+                        actions: paymentReminder.actions,
+                      }}
+                      onCopy={() => void handleCopy(paymentReminder)}
+                      onActionPress={handleQuickAction}
+                    />
+                  </View>
+                ) : null}
                 {showSuggestions ? (
                   <View style={styles.suggestions}>
                     {suggestions.map((suggestion) => (
@@ -703,9 +837,11 @@ export default function AiAssistantScreen() {
                         sectionLabel: message.sectionLabel,
                         bullets: message.bullets,
                         footer: message.footer,
+                        actions: message.actions,
                       }}
                       animate={message.id === typingMessageId}
                       onCopy={() => void handleCopy(message)}
+                      onActionPress={handleQuickAction}
                       onTyping={scrollToEnd}
                       onRegenerate={
                         message.id === lastAssistantMessageId && !isBusy
@@ -998,6 +1134,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: colors.muted,
+  },
+  reminderCard: {
+    marginTop: spacing.md,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+    padding: spacing.md,
+    ...shadow.soft,
   },
   suggestions: {
     flexDirection: "row",

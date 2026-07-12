@@ -1,7 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { formatMoney } from "@/lib/carrier-dashboard";
+import {
+  getPodVerificationMeta,
+  hasSubmittedPod,
+  isMissingPodColumnError,
+} from "@/lib/load-pod-verification";
 import { supabase } from "@/lib/supabase";
 import { AvailableLoad } from "@/lib/available-loads";
+import {
+  startCarrierGpsTracking,
+} from "@/lib/carrier-gps-tracker";
 
 const ACTIVE_STATUSES = ["active", "booked", "assigned", "pending", "loading"];
 const TRANSIT_STATUSES = ["in-transit"];
@@ -25,6 +33,11 @@ export type CarrierMyLoad = {
   deliveryLabel: string;
   updatedLabel: string;
   title: string;
+  podUrl?: string | null;
+  podName?: string | null;
+  podUploadedAt?: string | null;
+  podVerificationStatus?: string | null;
+  podReviewNote?: string | null;
 };
 
 export type CarrierMyLoadsData = {
@@ -130,6 +143,10 @@ export async function updateCarrierLoadStatus(
   loadId: string,
   newStatus: string
 ): Promise<CarrierMyLoadsData | null> {
+  if (newStatus.toLowerCase() === "delivered") {
+    throw new Error("Use POD upload to mark a load as delivered.");
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -146,6 +163,20 @@ export async function updateCarrierLoadStatus(
     .eq("carrier_id", user.id);
 
   if (error) throw error;
+
+  const normalizedStatus = newStatus.toLowerCase();
+  if (normalizedStatus === "in-transit" || normalizedStatus === "loading") {
+    const { data: loadRow } = await supabase
+      .from("loads")
+      .select("supplier_id")
+      .eq("id", loadId)
+      .eq("carrier_id", user.id)
+      .maybeSingle();
+
+    if (loadRow?.supplier_id) {
+      void startCarrierGpsTracking(loadId, loadRow.supplier_id);
+    }
+  }
 
   return fetchCarrierMyLoads();
 }
@@ -231,43 +262,70 @@ export async function fetchCarrierMyLoads(): Promise<CarrierMyLoadsData | null> 
 
   const displayName = profile?.full_name || profile?.company_name || "Carrier";
 
-  const { data, error } = await supabase
+  const selectWithPod =
+    "id, origin, destination, pickup_location, delivery_location, price, equipment, vehicle_type, pickup_date, delivery_date, created_at, commodity, title, status, pod_url, pod_name, pod_uploaded_at, pod_verification_status, pod_review_note";
+  const selectFallback =
+    "id, origin, destination, pickup_location, delivery_location, price, equipment, vehicle_type, pickup_date, delivery_date, created_at, commodity, title, status";
+
+  let rows: Record<string, unknown>[] = [];
+
+  const primary = await supabase
     .from("loads")
-    .select(
-      "id, origin, destination, pickup_location, delivery_location, price, equipment, vehicle_type, pickup_date, delivery_date, created_at, commodity, title, status"
-    )
+    .select(selectWithPod)
     .eq("carrier_id", user.id)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("fetchCarrierMyLoads", error);
-    throw error;
+  if (primary.error && isMissingPodColumnError(primary.error.message)) {
+    const fallback = await supabase
+      .from("loads")
+      .select(selectFallback)
+      .eq("carrier_id", user.id)
+      .order("created_at", { ascending: false });
+    if (fallback.error) {
+      console.error("fetchCarrierMyLoads", fallback.error);
+      throw fallback.error;
+    }
+    rows = (fallback.data ?? []) as Record<string, unknown>[];
+  } else if (primary.error) {
+    console.error("fetchCarrierMyLoads", primary.error);
+    throw primary.error;
+  } else {
+    rows = (primary.data ?? []) as Record<string, unknown>[];
   }
 
-  const rows = data || [];
   const loads: CarrierMyLoad[] = rows.map((row) => {
-    const origin = row.pickup_location || row.origin || "Origin";
-    const destination = row.delivery_location || row.destination || "Destination";
+    const origin = String(row.pickup_location || row.origin || "Origin");
+    const destination = String(row.delivery_location || row.destination || "Destination");
     const price = Number(row.price) || 0;
-    const status = row.status || "active";
+    const status = String(row.status || "active");
     const statusMeta = getLoadStatusMeta(status);
+    const podMeta = hasSubmittedPod({
+      pod_url: row.pod_url as string | null,
+    })
+      ? getPodVerificationMeta(row.pod_verification_status as string | null)
+      : null;
 
     return {
-      id: row.id,
-      code: `LD-${row.id.slice(0, 6).toUpperCase()}`,
+      id: String(row.id),
+      code: `LD-${String(row.id).slice(0, 6).toUpperCase()}`,
       origin,
       destination,
       price,
       priceLabel: formatMoney(price),
-      equipment: row.equipment || row.vehicle_type || "Any vehicle",
-      commodity: row.commodity || row.title || "General freight",
+      equipment: String(row.equipment || row.vehicle_type || "Any vehicle"),
+      commodity: String(row.commodity || row.title || "General freight"),
       status,
-      statusLabel: statusMeta.label,
-      pickupDate: row.pickup_date || "",
-      pickupLabel: formatDateLabel(row.pickup_date, "Pickup TBC"),
-      deliveryLabel: formatDateLabel(row.delivery_date, "Delivery TBC"),
-      updatedLabel: formatUpdatedLabel(row.created_at),
-      title: row.title || `Load ${row.id.slice(0, 6).toUpperCase()}`,
+      statusLabel: podMeta?.label ?? statusMeta.label,
+      podUrl: (row.pod_url as string | null) ?? null,
+      podName: (row.pod_name as string | null) ?? null,
+      podUploadedAt: (row.pod_uploaded_at as string | null) ?? null,
+      podVerificationStatus: (row.pod_verification_status as string | null) ?? null,
+      podReviewNote: (row.pod_review_note as string | null) ?? null,
+      pickupDate: String(row.pickup_date || ""),
+      pickupLabel: formatDateLabel(row.pickup_date as string | null, "Pickup TBC"),
+      deliveryLabel: formatDateLabel(row.delivery_date as string | null, "Delivery TBC"),
+      updatedLabel: formatUpdatedLabel(row.created_at as string | null),
+      title: String(row.title || `Load ${String(row.id).slice(0, 6).toUpperCase()}`),
     };
   });
 
