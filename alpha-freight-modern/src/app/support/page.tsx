@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import Navbar from "@/components/Navbar";
+import SupportLiveChat, { SUPPORT_EMAIL } from "@/components/SupportLiveChat";
 import NetworkCanvas3D from "@/components/NetworkCanvas3D";
 import Counter from "@/components/Counter";
 import FeatureIcon3D from "@/components/FeatureIcon3D";
@@ -23,6 +24,50 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { Footer, CinematicCTA } from "@/components/Footer";
+
+const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_mvxwoue";
+const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_21isokf";
+const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "f5bWSTVw5Z8mVVwTu";
+
+type QuickForm = {
+  name: string;
+  email: string;
+  message: string;
+};
+
+const initialQuickForm: QuickForm = {
+  name: "",
+  email: "",
+  message: "",
+};
+
+async function sendQuickSupportEmail(form: QuickForm) {
+  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: {
+        customer_name: form.name,
+        customer_email: form.email,
+        pickup_location: "Support Page Quick Assistance",
+        delivery_location: "Not provided",
+        additional_requirements: form.message,
+        from_name: form.name,
+        from_email: form.email,
+        reply_to: form.email,
+        to_name: "Alpha Freight Support",
+        to_email: SUPPORT_EMAIL,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to send support request.");
+  }
+}
 
 const supportCategories = [
   {
@@ -77,6 +122,10 @@ const faqs = [
 export default function SupportPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [quickForm, setQuickForm] = useState<QuickForm>(initialQuickForm);
+  const [quickSubmitting, setQuickSubmitting] = useState(false);
+  const [quickStatus, setQuickStatus] = useState<string | null>(null);
   const containerRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -86,6 +135,34 @@ export default function SupportPage() {
 
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+
+  const handleQuickSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setQuickSubmitting(true);
+    setQuickStatus(null);
+
+    const hasEmailJs =
+      Boolean(EMAILJS_SERVICE_ID) &&
+      Boolean(EMAILJS_TEMPLATE_ID) &&
+      Boolean(EMAILJS_PUBLIC_KEY) &&
+      !EMAILJS_PUBLIC_KEY.startsWith("YOUR_");
+
+    try {
+      if (hasEmailJs) {
+        await sendQuickSupportEmail(quickForm);
+        setQuickForm(initialQuickForm);
+        setQuickStatus("Request sent. Our team will reply within 2 hours.");
+      } else {
+        window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Support Request")}&body=${encodeURIComponent(`Name: ${quickForm.name}\nEmail: ${quickForm.email}\n\n${quickForm.message}`)}`;
+        setQuickForm(initialQuickForm);
+        setQuickStatus("Opening your email app...");
+      }
+    } catch {
+      setQuickStatus("Could not send request. Please email support@alphafreightuk.com directly.");
+    } finally {
+      setQuickSubmitting(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-black selection:bg-[#BFFF07] selection:text-black overflow-x-hidden">
@@ -249,11 +326,13 @@ export default function SupportPage() {
           <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Card 1: Live Chat */}
-              <motion.div 
+              <motion.button
+                type="button"
+                onClick={() => setChatOpen(true)}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="bg-[#BFFF07] p-12 rounded-3xl min-h-[450px] flex flex-col justify-between group cursor-pointer"
+                className="bg-[#BFFF07] p-12 rounded-3xl min-h-[450px] flex flex-col justify-between group cursor-pointer text-left w-full"
               >
                 <div className="space-y-8">
                   <div className="w-16 h-16 rounded-2xl bg-black/5 flex items-center justify-center">
@@ -270,10 +349,10 @@ export default function SupportPage() {
                 <div className="flex items-center gap-2 text-black font-black uppercase tracking-widest text-xs border-t border-black/10 pt-8">
                   Start Chat <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </div>
-              </motion.div>
+              </motion.button>
 
-              {/* Card 2: Email Support */}
-              <motion.div 
+              <motion.a
+                href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Alpha Freight Support Request")}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -289,13 +368,14 @@ export default function SupportPage() {
                   </h3>
                   <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
                     Detailed technical assistance. <br />
-                    Response within 2 hours.
+                    Response within 2 hours. <br />
+                    {SUPPORT_EMAIL}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-[#BFFF07] font-black uppercase tracking-widest text-xs border-t border-white/10 pt-8">
                   Send Email <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </div>
-              </motion.div>
+              </motion.a>
 
               {/* Card 3: Form/Interactive */}
               <motion.div 
@@ -309,13 +389,43 @@ export default function SupportPage() {
                   <h3 className="text-2xl font-bold text-black uppercase tracking-tight">
                     Quick Assistance
                   </h3>
-                  <form className="space-y-3">
-                    <input type="text" placeholder="NAME" className="w-full bg-white border border-black/5 rounded-xl p-4 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#BFFF07]" />
-                    <input type="email" placeholder="EMAIL" className="w-full bg-white border border-black/5 rounded-xl p-4 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#BFFF07]" />
-                    <textarea rows={3} placeholder="MESSAGE" className="w-full bg-white border border-black/5 rounded-xl p-4 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#BFFF07] resize-none" />
-                    <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-[#BFFF07] hover:text-black transition-all">
-                      Submit Request
+                  <form className="space-y-3" onSubmit={handleQuickSubmit}>
+                    <input
+                      type="text"
+                      required
+                      placeholder="NAME"
+                      value={quickForm.name}
+                      onChange={(event) => setQuickForm((current) => ({ ...current, name: event.target.value }))}
+                      className="w-full bg-white border border-black/5 rounded-xl p-4 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#BFFF07]"
+                    />
+                    <input
+                      type="email"
+                      required
+                      placeholder="EMAIL"
+                      value={quickForm.email}
+                      onChange={(event) => setQuickForm((current) => ({ ...current, email: event.target.value }))}
+                      className="w-full bg-white border border-black/5 rounded-xl p-4 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#BFFF07]"
+                    />
+                    <textarea
+                      rows={3}
+                      required
+                      placeholder="MESSAGE"
+                      value={quickForm.message}
+                      onChange={(event) => setQuickForm((current) => ({ ...current, message: event.target.value }))}
+                      className="w-full bg-white border border-black/5 rounded-xl p-4 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#BFFF07] resize-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={quickSubmitting}
+                      className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-[#BFFF07] hover:text-black transition-all disabled:opacity-60"
+                    >
+                      {quickSubmitting ? "Sending..." : "Submit Request"}
                     </button>
+                    {quickStatus ? (
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        {quickStatus}
+                      </p>
+                    ) : null}
                   </form>
                 </div>
               </motion.div>
@@ -374,6 +484,8 @@ export default function SupportPage() {
       </main>
 
       <Footer />
+
+      <SupportLiveChat open={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }
