@@ -7,6 +7,8 @@ function resolveBackendUrls(): string[] {
   const candidates = [
     process.env.AI_BACKEND_URL,
     process.env.NEXT_PUBLIC_API_URL,
+    process.env.NODE_ENV !== "production" ? "http://127.0.0.1:3003" : null,
+    process.env.NODE_ENV !== "production" ? "http://localhost:3003" : null,
   ]
     .filter(Boolean)
     .map((value) => value!.replace(/\/$/, ""));
@@ -37,7 +39,7 @@ async function proxyToBackend(
         method: "POST",
         headers,
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(120000),
       });
 
       if (!response.ok) {
