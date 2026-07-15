@@ -69,6 +69,7 @@ const navLinks: NavItem[] = [
         category: "Resources",
         items: [
           { name: "Academy", href: "/academy", desc: "Driver training & certification" },
+          { name: "Learning Series", href: "/learning-series", desc: "Free YouTube freight lessons" },
           { name: "Support Center", href: "/support", desc: "24/7 help and guidance" },
           { name: "Documentation", href: "/docs", desc: "Platform guides & tutorials" },
           { name: "Brand Kit", href: "/brand-kit", desc: "Logos, colors, and usage rules" },

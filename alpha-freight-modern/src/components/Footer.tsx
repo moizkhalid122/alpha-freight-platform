@@ -124,6 +124,7 @@ export function Footer() {
             <ul className="space-y-3">
               {[
                 { name: "Knowledge Base", href: "/knowledge-base" },
+                { name: "Learning Series", href: "/learning-series" },
                 { name: "Help Center", href: "/support" },
                 { name: "Company Blog", href: "/blog" },
                 { name: "Success Stories", href: "/success-stories" }

@@ -34,6 +34,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/suppliers",
   "/support",
   "/knowledge-base",
+  "/learning-series",
   "/academy",
   "/docs",
   "/system-status",
@@ -82,7 +83,7 @@ export function getPathPriority(path: string): number {
 
 export function getPathChangeFrequency(path: string): SitemapChangeFrequency {
   if (path === "/" || path === "/available-loads") return "daily";
-  if (path === "/blog" || path === "/system-status") return "weekly";
+  if (path === "/blog" || path === "/system-status" || path === "/learning-series") return "weekly";
   if (path.startsWith("/privacy") || path.startsWith("/terms") || path.startsWith("/cookie")) return "yearly";
   return "weekly";
 }
