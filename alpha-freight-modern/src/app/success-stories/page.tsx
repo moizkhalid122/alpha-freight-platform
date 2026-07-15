@@ -193,15 +193,6 @@ export default function SuccessStoriesPage() {
         stagger: 0.1,
         ease: "power4.out",
       });
-
-      gsap.from(".story-reveal", {
-        scrollTrigger: { trigger: ".story-reveal-grid", start: "top 82%" },
-        y: 42,
-        opacity: 0,
-        duration: 0.85,
-        stagger: 0.08,
-        ease: "power3.out",
-      });
     }, pageRef);
 
     return () => ctx.revert();
@@ -360,7 +351,7 @@ export default function SuccessStoriesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.35 }}
-                    className="story-reveal overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.04)]"
+                    className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.04)]"
                   >
                     <div className="relative h-52">
                       <Image
