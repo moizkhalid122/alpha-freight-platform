@@ -22,7 +22,7 @@ const config = {
     android: {
     package: "com.alphafreight.uk",
     googleServicesFile: "./google-services.json",
-    versionCode: 15,
+    versionCode: 17,
     softwareKeyboardLayoutMode: "resize",
     adaptiveIcon: {
       backgroundColor: "#000000",
