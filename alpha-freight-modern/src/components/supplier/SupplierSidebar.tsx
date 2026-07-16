@@ -16,7 +16,8 @@ import {
   Gift,
   Clock,
   Sparkles,
-  Newspaper
+  Newspaper,
+  MapPin,
 } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 
@@ -34,6 +35,7 @@ const sidebarCategories = [
     items: [
       { name: "Post a Load", path: "/supplier/post-load", icon: <PlusCircle className="w-4 h-4" />, badge: "NEW" },
       { name: "My Posts", path: "/supplier/my-posts", icon: <ClipboardList className="w-4 h-4" /> },
+      { name: "Live Tracking", path: "/supplier/track", icon: <MapPin className="w-4 h-4" />, badge: "GPS" },
       { name: "My Bids", path: "/supplier/my-bids", icon: <Clock className="w-4 h-4" /> },
     ]
   },

@@ -23,8 +23,13 @@ import {
   ExternalLink,
   Eye,
   XCircle,
+  Navigation,
 } from "lucide-react";
 import { getSupplierPaymentOrdersForUser, resolveSupplierPaymentState, type SupplierPaymentRecord } from "@/lib/supplier-payments";
+import {
+  canSupplierTrackShipment,
+  getSupplierPaymentStateForLoad,
+} from "@/lib/supplier-tracking";
 import {
   getPodVerificationMeta,
   hasSubmittedPod,
@@ -753,6 +758,10 @@ export default function MyPostsPage() {
                 selectedPost.status
               );
               const detailPaymentAction = showPaymentAction(detailPaymentState, selectedPost.status);
+              const detailCanTrack = canSupplierTrackShipment(
+                selectedPost,
+                getSupplierPaymentStateForLoad(selectedPost, detailPayment?.paymentState)
+              );
 
               return (
                 <>
@@ -988,6 +997,16 @@ export default function MyPostsPage() {
                         detailPrimaryAction.label
                       )}
                     </button>
+                  ) : null}
+
+                  {detailCanTrack ? (
+                    <Link
+                      href={`/supplier/track/${selectedPost.id}`}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      <Navigation className="h-4 w-4" />
+                      Track live GPS
+                    </Link>
                   ) : null}
 
                   <Link

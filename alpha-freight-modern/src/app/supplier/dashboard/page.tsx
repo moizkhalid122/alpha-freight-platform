@@ -824,14 +824,18 @@ export default function PremiumSupplierDashboard() {
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tracking</p>
               <h3 className="mt-0.5 text-[15px] font-bold text-slate-900">Live shipments</h3>
             </div>
-            <Link href="/supplier/my-posts" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">
-              View all
+            <Link href="/supplier/track" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">
+              Open live map
             </Link>
           </div>
           {recentLoads.length > 0 ? (
             <div className="space-y-2.5">
               {recentLoads.slice(0, 4).map((load) => (
-                <div key={load.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50/50 px-3.5 py-3">
+                <Link
+                  key={load.id}
+                  href={`/supplier/track/${load.id}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50/50 px-3.5 py-3 transition hover:border-blue-200 hover:bg-blue-50/40"
+                >
                   <div className="min-w-0">
                     <p className="truncate text-[12px] font-semibold text-slate-900">{load.route}</p>
                     <p className="mt-0.5 text-[11px] text-slate-500">
@@ -839,7 +843,7 @@ export default function PremiumSupplierDashboard() {
                     </p>
                   </div>
                   <StatusBadge status={load.status} />
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
