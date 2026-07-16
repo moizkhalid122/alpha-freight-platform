@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
+import AnalyticsPageTracker from "@/components/AnalyticsPageTracker";
 import Chatbot from "@/components/Chatbot";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 import { SITE_URL } from "@/lib/sitemap-data";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -44,7 +46,23 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
     >
       <body className="flex flex-col font-sans">
-        <GoogleAnalytics />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}', {
+              send_page_view: true,
+              page_path: window.location.pathname,
+              page_location: window.location.href,
+            });
+          `}
+        </Script>
+        <AnalyticsPageTracker />
         {children}
         <Chatbot />
       </body>
