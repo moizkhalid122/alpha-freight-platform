@@ -126,6 +126,9 @@ export function Footer() {
                 { name: "Knowledge Base", href: "/knowledge-base" },
                 { name: "Learning Series", href: "/learning-series" },
                 { name: "Help Center", href: "/support" },
+                { name: "Free Freight Tools", href: "/tools" },
+                { name: "Track Shipment", href: "/track" },
+                { name: "Send Feedback", href: "/feedback" },
                 { name: "Company Blog", href: "/blog" },
                 { name: "Success Stories", href: "/success-stories" }
               ].map((item) => (

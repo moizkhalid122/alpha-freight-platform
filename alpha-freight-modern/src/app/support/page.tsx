@@ -225,6 +225,21 @@ export default function SupportPage() {
                 className="w-full bg-white/5 border border-white/10 rounded-full py-8 pl-20 pr-8 text-lg focus:outline-none focus:border-[#BFFF07]/50 focus:bg-white/10 transition-all placeholder:text-white/10 uppercase tracking-widest text-sm font-bold"
               />
             </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.65, duration: 0.6 }}
+              className="mt-8"
+            >
+              <Link
+                href="/feedback"
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-white/40 transition hover:text-[#BFFF07]"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Send product feedback
+              </Link>
+            </motion.div>
           </motion.div>
 
           {/* Background Elements */}

@@ -65,6 +65,7 @@ const QUICK_LINKS = [
   { href: "/carrier/my-loads", label: "My loads", icon: FileText },
   { href: "/carrier/wallet", label: "Wallet", icon: Wallet },
   { href: "/carrier/referrals", label: "Referrals", icon: Users },
+  { href: "/feedback?role=carrier", label: "Send feedback", icon: MessageSquare },
 ];
 
 function CarrierSupportPageContent() {

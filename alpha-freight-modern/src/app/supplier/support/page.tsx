@@ -64,6 +64,7 @@ const QUICK_LINKS = [
   { href: "/supplier/my-posts", label: "My posts", icon: FileText },
   { href: "/supplier/my-bids", label: "My bids", icon: CreditCard },
   { href: "/supplier/referrals", label: "Referrals", icon: Users },
+  { href: "/feedback?role=supplier", label: "Send feedback", icon: MessageSquare },
 ];
 
 export default function SupplierSupport() {

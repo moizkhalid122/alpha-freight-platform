@@ -235,13 +235,14 @@ export default function AvailableLoadsLandingPage() {
               </div>
 
               <h1 className="loads-hero-item text-5xl font-bold uppercase leading-[0.92] tracking-tight text-white sm:text-7xl lg:text-8xl">
-                Available <br />
-                <span className="text-[#BFFF07]">Loads.</span>
+                Find Loads
+                <br />
+                <span className="text-[#BFFF07]">UK.</span>
               </h1>
 
               <p className="loads-hero-item max-w-2xl text-base font-medium leading-relaxed text-white/55 sm:text-xl">
-                The UK freight marketplace for verified carriers. Browse live lanes, place bids, and
-                get paid with Alpha Freight&apos;s carrier workflow.
+                Find freight loads and haulage jobs across the UK. Browse our live load board, place bids as a
+                verified carrier, and get paid with Alpha Freight&apos;s 7-day payout workflow.
               </p>
 
               <div className="loads-hero-item flex flex-col gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center">

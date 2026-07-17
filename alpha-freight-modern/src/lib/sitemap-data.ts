@@ -32,9 +32,18 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/products/roadmap",
   "/products/releases",
   "/available-loads",
+  "/find-loads",
+  "/post-loads",
+  "/auth/carrier-signup",
+  "/auth/supplier-signup",
   "/directory",
   "/suppliers",
   "/support",
+  "/feedback",
+  "/tools",
+  "/tools/lane-rates",
+  "/tools/freight-quote",
+  "/track",
   "/knowledge-base",
   "/learning-series",
   "/academy",
@@ -53,13 +62,23 @@ export function getPathPriority(path: string): number {
   if (path === "/") return 1;
   if (path === "/directory" || path === "/suppliers") return 0.85;
   if (path.startsWith("/products/")) return 0.8;
-  if (path === "/available-loads" || path === "/solution" || path === "/contact") return 0.75;
+  if (path === "/available-loads" || path === "/find-loads" || path === "/post-loads") return 0.88;
+  if (
+    path === "/tools" ||
+    path === "/tools/lane-rates" ||
+    path === "/tools/freight-quote" ||
+    path === "/track" ||
+    path === "/feedback"
+  )
+    return 0.86;
+  if (path === "/solution" || path === "/contact") return 0.75;
   if (path.startsWith("/privacy") || path.startsWith("/terms") || path.startsWith("/cookie")) return 0.4;
   return 0.65;
 }
 
 export function getPathChangeFrequency(path: string): SitemapChangeFrequency {
-  if (path === "/" || path === "/available-loads") return "daily";
+  if (path === "/" || path === "/available-loads" || path === "/find-loads" || path === "/post-loads") return "daily";
+  if (path === "/tools" || path.startsWith("/tools/") || path === "/track") return "daily";
   if (path === "/blog" || path === "/system-status" || path === "/learning-series") return "weekly";
   if (path.startsWith("/privacy") || path.startsWith("/terms") || path.startsWith("/cookie")) return "yearly";
   return "weekly";

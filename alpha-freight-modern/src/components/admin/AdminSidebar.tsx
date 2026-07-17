@@ -18,6 +18,7 @@ import {
   UserPlus,
   UserRoundCheck,
   Gift,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,11 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
         name: "Referrals",
         path: "/admin/referrals",
         icon: <Gift className="h-4 w-4" />,
+      },
+      {
+        name: "User Feedback",
+        path: "/admin/feedback",
+        icon: <MessageSquare className="h-4 w-4" />,
       },
     ],
   },

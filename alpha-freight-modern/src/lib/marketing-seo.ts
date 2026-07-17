@@ -58,16 +58,86 @@ export const marketingSeo = {
     path: "/suppliers",
   }),
   availableLoads: createPageMetadata({
-    title: "Available Freight Loads UK | Alpha Freight",
+    title: "Find Loads UK | Free Freight Load Board for Carriers | Alpha Freight",
     description:
-      "View live freight loads across the Alpha Freight marketplace. Carriers can browse opportunities by route, equipment, and timing.",
+      "Find loads in the UK on Alpha Freight. Browse live haulage jobs, freight lanes, and load board opportunities. Free carrier signup — bid, deliver, and get paid in 7 days.",
     path: "/available-loads",
+    keywords: [
+      "find loads UK",
+      "find freight loads",
+      "load board UK",
+      "haulage jobs UK",
+      "freight loads near me",
+      "carrier load board",
+    ],
+  }),
+  findLoads: createPageMetadata({
+    title: "Find Loads Online UK | Haulage & Freight Jobs | Alpha Freight",
+    description:
+      "Find loads online in the UK with Alpha Freight. Search live freight, compare lanes, and join verified carriers earning with 7-day payouts. Free to browse and bid.",
+    path: "/find-loads",
+    keywords: [
+      "find loads",
+      "find load UK",
+      "find freight loads online",
+      "haulage loads UK",
+      "truck loads UK",
+    ],
+  }),
+  postLoads: createPageMetadata({
+    title: "Post Loads Online UK | Free Freight Posting for Shippers | Alpha Freight",
+    description:
+      "Post loads online in the UK with Alpha Freight. Publish freight free, receive carrier bids from verified hauliers, track shipments live, and pay securely.",
+    path: "/post-loads",
+    keywords: [
+      "post loads",
+      "post load UK",
+      "post freight online",
+      "post haulage loads",
+      "ship freight UK",
+      "load posting platform",
+    ],
   }),
   support: createPageMetadata({
     title: "Support & Help | Alpha Freight",
     description:
       "Get help with Alpha Freight — live chat, email, phone support, knowledge base articles, and system status for UK freight operations.",
     path: "/support",
+  }),
+  feedback: createPageMetadata({
+    title: "Send Feedback | Alpha Freight",
+    description:
+      "Share product feedback with Alpha Freight — report bugs, request features, or tell us what to improve for carriers and suppliers in the UK.",
+    path: "/feedback",
+    keywords: ["Alpha Freight feedback", "product feedback", "report a bug", "feature request"],
+  }),
+  toolsHub: createPageMetadata({
+    title: "Free Freight Tools UK | Alpha Freight",
+    description:
+      "Free UK freight tools from Alpha Freight — live lane rate index, instant haulage quote calculator, and public shipment tracking by reference.",
+    path: "/tools",
+    keywords: ["freight tools UK", "haulage calculator", "lane rates UK", "track shipment"],
+  }),
+  laneRates: createPageMetadata({
+    title: "UK Lane Rate Index | Live Haulage Rates | Alpha Freight",
+    description:
+      "Live UK freight lane rate index from Alpha Freight marketplace data. Compare £/mile by corridor and equipment type across general, refrigerated, flatbed, and curtain-side haulage.",
+    path: "/tools/lane-rates",
+    keywords: ["UK lane rates", "haulage rates UK", "freight rate per mile", "logistics rate index"],
+  }),
+  freightQuote: createPageMetadata({
+    title: "Instant Freight Quote UK | Haulage Price Calculator | Alpha Freight",
+    description:
+      "Calculate an instant UK freight quote by pickup, delivery, equipment, and weight. Powered by Alpha Freight marketplace lane intelligence.",
+    path: "/tools/freight-quote",
+    keywords: ["freight quote UK", "haulage quote calculator", "shipping cost UK", "truck freight estimate"],
+  }),
+  trackShipment: createPageMetadata({
+    title: "Track Shipment | Public Load Tracking | Alpha Freight",
+    description:
+      "Track your Alpha Freight shipment by load reference (AF-XXXXXXXX). See booking status, transit progress, and delivery timeline without logging in.",
+    path: "/track",
+    keywords: ["track shipment UK", "freight tracking reference", "haulage tracking", "Alpha Freight track"],
   }),
   sevenDayPayouts: createPageMetadata({
     title: "7-Day Carrier Payouts | Alpha Freight UK",
@@ -124,10 +194,11 @@ export const marketingSeo = {
     path: "/cookie-policy",
   }),
   supplierPortal: createPageMetadata({
-    title: "Supplier Portal | Post Loads & Track Freight | Alpha Freight",
+    title: "Post Loads Online UK | Supplier Portal | Alpha Freight",
     description:
-      "Post UK freight loads, review carrier bids, pay securely, and track shipments in real time from the Alpha Freight supplier portal.",
+      "Post freight loads online in minutes. Alpha Freight supplier portal — publish lanes, compare verified carrier bids, track deliveries, and manage payments in one place.",
     path: "/products/supplier-portal",
+    keywords: ["post loads UK", "supplier freight portal", "post haulage online", "ship freight UK"],
   }),
   mobileApp: createPageMetadata({
     title: "Freight Mobile App | Carriers & Drivers | Alpha Freight",
