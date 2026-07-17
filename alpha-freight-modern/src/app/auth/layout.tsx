@@ -10,6 +10,12 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const role = searchParams.get("role");
   const bgImage = role === "supplier" ? "/alpha-box.jpg" : "/alpha freight truck.jpg";
+  const isMarketingSignup =
+    pathname === "/auth/supplier-signup" || pathname === "/auth/carrier-signup";
+
+  if (isMarketingSignup) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="relative flex w-full max-w-[1200px] overflow-hidden bg-white shadow-none sm:min-h-[720px] sm:rounded-3xl sm:bg-[#F3F4F6] sm:shadow-xl lg:min-h-[780px] lg:rounded-[40px] lg:shadow-2xl">
@@ -69,6 +75,20 @@ function AuthContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthLayoutShell>{children}</AuthLayoutShell>
+  );
+}
+
+function AuthLayoutShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isMarketingSignup =
+    pathname === "/auth/supplier-signup" || pathname === "/auth/carrier-signup";
+
+  if (isMarketingSignup) {
+    return <div className="min-h-[100dvh] bg-black font-sans">{children}</div>;
+  }
+
   return (
     <div className="flex min-h-[100dvh] justify-center bg-white font-sans sm:items-center sm:bg-[#E5E7EB] sm:p-6 md:p-8">
       <Suspense

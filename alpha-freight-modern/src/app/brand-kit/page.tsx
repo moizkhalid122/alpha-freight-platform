@@ -1,9 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, Copy, Download, ExternalLink, Search } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Search, Truck, MapPin, Package, ShieldCheck, Wallet, Navigation, FileText, Users } from "lucide-react";
+import {
+  brandPillars,
+  brandValues,
+  illustrationExamples,
+  illustrationPrinciples,
+  iconographyItems,
+  iconographyRules,
+  logoDonts,
+  materialGuidelines,
+  photographyExamples,
+  photographyRules,
+  socialTemplates,
+  toneWords,
+  typeScale,
+  typographyRules,
+  websitePatterns,
+} from "@/lib/brand-kit-content";
+
+const iconMap = {
+  Truck,
+  MapPin,
+  Package,
+  ShieldCheck,
+  Wallet,
+  Navigation,
+  FileText,
+  Users,
+} as const;
 
 type BrandColor = {
   name: string;
@@ -402,6 +430,53 @@ function NeutralSwatchCard({ color }: { color: BrandColor }) {
   );
 }
 
+function SectionCard({
+  eyebrow,
+  title,
+  children,
+  className = "",
+}: {
+  eyebrow?: string;
+  title?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm ${className}`}>
+      {eyebrow ? (
+        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">{eyebrow}</p>
+      ) : null}
+      {title ? (
+        <p className={`${eyebrow ? "mt-5" : ""} text-2xl font-black tracking-tight text-slate-900`}>{title}</p>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
+function DoDontGrid({ doItems, dontItems }: { doItems: string[]; dontItems: string[] }) {
+  return (
+    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 p-5">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Do</p>
+        <ul className="mt-3 space-y-2 text-sm font-medium leading-6 text-emerald-950/80">
+          {doItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="rounded-2xl border border-rose-200/60 bg-rose-50/60 p-5">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-800">Don&apos;t</p>
+        <ul className="mt-3 space-y-2 text-sm font-medium leading-6 text-rose-950/80">
+          {dontItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function LogoVariantCard({ variant }: { variant: LogoVariant }) {
   return (
     <div
@@ -686,188 +761,358 @@ export default function BrandKitPage() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="mt-16">
+                    <SectionCard eyebrow="Usage" title="Logo do not">
+                      <ul className="mt-5 space-y-3 text-sm font-medium leading-7 text-slate-600">
+                        {logoDonts.map((rule) => (
+                          <li key={rule} className="flex gap-3">
+                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+                            <span>{rule}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </SectionCard>
+                  </div>
                 </div>
               </div>
             ) : null}
 
             {activeTab === "typography" ? (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Headings
-                  </p>
-                  <p className="mt-5 text-5xl font-black tracking-tight text-slate-900">
-                    Alpha Freight
-                  </p>
-                  <p className="mt-3 text-lg font-semibold text-slate-600">
-                    Premium freight operations
-                  </p>
-                  <p className="mt-6 text-sm font-medium leading-7 text-slate-500">
-                    Keep hierarchy strong. Use bold headlines, calm supporting copy, and clear
-                    spacing to make the UI feel premium.
-                  </p>
+              <div className="space-y-8">
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <SectionCard eyebrow="Headings">
+                    <p className="mt-5 text-5xl font-black tracking-tight text-slate-900">Alpha Freight</p>
+                    <p className="mt-3 text-lg font-semibold text-slate-600">Premium freight operations</p>
+                    <p className="mt-6 text-sm font-medium leading-7 text-slate-500">
+                      Headlines should feel editorial and confident. Supporting copy stays calm and readable.
+                    </p>
+                  </SectionCard>
+                  <SectionCard eyebrow="Buttons">
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="rounded-full bg-[#0B0F14] px-4 py-2 text-xs font-black text-white"
+                      >
+                        Primary Action
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700"
+                      >
+                        Secondary
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-full bg-[#BFFF07] px-4 py-2 text-xs font-black text-black"
+                      >
+                        Alpha Lime
+                      </button>
+                    </div>
+                    <p className="mt-6 text-sm font-medium leading-7 text-slate-500">
+                      Use Alpha Lime only for emphasis and key actions. Keep most buttons neutral.
+                    </p>
+                  </SectionCard>
                 </div>
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Buttons
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="rounded-full bg-[#0B0F14] px-4 py-2 text-xs font-black text-white"
-                    >
-                      Primary Action
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700"
-                    >
-                      Secondary
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full bg-[#BFFF07] px-4 py-2 text-xs font-black text-black"
-                    >
-                      Alpha Lime
-                    </button>
+
+                <SectionCard eyebrow="Type scale" title="Hierarchy at a glance">
+                  <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+                    <div className="grid grid-cols-[1fr_1fr_1fr_1.4fr] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                      <p>Style</p>
+                      <p>Size</p>
+                      <p>Weight</p>
+                      <p>Use</p>
+                    </div>
+                    {typeScale.map((row) => (
+                      <div
+                        key={row.name}
+                        className="grid grid-cols-[1fr_1fr_1fr_1.4fr] gap-3 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
+                      >
+                        <p className="font-black text-slate-900">{row.name}</p>
+                        <p className="font-medium text-slate-600">{row.size}</p>
+                        <p className="font-medium text-slate-600">{row.weight}</p>
+                        <p className="font-medium leading-6 text-slate-500">{row.use}</p>
+                      </div>
+                    ))}
                   </div>
-                  <p className="mt-6 text-sm font-medium leading-7 text-slate-500">
-                    Use Alpha Lime only for emphasis and key actions. Keep most buttons neutral.
-                  </p>
-                </div>
+                </SectionCard>
+
+                <SectionCard eyebrow="Rules" title="Typography guidelines">
+                  <ul className="mt-5 space-y-3 text-sm font-medium leading-7 text-slate-600">
+                    {typographyRules.map((rule) => (
+                      <li key={rule} className="flex gap-3">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#BFFF07]" />
+                        <span>{rule}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </SectionCard>
               </div>
             ) : null}
 
             {activeTab === "tone" ? (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Voice
-                  </p>
-                  <p className="mt-5 text-2xl font-black tracking-tight text-slate-900">
-                    Senior logistics operator
-                  </p>
-                  <ul className="mt-6 space-y-2 text-sm font-medium text-slate-600">
-                    <li>Be direct and practical.</li>
-                    <li>Prefer steps and decisions over fluff.</li>
-                    <li>Never invent numbers. Ask for missing inputs.</li>
-                    <li>Keep tone premium, calm, and confident.</li>
-                  </ul>
-                </div>
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Examples
-                  </p>
-                  <div className="mt-5 space-y-4">
-                    <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 p-5">
-                      <p className="text-xs font-black text-emerald-800">Good</p>
-                      <p className="mt-2 text-sm font-medium leading-6 text-emerald-950/80">
-                        Share your route + equipment + rate. I will calculate effective RPM and
-                        show the profit drivers.
-                      </p>
+              <div className="space-y-8">
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <SectionCard eyebrow="Voice" title="Senior logistics operator">
+                    <ul className="mt-6 space-y-2 text-sm font-medium leading-7 text-slate-600">
+                      <li>Be direct and practical — operators are busy.</li>
+                      <li>Prefer steps and decisions over fluff.</li>
+                      <li>Never invent numbers. Ask for missing inputs.</li>
+                      <li>Keep tone premium, calm, and confident.</li>
+                    </ul>
+                  </SectionCard>
+                  <SectionCard eyebrow="Examples">
+                    <div className="mt-5 space-y-4">
+                      <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 p-5">
+                        <p className="text-xs font-black text-emerald-800">Good</p>
+                        <p className="mt-2 text-sm font-medium leading-6 text-emerald-950/80">
+                          Share your route + equipment + rate. I will calculate effective RPM and
+                          show the profit drivers.
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-rose-200/60 bg-rose-50/60 p-5">
+                        <p className="text-xs font-black text-rose-800">Bad</p>
+                        <p className="mt-2 text-sm font-medium leading-6 text-rose-950/80">
+                          That sounds interesting. Many factors exist. Please consider different
+                          options.
+                        </p>
+                      </div>
                     </div>
-                    <div className="rounded-2xl border border-rose-200/60 bg-rose-50/60 p-5">
-                      <p className="text-xs font-black text-rose-800">Bad</p>
-                      <p className="mt-2 text-sm font-medium leading-6 text-rose-950/80">
-                        That sounds interesting. Many factors exist. Please consider different
-                        options.
-                      </p>
+                  </SectionCard>
+                </div>
+
+                <SectionCard eyebrow="Word choice" title="Use vs avoid">
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Use</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {toneWords.use.map((word) => (
+                          <span
+                            key={word}
+                            className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800"
+                          >
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Avoid</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {toneWords.avoid.map((word) => (
+                          <span
+                            key={word}
+                            className="rounded-full border border-rose-200/70 bg-rose-50/70 px-3 py-1.5 text-xs font-bold text-rose-900/80"
+                          >
+                            {word}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </SectionCard>
               </div>
             ) : null}
 
             {activeTab === "introduction" ? (
-              <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                <p className="text-sm font-medium leading-7 text-slate-600">
-                  This page defines Alpha Freight’s visual system. Use it to keep product UI, web
-                  pages, and marketing consistent. The goal is a premium, calm experience that
-                  feels like a modern operations platform.
-                </p>
+              <div className="space-y-8">
+                <SectionCard eyebrow="Overview" title="One source of truth for Alpha Freight">
+                  <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
+                    This brand kit defines how Alpha Freight looks, reads, and feels across the website,
+                    mobile app, sales materials, and partner communications. Use it before shipping new
+                    UI, campaigns, or co-branded assets.
+                  </p>
+                </SectionCard>
+
+                <div className="grid gap-6 lg:grid-cols-3">
+                  {brandPillars.map((pillar) => (
+                    <SectionCard key={pillar.title} eyebrow="Pillar" title={pillar.title}>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{pillar.body}</p>
+                    </SectionCard>
+                  ))}
+                </div>
+
+                <SectionCard eyebrow="Quick links" title="Where this brand lives">
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {[
+                      { label: "Website", href: "/" },
+                      { label: "Support", href: "/support" },
+                      { label: "Directory", href: "/directory" },
+                      { label: "Learning Series", href: "/learning-series" },
+                    ].map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-black text-slate-900 transition hover:bg-white"
+                      >
+                        {link.label}
+                        <ExternalLink className="h-4 w-4 text-slate-400" />
+                      </Link>
+                    ))}
+                  </div>
+                </SectionCard>
               </div>
             ) : null}
 
             {activeTab === "mission" ? (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Mission
-                  </p>
-                  <p className="mt-5 text-2xl font-black tracking-tight text-slate-900">
-                    Make freight operations simple and predictable
-                  </p>
+              <div className="space-y-8">
+                <SectionCard eyebrow="Mission" title="Make freight operations simple and predictable">
                   <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
                     Our mission is to reduce friction between suppliers and carriers with better
-                    execution, transparent visibility, and AI support that performs actions.
+                    execution, transparent visibility, and AI support that performs actions — not
+                    just answers questions.
                   </p>
+                </SectionCard>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {brandValues.map((value) => (
+                    <SectionCard key={value.title} eyebrow="Value" title={value.title}>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{value.body}</p>
+                    </SectionCard>
+                  ))}
                 </div>
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Values
-                  </p>
-                  <ul className="mt-5 space-y-2 text-sm font-medium text-slate-600">
-                    <li>Truth over guesswork</li>
-                    <li>Speed with reliability</li>
-                    <li>Operational clarity</li>
-                    <li>Trust and compliance</li>
+              </div>
+            ) : null}
+
+            {activeTab === "website" ? (
+              <div className="space-y-8">
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {websitePatterns.map((pattern) => (
+                    <SectionCard key={pattern.title} eyebrow="Pattern" title={pattern.title}>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{pattern.body}</p>
+                      <Link
+                        href={pattern.href}
+                        className="mt-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black text-slate-700 transition hover:bg-slate-50"
+                      >
+                        View live
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </SectionCard>
+                  ))}
+                </div>
+                <SectionCard eyebrow="Preview" title="Marketing surface">
+                  <div className="relative mt-6 h-[360px] w-full overflow-hidden rounded-3xl bg-slate-100">
+                    <Image src="/demo%201.jpeg" alt="Website brand preview" fill className="object-cover" />
+                  </div>
+                </SectionCard>
+              </div>
+            ) : null}
+
+            {activeTab === "social" ? (
+              <div className="space-y-8">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {socialTemplates.map((template) => (
+                    <SectionCard key={template.title} eyebrow={template.ratio} title={template.title}>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{template.body}</p>
+                    </SectionCard>
+                  ))}
+                </div>
+                <SectionCard eyebrow="Preview" title="Feed-ready composition">
+                  <div className="relative mt-6 h-[360px] w-full overflow-hidden rounded-3xl bg-slate-100">
+                    <Image src="/alpha-freight-hero.png" alt="Social media preview" fill className="object-cover" />
+                  </div>
+                </SectionCard>
+              </div>
+            ) : null}
+
+            {activeTab === "materials" ? (
+              <div className="space-y-8">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {materialGuidelines.map((item) => (
+                    <SectionCard key={item.title} eyebrow="Guideline" title={item.title}>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{item.body}</p>
+                    </SectionCard>
+                  ))}
+                </div>
+                <SectionCard eyebrow="Logo usage" title="Do not">
+                  <ul className="mt-5 space-y-3 text-sm font-medium leading-7 text-slate-600">
+                    {logoDonts.map((rule) => (
+                      <li key={rule} className="flex gap-3">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+                        <span>{rule}</span>
+                      </li>
+                    ))}
                   </ul>
-                </div>
+                </SectionCard>
               </div>
             ) : null}
 
-            {activeTab === "website" || activeTab === "social" || activeTab === "materials" ? (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                  <p className="text-sm font-black text-slate-900">Recommended Layout</p>
-                  <p className="mt-3 text-sm font-medium leading-7 text-slate-500">
-                    Use calm backgrounds, strong typography hierarchy, and Alpha Lime as the accent
-                    for high-intent actions.
-                  </p>
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                      <p className="text-xs font-black text-slate-900">Cards</p>
-                      <p className="mt-2 text-xs font-medium leading-6 text-slate-500">
-                        Rounded, minimal borders, plenty of padding.
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                      <p className="text-xs font-black text-slate-900">Buttons</p>
-                      <p className="mt-2 text-xs font-medium leading-6 text-slate-500">
-                        Primary dark + Alpha Lime accent sparingly.
-                      </p>
-                    </div>
-                  </div>
+            {activeTab === "illustration" ? (
+              <div className="space-y-8">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {illustrationPrinciples.map((item) => (
+                    <SectionCard key={item.title} eyebrow="Principle" title={item.title}>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{item.body}</p>
+                    </SectionCard>
+                  ))}
                 </div>
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className="relative h-[360px] w-full overflow-hidden rounded-3xl bg-slate-100">
-                    <Image
-                      src="/demo%201.jpeg"
-                      alt="Brand preview"
-                      fill
-                      className="object-cover"
-                    />
+                <SectionCard eyebrow="Examples" title="Approved visual direction">
+                  <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                    {illustrationExamples.map((example) => (
+                      <div key={example.src}>
+                        <div className="relative h-56 overflow-hidden rounded-2xl bg-slate-100">
+                          <Image src={example.src} alt={example.alt} fill className="object-cover" />
+                        </div>
+                        <p className="mt-3 text-sm font-black text-slate-900">{example.caption}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <p className="text-sm font-black text-slate-900">Preview</p>
-                    <Link
-                      href="/demo"
-                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black text-slate-700 transition hover:bg-slate-50"
-                    >
-                      Open Demo
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </div>
+                </SectionCard>
               </div>
             ) : null}
 
-            {activeTab === "illustration" || activeTab === "iconography" || activeTab === "photography" ? (
-              <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-                <p className="text-sm font-medium leading-7 text-slate-600">
-                  This section will hold the final rules and examples. Keep visuals simple, calm,
-                  and logistics-first. Avoid heavy gradients, playful cartoons, or noisy textures.
-                </p>
+            {activeTab === "iconography" ? (
+              <div className="space-y-8">
+                <SectionCard eyebrow="System" title="Operational icon set">
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {iconographyItems.map((item) => {
+                      const Icon = iconMap[item.name as keyof typeof iconMap];
+                      return (
+                        <div
+                          key={item.name}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center"
+                        >
+                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
+                            <Icon className="h-6 w-6 text-slate-900" strokeWidth={1.5} />
+                          </div>
+                          <p className="mt-3 text-sm font-black text-slate-900">{item.name}</p>
+                          <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{item.use}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </SectionCard>
+                <SectionCard eyebrow="Rules" title="Icon usage">
+                  <ul className="mt-5 space-y-3 text-sm font-medium leading-7 text-slate-600">
+                    {iconographyRules.map((rule) => (
+                      <li key={rule} className="flex gap-3">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#BFFF07]" />
+                        <span>{rule}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </SectionCard>
+              </div>
+            ) : null}
+
+            {activeTab === "photography" ? (
+              <div className="space-y-8">
+                <SectionCard eyebrow="Direction" title="Real ops, real freight">
+                  <DoDontGrid doItems={photographyRules.do} dontItems={photographyRules.dont} />
+                </SectionCard>
+                <SectionCard eyebrow="Gallery" title="Approved photography">
+                  <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {photographyExamples.map((photo) => (
+                      <div key={photo.src}>
+                        <div className="relative h-52 overflow-hidden rounded-2xl bg-slate-100">
+                          <Image src={photo.src} alt={photo.title} fill className="object-cover" />
+                        </div>
+                        <p className="mt-3 text-sm font-black text-slate-900">{photo.title}</p>
+                        <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{photo.caption}</p>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
               </div>
             ) : null}
           </div>

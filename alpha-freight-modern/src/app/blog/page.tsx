@@ -2,83 +2,27 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { blogArticles, blogCategories } from "@/lib/blog-content";
 
-const categories = ["All", "Company News", "Technology", "Market Trends"] as const;
+const categories = blogCategories;
 
 type Category = (typeof categories)[number];
-
-type Article = {
-  slug: string;
-  category: Exclude<Category, "All">;
-  title: string;
-  excerpt: string;
-  image: string;
-};
-
-const articles: Article[] = [
-  {
-    slug: "transparency-standard-freight",
-    category: "Company News",
-    title: "Why Transparency is the New Standard in Freight",
-    excerpt:
-      "In an era of instant information, siloed data is a liability. Find out how our real-time tracking systems provide businesses with the absolute clarity they need to operate faster.",
-    image: "/news-new-1.jpg",
-  },
-  {
-    slug: "road-to-net-zero",
-    category: "Technology",
-    title: "The Road to Net-Zero: Future of Green Trucking",
-    excerpt:
-      "Sustainability is no longer optional in freight. Learn how high-performance fleets, route intelligence, and cleaner operations are reshaping tomorrow's transport model.",
-    image: "/news-new-2.jpg",
-  },
-  {
-    slug: "final-mile-precision",
-    category: "Market Trends",
-    title: "Redefining the Final Mile: Speed Meets Precision",
-    excerpt:
-      "The last mile is often the most complex part of the journey. We explore how integrated technology and local expertise ensure your goods arrive with control and speed.",
-    image: "/news-new-3.jpg",
-  },
-  {
-    slug: "digital-pod-momentum",
-    category: "Technology",
-    title: "Digital POD Is Quietly Transforming Freight Settlement",
-    excerpt:
-      "Faster confirmation, cleaner documentation, and fewer disputes. See why proof-of-delivery workflows are becoming central to efficient operations.",
-    image: "/news-new-4.jpg",
-  },
-  {
-    slug: "carrier-network-signal",
-    category: "Company News",
-    title: "What a Stronger Carrier Network Actually Looks Like",
-    excerpt:
-      "Growth alone is not the metric. The real win comes from consistency, verified performance, and better operational trust between every moving part.",
-    image: "/news-item-5.jpg",
-  },
-  {
-    slug: "market-rhythm-2026",
-    category: "Market Trends",
-    title: "Market Rhythm in 2026: Capacity, Timing, and Rate Pressure",
-    excerpt:
-      "Freight teams are navigating sharper demand windows and faster expectations. Here are the shifts shaping better decisions across the market.",
-    image: "/news-item-6.jpg",
-  },
-];
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
 
   const filteredArticles = useMemo(() => {
     if (activeCategory === "All") {
-      return articles;
+      return blogArticles;
     }
 
-    return articles.filter((article) => article.category === activeCategory);
+    return blogArticles.filter((article) => article.category === activeCategory);
   }, [activeCategory]);
 
   return (
@@ -157,32 +101,39 @@ export default function BlogPage() {
                     whileHover={{ y: -4 }}
                     className="group"
                   >
-                    <div className="relative aspect-[1.25/0.88] overflow-hidden bg-[#dfdfd8]">
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                      />
+                    <Link href={`/blog/${article.slug}`} className="block">
+                      <div className="relative aspect-[1.25/0.88] overflow-hidden bg-[#dfdfd8]">
+                        <Image
+                          src={article.image}
+                          alt={article.title}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                        />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />
 
-                      <div className="absolute top-3 left-3 px-3 py-1 bg-black/30 backdrop-blur-sm text-[9px] font-bold uppercase tracking-[0.14em] text-white">
-                        {article.category}
+                        <div className="absolute top-3 left-3 px-3 py-1 bg-black/30 backdrop-blur-sm text-[9px] font-bold uppercase tracking-[0.14em] text-white">
+                          {article.category}
+                        </div>
+
+                        <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-white/90" />
                       </div>
 
-                      <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-white/90" />
-                    </div>
+                      <div className="pt-4 md:pt-5 space-y-3">
+                        <h2 className="text-[1.65rem] md:text-[1.9rem] font-medium leading-[1.02] tracking-tight text-[#202020] group-hover:text-black transition-colors">
+                          {article.title}
+                        </h2>
 
-                    <div className="pt-4 md:pt-5 space-y-3">
-                      <h2 className="text-[1.65rem] md:text-[1.9rem] font-medium leading-[1.02] tracking-tight text-[#202020]">
-                        {article.title}
-                      </h2>
+                        <p className="text-[14px] md:text-[15px] leading-[1.7] text-black/45 max-w-[95%]">
+                          {article.excerpt}
+                        </p>
 
-                      <p className="text-[14px] md:text-[15px] leading-[1.7] text-black/45 max-w-[95%]">
-                        {article.excerpt}
-                      </p>
-                    </div>
+                        <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 group-hover:text-black transition-colors">
+                          Read article
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                        </span>
+                      </div>
+                    </Link>
                   </motion.article>
                 ))}
               </AnimatePresence>
