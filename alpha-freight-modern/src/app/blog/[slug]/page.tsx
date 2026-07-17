@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
+import JsonLd from "@/components/seo/JsonLd";
 import { CinematicCTA, Footer } from "@/components/Footer";
 import { getBlogArticle, getRelatedArticles } from "@/lib/blog-content";
+import { absoluteUrl, createArticleMetadata } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -24,10 +26,13 @@ export async function generateMetadata({ params }: PageProps) {
     return { title: "Article Not Found | Alpha Freight" };
   }
 
-  return {
+  return createArticleMetadata({
     title: `${article.title} | Alpha Freight Blog`,
     description: article.excerpt,
-  };
+    path: `/blog/${slug}`,
+    image: article.image,
+    publishedTime: article.publishedAt,
+  });
 }
 
 export default async function BlogArticlePage({ params }: PageProps) {
@@ -42,6 +47,29 @@ export default async function BlogArticlePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-[#f5f5f2] text-black overflow-x-hidden">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: article.title,
+          description: article.excerpt,
+          image: absoluteUrl(article.image),
+          author: {
+            "@type": "Organization",
+            name: article.author,
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "Alpha Freight",
+            logo: {
+              "@type": "ImageObject",
+              url: absoluteUrl("/favicon-192.png"),
+            },
+          },
+          datePublished: article.publishedAt,
+          mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
+        }}
+      />
       <Navbar variant="dark" />
 
       <main className="pt-28 md:pt-32">

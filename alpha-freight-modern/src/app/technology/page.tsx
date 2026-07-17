@@ -123,7 +123,7 @@ export default function TechnologyPage() {
                   <h3 className="text-5xl md:text-6xl font-medium tracking-tight text-black leading-[1.1]">
                     Optimize Operations with Real-time Data.
                   </h3>
-                  <Link href="#" className="inline-flex items-center gap-4 group">
+                  <Link href="/products/analytics" className="inline-flex items-center gap-4 group">
                     <div className="w-10 h-10 rounded-full bg-[#BFFF07] flex items-center justify-center text-black group-hover:scale-110 transition-transform">
                       <ArrowRight className="w-5 h-5" />
                     </div>

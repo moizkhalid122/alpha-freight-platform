@@ -105,7 +105,7 @@ export default function LoginPage() {
         <div className={AUTH.field}>
           <div className="flex items-center justify-between px-1 sm:px-3">
             <label className={AUTH.labelPlain}>Password</label>
-            <Link href="#" className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 hover:text-blue-700">
+            <Link href="/auth/forgot-password" className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 hover:text-blue-700">
               Forgot?
             </Link>
           </div>

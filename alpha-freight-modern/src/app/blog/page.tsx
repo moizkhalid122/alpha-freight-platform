@@ -54,9 +54,9 @@ export default function BlogPage() {
                 <h1 className="text-[3.2rem] sm:text-[4.8rem] md:text-[5.8rem] lg:text-[6.2rem] font-medium leading-[0.9] tracking-tighter uppercase text-[#171717]">
                   Insights Into The
                   <br />
-                  Driving The Future Of
+                  Future Of UK
                   <br />
-                  Global Logistics.
+                  Freight & Logistics.
                 </h1>
               </motion.div>
             </div>

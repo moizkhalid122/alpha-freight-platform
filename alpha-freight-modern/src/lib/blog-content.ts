@@ -19,7 +19,7 @@ export const blogArticles: BlogArticle[] = [
     title: "Why Transparency is the New Standard in Freight",
     excerpt:
       "In an era of instant information, siloed data is a liability. Find out how our real-time tracking systems provide businesses with the absolute clarity they need to operate faster.",
-    image: "/news-new-1.jpg",
+    image: "/1st box.jpg",
     author: "Alpha Freight Editorial",
     publishedAt: "March 12, 2026",
     readTime: "6 min read",
@@ -147,7 +147,7 @@ export const blogArticles: BlogArticle[] = [
     title: "What a Stronger Carrier Network Actually Looks Like",
     excerpt:
       "Growth alone is not the metric. The real win comes from consistency, verified performance, and better operational trust between every moving part.",
-    image: "/news-item-5.jpg",
+    image: "/network.png",
     author: "Alpha Freight Editorial",
     publishedAt: "February 10, 2026",
     readTime: "5 min read",
@@ -197,6 +197,133 @@ export const blogArticles: BlogArticle[] = [
         heading: "Data-led bidding wins",
         paragraphs: [
           "Market rate visibility, historical lane performance, and live load status help both sides make sharper decisions. That is the rhythm modern freight platforms are built around.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "uk-freight-broker-vs-platform",
+    category: "Market Trends",
+    title: "UK Freight Broker vs Digital Platform: What Shippers Should Know",
+    excerpt:
+      "Traditional brokers and digital freight platforms solve different problems. Here is how to choose the right model for UK haulage and distribution.",
+    image: "/w.jpg",
+    author: "Alpha Freight Editorial",
+    publishedAt: "April 2, 2026",
+    readTime: "8 min read",
+    sections: [
+      {
+        paragraphs: [
+          "UK shippers still work with freight brokers, 3PLs, and direct carrier relationships — often at the same time. The difference today is how much visibility, speed, and auditability each model provides.",
+          "Traditional brokerage can work well for complex, relationship-led freight. Digital platforms excel when you need faster matching, live tracking, structured documentation, and predictable settlement workflows.",
+        ],
+      },
+      {
+        heading: "Where brokers still add value",
+        paragraphs: [
+          "High-touch lanes, bespoke equipment, and exception-heavy freight often benefit from human negotiation and long-standing carrier relationships.",
+          "Brokers can also coordinate multi-leg movements where pricing and timing depend on context that is hard to encode in a standard load form.",
+        ],
+      },
+      {
+        heading: "Where platforms win",
+        paragraphs: [
+          "Repeatable UK lanes, transparent pricing bands, and high shipment volume benefit from marketplace tooling: verified carrier pools, digital POD, wallet settlement, and searchable performance history.",
+          "Alpha Freight combines marketplace speed with verification standards so suppliers get platform efficiency without sacrificing trust.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "verified-carrier-checklist-uk",
+    category: "Company News",
+    title: "Verified Carrier Checklist for UK Freight Buyers",
+    excerpt:
+      "Before you award a load, confirm insurance, compliance, equipment fit, and operational track record using this practical UK checklist.",
+    image: "/8.jpg",
+    author: "Alpha Freight Editorial",
+    publishedAt: "March 22, 2026",
+    readTime: "7 min read",
+    sections: [
+      {
+        paragraphs: [
+          "Awarding freight to the cheapest bid is risky when verification is weak. UK buyers should treat carrier vetting as part of procurement, not an afterthought.",
+        ],
+      },
+      {
+        heading: "Minimum checks",
+        paragraphs: [
+          "Confirm operator licensing, valid insurance including goods in transit where required, and vehicle suitability for cargo weight, dimensions, and handling needs.",
+          "Review operating region fit, recent performance indicators, and whether the carrier can meet pickup and delivery windows without subcontracting without disclosure.",
+        ],
+      },
+      {
+        heading: "Why marketplaces standardise this",
+        paragraphs: [
+          "Alpha Freight's vetting flow stores verification outcomes against carrier profiles so suppliers see trust signals before assignment rather than discovering gaps after dispatch.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "supplier-load-posting-guide-uk",
+    category: "Technology",
+    title: "Supplier Guide: Posting Loads That Match Faster in the UK",
+    excerpt:
+      "Better load details mean better carrier matches. A practical guide to budgets, timing, equipment, and documentation for UK freight postings.",
+    image: "/bi.png",
+    author: "Alpha Freight Editorial",
+    publishedAt: "March 18, 2026",
+    readTime: "6 min read",
+    sections: [
+      {
+        paragraphs: [
+          "Most matching delays come from incomplete load data, not a lack of carrier capacity. Suppliers who post precise route, cargo, and timing information receive stronger bids faster.",
+        ],
+      },
+      {
+        heading: "Fields that matter most",
+        paragraphs: [
+          "Pickup and delivery postcodes, access constraints, commodity type, weight, pallet count or dimensions, required equipment, and realistic budget ranges.",
+          "Flag special requirements early — ADR, tail lift, temperature control, and booked timed slots all change carrier fit and price.",
+        ],
+      },
+      {
+        heading: "After publication",
+        paragraphs: [
+          "Review bids on fit as well as rate. Accepting a verified carrier with strong lane history often reduces exceptions and support load later in the journey.",
+          "Use live tracking and digital POD to close the loop quickly and keep finance teams aligned on settlement.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "hgv-capacity-planning-2026",
+    category: "Market Trends",
+    title: "HGV Capacity Planning in 2026: Timing Beats Average Rates",
+    excerpt:
+      "UK fleet operators and shippers are planning around tighter windows and sharper lane volatility. Here is how to plan capacity with better data.",
+    image: "/hvg.jpg",
+    author: "Alpha Freight Editorial",
+    publishedAt: "March 5, 2026",
+    readTime: "7 min read",
+    sections: [
+      {
+        paragraphs: [
+          "Average rate benchmarks still matter, but execution speed matters more when capacity shifts weekly across retail, construction, and manufacturing lanes.",
+        ],
+      },
+      {
+        heading: "Plan earlier on volatile lanes",
+        paragraphs: [
+          "Posting loads further ahead improves match quality and reduces premium spot exposure. Carriers can position equipment with more certainty.",
+        ],
+      },
+      {
+        heading: "Use live signals, not stale reports",
+        paragraphs: [
+          "Tracking, POD timing, and lane-level completion history help both sides understand where delays originate and which partners perform consistently.",
+          "Alpha Freight surfaces these signals inside supplier and carrier dashboards so planning teams can act before service failures compound.",
         ],
       },
     ],

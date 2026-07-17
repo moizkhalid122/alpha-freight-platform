@@ -29,6 +29,8 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/products/ai-assistant",
   "/products/api",
   "/products/rates",
+  "/products/roadmap",
+  "/products/releases",
   "/available-loads",
   "/directory",
   "/suppliers",
@@ -43,32 +45,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/cookie-policy",
 ] as const;
 
-/** Carrier directory company profile slugs (matches /directory/[id]). */
-export const CARRIER_DIRECTORY_IDS = [
-  "amz-prep",
-  "synex-logistics",
-  "jmd-haulage",
-  "ws-transportation",
-  "wt-transport",
-  "transporter-eng",
-  "carntyne-transport",
-  "major-freight",
-  "road-transport-media",
-  "1",
-] as const;
-
-/** Supplier directory company profile slugs (matches /suppliers/[id]). */
-export const SUPPLIER_DIRECTORY_IDS = [
-  "british-steel",
-  "barrett-steel",
-  "parker-steel",
-  "advanced-fab",
-  "manufactory",
-  "contracts-engineering",
-  "wcm",
-  "fabricon-design",
-  "beck-pollitzer",
-] as const;
+export const SERVICE_DETAIL_IDS = ["01", "02", "03", "04", "05"] as const;
 
 export type SitemapChangeFrequency = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 

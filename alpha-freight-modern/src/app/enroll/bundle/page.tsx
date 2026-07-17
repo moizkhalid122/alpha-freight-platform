@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, Mail, Phone, Sparkles, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, Sparkles } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import { CinematicCTA, Footer } from "@/components/Footer";
+import AcademyEnrollmentForm from "@/components/academy/AcademyEnrollmentForm";
 
 const bundleIncludes = [
   "CPC Training Course",
@@ -18,13 +18,6 @@ const bundleIncludes = [
 ];
 
 export default function EnrollBundlePage() {
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitted(true);
-  };
-
   return (
     <div className="min-h-screen bg-black text-white selection:bg-[#BFFF07] selection:text-black overflow-x-hidden">
       <Navbar />
@@ -129,71 +122,11 @@ export default function EnrollBundlePage() {
                 </div>
               </div>
 
-              {submitted ? (
-                <div className="rounded-[1.5rem] border border-black/10 bg-white p-6 space-y-4">
-                  <CheckCircle2 className="h-8 w-8 text-black" />
-                  <h3 className="text-xl font-medium tracking-tight">Bundle request received</h3>
-                  <p className="text-sm leading-relaxed text-black/50">
-                    Thanks for choosing the Complete Driver Bundle. Our academy team will confirm your package, schedule, and payment details shortly.
-                  </p>
-                  <Link
-                    href="/academy"
-                    className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors"
-                  >
-                    Back to academy
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <label className="block">
-                    <span className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-black/35">
-                      <User className="h-3.5 w-3.5" />
-                      Full name
-                    </span>
-                    <input
-                      required
-                      name="name"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black"
-                      placeholder="Your full name"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-black/35">
-                      <Mail className="h-3.5 w-3.5" />
-                      Email
-                    </span>
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black"
-                      placeholder="you@company.com"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-black/35">
-                      <Phone className="h-3.5 w-3.5" />
-                      Phone
-                    </span>
-                    <input
-                      required
-                      name="phone"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black"
-                      placeholder="+44 ..."
-                    />
-                  </label>
-
-                  <button
-                    type="submit"
-                    className="w-full rounded-2xl bg-[#BFFF07] px-5 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-black hover:bg-black hover:text-white transition-colors"
-                  >
-                    Reserve bundle for £299
-                  </button>
-                </form>
-              )}
+              <AcademyEnrollmentForm
+                enrollmentType="bundle"
+                courseTitle="Complete Driver Bundle"
+                submitLabel="Reserve bundle for £299"
+              />
             </motion.div>
           </div>
         </section>

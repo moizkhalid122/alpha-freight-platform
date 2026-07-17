@@ -69,44 +69,50 @@ const serviceItems = [
 const newsArticles = [
   {
     id: 1,
+    slug: "transparency-standard-freight",
     tag: "NEWS",
-    date: "9.27.26",
-    title: "Transparency Through Real-Time Tracking",
-    image: "/news-new-1.jpg",
+    date: "Mar 12, 2026",
+    title: "Why Transparency is the New Standard in Freight",
+    image: "/1st box.jpg",
   },
   {
     id: 2,
+    slug: "road-to-net-zero",
     tag: "INSIGHTS",
-    date: "9.17.26",
-    title: "Optimize Your Global Supply Chain Today",
+    date: "Mar 8, 2026",
+    title: "The Road to Net-Zero: Future of Green Trucking",
     image: "/news-new-2.jpg",
   },
   {
     id: 3,
+    slug: "digital-pod-momentum",
     tag: "NEWS",
-    date: "9.08.26",
-    title: "Tech Transforms Shipping's Future",
+    date: "Feb 19, 2026",
+    title: "Digital POD Is Quietly Transforming Freight Settlement",
     image: "/news-new-3.jpg",
   },
   {
     id: 4,
+    slug: "final-mile-precision",
     tag: "INSIGHTS",
-    date: "10.31.26",
-    title: "Overcoming Global Logistics Challenges",
+    date: "Feb 28, 2026",
+    title: "Redefining the Final Mile: Speed Meets Precision",
     image: "/news-new-4.jpg",
   },
   {
     id: 5,
+    slug: "carrier-network-signal",
     tag: "NEWS",
-    date: "11.15.26",
-    title: "The Rise of Autonomous Freight",
-    image: "/news-item-5.jpg",
+    date: "Feb 10, 2026",
+    title: "What a Stronger Carrier Network Actually Looks Like",
+    image: "/network.png",
   },
   {
     id: 6,
+    slug: "market-rhythm-2026",
     tag: "INSIGHTS",
-    date: "11.28.26",
-    title: "Sustainable Packaging in Logistics",
+    date: "Jan 30, 2026",
+    title: "Market Rhythm in 2026: Capacity, Timing, and Rate Pressure",
     image: "/news-item-6.jpg",
   },
 ];
@@ -629,8 +635,11 @@ export default function Home() {
             >
               <div className="flex space-x-8 min-w-max pb-12 px-2">
                 {newsArticles.map((article) => (
-                  <motion.div 
+                  <Link
                     key={article.id}
+                    href={`/blog/${article.slug}`}
+                  >
+                  <motion.div 
                     whileHover={{ y: -10 }}
                     className="w-[300px] md:w-[400px] group cursor-pointer"
                   >
@@ -661,6 +670,7 @@ export default function Home() {
                       </div>
                     </div>
                   </motion.div>
+                  </Link>
                 ))}
               </div>
             </div>

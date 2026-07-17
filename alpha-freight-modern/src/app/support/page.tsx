@@ -24,6 +24,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { Footer, CinematicCTA } from "@/components/Footer";
+import { getSupportArticleHref } from "@/lib/support-links";
 
 const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_mvxwoue";
 const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_21isokf";
@@ -307,7 +308,7 @@ export default function SupportPage() {
                     <ul className="space-y-2">
                       {cat.links.map(link => (
                         <li key={link}>
-                          <Link href="#" className="text-gray-400 hover:text-black transition-colors text-sm font-medium flex items-center gap-2">
+                          <Link href={getSupportArticleHref(link)} className="text-gray-400 hover:text-black transition-colors text-sm font-medium flex items-center gap-2">
                             <span className="w-1 h-1 rounded-full bg-[#BFFF07]" />
                             {link}
                           </Link>
