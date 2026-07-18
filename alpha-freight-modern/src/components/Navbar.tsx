@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 import { Bookmark } from "lucide-react";
-import { TOOL_NAV_HIGHLIGHTS } from "@/lib/tools-hub-data";
 
 interface NavItem {
   name: string;
@@ -69,17 +68,11 @@ const navLinks: NavItem[] = [
       {
         category: "Resources",
         items: [
-          { name: "Free Freight Tools", href: "/tools", desc: "11 UK calculators & marketplace utilities" },
-          ...TOOL_NAV_HIGHLIGHTS.slice(1).map((tool) => ({
-            name: tool.name,
-            href: tool.href,
-            desc: tool.desc,
-          })),
+          { name: "All Free Tools", href: "/tools", desc: "UK freight calculators & marketplace utilities" },
           { name: "Academy", href: "/academy", desc: "Driver training & certification" },
           { name: "Learning Series", href: "/learning-series", desc: "Free YouTube freight lessons" },
           { name: "Support Center", href: "/support", desc: "24/7 help and guidance" },
           { name: "Documentation", href: "/docs", desc: "Platform guides & tutorials" },
-          { name: "Send Feedback", href: "/feedback", desc: "Tell us what to improve" },
           { name: "Brand Kit", href: "/brand-kit", desc: "Logos, colors, and usage rules" },
         ]
       },
