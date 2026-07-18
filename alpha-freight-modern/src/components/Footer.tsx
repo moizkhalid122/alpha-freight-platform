@@ -11,6 +11,7 @@ import {
   Phone,
   MapPin
 } from "lucide-react";
+import { TOOL_FOOTER_LINKS } from "@/lib/tools-hub-data";
 
 export function Footer() {
   return (
@@ -74,12 +75,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-32 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 mb-32 relative z-10">
           {/* Main Solutions */}
           <div className="col-span-1">
             <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Solutions</h4>
             <ul className="space-y-3">
               {[
+                { name: "Find Loads UK", href: "/find-loads" },
+                { name: "Post Loads UK", href: "/post-loads" },
                 { name: "Carrier Directory", href: "/directory" },
                 { name: "Supplier Directory", href: "/suppliers" },
                 { name: "AI Assistant", href: "/products/ai-assistant" },
@@ -126,12 +129,24 @@ export function Footer() {
                 { name: "Knowledge Base", href: "/knowledge-base" },
                 { name: "Learning Series", href: "/learning-series" },
                 { name: "Help Center", href: "/support" },
-                { name: "Free Freight Tools", href: "/tools" },
-                { name: "Track Shipment", href: "/track" },
                 { name: "Send Feedback", href: "/feedback" },
                 { name: "Company Blog", href: "/blog" },
-                { name: "Success Stories", href: "/success-stories" }
+                { name: "Success Stories", href: "/success-stories" },
               ].map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href}>
+                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{item.name}</motion.span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Free Tools */}
+          <div className="col-span-1">
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Free Tools</h4>
+            <ul className="space-y-3">
+              {TOOL_FOOTER_LINKS.map((item) => (
                 <li key={item.name}>
                   <Link href={item.href}>
                     <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{item.name}</motion.span>

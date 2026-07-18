@@ -43,6 +43,14 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/tools",
   "/tools/lane-rates",
   "/tools/freight-quote",
+  "/tools/distance",
+  "/tools/live-loads",
+  "/tools/rate-check",
+  "/tools/backhaul",
+  "/tools/pallet-fit",
+  "/tools/carrier-margin",
+  "/tools/fuel-surcharge",
+  "/tools/delivery-eta",
   "/track",
   "/knowledge-base",
   "/learning-series",
@@ -67,6 +75,10 @@ export function getPathPriority(path: string): number {
     path === "/tools" ||
     path === "/tools/lane-rates" ||
     path === "/tools/freight-quote" ||
+    path === "/tools/distance" ||
+    path === "/tools/live-loads" ||
+    path === "/tools/rate-check" ||
+    path === "/tools/backhaul" ||
     path === "/track" ||
     path === "/feedback"
   )

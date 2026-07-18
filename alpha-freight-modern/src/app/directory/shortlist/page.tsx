@@ -16,226 +16,70 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import type { PublicCarrierListing, PublicSupplierListing } from "@/lib/public-directory";
 
-// We need the carrier data to display their info
-const MOCK_CARRIERS = [
-  {
-    id: "amz-prep",
-    company_name: "AMZ Prep | Best 3PL Provider",
-    city: "Brampton, Canada",
-    image: "/AMZ Prep.png",
-    tag: "Premier Verified",
-    description: "AMZ Prep is a leading USA 3PL, Canada 3PL, and ecommerce 3PL partner for Amazon-first brands."
-  },
-  {
-    id: "synex-logistics",
-    company_name: "SYNEX Logistics",
-    city: "Kyiv, Ukraine",
-    image: "/SYNEX Logistics.png",
-    tag: "3PL Operator",
-    description: "Improving efficiency with logistics. Multimodal, transport and contract logistics services since 2009."
-  },
-  {
-    id: "jmd-haulage",
-    company_name: "JMD Haulage Contractors",
-    city: "Liverpool, England",
-    image: "/JMD Haulage Contractors.png",
-    tag: "Family Run",
-    description: "Family-run transport business with over 40 years of experience. Large independent container haulier."
-  },
-  {
-    id: "ws-transportation",
-    company_name: "WS Transportation",
-    city: "Barnton, England",
-    image: "/WS Transportation.png",
-    tag: "High & Heavy",
-    description: "Specialists in construction industry logistics and high & heavy haulage across the UK."
-  },
-  {
-    id: "wt-transport",
-    company_name: "WT TRANSPORT",
-    city: "Northampton, England",
-    image: "/WT TRANSPORT.png",
-    tag: "FORS Silver",
-    description: "Road haulage and warehousing service provider based in Northampton, specializing in comprehensive logistics solutions."
-  },
-  {
-    id: "transporter-eng",
-    company_name: "Transporter Engineering Limited",
-    city: "Braintree, England",
-    image: "/Transporter Engineering Limited.png",
-    tag: "Engineering",
-    description: "Manufacturer specializing in high-quality British-built mechanical and industrial engineering products."
-  },
-  {
-    id: "carntyne-transport",
-    company_name: "Carntyne Transport",
-    city: "Glasgow, Scotland",
-    image: "/Carntyne Transport.png",
-    tag: "Bulk Liquid",
-    description: "Leading third-party logistics provider specializing in bulk liquid transport and bonded cask warehousing."
-  },
-  {
-    id: "major-freight",
-    company_name: "MAJOR FREIGHT SERVICES LTD",
-    city: "Newtownabbey, Northern Ireland",
-    image: "/MAJOR FREIGHT SERVICES LTD.png",
-    tag: "Montgomery Group",
-    description: "Part of Montgomery Transport Group, specializing in integrated transport and logistics solutions across the UK, Ireland, and Europe."
-  },
-  {
-    id: "road-transport-media",
-    company_name: "Road Transport Media",
-    city: "Sutton, England",
-    image: "/Road Transport Media.png",
-    tag: "DVV Media",
-    description: "Publisher and service provider specializing in the road transport and logistics industry, featuring Commercial Motor and Motor Transport."
-  },
-  {
-    id: "1",
-    company_name: "Street Stream",
-    city: "London",
-    image: "/street stream.png",
-    tag: "Featured",
-    description: "Specializing in same day courier and last mile carrier services in London."
-  }
-];
+const FALLBACK_IMAGE = "/alpha freight truck.jpg";
 
-const MOCK_SUPPLIERS = [
-  {
-    id: "british-steel",
-    name: "British Steel",
-    city: "Scunthorpe, United Kingdom",
-    category: "Steel",
-    services: ["Manufacturing", "Fabrication", "Raw Materials"],
-    rating: 4.9,
-    reviews: 1250,
-    is_verified: true,
-    tag: "Primary Producer",
-    image: "/British Steel.png",
-    description: "British Steel is a leading steel manufacturer in Europe, producing around 3 million tonnes of high-quality steel products annually."
-  },
-  {
-    id: "barrett-steel",
-    name: "Barrett Steel",
-    city: "Bradford-on-Tone, United Kingdom",
-    category: "Steel",
-    services: ["General Steels", "Engineering Steels", "Tubes"],
-    rating: 4.8,
-    reviews: 426,
-    is_verified: true,
-    tag: "Tier 1 Supplier",
-    image: "/Barrett Steel.png",
-    description: "Barrett Steel is the UK's largest independent steel stockholder, specializing in a wide range of products and services."
-  },
-  {
-    id: "parker-steel",
-    name: "JOHN PARKER & SON LIMITED",
-    city: "Canterbury, United Kingdom",
-    category: "Steel",
-    services: ["Laser Cutting", "Steel Processing", "Stockholding"],
-    rating: 4.7,
-    reviews: 89,
-    is_verified: true,
-    tag: "Tier 1 Supplier",
-    image: "/JOHN PARKER & SON LIMITED1.png",
-    description: "ParkerSteel Limited specializing in a comprehensive range of steel products and services."
-  },
-  {
-    id: "advanced-fab",
-    name: "MS Companies",
-    city: "Indianapolis, United States",
-    category: "Manufacturing",
-    services: ["Workforce Solutions", "Inspection", "Containment"],
-    rating: 4.8,
-    reviews: 768,
-    is_verified: true,
-    tag: "Service Provider",
-    image: "/MS Companies.png",
-    description: "MS Companies is a data-driven technology company and service provider that specializes in building data and quality infrastructures for manufacturers."
-  },
-  {
-    id: "manufactory",
-    name: "Manufactory",
-    city: "Cheltenham, United Kingdom",
-    category: "Manufacturing",
-    services: ["Precision Machined", "Smart Factories", "AI-driven decisions"],
-    rating: 4.8,
-    reviews: 4,
-    is_verified: true,
-    tag: "Service Provider",
-    image: "/Manufactory.png",
-    description: "Manufactory is a provider of advanced manufacturing solutions, specializing in the development of a factory operating system."
-  },
-  {
-    id: "contracts-engineering",
-    name: "Contracts Engineering Limited",
-    city: "Sittingbourne, United Kingdom",
-    category: "Fabrication",
-    services: ["Laser Cutting", "Metal Fabrication", "Powder Coating"],
-    rating: 4.8,
-    reviews: 56,
-    is_verified: true,
-    tag: "Tier 1 Supplier",
-    image: "/Contracts Engineering Limited.png",
-    description: "Contracts Engineering Limited is a precision metal fabrication company specializing in laser cutting, folding, and welding services."
-  },
-  {
-    id: "wcm",
-    name: "WCM",
-    city: "Basildon, United Kingdom",
-    category: "Automotive",
-    services: ["Metal Production", "Plastic Parts", "3D Printing"],
-    rating: 3.7,
-    reviews: 7,
-    is_verified: true,
-    tag: "Manufacturer",
-    image: "/WCM.png",
-    description: "WCM is a world-class manufacturer specializing in the production of metal and plastic parts, assemblies, and systems for the automotive industry."
-  },
-  {
-    id: "fabricon-design",
-    name: "Fabricon Design",
-    city: "Tameside, United Kingdom",
-    category: "Manufacturing",
-    services: ["Design & Prototyping", "CNC Machining", "Injection Molding"],
-    rating: 5.0,
-    reviews: 3,
-    is_verified: true,
-    tag: "Manufacturer",
-    image: "/Fabricon Design.png",
-    description: "Fabricon Design is a manufacturer and service provider specializing in design, prototyping, and production services for a diverse range of products."
-  },
-  {
-    id: "beck-pollitzer",
-    name: "Beck & Pollitzer",
-    city: "Dartford, United Kingdom",
-    category: "Industrial",
-    services: ["Industrial Installation", "Machinery Relocation", "Engineering Solutions"],
-    rating: 3.0,
-    reviews: 2,
-    is_verified: true,
-    tag: "Service Provider",
-    image: "/Beck & Pollitzer.png",
-    description: "Beck & Pollitzer is a leading provider of complex engineering solutions specializing in industrial installation and relocation services."
-  }
-];
+type ShortlistItem = {
+  id: string;
+  type: "carrier" | "supplier";
+  company_name: string;
+  city: string;
+  image: string | null;
+  tag: string;
+};
 
 export default function ShortlistPage() {
   const router = useRouter();
-  const [shortlistedItems, setShortlistedItems] = useState<any[]>([]);
+  const [shortlistedItems, setShortlistedItems] = useState<ShortlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNotification, setShowNotification] = useState<string | null>(null);
 
   useEffect(() => {
-    const carrierIds = JSON.parse(localStorage.getItem('alpha_shortlist') || '[]');
-    const supplierIds = JSON.parse(localStorage.getItem('alpha_supplier_shortlist') || '[]');
-    
-    const carriers = MOCK_CARRIERS.filter(c => carrierIds.includes(c.id)).map(c => ({ ...c, type: 'carrier' }));
-    const suppliers = MOCK_SUPPLIERS.filter(s => supplierIds.includes(s.id)).map(s => ({ ...s, company_name: s.name, type: 'supplier' }));
-    
-    setShortlistedItems([...carriers, ...suppliers]);
-    setLoading(false);
+    async function loadShortlist() {
+      setLoading(true);
+
+      try {
+        const carrierIds = JSON.parse(localStorage.getItem("alpha_shortlist") || "[]") as string[];
+        const supplierIds = JSON.parse(localStorage.getItem("alpha_supplier_shortlist") || "[]") as string[];
+
+        const [carriersResponse, suppliersResponse] = await Promise.all([
+          fetch("/api/public/carriers"),
+          fetch("/api/public/suppliers"),
+        ]);
+
+        const carriersPayload = (await carriersResponse.json()) as { carriers?: PublicCarrierListing[] };
+        const suppliersPayload = (await suppliersResponse.json()) as { suppliers?: PublicSupplierListing[] };
+
+        const carriers = (carriersPayload.carriers ?? [])
+          .filter((carrier) => carrierIds.includes(carrier.id))
+          .map((carrier) => ({
+            id: carrier.id,
+            type: "carrier" as const,
+            company_name: carrier.company_name,
+            city: carrier.city,
+            image: carrier.image,
+            tag: carrier.tag,
+          }));
+
+        const suppliers = (suppliersPayload.suppliers ?? [])
+          .filter((supplier) => supplierIds.includes(supplier.id))
+          .map((supplier) => ({
+            id: supplier.id,
+            type: "supplier" as const,
+            company_name: supplier.name,
+            city: supplier.city,
+            image: supplier.image,
+            tag: supplier.tag,
+          }));
+
+        setShortlistedItems([...carriers, ...suppliers]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadShortlist();
   }, []);
 
   const removeFromShortlist = (id: string, type: 'carrier' | 'supplier', e: React.MouseEvent) => {
@@ -318,11 +162,9 @@ export default function ShortlistPage() {
                 >
                   <div className="aspect-[4/3] bg-white relative overflow-hidden flex items-center justify-center p-4">
                     <img 
-                      src={item.image} 
+                      src={item.image || FALLBACK_IMAGE} 
                       alt={item.company_name}
-                      className={`w-full h-full transition-transform duration-700 ${
-                        item.id === "transporter-eng" || item.id === "major-freight" || item.id === "road-transport-media" || item.type === 'supplier' ? "object-contain scale-75" : "object-cover group-hover:scale-105"
-                      }`}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute top-4 right-4 flex gap-2">
                       <button 
@@ -408,9 +250,12 @@ export default function ShortlistPage() {
                   Send your requirements to all {shortlistedItems.length} saved partners at once and get the best rates within minutes.
                 </p>
               </div>
-              <button className="px-12 py-6 bg-white text-blue-600 font-black rounded-[24px] shadow-2xl hover:scale-105 transition-all uppercase tracking-[0.2em] text-xs whitespace-nowrap">
+              <a
+                href={`mailto:support@alphafreightuk.com?subject=${encodeURIComponent("Bulk quote request from shortlist")}&body=${encodeURIComponent(`Hello Alpha Freight team,\n\nI would like quotes from my shortlisted partners (${shortlistedItems.length}).\n\nThanks,`)}`}
+                className="px-12 py-6 bg-white text-blue-600 font-black rounded-[24px] shadow-2xl hover:scale-105 transition-all uppercase tracking-[0.2em] text-xs whitespace-nowrap inline-block"
+              >
                 Send Bulk Request
-              </button>
+              </a>
             </div>
           </div>
         </section>

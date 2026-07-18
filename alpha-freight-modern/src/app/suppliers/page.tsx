@@ -23,133 +23,42 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import type { PublicSupplierListing } from "@/lib/public-directory";
 
-// Mock data for initial development/display
-const MOCK_SUPPLIERS = [
-  {
-    id: "british-steel",
-    name: "British Steel",
-    city: "Scunthorpe, United Kingdom",
-    category: "Steel",
-    services: ["Manufacturing", "Fabrication", "Raw Materials"],
-    rating: 4.9,
-    reviews: 1250,
-    is_verified: true,
-    tag: "Primary Producer",
-    image: "/British Steel.png",
-    description: "British Steel is a leading steel manufacturer in Europe, producing around 3 million tonnes of high-quality steel products annually."
-  },
-  {
-    id: "barrett-steel",
-    name: "Barrett Steel",
-    city: "Bradford-on-Tone, United Kingdom",
-    category: "Steel",
-    services: ["General Steels", "Engineering Steels", "Tubes"],
-    rating: 4.8,
-    reviews: 426,
-    is_verified: true,
-    tag: "Tier 1 Supplier",
-    image: "/Barrett Steel.png",
-    description: "Barrett Steel is the UK's largest independent steel stockholder, specializing in a wide range of products and services."
-  },
-  {
-    id: "parker-steel",
-    name: "JOHN PARKER & SON LIMITED",
-    city: "Canterbury, United Kingdom",
-    category: "Steel",
-    services: ["Laser Cutting", "Steel Processing", "Stockholding"],
-    rating: 4.7,
-    reviews: 89,
-    is_verified: true,
-    tag: "Tier 1 Supplier",
-    image: "/JOHN PARKER & SON LIMITED1.png",
-    description: "ParkerSteel Limited specializing in a comprehensive range of steel products and services."
-  },
-  {
-    id: "advanced-fab",
-    name: "MS Companies",
-    city: "Indianapolis, United States",
-    category: "Manufacturing",
-    services: ["Workforce Solutions", "Inspection", "Containment"],
-    rating: 4.8,
-    reviews: 768,
-    is_verified: true,
-    tag: "Service Provider",
-    image: "/MS Companies.png",
-    description: "MS Companies is a data-driven technology company and service provider that specializes in building data and quality infrastructures for manufacturers."
-  },
-  {
-    id: "manufactory",
-    name: "Manufactory",
-    city: "Cheltenham, United Kingdom",
-    category: "Manufacturing",
-    services: ["Precision Machined", "Smart Factories", "AI-driven decisions"],
-    rating: 4.8,
-    reviews: 4,
-    is_verified: true,
-    tag: "Service Provider",
-    image: "/Manufactory.png",
-    description: "Manufactory is a provider of advanced manufacturing solutions, specializing in the development of a factory operating system."
-  },
-  {
-    id: "contracts-engineering",
-    name: "Contracts Engineering Limited",
-    city: "Sittingbourne, United Kingdom",
-    category: "Fabrication",
-    services: ["Laser Cutting", "Metal Fabrication", "Powder Coating"],
-    rating: 4.8,
-    reviews: 56,
-    is_verified: true,
-    tag: "Tier 1 Supplier",
-    image: "/Contracts Engineering Limited.png",
-    description: "Contracts Engineering Limited is a precision metal fabrication company specializing in laser cutting, folding, and welding services."
-  },
-  {
-    id: "wcm",
-    name: "WCM",
-    city: "Basildon, United Kingdom",
-    category: "Automotive",
-    services: ["Metal Production", "Plastic Parts", "3D Printing"],
-    rating: 3.7,
-    reviews: 7,
-    is_verified: true,
-    tag: "Manufacturer",
-    image: "/WCM.png",
-    description: "WCM is a world-class manufacturer specializing in the production of metal and plastic parts, assemblies, and systems for the automotive industry."
-  },
-  {
-    id: "fabricon-design",
-    name: "Fabricon Design",
-    city: "Tameside, United Kingdom",
-    category: "Manufacturing",
-    services: ["Design & Prototyping", "CNC Machining", "Injection Molding"],
-    rating: 5.0,
-    reviews: 3,
-    is_verified: true,
-    tag: "Manufacturer",
-    image: "/Fabricon Design.png",
-    description: "Fabricon Design is a manufacturer and service provider specializing in design, prototyping, and production services for a diverse range of products."
-  },
-  {
-    id: "beck-pollitzer",
-    name: "Beck & Pollitzer",
-    city: "Dartford, United Kingdom",
-    category: "Industrial",
-    services: ["Industrial Installation", "Machinery Relocation", "Engineering Solutions"],
-    rating: 3.0,
-    reviews: 2,
-    is_verified: true,
-    tag: "Service Provider",
-    image: "/Beck & Pollitzer.png",
-    description: "Beck & Pollitzer is a leading provider of complex engineering solutions specializing in industrial installation and relocation services."
-  }
-];
+const FALLBACK_IMAGE = "/alpha freight truck.jpg";
 
 export default function SupplierDirectoryPage() {
   const router = useRouter();
-  const [suppliers, setSuppliers] = useState(MOCK_SUPPLIERS);
+  const [suppliers, setSuppliers] = useState<PublicSupplierListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
+    async function fetchSuppliers() {
+      setLoading(true);
+      setFetchError(null);
+
+      try {
+        const response = await fetch("/api/public/suppliers");
+        const payload = (await response.json()) as { suppliers?: PublicSupplierListing[]; error?: string };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Unable to load verified suppliers.");
+        }
+
+        setSuppliers(payload.suppliers ?? []);
+      } catch (error) {
+        setFetchError(error instanceof Error ? error.message : "Unable to load verified suppliers.");
+        setSuppliers([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSuppliers();
+  }, []);
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -159,7 +68,7 @@ export default function SupplierDirectoryPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ["All", "Steel", "Manufacturing", "Fabrication", "Machinery", "Industrial"];
+  const categories = ["All", ...Array.from(new Set(suppliers.map((supplier) => supplier.category)))];
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] font-sans">
@@ -253,6 +162,18 @@ export default function SupplierDirectoryPage() {
 
       {/* Main Listing Section */}
       <main className="max-w-7xl mx-auto px-6 pt-12 pb-32">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div key={idx} className="animate-pulse">
+                <div className="aspect-[4/3] mb-6 rounded-3xl bg-slate-100" />
+                <div className="h-6 w-2/3 rounded bg-slate-100 mb-3" />
+                <div className="h-4 w-full rounded bg-slate-50 mb-2" />
+                <div className="h-4 w-1/2 rounded bg-slate-50" />
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
           {filteredSuppliers.map((supplier, idx) => (
             <motion.div
@@ -266,11 +187,9 @@ export default function SupplierDirectoryPage() {
               {/* Card Image Wrapper */}
               <div className="relative aspect-[4/3] mb-6 overflow-hidden rounded-3xl bg-white border border-slate-100 group-hover:border-slate-200 transition-all flex items-center justify-center p-4">
                 <img 
-                  src={supplier.image} 
+                  src={supplier.image || FALLBACK_IMAGE} 
                   alt={supplier.name}
-                  className={`w-full h-full transition-transform duration-700 ease-out ${
-                    supplier.id === 'parker-steel' || supplier.id === 'advanced-fab' || supplier.id === 'manufactory' || supplier.id === 'contracts-engineering' || supplier.id === 'wcm' || supplier.id === 'fabricon-design' || supplier.id === 'beck-pollitzer' ? 'object-contain scale-75' : 'object-cover group-hover:scale-105'
-                  }`}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-white/20">
@@ -297,14 +216,23 @@ export default function SupplierDirectoryPage() {
             </motion.div>
           ))}
         </div>
+        )}
 
-        {filteredSuppliers.length === 0 && (
+        {!loading && fetchError && (
+          <div className="text-center py-12 mb-8 rounded-3xl border border-amber-100 bg-amber-50">
+            <p className="text-sm font-medium text-amber-900">{fetchError}</p>
+          </div>
+        )}
+
+        {!loading && !fetchError && filteredSuppliers.length === 0 && (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search className="w-8 h-8 text-slate-300" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">No suppliers found</h3>
-            <p className="text-slate-400 text-sm">Try adjusting your search or categories to find what you're looking for.</p>
+            <h3 className="text-xl font-black text-slate-900 mb-2">No verified suppliers yet</h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
+              Verified supplier profiles appear here once approved on Alpha Freight. Try adjusting filters or join as a supplier.
+            </p>
           </div>
         )}
       </main>

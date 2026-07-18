@@ -1,62 +1,64 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { getAdminSupabase, isAdminServiceConfigured } from "@/lib/supabase-admin";
+import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_LOAD_SELECT =
-  "id, origin, destination, pickup_location, delivery_location, price, equipment, pickup_date, delivery_date, status, commodity, title, created_at, payment_route, payment_state";
+import { normalizeLocation, parseEquipmentQuery, resolveUkCityLabel } from "@/lib/freight-tools";
+import { fetchPublicAvailableLoads } from "@/lib/public-freight-data";
 
-export async function GET() {
+function matchesCity(value: string, filter: string) {
+  const label = resolveUkCityLabel(value)?.toLowerCase();
+  const filterLabel = resolveUkCityLabel(filter)?.toLowerCase() ?? filter.toLowerCase();
+  if (!label) return value.toLowerCase().includes(filterLabel);
+  return label.includes(filterLabel) || filterLabel.includes(label);
+}
+
+function matchesEquipment(value: string, filter: string) {
+  const normalized = value.toLowerCase();
+  const equipment = parseEquipmentQuery(filter);
+  if (equipment === "general") return true;
+  if (equipment === "refrigerated") return normalized.includes("refrig") || normalized.includes("fridge");
+  if (equipment === "flatbed") return normalized.includes("flat");
+  if (equipment === "curtain") return normalized.includes("curtain") || normalized.includes("tilt");
+  return true;
+}
+
+export async function GET(request: NextRequest) {
+  const params = request.nextUrl.searchParams;
+  const origin = normalizeLocation(params.get("origin") || "");
+  const destination = normalizeLocation(params.get("destination") || "");
+  const equipment = params.get("equipment") || "";
+  const limit = Math.min(24, Math.max(1, Number(params.get("limit") || 12)));
+
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    let loads = await fetchPublicAvailableLoads(48);
 
-    if (!url || !anonKey) {
-      return NextResponse.json({ loads: [], stats: { total: 0, avgRatePerMile: null } });
+    if (origin) {
+      loads = loads.filter((load) => matchesCity(load.origin, origin));
+    }
+    if (destination) {
+      loads = loads.filter((load) => matchesCity(load.destination, destination));
+    }
+    if (equipment) {
+      loads = loads.filter((load) => matchesEquipment(load.equipment, equipment));
     }
 
-    const db = isAdminServiceConfigured()
-      ? getAdminSupabase()
-      : createClient(url, anonKey);
-
-    const { data, error } = await db
-      .from("loads")
-      .select(PUBLIC_LOAD_SELECT)
-      .in("status", ["active", "available", "pending"])
-      .is("carrier_id", null)
-      .order("created_at", { ascending: false })
-      .limit(48);
-
-    if (error) {
-      return NextResponse.json({ error: error.message, loads: [], stats: { total: 0, avgRatePerMile: null } }, { status: 500 });
-    }
-
-    const loads = (data ?? []).map((load) => ({
-      id: load.id,
-      code: `AF-${String(load.id).slice(0, 8).toUpperCase()}`,
-      origin: load.origin || load.pickup_location || "UK",
-      destination: load.destination || load.delivery_location || "UK",
-      price: Number(load.price) || 0,
-      equipment: load.equipment || "General",
-      pickupDate: load.pickup_date,
-      commodity: load.commodity || load.title || "Freight",
-      status: load.status,
-      createdAt: load.created_at,
-    }));
-
-    const pricedLoads = loads.filter((load) => load.price > 0);
+    const priced = loads.filter((load) => load.price > 0);
     const avgRatePerMile =
-      pricedLoads.length > 0
-        ? pricedLoads.reduce((sum, load) => {
-            const miles = 80 + (hashString(load.id) % 220);
-            return sum + load.price / miles;
-          }, 0) / pricedLoads.length
+      priced.length > 0
+        ? Number(
+            (
+              priced.reduce((sum, load) => {
+                const miles = 80 + (hashString(load.id) % 220);
+                return sum + load.price / miles;
+              }, 0) / priced.length
+            ).toFixed(2),
+          )
         : null;
 
     return NextResponse.json({
-      loads,
+      loads: loads.slice(0, limit),
       stats: {
         total: loads.length,
-        avgRatePerMile: avgRatePerMile ? Number(avgRatePerMile.toFixed(2)) : null,
+        avgRatePerMile,
+        filtered: Boolean(origin || destination || equipment),
       },
     });
   } catch (error) {
@@ -65,9 +67,9 @@ export async function GET() {
       {
         error: error instanceof Error ? error.message : "Unable to fetch loads.",
         loads: [],
-        stats: { total: 0, avgRatePerMile: null },
+        stats: { total: 0, avgRatePerMile: null, filtered: false },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -114,9 +114,9 @@ export const marketingSeo = {
   toolsHub: createPageMetadata({
     title: "Free Freight Tools UK | Alpha Freight",
     description:
-      "Free UK freight tools from Alpha Freight — live lane rate index, instant haulage quote calculator, and public shipment tracking by reference.",
+      "Free UK freight tools from Alpha Freight — lane rates, quotes, live loads, distance, margin, fuel surcharge, delivery ETA, and more.",
     path: "/tools",
-    keywords: ["freight tools UK", "haulage calculator", "lane rates UK", "track shipment"],
+    keywords: ["freight tools UK", "haulage calculator", "lane rates UK", "track shipment", "find loads UK"],
   }),
   laneRates: createPageMetadata({
     title: "UK Lane Rate Index | Live Haulage Rates | Alpha Freight",
@@ -138,6 +138,62 @@ export const marketingSeo = {
       "Track your Alpha Freight shipment by load reference (AF-XXXXXXXX). See booking status, transit progress, and delivery timeline without logging in.",
     path: "/track",
     keywords: ["track shipment UK", "freight tracking reference", "haulage tracking", "Alpha Freight track"],
+  }),
+  distanceCalculator: createPageMetadata({
+    title: "UK Haulage Distance Calculator | Alpha Freight",
+    description:
+      "Calculate road miles and drive time between UK cities for haulage planning. Free distance calculator from Alpha Freight.",
+    path: "/tools/distance",
+    keywords: ["UK haulage distance", "freight miles calculator", "truck route distance UK"],
+  }),
+  liveLoads: createPageMetadata({
+    title: "Find Loads UK Free | Live Load Board Preview | Alpha Freight",
+    description:
+      "Browse live UK freight loads on Alpha Freight. Filter open haulage jobs by route and equipment — free carrier signup to bid.",
+    path: "/tools/live-loads",
+    keywords: ["find loads UK free", "load board UK", "freight loads online", "haulage jobs"],
+  }),
+  rateCheck: createPageMetadata({
+    title: "Rate vs Market Check | UK Haulage Benchmark | Alpha Freight",
+    description:
+      "Compare your freight rate to Alpha Freight marketplace benchmarks by lane and equipment before posting or bidding.",
+    path: "/tools/rate-check",
+    keywords: ["haulage rate benchmark", "freight rate comparison UK", "rate per mile check"],
+  }),
+  backhaulFinder: createPageMetadata({
+    title: "Backhaul Lane Finder UK | Return Loads | Alpha Freight",
+    description:
+      "Find backhaul and return lanes from your current UK location. Reduce empty miles with Alpha Freight corridor intelligence.",
+    path: "/tools/backhaul",
+    keywords: ["backhaul loads UK", "return freight loads", "empty miles UK haulage"],
+  }),
+  palletFit: createPageMetadata({
+    title: "Pallet & Vehicle Fit Calculator UK | Alpha Freight",
+    description:
+      "Calculate the best UK haulage equipment for your pallet count and weight — curtain-side, refrigerated, flatbed, or general haulage.",
+    path: "/tools/pallet-fit",
+    keywords: ["pallet load calculator", "vehicle fit UK haulage", "curtain side pallet capacity"],
+  }),
+  carrierMargin: createPageMetadata({
+    title: "Carrier Earnings Calculator UK | Haulage Margin | Alpha Freight",
+    description:
+      "Estimate carrier profit after fuel and empty miles. Plan bids with Alpha Freight 7-day payout cash flow in mind.",
+    path: "/tools/carrier-margin",
+    keywords: ["carrier earnings calculator", "haulage profit margin", "truck bid calculator UK"],
+  }),
+  fuelSurcharge: createPageMetadata({
+    title: "Fuel Surcharge Calculator UK | Haulage FSC | Alpha Freight",
+    description:
+      "Calculate fuel surcharge on UK haulage base rates. Free FSC calculator for suppliers and carriers.",
+    path: "/tools/fuel-surcharge",
+    keywords: ["fuel surcharge calculator", "FSC haulage UK", "freight fuel surcharge"],
+  }),
+  deliveryEta: createPageMetadata({
+    title: "Delivery ETA Estimator UK | Haulage Arrival Time | Alpha Freight",
+    description:
+      "Estimate UK freight delivery windows from pickup time and distance using simplified HGV driving hours rules.",
+    path: "/tools/delivery-eta",
+    keywords: ["delivery ETA haulage", "freight arrival time UK", "HGV delivery estimate"],
   }),
   sevenDayPayouts: createPageMetadata({
     title: "7-Day Carrier Payouts | Alpha Freight UK",

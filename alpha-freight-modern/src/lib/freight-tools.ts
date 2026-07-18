@@ -98,7 +98,57 @@ export const UK_CITY_SUGGESTIONS = [
   "Newport",
 ];
 
-const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+const UK_CITY_LABELS: Record<string, string> = {
+  london: "London",
+  manchester: "Manchester",
+  birmingham: "Birmingham",
+  leeds: "Leeds",
+  glasgow: "Glasgow",
+  liverpool: "Liverpool",
+  bristol: "Bristol",
+  sheffield: "Sheffield",
+  edinburgh: "Edinburgh",
+  cardiff: "Cardiff",
+  newcastle: "Newcastle",
+  nottingham: "Nottingham",
+  southampton: "Southampton",
+  leicester: "Leicester",
+  coventry: "Coventry",
+  hull: "Hull",
+  plymouth: "Plymouth",
+  aberdeen: "Aberdeen",
+  belfast: "Belfast",
+  felixstowe: "Felixstowe",
+  dover: "Dover",
+  cambridge: "Cambridge",
+  exeter: "Exeter",
+  newport: "Newport",
+};
+
+/** Common misspellings mapped to a known UK city key. */
+const UK_CITY_ALIASES: Record<string, keyof typeof UK_CITY_LABELS> = {
+  manchestr: "manchester",
+  manchestet: "manchester",
+  manchest: "manchester",
+  manhester: "manchester",
+  birmigham: "birmingham",
+  birminghm: "birmingham",
+  liverpol: "liverpool",
+  edingburgh: "edinburgh",
+  glasgo: "glasgow",
+};
+
+const NON_UK_TERMS =
+  /\b(usa|u\.?s\.?a|america|pakistan|india|china|france|germany|spain|italy|dubai|uae|canada|australia|europe|international|worldwide)\b/i;
+
+const ADDRESS_TERMS =
+  /\b(house\s*no|street\s*no|block\s+[a-z0-9]|flat\s+\d|apt\s+\d|postcode|postal|setlight|township)\b/i;
+
+const MIN_LANE_RATE_GBP = 75;
+const MAX_LANE_RATE_GBP = 2500;
+const MIN_RPM = 0.85;
+const MAX_RPM = 4.5;
+const CITY_COORDS: Record<keyof typeof UK_CITY_LABELS, { lat: number; lng: number }> = {
   london: { lat: 51.5074, lng: -0.1278 },
   manchester: { lat: 53.4808, lng: -2.2426 },
   birmingham: { lat: 52.4862, lng: -1.8904 },
@@ -188,12 +238,45 @@ export function normalizeLocation(value: string) {
     .replace(/,\s*united kingdom$/i, "");
 }
 
-function extractCityKey(value: string) {
+function matchUkCityKey(value: string): keyof typeof UK_CITY_LABELS | null {
   const normalized = normalizeLocation(value).toLowerCase();
-  for (const city of Object.keys(CITY_COORDS)) {
-    if (normalized.includes(city)) return city;
+  if (!normalized || normalized.length > 48) return null;
+  if (NON_UK_TERMS.test(normalized) || ADDRESS_TERMS.test(normalized)) return null;
+
+  for (const [alias, cityKey] of Object.entries(UK_CITY_ALIASES)) {
+    if (normalized.includes(alias)) return cityKey;
   }
-  return normalized.split(/[,\-→/|]/)[0]?.trim() || normalized;
+
+  const cityKeys = Object.keys(UK_CITY_LABELS) as (keyof typeof UK_CITY_LABELS)[];
+  const sortedKeys = [...cityKeys].sort((a, b) => b.length - a.length);
+
+  for (const cityKey of sortedKeys) {
+    const pattern = new RegExp(`\\b${cityKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (pattern.test(normalized)) return cityKey;
+  }
+
+  return null;
+}
+
+export function resolveUkCityLabel(value: string): string | null {
+  const key = matchUkCityKey(value);
+  return key ? UK_CITY_LABELS[key] : null;
+}
+
+export function isValidUkLane(origin: string, destination: string) {
+  const originKey = matchUkCityKey(origin);
+  const destinationKey = matchUkCityKey(destination);
+  return Boolean(originKey && destinationKey && originKey !== destinationKey);
+}
+
+function extractCityKey(value: string) {
+  return matchUkCityKey(value) ?? "";
+}
+
+function formatLaneLabelFromKeys(originKey: string, destinationKey: string) {
+  const origin = UK_CITY_LABELS[originKey as keyof typeof UK_CITY_LABELS] ?? originKey;
+  const destination = UK_CITY_LABELS[destinationKey as keyof typeof UK_CITY_LABELS] ?? destinationKey;
+  return `${origin} → ${destination}`;
 }
 
 export function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -208,17 +291,17 @@ export function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: n
 }
 
 export function estimateDistanceMiles(origin: string, destination: string) {
-  const originKey = extractCityKey(origin);
-  const destKey = extractCityKey(destination);
-  const a = CITY_COORDS[originKey];
-  const b = CITY_COORDS[destKey];
+  const originKey = matchUkCityKey(origin);
+  const destKey = matchUkCityKey(destination);
+  const a = originKey ? CITY_COORDS[originKey] : undefined;
+  const b = destKey ? CITY_COORDS[destKey] : undefined;
 
   if (a && b) {
     const straight = haversineMiles(a.lat, a.lng, b.lat, b.lng);
     return Math.max(35, Math.round(straight * 1.22));
   }
 
-  const seed = hashString(`${originKey}|${destKey}`);
+  const seed = hashString(`${originKey || origin}|${destKey || destination}`);
   return 80 + (seed % 320);
 }
 
@@ -261,15 +344,23 @@ function getEquipmentMultiplier(equipment: EquipmentType) {
 }
 
 function laneKey(origin: string, destination: string) {
-  return `${extractCityKey(origin)}→${extractCityKey(destination)}`;
+  const originKey = matchUkCityKey(origin);
+  const destinationKey = matchUkCityKey(destination);
+  if (!originKey || !destinationKey) return "";
+  return `${originKey}→${destinationKey}`;
 }
 
 function formatLaneLabel(origin: string, destination: string) {
-  const o = normalizeLocation(origin);
-  const d = normalizeLocation(destination);
-  const oCity = o.split(",")[0]?.trim() || o;
-  const dCity = d.split(",")[0]?.trim() || d;
-  return `${oCity} → ${dCity}`;
+  const originKey = matchUkCityKey(origin);
+  const destinationKey = matchUkCityKey(destination);
+  if (originKey && destinationKey) return formatLaneLabelFromKeys(originKey, destinationKey);
+  return `${normalizeLocation(origin)} → ${normalizeLocation(destination)}`;
+}
+
+function isReasonableLaneRate(rate: number, miles: number) {
+  if (rate < MIN_LANE_RATE_GBP || rate > MAX_LANE_RATE_GBP) return false;
+  const rpm = rate / Math.max(miles, 1);
+  return rpm >= MIN_RPM && rpm <= MAX_RPM;
 }
 
 function computeTrend(samples: { price: number; createdAt?: string | null }[]): LaneTrend {
@@ -294,20 +385,29 @@ function computeTrend(samples: { price: number; createdAt?: string | null }[]): 
 export function aggregateMarketLaneRates(loads: RateLoadRow[], equipment: EquipmentType): LaneRateRow[] {
   const grouped = new Map<
     string,
-    { origin: string; destination: string; samples: { price: number; createdAt?: string | null }[] }
+    {
+      originKey: string;
+      destinationKey: string;
+      samples: { price: number; createdAt?: string | null }[];
+    }
   >();
 
   for (const load of loads) {
     const price = Number(load.price) || 0;
     if (price <= 0) continue;
 
-    const origin = load.origin || load.pickup_location || "";
-    const destination = load.destination || load.delivery_location || "";
-    if (!origin || !destination) continue;
+    const originRaw = load.origin || load.pickup_location || "";
+    const destinationRaw = load.destination || load.delivery_location || "";
+    if (!originRaw || !destinationRaw) continue;
+    if (!isValidUkLane(originRaw, destinationRaw)) continue;
     if (mapEquipmentType(load.equipment) !== equipment) continue;
 
-    const key = laneKey(origin, destination);
-    const entry = grouped.get(key) ?? { origin, destination, samples: [] };
+    const originKey = matchUkCityKey(originRaw);
+    const destinationKey = matchUkCityKey(destinationRaw);
+    if (!originKey || !destinationKey) continue;
+
+    const key = `${originKey}→${destinationKey}`;
+    const entry = grouped.get(key) ?? { originKey, destinationKey, samples: [] };
     entry.samples.push({ price, createdAt: load.created_at });
     grouped.set(key, entry);
   }
@@ -315,12 +415,16 @@ export function aggregateMarketLaneRates(loads: RateLoadRow[], equipment: Equipm
   const rows: LaneRateRow[] = [];
 
   grouped.forEach((entry) => {
-    const miles = estimateDistanceMiles(entry.origin, entry.destination);
+    const originLabel = UK_CITY_LABELS[entry.originKey as keyof typeof UK_CITY_LABELS];
+    const destinationLabel = UK_CITY_LABELS[entry.destinationKey as keyof typeof UK_CITY_LABELS];
+    const miles = estimateDistanceMiles(originLabel, destinationLabel);
     const avgRate = entry.samples.reduce((sum, item) => sum + item.price, 0) / entry.samples.length;
+    if (!isReasonableLaneRate(avgRate, miles)) return;
+
     rows.push({
-      lane: formatLaneLabel(entry.origin, entry.destination),
-      origin: entry.origin,
-      destination: entry.destination,
+      lane: formatLaneLabelFromKeys(entry.originKey, entry.destinationKey),
+      origin: originLabel,
+      destination: destinationLabel,
       miles,
       rate: Math.round(avgRate),
       rpm: Number((avgRate / miles).toFixed(2)),
@@ -349,9 +453,16 @@ function baselineLaneRows(equipment: EquipmentType): LaneRateRow[] {
 
 export function buildLaneRatesResponse(loads: RateLoadRow[], equipment: EquipmentType): LaneRatesResponse {
   const marketplaceRows = aggregateMarketLaneRates(loads, equipment);
+  const validUkLoadCount = loads.filter((load) => {
+    const price = Number(load.price) || 0;
+    if (price <= 0) return false;
+    const origin = load.origin || load.pickup_location || "";
+    const destination = load.destination || load.delivery_location || "";
+    return isValidUkLane(origin, destination);
+  }).length;
+
   const lanes = marketplaceRows.length >= 3 ? marketplaceRows.slice(0, 8) : baselineLaneRows(equipment);
-  const indexRpm =
-    lanes.reduce((sum, lane) => sum + lane.rpm, 0) / Math.max(lanes.length, 1);
+  const indexRpm = lanes.reduce((sum, lane) => sum + lane.rpm, 0) / Math.max(lanes.length, 1);
   const upCount = lanes.filter((lane) => lane.trend === "up").length;
   const downCount = lanes.filter((lane) => lane.trend === "down").length;
   const deltaPositive = upCount >= downCount;
@@ -365,7 +476,7 @@ export function buildLaneRatesResponse(loads: RateLoadRow[], equipment: Equipmen
     lanes,
     updatedAt: new Date().toISOString(),
     source: marketplaceRows.length >= 3 ? "marketplace" : "baseline",
-    liveLoadCount: loads.filter((load) => Number(load.price) > 0).length,
+    liveLoadCount: validUkLoadCount,
   };
 }
 
@@ -378,7 +489,11 @@ export function calculateFreightQuote(input: {
 }): FreightQuoteResult {
   const origin = normalizeLocation(input.origin);
   const destination = normalizeLocation(input.destination);
-  const distanceMiles = estimateDistanceMiles(origin, destination);
+  const originLabel = resolveUkCityLabel(origin);
+  const destinationLabel = resolveUkCityLabel(destination);
+  const quoteOrigin = originLabel ?? origin;
+  const quoteDestination = destinationLabel ?? destination;
+  const distanceMiles = estimateDistanceMiles(quoteOrigin, quoteDestination);
   const equipment = input.equipment;
 
   let ratePerMile = 2.12 * getEquipmentMultiplier(equipment);
@@ -386,8 +501,8 @@ export function calculateFreightQuote(input: {
   let matchedLane: string | null = null;
 
   const marketRows = input.loads ? aggregateMarketLaneRates(input.loads, equipment) : [];
-  const key = laneKey(origin, destination);
-  const reverseKey = laneKey(destination, origin);
+  const key = laneKey(quoteOrigin, quoteDestination);
+  const reverseKey = laneKey(quoteDestination, quoteOrigin);
 
   const direct =
     marketRows.find((row) => laneKey(row.origin, row.destination) === key) ??
@@ -409,8 +524,8 @@ export function calculateFreightQuote(input: {
   const spread = Math.max(35, Math.round(mid * 0.12));
 
   return {
-    origin,
-    destination,
+    origin: quoteOrigin,
+    destination: quoteDestination,
     equipment,
     distanceMiles,
     ratePerMile: Number(ratePerMile.toFixed(2)),
@@ -518,4 +633,209 @@ export function parseEquipmentQuery(value: string | null): EquipmentType {
   if (normalized === "flatbed") return "flatbed";
   if (normalized === "curtain" || normalized === "curtain-side") return "curtain";
   return "general";
+}
+
+export type DistanceResult = {
+  origin: string;
+  destination: string;
+  distanceMiles: number;
+  drivingHoursMin: number;
+  drivingHoursMax: number;
+  method: "coordinates" | "estimate";
+};
+
+export type RateVerdict = "below" | "at" | "above";
+
+export type RateComparisonResult = {
+  origin: string;
+  destination: string;
+  equipment: EquipmentType;
+  userRate: number;
+  marketRate: number;
+  marketRpm: number;
+  userRpm: number;
+  distanceMiles: number;
+  verdict: RateVerdict;
+  deltaPct: number;
+  deltaLabel: string;
+  source: "marketplace" | "model";
+  matchedLane: string | null;
+  guidance: string;
+};
+
+export type BackhaulLaneRow = {
+  lane: string;
+  origin: string;
+  destination: string;
+  miles: number;
+  rate: number;
+  rpm: number;
+  type: "return" | "corridor";
+  sampleSize: number;
+};
+
+export type BackhaulResult = {
+  fromCity: string;
+  equipment: EquipmentType;
+  lanes: BackhaulLaneRow[];
+  source: "marketplace" | "baseline";
+};
+
+export function calculateUkDistance(origin: string, destination: string): DistanceResult {
+  const originLabel = resolveUkCityLabel(origin) ?? normalizeLocation(origin);
+  const destinationLabel = resolveUkCityLabel(destination) ?? normalizeLocation(destination);
+  const originKey = matchUkCityKey(origin);
+  const destKey = matchUkCityKey(destination);
+  const distanceMiles = estimateDistanceMiles(originLabel, destinationLabel);
+  const method = originKey && destKey ? "coordinates" : "estimate";
+
+  return {
+    origin: originLabel,
+    destination: destinationLabel,
+    distanceMiles,
+    drivingHoursMin: Number((distanceMiles / 52).toFixed(1)),
+    drivingHoursMax: Number((distanceMiles / 42).toFixed(1)),
+    method,
+  };
+}
+
+export function compareRateToMarket(input: {
+  origin: string;
+  destination: string;
+  equipment: EquipmentType;
+  userRate: number;
+  loads?: RateLoadRow[];
+}): RateComparisonResult {
+  const origin = normalizeLocation(input.origin);
+  const destination = normalizeLocation(input.destination);
+  const originLabel = resolveUkCityLabel(origin) ?? origin;
+  const destinationLabel = resolveUkCityLabel(destination) ?? destination;
+  const distanceMiles = estimateDistanceMiles(originLabel, destinationLabel);
+  const userRpm = Number((input.userRate / Math.max(distanceMiles, 1)).toFixed(2));
+
+  const quote = calculateFreightQuote({
+    origin,
+    destination,
+    equipment: input.equipment,
+    loads: input.loads,
+  });
+
+  const marketRate = quote.estimateMid;
+  const marketRpm = quote.ratePerMile;
+  const deltaPct = Number((((userRpm - marketRpm) / Math.max(marketRpm, 0.01)) * 100).toFixed(1));
+
+  let verdict: RateVerdict = "at";
+  if (deltaPct < -5) verdict = "below";
+  else if (deltaPct > 5) verdict = "above";
+
+  const deltaLabel =
+    verdict === "at"
+      ? "In line with market"
+      : `${Math.abs(deltaPct).toFixed(1)}% ${verdict === "below" ? "below" : "above"} market £/mile`;
+
+  const guidance =
+    verdict === "below"
+      ? "Your rate is below typical marketplace levels — you may attract bids quickly but leave margin on the table."
+      : verdict === "above"
+        ? "Your rate is above current corridor benchmarks — consider adjusting if bid volume is low."
+        : "Your rate aligns with Alpha Freight corridor benchmarks for this lane and equipment.";
+
+  return {
+    origin: originLabel,
+    destination: destinationLabel,
+    equipment: input.equipment,
+    userRate: Math.round(input.userRate),
+    marketRate,
+    marketRpm,
+    userRpm,
+    distanceMiles,
+    verdict,
+    deltaPct,
+    deltaLabel,
+    source: quote.source,
+    matchedLane: quote.matchedLane,
+    guidance,
+  };
+}
+
+export function findBackhaulLanes(input: {
+  fromCity: string;
+  equipment: EquipmentType;
+  loads?: RateLoadRow[];
+  limit?: number;
+}): BackhaulResult {
+  const fromLabel = resolveUkCityLabel(input.fromCity) ?? normalizeLocation(input.fromCity);
+  const fromKey = matchUkCityKey(input.fromCity);
+  const limit = input.limit ?? 6;
+  const equipment = input.equipment;
+
+  const marketRows = input.loads ? aggregateMarketLaneRates(input.loads, equipment) : [];
+  const baselineRows = baselineLaneRows(equipment);
+  const source = marketRows.length >= 2 ? "marketplace" : "baseline";
+  const pool = source === "marketplace" ? marketRows : baselineRows;
+
+  const lanes: BackhaulLaneRow[] = [];
+
+  for (const row of pool) {
+    const rowOriginKey = matchUkCityKey(row.origin);
+    const rowDestKey = matchUkCityKey(row.destination);
+    if (!rowOriginKey) continue;
+
+    if (fromKey && rowOriginKey === fromKey) {
+      lanes.push({
+        lane: row.lane,
+        origin: row.origin,
+        destination: row.destination,
+        miles: row.miles,
+        rate: row.rate,
+        rpm: row.rpm,
+        type: "return",
+        sampleSize: row.sampleSize,
+      });
+    } else if (fromKey && rowDestKey === fromKey) {
+      lanes.push({
+        lane: row.lane,
+        origin: row.origin,
+        destination: row.destination,
+        miles: row.miles,
+        rate: row.rate,
+        rpm: row.rpm,
+        type: "corridor",
+        sampleSize: row.sampleSize,
+      });
+    }
+  }
+
+  const deduped = lanes.filter(
+    (lane, index, array) => array.findIndex((item) => item.lane === lane.lane) === index,
+  );
+
+  const sorted = deduped.sort((a, b) => {
+    if (a.type !== b.type) return a.type === "return" ? -1 : 1;
+    return b.rpm - a.rpm;
+  });
+
+  if (sorted.length === 0 && fromKey) {
+    for (const row of baselineRows) {
+      if (matchUkCityKey(row.origin) === fromKey) {
+        sorted.push({
+          lane: row.lane,
+          origin: row.origin,
+          destination: row.destination,
+          miles: row.miles,
+          rate: row.rate,
+          rpm: row.rpm,
+          type: "return",
+          sampleSize: 0,
+        });
+      }
+    }
+  }
+
+  return {
+    fromCity: fromLabel,
+    equipment,
+    lanes: sorted.slice(0, limit),
+    source: sorted.length > 0 && marketRows.length >= 2 ? "marketplace" : "baseline",
+  };
 }

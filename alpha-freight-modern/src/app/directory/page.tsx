@@ -18,146 +18,15 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { supabase } from "@/lib/supabase";
+import type { PublicCarrierListing } from "@/lib/public-directory";
 
-// Mock data for initial development/display
-const MOCK_CARRIERS = [
-  {
-    id: "amz-prep",
-    company_name: "AMZ Prep | Best 3PL Provider",
-    city: "Brampton, Canada",
-    service_areas: ["USA", "Canada", "UK", "EU", "Australia"],
-    vehicle_types: ["3PL", "Fulfillment", "FBA Prep"],
-    rating: 4.9,
-    reviews: 90,
-    is_verified: true,
-    tag: "Premier Verified",
-    image: "/AMZ Prep.png",
-    description: "AMZ Prep is a leading USA 3PL, Canada 3PL, and ecommerce 3PL partner for Amazon-first brands."
-  },
-  {
-    id: "synex-logistics",
-    company_name: "SYNEX Logistics",
-    city: "Kyiv, Ukraine",
-    service_areas: ["Czech Republic", "Ukraine", "Kazakhstan", "Poland"],
-    vehicle_types: ["Logistics", "Multimodal", "Transport", "Contract Logistics"],
-    rating: 4.8,
-    reviews: 11,
-    is_verified: true,
-    tag: "3PL Operator",
-    image: "/SYNEX Logistics.png",
-    description: "Improving efficiency with logistics. Multimodal, transport and contract logistics services since 2009."
-  },
-  {
-    id: "jmd-haulage",
-    company_name: "JMD Haulage Contractors",
-    city: "Liverpool, England",
-    service_areas: ["UK Wide"],
-    vehicle_types: ["Haulage", "Trucking", "Container Haulier"],
-    rating: 4.9,
-    reviews: 0,
-    is_verified: true,
-    tag: "Family Run",
-    image: "/JMD Haulage Contractors.png",
-    description: "Family-run transport business with over 40 years of experience. Large independent container haulier."
-  },
-  {
-    id: "ws-transportation",
-    company_name: "WS Transportation",
-    city: "Barnton, England",
-    service_areas: ["UK Wide"],
-    vehicle_types: ["Flatbed", "Heavy Haulage", "Machinery"],
-    rating: 4.8,
-    reviews: 173,
-    is_verified: true,
-    tag: "High & Heavy",
-    image: "/WS Transportation.png",
-    description: "Specialists in construction industry logistics and high & heavy haulage across the UK."
-  },
-  {
-    id: "wt-transport",
-    company_name: "WT TRANSPORT",
-    city: "Northampton, England",
-    service_areas: ["UK Wide"],
-    vehicle_types: ["Haulage", "Warehousing", "Pallet Network"],
-    rating: 4.7,
-    reviews: 106,
-    is_verified: true,
-    tag: "FORS Silver",
-    image: "/WT TRANSPORT.png",
-    description: "Road haulage and warehousing service provider based in Northampton, specializing in comprehensive logistics solutions."
-  },
-  {
-    id: "transporter-eng",
-    company_name: "Transporter Engineering Limited",
-    city: "Braintree, England",
-    service_areas: ["UK", "Europe"],
-    vehicle_types: ["Manufacturing", "Engineering", "Repairs"],
-    rating: 4.6,
-    reviews: 22,
-    is_verified: true,
-    tag: "Engineering",
-    image: "/Transporter Engineering Limited.png",
-    description: "Manufacturer specializing in high-quality British-built mechanical and industrial engineering products."
-  },
-  {
-    id: "carntyne-transport",
-    company_name: "Carntyne Transport",
-    city: "Glasgow, Scotland",
-    service_areas: ["UK Wide"],
-    vehicle_types: ["Bulk Liquid", "Warehousing", "On-site Logistics"],
-    rating: 4.8,
-    reviews: 55,
-    is_verified: true,
-    tag: "Bulk Liquid",
-    image: "/Carntyne Transport.png",
-    description: "Leading third-party logistics provider specializing in bulk liquid transport and bonded cask warehousing."
-  },
-  {
-    id: "major-freight",
-    company_name: "MAJOR FREIGHT SERVICES LTD",
-    city: "Newtownabbey, Northern Ireland",
-    service_areas: ["UK", "Ireland", "Europe"],
-    vehicle_types: ["Integrated Transport", "Logistics", "Temperature-controlled"],
-    rating: 4.9,
-    reviews: 87,
-    is_verified: true,
-    tag: "Montgomery Group",
-    image: "/MAJOR FREIGHT SERVICES LTD.png",
-    description: "Part of Montgomery Transport Group, specializing in integrated transport and logistics solutions across the UK, Ireland, and Europe."
-  },
-  {
-    id: "road-transport-media",
-    company_name: "Road Transport Media",
-    city: "Sutton, England",
-    service_areas: ["UK Wide"],
-    vehicle_types: ["Logistics", "Media", "Publishing", "Events"],
-    rating: 4.5,
-    reviews: 14,
-    is_verified: true,
-    tag: "DVV Media",
-    image: "/Road Transport Media.png",
-    description: "Publisher and service provider specializing in the road transport and logistics industry, featuring Commercial Motor and Motor Transport."
-  },
-  {
-    id: "1",
-    company_name: "Street Stream",
-    city: "London",
-    service_areas: ["London", "Greater London"],
-    vehicle_types: ["Haulage", "On-demand Delivery", "Sameday Delivery"],
-    rating: 4.9,
-    reviews: 128,
-    is_verified: true,
-    tag: "Featured",
-    image: "/street stream.png",
-    description: "Specializing in same day courier and last mile carrier services in London."
-  }
-];
+const FALLBACK_IMAGE = "/alpha freight truck.jpg";
 
 export default function DirectoryPage() {
   const router = useRouter();
-  const [carriers, setCarriers] = useState(MOCK_CARRIERS);
-  const [loading, setLoading] = useState(false);
+  const [carriers, setCarriers] = useState<PublicCarrierListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [selectedVehicle, setSelectedVehicle] = useState("All");
@@ -165,13 +34,26 @@ export default function DirectoryPage() {
 
   useEffect(() => {
     async function fetchCarriers() {
-      // In a real app, we would fetch from Supabase
-      // const { data, error } = await supabase
-      //   .from('carriers')
-      //   .select('*')
-      //   .eq('is_approved', true);
-      // if (data) setCarriers(data);
+      setLoading(true);
+      setFetchError(null);
+
+      try {
+        const response = await fetch("/api/public/carriers");
+        const payload = (await response.json()) as { carriers?: PublicCarrierListing[]; error?: string };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Unable to load verified carriers.");
+        }
+
+        setCarriers(payload.carriers ?? []);
+      } catch (error) {
+        setFetchError(error instanceof Error ? error.message : "Unable to load verified carriers.");
+        setCarriers([]);
+      } finally {
+        setLoading(false);
+      }
     }
+
     fetchCarriers();
   }, []);
 
@@ -185,7 +67,7 @@ export default function DirectoryPage() {
   });
 
   const cities = ["All Cities", ...Array.from(new Set(carriers.map(c => c.city)))];
-  const vehicleTypes = ["All", "3PL", "Haulage", "Heavy Haulage", "Warehousing", "Logistics", "Engineering"];
+  const vehicleTypes = ["All", ...Array.from(new Set(carriers.flatMap((carrier) => carrier.vehicle_types)))];
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] font-sans">
@@ -252,8 +134,10 @@ export default function DirectoryPage() {
                 <Filter className="w-6 h-6 text-slate-900" />
               </div>
               <div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Gallery</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{filteredCarriers.length} Carriers Available</p>
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Verified carriers</h2>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {loading ? "Loading..." : `${filteredCarriers.length} verified on Alpha Freight`}
+                </p>
               </div>
             </div>
             
@@ -292,6 +176,22 @@ export default function DirectoryPage() {
 
       {/* Main Listing Section */}
       <main className="max-w-7xl mx-auto px-6 pt-12 pb-32">
+        {fetchError ? (
+          <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
+            {fetchError}
+          </div>
+        ) : null}
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="aspect-[4/3] rounded-3xl bg-slate-100 mb-6" />
+                <div className="h-6 w-2/3 rounded bg-slate-100" />
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
           {filteredCarriers.map((carrier, idx) => (
             <motion.div
@@ -302,14 +202,11 @@ export default function DirectoryPage() {
               className="group cursor-pointer"
               onClick={() => router.push(`/directory/${carrier.id}`)}
             >
-              {/* Card Image Wrapper */}
               <div className="relative aspect-[4/3] mb-6 overflow-hidden rounded-3xl bg-slate-100">
                 <img 
-                  src={carrier.image} 
+                  src={carrier.image || FALLBACK_IMAGE} 
                   alt={carrier.company_name}
-                  className={`w-full h-full transition-transform duration-700 ease-out ${
-                    carrier.id === "transporter-eng" || carrier.id === "major-freight" || carrier.id === "road-transport-media" ? "object-contain p-10" : "object-cover group-hover:scale-105"
-                  }`}
+                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm">
@@ -332,14 +229,21 @@ export default function DirectoryPage() {
             </motion.div>
           ))}
         </div>
+        )}
 
-        {filteredCarriers.length === 0 && (
+        {!loading && filteredCarriers.length === 0 && (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search className="w-8 h-8 text-slate-300" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">No carriers found</h3>
-            <p className="text-slate-400 text-sm">Try adjusting your search or filters to find what you're looking for.</p>
+            <h3 className="text-xl font-black text-slate-900 mb-2">
+              {carriers.length === 0 ? "Verified carriers are joining the network" : "No carriers found"}
+            </h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
+              {carriers.length === 0
+                ? "Once carriers complete verification, they appear here automatically."
+                : "Try adjusting your search or filters to find what you're looking for."}
+            </p>
           </div>
         )}
       </main>

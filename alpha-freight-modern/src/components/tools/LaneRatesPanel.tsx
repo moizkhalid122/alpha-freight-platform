@@ -89,8 +89,11 @@ export default function LaneRatesPanel() {
               {data.deltaLabel} vs prior samples
             </p>
             <p className="mt-4 text-xs leading-5 text-slate-400">
-              Source: {data.source === "marketplace" ? "Alpha Freight live marketplace" : "UK baseline corridors"}
-              {data.liveLoadCount ? ` · ${data.liveLoadCount} priced loads sampled` : ""}
+              Source:{" "}
+              {data.source === "marketplace"
+                ? "Verified UK marketplace lanes"
+                : "UK baseline corridors (official Alpha Freight index)"}
+              {data.liveLoadCount ? ` · ${data.liveLoadCount} verified UK loads sampled` : ""}
             </p>
           </div>
         ) : null}
@@ -100,7 +103,7 @@ export default function LaneRatesPanel() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900">Live lane rate index</h2>
-            <p className="mt-1 text-sm text-slate-500">UK corridors refreshed from marketplace activity.</p>
+            <p className="mt-1 text-sm text-slate-500">UK corridors only — verified cities, no test or international lanes.</p>
           </div>
           {loading ? <Loader2 className="h-5 w-5 animate-spin text-slate-400" /> : null}
         </div>
