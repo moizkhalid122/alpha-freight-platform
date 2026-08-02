@@ -169,10 +169,53 @@ export function getMarketingChatReply(
     };
   }
 
+  if (includesAny(text, ["rpm", "revenue per mile", "rate per mile"])) {
+    return {
+      message: `**RPM (Revenue Per Mile)** = total load payment ÷ loaded miles driven.
+
+Example: £800 load ÷ 320 miles = **£2.50/mile RPM**.
+
+Why it matters:
+• Compare loads fairly — a £600/200mi load (£3.00 RPM) beats £900/400mi (£2.25 RPM)
+• Subtract fuel + deadhead costs to see real profit
+• UK target: many operators aim for **£2.00+ RPM** on long haul
+
+Use **Find Loads** to sort by rate, or ask me to calculate profit on a specific load.`,
+    };
+  }
+
   if (includesAny(text, ["vet", "verify", "insurance", "compliance"])) {
     return {
       message:
         "Every carrier passes a 5-step vetting flow: identity & registration, insurance verification, safety/compliance checks, equipment review, and performance assessment. This keeps the Alpha network trusted for suppliers.",
+    };
+  }
+
+  if (
+    includesAny(text, [
+      "book load",
+      "book karna",
+      "pehla load",
+      "first load",
+      "kaise book",
+      "load book",
+      "load accept",
+      "bid accept",
+    ])
+  ) {
+    return {
+      message: `Carrier ke liye pehla load book karna — step by step:
+
+1. **Login** karein carrier account se
+2. **Available Loads** par jayein — apne route ke loads dekhein
+3. Load par click karein aur **Submit Bid** karein (ya direct accept agar fixed rate ho)
+4. Supplier bid accept kare → load **My Loads** mein aa jayega
+5. Pickup par jayein, status **In Transit** karein, delivery ke baad **Digital POD** upload karein
+6. POD verify hone ke baad **Wallet** mein payment 7 din ke andar
+
+Mobile app se bhi same flow — Available Loads → Bid → Track → POD upload.
+
+Help chahiye? ${SUPPORT_EMAIL}`,
     };
   }
 
@@ -182,12 +225,39 @@ export function getMarketingChatReply(
     };
   }
 
+  if (
+    includesAny(text, ["diesel", "desile", "desial", "fuel price", "petrol price"]) ||
+    (includesAny(text, ["price", "rate", "cost"]) && includesAny(text, ["uk", "diesel", "desile", "fuel", "petrol"]))
+  ) {
+    return {
+      message: `⛽ **UK Diesel / HGV Fuel Prices**
+
+UK diesel prices change weekly. For carriers, fuel cost directly affects RPM and profit.
+
+**Where to check live UK diesel rates:**
+• RAC Fuel Watch — rac.co.uk/fuel-watch
+• AA Fuel Price Report — theaa.com/driving advice/fuel prices
+• UK GOV fuel statistics — gov.uk
+
+**Quick haulage tip:**
+• Average UK diesel is often **£1.45–£1.55/litre** (varies by region)
+• Calculate: (total miles ÷ MPG) × fuel price = trip fuel cost
+• Always subtract fuel + deadhead from rate before accepting a load
+
+Ask me: *"Calculate profit £800 for 320 miles"* or *"What is RPM?"*`,
+    };
+  }
+
   const lastTopic = history
     .slice()
     .reverse()
     .find((item) => item.role === "assistant")?.content;
 
-  if (text.length <= 20 && lastTopic) {
+  if (
+    text.length <= 20 &&
+    lastTopic &&
+    !includesAny(text, ["diesel", "desile", "desial", "fuel", "price", "uk", "rpm", "load", "bid"])
+  ) {
     return {
       message: `Happy to help with more detail on that. Could you tell me if you're a **supplier** or **carrier**, and what step you're stuck on? You can also email ${SUPPORT_EMAIL} for direct support.`,
     };

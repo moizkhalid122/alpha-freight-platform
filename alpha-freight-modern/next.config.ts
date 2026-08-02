@@ -53,6 +53,36 @@ const nextConfig: NextConfig = {
         destination: "/account-deletion",
         permanent: true,
       },
+      {
+        source: "/uk-freight-ai",
+        destination: "/ai",
+        permanent: true,
+      },
+      {
+        source: "/freight-ai",
+        destination: "/ai",
+        permanent: true,
+      },
+      {
+        source: "/free-freight-ai",
+        destination: "/ai",
+        permanent: true,
+      },
+      {
+        source: "/haulage-ai",
+        destination: "/ai",
+        permanent: true,
+      },
+      {
+        source: "/uk-haulage-ai",
+        destination: "/ai",
+        permanent: true,
+      },
+      {
+        source: "/rpm-calculator",
+        destination: "/ai/rpm-calculator",
+        permanent: true,
+      },
     ];
   },
   turbopack: {

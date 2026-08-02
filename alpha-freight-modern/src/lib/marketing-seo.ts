@@ -27,6 +27,32 @@ export const marketingSeo = {
       "Explore Alpha Freight services including full truckload, express distribution, refrigerated haulage, and managed freight across the UK network.",
     path: "/services",
   }),
+  pricing: createPageMetadata({
+    title: "Pricing | Free to Join — 3–5% Commission per Load | Alpha Freight",
+    description:
+      "Alpha Freight pricing: free account, free load posting, and free load board access. Pay 3–5% commission before delivery when you assign a carrier — no monthly subscriptions.",
+    path: "/pricing",
+    keywords: [
+      "freight marketplace pricing UK",
+      "load board pricing",
+      "haulage commission",
+      "free freight platform",
+      "Alpha Freight pricing",
+    ],
+  }),
+  awards: createPageMetadata({
+    title: "Alpha Freight Awards 2027 | UK Logistics Industry Awards",
+    description:
+      "Alpha Freight Awards recognise top UK carriers, suppliers, and logistics companies. Live countdown to the London ceremony — transparent scoring, trophies, cash prizes, and the Trust Seal.",
+    path: "/awards",
+    keywords: [
+      "freight awards UK",
+      "logistics awards London",
+      "carrier of the year UK",
+      "Alpha Freight awards",
+      "haulage industry awards",
+    ],
+  }),
   career: createPageMetadata({
     title: "Careers at Alpha Freight | Join Our Logistics Team",
     description:
@@ -285,6 +311,26 @@ export const marketingSeo = {
     description:
       "Ask operational questions, get load guidance, and resolve platform tasks faster with the Alpha Freight AI assistant.",
     path: "/products/ai-assistant",
+  }),
+  freeFreightAi: createPageMetadata({
+    title: "Free UK Freight AI | Ask Haulage & Logistics Questions | Alpha Freight",
+    description:
+      "Free UK freight AI by Alpha Freight — ask about loads, RPM, diesel, POD, payouts & haulage. No login. The freight AI built for UK carriers and suppliers.",
+    path: "/ai",
+    keywords: [
+      "UK freight AI",
+      "freight AI",
+      "free freight AI",
+      "haulage AI",
+      "logistics AI UK",
+      "trucking AI UK",
+      "AI load board",
+      "freight assistant UK",
+      "Alpha Freight AI",
+      "UK haulage assistant",
+      "RPM calculator AI",
+      "diesel price haulage UK",
+    ],
   }),
   roadmap: createPageMetadata({
     title: "Product Roadmap | Alpha Freight",

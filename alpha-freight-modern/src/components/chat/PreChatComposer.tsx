@@ -1,7 +1,8 @@
 "use client";
 
-import { Paperclip, Mic, Link2, Smile, Sparkles, Send, Image as ImageIcon } from "lucide-react";
+import { Link2, Smile, Sparkles, Send, Image as ImageIcon } from "lucide-react";
 import { useCallback } from "react";
+import VoiceInputButton from "@/components/chat/VoiceInputButton";
 
 type Variant = "emerald" | "blue" | "slate";
 
@@ -30,6 +31,9 @@ interface PreChatComposerProps {
   disabled?: boolean;
   placeholder?: string;
   variant?: Variant;
+  onVoiceTranscript?: (text: string) => void;
+  showPodPanel?: boolean;
+  onPodAnalyze?: (text: string) => void;
 }
 
 export default function PreChatComposer({
@@ -39,6 +43,7 @@ export default function PreChatComposer({
   disabled = false,
   placeholder = "Ask anything...",
   variant = "slate",
+  onVoiceTranscript,
 }: PreChatComposerProps) {
   const style = stylesByVariant[variant];
 
@@ -69,17 +74,20 @@ export default function PreChatComposer({
       />
       <div className="flex items-center justify-between border-t border-slate-200 px-3 py-2">
         <div className="flex items-center gap-1">
-          <button type="button" disabled={disabled} className={iconButtonClass} aria-label="Attach">
-            <Paperclip className="h-4 w-4" />
-          </button>
+          {onVoiceTranscript ? (
+            <VoiceInputButton
+              disabled={disabled}
+              onTranscript={(text) => {
+                onChange(text);
+                onVoiceTranscript(text);
+              }}
+            />
+          ) : null}
           <button type="button" disabled={disabled} className={iconButtonClass} aria-label="Add image">
             <ImageIcon className="h-4 w-4" />
           </button>
           <button type="button" disabled={disabled} className={iconButtonClass} aria-label="Insert link">
             <Link2 className="h-4 w-4" />
-          </button>
-          <button type="button" disabled={disabled} className={iconButtonClass} aria-label="Voice input">
-            <Mic className="h-4 w-4" />
           </button>
           <button type="button" disabled={disabled} className={iconButtonClass} aria-label="Emoji">
             <Smile className="h-4 w-4" />

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { AI_TOPIC_PAGES } from "@/lib/ai-topic-pages";
 import { blogArticles } from "@/lib/blog-content";
 import { careerOpenings } from "@/lib/careers-content";
 import { knowledgeBaseArticles } from "@/lib/knowledge-base-content";
@@ -48,8 +49,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const aiTopicPages: MetadataRoute.Sitemap = AI_TOPIC_PAGES.map((topic) => {
+    const path = `/ai/${topic.slug}`;
+    return {
+      url: `${SITE_URL}${path}`,
+      lastModified,
+      changeFrequency: getPathChangeFrequency(path),
+      priority: getPathPriority(path),
+    };
+  });
+
   return [
     ...staticPages,
+    ...aiTopicPages,
     ...blogPages,
     ...careerPages,
     ...knowledgeBasePages,

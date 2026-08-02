@@ -257,44 +257,57 @@ export default function Home() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Hero Entrance
-      gsap.from(".hero-content > *", {
-        y: 60,
-        opacity: 0,
-        duration: 1.2,
-        stagger: 0.2,
-        ease: "power4.out",
-      });
+      // Hero Entrance — fromTo avoids React Strict Mode leaving content at opacity 0
+      gsap.fromTo(
+        ".hero-content > *",
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1.2,
+          stagger: 0.2,
+          ease: "power4.out",
+          clearProps: "transform",
+        }
+      );
 
       // Services Animation
       const serviceCards = servicesRef.current?.querySelectorAll(".service-card") ?? [];
       if (serviceCards.length > 0) {
-        gsap.from(serviceCards, {
-          scrollTrigger: {
-            trigger: servicesRef.current,
-            start: "top 70%",
-          },
-          y: 100,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.3,
-          ease: "power3.out",
-        });
+        gsap.fromTo(
+          serviceCards,
+          { y: 100, opacity: 0 },
+          {
+            scrollTrigger: {
+              trigger: servicesRef.current,
+              start: "top 70%",
+            },
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.3,
+            ease: "power3.out",
+          }
+        );
       }
 
       // Subtle horizontal lines reveal
       const revealLines = servicesRef.current?.querySelectorAll(".reveal-line") ?? [];
       if (revealLines.length > 0) {
-        gsap.from(revealLines, {
-          scrollTrigger: {
-            trigger: servicesRef.current,
-            start: "top 80%",
-          },
-          scaleX: 0,
-          transformOrigin: "left",
-          duration: 1.5,
-          ease: "expo.out",
-        });
+        gsap.fromTo(
+          revealLines,
+          { scaleX: 0 },
+          {
+            scrollTrigger: {
+              trigger: servicesRef.current,
+              start: "top 80%",
+            },
+            scaleX: 1,
+            transformOrigin: "left",
+            duration: 1.5,
+            ease: "expo.out",
+          }
+        );
       }
     }, pageRef);
     return () => ctx.revert();
@@ -304,6 +317,7 @@ export default function Home() {
     <div
       ref={pageRef}
       className="relative min-h-screen bg-black selection:bg-[#BFFF07] selection:text-black overflow-x-hidden"
+      style={{ backgroundColor: "#000", minHeight: "100vh" }}
     >
       <Navbar />
       
@@ -349,6 +363,25 @@ export default function Home() {
                 Logistics that <br />
                 move with <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40 italic font-serif font-light">precision.</span>
               </h1>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.8 }}
+              >
+                <Link
+                  href="/ai"
+                  className="inline-flex items-center gap-3 rounded-full border border-[#BFFF07]/40 bg-[#BFFF07]/10 px-6 py-3 text-sm font-semibold text-[#BFFF07] backdrop-blur transition hover:bg-[#BFFF07] hover:text-black"
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#BFFF07] text-[10px] font-black text-black">
+                    AI
+                  </span>
+                  Try Free UK Freight AI
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </Link>
+              </motion.div>
             </div>
           </div>
 

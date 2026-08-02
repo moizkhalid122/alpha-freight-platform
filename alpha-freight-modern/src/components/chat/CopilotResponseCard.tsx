@@ -68,7 +68,14 @@ export default function CopilotResponseCard({
         </div>
         {response.knowledgeSource ? (
           <p className="text-[11px] font-medium text-slate-400">
-            Source: {response.knowledgeSource}
+            Source:{" "}
+            {response.knowledgeSource === "openai"
+              ? "Live AI"
+              : response.knowledgeSource === "web_search"
+                ? "Live Data"
+                : response.knowledgeSource === "handoff"
+                  ? "Support"
+                  : response.knowledgeSource}
           </p>
         ) : null}
       </div>

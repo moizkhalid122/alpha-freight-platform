@@ -2,19 +2,19 @@ export type AssistantKind = "general" | "carrier" | "supplier";
 
 const THINKING_STATES: Record<AssistantKind, string[]> = {
   general: [
-    "Reviewing freight context and recent conversation",
-    "Checking logistics knowledge and operations flow",
-    "Preparing a professional copilot recommendation",
+    "Reading your question and conversation context",
+    "Matching UK freight knowledge to your request",
+    "Polishing a clear, helpful response",
   ],
   carrier: [
-    "Reviewing route, RPM, and load quality",
-    "Checking carrier-side operations and earnings factors",
-    "Preparing a dispatch-style recommendation",
+    "Analyzing routes, RPM, and load quality",
+    "Reviewing carrier ops and earnings factors",
+    "Building your dispatch recommendation",
   ],
   supplier: [
-    "Reviewing shipment requirements and service fit",
-    "Checking supplier-side pricing and tracking guidance",
-    "Preparing a clear operations-focused next step",
+    "Reviewing shipment requirements and fit",
+    "Checking pricing, bids, and tracking flow",
+    "Preparing your next best action",
   ],
 };
 
@@ -36,12 +36,12 @@ const SUGGESTED_PROMPTS: Record<AssistantKind, string[]> = {
     "📈 Maximize earnings",
   ],
   supplier: [
-    "🚛 Find loads near me",
-    "💰 Show highest paying loads",
-    "📦 Explain shipment tracking",
-    "📍 Find backhaul loads",
-    "⛽ Calculate fuel cost",
-    "📈 Maximize earnings",
+    "📦 Post a new load",
+    "💰 Review incoming bids",
+    "🚛 Find best carrier for my route",
+    "📍 Track active shipments",
+    "💳 Pay instant vs pay later",
+    "📄 POD upload guide",
   ],
 };
 
@@ -59,23 +59,31 @@ export function getTypingDelay(word: string): number {
   }
 
   if (/[.!?]$/.test(word)) {
-    return 75;
-  }
-
-  if (/[,;:]$/.test(word)) {
-    return 45;
-  }
-
-  if (word.length >= 10) {
     return 28;
   }
 
-  return 16;
+  if (/[,;:]$/.test(word)) {
+    return 16;
+  }
+
+  if (word.length >= 10) {
+    return 10;
+  }
+
+  return 6;
+}
+
+/** Only skip typewriter for load cards / error retry — text replies animate word-by-word */
+export function shouldShowInstantReply(
+  structured?: { knowledgeSource?: string } | null
+): boolean {
+  const source = structured?.knowledgeSource;
+  return source === "platform-fast" || source === "openai-retry";
 }
 
 export async function waitForMinimumDuration(
   startedAt: number,
-  minimumMs = 420
+  minimumMs = 120
 ): Promise<void> {
   const elapsed = Date.now() - startedAt;
   const remaining = minimumMs - elapsed;

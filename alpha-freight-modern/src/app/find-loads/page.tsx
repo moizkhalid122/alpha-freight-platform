@@ -155,6 +155,12 @@ export default function FindLoadsPage() {
                   >
                     Join as carrier
                   </Link>
+                  <Link
+                    href="/ai/find-loads"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/70 transition-colors hover:border-[#BFFF07]/40 hover:text-[#BFFF07]"
+                  >
+                    Ask freight AI
+                  </Link>
                 </motion.div>
               </div>
 

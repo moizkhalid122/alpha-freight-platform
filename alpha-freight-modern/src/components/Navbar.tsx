@@ -47,6 +47,7 @@ const navLinks: NavItem[] = [
           { name: "Analytics Dashboard", href: "/products/analytics", desc: "Data-driven shipping insights" },
           { name: "Market Rates", href: "/products/rates", desc: "Live freight market pricing" },
           { name: "Predictive AI", href: "/products/ai", desc: "Forecast demand & delays" },
+          { name: "Free UK Freight AI", href: "/ai", desc: "Ask haulage questions — no login" },
         ]
       }
     ]
@@ -80,13 +81,15 @@ const navLinks: NavItem[] = [
         category: "Ecosystem",
         items: [
           { name: "Network", href: "/network", desc: "Our global infrastructure" },
-          { name: "Technology", href: "/products/ai-assistant", desc: "AI-powered logistics" },
+          { name: "Technology", href: "/ai", desc: "Free UK freight AI assistant" },
           { name: "Partners", href: "/partners", desc: "Join our strategic network" },
         ]
       }
     ]
   },
   { name: "Services", href: "/services" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "Free AI", href: "/ai" },
   { name: "About us", href: "/about" },
   { name: "Investor", href: "/investor" },
   { name: "Blog", href: "/blog" },
@@ -272,6 +275,32 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                                   </Link>
                                 ))}
                               </div>
+                              {column.category === "Ecosystem" ? (
+                                <Link
+                                  href="/awards"
+                                  className="group/awards relative mt-6 block overflow-hidden rounded-2xl border border-black/5 shadow-[0_8px_30px_rgba(0,0,0,0.08)]"
+                                >
+                                  <Image
+                                    src="/header.jpg"
+                                    alt="Alpha Freight Awards 2027"
+                                    width={400}
+                                    height={280}
+                                    className="h-[196px] w-full object-cover transition-transform duration-500 group-hover/awards:scale-105"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/10 transition-colors group-hover/awards:from-black/80" />
+                                  <div className="absolute inset-0 flex flex-col justify-end p-5">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#93C5FD]">
+                                      2027 Ceremony
+                                    </p>
+                                    <p className="mt-1.5 text-[17px] font-bold leading-tight text-white">
+                                      Alpha Freight Awards
+                                    </p>
+                                    <p className="mt-1 text-[12px] font-medium leading-snug text-white/75">
+                                      UK logistics industry awards ceremony
+                                    </p>
+                                  </div>
+                                </Link>
+                              ) : null}
                             </div>
                           ))}
                         </div>
@@ -447,6 +476,30 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                                   {item.name}
                                 </Link>
                               ))}
+                              {column.category === "Ecosystem" ? (
+                                <Link
+                                  href="/awards"
+                                  className="group/awards relative mt-5 block overflow-hidden rounded-xl border border-black/10"
+                                  onClick={closeMobileMenu}
+                                >
+                                  <Image
+                                    src="/header.jpg"
+                                    alt="Alpha Freight Awards 2027"
+                                    width={400}
+                                    height={280}
+                                    className="h-44 w-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent" />
+                                  <div className="absolute inset-0 flex flex-col justify-end p-4">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#93C5FD]">
+                                      Alpha Freight Awards
+                                    </p>
+                                    <p className="mt-1 text-sm font-semibold text-white">
+                                      UK logistics awards ceremony
+                                    </p>
+                                  </div>
+                                </Link>
+                              ) : null}
                             </div>
                           </div>
                         ))}

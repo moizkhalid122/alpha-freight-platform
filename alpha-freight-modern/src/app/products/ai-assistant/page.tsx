@@ -187,17 +187,23 @@ export default function AIAssistantProductPage() {
 
               <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
                 <Link
-                  href="/supplier/ai-assistant"
+                  href="/ai"
                   className="inline-flex items-center gap-3 rounded-full bg-[#BFFF07] px-10 py-4 text-[10px] font-bold uppercase tracking-widest text-black transition-all duration-300 shadow-2xl hover:bg-white"
                 >
-                  Try Supplier AI
+                  Free UK Freight AI
                   <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/supplier/ai-assistant"
+                  className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/5 px-10 py-4 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur transition-colors hover:bg-white/10"
+                >
+                  Supplier Co-Pilot
                 </Link>
                 <Link
                   href="/carrier/ai-assistant"
                   className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/5 px-10 py-4 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur transition-colors hover:bg-white/10"
                 >
-                  Try Carrier AI
+                  Carrier Co-Pilot
                 </Link>
               </div>
             </motion.div>

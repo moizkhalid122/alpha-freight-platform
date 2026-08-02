@@ -46,10 +46,10 @@ export function Footer() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/products/ai-assistant"
+                href="/ai"
                 className="inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-[10px] font-bold uppercase tracking-[0.28em] text-black transition-all hover:bg-[#BFFF07]"
               >
-                Explore AI Assistant
+                Free UK Freight AI
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -85,6 +85,7 @@ export function Footer() {
                 { name: "Post Loads UK", href: "/post-loads" },
                 { name: "Carrier Directory", href: "/directory" },
                 { name: "Supplier Directory", href: "/suppliers" },
+                { name: "Free UK Freight AI", href: "/ai" },
                 { name: "AI Assistant", href: "/products/ai-assistant" },
                 { name: "Freight Marketplace", href: "/docs?tab=finding-loads" },
                 { name: "Smart Bidding", href: "/docs?tab=bidding" },
@@ -92,6 +93,8 @@ export function Footer() {
                 { name: "Real-time Tracking", href: "/docs?tab=tracking" },
                 { name: "Carrier Vetting", href: "/docs?tab=vetting" },
                 { name: "7-Day Payouts", href: "/7-day-payouts" },
+                { name: "Pricing", href: "/pricing" },
+                { name: "Alpha Freight Awards", href: "/awards" },
               ].map((item) => (
                 <li key={item.name}>
                   <Link href={item.href}>
@@ -127,6 +130,9 @@ export function Footer() {
             <ul className="space-y-3">
               {[
                 { name: "Knowledge Base", href: "/knowledge-base" },
+                { name: "Free UK Freight AI", href: "/ai" },
+                { name: "Find Loads AI Guide", href: "/ai/find-loads" },
+                { name: "RPM Calculator AI", href: "/ai/rpm-calculator" },
                 { name: "Learning Series", href: "/learning-series" },
                 { name: "Help Center", href: "/support" },
                 { name: "Send Feedback", href: "/feedback" },

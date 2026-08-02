@@ -4,14 +4,19 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, PenLine, Send, User, Sparkles, Route, Wallet } from "lucide-react";
 import Image from "next/image";
-import { sendChatMessage } from "@/lib/api";
-import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration } from "@/lib/chat-ui";
+import { sendChatMessage, saveChatFeedback, loadChatHistory, createNewConversation } from "@/lib/api";
+import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration, shouldShowInstantReply } from "@/lib/chat-ui";
 import AssistantMessageActions from "@/components/chat/AssistantMessageActions";
 import PreChatComposer from "@/components/chat/PreChatComposer";
 import { supabase } from "@/lib/supabase";
 import CopilotResponseCard from "@/components/chat/CopilotResponseCard";
 import AssistantMessageHeader from "@/components/chat/AssistantMessageHeader";
 import ThinkingStateCard from "@/components/chat/ThinkingStateCard";
+import AiAssistantToolbar from "@/components/chat/AiAssistantToolbar";
+import ChatHistorySidebar from "@/components/chat/ChatHistorySidebar";
+import ProactiveAlertsBar from "@/components/chat/ProactiveAlertsBar";
+import PodUploadPanel from "@/components/chat/PodUploadPanel";
+import type { LanguagePreference } from "@/lib/copilot/language";
 import {
   buildCarrierWelcomeReply,
   isGreetingOnlyMessage,
@@ -62,7 +67,9 @@ function buildStructuredText(reply: StructuredAssistantReply | undefined, fallba
   return [
     reply.title,
     reply.shortExplanation,
-    reply.nextStep ? `Next Step: ${reply.nextStep}` : "",
+    ...(reply.keyPoints || []).slice(0, 4),
+    reply.recommendation ? `💡 ${reply.recommendation}` : "",
+    reply.nextStep ? `➡️ Next: ${reply.nextStep}` : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -441,6 +448,10 @@ export default function CarrierAIAssistant() {
   const [messageFeedback, setMessageFeedback] = useState<Record<string, "up" | "down" | null>>({});
   const [moreMessageId, setMoreMessageId] = useState<string | null>(null);
   const [sessionMemory, setSessionMemory] = useState<CopilotContextMemory | null>(null);
+  const [language, setLanguage] = useState<LanguagePreference>("english");
+  const [conversationId, setConversationId] = useState<string | undefined>();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [showPodPanel, setShowPodPanel] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -489,7 +500,7 @@ export default function CarrierAIAssistant() {
 
     const intervalId = window.setInterval(() => {
       setThinkingStep((current) => (current + 1) % thinkingStates.length);
-    }, 1700);
+    }, 1400);
 
     return () => window.clearInterval(intervalId);
   }, [isTyping]);
@@ -519,11 +530,63 @@ export default function CarrierAIAssistant() {
     }
   };
 
-  const handleFeedback = (messageId: string, value: "up" | "down") => {
+  const handleFeedback = async (messageId: string, value: "up" | "down") => {
     setMessageFeedback((current) => ({
       ...current,
       [messageId]: current[messageId] === value ? null : value,
     }));
+    const target = messages.find((m) => m.id === messageId);
+    const userMsg = messages.find((m, i) => m.role === "user" && messages[i + 1]?.id === messageId);
+    await saveChatFeedback({
+      messageId,
+      feedback: value,
+      assistantType: "carrier",
+      query: userMsg?.content,
+      replyTitle: target?.structuredMessage?.title,
+    });
+  };
+
+  const handleHandoff = async () => {
+    const res = await fetch("/api/chat/handoff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "User requested human support", assistantType: "carrier" }),
+    });
+    const data = await res.json();
+    if (data.structuredMessage) {
+      const aiMessage: Message = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: data.message,
+        timestamp: getTimestamp(),
+        structuredMessage: data.structuredMessage,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      setHasStarted(true);
+    }
+  };
+
+  const handleLoadConversation = async (id: string) => {
+    const rows = await loadChatHistory(id);
+    setConversationId(id);
+    setHasStarted(true);
+    setMessages(
+      rows.map((row: { id: string; role: string; content: string; structuredMessage?: StructuredAssistantReply }) => ({
+        id: row.id,
+        role: row.role as "user" | "assistant",
+        content: row.content,
+        structuredMessage: row.structuredMessage,
+        timestamp: getTimestamp(),
+      }))
+    );
+  };
+
+  const handleNewChat = async () => {
+    const id = await createNewConversation("carrier");
+    setConversationId(id);
+    setMessages([]);
+    setHasStarted(false);
+    setInput("");
   };
 
   const handleShare = async (messageId: string) => {
@@ -613,12 +676,23 @@ export default function CarrierAIAssistant() {
     messageId: string,
     structuredMessage?: StructuredAssistantReply
   ) => {
+    if (shouldShowInstantReply(structuredMessage)) {
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === messageId
+            ? { ...message, content: fullText, structuredMessage }
+            : message
+        )
+      );
+      return;
+    }
+
     await typeMessage(fullText, messageId);
     if (!structuredMessage) return;
 
     setMessages((current) =>
       current.map((message) =>
-        message.id === messageId ? { ...message, structuredMessage } : message
+        message.id === messageId ? { ...message, structuredMessage, content: "" } : message
       )
     );
   };
@@ -666,15 +740,24 @@ export default function CarrierAIAssistant() {
       const aiResponse = await sendChatMessage(trimmedText, {
         assistantType: "carrier",
         history: buildHistory(nextMessages),
+        language,
+        conversationId,
+        confirmAction: /\bconfirm post load\b/i.test(trimmedText),
       });
-      await waitForMinimumDuration(thinkingStartedAt);
+      const enrichedStructuredReply = aiResponse.structuredMessage?.platformResult
+        ? aiResponse.structuredMessage
+        : aiResponse.structuredMessage?.knowledgeSource === "platform-fast" ||
+            aiResponse.structuredMessage?.knowledgeSource === "instant"
+          ? aiResponse.structuredMessage
+          : await enrichCarrierPlatformData(aiResponse.structuredMessage, trimmedText);
+      await waitForMinimumDuration(
+        thinkingStartedAt,
+        shouldShowInstantReply(enrichedStructuredReply) ? 0 : 80
+      );
+      if (aiResponse.conversationId) setConversationId(aiResponse.conversationId);
       const aiMessageId = (Date.now() + 1).toString();
       setIsTyping(false);
 
-      const enrichedStructuredReply = await enrichCarrierPlatformData(
-        aiResponse.structuredMessage,
-        trimmedText
-      );
       const finalMessageText = buildStructuredText(enrichedStructuredReply, aiResponse.message);
       if (enrichedStructuredReply?.memory) {
         setSessionMemory(enrichedStructuredReply.memory);
@@ -756,12 +839,15 @@ export default function CarrierAIAssistant() {
         history,
       });
 
-      await waitForMinimumDuration(thinkingStartedAt);
-      setIsTyping(false);
       const enrichedStructuredReply = await enrichCarrierPlatformData(
         aiResponse.structuredMessage,
         prompt
       );
+      await waitForMinimumDuration(
+        thinkingStartedAt,
+        shouldShowInstantReply(enrichedStructuredReply) ? 0 : 120
+      );
+      setIsTyping(false);
       const finalMessageText = buildStructuredText(enrichedStructuredReply, aiResponse.message);
       if (enrichedStructuredReply?.memory) {
         setSessionMemory(enrichedStructuredReply.memory);
@@ -789,6 +875,21 @@ export default function CarrierAIAssistant() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#FDFDFD]">
+      <ChatHistorySidebar
+        assistantType="carrier"
+        activeId={conversationId}
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onSelect={handleLoadConversation}
+        onNew={handleNewChat}
+      />
+      <ProactiveAlertsBar assistantType="carrier" onAction={(action) => handleSend(action)} />
+      {showPodPanel && (
+        <PodUploadPanel
+          disabled={isTyping}
+          onAnalyze={(text) => handleSend(`Check my POD: ${text}`)}
+        />
+      )}
       {/* Header - only show when chat has started */}
       <AnimatePresence>
         {hasStarted && (
@@ -839,6 +940,12 @@ export default function CarrierAIAssistant() {
                 </div>
 
                 <div className="mx-auto mt-8 max-w-3xl">
+                  <AiAssistantToolbar
+                    language={language}
+                    onLanguageChange={setLanguage}
+                    onOpenHistory={() => setHistoryOpen(true)}
+                    onHandoff={handleHandoff}
+                  />
                   <PreChatComposer
                     value={input}
                     onChange={setInput}
@@ -846,10 +953,18 @@ export default function CarrierAIAssistant() {
                     disabled={isTyping}
                     placeholder="Ask about loads, routes, payout, verification..."
                     variant="emerald"
+                    onVoiceTranscript={(text) => handleSend(text)}
                   />
                 </div>
 
-                <div className="mx-auto mt-4 flex max-w-3xl justify-center">
+                <div className="mx-auto mt-3 flex max-w-3xl justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowPodPanel((v) => !v)}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                  >
+                    {showPodPanel ? "Hide POD Check" : "📄 POD Check"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => handleSend("Give me quick tips to find the best loads today.")}
@@ -959,6 +1074,8 @@ export default function CarrierAIAssistant() {
                       message.structuredMessage &&
                         (
                           message.structuredMessage.displayStyle === "card" ||
+                          message.structuredMessage.knowledgeSource === "openai" ||
+                          (message.structuredMessage.keyPoints?.length ?? 0) > 0 ||
                           message.structuredMessage.platformResult?.loads?.length ||
                           message.structuredMessage.quickActions?.length ||
                           message.structuredMessage.actionRequest
@@ -983,7 +1100,12 @@ export default function CarrierAIAssistant() {
                         />
                         {!shouldRenderCard ? (
                           <div className="px-0 py-1 text-slate-900">
-                            <p className="text-sm leading-7 whitespace-pre-line">{message.content}</p>
+                            <p className="text-sm leading-7 whitespace-pre-line">
+                              {message.content}
+                              {streamingMessageId === message.id ? (
+                                <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-slate-900 align-middle" />
+                              ) : null}
+                            </p>
                           </div>
                         ) : (
                           <CopilotResponseCard

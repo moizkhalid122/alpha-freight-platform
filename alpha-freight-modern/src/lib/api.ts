@@ -17,12 +17,24 @@ async function buildChatHeaders() {
   return headers;
 }
 
+export type ChatApiExtendedResponse = ChatApiResponse & {
+  source?: string;
+  conversationId?: string;
+  alerts?: Array<{ id: string; title: string; message: string; action?: string }>;
+  remaining?: number;
+  limitReached?: boolean;
+};
+
 export async function sendChatMessage(
   message: string,
-  options: SendChatMessageOptions = {}
-): Promise<ChatApiResponse> {
+  options: SendChatMessageOptions & {
+    language?: string;
+    conversationId?: string;
+    confirmAction?: boolean;
+  } = {}
+): Promise<ChatApiExtendedResponse> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 55000);
+  const timeoutId = setTimeout(() => controller.abort(), 90000);
 
   try {
     const headers = await buildChatHeaders();
@@ -35,23 +47,48 @@ export async function sendChatMessage(
         assistantType: options.assistantType || "general",
         mode: options.mode,
         history: options.history || [],
+        language: options.language,
+        conversationId: options.conversationId,
+        confirmAction: options.confirmAction,
+        publicMode: options.publicMode,
       }),
     });
 
     if (response.status === 401) {
-      return {
-        message: "Please log in again to use AI assistant.",
-      };
+      return { message: "Please log in again to use AI assistant." };
     }
 
     if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      if (data.limitReached) {
+        return {
+          message: data.message,
+          structuredMessage: data.structuredMessage,
+          limitReached: true,
+          remaining: 0,
+        };
+      }
       throw new Error("Failed to send message");
     }
 
     const data = await response.json();
+
+    if (data.limitReached) {
+      return {
+        message: data.message,
+        structuredMessage: data.structuredMessage,
+        limitReached: true,
+        remaining: 0,
+      };
+    }
+
     return {
       message: data.message,
       structuredMessage: data.structuredMessage,
+      source: data.source,
+      conversationId: data.conversationId,
+      alerts: data.alerts,
+      remaining: data.remaining,
     };
   } catch (error) {
     console.error("Error sending chat message:", error);
@@ -68,4 +105,41 @@ export async function sendChatMessage(
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+export async function saveChatFeedback(options: {
+  messageId: string;
+  feedback: "up" | "down";
+  assistantType: string;
+  query?: string;
+  replyTitle?: string;
+}) {
+  const headers = await buildChatHeaders();
+  await fetch("/api/chat/feedback", {
+    method: "POST",
+    headers,
+    body: JSON.stringify(options),
+  });
+}
+
+export async function loadChatHistory(conversationId: string) {
+  const headers = await buildChatHeaders();
+  const res = await fetch("/api/chat/history", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ conversationId }),
+  });
+  const data = await res.json();
+  return data.messages || [];
+}
+
+export async function createNewConversation(assistantType: string) {
+  const headers = await buildChatHeaders();
+  const res = await fetch("/api/chat/history", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ assistantType }),
+  });
+  const data = await res.json();
+  return data.conversationId as string | undefined;
 }

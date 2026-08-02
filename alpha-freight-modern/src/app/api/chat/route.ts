@@ -1,65 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMarketingChatReply } from "@/lib/marketing-chat";
+import type { AssistantKind, ChatHistoryItem } from "@/lib/chat-types";
+import { runCopilotEngine } from "@/lib/copilot-engine";
+import type { LanguagePreference } from "@/lib/copilot/language";
+import { checkPublicAiRateLimit, getClientIp, PUBLIC_AI_MESSAGE_LIMIT } from "@/lib/public-ai-rate-limit";
+import { createAuthedSupabaseFromRequest } from "@/lib/admin-api-db";
 
 export const runtime = "nodejs";
-
-function resolveBackendUrls(): string[] {
-  const candidates = [
-    process.env.AI_BACKEND_URL,
-    process.env.NEXT_PUBLIC_API_URL,
-    process.env.NODE_ENV !== "production" ? "http://127.0.0.1:3003" : null,
-    process.env.NODE_ENV !== "production" ? "http://localhost:3003" : null,
-  ]
-    .filter(Boolean)
-    .map((value) => value!.replace(/\/$/, ""));
-
-  return [...new Set(candidates)];
-}
-
-async function proxyToBackend(
-  request: NextRequest,
-  body: Record<string, unknown>
-): Promise<{ message: string; structuredMessage?: unknown } | null> {
-  const authHeader = request.headers.get("authorization");
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (authHeader) {
-    headers.Authorization = authHeader;
-  }
-
-  for (const baseUrl of resolveBackendUrls()) {
-    if (process.env.NODE_ENV === "production" && baseUrl.includes("localhost")) {
-      continue;
-    }
-
-    try {
-      const response = await fetch(`${baseUrl}/api/chat`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(120000),
-      });
-
-      if (!response.ok) {
-        continue;
-      }
-
-      const data = await response.json();
-      if (typeof data?.message === "string" && data.message.trim()) {
-        return {
-          message: data.message,
-          structuredMessage: data.structuredMessage,
-        };
-      }
-    } catch {
-      // Try next backend or fall back to built-in responder.
-    }
-  }
-
-  return null;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,7 +14,10 @@ export async function POST(request: NextRequest) {
     const history = Array.isArray(body.history) ? body.history : [];
     const assistantType =
       typeof body.assistantType === "string" ? body.assistantType : "general";
-    const mode = typeof body.mode === "string" ? body.mode : undefined;
+    const language = typeof body.language === "string" ? (body.language as LanguagePreference) : undefined;
+    const confirmAction = Boolean(body.confirmAction);
+    const conversationId = typeof body.conversationId === "string" ? body.conversationId : undefined;
+    const publicMode = Boolean(body.publicMode);
 
     if (!message) {
       return NextResponse.json(
@@ -77,29 +26,71 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const proxied = await proxyToBackend(request, {
-      message,
-      assistantType,
-      mode,
-      history,
-    });
+    const normalizedType: AssistantKind =
+      assistantType === "carrier" || assistantType === "supplier"
+        ? assistantType
+        : "general";
 
-    if (proxied) {
-      return NextResponse.json({
-        success: true,
-        message: proxied.message,
-        structuredMessage: proxied.structuredMessage,
-      });
+    const supabase = createAuthedSupabaseFromRequest(request);
+    const { data: { user } } = await supabase.auth.getUser();
+    const isGuest = !user;
+    let guestRemaining: number | undefined;
+
+    if (publicMode && isGuest) {
+      const ip = getClientIp(request);
+      const limit = checkPublicAiRateLimit(ip);
+      guestRemaining = limit.remaining;
+
+      if (!limit.allowed) {
+        return NextResponse.json({
+          success: false,
+          limitReached: true,
+          message: `Free limit reached (${PUBLIC_AI_MESSAGE_LIMIT} messages/hour). Sign up free for unlimited Alpha Freight AI + live loads.`,
+          structuredMessage: {
+            mode: "logistics_copilot",
+            displayStyle: "card",
+            title: "🔓 Sign Up for Unlimited AI",
+            shortExplanation:
+              "You've used your free guest messages for this hour. Create a free Alpha Freight account for unlimited AI, live load board, bids, and wallet.",
+            keyPoints: [
+              "✅ Free carrier or supplier account",
+              "🚛 Live UK load board & smart matching",
+              "💰 RPM tools, wallet & 7-day payouts",
+            ],
+            recommendation: "💡 Signing up takes under 2 minutes — no monthly fee.",
+            nextStep: "Choose carrier (find loads) or supplier (post loads).",
+            quickActions: [
+              { label: "Sign Up Free", href: "/auth/select", action: "How do I sign up?", variant: "primary" },
+            ],
+          },
+          remaining: 0,
+        });
+      }
+
     }
 
-    const fallback = getMarketingChatReply(message, history);
+    const result = await runCopilotEngine({
+      message,
+      assistantType: normalizedType,
+      history: history as ChatHistoryItem[],
+      language,
+      request,
+      confirmAction,
+      conversationId,
+      publicMode,
+    });
+
     return NextResponse.json({
       success: true,
-      message: fallback.message,
-      structuredMessage: fallback.structuredMessage,
-      source: "marketing-fallback",
+      message: result.message,
+      structuredMessage: result.structuredMessage,
+      source: result.source,
+      conversationId: result.conversationId || conversationId,
+      alerts: result.alerts || [],
+      remaining: guestRemaining,
     });
-  } catch {
+  } catch (error) {
+    console.error("Chat API error:", error);
     return NextResponse.json(
       {
         success: false,

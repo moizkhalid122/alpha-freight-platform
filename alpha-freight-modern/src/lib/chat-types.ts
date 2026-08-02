@@ -130,4 +130,5 @@ export interface SendChatMessageOptions {
   assistantType?: AssistantKind;
   mode?: CopilotMode;
   history?: ChatHistoryItem[];
+  publicMode?: boolean;
 }

@@ -6,7 +6,7 @@ import { Send, X, User, Sparkles, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { sendChatMessage } from "@/lib/api";
-import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration } from "@/lib/chat-ui";
+import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration, shouldShowInstantReply } from "@/lib/chat-ui";
 import AssistantMessageActions from "@/components/chat/AssistantMessageActions";
 import CopilotResponseCard from "@/components/chat/CopilotResponseCard";
 import CopilotMemoryBar from "@/components/chat/CopilotMemoryBar";
@@ -64,7 +64,9 @@ export default function Chatbot() {
     pathname.startsWith("/supplier") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/auth");
+    pathname.startsWith("/auth") ||
+    pathname === "/ai" ||
+    pathname.startsWith("/ai/");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -94,7 +96,7 @@ export default function Chatbot() {
 
     const intervalId = window.setInterval(() => {
       setThinkingStep((current) => (current + 1) % thinkingStates.length);
-    }, 1700);
+    }, 1400);
 
     return () => window.clearInterval(intervalId);
   }, [isTyping]);
@@ -184,6 +186,17 @@ export default function Chatbot() {
     messageId: string,
     structuredMessage?: StructuredAssistantReply
   ) => {
+    if (shouldShowInstantReply(structuredMessage)) {
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === messageId
+            ? { ...message, content: fullText, structuredMessage }
+            : message
+        )
+      );
+      return;
+    }
+
     await typeMessage(fullText, messageId);
     if (!structuredMessage) return;
 
@@ -218,7 +231,10 @@ export default function Chatbot() {
         mode: selectedMode,
         history: buildHistory(nextMessages),
       });
-      await waitForMinimumDuration(thinkingStartedAt);
+      await waitForMinimumDuration(
+        thinkingStartedAt,
+        shouldShowInstantReply(aiResponse.structuredMessage) ? 0 : 120
+      );
       const aiMessageId = (Date.now() + 1).toString();
       setIsTyping(false);
 
@@ -283,7 +299,10 @@ export default function Chatbot() {
         history,
       });
 
-      await waitForMinimumDuration(thinkingStartedAt);
+      await waitForMinimumDuration(
+        thinkingStartedAt,
+        shouldShowInstantReply(aiResponse.structuredMessage) ? 0 : 120
+      );
       setIsTyping(false);
       if (aiResponse.structuredMessage?.memory) {
         setSessionMemory(aiResponse.structuredMessage.memory);
@@ -386,6 +405,8 @@ export default function Chatbot() {
                     message.structuredMessage &&
                       (
                         message.structuredMessage.displayStyle === "card" ||
+                        message.structuredMessage.knowledgeSource === "openai" ||
+                        (message.structuredMessage.keyPoints?.length ?? 0) > 0 ||
                         message.structuredMessage.platformResult?.loads?.length ||
                         message.structuredMessage.quickActions?.length ||
                         message.structuredMessage.actionRequest
