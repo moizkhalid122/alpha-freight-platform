@@ -327,7 +327,7 @@ export default function Home() {
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
-              src="/alphafreight1.png"
+              src="/hero2.png"
               alt="Alpha Freight Logistics"
               fill
               sizes="100vw"
@@ -363,25 +363,6 @@ export default function Home() {
                 Logistics that <br />
                 move with <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40 italic font-serif font-light">precision.</span>
               </h1>
-
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.8 }}
-              >
-                <Link
-                  href="/ai"
-                  className="inline-flex items-center gap-3 rounded-full border border-[#BFFF07]/40 bg-[#BFFF07]/10 px-6 py-3 text-sm font-semibold text-[#BFFF07] backdrop-blur transition hover:bg-[#BFFF07] hover:text-black"
-                >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#BFFF07] text-[10px] font-black text-black">
-                    AI
-                  </span>
-                  Try Free UK Freight AI
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </Link>
-              </motion.div>
             </div>
           </div>
 

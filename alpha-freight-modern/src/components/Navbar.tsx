@@ -172,23 +172,23 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                 className="object-contain"
               />
             </div>
-            <span className={`text-base sm:text-xl font-bold tracking-tighter truncate ${isDark ? "text-slate-900" : "text-white"}`}>
+            <span className={`text-sm lg:text-base xl:text-xl font-bold tracking-tighter truncate ${isDark ? "text-slate-900" : "text-white"}`}>
               ALPHA FREIGHT
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center space-x-8">
-            {navLinks.map((link) => (
+          <div className="hidden lg:flex items-center lg:space-x-3 xl:space-x-5 2xl:space-x-8 min-w-0 flex-1 justify-center mx-2 xl:mx-4">
+            {navLinks.filter((link) => link.href !== "/ai").map((link) => (
               <div 
                 key={link.name}
-                className="relative"
+                className={`relative shrink-0 ${link.name === "Investor" || link.name === "Career" ? "hidden xl:block" : ""}`}
                 onMouseEnter={() => setHoveredLink(link.name)}
                 onMouseLeave={() => setHoveredLink(null)}
               >
                 <Link
                   href={link.href}
-                  className={`text-[13px] font-medium transition-colors flex items-center gap-1 py-2 ${
+                  className={`text-[12px] xl:text-[13px] font-medium transition-colors flex items-center gap-1 py-2 whitespace-nowrap ${
                     isDark ? "text-slate-600 hover:text-slate-900" : "text-white/70 hover:text-white"
                   }`}
                 >
@@ -331,10 +331,10 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           </div>
 
           {/* Action Button */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center shrink-0 lg:gap-2 xl:gap-3">
             <Link
               href="/directory/shortlist"
-              className={`relative p-2 rounded-full transition-all ${
+              className={`relative p-2 rounded-full transition-all shrink-0 ${
                 isDark ? "hover:bg-slate-100 text-slate-600" : "hover:bg-white/10 text-white"
               }`}
               title="View Shortlist"
@@ -348,8 +348,18 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             </Link>
 
             <Link
+              href="/ai"
+              className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] xl:px-4 xl:py-2 xl:text-[12px] font-bold uppercase tracking-wide transition-all ${
+                isDark
+                  ? "border-[#BFFF07]/40 bg-[#BFFF07]/10 text-[#3d5a00] hover:bg-[#BFFF07] hover:text-black"
+                  : "border-[#BFFF07]/50 bg-[#BFFF07]/15 text-[#BFFF07] hover:bg-[#BFFF07] hover:text-black"
+              }`}
+            >
+              Free AI
+            </Link>
+            <Link
               href="/auth/select"
-              className={`px-6 py-2 rounded-full border text-[13px] font-medium transition-all ${
+              className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] xl:px-5 xl:py-2 xl:text-[13px] font-medium transition-all ${
                 isDark ? "border-slate-200 text-slate-900 hover:bg-slate-50" : "border-white/20 text-white hover:bg-white hover:text-black"
               }`}
             >
@@ -357,7 +367,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             </Link>
             <Link
               href="/contact"
-              className={`px-6 py-2 rounded-full text-[13px] font-medium transition-all ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[11px] xl:px-5 xl:py-2 xl:text-[13px] font-medium transition-all ${
                 isDark ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-white text-black hover:bg-gray-100"
               }`}
             >
@@ -417,9 +427,13 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     <div className="flex items-center justify-between gap-3">
                       <Link
                         href={link.href === "#" ? "/products/supplier-portal" : link.href}
-                        className={`text-2xl sm:text-3xl font-bold tracking-tight uppercase ${
-                          isDark ? "text-slate-900 hover:text-blue-600" : "text-white hover:text-[#BFFF07]"
-                        }`}
+                        className={
+                          link.href === "/ai"
+                            ? "inline-flex w-fit items-center rounded-full border border-[#BFFF07]/50 bg-[#BFFF07]/15 px-5 py-3 text-sm font-bold uppercase tracking-wide text-[#BFFF07]"
+                            : `text-2xl sm:text-3xl font-bold tracking-tight uppercase ${
+                                isDark ? "text-slate-900 hover:text-blue-600" : "text-white hover:text-[#BFFF07]"
+                              }`
+                        }
                         onClick={() => !(link.dropdown || link.megaMenu) && closeMobileMenu()}
                       >
                         {link.name}
