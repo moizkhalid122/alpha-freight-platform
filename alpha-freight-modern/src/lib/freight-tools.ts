@@ -263,6 +263,12 @@ export function resolveUkCityLabel(value: string): string | null {
   return key ? UK_CITY_LABELS[key] : null;
 }
 
+export function getUkCityCoordinates(city: string): { lat: number; lng: number } | null {
+  const key = matchUkCityKey(city);
+  if (!key) return null;
+  return CITY_COORDS[key] ?? null;
+}
+
 export function isValidUkLane(origin: string, destination: string) {
   const originKey = matchUkCityKey(origin);
   const destinationKey = matchUkCityKey(destination);

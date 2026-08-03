@@ -1,22 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
-import { Navigation, MapPin } from "lucide-react";
-import { useLoadRoute } from "@/hooks/useLoadRoute";
-import { formatDistance, formatDuration } from "@/lib/mapbox-routes";
+import { Navigation } from "lucide-react";
 import { buildRouteMetrics } from "@/lib/public-ai-widgets";
+import { buildOsmEmbedUrl } from "@/lib/osm-embed";
 import AiMetricPills from "@/components/marketing/ai/AiMetricPills";
-import { MAPBOX_TOKEN } from "@/lib/mapbox";
+import type { CopilotMetric } from "@/lib/chat-types";
 
-const MapCanvas = dynamic(() => import("@/components/marketing/ai/AiRouteMapCanvas"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[160px] items-center justify-center rounded-xl bg-[#f4f4f4] text-xs text-[#999]">
-      Loading map…
-    </div>
-  ),
-});
+type RouteMapPayload = {
+  originCoords: { lat: number; lng: number } | null;
+  destCoords: { lat: number; lng: number } | null;
+  staticMapUrl: string | null;
+  route: {
+    distanceMeters: number;
+    durationSeconds: number;
+    coordinates: Array<{ latitude: number; longitude: number }>;
+  } | null;
+  metrics: CopilotMetric[];
+};
 
 type AiRouteMiniMapProps = {
   origin: string;
@@ -24,23 +27,49 @@ type AiRouteMiniMapProps = {
 };
 
 export default function AiRouteMiniMap({ origin, destination }: AiRouteMiniMapProps) {
-  const { route, loading } = useLoadRoute(origin, destination, Boolean(MAPBOX_TOKEN));
-  const staticMetrics = buildRouteMetrics(origin, destination);
+  const [payload, setPayload] = useState<RouteMapPayload | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const liveMetrics =
-    route && !loading
-      ? [
-          { label: "Distance", value: formatDistance(route.distanceMeters), icon: "📍" as const },
-          { label: "ETA", value: formatDuration(route.durationSeconds), icon: "⏱️" as const },
-          {
-            label: "Fuel est.",
-            value: `~£${Math.round((route.distanceMeters / 1609) * 0.58 * 1.48)}`,
-            icon: "⛽" as const,
-            tone: "warning" as const,
-          },
-          { label: "Traffic", value: "Live route", icon: "🚦" as const },
-        ]
-      : staticMetrics;
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/ai/route-map?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`
+        );
+        const data = (await res.json()) as RouteMapPayload;
+        if (!cancelled) setPayload(data);
+      } catch {
+        if (!cancelled) {
+          setPayload({
+            originCoords: null,
+            destCoords: null,
+            staticMapUrl: null,
+            route: null,
+            metrics: buildRouteMetrics(origin, destination),
+          });
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [origin, destination]);
+
+  const metrics = payload?.metrics?.length ? payload.metrics : buildRouteMetrics(origin, destination);
+  const osmEmbedUrl =
+    payload?.originCoords && payload?.destCoords
+      ? buildOsmEmbedUrl(
+          { lat: payload.originCoords.lat, lng: payload.originCoords.lng },
+          { lat: payload.destCoords.lat, lng: payload.destCoords.lng }
+        )
+      : null;
 
   return (
     <motion.div
@@ -55,37 +84,35 @@ export default function AiRouteMiniMap({ origin, destination }: AiRouteMiniMapPr
         </span>
       </div>
 
-      {MAPBOX_TOKEN && route ? (
-        <div className="h-[160px] w-full">
-          <MapCanvas route={route} origin={origin} destination={destination} />
-        </div>
-      ) : (
-        <div className="relative mx-4 mt-3 h-[120px] overflow-hidden rounded-xl bg-gradient-to-br from-[#eef5e0] via-[#f7f7f8] to-[#e8f0ff]">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg viewBox="0 0 320 120" className="h-full w-full px-6" aria-hidden>
-              <path
-                d="M 40 80 Q 120 20, 200 50 T 280 40"
-                fill="none"
-                stroke="#7a9900"
-                strokeWidth="3"
-                strokeDasharray="6 4"
-                strokeLinecap="round"
-              />
-              <circle cx="40" cy="80" r="8" fill="#BFFF07" stroke="#7a9900" strokeWidth="2" />
-              <circle cx="280" cy="40" r="8" fill="#111" stroke="#666" strokeWidth="2" />
-            </svg>
+      <div className="relative h-[200px] w-full bg-[#eef2ea]">
+        {loading ? (
+          <div className="flex h-full items-center justify-center text-xs text-[#999]">Loading map…</div>
+        ) : payload?.staticMapUrl ? (
+          <Image
+            src={payload.staticMapUrl}
+            alt={`Route map ${origin} to ${destination}`}
+            fill
+            unoptimized
+            className="object-cover"
+            sizes="640px"
+          />
+        ) : osmEmbedUrl ? (
+          <iframe
+            title={`Route ${origin} to ${destination}`}
+            src={osmEmbedUrl}
+            className="h-full w-full border-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center px-4 text-center text-xs text-[#888]">
+            Map unavailable — distance stats below are still accurate.
           </div>
-          <div className="absolute bottom-2 left-3 flex items-center gap-1 text-[10px] font-medium text-[#666]">
-            <MapPin className="h-3 w-3" /> {origin}
-          </div>
-          <div className="absolute right-3 top-2 flex items-center gap-1 text-[10px] font-medium text-[#666]">
-            <MapPin className="h-3 w-3" /> {destination}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="px-4 py-3">
-        <AiMetricPills metrics={liveMetrics} />
+        <AiMetricPills metrics={metrics} />
       </div>
     </motion.div>
   );
