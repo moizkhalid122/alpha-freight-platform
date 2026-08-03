@@ -51,7 +51,7 @@ import AiFuelChart from "@/components/marketing/ai/AiFuelChart";
 import AiRpmCalculator from "@/components/marketing/ai/AiRpmCalculator";
 import { prependPersonality, getPersonalityPrefix } from "@/lib/ai-personality";
 import { playAiCompleteSound } from "@/lib/ai-complete-sound";
-import { matchInputSuggestions, isFuelChartQuery } from "@/lib/ai-input-suggestions";
+import { matchInputSuggestions, isFuelChartQuery, isRpmCalculatorQuery } from "@/lib/ai-input-suggestions";
 import {
   extractMemoryFromText,
   loadPublicAiMemory,
@@ -116,11 +116,36 @@ function fromStoredMessages(stored: StoredChatMessage[]): Message[] {
   return stored.map((m) => ({ ...m }));
 }
 
+function QuickActionLinks({ actions }: { actions: NonNullable<StructuredAssistantReply["quickActions"]> }) {
+  return (
+    <div className="flex flex-wrap gap-2 pt-1">
+      {actions.map((action) =>
+        action.href ? (
+          <Link
+            key={action.label}
+            href={action.href}
+            className="rounded-full border border-[#e5e5e5] bg-white px-4 py-2 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f7f7f8]"
+          >
+            {action.label}
+          </Link>
+        ) : null
+      )}
+    </div>
+  );
+}
+
 function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAssistantReply; content: string; isStreaming?: boolean }) {
   const markdown = (reply?.rawText || reply?.shortExplanation || content).trim();
 
   if (isStreaming || !reply || reply.displayStyle === "plain") {
-    return <AiRichMarkdown content={markdown} isStreaming={isStreaming} />;
+    return (
+      <div className="space-y-3 text-[15px] leading-[1.75] text-[#0d0d0d]">
+        <AiRichMarkdown content={markdown} isStreaming={isStreaming} />
+        {!isStreaming && reply?.quickActions && reply.quickActions.length > 0 ? (
+          <QuickActionLinks actions={reply.quickActions} />
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -144,19 +169,7 @@ function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAss
       ) : null}
       {reply.nextStep ? <p className="text-sm text-[#666]">{reply.nextStep}</p> : null}
       {reply.quickActions && reply.quickActions.length > 0 ? (
-        <div className="flex flex-wrap gap-2 pt-1">
-          {reply.quickActions.map((action) =>
-            action.href ? (
-              <Link
-                key={action.label}
-                href={action.href}
-                className="rounded-full border border-[#e5e5e5] bg-white px-4 py-2 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f7f7f8]"
-              >
-                {action.label}
-              </Link>
-            ) : null
-          )}
-        </div>
+        <QuickActionLinks actions={reply.quickActions} />
       ) : null}
       {!reply.shortExplanation && !reply.keyPoints?.length && content ? (
         <AiRichMarkdown content={content} />
@@ -893,10 +906,12 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                                 <AiFuelChart />
                               ) : null}
 
-                            {message.structuredMessage?.inlineTool === "rpm_calculator" &&
-                              streamingMessageId !== message.id && (
+                            {streamingMessageId !== message.id &&
+                            message.meta?.userQuery &&
+                            (message.structuredMessage?.inlineTool === "rpm_calculator" ||
+                              isRpmCalculatorQuery(message.meta.userQuery)) ? (
                                 <AiRpmCalculator onAskFollowUp={(q) => void handleSend(q)} />
-                              )}
+                              ) : null}
 
                             {message.content && streamingMessageId !== message.id ? (
                               <AiConfidenceFooter

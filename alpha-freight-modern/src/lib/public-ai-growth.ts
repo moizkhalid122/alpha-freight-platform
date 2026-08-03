@@ -117,8 +117,14 @@ export function enrichPublicAiReply(
     });
   }
 
+  let inlineTool = reply.inlineTool;
+  if (!inlineTool && /\b(rpm|revenue per mile|rate per mile|calculate profit|profit for|margin)\b/i.test(message)) {
+    inlineTool = "rpm_calculator";
+  }
+
   return {
     ...reply,
+    inlineTool,
     quickActions: mergeQuickActions(reply, growthActions),
   };
 }

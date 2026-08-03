@@ -27,5 +27,11 @@ export function matchInputSuggestions(input: string): InputSuggestion[] {
 }
 
 export function isFuelChartQuery(text: string): boolean {
-  return /\b(fuel|diesel|petrol|fuel cost|diesel price|fuel price)\b/i.test(text);
+  return /\b(fuel|diesel|petrol|fuel cost|diesel price|fuel price|fuel surcharge)\b/i.test(text);
+}
+
+export function isRpmCalculatorQuery(text: string): boolean {
+  return /\b(rpm|revenue per mile|rate per mile|calculate profit|profit calc|margin calc|£\s?\d+\s*(for|over|across)\s*\d+\s*miles?)\b/i.test(
+    text
+  );
 }

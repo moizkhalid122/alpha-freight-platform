@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { normalizeAiMarkdown } from "@/lib/ai-markdown-normalize";
 import {
   ChevronDown,
   Info,
@@ -207,10 +208,11 @@ export default function AiRichMarkdown({
   content: string;
   isStreaming?: boolean;
 }) {
-  const blocks = splitCollapsibleBlocks(content);
+  const normalized = isStreaming ? content : normalizeAiMarkdown(content);
+  const blocks = splitCollapsibleBlocks(normalized);
 
   if (!blocks.length) {
-    return <MarkdownBody content={content} isStreaming={isStreaming} />;
+    return <MarkdownBody content={normalized} isStreaming={isStreaming} />;
   }
 
   return (
