@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/admin/",
+          "/ops-af-7x9k2/",
           "/carrier/",
           "/supplier/",
           "/auth/login",

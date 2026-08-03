@@ -62,6 +62,7 @@ export default function Chatbot() {
   const hideWidget =
     pathname.startsWith("/carrier") ||
     pathname.startsWith("/supplier") ||
+    pathname.startsWith("/ops-af-7x9k2") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/auth") ||

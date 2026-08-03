@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
   ClipboardList,
@@ -21,6 +20,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { adminRoute } from "@/lib/admin-path";
+import { supabase } from "@/lib/supabase";
 
 type AdminNavItem = {
   name: string;
@@ -34,22 +35,22 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
     items: [
       {
         name: "Overview",
-        path: "/admin",
+        path: "/ops-af-7x9k2",
         icon: <LayoutDashboard className="h-4 w-4" />,
       },
       {
         name: "Quick Stats",
-        path: "/admin/quick-stats",
+        path: "/ops-af-7x9k2/quick-stats",
         icon: <Gauge className="h-4 w-4" />,
       },
       {
         name: "Referrals",
-        path: "/admin/referrals",
+        path: "/ops-af-7x9k2/referrals",
         icon: <Gift className="h-4 w-4" />,
       },
       {
         name: "User Feedback",
-        path: "/admin/feedback",
+        path: "/ops-af-7x9k2/feedback",
         icon: <MessageSquare className="h-4 w-4" />,
       },
     ],
@@ -59,32 +60,32 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
     items: [
       {
         name: "All Carriers",
-        path: "/admin/carriers",
+        path: "/ops-af-7x9k2/carriers",
         icon: <Truck className="h-4 w-4" />,
       },
       {
         name: "Pending Verification",
-        path: "/admin/carriers/pending-verifications",
+        path: "/ops-af-7x9k2/carriers/pending-verifications",
         icon: <ShieldCheck className="h-4 w-4" />,
       },
       {
         name: "Verified Carriers",
-        path: "/admin/carriers/verified",
+        path: "/ops-af-7x9k2/carriers/verified",
         icon: <UserRoundCheck className="h-4 w-4" />,
       },
       {
         name: "Add Carrier",
-        path: "/admin/carriers/add",
+        path: "/ops-af-7x9k2/carriers/add",
         icon: <UserPlus className="h-4 w-4" />,
       },
       {
         name: "POD Verification",
-        path: "/admin/carriers/pod-verification",
+        path: "/ops-af-7x9k2/carriers/pod-verification",
         icon: <FileText className="h-4 w-4" />,
       },
       {
         name: "Carrier Payments",
-        path: "/admin/carriers/payments",
+        path: "/ops-af-7x9k2/carriers/payments",
         icon: <CreditCard className="h-4 w-4" />,
       },
     ],
@@ -94,7 +95,7 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
     items: [
       {
         name: "All Suppliers",
-        path: "/admin/suppliers",
+        path: "/ops-af-7x9k2/suppliers",
         icon: <Building2 className="h-4 w-4" />,
       },
     ],
@@ -104,12 +105,12 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
     items: [
       {
         name: "All Loads",
-        path: "/admin/loads",
+        path: "/ops-af-7x9k2/loads",
         icon: <ClipboardList className="h-4 w-4" />,
       },
       {
         name: "Post Load",
-        path: "/admin/post-load",
+        path: "/ops-af-7x9k2/post-load",
         icon: <PackagePlus className="h-4 w-4" />,
       },
     ],
@@ -119,7 +120,7 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
     items: [
       {
         name: "Settings",
-        path: "/admin/settings",
+        path: "/ops-af-7x9k2/settings",
         icon: <Settings className="h-4 w-4" />,
       },
     ],
@@ -127,8 +128,8 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
 ];
 
 function isItemActive(pathname: string, itemPath: string) {
-  if (itemPath === "/admin") {
-    return pathname === "/admin";
+  if (itemPath === "/ops-af-7x9k2") {
+    return pathname === "/ops-af-7x9k2";
   }
 
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
@@ -142,6 +143,13 @@ export default function AdminSidebar({
   collapsed?: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push(adminRoute("/login"));
+    router.refresh();
+  };
 
   return (
     <aside
@@ -151,7 +159,7 @@ export default function AdminSidebar({
       )}
     >
       <div className={cn("border-b border-slate-200/70", collapsed ? "px-4 py-5" : "px-5 py-5")}>
-        <Link href="/admin" onClick={onClose} className="flex items-center gap-3">
+        <Link href="/ops-af-7x9k2" onClick={onClose} className="flex items-center gap-3">
           <div className="relative h-10 w-10 overflow-hidden rounded-2xl bg-white shadow-[0_14px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
             <Image
               src="/logo.png"
@@ -226,17 +234,17 @@ export default function AdminSidebar({
             </p>
           </div>
         ) : null}
-        <Link
-          href="/auth/login"
-          onClick={onClose}
+        <button
+          type="button"
+          onClick={handleLogout}
           className={cn(
-            "mt-3 flex rounded-2xl text-sm font-bold text-red-500 transition-colors hover:bg-red-50 hover:text-red-600",
+            "mt-3 flex w-full rounded-2xl text-sm font-bold text-red-500 transition-colors hover:bg-red-50 hover:text-red-600",
             collapsed ? "justify-center px-2 py-3" : "items-center gap-3 px-4 py-3"
           )}
         >
           <LogOut className="h-4 w-4" />
           {!collapsed ? <span>Logout</span> : null}
-        </Link>
+        </button>
       </div>
     </aside>
   );

@@ -439,10 +439,10 @@ export default function AnalyticsDashboardPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/admin/analytics"
+                href="/auth/login?role=supplier"
                 className="inline-flex h-12 items-center gap-2 rounded-full border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
               >
-                Explore admin analytics
+                Sign in to your dashboard
               </Link>
             </div>
           </div>
