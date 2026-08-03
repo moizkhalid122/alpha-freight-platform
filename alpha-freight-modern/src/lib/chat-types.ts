@@ -118,7 +118,8 @@ export interface StructuredAssistantReply {
   platformResult?: CopilotPlatformResult;
   actionRequest?: CopilotActionRequest | null;
   memory?: CopilotContextMemory;
-  inlineTool?: "rpm_calculator" | "fuel_surcharge";
+  inlineTool?: "rpm_calculator" | "fuel_surcharge" | "load_cards" | "route_map" | "comparison_chart";
+  chartType?: "rpm" | "profit" | "fuel";
   rawText?: string;
 }
 

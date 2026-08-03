@@ -1,5 +1,3 @@
-const SECTION_LABELS = ["Quick Answer", "Explanation", "Example", "Next step", "Next Step"];
-
 function latexToPlain(latex: string): string {
   let s = latex.trim();
   s = s.replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, "$1 ÷ $2");
@@ -16,9 +14,18 @@ function isLatexBlock(inner: string): boolean {
   return /\\frac|\\text|\\times|\\cdot|\\[a-zA-Z]/.test(inner);
 }
 
+const ROBOTIC_HEADERS = ["Quick Answer", "Explanation", "Example", "Next step", "Next Step"];
+
 /** Normalize OpenAI markdown so tables, callouts, and maths render in the UI. */
 export function normalizeAiMarkdown(source: string): string {
   let text = source;
+
+  for (const header of ROBOTIC_HEADERS) {
+    text = text.replace(new RegExp(`^###\\s+${header}\\s*$`, "gim"), "");
+    text = text.replace(new RegExp(`^\\*\\*${header}\\*\\*\\s*$`, "gim"), "");
+  }
+
+  text = text.replace(/\n{3,}/g, "\n\n").trim();
 
   text = text.replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `\n\n**${latexToPlain(inner)}**\n\n`);
   text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => latexToPlain(inner));
@@ -29,11 +36,6 @@ export function normalizeAiMarkdown(source: string): string {
     if (!isLatexBlock(inner)) return match;
     return `\n\n**${latexToPlain(inner)}**\n\n`;
   });
-
-  for (const section of SECTION_LABELS) {
-    text = text.replace(new RegExp(`^\\*\\*${section}\\*\\*\\s*$`, "gim"), `### ${section}`);
-    text = text.replace(new RegExp(`^${section}\\s*$`, "gim"), `### ${section}`);
-  }
 
   return text;
 }

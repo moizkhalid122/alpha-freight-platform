@@ -11,6 +11,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   Truck,
+  Sparkles,
+  BookOpen,
+  Calculator,
+  ArrowRightCircle,
 } from "lucide-react";
 
 type BlockPart =
@@ -37,6 +41,18 @@ const CALLOUT_ICONS = {
 } as const;
 
 type CalloutKind = keyof typeof CALLOUT_ICONS;
+
+const SECTION_ICONS: Record<string, typeof Sparkles> = {
+  "quick answer": Sparkles,
+  explanation: BookOpen,
+  example: Calculator,
+  "next step": ArrowRightCircle,
+};
+
+function headingIcon(text: string) {
+  const key = text.toLowerCase().trim();
+  return SECTION_ICONS[key] || null;
+}
 
 const CALLOUT_STYLES: Record<CalloutKind, string> = {
   tip: "border-[#BFFF07]/50 bg-[#f7ffe8] text-[#3d4d00]",
@@ -124,9 +140,18 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
             {children}
           </h3>
         ),
-        h3: ({ children }) => (
-          <h4 className="mb-2 mt-4 text-base font-semibold text-[#222] first:mt-0">{children}</h4>
-        ),
+        h3: ({ children }) => {
+          const label = nodeToText(children).trim();
+          const Icon = headingIcon(label);
+          return (
+            <h4 className="mb-2 mt-5 flex items-center gap-2 text-base font-semibold text-[#222] first:mt-0">
+              {Icon ? <Icon className="h-4 w-4 shrink-0 text-[#7a9900]" /> : (
+                <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[#BFFF07]" />
+              )}
+              {children}
+            </h4>
+          );
+        },
         p: ({ children }) => <p className="mb-3 leading-[1.8] text-[#1a1a1a] last:mb-0">{children}</p>,
         strong: ({ children }) => <strong className="font-semibold text-[#0d0d0d]">{children}</strong>,
         ul: ({ children }) => <ul className="my-3 space-y-2 pl-1">{children}</ul>,

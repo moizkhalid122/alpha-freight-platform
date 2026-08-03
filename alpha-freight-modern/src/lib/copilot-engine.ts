@@ -370,7 +370,12 @@ function flattenPublicReply(result: CopilotEngineResult): CopilotEngineResult {
       recommendation: "",
       nextStep: "",
       rawText: body,
-      quickActions: [],
+      platformResult: sm.platformResult,
+      routePreview: sm.routePreview,
+      metrics: sm.metrics,
+      inlineTool: sm.inlineTool,
+      chartType: sm.chartType,
+      quickActions: sm.quickActions?.length ? sm.quickActions : [],
     },
   };
 }

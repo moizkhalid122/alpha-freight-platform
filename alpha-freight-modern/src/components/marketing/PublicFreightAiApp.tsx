@@ -47,11 +47,10 @@ import AiRichMarkdown from "@/components/marketing/AiRichMarkdown";
 import AiPageBackground from "@/components/marketing/ai/AiPageBackground";
 import AiInputSuggestions from "@/components/marketing/ai/AiInputSuggestions";
 import AiConfidenceFooter from "@/components/marketing/ai/AiConfidenceFooter";
-import AiFuelChart from "@/components/marketing/ai/AiFuelChart";
-import AiRpmCalculator from "@/components/marketing/ai/AiRpmCalculator";
+import PublicAiMessageExtras from "@/components/marketing/ai/PublicAiMessageExtras";
 import { prependPersonality, getPersonalityPrefix } from "@/lib/ai-personality";
 import { playAiCompleteSound } from "@/lib/ai-complete-sound";
-import { matchInputSuggestions, isFuelChartQuery, isRpmCalculatorQuery } from "@/lib/ai-input-suggestions";
+import { matchInputSuggestions } from "@/lib/ai-input-suggestions";
 import {
   extractMemoryFromText,
   loadPublicAiMemory,
@@ -899,19 +898,14 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                               content={message.content}
                               isStreaming={streamingMessageId === message.id}
                             />
-                            {message.meta?.userQuery &&
-                              isFuelChartQuery(message.meta.userQuery) &&
-                              streamingMessageId !== message.id &&
-                              message.content ? (
-                                <AiFuelChart />
-                              ) : null}
 
-                            {streamingMessageId !== message.id &&
-                            message.meta?.userQuery &&
-                            (message.structuredMessage?.inlineTool === "rpm_calculator" ||
-                              isRpmCalculatorQuery(message.meta.userQuery)) ? (
-                                <AiRpmCalculator onAskFollowUp={(q) => void handleSend(q)} />
-                              ) : null}
+                            <PublicAiMessageExtras
+                              structuredMessage={message.structuredMessage}
+                              userQuery={message.meta?.userQuery}
+                              hasContent={Boolean(message.content)}
+                              isStreaming={streamingMessageId === message.id}
+                              onAskFollowUp={(q) => void handleSend(q)}
+                            />
 
                             {message.content && streamingMessageId !== message.id ? (
                               <AiConfidenceFooter

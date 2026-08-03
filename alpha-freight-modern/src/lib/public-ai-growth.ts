@@ -1,4 +1,12 @@
 import type { StructuredAssistantReply } from "@/lib/chat-types";
+import {
+  buildDemoLoadCards,
+  buildRouteMetrics,
+  buildRoutePreview,
+  parseComparisonChartType,
+  parseLoadSearchQuery,
+  parseRouteQuery,
+} from "@/lib/public-ai-widgets";
 
 const FREIGHT_PATTERN =
   /\b(freight|load|loads|haul|haulage|truck|hgv|lorry|carrier|supplier|rpm|diesel|fuel|pod|delivery|logistics|alpha|bid|wallet|payout|route|backhaul|margin|rate|quote|book|profit|mile|artic|van|reefer|dispatch|sign up|signup)\b/i;
@@ -118,13 +126,51 @@ export function enrichPublicAiReply(
   }
 
   let inlineTool = reply.inlineTool;
+  let chartType = reply.chartType;
+  let platformResult = reply.platformResult;
+  let routePreview = reply.routePreview;
+  let metrics = reply.metrics;
+
+  const loadLocation = parseLoadSearchQuery(message);
+  if (loadLocation && !platformResult?.loads?.length) {
+    inlineTool = "load_cards";
+    platformResult = buildDemoLoadCards(loadLocation);
+    growthActions.unshift({
+      label: "Sign up to book loads",
+      href: "/auth/select",
+      action: "Sign up free to bid on live loads",
+      variant: "primary",
+    });
+  }
+
+  const route = parseRouteQuery(message);
+  if (route && !loadLocation) {
+    inlineTool = inlineTool === "load_cards" ? inlineTool : "route_map";
+    routePreview = buildRoutePreview(route.origin, route.destination);
+    metrics = buildRouteMetrics(route.origin, route.destination);
+  }
+
+  const comparison = parseComparisonChartType(message);
+  if (comparison) {
+    inlineTool = "comparison_chart";
+    chartType = comparison;
+  }
+
   if (!inlineTool && /\b(rpm|revenue per mile|rate per mile|calculate profit|profit for|margin)\b/i.test(message)) {
     inlineTool = "rpm_calculator";
+  }
+
+  if (!inlineTool && /\b(diesel|fuel price|fuel cost|fuel surcharge)\b/i.test(message)) {
+    inlineTool = "fuel_surcharge";
   }
 
   return {
     ...reply,
     inlineTool,
+    chartType,
+    platformResult,
+    routePreview,
+    metrics,
     quickActions: mergeQuickActions(reply, growthActions),
   };
 }
