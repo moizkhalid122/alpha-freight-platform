@@ -43,6 +43,7 @@ import {
   isWeatherQuery,
 } from "@/lib/copilot/weather-provider";
 import { isOpenAiReachable, markOpenAiUnreachable } from "@/lib/copilot/connectivity";
+import { needsLiveWebSearch, isGeneralKnowledgeQuery } from "@/lib/public-ai-live-search";
 
 export type CopilotEngineInput = {
   message: string;
@@ -136,45 +137,6 @@ export async function preparePublicStreamChat(
     };
   }
 
-  if (isDieselOrFuelQuery(message)) {
-    const webSearch = await withTimeout(searchWeb(message), 2500, null);
-    if (webSearch?.ok && webSearch.answer) {
-      const fast = buildWebSearchFastReply(webSearch, message);
-      return {
-        mode: "complete",
-        result: flattenPublicReply({
-          ...fast,
-          structuredMessage: enrichPublicAiReply(fast.structuredMessage, message),
-          source: "web_search",
-        }),
-      };
-    }
-    const diesel = buildDieselPriceReply(assistantType);
-    return {
-      mode: "complete",
-      result: flattenPublicReply({
-        ...diesel,
-        structuredMessage: enrichPublicAiReply(diesel.structuredMessage, message),
-        source: "instant",
-      }),
-    };
-  }
-
-  if (detected.needsWebSearch) {
-    const webSearch = await withTimeout(searchWeb(message), 3500, null);
-    if (webSearch?.ok && (webSearch.answer || webSearch.results.length > 0)) {
-      const fast = buildWebSearchFastReply(webSearch, message);
-      return {
-        mode: "complete",
-        result: flattenPublicReply({
-          ...fast,
-          structuredMessage: enrichPublicAiReply(fast.structuredMessage, message),
-          source: "web_search",
-        }),
-      };
-    }
-  }
-
   if (!isOpenAiConfigured()) {
     return {
       mode: "complete",
@@ -192,6 +154,12 @@ export async function preparePublicStreamChat(
 
   const extraContext: string[] = [getLanguageInstruction(lang), PUBLIC_AI_CONTEXT];
 
+  if (isGeneralKnowledgeQuery(message)) {
+    extraContext.push(
+      "User asked a general knowledge question — give a full helpful answer (science/history/business/coding/English/health/geography). Do not refuse or redirect to freight only."
+    );
+  }
+
   const memoryHint = formatMemoryForPrompt(sessionMemory || {});
   if (memoryHint) extraContext.push(memoryHint);
 
@@ -206,11 +174,13 @@ export async function preparePublicStreamChat(
     if (rag) extraContext.push(rag);
   }
 
-  const webSearch = detected.needsWebSearch
-    ? await withTimeout(searchWeb(message), 2500, null)
-    : null;
-  if (webSearch?.ok && webSearch.answer) {
-    extraContext.push(`Live web data (prefer over outdated knowledge): ${webSearch.answer.slice(0, 600)}`);
+  const shouldSearchWeb =
+    detected.needsWebSearch || needsLiveWebSearch(message) || isDieselOrFuelQuery(message);
+  const webSearch = shouldSearchWeb ? await withTimeout(searchWeb(message), 4000, null) : null;
+  if (webSearch?.ok && (webSearch.answer || webSearch.results.length > 0)) {
+    extraContext.push(
+      `Live web search results (use for weather, news, diesel, traffic, exchange rates — prefer over outdated knowledge):\n${formatWebSearchContext(webSearch).slice(0, 1400)}`
+    );
   }
 
   const intentHint = detected
@@ -315,7 +285,7 @@ export async function buildPublicOfflineReply(
   }
 
   const detected = detectIntent(message, assistantType);
-  if (detected.needsWebSearch) {
+  if (detected.needsWebSearch || needsLiveWebSearch(message)) {
     const web = await searchWeb(message);
     if (web.ok && (web.answer || web.results.length > 0)) {
       return flattenPublicReply(buildWebSearchFastReply(web, message));
@@ -455,7 +425,7 @@ function saveChatMessagesAsync(
   })();
 }
 
-const PUBLIC_AI_CONTEXT = `Public /ai page — guest, no login. You are Alpha Freight AI only. Never mention OpenAI or other AI brands in replies.`;
+const PUBLIC_AI_CONTEXT = `Public /ai guest chat. You are Alpha Freight AI — UK freight expert AND a capable general assistant. Answer science, history, business, coding, English, health, and geography fully. Use live web data when provided. Never refuse reasonable general questions. Never mention OpenAI.`;
 
 async function runPublicCopilotEngine(
   input: CopilotEngineInput

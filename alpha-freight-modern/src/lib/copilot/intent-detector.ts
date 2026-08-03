@@ -49,12 +49,14 @@ export function detectIntent(message: string, assistantType: AssistantKind): Det
     /\b(price|prices|cost|rate) (?:of |for )?(?:uk )?(?:diesel|petrol|fuel|desile)\b/i,
     /\b(?:uk|british)\b.*\b(diesel|petrol|fuel|desile|desial|hgv)\b/i,
     /\b(diesel|petrol|fuel|desile|desial)\b.*\b(?:uk|british)\b/i,
-    /\b(news|closure|closed|traffic|delay|accident|weather|forecast|wather)\b/i,
-    /\b(london|manchester|birmingham|leeds|glasgow|bristol|liverpool|edinburgh)\b.*\b(weather|forecast|wather|traffic)\b/i,
-    /\b(weather|forecast|wather|traffic)\b.*\b(london|manchester|birmingham|leeds|glasgow|uk)\b/i,
-    /\b(m\d+|motorway)\b.*\b(closure|closed|traffic|delay|accident|works)\b/i,
+    /\b(news|headline|headlines|breaking|closure|closed|traffic|delay|accident|weather|forecast|wather)\b/i,
+    /\b(exchange rate|currency|currencies|gbp|usd|eur|euro|dollar|forex|pound to)\b/i,
+    /\b(london|manchester|birmingham|leeds|glasgow|bristol|liverpool|edinburgh)\b.*\b(weather|forecast|wather|traffic|news)\b/i,
+    /\b(weather|forecast|wather|traffic|news)\b.*\b(london|manchester|birmingham|leeds|glasgow|uk)\b/i,
+    /\b(m\d+|motorway|a\d+)\b.*\b(closure|closed|traffic|delay|accident|works)\b/i,
     /\b(hgv|lorry|haulage) (?:rules|regulations|news)\b/i,
-    /\b(live|real.?time|today|current|latest)\b.*\b(update|status|price|news|weather)\b/i,
+    /\b(live|real.?time|today|current|latest|right now)\b.*\b(update|status|price|news|weather|traffic|rate)\b/i,
+    /\b(stock|ftse|bitcoin|crypto)\b.*\b(price|today|news)\b/i,
   ];
   if (webPatterns.some((p) => p.test(lower)) && !/\b(my wallet|my bids?|my loads?)\b/i.test(lower)) {
     result.needsWebSearch = true;

@@ -362,12 +362,10 @@ Need help with a **load, RPM, or backhaul** on that route? Ask me — e.g. "Find
   }
 
   return {
-    message: `I can help with posting loads, finding freight, payouts, live tracking, POD, and account questions.
+    message: `I'm **Alpha Freight AI** — I answer UK freight questions and general topics (science, history, business, coding, English, health, geography) when live AI is connected.
 
-Try asking something like:
-• "How do I post a load?"
-• "How do carrier payouts work?"
-• "Help with live tracking"
+**Freight:** loads, RPM, diesel, POD, payouts, tracking
+**Try:** "What is photosynthesis?" · "GBP to USD today" · "London weather" · "What is RPM?"
 
 Or email ${SUPPORT_EMAIL} for human support.`,
   };

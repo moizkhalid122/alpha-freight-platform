@@ -27,7 +27,7 @@ export function searchHelpArticles(query: string, limit = 2): string[] {
 }
 
 export function shouldUsePublicRag(query: string): boolean {
-  return query.trim().length > 2 && (FREIGHT_QUERY.test(query) || query.length < 30);
+  return query.trim().length > 2 && FREIGHT_QUERY.test(query);
 }
 
 export function buildPublicRagContext(query: string): string {

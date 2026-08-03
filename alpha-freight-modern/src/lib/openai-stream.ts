@@ -1,6 +1,7 @@
 import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply } from "@/lib/chat-types";
 import type { DetectedIntent } from "@/lib/copilot/intent-detector";
 import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
+import { generalKnowledgeCategory } from "@/lib/public-ai-live-search";
 import { fetchWithTimeout, OPENAI_STREAM_TIMEOUT_MS } from "@/lib/copilot/fetch-utils";
 
 const ROLE_LABELS: Record<AssistantKind, string> = {
@@ -93,7 +94,37 @@ export function inferPublicSuggestedQuestions(message: string, history: ChatHist
   if (/sign up|signup|register|account/i.test(lower)) {
     return ["How do I sign up as a carrier?", "How do I sign up as a supplier?", "Is Alpha Freight free?"];
   }
-  return ["How do I find loads in the UK?", "What is RPM in haulage?", "How does Alpha Freight work?"];
+
+  const category = generalKnowledgeCategory(message);
+  if (category === "science") {
+    return ["Explain another science topic", "How does this relate to everyday life?", "What is RPM in haulage?"];
+  }
+  if (category === "history") {
+    return ["Tell me more about this period", "What caused this event?", "How do I find loads in the UK?"];
+  }
+  if (category === "business") {
+    return ["Give a practical example", "How do startups raise funding?", "How does Alpha Freight work?"];
+  }
+  if (category === "coding") {
+    return ["Show a simple code example", "Explain this in beginner terms", "What is RPM in haulage?"];
+  }
+  if (category === "english") {
+    return ["Give more grammar examples", "How do I write more clearly?", "What is RPM?"];
+  }
+  if (category === "health") {
+    return ["What are general wellness tips?", "Explain nutrition basics", "How do carrier payouts work?"];
+  }
+  if (category === "geography") {
+    return ["Tell me about another country", "What is the capital?", "Find loads in the UK"];
+  }
+  if (/exchange|currency|gbp|usd|euro|forex/i.test(lower)) {
+    return ["GBP to USD today", "UK diesel price today", "What is RPM?"];
+  }
+  if (/news|headline|breaking/i.test(lower)) {
+    return ["UK diesel price today", "London weather today", "What is RPM?"];
+  }
+
+  return ["How do I find loads in the UK?", "What is RPM in haulage?", "Explain a general topic"];
 }
 
 export function buildPublicStreamMessages(options: {
