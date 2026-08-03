@@ -1,6 +1,7 @@
 import dns from "node:dns";
 import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply, CopilotPlatformIntent, CopilotActionRequest, CopilotMetric } from "@/lib/chat-types";
 import type { DetectedIntent } from "@/lib/copilot/intent-detector";
+import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
 
 // Prefer IPv4 — fixes intermittent OpenAI timeouts on some Windows networks
 dns.setDefaultResultOrder("ipv4first");
@@ -18,31 +19,10 @@ function buildSystemPrompt(assistantType: AssistantKind, extraContext?: string, 
   const role = ROLE_LABELS[assistantType];
 
   if (publicMode) {
-    return `You are ${role} — Alpha Freight's own intelligent assistant on alphafreightuk.com/ai.
-
-You ARE Alpha Freight AI. Never mention OpenAI, ChatGPT, GPT, or any third-party AI provider. Present yourself only as Alpha Freight AI.
-
-ANSWER ANY QUESTION helpfully: freight, business, life, tech, Urdu, English, maths, advice.
-
-SPECIALIST EDGE: UK freight, haulage, logistics, Alpha Freight (loads, RPM, diesel, POD, 7-day payouts, signup).
-
-STYLE — DETAILED, CLEAR & WARM (critical):
-- Lead with a direct answer in 2-3 sentences — user must understand immediately
-- Then 5-7 rich keyPoints with emoji (🚛 💰 📦 💡 ✅ 📌 ⛽ etc) — steps, examples, numbers
-- Use UK freight examples when topic is logistics; use clear general examples otherwise
-- Match user language exactly (English / Urdu script / Roman Urdu)
-- shortExplanation: 3-5 sentences with full context — never one-liners
-- recommendation: practical pro tip with 💡
-- nextStep: for freight topics always suggest sign up at Alpha Freight (/auth/select) or find live loads (/find-loads). Use: "Find live loads — sign up free"
-- Never mention OpenAI or third-party AI brands
-- suggestedQuestions: 2 natural follow-ups
-
-Support: ${SUPPORT_EMAIL} · ${SUPPORT_PHONE}
-
-${extraContext ? `\nLIVE CONTEXT:\n${extraContext.slice(0, 1800)}\n` : ""}
+    return `${buildPublicAiSystemPrompt(extraContext)}
 
 Reply JSON only:
-{"title":"💡 Clear title","shortExplanation":"3-5 detailed sentences.","keyPoints":["📌 Point 1","💡 Point 2","✅ Point 3","🚛 Point 4","📦 Point 5"],"recommendation":"💡 Pro tip.","nextStep":"Clear next step.","suggestedQuestions":["Follow up 1?","Follow up 2?"],"platformIntent":null,"actionRequest":null,"metrics":[]}`;
+{"message":"Full markdown response using the structure above.","suggestedQuestions":["Follow up 1?","Follow up 2?","Follow up 3?"]}`;
   }
 
   const contextByType: Record<AssistantKind, string> = {
@@ -96,6 +76,7 @@ function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
 }
 
 type OpenAiJsonReply = {
+  message?: string;
   title?: string;
   shortExplanation?: string;
   keyPoints?: string[];
@@ -122,12 +103,49 @@ function parseJsonReply(raw: string): OpenAiJsonReply | null {
   }
 }
 
+function toPlainPublicReply(
+  text: string,
+  assistantType: AssistantKind,
+  suggestedQuestions: string[] = []
+): StructuredAssistantReply {
+  const label = ROLE_LABELS[assistantType];
+  const body = text.trim();
+
+  return {
+    mode: "logistics_copilot",
+    displayStyle: "plain",
+    assistantName: label,
+    modeLabel: label,
+    knowledgeSource: "openai",
+    confidence: 94,
+    title: "",
+    shortExplanation: body,
+    keyPoints: [],
+    recommendation: "",
+    nextStep: "",
+    suggestedQuestions: suggestedQuestions.slice(0, 2),
+    quickActions: [],
+    rawText: body,
+  };
+}
+
 function toStructuredReply(
   parsed: OpenAiJsonReply | null,
   plainText: string,
-  assistantType: AssistantKind
+  assistantType: AssistantKind,
+  publicMode?: boolean
 ): StructuredAssistantReply {
   const label = ROLE_LABELS[assistantType];
+
+  if (publicMode) {
+    const suggestedQuestions = (parsed?.suggestedQuestions || [])
+      .map((q) => String(q).trim())
+      .filter(Boolean)
+      .slice(0, 2);
+
+    const body = String(parsed?.message || parsed?.shortExplanation || plainText).trim();
+    return toPlainPublicReply(body, assistantType, suggestedQuestions);
+  }
 
   if (!parsed) {
     return {
@@ -137,7 +155,7 @@ function toStructuredReply(
       modeLabel: label,
       knowledgeSource: "openai",
       confidence: 88,
-      title: `${label} 🚛`,
+      title: label,
       shortExplanation: plainText.trim(),
       keyPoints: [],
       recommendation: "",
@@ -158,7 +176,7 @@ function toStructuredReply(
     .slice(0, 2);
 
   const title = String(parsed.title || label).trim();
-  const shortExplanation = String(parsed.shortExplanation || plainText).trim();
+  const shortExplanation = String(parsed.shortExplanation || parsed.message || plainText).trim();
   const recommendation = String(parsed.recommendation || "").trim();
   const nextStep = String(parsed.nextStep || "").trim();
 
@@ -166,8 +184,8 @@ function toStructuredReply(
     title,
     shortExplanation,
     ...keyPoints,
-    recommendation ? `💡 Tip: ${recommendation}` : "",
-    nextStep ? `➡️ Next: ${nextStep}` : "",
+    recommendation ? `Tip: ${recommendation}` : "",
+    nextStep ? `Next: ${nextStep}` : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -248,8 +266,8 @@ export async function getOpenAiChatReply(options: {
     { role: "user", content: options.message.trim().slice(0, 2000) },
   ];
 
-  const timeouts = publicMode ? [12000, 18000] : [10000];
-  const maxTokens = publicMode ? 1100 : 780;
+  const timeouts = publicMode ? [7000, 12000] : [10000];
+  const maxTokens = publicMode ? 1400 : 780;
 
   for (let attempt = 0; attempt < timeouts.length; attempt += 1) {
     try {
@@ -286,9 +304,10 @@ export async function getOpenAiChatReply(options: {
       if (!raw) continue;
 
       const parsed = parseJsonReply(raw);
-      const structuredMessage = toStructuredReply(parsed, raw, assistantType);
+      const structuredMessage = toStructuredReply(parsed, raw, assistantType, publicMode);
       const message =
         structuredMessage.rawText ||
+        structuredMessage.shortExplanation ||
         [structuredMessage.title, structuredMessage.shortExplanation]
           .filter(Boolean)
           .join("\n\n");

@@ -1,9 +1,17 @@
 import type { NextRequest } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply } from "@/lib/chat-types";
+import type { AssistantKind, ChatHistoryItem, CopilotContextMemory, StructuredAssistantReply } from "@/lib/chat-types";
 import { createAuthedSupabaseFromRequest } from "@/lib/admin-api-db";
 import { detectIntent } from "@/lib/copilot/intent-detector";
 import { searchWeb, formatWebSearchContext, type WebSearchResult } from "@/lib/copilot/web-search";
+import {
+  buildClarificationReply,
+  buildRpmCalculatorToolReply,
+  detectClarificationNeeded,
+  wantsRpmCalculatorForm,
+} from "@/lib/copilot/query-clarifier";
+import { inferGarbledQueryHint, normalizeUserQuery } from "@/lib/copilot/query-normalizer";
+import { buildPublicRagContext, inferRagSourceLabel, shouldUsePublicRag } from "@/lib/copilot/public-rag";
 import { buildKbContext } from "@/lib/copilot/knowledge-base";
 import { fetchCopilotUserContext, formatUserContextForPrompt } from "@/lib/copilot/user-context";
 import { enrichPlatformReply, executeCreateLoad } from "@/lib/copilot/platform-enrichment";
@@ -21,10 +29,20 @@ import {
   isGreetingOrThanks,
   isDieselOrFuelQuery,
   buildDieselPriceReply,
+  buildPublicKnowledgeReply,
 } from "@/lib/copilot/fast-replies";
 import { getOpenAiChatReply, isOpenAiConfigured, buildOpenAiRetryReply } from "@/lib/openai-chat";
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
+import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
+import { formatMemoryForPrompt } from "@/lib/public-ai-memory";
+import {
+  buildWeatherOfflineReply,
+  buildWeatherToolReply,
+  fetchUkWeather,
+  isWeatherQuery,
+} from "@/lib/copilot/weather-provider";
+import { isOpenAiReachable, markOpenAiUnreachable } from "@/lib/copilot/connectivity";
 
 export type CopilotEngineInput = {
   message: string;
@@ -35,6 +53,7 @@ export type CopilotEngineInput = {
   confirmAction?: boolean;
   conversationId?: string;
   publicMode?: boolean;
+  sessionMemory?: CopilotContextMemory;
 };
 
 export type CopilotEngineResult = {
@@ -44,6 +63,173 @@ export type CopilotEngineResult = {
   conversationId?: string;
   alerts?: ReturnType<typeof buildProactiveAlerts>;
 };
+
+export type PublicStreamPrepareResult =
+  | { mode: "complete"; result: CopilotEngineResult }
+  | {
+      mode: "stream";
+      message: string;
+      history: ChatHistoryItem[];
+      assistantType: AssistantKind;
+      extraContext: string;
+    };
+
+export async function preparePublicStreamChat(
+  input: CopilotEngineInput
+): Promise<PublicStreamPrepareResult> {
+  const { assistantType, history, language: explicitLang, sessionMemory } = input;
+  const message = normalizeUserQuery(input.message);
+
+  const socialInstant = buildPublicInstantSocialReply(message, history);
+  if (socialInstant) {
+    return {
+      mode: "complete",
+      result: flattenPublicReply({ ...socialInstant, source: "instant" }),
+    };
+  }
+
+  const clarification = detectClarificationNeeded(message, history);
+  if (clarification) {
+    const reply = buildClarificationReply(clarification);
+    return {
+      mode: "complete",
+      result: flattenPublicReply({ ...reply, source: "clarification" }),
+    };
+  }
+
+  if (wantsRpmCalculatorForm(message)) {
+    const toolReply = buildRpmCalculatorToolReply();
+    return {
+      mode: "complete",
+      result: flattenPublicReply({ ...toolReply, source: "tool" }),
+    };
+  }
+
+  if (isWeatherQuery(message)) {
+    const live = await fetchUkWeather(message);
+    if (live.ok) {
+      const wx = buildWeatherToolReply(live);
+      return {
+        mode: "complete",
+        result: flattenPublicReply({ ...wx, source: "live_weather" }),
+      };
+    }
+    const offline = buildWeatherOfflineReply(message);
+    return {
+      mode: "complete",
+      result: flattenPublicReply({ ...offline, source: "offline_weather" }),
+    };
+  }
+
+  const lang = detectLanguage(message, explicitLang);
+  const detected = detectIntent(message, assistantType);
+
+  const profitFast = buildProfitFastReply(message, assistantType);
+  if (profitFast && detected.needsProfitCalc) {
+    return {
+      mode: "complete",
+      result: flattenPublicReply({
+        ...profitFast,
+        structuredMessage: enrichPublicAiReply(profitFast.structuredMessage, message),
+        source: "instant",
+      }),
+    };
+  }
+
+  if (isDieselOrFuelQuery(message)) {
+    const webSearch = await withTimeout(searchWeb(message), 2500, null);
+    if (webSearch?.ok && webSearch.answer) {
+      const fast = buildWebSearchFastReply(webSearch, message);
+      return {
+        mode: "complete",
+        result: flattenPublicReply({
+          ...fast,
+          structuredMessage: enrichPublicAiReply(fast.structuredMessage, message),
+          source: "web_search",
+        }),
+      };
+    }
+    const diesel = buildDieselPriceReply(assistantType);
+    return {
+      mode: "complete",
+      result: flattenPublicReply({
+        ...diesel,
+        structuredMessage: enrichPublicAiReply(diesel.structuredMessage, message),
+        source: "instant",
+      }),
+    };
+  }
+
+  if (detected.needsWebSearch) {
+    const webSearch = await withTimeout(searchWeb(message), 3500, null);
+    if (webSearch?.ok && (webSearch.answer || webSearch.results.length > 0)) {
+      const fast = buildWebSearchFastReply(webSearch, message);
+      return {
+        mode: "complete",
+        result: flattenPublicReply({
+          ...fast,
+          structuredMessage: enrichPublicAiReply(fast.structuredMessage, message),
+          source: "web_search",
+        }),
+      };
+    }
+  }
+
+  if (!isOpenAiConfigured()) {
+    return {
+      mode: "complete",
+      result: await buildPublicOfflineReply(message, history, assistantType),
+    };
+  }
+
+  const openAiUp = await isOpenAiReachable();
+  if (!openAiUp) {
+    return {
+      mode: "complete",
+      result: await buildPublicOfflineReply(message, history, assistantType),
+    };
+  }
+
+  const extraContext: string[] = [getLanguageInstruction(lang), PUBLIC_AI_CONTEXT];
+
+  const memoryHint = formatMemoryForPrompt(sessionMemory || {});
+  if (memoryHint) extraContext.push(memoryHint);
+
+  const garbled = inferGarbledQueryHint(message);
+  if (garbled) extraContext.push(garbled);
+
+  const glossary = buildGlossaryContext(message);
+  if (glossary) extraContext.push(glossary);
+
+  if (shouldUsePublicRag(message)) {
+    const rag = buildPublicRagContext(message);
+    if (rag) extraContext.push(rag);
+  }
+
+  const webSearch = detected.needsWebSearch
+    ? await withTimeout(searchWeb(message), 2500, null)
+    : null;
+  if (webSearch?.ok && webSearch.answer) {
+    extraContext.push(`Live web data (prefer over outdated knowledge): ${webSearch.answer.slice(0, 600)}`);
+  }
+
+  const intentHint = detected
+    ? `\nPre-detected intent: ${JSON.stringify({
+        platformIntent: detected.platformIntent,
+        actionRequest: detected.actionRequest,
+      })}`
+    : "";
+
+  const ragLabel = inferRagSourceLabel(message);
+
+  return {
+    mode: "stream",
+    message,
+    history,
+    assistantType,
+    extraContext: extraContext.filter(Boolean).join("\n") + intentHint + `\nRAG priority: ${ragLabel}`,
+  };
+}
 
 function needsUserContext(
   detected: ReturnType<typeof detectIntent>,
@@ -75,23 +261,118 @@ function mergeIntentIntoReply(
 
 function buildWebSearchFastReply(search: WebSearchResult, message: string): CopilotEngineResult {
   const answer = search.answer || search.results[0]?.content?.slice(0, 500) || "No live results found.";
+  const isWeather = /\b(weather|forecast|wather|rain|temperature)\b/i.test(message);
+  const title = isWeather ? "🌤️ Live weather" : "🔎 Live update";
+  const body = isWeather
+    ? `### Quick Answer\n\n${answer}\n\n> [!INFO]\n> Live data — check [BBC Weather](https://www.bbc.co.uk/weather) or [Met Office](https://www.metoffice.gov.uk/) before critical travel decisions.\n\n### For your run\nIf weather affects your schedule, I can help with **loads, RPM, or backhaul** on your route.`
+    : `### Quick Answer\n\n${answer}\n\n> [!TIP]\n> Live data — verify before booking or dispatch decisions.`;
+
   const structured: StructuredAssistantReply = {
     mode: "logistics_copilot",
-    displayStyle: "card",
-    assistantName: "Alpha Freight Co-Pilot",
+    displayStyle: "plain",
+    assistantName: "Alpha Freight AI",
     modeLabel: "Live Data",
     knowledgeSource: "web_search",
-    confidence: 90,
-    title: "🔎 Live Update",
-    shortExplanation: answer,
-    keyPoints: search.results.slice(0, 3).map((r, i) => `${["📌", "🌐", "💡"][i] || "📌"} ${r.title}`),
-    recommendation: "💡 Live data — verify critical numbers before booking decisions.",
-    nextStep: "Ask a follow-up if you need a specific route or date.",
-    suggestedQuestions: ["⛽ Diesel price near me?", "🛣️ M1 traffic today?"],
+    confidence: 92,
+    title: "",
+    shortExplanation: body,
+    keyPoints: search.results.slice(0, 2).map((r) => r.title),
+    recommendation: "",
+    nextStep: isWeather ? "Ask about loads or RPM for your lane." : "Ask a follow-up if you need more detail.",
+    suggestedQuestions: isWeather
+      ? ["Find loads in the UK", "What is RPM?", "UK diesel price today"]
+      : ["UK diesel price today", "How do I find loads?", "What is RPM?"],
     quickActions: [],
-    rawText: answer,
+    rawText: body,
   };
-  return { message: answer, structuredMessage: structured, source: "web_search" };
+  return { message: body, structuredMessage: structured, source: "web_search" };
+}
+
+export async function buildPublicChatStreamFallback(
+  message: string,
+  history: ChatHistoryItem[],
+  assistantType: AssistantKind = "general"
+): Promise<CopilotEngineResult> {
+  return buildPublicOfflineReply(message, history, assistantType);
+}
+
+export async function buildPublicOfflineReply(
+  message: string,
+  history: ChatHistoryItem[],
+  assistantType: AssistantKind = "general"
+): Promise<CopilotEngineResult> {
+  const socialInstant = buildPublicInstantSocialReply(message, []);
+  if (socialInstant) {
+    return flattenPublicReply({ ...socialInstant, source: "instant" });
+  }
+
+  if (isWeatherQuery(message)) {
+    const live = await fetchUkWeather(message);
+    if (live.ok) {
+      return flattenPublicReply({ ...buildWeatherToolReply(live), source: "live_weather" });
+    }
+    return flattenPublicReply({ ...buildWeatherOfflineReply(message), source: "offline_weather" });
+  }
+
+  const detected = detectIntent(message, assistantType);
+  if (detected.needsWebSearch) {
+    const web = await searchWeb(message);
+    if (web.ok && (web.answer || web.results.length > 0)) {
+      return flattenPublicReply(buildWebSearchFastReply(web, message));
+    }
+  }
+
+  if (isDieselOrFuelQuery(message)) {
+    return flattenPublicReply({
+      ...buildDieselPriceReply(assistantType),
+      source: "instant",
+    });
+  }
+
+  return flattenPublicReply({
+    ...buildPublicKnowledgeReply(message, history, assistantType),
+    source: "marketing-fallback",
+  });
+}
+
+function flattenPublicReply(result: CopilotEngineResult): CopilotEngineResult {
+  const sm = result.structuredMessage;
+  if (sm.displayStyle === "plain") {
+    const body = (sm.rawText || sm.shortExplanation || result.message).trim();
+    return {
+      ...result,
+      message: body,
+      structuredMessage: { ...sm, rawText: body, shortExplanation: body },
+    };
+  }
+
+  const body = (
+    sm.rawText ||
+    [
+      sm.shortExplanation,
+      ...(sm.keyPoints || []),
+      sm.recommendation,
+      sm.nextStep,
+    ]
+      .filter(Boolean)
+      .join("\n\n")
+  ).trim();
+
+  return {
+    ...result,
+    message: body,
+    structuredMessage: {
+      ...sm,
+      displayStyle: "plain",
+      title: "",
+      shortExplanation: body,
+      keyPoints: [],
+      recommendation: "",
+      nextStep: "",
+      rawText: body,
+      quickActions: [],
+    },
+  };
 }
 
 function applyProfitCalc(reply: StructuredAssistantReply, message: string): StructuredAssistantReply {
@@ -175,6 +456,12 @@ async function runPublicCopilotEngine(
   input: CopilotEngineInput
 ): Promise<CopilotEngineResult | null> {
   const { message, assistantType, history, language: explicitLang } = input;
+
+  const socialInstant = buildPublicInstantSocialReply(message, history);
+  if (socialInstant) {
+    return flattenPublicReply({ ...socialInstant, source: "instant" });
+  }
+
   if (!isOpenAiConfigured()) return null;
 
   const lang = detectLanguage(message, explicitLang);
@@ -182,29 +469,29 @@ async function runPublicCopilotEngine(
 
   const profitFast = buildProfitFastReply(message, assistantType);
   if (profitFast && detected.needsProfitCalc) {
-    return {
+    return flattenPublicReply({
       ...profitFast,
       structuredMessage: enrichPublicAiReply(profitFast.structuredMessage, message),
       source: "instant",
-    };
+    });
   }
 
   if (isDieselOrFuelQuery(message)) {
     const webSearch = await withTimeout(searchWeb(message), 2500, null);
     if (webSearch?.ok && webSearch.answer) {
       const fast = buildWebSearchFastReply(webSearch, message);
-      return {
+      return flattenPublicReply({
         ...fast,
         structuredMessage: enrichPublicAiReply(fast.structuredMessage, message),
         source: "web_search",
-      };
+      });
     }
     const diesel = buildDieselPriceReply(assistantType);
-    return {
+    return flattenPublicReply({
       ...diesel,
       structuredMessage: enrichPublicAiReply(diesel.structuredMessage, message),
       source: "instant",
-    };
+    });
   }
 
   const extraContext: string[] = [getLanguageInstruction(lang), PUBLIC_AI_CONTEXT];
@@ -232,7 +519,12 @@ async function runPublicCopilotEngine(
     null
   );
 
-  if (!openAiReply) return null;
+  if (!openAiReply) {
+    return flattenPublicReply({
+      ...buildPublicKnowledgeReply(message, history, assistantType),
+      source: "marketing-fallback",
+    });
+  }
 
   let structured = mergeIntentIntoReply(openAiReply.structuredMessage, detected);
 
@@ -253,40 +545,27 @@ async function runPublicCopilotEngine(
   structured = enrichPublicAiReply(structured, message);
   structured.knowledgeSource = structured.knowledgeSource || "openai";
 
-  return {
+  return flattenPublicReply({
     message: openAiReply.message,
     structuredMessage: structured,
     source: "openai",
-  };
+  });
 }
 
 export async function runCopilotEngine(input: CopilotEngineInput): Promise<CopilotEngineResult> {
   const { message, assistantType, history, language: explicitLang, confirmAction, conversationId: inputConvId, publicMode } = input;
 
   if (publicMode) {
+    const socialInstant = buildPublicInstantSocialReply(message, history);
+    if (socialInstant) {
+      return flattenPublicReply({ ...socialInstant, source: "instant" });
+    }
+
     const publicResult = await runPublicCopilotEngine(input);
     if (publicResult) return publicResult;
 
-    const fallback = getMarketingChatReply(message, history);
-    return {
-      message: fallback.message,
-      structuredMessage: {
-        mode: "logistics_copilot",
-        displayStyle: "card",
-        assistantName: "Alpha Freight AI",
-        modeLabel: "Alpha Freight AI",
-        knowledgeSource: "marketing-fallback",
-        confidence: 70,
-        title: "Alpha Freight AI",
-        shortExplanation: fallback.message,
-        keyPoints: [],
-        recommendation: "",
-        nextStep: "Try again in a few seconds — Alpha Freight AI is reconnecting.",
-        quickActions: [],
-        rawText: fallback.message,
-      },
-      source: "marketing-fallback",
-    };
+    const knowledge = buildPublicKnowledgeReply(message, history, assistantType);
+    return flattenPublicReply({ ...knowledge, source: "marketing-fallback" });
   }
 
   const supabase = input.request ? createAuthedSupabaseFromRequest(input.request) : null;
@@ -360,7 +639,7 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
     return { ...fast, alerts };
   }
 
-  if (isGreetingOrThanks(message)) {
+  if (isGreetingOrThanks(message, history)) {
     const instant = buildInstantMarketingReply(message, assistantType, history);
     if (supabase) saveChatMessagesAsync(supabase, inputConvId, message, instant.structuredMessage, assistantType);
     return { ...instant, source: "instant", alerts };

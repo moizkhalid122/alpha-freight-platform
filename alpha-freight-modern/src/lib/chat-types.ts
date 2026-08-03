@@ -118,6 +118,7 @@ export interface StructuredAssistantReply {
   platformResult?: CopilotPlatformResult;
   actionRequest?: CopilotActionRequest | null;
   memory?: CopilotContextMemory;
+  inlineTool?: "rpm_calculator" | "fuel_surcharge";
   rawText?: string;
 }
 
@@ -126,9 +127,10 @@ export interface ChatApiResponse {
   structuredMessage?: StructuredAssistantReply;
 }
 
-export interface SendChatMessageOptions {
+export type SendChatMessageOptions = {
   assistantType?: AssistantKind;
   mode?: CopilotMode;
   history?: ChatHistoryItem[];
   publicMode?: boolean;
-}
+  sessionMemory?: CopilotContextMemory;
+};

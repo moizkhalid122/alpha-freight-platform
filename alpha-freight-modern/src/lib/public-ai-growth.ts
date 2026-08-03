@@ -1,8 +1,5 @@
 import type { StructuredAssistantReply } from "@/lib/chat-types";
 
-const CARRIER_REFERRAL_REWARD = 50;
-const SUPPLIER_REFERRAL_REWARD = 100;
-
 const FREIGHT_PATTERN =
   /\b(freight|load|loads|haul|haulage|truck|hgv|lorry|carrier|supplier|rpm|diesel|fuel|pod|delivery|logistics|alpha|bid|wallet|payout|route|backhaul|margin|rate|quote|book|profit|mile|artic|van|reefer|dispatch|sign up|signup)\b/i;
 
@@ -97,6 +94,10 @@ export function enrichPublicAiReply(
   reply: StructuredAssistantReply,
   message: string
 ): StructuredAssistantReply {
+  if (reply.knowledgeSource === "public-instant-social" || reply.knowledgeSource === "clarification" || reply.knowledgeSource === "tool" || reply.knowledgeSource === "offline_weather") {
+    return reply;
+  }
+
   const freight = isFreightQuery(message);
   const toolLinks = detectToolLinks(message);
 
@@ -107,47 +108,17 @@ export function enrichPublicAiReply(
     variant?: "primary" | "secondary" | "ghost";
   }> = toolLinks.map((t) => ({ ...t, variant: "secondary" as const }));
 
-  if (freight) {
-    growthActions.unshift({
-      label: "Find live loads — sign up free",
-      href: "/auth/select",
-      action: "How do I sign up and find live loads?",
-      variant: "primary",
-    });
+  if (freight && growthActions.length === 0 && (reply.quickActions?.length || 0) < 2) {
     growthActions.push({
-      label: "Browse load board",
+      label: "Find loads",
       href: "/find-loads",
       action: "Show me how to find loads in the UK",
       variant: "secondary",
     });
-    growthActions.push({
-      label: "Get mobile app",
-      href: "/products/mobile-app",
-      action: "Tell me about the Alpha Freight mobile app",
-      variant: "ghost",
-    });
-  }
-
-  let recommendation = reply.recommendation || "";
-  if (freight && !/referral|invite|share with/i.test(recommendation)) {
-    const referralLine = `💡 Share with a driver or shipper — earn up to £${CARRIER_REFERRAL_REWARD}–£${SUPPLIER_REFERRAL_REWARD} per qualified referral when they join Alpha Freight.`;
-    recommendation = recommendation ? `${recommendation} ${referralLine}` : referralLine;
-  }
-
-  if (freight && /\b(app|mobile|track|on the go)\b/i.test(message) && !/mobile app/i.test(recommendation)) {
-    recommendation += " 📱 Get the Alpha Freight app to track loads and upload POD on the go.";
-  }
-
-  let nextStep = reply.nextStep || "";
-  if (freight && !/sign up|signup|account|auth\/select/i.test(nextStep)) {
-    nextStep =
-      "Find live loads — sign up free at Alpha Freight for unlimited AI, load board, bids & wallet.";
   }
 
   return {
     ...reply,
-    recommendation,
-    nextStep,
     quickActions: mergeQuickActions(reply, growthActions),
   };
 }

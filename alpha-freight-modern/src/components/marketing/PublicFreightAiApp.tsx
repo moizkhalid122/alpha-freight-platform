@@ -23,8 +23,8 @@ import {
   Truck,
   X,
 } from "lucide-react";
-import { sendChatMessage } from "@/lib/api";
-import { getTypingDelay, waitForMinimumDuration } from "@/lib/chat-ui";
+import { streamPublicChatMessage } from "@/lib/api";
+import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
 import { PUBLIC_AI_MESSAGE_LIMIT } from "@/lib/public-ai-rate-limit";
 import { buildWhatsAppShareBody } from "@/lib/public-ai-growth";
 import {
@@ -35,10 +35,7 @@ import {
   type StoredChatMessage,
 } from "@/lib/public-ai-storage";
 import {
-  detectThinkingMode,
-  getThinkingMessages,
   buildShareUrl,
-  type ThinkingMode,
 } from "@/lib/public-ai-thinking";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { supabase } from "@/lib/supabase";
@@ -46,6 +43,22 @@ import AiThinkingIndicator from "@/components/marketing/AiThinkingIndicator";
 import LimitReachedModal from "@/components/marketing/LimitReachedModal";
 import CopilotUpgradeBanner from "@/components/marketing/CopilotUpgradeBanner";
 import EmailCaptureBar from "@/components/marketing/EmailCaptureBar";
+import AiRichMarkdown from "@/components/marketing/AiRichMarkdown";
+import AiPageBackground from "@/components/marketing/ai/AiPageBackground";
+import AiInputSuggestions from "@/components/marketing/ai/AiInputSuggestions";
+import AiConfidenceFooter from "@/components/marketing/ai/AiConfidenceFooter";
+import AiFuelChart from "@/components/marketing/ai/AiFuelChart";
+import AiRpmCalculator from "@/components/marketing/ai/AiRpmCalculator";
+import { prependPersonality, getPersonalityPrefix } from "@/lib/ai-personality";
+import { playAiCompleteSound } from "@/lib/ai-complete-sound";
+import { matchInputSuggestions, isFuelChartQuery } from "@/lib/ai-input-suggestions";
+import {
+  extractMemoryFromText,
+  loadPublicAiMemory,
+  mergeMemoryFromHistory,
+  savePublicAiMemory,
+  type PublicAiSessionMemory,
+} from "@/lib/public-ai-memory";
 import type { ChatHistoryItem, StructuredAssistantReply } from "@/lib/chat-types";
 
 interface PublicFreightAiAppProps {
@@ -58,6 +71,10 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   structuredMessage?: StructuredAssistantReply;
+  meta?: {
+    responseTimeMs?: number;
+    userQuery?: string;
+  };
 }
 
 const SUGGESTED_PROMPTS = [
@@ -77,12 +94,15 @@ const SIDEBAR_LINKS = [
 
 function buildDisplayText(reply?: StructuredAssistantReply, fallback = ""): string {
   if (!reply) return fallback;
+  if (reply.displayStyle === "plain") {
+    return reply.rawText || reply.shortExplanation || fallback;
+  }
   return [
     reply.title,
     reply.shortExplanation,
     ...(reply.keyPoints || []),
-    reply.recommendation ? `💡 ${reply.recommendation}` : "",
-    reply.nextStep ? `→ ${reply.nextStep}` : "",
+    reply.recommendation ? reply.recommendation : "",
+    reply.nextStep ? reply.nextStep : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -97,26 +117,30 @@ function fromStoredMessages(stored: StoredChatMessage[]): Message[] {
 }
 
 function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAssistantReply; content: string; isStreaming?: boolean }) {
-  if (isStreaming || !reply) {
-    return <p className="whitespace-pre-wrap text-[15px] leading-[1.75] text-[#0d0d0d]">{content}</p>;
+  const markdown = (reply?.rawText || reply?.shortExplanation || content).trim();
+
+  if (isStreaming || !reply || reply.displayStyle === "plain") {
+    return <AiRichMarkdown content={markdown} isStreaming={isStreaming} />;
   }
 
   return (
     <div className="space-y-3 text-[15px] leading-[1.75] text-[#0d0d0d]">
       {reply.title ? <p className="font-semibold text-[#0d0d0d]">{reply.title}</p> : null}
-      {reply.shortExplanation ? <p>{reply.shortExplanation}</p> : null}
+      {reply.shortExplanation ? <AiRichMarkdown content={reply.shortExplanation} /> : null}
       {reply.keyPoints && reply.keyPoints.length > 0 ? (
         <ul className="space-y-2 pl-1">
           {reply.keyPoints.map((point, i) => (
             <li key={i} className="flex gap-2">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400" />
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#BFFF07]" />
               <span>{point}</span>
             </li>
           ))}
         </ul>
       ) : null}
       {reply.recommendation ? (
-        <p className="rounded-xl bg-[#f4f4f4] px-4 py-3 text-sm text-[#444]">{reply.recommendation}</p>
+        <div className="rounded-xl border border-[#BFFF07]/40 bg-[#f7ffe8] px-4 py-3 text-sm text-[#3d4d00]">
+          {reply.recommendation}
+        </div>
       ) : null}
       {reply.nextStep ? <p className="text-sm text-[#666]">{reply.nextStep}</p> : null}
       {reply.quickActions && reply.quickActions.length > 0 ? (
@@ -135,7 +159,7 @@ function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAss
         </div>
       ) : null}
       {!reply.shortExplanation && !reply.keyPoints?.length && content ? (
-        <p className="whitespace-pre-wrap">{content}</p>
+        <AiRichMarkdown content={content} />
       ) : null}
     </div>
   );
@@ -154,17 +178,17 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const [feedback, setFeedback] = useState<Record<string, "up" | "down" | null>>({});
   const [recentChats, setRecentChats] = useState<StoredChat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [thinkingMessage, setThinkingMessage] = useState("Alpha Freight AI is thinking…");
-  const [thinkingMode, setThinkingMode] = useState<ThinkingMode>("thinking");
+  const [pendingQuery, setPendingQuery] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [sessionMemory, setSessionMemory] = useState<PublicAiSessionMemory>(() => loadPublicAiMemory());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const initialQueryHandled = useRef(false);
-  const thinkingIndexRef = useRef(0);
 
   const hasConversation = messages.some((m) => m.role === "user");
+  const inputSuggestions = matchInputSuggestions(input);
   const firstUserQuery = messages.find((m) => m.role === "user")?.content || "";
 
   const { isListening, supported: voiceSupported, toggle: toggleVoice } = useVoiceInput(
@@ -203,7 +227,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping, thinkingMessage]);
+  }, [messages, isTyping]);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -211,16 +235,6 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, [input]);
-
-  useEffect(() => {
-    if (!isTyping) return;
-    const messages_list = getThinkingMessages(thinkingMode);
-    const intervalId = window.setInterval(() => {
-      thinkingIndexRef.current = (thinkingIndexRef.current + 1) % messages_list.length;
-      setThinkingMessage(messages_list[thinkingIndexRef.current]);
-    }, 2200);
-    return () => window.clearInterval(intervalId);
-  }, [isTyping, thinkingMode]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -257,55 +271,28 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       content: item.content || buildDisplayText(item.structuredMessage),
     }));
 
-  const typeMessage = async (fullText: string, messageId: string) => {
-    const words = fullText.split(/\s+/).filter(Boolean);
-    let currentText = "";
-    setStreamingMessageId(messageId);
-
-    const batchSize = words.length > 100 ? 2 : 1;
-
-    for (let i = 0; i < words.length; i += batchSize) {
-      const chunk = words.slice(i, i + batchSize).join(" ");
-      currentText += (currentText ? " " : "") + chunk;
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === messageId ? { ...msg, content: currentText } : msg))
-      );
-      const delay = batchSize > 1 ? 5 : getTypingDelay(words[i]);
-      await new Promise((r) => setTimeout(r, delay));
-    }
-
-    setStreamingMessageId(null);
-  };
-
-  const streamAssistantReply = async (
-    fullText: string,
-    messageId: string,
-    structuredMessage?: StructuredAssistantReply
-  ) => {
-    const displayText = buildDisplayText(structuredMessage, fullText);
-    await typeMessage(displayText, messageId);
-    if (structuredMessage) {
-      setMessages((current) =>
-        current.map((message) =>
-          message.id === messageId ? { ...message, structuredMessage } : message
-        )
-      );
-    }
-  };
-
   const handleNewChat = () => {
     setMessages([]);
     setInput("");
     setActiveChatId(null);
     setMobileSidebar(false);
+    setSessionMemory({});
+    savePublicAiMemory({});
     window.history.replaceState({}, "", "/ai");
     textareaRef.current?.focus();
   };
 
   const loadChat = (chat: StoredChat) => {
-    setMessages(fromStoredMessages(chat.messages));
+    const loaded = fromStoredMessages(chat.messages);
+    setMessages(loaded);
     setActiveChatId(chat.id);
     setMobileSidebar(false);
+    const mem = mergeMemoryFromHistory(
+      loaded.map((m) => ({ role: m.role, content: m.content })),
+      {}
+    );
+    setSessionMemory(mem);
+    savePublicAiMemory(mem);
     const firstQ = chat.messages.find((m) => m.role === "user")?.content;
     if (firstQ) updateShareUrl(firstQ);
   };
@@ -320,12 +307,13 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
     updateShareUrl(trimmedText);
 
-    const mode = detectThinkingMode(trimmedText);
-    setThinkingMode(mode);
-    thinkingIndexRef.current = 0;
-    setThinkingMessage(getThinkingMessages(mode)[0]);
+    const priorHistory = buildHistory(messages);
+    const instantSocial = buildPublicInstantSocialReply(trimmedText, priorHistory);
 
-    const thinkingStartedAt = Date.now();
+    const nextMemory = extractMemoryFromText(trimmedText, sessionMemory);
+    setSessionMemory(nextMemory);
+    savePublicAiMemory(nextMemory);
+
     const userMessage: Message = {
       id: `${Date.now()}-user`,
       role: "user",
@@ -335,23 +323,86 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setInput("");
-    setIsTyping(true);
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
 
-    try {
-      const aiResponse = await sendChatMessage(trimmedText, {
-        assistantType: "general",
-        history: buildHistory(nextMessages),
-        publicMode: true,
+    if (instantSocial) {
+      const aiMessageId = `${Date.now()}-assistant`;
+      const body = prependPersonality(
+        buildDisplayText(instantSocial.structuredMessage, instantSocial.message),
+        trimmedText
+      );
+      const withAssistant = [
+        ...nextMessages,
+        {
+          id: aiMessageId,
+          role: "assistant" as const,
+          content: body,
+          structuredMessage: { ...instantSocial.structuredMessage, rawText: body, shortExplanation: body },
+          meta: { userQuery: trimmedText, responseTimeMs: 120 },
+        },
+      ];
+      setMessages(withAssistant);
+      playAiCompleteSound();
+      setMessages((current) => {
+        persistChat(chatId, current);
+        return current;
       });
+      return;
+    }
+
+    setPendingQuery(trimmedText);
+    const aiMessageId = `${Date.now()}-assistant`;
+    const requestStartedAt = Date.now();
+    setIsTyping(true);
+    setStreamingMessageId(null);
+
+    let streamStarted = false;
+    const personalityPrefix = getPersonalityPrefix(trimmedText);
+
+    try {
+      const aiResponse = await streamPublicChatMessage(
+        trimmedText,
+        { history: buildHistory(nextMessages), sessionMemory: nextMemory },
+        {
+          onToken: (_delta, fullText) => {
+            setIsTyping(false);
+            setPendingQuery("");
+            const display =
+              personalityPrefix && !fullText.startsWith(personalityPrefix)
+                ? `${personalityPrefix}\n\n${fullText}`
+                : fullText;
+            if (!streamStarted) {
+              streamStarted = true;
+              setStreamingMessageId(aiMessageId);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: aiMessageId,
+                  role: "assistant" as const,
+                  content: display,
+                  meta: { userQuery: trimmedText },
+                },
+              ]);
+              return;
+            }
+            setMessages((prev) =>
+              prev.map((msg) => (msg.id === aiMessageId ? { ...msg, content: display } : msg))
+            );
+          },
+          onLimit: () => {
+            setIsTyping(false);
+            setStreamingMessageId(null);
+            setRemaining(0);
+            setShowLimitModal(true);
+          },
+        }
+      );
 
       if (aiResponse.limitReached) {
         setIsTyping(false);
-        setRemaining(0);
-        setShowLimitModal(true);
         return;
       }
 
@@ -359,34 +410,67 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
         setRemaining(aiResponse.remaining);
       }
 
-      await waitForMinimumDuration(thinkingStartedAt, 60);
-
-      const aiMessageId = `${Date.now()}-assistant`;
       setIsTyping(false);
+      setPendingQuery("");
+      setStreamingMessageId(null);
 
-      const withAssistant = [
-        ...nextMessages,
-        { id: aiMessageId, role: "assistant" as const, content: "" },
-      ];
-      setMessages(withAssistant);
-
-      await streamAssistantReply(aiResponse.message, aiMessageId, aiResponse.structuredMessage);
+      const responseTimeMs = Date.now() - requestStartedAt;
+      playAiCompleteSound();
 
       setMessages((current) => {
-        persistChat(chatId, current);
-        return current;
+        const exists = current.some((m) => m.id === aiMessageId);
+        const finalContent = prependPersonality(aiResponse.message || "", trimmedText);
+        const updated = exists
+          ? current.map((msg) =>
+              msg.id === aiMessageId
+                ? {
+                    ...msg,
+                    content: finalContent || msg.content,
+                    structuredMessage: aiResponse.structuredMessage
+                      ? {
+                          ...aiResponse.structuredMessage,
+                          rawText: finalContent || msg.content,
+                          shortExplanation: finalContent || msg.content,
+                        }
+                      : msg.structuredMessage,
+                    meta: { userQuery: trimmedText, responseTimeMs },
+                  }
+                : msg
+            )
+          : [
+              ...current,
+              {
+                id: aiMessageId,
+                role: "assistant" as const,
+                content: finalContent,
+                structuredMessage: aiResponse.structuredMessage,
+                meta: { userQuery: trimmedText, responseTimeMs },
+              },
+            ];
+        persistChat(chatId, updated);
+        return updated;
       });
     } catch {
       setIsTyping(false);
-      setStreamingMessageId(null);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `${Date.now()}-err`,
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-        },
-      ]);
+      setPendingQuery("");
+      if (streamStarted) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMessageId
+              ? { ...msg, content: "Sorry, something went wrong. Please try again." }
+              : msg
+          )
+        );
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: aiMessageId,
+            role: "assistant" as const,
+            content: "Sorry, something went wrong. Please try again.",
+          },
+        ]);
+      }
     }
   };
 
@@ -562,17 +646,28 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
   const inputBox = (
     <div className="mx-auto w-full max-w-3xl">
-      <form
+      <motion.form
+        initial={false}
+        whileHover={{ scale: 1.005 }}
         onSubmit={(e) => void handleSend(input, e)}
-        className="relative flex items-end gap-2 rounded-[28px] border border-[#e5e5e5] bg-white px-3 py-2 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition focus-within:border-[#d0d0d0] focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
+        className="relative flex items-end gap-2 rounded-[20px] border border-white/70 bg-white/75 px-3 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl transition focus-within:border-[#BFFF07]/40 focus-within:shadow-[0_12px_40px_rgba(191,255,7,0.12)]"
       >
-        <button
+        <AiInputSuggestions
+          suggestions={inputSuggestions}
+          onSelect={(value) => {
+            setInput(value);
+            void handleSend(value);
+          }}
+        />
+        <motion.button
           type="button"
-          className="mb-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#666] transition hover:bg-[#f4f4f4]"
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          className="mb-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#666] transition hover:bg-[#f4f4f4]/80"
           aria-label="Attach"
         >
           <Plus className="h-5 w-5" />
-        </button>
+        </motion.button>
 
         <textarea
           ref={textareaRef}
@@ -592,32 +687,36 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
         <div className="mb-1.5 flex shrink-0 items-center gap-1">
           {voiceSupported && (
-            <button
+            <motion.button
               type="button"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
               onClick={toggleVoice}
               disabled={isTyping}
               className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                isListening ? "bg-red-50 text-red-600" : "text-[#666] hover:bg-[#f4f4f4]"
+                isListening ? "bg-red-50 text-red-600" : "text-[#666] hover:bg-[#f4f4f4]/80"
               }`}
               aria-label="Voice input"
             >
               <Mic className="h-5 w-5" />
-            </button>
+            </motion.button>
           )}
-          <button
+          <motion.button
             type="submit"
+            whileHover={{ scale: input.trim() ? 1.08 : 1 }}
+            whileTap={{ scale: 0.95 }}
             disabled={isTyping || !input.trim()}
             className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              input.trim() ? "bg-[#0d0d0d] text-white hover:bg-[#333]" : "bg-[#f4f4f4] text-[#bbb]"
+              input.trim() ? "bg-[#0d0d0d] text-white shadow-md hover:bg-[#333]" : "bg-[#f4f4f4] text-[#bbb]"
             } disabled:opacity-50`}
             aria-label="Send"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
               <path d="M12 2L4 12h6v10l8-12h-6V2z" />
             </svg>
-          </button>
+          </motion.button>
         </div>
-      </form>
+      </motion.form>
       <p className="mt-3 text-center text-xs text-[#999]">
         Alpha Freight AI · Enter to send · Shift+Enter new line · Ctrl+K new chat
       </p>
@@ -626,13 +725,18 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
   return (
     <div
-      className={`flex overflow-hidden bg-white text-[#0d0d0d] ${
+      className={`relative flex overflow-hidden bg-white text-[#0d0d0d] ${
         embedded ? "h-full min-h-0" : "h-[100dvh]"
       }`}
     >
+      <AiPageBackground />
+      <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
       <LimitReachedModal open={showLimitModal} onClose={() => setShowLimitModal(false)} />
+      {userRole && (userRole === "carrier" || userRole === "supplier") ? (
+        <CopilotUpgradeBanner role={userRole} />
+      ) : null}
       <aside
-        className={`hidden shrink-0 flex-col border-r border-[#e5e5e5] bg-[#f9f9f9] transition-all duration-200 md:flex ${
+        className={`hidden shrink-0 flex-col border-r border-[#e5e5e5]/80 bg-[#f9f9f9]/80 backdrop-blur-md transition-all duration-300 md:flex ${
           sidebarOpen ? "w-[260px]" : "w-[52px]"
         }`}
       >
@@ -670,9 +774,6 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {userRole && (userRole === "carrier" || userRole === "supplier") && (
-          <CopilotUpgradeBanner role={userRole} />
-        )}
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#ececec] px-4">
           <div className="flex items-center gap-2">
             <button
@@ -733,16 +834,21 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               </motion.h1>
               <div className="w-full max-w-3xl">{inputBox}</div>
               <div className="mt-6 flex flex-wrap justify-center gap-2 px-4">
-                {SUGGESTED_PROMPTS.map((prompt) => (
-                  <button
+                {SUGGESTED_PROMPTS.map((prompt, i) => (
+                  <motion.button
                     key={prompt}
                     type="button"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    whileHover={{ scale: 1.04, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => void handleSend(prompt)}
                     disabled={isTyping}
-                    className="rounded-full border border-[#e5e5e5] bg-white px-4 py-2 text-sm text-[#444] transition hover:bg-[#f7f7f8] disabled:opacity-50"
+                    className="rounded-full border border-[#e5e5e5]/80 bg-white/80 px-4 py-2 text-sm text-[#444] shadow-sm backdrop-blur-sm transition hover:border-[#BFFF07]/40 hover:shadow-md disabled:opacity-50"
                   >
                     {prompt}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -751,24 +857,53 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               <div className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
                   {messages.map((message) => (
-                    <div key={message.id}>
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                    >
                       {message.role === "user" ? (
                         <div className="flex justify-end">
-                          <div className="max-w-[85%] rounded-[24px] bg-[#f4f4f4] px-5 py-3 text-[15px] leading-relaxed text-[#0d0d0d]">
+                          <motion.div
+                            whileHover={{ scale: 1.01 }}
+                            className="max-w-[85%] rounded-[20px] border border-white/60 bg-white/70 px-5 py-3.5 text-[15px] leading-relaxed text-[#0d0d0d] shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl"
+                          >
                             {message.content}
-                          </div>
+                          </motion.div>
                         </div>
                       ) : (
                         <div className="group flex gap-4">
-                          <div className="relative mt-0.5 h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[#f4f4f4] ring-1 ring-[#ececec]">
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="relative mt-0.5 h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/80 ring-1 ring-[#ececec] shadow-sm backdrop-blur-sm"
+                          >
                             <Image src="/logo.png" alt="" fill className="object-contain p-1" />
-                          </div>
+                          </motion.div>
                           <div className="min-w-0 flex-1 pt-0.5">
                             <AssistantReply
                               reply={message.structuredMessage}
                               content={message.content}
                               isStreaming={streamingMessageId === message.id}
                             />
+                            {message.meta?.userQuery &&
+                              isFuelChartQuery(message.meta.userQuery) &&
+                              streamingMessageId !== message.id &&
+                              message.content ? (
+                                <AiFuelChart />
+                              ) : null}
+
+                            {message.structuredMessage?.inlineTool === "rpm_calculator" &&
+                              streamingMessageId !== message.id && (
+                                <AiRpmCalculator onAskFollowUp={(q) => void handleSend(q)} />
+                              )}
+
+                            {message.content && streamingMessageId !== message.id ? (
+                              <AiConfidenceFooter
+                                responseTimeMs={message.meta?.responseTimeMs}
+                                knowledgeSource={message.structuredMessage?.knowledgeSource}
+                              />
+                            ) : null}
 
                             {message.content && streamingMessageId !== message.id && (
                               <div className="mt-3 flex flex-wrap items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
@@ -827,25 +962,28 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                               </div>
                             )}
 
-                            {message.structuredMessage?.suggestedQuestions?.map((q) => (
-                              <button
-                                key={q}
-                                type="button"
-                                onClick={() => void handleSend(q.replace(/^[^\w]+/, "").trim() || q)}
-                                className="mt-2 mr-2 inline-block rounded-full border border-[#e5e5e5] px-3 py-1.5 text-sm text-[#666] hover:bg-[#f7f7f8]"
-                              >
-                                {q}
-                              </button>
-                            ))}
+                            {(message.structuredMessage?.suggestedQuestions?.length ?? 0) > 0 &&
+                              message.structuredMessage?.suggestedQuestions?.map((q) => (
+                                <button
+                                  key={q}
+                                  type="button"
+                                  onClick={() => void handleSend(q.replace(/^[^\w]+/, "").trim() || q)}
+                                  className="mt-2 mr-2 inline-block rounded-full border border-[#e5e5e5] px-3 py-1.5 text-sm text-[#666] hover:bg-[#f7f7f8]"
+                                >
+                                  {q}
+                                </button>
+                              ))}
                           </div>
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
 
-                  {isTyping && (
-                    <AiThinkingIndicator message={thinkingMessage} mode={thinkingMode} />
-                  )}
+                  <AnimatePresence>
+                  {isTyping && pendingQuery ? (
+                    <AiThinkingIndicator query={pendingQuery} />
+                  ) : null}
+                  </AnimatePresence>
                   <div ref={messagesEndRef} />
                 </div>
               </div>
@@ -856,6 +994,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             </>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

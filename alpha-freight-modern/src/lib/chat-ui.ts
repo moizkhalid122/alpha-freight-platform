@@ -73,12 +73,16 @@ export function getTypingDelay(word: string): number {
   return 6;
 }
 
-/** Only skip typewriter for load cards / error retry — text replies animate word-by-word */
+/** Skip typewriter for instant local replies only — OpenAI streams like ChatGPT */
 export function shouldShowInstantReply(
   structured?: { knowledgeSource?: string } | null
 ): boolean {
   const source = structured?.knowledgeSource;
-  return source === "platform-fast" || source === "openai-retry";
+  return (
+    source === "platform-fast" ||
+    source === "openai-retry" ||
+    source === "public-instant-social"
+  );
 }
 
 export async function waitForMinimumDuration(

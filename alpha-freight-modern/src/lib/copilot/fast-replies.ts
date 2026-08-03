@@ -4,6 +4,8 @@ import type { CopilotUserContext } from "@/lib/copilot/user-context";
 import { enrichPlatformReply } from "@/lib/copilot/platform-enrichment";
 import { calculateProfit, extractProfitFromMessage } from "@/lib/copilot/profit-calculator";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
+import { inferPublicSuggestedQuestions } from "@/lib/openai-stream";
+import { isPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
 
 const ROLE_LABELS: Record<AssistantKind, string> = {
   general: "Alpha Freight AI",
@@ -16,11 +18,8 @@ export function isGenericMarketingFallback(message: string, history: ChatHistory
   return reply.message.includes("Try asking something like");
 }
 
-export function isGreetingOrThanks(message: string): boolean {
-  const text = message.toLowerCase().trim();
-  return /^(hi|hello|hey|salam|assalam|good morning|good afternoon|thanks?|thank you|shukriya)[.!?]?$/i.test(
-    text
-  );
+export function isGreetingOrThanks(message: string, history: ChatHistoryItem[] = []): boolean {
+  return isPublicInstantSocialReply(message, history);
 }
 
 export function isDieselOrFuelQuery(message: string): boolean {
@@ -37,7 +36,7 @@ export function buildDieselPriceReply(assistantType: AssistantKind): {
   structuredMessage: StructuredAssistantReply;
 } {
   const label = ROLE_LABELS[assistantType];
-  const message = `⛽ UK diesel prices change weekly — check RAC Fuel Watch or AA for today's rate. Typical haulage range: £1.45–£1.55/litre. Always factor fuel + deadhead into RPM before booking.`;
+  const message = `UK diesel prices change weekly — check RAC Fuel Watch or AA for today's rate. Typical haulage range: £1.45–£1.55/litre. Always factor fuel and deadhead into RPM before booking.`;
 
   return {
     message,
@@ -48,19 +47,19 @@ export function buildDieselPriceReply(assistantType: AssistantKind): {
       modeLabel: "Fuel Update",
       knowledgeSource: "instant",
       confidence: 90,
-      title: "⛽ UK Diesel Price Guide",
+      title: "UK Diesel Price Guide",
       shortExplanation:
         "UK diesel rates move weekly by region. For accurate today price, check RAC Fuel Watch or AA Fuel Report — then plug the number into your RPM calculation.",
       keyPoints: [
-        "📊 Typical range: £1.45–£1.55/litre (varies by region & station)",
-        "🔗 RAC Fuel Watch: rac.co.uk/fuel-watch",
-        "🔗 AA Fuel Prices: theaa.com (Driving → Fuel prices)",
-        "💡 Formula: (miles ÷ MPG) × £/litre = fuel cost per trip",
-        "✅ Subtract fuel + deadhead from rate before accepting any load",
+        "Typical range: £1.45–£1.55/litre (varies by region and station)",
+        "RAC Fuel Watch: rac.co.uk/fuel-watch",
+        "AA Fuel Prices: theaa.com (Driving → Fuel prices)",
+        "Formula: (miles ÷ MPG) × £/litre = fuel cost per trip",
+        "Subtract fuel and deadhead from rate before accepting any load",
       ],
-      recommendation: "💡 Re-check fuel price weekly — a 5p/litre change can wipe profit on long runs.",
+      recommendation: "Re-check fuel price weekly — a 5p/litre change can wipe profit on long runs.",
       nextStep: "Ask me: Calculate profit £800 for 320 miles at today's diesel rate.",
-      suggestedQuestions: ["📈 What is RPM?", "💰 Calculate profit for my load"],
+      suggestedQuestions: ["What is RPM?", "Calculate profit for my load"],
       quickActions: [],
       rawText: message,
     },
@@ -72,37 +71,36 @@ export function buildInstantMarketingReply(
   assistantType: AssistantKind,
   history: ChatHistoryItem[] = []
 ): { message: string; structuredMessage: StructuredAssistantReply } {
+  return buildPublicKnowledgeReply(message, history, assistantType);
+}
+
+export function buildPublicKnowledgeReply(
+  message: string,
+  history: ChatHistoryItem[] = [],
+  assistantType: AssistantKind = "general"
+): { message: string; structuredMessage: StructuredAssistantReply } {
   const { message: text } = getMarketingChatReply(message, history);
   const label = ROLE_LABELS[assistantType];
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  const bullets = lines.slice(1).filter((l) => l.length > 2).slice(0, 5);
+  const suggestedQuestions = inferPublicSuggestedQuestions(message, history);
 
-  return {
-    message: text,
-    structuredMessage: {
-      mode: "logistics_copilot",
-      displayStyle: "card",
-      assistantName: label,
-      modeLabel: label,
-      knowledgeSource: "instant",
-      confidence: 92,
-      title: `👋 ${label}`,
-      shortExplanation: lines.slice(0, 2).join(" ") || text.slice(0, 300),
-      keyPoints: bullets.map((b, i) => {
-        const icons = ["📌", "💡", "✅", "🚛", "💰"];
-        const cleaned = b.replace(/^[-*•\d.)]+\s*/, "").trim();
-        if (/^[^\u{1F300}-\u{1FAFF}]/u.test(cleaned)) {
-          return `${icons[i % icons.length]} ${cleaned}`;
-        }
-        return cleaned;
-      }),
-      recommendation: "💡 Ask me about loads, RPM, payouts, tracking, or posting freight.",
-      nextStep: "Try a quick prompt below or type your question.",
-      suggestedQuestions: ["🚛 Find loads near me", "💰 How do payouts work?"],
-      quickActions: [],
-      rawText: text,
-    },
+  const structured: StructuredAssistantReply = {
+    mode: "logistics_copilot",
+    displayStyle: "plain",
+    assistantName: label,
+    modeLabel: label,
+    knowledgeSource: "marketing-fallback",
+    confidence: 88,
+    title: "",
+    shortExplanation: text,
+    keyPoints: [],
+    recommendation: "",
+    nextStep: "",
+    suggestedQuestions,
+    quickActions: [],
+    rawText: text,
   };
+
+  return { message: text, structuredMessage: structured };
 }
 
 export function buildPlatformFastReply(

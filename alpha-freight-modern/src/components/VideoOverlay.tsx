@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { ConfettiBurst } from "@/components/motion/ConfettiBurst";
 
 interface VideoOverlayProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function VideoOverlay({
 }: VideoOverlayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const navigateToTarget = () => {
     if (!targetPath) return;
@@ -26,6 +28,7 @@ export default function VideoOverlay({
 
   useEffect(() => {
     if (!isOpen || !targetPath) return;
+    setShowConfetti(true);
 
     const fallbackTimer = window.setTimeout(navigateToTarget, 4500);
 
@@ -48,7 +51,9 @@ export default function VideoOverlay({
   };
 
   return (
-    <AnimatePresence>
+    <>
+      <ConfettiBurst active={showConfetti && isOpen} onDone={() => setShowConfetti(false)} />
+      <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -70,5 +75,6 @@ export default function VideoOverlay({
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }

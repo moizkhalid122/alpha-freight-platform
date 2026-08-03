@@ -82,8 +82,17 @@ export function getMarketingChatReply(
 ): ChatApiResponse {
   const text = message.toLowerCase().trim();
 
+  if (/^(how are you|how r u|how are u|how'?s it going|kaise ho|kese ho|theek ho)[.!?\s]*$/i.test(text)) {
+    return {
+      message:
+        "I'm doing well, thanks for asking! I'm **Alpha Freight AI** — ready to help with UK loads, **RPM**, diesel, payouts, or platform questions. What can I help you with today?",
+    };
+  }
+
   if (
-    includesAny(text, ["hi", "hello", "hey", "salam", "assalam", "aslam", "good morning", "good afternoon"])
+    /^(hi+|hello+|hey+|hiya|yo+|salam|assalam|assalamu alaikum|aslam|aoa|salaam|good morning|good afternoon|good evening)[.!?\s]*$/i.test(
+      text
+    )
   ) {
     return { message: greetingReply() };
   }
@@ -171,16 +180,46 @@ export function getMarketingChatReply(
 
   if (includesAny(text, ["rpm", "revenue per mile", "rate per mile"])) {
     return {
-      message: `**RPM (Revenue Per Mile)** = total load payment ÷ loaded miles driven.
+      message: `## 💰 What is RPM (Revenue Per Mile)?
 
-Example: £800 load ÷ 320 miles = **£2.50/mile RPM**.
+**RPM** is the standard UK haulage metric for comparing load profitability:
 
-Why it matters:
-• Compare loads fairly — a £600/200mi load (£3.00 RPM) beats £900/400mi (£2.25 RPM)
-• Subtract fuel + deadhead costs to see real profit
-• UK target: many operators aim for **£2.00+ RPM** on long haul
+\`RPM = Total load payment ÷ Loaded miles\`
 
-Use **Find Loads** to sort by rate, or ask me to calculate profit on a specific load.`,
+### Worked example
+
+| Load pay | Loaded miles | RPM |
+| --- | --- | --- |
+| **£800** | 320 mi | **£2.50/mi** |
+| £600 | 200 mi | **£3.00/mi** |
+| £900 | 400 mi | £2.25/mi |
+
+> [!TIP]
+> A **£600 / 200-mile** load (£3.00 RPM) beats **£900 / 400 miles** (£2.25 RPM) on per-mile earnings.
+
+### Why RPM matters
+
+- Normalises comparison between loads of different distances
+- Helps set minimum rates before bidding
+- Combined with fuel and deadhead, reveals **true profit**
+
+### UK benchmarks
+
+- **Long-haul artic:** target **£2.00–£2.50+** RPM
+- **Short regional:** often need **£3.00+** RPM
+- At ~**£1.50/litre** diesel and 8 MPG, 320 miles ≈ **£270–£290** fuel cost
+
+<<collapse:How to use RPM on Alpha Freight>>
+1. Sort **Available Loads** by rate
+2. Calculate RPM before every bid
+3. Ask me: *"Calculate profit £800 for 320 miles"*
+4. Always factor **empty miles** to pickup and return
+<</collapse>>
+
+> [!WARNING]
+> Never accept on headline rate alone — subtract fuel, deadhead, and fixed costs first.
+
+Would you like me to calculate RPM for a specific load you're looking at?`,
     };
   }
 
@@ -253,13 +292,72 @@ Ask me: *"Calculate profit £800 for 320 miles"* or *"What is RPM?"*`,
     .reverse()
     .find((item) => item.role === "assistant")?.content;
 
+  const isShortSocial =
+    /^(ok|okay|thanks?|thank you|thx|see+\s*ya|see+\s*you|bye+|goodbye|got it|cool|sure|alright|take care|later)[.!?\s]*$/i.test(
+      text
+    );
+
+  if (isShortSocial && lastTopic) {
+    if (/rpm|profit|margin|revenue per mile/i.test(lastTopic)) {
+      return {
+        message:
+          "Glad that helped with RPM — if you want to run the numbers on another load, just send the rate and miles.",
+      };
+    }
+    if (/diesel|fuel|petrol/i.test(lastTopic)) {
+      return {
+        message:
+          "You're welcome — plug your latest diesel price into the RPM calc before you book the next run.",
+      };
+    }
+    if (/^(see+\s*ya|see+\s*you|bye+|goodbye|take care|later)/i.test(text)) {
+      return {
+        message: "Take care and drive safe — come back anytime you need freight help.",
+      };
+    }
+    return {
+      message: "You're welcome — just ask if anything else comes up on loads, rates, or the platform.",
+    };
+  }
+
   if (
-    text.length <= 20 &&
+    text.length <= 24 &&
     lastTopic &&
-    !includesAny(text, ["diesel", "desile", "desial", "fuel", "price", "uk", "rpm", "load", "bid"])
+    /\b(load|freight|haul|rpm|bid|pod|payout|carrier|supplier|alpha|book|post|wallet|track)\b/i.test(text)
   ) {
     return {
       message: `Happy to help with more detail on that. Could you tell me if you're a **supplier** or **carrier**, and what step you're stuck on? You can also email ${SUPPORT_EMAIL} for direct support.`,
+    };
+  }
+
+  if (/\b(weather|forecast|wather|rain|temperature)\b/i.test(text)) {
+    const cityMatch = text.match(
+      /\b(london|manchester|birmingham|leeds|glasgow|liverpool|bristol|sheffield|edinburgh|cardiff|nottingham|newcastle)\b/i
+    );
+    const place = cityMatch ? cityMatch[1] : "your area";
+    return {
+      message: `### Quick Answer
+
+I couldn't reach the live weather API from this server right now, so here's how to check **${place}** quickly:
+
+- [BBC Weather — ${place}](https://www.bbc.co.uk/weather)
+- [Met Office UK forecast](https://www.metoffice.gov.uk/)
+
+> [!INFO]
+> **Tip for carriers:** Check wind, rain, and visibility before tight delivery windows — add buffer on wet or windy days.
+
+### Alpha Freight can help with
+Loads, **RPM**, fuel cost, and route planning — e.g. *"Find loads London to Manchester"* or *"Calculate profit £800 for 320 miles"*.
+
+If live AI answers aren't loading, try **VPN** or deploy to production — OpenAI may be blocked on some local networks.`,
+    };
+  }
+
+  if (/\b(traffic|motorway|m\d+|delay|closure|accident)\b/i.test(text)) {
+    return {
+      message: `For live **UK traffic**, check [National Highways](https://nationalhighways.co.uk/traffic/) or Google Maps traffic layer before you roll.
+
+Need help with a **load, RPM, or backhaul** on that route? Ask me — e.g. "Find loads Manchester to London".`,
     };
   }
 

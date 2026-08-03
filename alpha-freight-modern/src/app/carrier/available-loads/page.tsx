@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
 import { MAPBOX_TOKEN } from "@/lib/mapbox";
 import NothingLottie from "@/components/ui/NothingLottie";
+import { LoadCardSkeleton } from "@/components/motion/LoadCardSkeleton";
 import InstantBookSuccessOverlay from "@/components/carrier/InstantBookSuccessOverlay";
 import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
@@ -1137,12 +1138,7 @@ export default function AvailableLoadsPage() {
         <div className={viewMode === "grid" ? "grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" : "space-y-3"}>
           <AnimatePresence mode="popLayout">
             {isLoading ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-[148px] animate-pulse rounded-xl border border-slate-200 bg-white"
-                />
-              ))
+              Array.from({ length: 6 }).map((_, index) => <LoadCardSkeleton key={index} />)
             ) : filteredLoads.length > 0 ? (
               filteredLoads.map((load, index) => renderLoadCard(load, index))
             ) : (

@@ -1,3 +1,5 @@
+import { fetchWithTimeout, WEB_SEARCH_TIMEOUT_MS } from "@/lib/copilot/fetch-utils";
+
 const TAVILY_API_URL = "https://api.tavily.com/search";
 
 export type WebSearchResult = {
@@ -20,6 +22,9 @@ function buildQuery(message: string): string {
   if (/\b(m\d+|motorway)\b/i.test(lower) && !/\buk\b/i.test(lower)) {
     return `${trimmed} UK traffic`;
   }
+  if (/\b(weather|forecast|wather)\b/i.test(lower)) {
+    return `${trimmed} UK current conditions`;
+  }
   return trimmed;
 }
 
@@ -32,18 +37,21 @@ export async function searchWeb(message: string): Promise<WebSearchResult> {
   }
 
   try {
-    const response = await fetch(TAVILY_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: apiKey,
-        query,
-        search_depth: "basic",
-        max_results: 2,
-        include_answer: true,
-      }),
-      signal: AbortSignal.timeout(5000),
-    });
+    const response = await fetchWithTimeout(
+      TAVILY_API_URL,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_key: apiKey,
+          query,
+          search_depth: "basic",
+          max_results: 2,
+          include_answer: true,
+        }),
+      },
+      WEB_SEARCH_TIMEOUT_MS
+    );
 
     if (!response.ok) {
       return { ok: false, query, answer: null, results: [], error: `http_${response.status}` };

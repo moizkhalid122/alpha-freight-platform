@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import AnalyticsPageTracker from "@/components/AnalyticsPageTracker";
 import Chatbot from "@/components/Chatbot";
@@ -8,18 +7,6 @@ import JsonLd from "@/components/seo/JsonLd";
 import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 import { createPageMetadata } from "@/lib/seo";
 import { SITE_URL } from "@/lib/sitemap-data";
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
 
 export const metadata: Metadata = {
   ...createPageMetadata({
@@ -55,10 +42,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en-GB"
-      className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
-    >
+    <html lang="en-GB" className="antialiased">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="flex flex-col font-sans">
         <JsonLd
           data={[

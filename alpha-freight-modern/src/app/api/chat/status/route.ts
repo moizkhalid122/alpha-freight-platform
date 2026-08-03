@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { isOpenAiConfigured, getOpenAiChatReply } from "@/lib/openai-chat";
+import { isOpenAiConfigured } from "@/lib/openai-chat";
+import { isOpenAiReachable } from "@/lib/copilot/connectivity";
 
 export const runtime = "nodejs";
 
@@ -10,28 +11,26 @@ export async function GET() {
     return NextResponse.json({
       ok: false,
       openai: "not_configured",
+      live: false,
       message: "Add OPENAI_API_KEY to .env.local and restart the server.",
     });
   }
 
-  const probe = await getOpenAiChatReply({
-    message: "Reply with exactly: OK",
-    assistantType: "general",
-    history: [],
-  });
+  const reachable = await isOpenAiReachable();
 
-  if (probe) {
+  if (reachable) {
     return NextResponse.json({
       ok: true,
       openai: "connected",
+      live: true,
       model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-      sample: probe.message.slice(0, 80),
     });
   }
 
   return NextResponse.json({
     ok: false,
-    openai: "timeout_or_error",
-    message: "Key is set but OpenAI API is not reachable. Try VPN or check internet.",
+    openai: "blocked_or_timeout",
+    live: false,
+    message: "OpenAI key is set but api.openai.com is not reachable from this network. Use VPN or deploy to production.",
   });
 }

@@ -1,4 +1,4 @@
-import type { ChatApiResponse, SendChatMessageOptions } from "@/lib/chat-types";
+import type { ChatApiResponse, SendChatMessageOptions, StructuredAssistantReply } from "@/lib/chat-types";
 import { supabase } from "@/lib/supabase";
 
 async function buildChatHeaders() {
@@ -142,4 +142,130 @@ export async function createNewConversation(assistantType: string) {
   });
   const data = await res.json();
   return data.conversationId as string | undefined;
+}
+
+export type PublicChatStreamCallbacks = {
+  onToken?: (delta: string, fullText: string) => void;
+  onDone?: (result: ChatApiExtendedResponse) => void;
+  onError?: (message: string) => void;
+  onLimit?: (result: ChatApiExtendedResponse) => void;
+};
+
+function parseSseBlock(block: string): { event: string; data: string } | null {
+  const lines = block.split("\n");
+  let event = "message";
+  const dataLines: string[] = [];
+
+  for (const line of lines) {
+    if (line.startsWith("event: ")) event = line.slice(7).trim();
+    if (line.startsWith("data: ")) dataLines.push(line.slice(6));
+  }
+
+  if (!dataLines.length) return null;
+  return { event, data: dataLines.join("\n") };
+}
+
+export async function streamPublicChatMessage(
+  message: string,
+  options: {
+    history?: SendChatMessageOptions["history"];
+    language?: string;
+    sessionMemory?: SendChatMessageOptions["sessionMemory"];
+  } = {},
+  callbacks: PublicChatStreamCallbacks = {}
+): Promise<ChatApiExtendedResponse> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+  try {
+    const headers = await buildChatHeaders();
+    const response = await fetch("/api/chat/stream", {
+      method: "POST",
+      headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        message,
+        history: options.history || [],
+        language: options.language,
+        sessionMemory: options.sessionMemory,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Stream request failed");
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No stream body");
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let fullText = "";
+    let finalResult: ChatApiExtendedResponse = { message: "" };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split("\n\n");
+      buffer = blocks.pop() || "";
+
+      for (const block of blocks) {
+        const parsed = parseSseBlock(block.trim());
+        if (!parsed) continue;
+
+        const payload = JSON.parse(parsed.data) as Record<string, unknown>;
+
+        if (parsed.event === "token") {
+          const delta = String(payload.delta || "");
+          fullText += delta;
+          callbacks.onToken?.(delta, fullText);
+        }
+
+        if (parsed.event === "limit") {
+          finalResult = {
+            message: String(payload.message || ""),
+            structuredMessage: payload.structuredMessage as StructuredAssistantReply | undefined,
+            limitReached: true,
+            remaining: 0,
+          };
+          callbacks.onLimit?.(finalResult);
+          return finalResult;
+        }
+
+        if (parsed.event === "done") {
+          finalResult = {
+            message: String(payload.message || fullText),
+            structuredMessage: payload.structuredMessage as StructuredAssistantReply | undefined,
+            source: String(payload.source || "openai"),
+            remaining: typeof payload.remaining === "number" ? payload.remaining : undefined,
+          };
+          callbacks.onDone?.(finalResult);
+        }
+
+        if (parsed.event === "error") {
+          const errMsg = String(payload.message || "Stream error");
+          callbacks.onError?.(errMsg);
+          finalResult = { message: errMsg };
+        }
+      }
+    }
+
+    if (!finalResult.message && fullText) {
+      finalResult = { message: fullText };
+    }
+
+    return finalResult.message ? finalResult : { message: "Sorry, no response received." };
+  } catch (error) {
+    console.error("Error streaming chat message:", error);
+    const errMsg =
+      error instanceof Error && error.name === "AbortError"
+        ? "Sorry, the response took too long. Please try again."
+        : "Sorry, I encountered an error. Please try again later.";
+    callbacks.onError?.(errMsg);
+    return { message: errMsg };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }

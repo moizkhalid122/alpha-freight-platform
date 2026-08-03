@@ -9,6 +9,17 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { Footer, CinematicCTA } from "@/components/Footer";
+import Counter from "@/components/Counter";
+import { StaggerWords } from "@/components/motion/StaggerWords";
+import { HomeHeroMesh } from "@/components/motion/HomeHeroMesh";
+import { useMarketingSmoothScroll } from "@/hooks/useMarketingSmoothScroll";
+
+const homeStats = [
+  { label: "UK carriers", value: 500, suffix: "+" },
+  { label: "Daily loads", value: 120, suffix: "+" },
+  { label: "Payout speed", value: 7, suffix: " days" },
+  { label: "Free AI tools", value: 11, suffix: "" },
+];
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -233,6 +244,15 @@ export default function Home() {
 
   const lineHeight = useTransform(howItWorksScroll, [0, 1], ["0%", "100%"]);
 
+  const { scrollYProgress: heroScroll } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroImageY = useTransform(heroScroll, [0, 1], ["0%", "16%"]);
+  const heroImageScale = useTransform(heroScroll, [0, 1], [1, 1.07]);
+
+  useMarketingSmoothScroll(true);
+
   const scroll = (direction: "left" | "right") => {
     if (sliderRef.current) {
       const scrollAmount = 432; // card width (400) + gap (32)
@@ -309,6 +329,24 @@ export default function Home() {
           }
         );
       }
+
+      const revealSections = pageRef.current?.querySelectorAll(".scroll-reveal") ?? [];
+      revealSections.forEach((section) => {
+        gsap.fromTo(
+          section,
+          { y: 48, opacity: 0 },
+          {
+            scrollTrigger: {
+              trigger: section,
+              start: "top 88%",
+            },
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "power3.out",
+          }
+        );
+      });
     }, pageRef);
     return () => ctx.revert();
   }, []);
@@ -324,17 +362,22 @@ export default function Home() {
       <main>
         {/* Hero Section */}
         <section ref={heroRef} className="relative min-h-[100dvh] h-[100dvh] max-h-[900px] md:max-h-none md:h-screen w-full overflow-hidden flex flex-col justify-start pt-24 sm:pt-32 md:pt-48">
-          {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
-            <Image
-              src="/hero2.png"
-              alt="Alpha Freight Logistics"
-              fill
-              sizes="100vw"
-              className="object-cover object-center opacity-70"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black" />
+            <motion.div
+              className="absolute inset-0"
+              style={{ y: heroImageY, scale: heroImageScale }}
+            >
+              <Image
+                src="/hero2.png"
+                alt="Alpha Freight Logistics"
+                fill
+                sizes="100vw"
+                className="object-cover object-center opacity-70"
+                priority
+              />
+            </motion.div>
+            <HomeHeroMesh />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black z-[2]" />
           </div>
 
           {/* Grid Lines Overlay */}
@@ -360,8 +403,19 @@ export default function Home() {
               </motion.div>
               
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tighter mb-6 sm:mb-8 md:mb-12">
-                Logistics that <br />
-                move with <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40 italic font-serif font-light">precision.</span>
+                <StaggerWords text="Logistics that" className="block" delay={0.15} as="span" />
+                <br />
+                <span className="block">
+                  <StaggerWords text="move with" className="inline" delay={0.45} as="span" />{" "}
+                  <motion.span
+                    initial={{ opacity: 0, y: 28 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.85, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40 italic font-serif font-light"
+                  >
+                    precision.
+                  </motion.span>
+                </span>
               </h1>
             </div>
           </div>
@@ -377,7 +431,7 @@ export default function Home() {
               >
                 <Link
                   href="/contact"
-                  className="flex items-center space-x-3 bg-white hover:bg-gray-100 transition-all duration-300 px-5 py-2.5 rounded-full"
+                  className="btn-scale lime-pulse flex items-center space-x-3 bg-white hover:bg-gray-100 transition-all duration-300 px-5 py-2.5 rounded-full"
                 >
                   <span className="text-black font-medium text-[13px]">Request a Consultation</span>
                   <div className="w-7 h-7 rounded-full bg-[#BFFF07] flex items-center justify-center group-hover:rotate-45 transition-transform duration-300">
@@ -409,8 +463,22 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Stats Bar */}
+        <section className="scroll-reveal relative z-20 border-y border-white/10 bg-black py-10 md:py-14">
+          <div className="mx-auto grid max-w-[1800px] grid-cols-2 gap-8 px-6 md:grid-cols-4 lg:px-12">
+            {homeStats.map((stat) => (
+              <div key={stat.label} className="text-center md:text-left">
+                <p className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                  <Counter value={stat.value} suffix={stat.suffix} duration={2.2} />
+                </p>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* What We Do Section - Directly under Hero */}
-        <section className="py-16 md:py-32 bg-white relative overflow-hidden">
+        <section className="scroll-reveal py-16 md:py-32 bg-white relative overflow-hidden">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12">
             {/* Top Border Line */}
             <div className="w-full h-px bg-gray-100 mb-10 md:mb-20" />
@@ -432,7 +500,7 @@ export default function Home() {
 
                 <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10 md:gap-16 mb-12 md:mb-20">
                   {/* Service 1 */}
-                  <div className="space-y-8">
+                  <div className="card-lift space-y-8">
                     <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-lg">
                       <svg className="w-5 h-5 text-black opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -447,7 +515,7 @@ export default function Home() {
                   </div>
 
                   {/* Service 2 */}
-                  <div className="space-y-8">
+                  <div className="card-lift space-y-8">
                     <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-lg">
                       <svg className="w-5 h-5 text-black opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -462,7 +530,7 @@ export default function Home() {
                   </div>
 
                   {/* Service 3 */}
-                  <div className="space-y-8">
+                  <div className="card-lift space-y-8">
                     <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-lg">
                       <svg className="w-5 h-5 text-black opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -480,7 +548,7 @@ export default function Home() {
                 <div className="flex flex-wrap gap-4">
                   <Link 
                     href="/about"
-                    className="inline-block px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all"
+                    className="btn-scale inline-block px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all"
                   >
                     Learn More
                   </Link>
@@ -491,7 +559,7 @@ export default function Home() {
         </section>
 
         {/* Services / Philosophy Section */}
-        <section ref={servicesRef} className="bg-black relative min-h-screen flex items-stretch">
+        <section ref={servicesRef} className="scroll-reveal bg-black relative min-h-screen flex items-stretch">
           <div className="flex flex-col lg:flex-row w-full">
             {services.map((service, i) => (
               <div key={i} className="service-card group relative flex-1 min-h-[420px] sm:min-h-[500px] lg:min-h-[600px] lg:h-auto overflow-hidden border-b lg:border-b-0 lg:border-r border-white/10 last:border-r-0">
@@ -531,7 +599,7 @@ export default function Home() {
         </section>
 
         {/* New Interactive Services Section */}
-        <section className="py-16 md:py-32 bg-white relative overflow-hidden">
+        <section className="scroll-reveal py-16 md:py-32 bg-white relative overflow-hidden">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12">
             {/* Header with Counter */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-gray-100 pb-8 md:pb-12 mb-10 md:mb-20">
@@ -547,6 +615,7 @@ export default function Home() {
                     key={item.id} 
                     className="flex items-center group cursor-pointer py-2"
                     onMouseEnter={() => setActiveService(item)}
+                    onClick={() => setActiveService(item)}
                   >
                     <span className={`text-base sm:text-xl font-medium mr-4 sm:mr-12 transition-colors duration-300 ${activeService.id === item.id ? "text-black" : "text-gray-300 group-hover:text-black/50"}`}>
                       {item.id}

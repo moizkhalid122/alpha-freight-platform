@@ -257,7 +257,7 @@ export function CinematicCTA({
 
         <Link 
           href={buttonHref}
-          className="inline-block px-10 py-4 bg-white/20 backdrop-blur-md border border-white/30 text-white rounded-xl font-medium text-sm hover:bg-white hover:text-black transition-all duration-300 shadow-2xl uppercase tracking-widest"
+          className="btn-scale lime-pulse inline-block px-10 py-4 bg-white/20 backdrop-blur-md border border-white/30 text-white rounded-xl font-medium text-sm hover:bg-[#BFFF07] hover:text-black hover:border-[#BFFF07] transition-all duration-300 shadow-2xl uppercase tracking-widest"
         >
           {buttonText}
         </Link>
