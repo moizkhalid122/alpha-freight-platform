@@ -15,6 +15,9 @@ import {
   BookOpen,
   Calculator,
   ArrowRightCircle,
+  ChevronRight,
+  ListOrdered,
+  ExternalLink,
 } from "lucide-react";
 
 type BlockPart =
@@ -62,12 +65,28 @@ const CALLOUT_STYLES: Record<CalloutKind, string> = {
 };
 
 function parseCalloutKind(text: string): { kind: CalloutKind; body: string } | null {
-  const match = text.match(/^\s*\[!?(TIP|INFO|WARNING|SUCCESS|NOTE)\]\s*/i);
-  if (!match) return null;
-  const tag = match[1].toUpperCase();
-  const kind: CalloutKind =
-    tag === "TIP" ? "tip" : tag === "WARNING" ? "warning" : tag === "SUCCESS" ? "success" : "info";
-  return { kind, body: text.slice(match[0].length).trim() };
+  const tagMatch = text.match(/^\s*\[!?(TIP|INFO|WARNING|SUCCESS|NOTE)\]\s*/i);
+  if (tagMatch) {
+    const tag = tagMatch[1].toUpperCase();
+    const kind: CalloutKind =
+      tag === "TIP" ? "tip" : tag === "WARNING" ? "warning" : tag === "SUCCESS" ? "success" : "info";
+    return { kind, body: text.slice(tagMatch[0].length).trim() };
+  }
+
+  if (/^💡|^tip:/i.test(text)) {
+    return { kind: "tip", body: text.replace(/^💡\s*|^tip:\s*/i, "").trim() };
+  }
+  if (/^⚠️|^⚠|^warning:/i.test(text)) {
+    return { kind: "warning", body: text.replace(/^⚠️?\s*|^warning:\s*/i, "").trim() };
+  }
+  if (/^✅|^success:/i.test(text)) {
+    return { kind: "success", body: text.replace(/^✅\s*|^success:\s*/i, "").trim() };
+  }
+  if (/^ℹ️|^ℹ|^note:/i.test(text)) {
+    return { kind: "info", body: text.replace(/^ℹ️?\s*|^note:\s*/i, "").trim() };
+  }
+
+  return null;
 }
 
 function splitCollapsibleBlocks(source: string): BlockPart[] {
@@ -136,7 +155,7 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
         ),
         h2: ({ children }) => (
           <h3 className="mb-2.5 mt-5 flex items-center gap-2 text-lg font-semibold text-[#0d0d0d] first:mt-0">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#BFFF07]" />
+            <Sparkles className="h-4 w-4 shrink-0 text-[#7a9900]" strokeWidth={2.25} />
             {children}
           </h3>
         ),
@@ -154,12 +173,12 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
         },
         p: ({ children }) => <p className="mb-3 leading-[1.8] text-[#1a1a1a] last:mb-0">{children}</p>,
         strong: ({ children }) => <strong className="font-semibold text-[#0d0d0d]">{children}</strong>,
-        ul: ({ children }) => <ul className="my-3 space-y-2 pl-1">{children}</ul>,
-        ol: ({ children }) => <ol className="my-3 list-decimal space-y-2 pl-5">{children}</ol>,
+        ul: ({ children }) => <ul className="my-3 space-y-2.5 pl-0">{children}</ul>,
+        ol: ({ children }) => <ol className="my-3 list-decimal space-y-2.5 pl-5 marker:text-[#7a9900] marker:font-semibold">{children}</ol>,
         li: ({ children }) => (
-          <li className="flex gap-2.5 text-[15px] leading-relaxed text-[#1a1a1a]">
-            <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#BFFF07]" />
-            <span className="min-w-0 flex-1">{children}</span>
+          <li className="flex gap-2.5 text-[15px] leading-relaxed text-[#1a1a1a] [&>span]:min-w-0 [&>span]:flex-1">
+            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[#7a9900] [.list-decimal_&]:hidden" strokeWidth={2.5} />
+            <span>{children}</span>
           </li>
         ),
         blockquote: ({ children }) => {
@@ -186,7 +205,10 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
         thead: ({ children }) => <thead className="bg-[#f7f7f8] text-[#0d0d0d]">{children}</thead>,
         th: ({ children }) => (
           <th className="border-b border-[#ececec] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">
-            {children}
+            <span className="inline-flex items-center gap-1.5">
+              <ListOrdered className="h-3 w-3 text-[#7a9900]" />
+              {children}
+            </span>
           </th>
         ),
         td: ({ children }) => (
@@ -199,9 +221,10 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-[#2563eb] underline decoration-[#2563eb]/30 underline-offset-2 hover:decoration-[#2563eb]"
+            className="inline-flex items-center gap-1 font-medium text-[#2563eb] underline decoration-[#2563eb]/30 underline-offset-2 hover:decoration-[#2563eb]"
           >
             {children}
+            <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
           </a>
         ),
         code: ({ className, children }) => {

@@ -22,6 +22,9 @@ import {
   Trash2,
   Truck,
   X,
+  ArrowRight,
+  MessageCircle,
+  Lightbulb,
 } from "lucide-react";
 import { streamPublicChatMessage } from "@/lib/api";
 import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
@@ -123,9 +126,10 @@ function QuickActionLinks({ actions }: { actions: NonNullable<StructuredAssistan
           <Link
             key={action.label}
             href={action.href}
-            className="rounded-full border border-[#e5e5e5] bg-white px-4 py-2 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f7f7f8]"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#e5e5e5] bg-white px-4 py-2 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f7f7f8]"
           >
             {action.label}
+            <ArrowRight className="h-3.5 w-3.5 text-[#7a9900]" />
           </Link>
         ) : null
       )}
@@ -162,8 +166,9 @@ function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAss
         </ul>
       ) : null}
       {reply.recommendation ? (
-        <div className="rounded-xl border border-[#BFFF07]/40 bg-[#f7ffe8] px-4 py-3 text-sm text-[#3d4d00]">
-          {reply.recommendation}
+        <div className="flex gap-2.5 rounded-xl border border-[#BFFF07]/40 bg-[#f7ffe8] px-4 py-3 text-sm text-[#3d4d00]">
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#7a9900]" />
+          <span>{reply.recommendation}</span>
         </div>
       ) : null}
       {reply.nextStep ? <p className="text-sm text-[#666]">{reply.nextStep}</p> : null}
@@ -977,8 +982,9 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                                   key={q}
                                   type="button"
                                   onClick={() => void handleSend(q.replace(/^[^\w]+/, "").trim() || q)}
-                                  className="mt-2 mr-2 inline-block rounded-full border border-[#e5e5e5] px-3 py-1.5 text-sm text-[#666] hover:bg-[#f7f7f8]"
+                                  className="mt-2 mr-2 inline-flex items-center gap-1.5 rounded-full border border-[#e5e5e5] px-3 py-1.5 text-sm text-[#666] hover:bg-[#f7f7f8]"
                                 >
+                                  <MessageCircle className="h-3.5 w-3.5 shrink-0 text-[#7a9900]" />
                                   {q}
                                 </button>
                               ))}

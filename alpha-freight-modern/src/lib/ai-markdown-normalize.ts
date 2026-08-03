@@ -37,5 +37,12 @@ export function normalizeAiMarkdown(source: string): string {
     return `\n\n**${latexToPlain(inner)}**\n\n`;
   });
 
+  text = text.replace(/^>\s*💡\s*/gim, "> [!TIP] ");
+  text = text.replace(/^>\s*⚠️?\s*/gim, "> [!WARNING] ");
+  text = text.replace(/^>\s*✅\s*/gim, "> [!SUCCESS] ");
+  text = text.replace(/^>\s*ℹ️\s*/gim, "> [!INFO] ");
+  text = text.replace(/^>\s*\*\*Tip:?\*\*\s*/gim, "> [!TIP] ");
+  text = text.replace(/^>\s*\*\*Note:?\*\*\s*/gim, "> [!INFO] ");
+
   return text;
 }
