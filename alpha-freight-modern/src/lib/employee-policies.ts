@@ -1,3 +1,5 @@
+export const COMPANY_LEGAL_NAME = "Alpha Freight Solutions Limited";
+
 export type EmployeePolicyId = "nda" | "employment" | "commission";
 
 export type EmployeePolicySection = {
@@ -26,7 +28,7 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
       {
         heading: "1. Parties",
         paragraphs: [
-          "This Non-Disclosure Agreement (“Agreement”) is between Alpha Freight UK (“the Company”) and you as an employee, contractor, or team member (“you”).",
+          `This Non-Disclosure Agreement ("Agreement") is entered into between ${COMPANY_LEGAL_NAME} ("the Company") and the individual accepting this Agreement ("Team Member").`,
           "By accepting this Agreement during onboarding, you confirm that you have read, understood, and agree to be bound by its terms.",
         ],
       },
@@ -37,7 +39,7 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
           "Customer and supplier names, contact details, pricing, and contract terms",
           "Load details, routes, margins, and commercial negotiations",
           "Internal CRM data, lead lists, call recordings, and sales pipelines",
-          "Commission rates, payroll information, and HR records",
+          "Commission rates, payroll information, and team records",
           "Software credentials, platform access, and internal processes",
           "Any information marked confidential or that a reasonable person would treat as confidential",
         ],
@@ -50,92 +52,203 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
         ],
         bullets: [
           "Do not share client or load information on social media or public channels",
-          "Do not remove Company data when your role ends unless expressly authorised",
+          "Do not remove Company data when your engagement ends unless expressly authorised",
           "Report any suspected data breach or unauthorised disclosure immediately",
         ],
       },
       {
         heading: "4. Exceptions",
         paragraphs: [
-          "This Agreement does not restrict information that is already public through no fault of yours, was lawfully known to you before employment, or must be disclosed by law or court order (provided you notify the Company where legally permitted).",
+          "This Agreement does not restrict information that is already public through no fault of yours, was lawfully known to you before joining the team, or must be disclosed by law or court order (provided you notify the Company where legally permitted).",
         ],
       },
       {
         heading: "5. Duration",
         paragraphs: [
-          "Your confidentiality obligations continue during your engagement with Alpha Freight UK and for 24 months after it ends, unless a longer period is required by law or a separate written agreement.",
+          `Your confidentiality obligations continue during your engagement with ${COMPANY_LEGAL_NAME} and for 24 months after it ends, unless a longer period is required by law or a separate written agreement.`,
         ],
       },
       {
         heading: "6. Remedies",
         paragraphs: [
-          "Unauthorised disclosure may result in disciplinary action, termination, and legal remedies including injunctive relief and recovery of losses caused by the breach.",
+          "Unauthorised disclosure may result in disciplinary action, termination of your team engagement, and legal remedies including injunctive relief and recovery of losses caused by the breach.",
         ],
       },
     ],
   },
   employment: {
     id: "employment",
-    title: "Employment Agreement",
-    shortTitle: "Employment Agreement",
-    summary: "Sets out your working relationship, responsibilities, and conduct standards with Alpha Freight UK.",
+    title: "Founding Team Member Agreement",
+    shortTitle: "Founding Team Member Agreement",
+    summary: `Sets out your role, responsibilities, and standards as a founding team member of ${COMPANY_LEGAL_NAME}.`,
     lastUpdated: "1 August 2026",
     sections: [
       {
-        heading: "1. Role and duties",
+        heading: "1. Parties",
         paragraphs: [
-          "You are engaged by Alpha Freight UK in the role assigned to you at onboarding (or as updated in writing by management).",
-          "You agree to perform your duties diligently, follow reasonable instructions, and represent the Company professionally with customers, carriers, suppliers, and colleagues.",
+          `This Founding Team Member Agreement ("Agreement") is entered into between ${COMPANY_LEGAL_NAME} ("the Company") and the individual accepting this Agreement ("Team Member").`,
+          "By accepting this Agreement during onboarding, you confirm that you have read, understood, and agree to be bound by its terms.",
         ],
       },
       {
-        heading: "2. Probation and performance",
+        heading: "2. Purpose of the Role",
         paragraphs: [
-          "Unless otherwise agreed in writing, a probationary period of up to 3 months applies. During probation, either party may end the engagement with one week’s notice.",
-          "Ongoing employment may depend on satisfactory performance, attendance, compliance with Company policies, and achievement of reasonable KPIs set by your line manager.",
+          `You are joining ${COMPANY_LEGAL_NAME} as a member of the founding team.`,
+          "Your role and responsibilities will be assigned during onboarding and may be updated by the Company as business requirements change.",
+          "You agree to perform your duties professionally, honestly, and in the best interests of the Company.",
         ],
       },
       {
-        heading: "3. Working hours and availability",
+        heading: "3. Performance-Based Engagement",
         paragraphs: [
-          "Your standard working pattern will be agreed with management. You may be required to attend meetings, respond to urgent customer matters, and use the employee portal for tasks, leads, calls, and updates during agreed working hours.",
-          "Remote or hybrid working may be permitted where appropriate, but you remain responsible for secure handling of Company systems and data.",
+          `At this stage, ${COMPANY_LEGAL_NAME} is an early-stage startup.`,
+          "Your position is currently performance-based.",
+          "Unless confirmed separately in writing by the Company, this position does not include a guaranteed salary.",
+          "Compensation will be paid in accordance with the Company's Commission Policy.",
+          "The Company intends to introduce salaried positions for high-performing team members as the business grows.",
         ],
       },
       {
-        heading: "4. Conduct and compliance",
-        paragraphs: ["You must at all times:"],
+        heading: "4. Responsibilities",
+        paragraphs: ["As a Team Member you agree to:"],
         bullets: [
-          "Comply with UK employment law, health and safety requirements, and Company policies",
-          "Use Company systems only for authorised business purposes",
-          "Avoid conflicts of interest and disclose any secondary employment if requested",
-          "Treat colleagues, clients, and partners with respect and without discrimination or harassment",
+          "Represent the Company professionally",
+          "Follow reasonable instructions from management",
+          "Complete assigned tasks through the team dashboard",
+          "Keep CRM records accurate and up to date",
+          "Record calls, meetings and customer interactions honestly",
+          "Maintain a professional standard when communicating with customers, carriers and suppliers",
+          "Protect the Company's reputation at all times",
         ],
       },
       {
-        heading: "5. Data protection",
+        heading: "5. Working Arrangements",
         paragraphs: [
-          "You will handle personal data in line with UK GDPR and the Company’s privacy practices. You must not export, sell, or misuse contact or customer data obtained through your role.",
+          "Working hours will be agreed with management.",
+          "You may work remotely unless instructed otherwise.",
+          "You are responsible for maintaining a reliable internet connection and suitable working environment.",
         ],
       },
       {
-        heading: "6. Leave and absences",
+        heading: "6. Company Systems",
         paragraphs: [
-          "Annual leave and sickness absence must be requested and recorded through the employee portal where available. Unauthorised absence or repeated lateness may lead to disciplinary action.",
+          "You agree to use Company systems only for authorised business purposes.",
+          "This includes:",
+          "Unauthorised access or misuse of Company systems is prohibited.",
+        ],
+        bullets: [
+          "Team Dashboard",
+          "CRM",
+          "Company Email",
+          "Training Portal",
+          "Documents",
+          "Customer Database",
+          "Internal Communication Tools",
         ],
       },
       {
-        heading: "7. Termination",
+        heading: "7. Company Property",
         paragraphs: [
-          "After successful completion of probation, notice periods will be as stated in your written offer or contract (typically 2–4 weeks unless otherwise agreed).",
-          "The Company may terminate employment immediately in cases of gross misconduct, including theft, fraud, serious breach of confidentiality, or violence.",
+          `All Company property remains the exclusive property of ${COMPANY_LEGAL_NAME}, including:`,
+          "You must return or permanently delete Company property immediately upon request or when your engagement ends.",
+        ],
+        bullets: [
+          "Customer databases",
+          "Supplier databases",
+          "Carrier databases",
+          "CRM records",
+          "Sales pipelines",
+          "Training materials",
+          "Documents",
+          "Company email accounts",
+          "Passwords",
+          "Software",
+          "Internal procedures",
+          "Marketing materials",
         ],
       },
       {
-        heading: "8. Acceptance",
+        heading: "8. Commission",
         paragraphs: [
-          "By accepting this Agreement, you confirm that the role details, contact information, and documents submitted during onboarding are accurate and complete to the best of your knowledge.",
+          "Commission is governed separately under the Company's Commission Policy.",
+          "Commission becomes payable only after:",
         ],
+        bullets: [
+          "the Company confirms the transaction,",
+          "all required approvals have been completed, and",
+          "payment conditions under the Commission Policy have been met.",
+        ],
+      },
+      {
+        heading: "9. Standards of Conduct",
+        paragraphs: ["You agree to:"],
+        bullets: [
+          "Act honestly and professionally",
+          "Treat colleagues, customers and partners respectfully",
+          "Avoid discrimination, harassment or abusive behaviour",
+          "Follow Company policies",
+          "Comply with applicable laws",
+        ],
+      },
+      {
+        heading: "10. Confidential Information",
+        paragraphs: [
+          "You agree to comply with the Company's Non-Disclosure Agreement (NDA).",
+          "Confidential information must never be shared without written permission.",
+        ],
+      },
+      {
+        heading: "11. Data Protection",
+        paragraphs: [
+          "You must handle all personal and business data responsibly.",
+          "You must not:",
+        ],
+        bullets: [
+          "Copy customer lists",
+          "Sell Company information",
+          "Share Company data with third parties",
+          "Download Company information for personal use",
+        ],
+      },
+      {
+        heading: "12. Termination",
+        paragraphs: [
+          "Either party may end this engagement at any time by providing reasonable notice unless immediate termination is justified.",
+          "The Company may immediately terminate this Agreement in cases including:",
+          "Upon termination you must immediately stop using Company systems and return or permanently delete all Company information.",
+        ],
+        bullets: [
+          "Fraud",
+          "Theft",
+          "Serious misconduct",
+          "Breach of confidentiality",
+          "Misuse of Company systems",
+          "Dishonesty",
+          "Bringing the Company into disrepute",
+        ],
+      },
+      {
+        heading: "13. Governing Law",
+        paragraphs: [
+          "This Agreement shall be governed by and interpreted in accordance with the laws of England and Wales.",
+          "Any dispute arising under this Agreement shall be subject to the exclusive jurisdiction of the courts of England and Wales.",
+        ],
+      },
+      {
+        heading: "14. Acceptance",
+        paragraphs: [
+          'By clicking "I Agree" during onboarding, you confirm that:',
+        ],
+        bullets: [
+          "You have read and understood this Agreement",
+          "The information provided during onboarding is accurate",
+          "You agree to comply with this Agreement",
+          "You agree to follow Company policies, including the NDA and Commission Policy",
+        ],
+      },
+      {
+        heading: "Electronic acceptance",
+        paragraphs: ["Your electronic acceptance shall have the same effect as a handwritten signature."],
       },
     ],
   },
@@ -143,18 +256,20 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
     id: "commission",
     title: "Commission Policy",
     shortTitle: "Commission Policy",
-    summary: "Explains how sales commission is calculated, approved, and paid.",
+    summary: "Explains how sales commission is calculated, approved, and paid for founding team members.",
     lastUpdated: "1 August 2026",
     sections: [
       {
         heading: "1. Eligibility",
         paragraphs: [
-          "Commission applies to eligible sales and business-development roles as confirmed by management. Your assigned commission rate is shown on your employee profile and in the commission workspace.",
+          "Commission applies to eligible sales and business-development roles as confirmed by management. Your assigned commission rate is shown on your team profile and in the commission workspace.",
         ],
       },
       {
         heading: "2. How commission is earned",
-        paragraphs: ["Commission is calculated on closed deal value when a lead is marked Won in the employee CRM, subject to management verification."],
+        paragraphs: [
+          "Commission is calculated on closed deal value when a lead is marked Won in the team CRM, subject to management verification.",
+        ],
         bullets: [
           "Default sales rate is 8% unless a different rate is set on your profile",
           "Commission is based on confirmed revenue or contract value, excluding VAT where applicable",
@@ -172,7 +287,7 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
       {
         heading: "4. Payment schedule",
         paragraphs: [
-          "Approved commissions are typically paid monthly to the bank account registered in your employee profile.",
+          "Approved commissions are typically paid monthly to the bank account registered in your team profile.",
           "Payouts usually arrive within 5–7 working days after month-end approval, subject to banking cut-off times and public holidays.",
         ],
       },
@@ -185,7 +300,7 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
       {
         heading: "6. Disputes",
         paragraphs: [
-          "Commission queries must be raised within 30 days of the payout date through your line manager or the HR admin team, with supporting CRM references.",
+          "Commission queries must be raised within 30 days of the payout date through your line manager or the admin team, with supporting CRM references.",
         ],
       },
       {

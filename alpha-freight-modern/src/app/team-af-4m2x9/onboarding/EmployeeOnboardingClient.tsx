@@ -219,7 +219,7 @@ export default function EmployeeOnboardingClient() {
               <PartyPopper className="h-9 w-9 text-slate-900" />
             </div>
             <h1 className="font-serif text-4xl font-black italic tracking-tight text-slate-900">You&apos;re all set!</h1>
-            <p className="mt-3 text-sm font-medium text-slate-500">Welcome to the Alpha Freight team workspace.</p>
+            <p className="mt-3 text-sm font-medium text-slate-500">Welcome to the Alpha Freight Solutions founding team.</p>
             <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400">Alpha Freight Premium</p>
           </motion.div>
         </div>
@@ -272,7 +272,7 @@ export default function EmployeeOnboardingClient() {
           <BrandMark href="/" iconClassName="h-8 w-8" textClassName="text-base font-bold" />
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
             <Briefcase className="h-3.5 w-3.5" />
-            Employee onboarding
+            Team onboarding
           </div>
         </div>
       </header>
@@ -431,7 +431,7 @@ export default function EmployeeOnboardingClient() {
                           className="mt-1 rounded"
                         />
                         <span className="text-sm font-semibold">
-                          I accept the {item.policy.shortTitle}
+                          I agree to the {item.policy.shortTitle}
                         </span>
                       </label>
                     </div>

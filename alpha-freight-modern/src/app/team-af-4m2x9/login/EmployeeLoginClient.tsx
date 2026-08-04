@@ -38,7 +38,7 @@ export default function EmployeeLoginClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(
-    accessDenied ? "Access denied. This account is not authorised for the employee portal." : null
+    accessDenied ? "Access denied. This account is not authorised for the team portal." : null
   );
   const [showVideo, setShowVideo] = useState(false);
   const [targetPath, setTargetPath] = useState("");
@@ -68,7 +68,7 @@ export default function EmployeeLoginClient() {
         if (!isEmployee) {
           await authClient.auth.signOut();
           throw new Error(
-            "This account is not an employee account. Create a new employee account or ask HR to set your role."
+            "This account is not a team account. Create a new team account or ask your manager to set your role."
           );
         }
       }
@@ -100,7 +100,7 @@ export default function EmployeeLoginClient() {
   return (
     <div className="w-full">
       <div className={AUTH.header}>
-        <h2 className={AUTH.title}>Employee sign in</h2>
+        <h2 className={AUTH.title}>Team sign in</h2>
         <p className={AUTH.subtitle}>Welcome back. Enter your work credentials to continue.</p>
       </div>
 
@@ -166,13 +166,13 @@ export default function EmployeeLoginClient() {
           {isLoading ? (
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-900/20 border-t-slate-900" />
           ) : (
-            "Sign in to Employee Hub"
+            "Sign in to Team Hub"
           )}
         </motion.button>
       </form>
 
       <p className={`${AUTH.footerText} mt-5 sm:mt-6`}>
-        New employee?{" "}
+        New team member?{" "}
         <Link href={employeeSignupPath()} className="font-bold text-slate-900 hover:underline underline-offset-4">
           Create account
         </Link>
