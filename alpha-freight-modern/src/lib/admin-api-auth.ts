@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { isAdminPanelEmail } from "@/lib/admin-access";
+import { withTimeout } from "@/lib/employee-auth-utils";
 export type AdminAccessResult =
   | { ok: true }
   | { ok: false; status: number; error: string };
@@ -43,7 +44,7 @@ export async function verifyAdminApiAccess(request: NextRequest): Promise<AdminA
   const {
     data: { user },
     error: authError,
-  } = await adminClient.auth.getUser(bearerToken);
+  } = await withTimeout(adminClient.auth.getUser(bearerToken), 10000, "Admin auth");
 
   if (authError || !user) {
     return { ok: false, status: 401, error: "Invalid or expired session." };
