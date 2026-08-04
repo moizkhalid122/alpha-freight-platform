@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Users, UserCheck, FileText, CircleDollarSign, Target, TrendingUp, BarChart3, ListTodo } from "lucide-react";
+import { Users, UserCheck, FileText, CircleDollarSign, Target, TrendingUp, BarChart3, ListTodo, ClipboardList } from "lucide-react";
 import { adminRoute } from "@/lib/admin-path";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { name: "Employees", path: "/ops-af-7x9k2/employees", icon: Users },
+  { name: "Onboarding", path: "/ops-af-7x9k2/employees/onboarding", icon: ClipboardList },
   { name: "Tasks", path: "/ops-af-7x9k2/employees/tasks", icon: ListTodo },
   { name: "Status", path: "/ops-af-7x9k2/employees/status", icon: UserCheck },
   { name: "Documents", path: "/ops-af-7x9k2/employees/documents", icon: FileText },

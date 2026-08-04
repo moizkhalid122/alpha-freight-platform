@@ -100,7 +100,7 @@ export type EmployeeSettingsData = {
   needsOnboardingResync: boolean;
 };
 
-function employeeStoragePath(url: string): string | null {
+export function employeeStoragePath(url: string): string | null {
   try {
     const marker = `/employee-documents/`;
     const idx = url.indexOf(marker);

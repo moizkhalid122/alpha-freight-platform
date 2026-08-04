@@ -63,3 +63,38 @@ export function useAdminTeamStats() {
     refetch: query.refetch,
   };
 }
+
+export type AdminEmployeeOnboardingRow = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  employee_code: string | null;
+  job_title: string | null;
+  department: string | null;
+  phone: string | null;
+  address: string | null;
+  profile_photo_url: string | null;
+  cv_url: string | null;
+  id_document_url: string | null;
+  onboarding_completed: boolean;
+  accepted_nda_at: string | null;
+  accepted_employment_at: string | null;
+  accepted_commission_at: string | null;
+  updated_at: string | null;
+};
+
+export function useAdminEmployeeOnboarding() {
+  const query = useQuery({
+    queryKey: ["admin", "employee-onboarding"],
+    queryFn: () =>
+      adminFetch<{ onboarding: AdminEmployeeOnboardingRow[] }>("/api/admin/employee-onboarding"),
+    staleTime: 60_000,
+  });
+
+  return {
+    onboarding: query.data?.onboarding ?? [],
+    loading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : query.error ? String(query.error) : null,
+    refetch: query.refetch,
+  };
+}
