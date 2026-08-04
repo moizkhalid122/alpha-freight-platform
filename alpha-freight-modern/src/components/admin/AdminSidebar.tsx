@@ -19,6 +19,8 @@ import {
   UserRoundCheck,
   Gift,
   MessageSquare,
+  Users,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminRoute } from "@/lib/admin-path";
@@ -113,6 +115,21 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
         name: "Post Load",
         path: "/ops-af-7x9k2/post-load",
         icon: <PackagePlus className="h-4 w-4" />,
+      },
+    ],
+  },
+  {
+    label: "HR & EMPLOYEES",
+    items: [
+      {
+        name: "Employees",
+        path: "/ops-af-7x9k2/employees",
+        icon: <Users className="h-4 w-4" />,
+      },
+      {
+        name: "Employee KPIs",
+        path: "/ops-af-7x9k2/employees/kpis",
+        icon: <BarChart3 className="h-4 w-4" />,
       },
     ],
   },

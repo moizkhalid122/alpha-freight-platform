@@ -5,12 +5,14 @@ import { enrichPlatformReply } from "@/lib/copilot/platform-enrichment";
 import { calculateProfit, extractProfitFromMessage } from "@/lib/copilot/profit-calculator";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
 import { inferPublicSuggestedQuestions } from "@/lib/openai-stream";
+import { buildEmployeeKnowledgeReply } from "@/lib/employee-team-ai-knowledge";
 import { isPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
 
 const ROLE_LABELS: Record<AssistantKind, string> = {
   general: "Alpha Freight AI",
   carrier: "Carrier Co-Pilot",
   supplier: "Supplier Co-Pilot",
+  employee: "Team AI",
 };
 
 export function isGenericMarketingFallback(message: string, history: ChatHistoryItem[] = []): boolean {
@@ -79,6 +81,10 @@ export function buildPublicKnowledgeReply(
   history: ChatHistoryItem[] = [],
   assistantType: AssistantKind = "general"
 ): { message: string; structuredMessage: StructuredAssistantReply } {
+  if (assistantType === "employee") {
+    return buildEmployeeKnowledgeReply(message, history);
+  }
+
   const { message: text } = getMarketingChatReply(message, history);
   const label = ROLE_LABELS[assistantType];
   const suggestedQuestions = inferPublicSuggestedQuestions(message, history);

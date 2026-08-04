@@ -1,4 +1,4 @@
-import type { ChatApiResponse, SendChatMessageOptions, StructuredAssistantReply } from "@/lib/chat-types";
+import type { AssistantKind, ChatApiResponse, SendChatMessageOptions, StructuredAssistantReply } from "@/lib/chat-types";
 import { supabase } from "@/lib/supabase";
 
 async function buildChatHeaders() {
@@ -171,6 +171,7 @@ export async function streamPublicChatMessage(
     history?: SendChatMessageOptions["history"];
     language?: string;
     sessionMemory?: SendChatMessageOptions["sessionMemory"];
+    assistantType?: AssistantKind;
   } = {},
   callbacks: PublicChatStreamCallbacks = {}
 ): Promise<ChatApiExtendedResponse> {
@@ -188,6 +189,7 @@ export async function streamPublicChatMessage(
         history: options.history || [],
         language: options.language,
         sessionMemory: options.sessionMemory,
+        assistantType: options.assistantType || "general",
       }),
     });
 

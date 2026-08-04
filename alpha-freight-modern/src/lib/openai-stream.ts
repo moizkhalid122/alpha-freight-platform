@@ -1,6 +1,7 @@
 import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply } from "@/lib/chat-types";
 import type { DetectedIntent } from "@/lib/copilot/intent-detector";
 import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
+import { buildEmployeeTeamAiSystemPrompt } from "@/lib/employee-team-ai-prompt";
 import { generalKnowledgeCategory } from "@/lib/public-ai-live-search";
 import { fetchWithTimeout, OPENAI_STREAM_TIMEOUT_MS } from "@/lib/copilot/fetch-utils";
 
@@ -8,6 +9,7 @@ const ROLE_LABELS: Record<AssistantKind, string> = {
   general: "Alpha Freight AI",
   carrier: "Carrier Co-Pilot",
   supplier: "Supplier Co-Pilot",
+  employee: "Team AI",
 };
 
 function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
@@ -25,7 +27,10 @@ function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
     }));
 }
 
-function buildPublicStreamSystemPrompt(extraContext?: string): string {
+function buildPublicStreamSystemPrompt(extraContext?: string, assistantType: AssistantKind = "general"): string {
+  if (assistantType === "employee") {
+    return buildEmployeeTeamAiSystemPrompt(extraContext);
+  }
   return buildPublicAiSystemPrompt(extraContext);
 }
 
@@ -132,6 +137,7 @@ export function buildPublicStreamMessages(options: {
   history?: ChatHistoryItem[];
   extraContext?: string;
   detectedIntent?: DetectedIntent;
+  assistantType?: AssistantKind;
 }): Array<{ role: "system" | "user" | "assistant"; content: string }> {
   const history = normalizeHistory(options.history || []);
   const userMessage = options.message.trim().slice(0, 2000);
@@ -146,11 +152,12 @@ export function buildPublicStreamMessages(options: {
         actionRequest: options.detectedIntent.actionRequest,
       })}`
     : "";
+  const assistantType = options.assistantType ?? "general";
 
   return [
     {
       role: "system",
-      content: buildPublicStreamSystemPrompt((options.extraContext || "") + intentHint),
+      content: buildPublicStreamSystemPrompt((options.extraContext || "") + intentHint, assistantType),
     },
     ...historyForApi.map((item) => ({
       role: item.role as "user" | "assistant",

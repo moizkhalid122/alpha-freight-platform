@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 
-import { userHasAdminAccess } from "@/lib/admin-session";
-
+import { isAdminPanelEmail } from "@/lib/admin-access";
 export type AdminAccessResult =
   | { ok: true }
   | { ok: false; status: number; error: string };
@@ -35,27 +34,32 @@ export async function verifyAdminApiAccess(request: NextRequest): Promise<AdminA
 
   const { createClient } = await import("@supabase/supabase-js");
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-  const userClient = createClient(url, anonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    },
+  const adminClient = createClient(url, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
 
   const {
     data: { user },
     error: authError,
-  } = await userClient.auth.getUser();
+  } = await adminClient.auth.getUser(bearerToken);
 
   if (authError || !user) {
     return { ok: false, status: 401, error: "Invalid or expired session." };
   }
 
-  const isAdmin = await userHasAdminAccess(userClient, user);
-  if (!isAdmin) {
+  if (isAdminPanelEmail(user.email)) {
+    return { ok: true };
+  }
+
+  const { data: profile, error: profileError } = await adminClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError || String(profile?.role ?? "").toLowerCase() !== "admin") {
     return {
       ok: false,
       status: 403,

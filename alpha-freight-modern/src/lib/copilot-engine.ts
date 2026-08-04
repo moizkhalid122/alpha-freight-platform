@@ -32,6 +32,7 @@ import {
   buildPublicKnowledgeReply,
 } from "@/lib/copilot/fast-replies";
 import { getOpenAiChatReply, isOpenAiConfigured, buildOpenAiRetryReply } from "@/lib/openai-chat";
+import { buildEmployeeKnowledgeReply, buildEmployeeFastReply } from "@/lib/employee-team-ai-knowledge";
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
 import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
@@ -106,6 +107,16 @@ export async function preparePublicStreamChat(
     };
   }
 
+  if (assistantType === "employee") {
+    const employeeFast = buildEmployeeFastReply(message, history);
+    if (employeeFast) {
+      return {
+        mode: "complete",
+        result: flattenPublicReply({ ...employeeFast, source: "employee-knowledge" }),
+      };
+    }
+  }
+
   if (isWeatherQuery(message)) {
     const live = await fetchUkWeather(message);
     if (live.ok) {
@@ -144,15 +155,20 @@ export async function preparePublicStreamChat(
     };
   }
 
-  const openAiUp = await isOpenAiReachable();
-  if (!openAiUp) {
-    return {
-      mode: "complete",
-      result: await buildPublicOfflineReply(message, history, assistantType),
-    };
+  if (assistantType !== "employee") {
+    const openAiUp = await isOpenAiReachable();
+    if (!openAiUp) {
+      return {
+        mode: "complete",
+        result: await buildPublicOfflineReply(message, history, assistantType),
+      };
+    }
   }
 
-  const extraContext: string[] = [getLanguageInstruction(lang), PUBLIC_AI_CONTEXT];
+  const extraContext: string[] = [
+    getLanguageInstruction(lang),
+    assistantType === "employee" ? EMPLOYEE_TEAM_AI_CONTEXT : PUBLIC_AI_CONTEXT,
+  ];
 
   if (isGeneralKnowledgeQuery(message)) {
     extraContext.push(
@@ -299,6 +315,13 @@ export async function buildPublicOfflineReply(
     });
   }
 
+  if (assistantType === "employee") {
+    return flattenPublicReply({
+      ...buildEmployeeKnowledgeReply(message, history),
+      source: "employee-knowledge",
+    });
+  }
+
   return flattenPublicReply({
     ...buildPublicKnowledgeReply(message, history, assistantType),
     source: "marketing-fallback",
@@ -426,6 +449,8 @@ function saveChatMessagesAsync(
 }
 
 const PUBLIC_AI_CONTEXT = `Public /ai guest chat. You are Alpha Freight AI — UK freight expert AND a capable general assistant. Answer science, history, business, coding, English, health, and geography fully. Use live web data when provided. Never refuse reasonable general questions. Never mention OpenAI.`;
+
+const EMPLOYEE_TEAM_AI_CONTEXT = `Internal Team AI for Alpha Freight employees. You are a senior sales coach — give copy-paste scripts, email templates, CRM steps, objection handling, commission info, and UK freight knowledge. Never say you are "Alpha Freight AI" public bot. Never mention OpenAI. Always answer the employee's question directly with actionable content.`;
 
 async function runPublicCopilotEngine(
   input: CopilotEngineInput

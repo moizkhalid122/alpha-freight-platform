@@ -2,6 +2,7 @@ import dns from "node:dns";
 import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply, CopilotPlatformIntent, CopilotActionRequest, CopilotMetric } from "@/lib/chat-types";
 import type { DetectedIntent } from "@/lib/copilot/intent-detector";
 import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
+import { buildEmployeeTeamAiSystemPrompt } from "@/lib/employee-team-ai-prompt";
 
 // Prefer IPv4 — fixes intermittent OpenAI timeouts on some Windows networks
 dns.setDefaultResultOrder("ipv4first");
@@ -13,13 +14,19 @@ const ROLE_LABELS: Record<AssistantKind, string> = {
   general: "Alpha Freight AI",
   carrier: "Carrier Co-Pilot",
   supplier: "Supplier Co-Pilot",
+  employee: "Team AI",
 };
 
 function buildSystemPrompt(assistantType: AssistantKind, extraContext?: string, publicMode?: boolean): string {
   const role = ROLE_LABELS[assistantType];
 
   if (publicMode) {
-    return `${buildPublicAiSystemPrompt(extraContext)}
+    const basePrompt =
+      assistantType === "employee"
+        ? buildEmployeeTeamAiSystemPrompt(extraContext)
+        : buildPublicAiSystemPrompt(extraContext);
+
+    return `${basePrompt}
 
 Reply JSON only:
 {"message":"Full markdown response using the structure above.","suggestedQuestions":["Follow up 1?","Follow up 2?","Follow up 3?"]}`;
@@ -29,6 +36,7 @@ Reply JSON only:
     general: `Alpha Freight — UK's free freight AI & load board. Post loads, find haulage, RPM, diesel, payouts, tracking, POD, signup. Brand: "Alpha Freight AI" / "UK Freight AI".`,
     carrier: `UK carriers: loads, bids, RPM, routes, wallet, payouts, tracking, POD.`,
     supplier: `UK suppliers: post loads, bids, pay instant/later, tracking, POD.`,
+    employee: `Internal sales team: CRM, cold calls, follow-ups, commission, lead status, daily targets, scripts, objection handling.`,
   };
 
   return `You are ${role} for Alpha Freight (UK logistics).
@@ -242,7 +250,9 @@ export async function getOpenAiChatReply(options: {
   if (!apiKey) return null;
 
   const assistantType: AssistantKind =
-    options.assistantType === "carrier" || options.assistantType === "supplier"
+    options.assistantType === "carrier" ||
+    options.assistantType === "supplier" ||
+    options.assistantType === "employee"
       ? options.assistantType
       : "general";
 

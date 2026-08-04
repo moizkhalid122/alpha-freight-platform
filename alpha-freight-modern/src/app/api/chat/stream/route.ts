@@ -22,6 +22,12 @@ export async function POST(request: NextRequest) {
     const message = typeof body.message === "string" ? body.message.trim() : "";
     const history = Array.isArray(body.history) ? body.history : [];
     const language = typeof body.language === "string" ? (body.language as LanguagePreference) : undefined;
+    const assistantType: AssistantKind =
+      body.assistantType === "employee" ||
+      body.assistantType === "carrier" ||
+      body.assistantType === "supplier"
+        ? body.assistantType
+        : "general";
 
     if (!message) {
       return new Response(JSON.stringify({ error: "Message is required" }), { status: 400 });
@@ -81,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     const prepared = await preparePublicStreamChat({
       message,
-      assistantType: "general",
+      assistantType,
       history: history as ChatHistoryItem[],
       language,
       publicMode: true,

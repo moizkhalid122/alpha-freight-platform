@@ -1,4 +1,4 @@
-export type AssistantKind = "general" | "carrier" | "supplier";
+export type AssistantKind = "general" | "carrier" | "supplier" | "employee";
 export type CopilotMode =
   | "logistics_copilot"
   | "tracking_assistant"

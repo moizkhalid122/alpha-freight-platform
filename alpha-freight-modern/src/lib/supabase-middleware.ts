@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { NextRequest, NextResponse } from "next/server";
 
 export function createSupabaseMiddlewareClient(
@@ -24,3 +25,14 @@ export function createSupabaseMiddlewareClient(
     },
   });
 }
+
+/** Cookie session only — no network call (getUser() can hang 10s+ when Supabase is slow). */
+export async function getMiddlewareSessionUser(
+  supabase: SupabaseClient
+): Promise<User | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.user ?? null;
+}
+

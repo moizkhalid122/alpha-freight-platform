@@ -36,7 +36,7 @@ export default function NothingLottie({
   useEffect(() => {
     let active = true;
 
-    fetch("/animations/nothing.json")
+    fetch("/animations/cat-love-empty.json")
       .then((response) => {
         if (!response.ok) throw new Error("Animation file missing");
         return response.json();

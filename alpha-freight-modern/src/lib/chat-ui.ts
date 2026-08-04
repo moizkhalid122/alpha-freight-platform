@@ -1,4 +1,4 @@
-export type AssistantKind = "general" | "carrier" | "supplier";
+export type AssistantKind = "general" | "carrier" | "supplier" | "employee";
 
 const THINKING_STATES: Record<AssistantKind, string[]> = {
   general: [
@@ -15,6 +15,11 @@ const THINKING_STATES: Record<AssistantKind, string[]> = {
     "Reviewing shipment requirements and fit",
     "Checking pricing, bids, and tracking flow",
     "Preparing your next best action",
+  ],
+  employee: [
+    "Reviewing your sales question and CRM context",
+    "Pulling scripts, objection handling, and freight tips",
+    "Drafting a practical reply you can use right away",
   ],
 };
 
@@ -42,6 +47,14 @@ const SUGGESTED_PROMPTS: Record<AssistantKind, string[]> = {
     "📍 Track active shipments",
     "💳 Pay instant vs pay later",
     "📄 POD upload guide",
+  ],
+  employee: [
+    "Write a cold call opener for a UK carrier",
+    "How do I handle price objections?",
+    "Draft a follow-up email after a demo",
+    "Explain our commission structure",
+    "What should I log in CRM after a call?",
+    "Calculate RPM profit: £800 load, 320 miles",
   ],
 };
 
