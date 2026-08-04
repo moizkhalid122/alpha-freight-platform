@@ -8,6 +8,7 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
   FileText,
   PartyPopper,
   ShieldCheck,
@@ -16,7 +17,12 @@ import {
 } from "lucide-react";
 import VideoOverlay from "@/components/VideoOverlay";
 import BrandMark from "@/components/BrandMark";
-import { employeeRoute } from "@/lib/employee-path";
+import EmployeePolicyModal from "@/components/employee/EmployeePolicyModal";
+import { employeePolicyPath, employeeRoute } from "@/lib/employee-path";
+import {
+  EMPLOYEE_POLICIES,
+  type EmployeePolicyId,
+} from "@/lib/employee-policies";
 import {
   clearLocalOnboardingComplete,
   fetchEmployeeOnboarding,
@@ -69,6 +75,12 @@ export default function EmployeeOnboardingClient() {
   const [acceptNda, setAcceptNda] = useState(false);
   const [acceptEmployment, setAcceptEmployment] = useState(false);
   const [acceptCommission, setAcceptCommission] = useState(false);
+  const [readPolicies, setReadPolicies] = useState<Record<EmployeePolicyId, boolean>>({
+    nda: false,
+    employment: false,
+    commission: false,
+  });
+  const [activePolicyId, setActivePolicyId] = useState<EmployeePolicyId | null>(null);
 
   const [existingCv, setExistingCv] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -133,7 +145,7 @@ export default function EmployeeOnboardingClient() {
       return false;
     }
     if (step === 2 && (!acceptNda || !acceptEmployment || !acceptCommission)) {
-      setError("Please accept all policies to continue.");
+      setError("Please read and accept all policies to continue.");
       return false;
     }
     setError(null);
@@ -218,6 +230,41 @@ export default function EmployeeOnboardingClient() {
 
   const StepIcon = STEPS[step].icon;
 
+  const policyItems = [
+    {
+      id: "nda" as const,
+      policy: EMPLOYEE_POLICIES.nda,
+      checked: acceptNda,
+      set: setAcceptNda,
+    },
+    {
+      id: "employment" as const,
+      policy: EMPLOYEE_POLICIES.employment,
+      checked: acceptEmployment,
+      set: setAcceptEmployment,
+    },
+    {
+      id: "commission" as const,
+      policy: EMPLOYEE_POLICIES.commission,
+      checked: acceptCommission,
+      set: setAcceptCommission,
+    },
+  ];
+
+  const handlePolicyRead = (policyId: EmployeePolicyId) => {
+    setReadPolicies((current) => ({ ...current, [policyId]: true }));
+    setActivePolicyId(null);
+  };
+
+  const handlePolicyAccept = (policyId: EmployeePolicyId, checked: boolean, setAccepted: (value: boolean) => void) => {
+    if (!readPolicies[policyId]) {
+      setError("Please read the full document before accepting.");
+      return;
+    }
+    setAccepted(checked);
+    setError(null);
+  };
+
   return (
     <div className="min-h-[100dvh] bg-white font-sans">
       <header className="border-b border-slate-100 px-6 py-5">
@@ -269,7 +316,7 @@ export default function EmployeeOnboardingClient() {
               </p>
             </div>
 
-            <div className="mx-auto max-w-sm space-y-4">
+            <div className={cn("mx-auto space-y-4", step === 2 ? "max-w-lg" : "max-w-sm")}>
               {step === 0 && (
                 <>
                   <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
@@ -318,21 +365,76 @@ export default function EmployeeOnboardingClient() {
 
               {step === 2 && (
                 <>
-                  {[
-                    { label: "Accept NDA", checked: acceptNda, set: setAcceptNda },
-                    { label: "Accept Employment Agreement", checked: acceptEmployment, set: setAcceptEmployment },
-                    { label: "Accept Commission Policy", checked: acceptCommission, set: setAcceptCommission },
-                  ].map((item) => (
-                    <label
-                      key={item.label}
+                  {policyItems.map((item) => (
+                    <div
+                      key={item.id}
                       className={cn(
-                        "flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition",
-                        item.checked ? "border-slate-900 bg-slate-900 text-white" : "border-slate-100 bg-white hover:border-slate-200"
+                        "rounded-2xl border p-4 transition",
+                        item.checked ? "border-slate-900 bg-slate-900 text-white" : "border-slate-100 bg-white"
                       )}
                     >
-                      <input type="checkbox" checked={item.checked} onChange={(e) => item.set(e.target.checked)} className="mt-1 rounded" />
-                      <span className="text-sm font-semibold">{item.label}</span>
-                    </label>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-bold">{item.policy.title}</p>
+                          <p className={cn("mt-1 text-xs", item.checked ? "text-slate-300" : "text-slate-500")}>
+                            {item.policy.summary}
+                          </p>
+                        </div>
+                        {readPolicies[item.id] ? (
+                          <span className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                            Read
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setActivePolicyId(item.id)}
+                          className={cn(
+                            "rounded-xl px-3 py-2 text-xs font-bold transition",
+                            item.checked
+                              ? "bg-white/10 text-white hover:bg-white/15"
+                              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          )}
+                        >
+                          Read document
+                        </button>
+                        <a
+                          href={employeePolicyPath(item.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold transition",
+                            item.checked
+                              ? "bg-white/10 text-white hover:bg-white/15"
+                              : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                          )}
+                        >
+                          Open page
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+
+                      <label
+                        className={cn(
+                          "mt-4 flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3",
+                          item.checked ? "border-white/10 bg-white/5" : "border-slate-100 bg-slate-50/70",
+                          !readPolicies[item.id] && "cursor-not-allowed opacity-70"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.checked}
+                          disabled={!readPolicies[item.id]}
+                          onChange={(e) => handlePolicyAccept(item.id, e.target.checked, item.set)}
+                          className="mt-1 rounded"
+                        />
+                        <span className="text-sm font-semibold">
+                          I accept the {item.policy.shortTitle}
+                        </span>
+                      </label>
+                    </div>
                   ))}
                 </>
               )}
@@ -366,6 +468,14 @@ export default function EmployeeOnboardingClient() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <EmployeePolicyModal
+        policy={activePolicyId ? EMPLOYEE_POLICIES[activePolicyId] : null}
+        open={activePolicyId !== null}
+        onClose={() => setActivePolicyId(null)}
+        onConfirmRead={handlePolicyRead}
+        alreadyRead={activePolicyId ? readPolicies[activePolicyId] : false}
+      />
     </div>
   );
 }
