@@ -256,57 +256,149 @@ export const EMPLOYEE_POLICIES: Record<EmployeePolicyId, EmployeePolicyDocument>
     id: "commission",
     title: "Commission Policy",
     shortTitle: "Commission Policy",
-    summary: "Explains how sales commission is calculated, approved, and paid for founding team members.",
+    summary: "Explains how commission is earned, approved and paid.",
     lastUpdated: "1 August 2026",
     sections: [
       {
         heading: "1. Eligibility",
         paragraphs: [
-          "Commission applies to eligible sales and business-development roles as confirmed by management. Your assigned commission rate is shown on your team profile and in the commission workspace.",
+          `This Commission Policy applies to eligible Business Development Representatives, Sales Representatives, and other team members authorised by ${COMPANY_LEGAL_NAME}.`,
+          "Your commission eligibility and commission structure will be shown in your team dashboard.",
         ],
       },
       {
-        heading: "2. How commission is earned",
+        heading: "2. Commission Structure",
         paragraphs: [
-          "Commission is calculated on closed deal value when a lead is marked Won in the team CRM, subject to management verification.",
+          "Each team member's commission rate is determined by management and may vary depending on:",
+          "Your current commission structure will always be displayed in your team dashboard.",
+          "The Company reserves the right to update commission structures where necessary.",
         ],
         bullets: [
-          "Default sales rate is 8% unless a different rate is set on your profile",
-          "Commission is based on confirmed revenue or contract value, excluding VAT where applicable",
-          "Cancelled, refunded, or fraudulent deals may result in commission reversal",
-          "Split deals must be agreed in writing with management before payout",
+          "Customer type",
+          "Service type",
+          "Business agreement",
+          "Sales campaign",
+          "Performance level",
+          "Special incentive programmes",
         ],
       },
       {
-        heading: "3. Approval process",
+        heading: "3. How Commission is Earned",
         paragraphs: [
-          "New commission entries are created as Pending when a deal is marked Won. An authorised manager reviews the deal value, supporting notes, and CRM activity before approval.",
-          "The Company may reject or adjust commission where records are incomplete, inaccurate, or inconsistent with agreed terms.",
+          "Commission is earned only when:",
+          "Only approved deals are eligible for commission.",
+        ],
+        bullets: [
+          "A lead is successfully converted into a confirmed customer.",
+          "The deal has been verified by management.",
+          "The CRM records are complete and accurate.",
+          "The customer has fulfilled the agreed payment obligations (unless otherwise approved by management).",
         ],
       },
       {
-        heading: "4. Payment schedule",
+        heading: "4. CRM Requirements",
         paragraphs: [
-          "Approved commissions are typically paid monthly to the bank account registered in your team profile.",
-          "Payouts usually arrive within 5–7 working days after month-end approval, subject to banking cut-off times and public holidays.",
+          "To qualify for commission you must accurately maintain CRM records, including:",
+          "Incomplete or inaccurate CRM records may delay or prevent commission approval.",
+        ],
+        bullets: [
+          "Lead information",
+          "Call history",
+          "Meeting notes",
+          "Follow-up activity",
+          "Customer communications",
+          "Deal status",
         ],
       },
       {
-        heading: "5. Clawback and adjustments",
+        heading: "5. Approval Process",
         paragraphs: [
-          "If a customer fails to pay, a contract is cancelled, or a deal is re-opened within 90 days of payout, the Company may offset the related commission from future earnings.",
+          "When a deal is marked as Won, it enters the Pending Commission stage.",
+          "Management will review:",
+          "Only authorised management may approve commission.",
+          "Management reserves the right to adjust or reject commission where records are incomplete, inaccurate or inconsistent with Company policies.",
+        ],
+        bullets: [
+          "CRM activity",
+          "Deal value",
+          "Customer verification",
+          "Supporting notes",
+          "Payment status",
         ],
       },
       {
-        heading: "6. Disputes",
+        heading: "6. Payment Schedule",
         paragraphs: [
-          "Commission queries must be raised within 30 days of the payout date through your line manager or the admin team, with supporting CRM references.",
+          "Approved commission is normally paid monthly to the bank account registered in your team profile.",
+          "Payments are generally processed within 5–7 working days following the monthly approval cycle, subject to banking schedules and public holidays.",
         ],
       },
       {
-        heading: "7. Acceptance",
+        heading: "7. Commission Adjustments & Clawbacks",
         paragraphs: [
-          "By accepting this policy, you agree that commission is discretionary to the extent permitted by law and subject to verified CRM records and management approval.",
+          "The Company may reduce or recover commission where:",
+          "Any adjustment will appear in your team dashboard.",
+        ],
+        bullets: [
+          "A customer fails to pay.",
+          "A contract is cancelled.",
+          "A payment is refunded.",
+          "A deal is found to be fraudulent.",
+          "A deal is reopened or reversed.",
+          "Incorrect information was used to obtain commission.",
+        ],
+      },
+      {
+        heading: "8. Fraud & Misconduct",
+        paragraphs: [
+          "The following may result in immediate termination of your engagement and forfeiture of unpaid commission:",
+          "The Company reserves the right to take legal action where appropriate.",
+        ],
+        bullets: [
+          "Creating fake leads",
+          "Duplicate deals",
+          "False CRM records",
+          "Falsifying customer information",
+          "Misrepresenting sales activity",
+          "Attempting to obtain commission dishonestly",
+          "Collusion with customers or other team members",
+        ],
+      },
+      {
+        heading: "9. Taxes",
+        paragraphs: [
+          "Each team member is responsible for any personal tax obligations arising from commission payments unless otherwise required by applicable law.",
+        ],
+      },
+      {
+        heading: "10. Policy Changes",
+        paragraphs: [
+          `${COMPANY_LEGAL_NAME} reserves the right to amend this Commission Policy at any time.`,
+          "Any changes will be communicated through the team dashboard and will apply from the effective date specified.",
+        ],
+      },
+      {
+        heading: "11. Disputes",
+        paragraphs: [
+          "Any commission query must be raised within 30 days of the relevant payment date.",
+          "Supporting CRM records and documentation may be requested during the review process.",
+          "Management's decision shall be final unless otherwise required by law.",
+        ],
+      },
+      {
+        heading: "12. Acceptance",
+        paragraphs: ['By clicking "I Agree" during onboarding, you confirm that:'],
+        bullets: [
+          "You have read and understood this Commission Policy.",
+          "You agree to comply with its terms.",
+          "You understand that commission is subject to management approval, verified CRM activity and Company policies.",
+          "You understand that commission is not guaranteed unless all approval requirements have been satisfied.",
+        ],
+      },
+      {
+        heading: "Electronic acceptance",
+        paragraphs: [
+          "Your electronic acceptance shall have the same legal effect as a handwritten signature.",
         ],
       },
     ],
