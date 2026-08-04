@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: alpha-freight-ai
+    runtime: node
+    rootDir: alpha-freight-modern
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/health
+    plan: starter
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3003
+      - key: AI_REQUIRE_AUTH
+        value: true
+      - key: AI_RATE_LIMIT
+        value: 40
+      - key: OLLAMA_URL
+        sync: false
+      - key: MODEL_NAME
+        value: llama3.1
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
