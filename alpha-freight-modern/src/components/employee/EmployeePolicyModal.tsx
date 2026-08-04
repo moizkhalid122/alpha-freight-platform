@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 import EmployeePolicyDocument from "@/components/employee/EmployeePolicyDocument";
+import EmployeePolicySaveButton from "@/components/employee/EmployeePolicySaveButton";
 import type { EmployeePolicyDocument as PolicyDoc } from "@/lib/employee-policies";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +71,9 @@ export default function EmployeePolicyModal({
         </div>
 
         <div className="border-t border-slate-100 bg-slate-50/80 px-5 py-4">
+          <div className="mb-3 flex justify-center">
+            <EmployeePolicySaveButton label="Save as PDF" />
+          </div>
           {alreadyRead ? (
             <p className="text-center text-sm font-semibold text-emerald-600">You have read this document.</p>
           ) : (
