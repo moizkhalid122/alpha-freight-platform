@@ -5,6 +5,9 @@ alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles add constraint profiles_role_check
   check (role in ('supplier', 'carrier', 'admin', 'driver', 'employee'));
 
+-- Optional: speeds up admin employee list (run admin-profiles-email.sql for full backfill + trigger)
+alter table public.profiles add column if not exists email text;
+
 alter table public.employee_profiles add column if not exists onboarding_completed boolean not null default false;
 alter table public.employee_profiles add column if not exists profile_photo_url text;
 alter table public.employee_profiles add column if not exists address text;

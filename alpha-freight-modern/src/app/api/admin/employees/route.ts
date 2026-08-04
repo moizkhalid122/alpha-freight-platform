@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const db = getSupabaseForAdminApi(request);
 
     const [{ data: roleProfiles, error: roleErr }, { data: hrRows, error: hrErr }] = await Promise.all([
-      db.from("profiles").select("id, full_name, email, created_at, role").eq("role", "employee"),
+      db.from("profiles").select("id, full_name, created_at, role").eq("role", "employee"),
       db.from("employee_profiles").select(HR_SELECT),
     ]);
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     if (missingProfileIds.length) {
       const { data: extraProfiles } = await db
         .from("profiles")
-        .select("id, full_name, email, created_at, role")
+        .select("id, full_name, created_at, role")
         .in("id", missingProfileIds);
       for (const profile of extraProfiles ?? []) {
         profileMap.set(profile.id, profile);
