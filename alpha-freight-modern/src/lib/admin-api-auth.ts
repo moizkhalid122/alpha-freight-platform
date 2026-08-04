@@ -20,7 +20,7 @@ export async function verifyAdminApiAccess(request: NextRequest): Promise<AdminA
       ok: false,
       status: 503,
       error:
-        "Admin service role is not configured. Set SUPABASE_SERVICE_ROLE_KEY in .env.local and restart the server.",
+        "Admin service role is not configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel → Settings → Environment Variables (Production), then redeploy. Local dev: add it to .env.local and restart npm run dev.",
     };
   }
 
