@@ -32,6 +32,8 @@ import {
 
   isEmployeeOnboardingPath,
 
+  isEmployeePolicyPath,
+
   isEmployeePanelPath,
 
   isEmployeeSignupPath,
@@ -127,9 +129,9 @@ export async function middleware(request: NextRequest) {
 
 
 
-    if (isEmployeeOnboardingPath(pathname)) {
+    if (isEmployeeOnboardingPath(pathname) || isEmployeePolicyPath(pathname)) {
 
-      if (onboarded) {
+      if (onboarded && isEmployeeOnboardingPath(pathname)) {
 
         return NextResponse.redirect(new URL(EMPLOYEE_PANEL_PATH, request.url));
 

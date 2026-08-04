@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 import { EmployeePageHeader, EmployeePanel } from "@/components/employee/EmployeeShell";
 import { useEmployeeProfile } from "@/hooks/useEmployeeData";
-import { employeeOnboardingPath } from "@/lib/employee-path";
+import { employeeOnboardingPath, employeePolicyPath } from "@/lib/employee-path";
+import { EMPLOYEE_POLICIES } from "@/lib/employee-policies";
 import {
   clearLocalOnboardingComplete,
   loadEmployeeSettings,
@@ -452,24 +453,37 @@ export default function EmployeeSettingsWorkspace() {
               </div>
             </div>
             <div className="space-y-2">
-              {[
-                { label: "NDA", date: hr?.accepted_nda_at ?? null },
-                { label: "Employment agreement", date: hr?.accepted_employment_at ?? null },
-                { label: "Commission policy", date: hr?.accepted_commission_at ?? null },
-              ].map((item) => (
+              {(
+                [
+                  { id: "nda" as const, date: hr?.accepted_nda_at ?? null },
+                  { id: "employment" as const, date: hr?.accepted_employment_at ?? null },
+                  { id: "commission" as const, date: hr?.accepted_commission_at ?? null },
+                ] as const
+              ).map((item) => (
                 <div
-                  key={item.label}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/40 px-4 py-3"
+                  key={item.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/40 px-4 py-3"
                 >
-                  <span className="text-sm font-semibold text-slate-800">{item.label}</span>
-                  <span
-                    className={cn(
-                      "text-xs font-medium",
-                      item.date ? "text-emerald-600" : "text-slate-400"
-                    )}
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{EMPLOYEE_POLICIES[item.id].shortTitle}</p>
+                    <span
+                      className={cn(
+                        "text-xs font-medium",
+                        item.date ? "text-emerald-600" : "text-slate-400"
+                      )}
+                    >
+                      {formatAcceptedDate(item.date)}
+                    </span>
+                  </div>
+                  <a
+                    href={`${employeePolicyPath(item.id)}?from=settings`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
                   >
-                    {formatAcceptedDate(item.date)}
-                  </span>
+                    View
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
                 </div>
               ))}
             </div>

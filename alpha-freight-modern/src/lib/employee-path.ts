@@ -25,6 +25,14 @@ export function employeeOnboardingPath(): string {
   return employeeRoute("/onboarding");
 }
 
+export function employeePolicyPath(slug: string): string {
+  return employeeRoute(`/policies/${slug}`);
+}
+
+export function isEmployeePolicyPath(pathname: string): boolean {
+  return pathname.startsWith(`${EMPLOYEE_PANEL_PATH}/policies/`);
+}
+
 export function isEmployeeSignupPath(pathname: string): boolean {
   return pathname === employeeSignupPath();
 }
