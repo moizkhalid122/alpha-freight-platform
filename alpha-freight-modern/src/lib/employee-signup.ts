@@ -76,7 +76,6 @@ async function upsertEmployeeRows(
     {
       id: userId,
       full_name: identity.fullName,
-      email: identity.email ?? null,
       role: "employee",
       created_at: now,
     },

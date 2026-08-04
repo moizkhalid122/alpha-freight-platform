@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const db = getSupabaseForAdminApi(request);
 
     const [{ data: roleProfiles, error: roleErr }, { data: hrRows, error: hrErr }] = await Promise.all([
-      db.from("profiles").select("id, full_name, email, created_at, role").eq("role", "employee"),
+      db.from("profiles").select("id, full_name, created_at, role").eq("role", "employee"),
       db.from("employee_profiles").select(HR_SELECT),
     ]);
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     if (missingProfileIds.length) {
       const { data: extraProfiles } = await db
         .from("profiles")
-        .select("id, full_name, email, created_at, role")
+        .select("id, full_name, created_at, role")
         .in("id", missingProfileIds);
       for (const profile of extraProfiles ?? []) {
         profileMap.set(profile.id, profile);
@@ -54,13 +54,11 @@ export async function GET(request: NextRequest) {
         commission_rate: Number(hr?.commission_rate ?? 0),
         phone: hr?.phone ?? null,
         full_name: p?.full_name ?? null,
-        email: p?.email ?? null,
+        email: null,
       };
     });
 
-    employees.sort((a, b) =>
-      (a.full_name ?? a.email ?? "").localeCompare(b.full_name ?? b.email ?? "")
-    );
+    employees.sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
 
     return NextResponse.json(
       { employees },

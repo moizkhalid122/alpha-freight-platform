@@ -1,5 +1,6 @@
 "use client";
 
+import { withTimeout } from "@/lib/employee-auth-utils";
 import { supabase } from "@/lib/supabase";
 
 const LOAD_LIST_SELECT =
@@ -11,7 +12,7 @@ const LOAD_DETAIL_SELECT =
 export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await withTimeout(supabase.auth.getSession(), 8000, "Admin session");
 
   const headers = new Headers(init?.headers);
   headers.set("Content-Type", "application/json");
@@ -20,11 +21,15 @@ export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T
     headers.set("Authorization", `Bearer ${session.access_token}`);
   }
 
-  const response = await fetch(path, {
-    ...init,
-    headers,
-    credentials: "same-origin",
-  });
+  const response = await withTimeout(
+    fetch(path, {
+      ...init,
+      headers,
+      credentials: "same-origin",
+    }),
+    20000,
+    "Admin API"
+  );
 
   const payload = await response.json().catch(() => ({}));
 

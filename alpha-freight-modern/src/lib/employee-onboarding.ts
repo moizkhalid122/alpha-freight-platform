@@ -100,7 +100,7 @@ export type EmployeeSettingsData = {
   needsOnboardingResync: boolean;
 };
 
-function employeeStoragePath(url: string): string | null {
+export function employeeStoragePath(url: string): string | null {
   try {
     const marker = `/employee-documents/`;
     const idx = url.indexOf(marker);
@@ -296,15 +296,47 @@ export async function uploadEmployeeDocument(
     upsert: true,
   });
 
-  if (error) {
-    const msg = `Upload failed (${kind}): ${error.message}. Create the employee-documents storage bucket in Supabase.`;
-    if (opts?.required) throw new Error(msg);
-    console.warn(msg);
-    return null;
+  if (!error) {
+    const { data } = supabase.storage.from(EMPLOYEE_DOCUMENTS_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
   }
 
-  const { data } = supabase.storage.from(EMPLOYEE_DOCUMENTS_BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  const isPolicyError = /row-level security|policy|permission denied/i.test(error.message);
+  if (isPolicyError) {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("kind", kind);
+        const response = await fetch("/api/employee/upload-document", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: formData,
+        });
+        const payload = (await response.json().catch(() => null)) as { url?: string; error?: string } | null;
+        if (response.ok && payload?.url) {
+          return payload.url;
+        }
+        if (payload?.error) {
+          if (opts?.required) throw new Error(payload.error);
+          console.warn(payload.error);
+          return null;
+        }
+      }
+    } catch (fallbackErr) {
+      if (opts?.required) {
+        throw fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+      }
+    }
+  }
+
+  const msg = `Upload failed (${kind}): ${error.message}. Run employee-documents-storage.sql in Supabase SQL Editor.`;
+  if (opts?.required) throw new Error(msg);
+  console.warn(msg);
+  return null;
 }
 
 export function buildEmployeeInviteUrl(params: {

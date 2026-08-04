@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { isAdminPanelEmail } from "@/lib/admin-access";
+import { withTimeout } from "@/lib/employee-auth-utils";
 export type AdminAccessResult =
   | { ok: true }
   | { ok: false; status: number; error: string };
@@ -19,7 +20,7 @@ export async function verifyAdminApiAccess(request: NextRequest): Promise<AdminA
       ok: false,
       status: 503,
       error:
-        "Admin service role is not configured. Set SUPABASE_SERVICE_ROLE_KEY in .env.local and restart the server.",
+        "Admin service role is not configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel → Settings → Environment Variables (Production), then redeploy. Local dev: add it to .env.local and restart npm run dev.",
     };
   }
 
@@ -43,7 +44,7 @@ export async function verifyAdminApiAccess(request: NextRequest): Promise<AdminA
   const {
     data: { user },
     error: authError,
-  } = await adminClient.auth.getUser(bearerToken);
+  } = await withTimeout(adminClient.auth.getUser(bearerToken), 10000, "Admin auth");
 
   if (authError || !user) {
     return { ok: false, status: 401, error: "Invalid or expired session." };

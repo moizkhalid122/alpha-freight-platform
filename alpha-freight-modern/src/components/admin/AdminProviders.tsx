@@ -12,6 +12,7 @@ export default function AdminProviders({ children }: { children: ReactNode }) {
           queries: {
             staleTime: 60_000,
             refetchOnWindowFocus: false,
+            retry: 1,
           },
         },
       })

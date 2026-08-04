@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
   const profilePayload = {
     id: user.id,
     full_name: fullName,
-    email: user.email ?? null,
     role: "employee",
     created_at: now,
   };
@@ -76,10 +75,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-  }
-
-  if (user.email) {
-    await db.from("profiles").update({ email: user.email }).eq("id", user.id);
   }
 
   const { error: hrError } = await db.from("employee_profiles").upsert(
