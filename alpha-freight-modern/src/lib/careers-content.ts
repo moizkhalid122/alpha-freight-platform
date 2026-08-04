@@ -1,4 +1,4 @@
-export type CareerTeam = "Design" | "Engineering" | "Operations" | "Product" | "Growth";
+export type CareerTeam = "Design" | "Engineering" | "Operations" | "Product" | "Growth" | "Sales";
 
 export type CareerOpening = {
   slug: string;
@@ -17,9 +17,46 @@ export type CareerOpening = {
   niceToHave: string[];
 };
 
-export const careerTeams = ["All", "Design", "Engineering", "Operations", "Product", "Growth"] as const;
+export const careerTeams = ["All", "Design", "Engineering", "Operations", "Product", "Growth", "Sales"] as const;
 
 export const careerOpenings: CareerOpening[] = [
+  {
+    slug: "business-development-executive-remote",
+    title: "Business Development Executive (Remote)",
+    location: "Remote (UK / International)",
+    type: "Full-Time / Founding Team",
+    team: "Sales",
+    summary:
+      "Join the Alpha Freight Solutions founding sales team — remote BDR role with performance-based commission and a clear path to salaried positions as we scale.",
+    highlights: ["Remote", "Commission + growth", "Founding team"],
+    salary: "Performance-based commission · future salaried opportunities",
+    experience: "Founding team",
+    image: "/alpha-man.png",
+    about:
+      "Alpha Freight Solutions Limited is building a modern UK freight platform connecting suppliers and carriers. As a founding Business Development Executive, you will help grow our customer base through outbound sales, CRM discipline, and professional relationship building — fully remote across the UK and internationally.",
+    responsibilities: [
+      "Generate and qualify leads for carrier and supplier partnerships through outbound calls, email, and LinkedIn.",
+      "Maintain accurate CRM records including call history, follow-ups, meeting notes, and deal status.",
+      "Book discovery calls and support the pipeline from first contact through to closed deals.",
+      "Represent Alpha Freight professionally with customers, carriers, and suppliers at all times.",
+      "Collaborate with the founding team on scripts, campaigns, and sales process improvements.",
+      "Hit agreed activity targets and follow the company Commission Policy for all won deals.",
+    ],
+    requirements: [
+      "Strong communication skills and confidence on outbound sales calls.",
+      "Self-motivated remote working setup with reliable internet and a professional environment.",
+      "Organised approach to CRM logging, follow-ups, and pipeline management.",
+      "Interest in freight, logistics, B2B sales, or marketplace businesses.",
+      "Right to work in the UK or ability to operate effectively in an international remote role.",
+      "Willingness to join as founding team on a performance-based commission structure.",
+    ],
+    niceToHave: [
+      "Experience in freight, logistics, transport, or B2B SaaS sales.",
+      "Familiarity with CRM tools and structured sales follow-up.",
+      "LinkedIn outreach or appointment-setting background.",
+      "Multilingual communication for international prospects.",
+    ],
+  },
   {
     slug: "product-designer",
     title: "Senior Product Designer",

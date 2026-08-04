@@ -66,7 +66,7 @@ const hiringSteps = [
 
 const teamStats = [
   { label: "Open roles", value: careerOpenings.length, suffix: "" },
-  { label: "Teams hiring", value: 5, suffix: "" },
+  { label: "Teams hiring", value: 6, suffix: "" },
   { label: "UK + remote", value: 100, suffix: "%" },
   { label: "Response target", value: 5, suffix: " days" },
 ];
