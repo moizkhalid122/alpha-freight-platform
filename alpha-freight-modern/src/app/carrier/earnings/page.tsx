@@ -60,6 +60,9 @@ type ChartPoint = {
   revenue: number;
 };
 
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
+
 const COMPLETED_STATUSES = new Set(["completed", "delivered"]);
 const ACTIVE_STATUSES = new Set(["in-transit", "loading", "booked", "assigned", "active", "pending"]);
 const POD_UPLOADS_STORAGE_KEY = "alpha-carrier-pod-uploads";
@@ -71,6 +74,13 @@ function normalizeStatus(status: string | null | undefined) {
 function toNumber(value: number | string | null | undefined) {
   const parsed = Number(value || 0);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function carrierEarnings(
+  load: { price?: number | string | null; max_budget?: number | string | null; notes?: string | null },
+  currency?: string
+) {
+  return getCarrierDisplayPrice(load, currency);
 }
 
 function startOfDay(date: Date) {
@@ -121,13 +131,6 @@ function getPreviousRange(range: TimeRange) {
   return { previousStart, previousEnd };
 }
 
-function formatMoney(value: number, compact = false) {
-  if (compact && value >= 1000) {
-    return `£${(value / 1000).toFixed(1)}k`;
-  }
-  return `£${value.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
 function readCarrierPodUploads(): Record<string, CarrierPodUploadRecord> {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") return {};
 
@@ -153,7 +156,8 @@ function getCompletedLoadDate(
 function buildChartData(
   loads: LoadRecord[],
   timeRange: TimeRange,
-  podUploads: Record<string, CarrierPodUploadRecord>
+  podUploads: Record<string, CarrierPodUploadRecord>,
+  currency?: string
 ) {
   const completedLoads = loads.filter((load) => COMPLETED_STATUSES.has(normalizeStatus(load.status)));
   const buckets: ChartPoint[] = [];
@@ -168,7 +172,7 @@ function buildChartData(
           const completedAt = getCompletedLoadDate(load, podUploads);
           return completedAt && completedAt >= bucketDate && completedAt < nextMonth;
         })
-        .reduce((sum, load) => sum + toNumber(load.price), 0);
+        .reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
 
       buckets.push({
         name: bucketDate.toLocaleDateString("en-GB", { month: "short" }),
@@ -188,7 +192,7 @@ function buildChartData(
         const completedAt = getCompletedLoadDate(load, podUploads);
         return completedAt && completedAt >= bucketDate && completedAt < nextDay;
       })
-      .reduce((sum, load) => sum + toNumber(load.price), 0);
+      .reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
 
     buckets.push({
       name:
@@ -205,7 +209,8 @@ function buildChartData(
 function deriveSummary(
   loads: LoadRecord[],
   timeRange: TimeRange,
-  podUploads: Record<string, CarrierPodUploadRecord>
+  podUploads: Record<string, CarrierPodUploadRecord>,
+  currency?: string
 ): EarningsSummary {
   const currentStart = getRangeStart(timeRange);
   const currentEnd = new Date();
@@ -224,21 +229,21 @@ function deriveSummary(
     return completedAt && completedAt >= previousStart && completedAt <= previousEnd;
   });
 
-  const totalEarnings = currentRangeCompleted.reduce((sum, load) => sum + toNumber(load.price), 0);
-  const previousTotal = previousRangeCompleted.reduce((sum, load) => sum + toNumber(load.price), 0);
-  const activeRevenue = activeLoads.reduce((sum, load) => sum + toNumber(load.price), 0);
+  const totalEarnings = currentRangeCompleted.reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
+  const previousTotal = previousRangeCompleted.reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
+  const activeRevenue = activeLoads.reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
   const currentMonthRevenue = completedLoads
     .filter((load) => {
       const completedAt = getCompletedLoadDate(load, podUploads);
       return completedAt && completedAt >= currentMonthStart;
     })
-    .reduce((sum, load) => sum + toNumber(load.price), 0);
+    .reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
   const previousMonthRevenue = completedLoads
     .filter((load) => {
       const completedAt = getCompletedLoadDate(load, podUploads);
       return completedAt && completedAt >= previousMonthStart && completedAt < currentMonthStart;
     })
-    .reduce((sum, load) => sum + toNumber(load.price), 0);
+    .reduce((sum, load) => sum + carrierEarnings(load, currency), 0);
 
   const growth =
     previousTotal > 0 ? Number((((totalEarnings - previousTotal) / previousTotal) * 100).toFixed(1)) : 0;
@@ -249,7 +254,7 @@ function deriveSummary(
     growth,
     avgPerLoad: currentRangeCompleted.length > 0 ? totalEarnings / currentRangeCompleted.length : 0,
     completedCount: currentRangeCompleted.length,
-    highestPayout: currentRangeCompleted.reduce((max, load) => Math.max(max, toNumber(load.price)), 0),
+    highestPayout: currentRangeCompleted.reduce((max, load) => Math.max(max, carrierEarnings(load, currency)), 0),
     activeLoadsCount: activeLoads.length,
     completionRate:
       loads.length > 0 ? Math.round((completedLoads.length / Math.max(loads.length, 1)) * 100) : 0,
@@ -259,6 +264,7 @@ function deriveSummary(
 }
 
 export default function EarningsPage() {
+  const market = useMarketCurrency("carrier");
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>("week");
   const [loads, setLoads] = useState<LoadRecord[]>([]);
@@ -297,10 +303,13 @@ export default function EarningsPage() {
     fetchEarningsData();
   }, []);
 
-  const stats = useMemo(() => deriveSummary(loads, timeRange, podUploads), [loads, podUploads, timeRange]);
+  const stats = useMemo(
+    () => deriveSummary(loads, timeRange, podUploads, market.currency),
+    [loads, podUploads, timeRange, market.currency]
+  );
   const chartData = useMemo(
-    () => buildChartData(loads, timeRange, podUploads),
-    [loads, podUploads, timeRange]
+    () => buildChartData(loads, timeRange, podUploads, market.currency),
+    [loads, podUploads, timeRange, market.currency]
   );
   const monthGoalBase = Math.max(stats.previousMonthRevenue, stats.currentMonthRevenue, 1);
   const monthGoalTarget = Math.max(Math.round(monthGoalBase * 1.15), 1000);
@@ -309,21 +318,21 @@ export default function EarningsPage() {
   const statCards = [
     {
       label: "Gross revenue",
-      value: formatMoney(stats.totalEarnings),
+      value: market.formatMoney(stats.totalEarnings),
       sub: stats.growth === 0 ? "No change vs prior period" : `${stats.growth > 0 ? "+" : ""}${stats.growth}% vs prior`,
       icon: DollarSign,
       tone: stats.growth >= 0 ? "text-emerald-600" : "text-rose-600",
     },
     {
       label: "Active revenue",
-      value: formatMoney(stats.activeRevenue),
+      value: market.formatMoney(stats.activeRevenue),
       sub: `${stats.activeLoadsCount} live loads`,
       icon: Clock,
       tone: "text-blue-600",
     },
     {
       label: "Avg. per load",
-      value: formatMoney(stats.avgPerLoad),
+      value: market.formatMoney(stats.avgPerLoad),
       sub: timeRange === "year" ? "12 month window" : timeRange === "month" ? "30 day window" : "7 day window",
       icon: Target,
       tone: "text-amber-600",
@@ -340,7 +349,7 @@ export default function EarningsPage() {
   const liveMetrics = [
     {
       title: "Highest completed load",
-      value: formatMoney(stats.highestPayout),
+      value: market.formatMoney(stats.highestPayout),
       note: timeRange === "year" ? "Best in 12 months" : `Best in selected ${timeRange}`,
     },
     {
@@ -410,7 +419,7 @@ export default function EarningsPage() {
                     {rangeLabel} · gross revenue
                   </p>
                   <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                    {formatMoney(stats.totalEarnings)}
+                    {market.formatMoney(stats.totalEarnings)}
                   </p>
                   <p
                     className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
@@ -428,9 +437,9 @@ export default function EarningsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[280px]">
                   {[
-                    { label: "This month", value: formatMoney(stats.currentMonthRevenue) },
-                    { label: "Last month", value: formatMoney(stats.previousMonthRevenue) },
-                    { label: "Top load", value: formatMoney(stats.highestPayout) },
+                    { label: "This month", value: market.formatMoney(stats.currentMonthRevenue) },
+                    { label: "Last month", value: market.formatMoney(stats.previousMonthRevenue) },
+                    { label: "Top load", value: market.formatMoney(stats.highestPayout) },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl bg-slate-50 px-3 py-2.5">
                       <p className="text-[10px] text-slate-500">{item.label}</p>
@@ -443,7 +452,7 @@ export default function EarningsPage() {
                 <div className="mb-1.5 flex justify-between text-[10px] text-slate-500">
                   <span>Monthly goal progress</span>
                   <span>
-                    {formatMoney(stats.currentMonthRevenue)} / {formatMoney(monthGoalTarget)}
+                    {market.formatMoney(stats.currentMonthRevenue)} / {market.formatMoney(monthGoalTarget)}
                   </span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
@@ -520,11 +529,11 @@ export default function EarningsPage() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 11, fill: "#94a3b8" }}
-                      tickFormatter={(value) => formatMoney(Number(value), true)}
+                      tickFormatter={(value) => market.formatMoneyCompact(Number(value))}
                       width={48}
                     />
                     <Tooltip
-                      formatter={(value) => [formatMoney(Number(value ?? 0)), "Revenue"]}
+                      formatter={(value) => [market.formatMoney(Number(value ?? 0)), "Revenue"]}
                       contentStyle={{
                         borderRadius: "12px",
                         border: "1px solid #e2e8f0",
@@ -584,7 +593,7 @@ export default function EarningsPage() {
                 {Math.round(monthGoalProgress)}%
               </p>
               <p className="mt-1 text-[12px] text-slate-500">
-                {formatMoney(stats.currentMonthRevenue)} earned toward {formatMoney(monthGoalTarget)} goal
+                {market.formatMoney(stats.currentMonthRevenue)} earned toward {market.formatMoney(monthGoalTarget)} goal
               </p>
             </div>
 

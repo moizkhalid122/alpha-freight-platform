@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { supabase } from "@/lib/supabase";
 import {
   CarrierProfileExtras,
@@ -78,8 +80,6 @@ type PendingImageCrop = {
   offsetX: number;
   offsetY: number;
 };
-
-const formatMoney = (value: number) => `£${value.toLocaleString()}`;
 
 const formatSince = (dateString?: string | null) => {
   if (!dateString) return "Recently Joined";
@@ -279,6 +279,7 @@ const getReadableError = (error: unknown) => {
 };
 
 export default function ProfilePage() {
+  const market = useMarketCurrency("carrier");
   const [activeSection, setActiveSection] = useState<"overview" | "services" | "compliance" | "stats">("overview");
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<CarrierProfileRecord | null>(null);
@@ -360,7 +361,10 @@ export default function ProfilePage() {
         const activeLoads = safeLoads.filter((load) =>
           ["booked", "accepted", "loading", "in-transit"].includes(load.status || "")
         ).length;
-        const totalEarnings = safeLoads.reduce((sum, load) => sum + (Number(load.price) || 0), 0);
+        const totalEarnings = safeLoads.reduce(
+          (sum, load) => sum + getCarrierDisplayPrice(load, market.currency),
+          0
+        );
 
         setStats({
           totalLoads: safeLoads.length,
@@ -487,7 +491,7 @@ export default function ProfilePage() {
   const quickStats = [
     { icon: <Truck className="w-4 h-4" />, label: "Active Loads", value: stats.activeLoads.toLocaleString() },
     { icon: <CheckCircle2 className="w-4 h-4" />, label: "Completed Loads", value: stats.completedLoads.toLocaleString() },
-    { icon: <Wallet className="w-4 h-4" />, label: "Carrier Earnings", value: formatMoney(stats.totalEarnings) },
+    { icon: <Wallet className="w-4 h-4" />, label: "Carrier Earnings", value: market.formatMoney(stats.totalEarnings) },
   ];
 
   const openEditModal = () => {
@@ -849,7 +853,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="rounded-lg bg-slate-50/80 px-3 py-2.5">
                   <p className="text-[10px] text-slate-500">Earnings</p>
-                  <p className="mt-0.5 text-lg font-bold text-slate-900">{loading ? "…" : formatMoney(stats.totalEarnings)}</p>
+                  <p className="mt-0.5 text-lg font-bold text-slate-900">{loading ? "…" : market.formatMoney(stats.totalEarnings)}</p>
                 </div>
               </div>
 
@@ -1128,7 +1132,7 @@ export default function ProfilePage() {
                     { label: "Total loads", value: stats.totalLoads.toLocaleString(), icon: Package, tone: "text-blue-600" },
                     { label: "Completed loads", value: stats.completedLoads.toLocaleString(), icon: CheckCircle2, tone: "text-emerald-600" },
                     { label: "Active loads", value: stats.activeLoads.toLocaleString(), icon: Truck, tone: "text-violet-600" },
-                    { label: "Carrier earnings", value: formatMoney(stats.totalEarnings), icon: Wallet, tone: "text-amber-600" },
+                    { label: "Carrier earnings", value: market.formatMoney(stats.totalEarnings), icon: Wallet, tone: "text-amber-600" },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl bg-slate-50/80 px-4 py-3">
                       <div className="flex items-center gap-2">

@@ -25,6 +25,8 @@ import {
   resolveSupplierPaymentState,
   type SupplierPaymentRecord,
 } from "@/lib/supplier-payments";
+import { calculateSupplierTotal } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import PaymentSuccessOverlay from "@/components/payments/PaymentSuccessOverlay";
 
 type LoadRow = {
@@ -41,11 +43,8 @@ type LoadRow = {
 type InstantOrder = SupplierPaymentRecord & {
   loadStatus: string;
   pickupDate: string;
+  loadBudget: number;
 };
-
-function formatMoney(value: number) {
-  return `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 function formatPickupDate(value: string) {
   if (!value || value === "Schedule pending") return "To be scheduled";
@@ -69,6 +68,7 @@ function formatRoute(origin: string, destination: string) {
 }
 
 function SupplierPayInstantPageContent() {
+  const market = useMarketCurrency("supplier");
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedLoadId = searchParams.get("load");
@@ -140,12 +140,14 @@ function SupplierPayInstantPageContent() {
     }
 
     const loadRow = load as LoadRow & { payment_state?: string | null; payment_route?: string | null };
+    const loadBudget = loadRow.price ? Number(loadRow.price) : 0;
+    const paymentTotal = Number(paymentOrder?.amount || 0);
     const merged: InstantOrder = {
       loadId: loadRow.id,
       supplierId: user.id,
       paymentRoute: (paymentOrder?.paymentRoute || loadRow.payment_route || "pay-now") as "pay-now" | "pay-later",
       paymentState: resolveSupplierPaymentState(loadRow.payment_state, paymentOrder?.paymentState),
-      amount: loadRow.price ? Number(loadRow.price) : Number(paymentOrder?.amount || 0),
+      amount: paymentTotal > 0 ? paymentTotal : calculateSupplierTotal(loadBudget, market.currency).totalPayable,
       currency: paymentOrder?.currency || "gbp",
       title: paymentOrder?.title || `${loadRow.origin || "Origin"} → ${loadRow.destination || "Destination"}`,
       origin: loadRow.origin || paymentOrder?.origin || "",
@@ -156,6 +158,7 @@ function SupplierPayInstantPageContent() {
       paymentMethod: paymentOrder?.paymentMethod || "card",
       loadStatus: loadRow.status || "pending-payment",
       pickupDate: loadRow.pickup_date || "Schedule pending",
+      loadBudget,
       cardBrand: paymentOrder?.cardBrand,
       cardLast4: paymentOrder?.cardLast4,
       paidAt: paymentOrder?.paidAt,
@@ -325,6 +328,8 @@ function SupplierPayInstantPageContent() {
 
   const isPaid = activeOrder.paymentState === "paid";
   const amount = Number(activeOrder.amount || 0);
+  const loadBudget = Number(activeOrder.loadBudget || 0);
+  const commissionBreakdown = calculateSupplierTotal(loadBudget, market.currency);
   const pickupLabel = formatPickupDate(activeOrder.pickupDate);
   const routeLabel = formatRoute(activeOrder.origin, activeOrder.destination);
 
@@ -336,7 +341,7 @@ function SupplierPayInstantPageContent() {
     <div className="min-h-screen bg-white text-slate-900">
       <PaymentSuccessOverlay
         open={showSuccessOverlay}
-        amountLabel={formatMoney(amount)}
+        amountLabel={market.formatMoney(amount)}
         onClose={() => setShowSuccessOverlay(false)}
       />
       <header className="border-b border-slate-100 px-6 py-3.5">
@@ -413,7 +418,7 @@ function SupplierPayInstantPageContent() {
             {paymentMethod === "card" && isLiveCardCheckoutEnabled() && (
               <>
                 <p className="mt-6 text-[13px] leading-6 text-slate-500">
-                  You will pay <span className="font-semibold text-slate-800">{formatMoney(amount)}</span> for this
+                  You will pay <span className="font-semibold text-slate-800">{market.formatMoney(amount)}</span> for this
                   load. Payment secures your shipment on the marketplace.
                 </p>
                 <p className="mt-2 text-[12px] leading-5 text-slate-400">
@@ -444,7 +449,7 @@ function SupplierPayInstantPageContent() {
                   isPaid={isPaid}
                   inputClass={inputClass}
                   labelClass={labelClass}
-                  formatMoney={formatMoney}
+                  formatMoney={market.formatMoney}
                   onFlashMessage={setFlashMessage}
                   onSuccess={handleStripeSuccess}
                 />
@@ -541,7 +546,7 @@ function SupplierPayInstantPageContent() {
             {paymentMethod !== "card" || !isLiveCardCheckoutEnabled() ? (
               <>
             <p className="mt-6 text-[13px] leading-6 text-slate-500">
-              You will pay <span className="font-semibold text-slate-800">{formatMoney(amount)}</span> for this load.
+              You will pay <span className="font-semibold text-slate-800">{market.formatMoney(amount)}</span> for this load.
               Payment secures your shipment on the marketplace.
             </p>
 
@@ -576,7 +581,7 @@ function SupplierPayInstantPageContent() {
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Pay {formatMoney(amount)}
+                  Pay {market.formatMoney(amount)}
                 </>
               )}
             </button>
@@ -588,7 +593,7 @@ function SupplierPayInstantPageContent() {
                 <CircleHelp className="h-4 w-4" />
                 Help Center
               </Link>
-              <span>GBP</span>
+              <span>{market.currency}</span>
             </div>
           </div>
         </div>
@@ -605,7 +610,7 @@ function SupplierPayInstantPageContent() {
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold leading-snug text-slate-900">{activeOrder.title}</p>
                 <p className="mt-1 text-[13px] text-slate-500">{formatLabel(activeOrder.equipment)}</p>
-                <p className="mt-2 text-[15px] font-semibold text-slate-900">{formatMoney(amount)}</p>
+                <p className="mt-2 text-[15px] font-semibold text-slate-900">{market.formatMoney(amount)}</p>
                 {!isPaid && (
                   <p className="mt-1.5 text-[12px] font-medium text-emerald-600">Payment required to activate</p>
                 )}
@@ -632,13 +637,26 @@ function SupplierPayInstantPageContent() {
             </dl>
 
             <div className="mt-5 space-y-3 border-t border-slate-200/80 pt-5">
-              <div className="flex justify-between text-[14px] text-slate-500">
-                <span>Subtotal</span>
-                <span className="font-medium text-slate-800">{formatMoney(amount)}</span>
-              </div>
+              {loadBudget > 0 ? (
+                <>
+                  <div className="flex justify-between text-[14px] text-slate-500">
+                    <span>Load budget</span>
+                    <span className="font-medium text-slate-800">{market.formatMoney(commissionBreakdown.loadValue)}</span>
+                  </div>
+                  <div className="flex justify-between text-[14px] text-slate-500">
+                    <span>Platform commission ({commissionBreakdown.tierLabel})</span>
+                    <span className="font-medium text-slate-800">{market.formatMoney(commissionBreakdown.commissionAmount)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-[14px] text-slate-500">
+                  <span>Subtotal</span>
+                  <span className="font-medium text-slate-800">{market.formatMoney(amount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-[15px] font-semibold text-slate-900">
                 <span>Total due today</span>
-                <span>{isPaid ? formatMoney(0) : formatMoney(amount)}</span>
+                <span>{isPaid ? market.formatMoney(0) : market.formatMoney(amount)}</span>
               </div>
               {isPaid && activeOrder.paidAt && (
                 <p className="text-[12px] text-slate-400">

@@ -1,6 +1,8 @@
 "use client";
 
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import Link from "next/link";
+import { calculateSupplierTotal } from "@/lib/load-commission";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -110,8 +112,6 @@ type LoadRecord = {
 const CARD =
   "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:shadow-md";
 
-const formatMoney = (value: number) => `£${value.toLocaleString("en-GB")}`;
-
 const getCity = (value: string | null | undefined) => {
   if (!value) return "—";
   return value.split(",")[0].trim();
@@ -126,7 +126,11 @@ const ZERO_REVENUE_BREAKDOWN: RevenuePoint[] = [
   { key: "express", name: "Express", value: 0 },
 ];
 
-const buildRollingMonthlySpendData = (loads: LoadRecord[], monthsToShow = 12): RevenuePoint[] => {
+const buildRollingMonthlySpendData = (
+  loads: LoadRecord[],
+  currency: string,
+  monthsToShow = 12
+): RevenuePoint[] => {
   const formatter = new Intl.DateTimeFormat("en-GB", {
     month: "short",
     year: "2-digit",
@@ -157,7 +161,7 @@ const buildRollingMonthlySpendData = (loads: LoadRecord[], monthsToShow = 12): R
     const point = pointMap.get(key);
 
     if (point) {
-      point.value += Number(load.price) || 0;
+      point.value += calculateSupplierTotal(Number(load.price) || 0, currency).totalPayable;
     }
   });
 
@@ -200,6 +204,7 @@ const StatusBadge = ({ status }: { status: DashboardStatus }) => {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 export default function PremiumSupplierDashboard() {
+  const market = useMarketCurrency("supplier");
   // Dashboard state
   const [timeRange, setTimeRange] = useState("3M");
   const [searchTerm, setSearchTerm] = useState("");
@@ -218,7 +223,7 @@ export default function PremiumSupplierDashboard() {
   const [aiInsights, setAiInsights] = useState<InsightItem[]>([
     { title: "Demand Trends", description: "Manchester routes are 30% more in demand this week", type: "trend", icon: TrendingUp },
     { title: "Route Recommendations", description: "Avoid M6 due to heavy traffic - use alternative route", type: "alert", icon: AlertTriangle },
-    { title: "Cost Optimization", description: "Potential savings of £245 on next shipment", type: "saving", icon: DollarSign },
+    { title: "Cost Optimization", description: "Potential savings on your next shipment", type: "saving", icon: DollarSign },
     { title: "Shipment Risk Alert", description: "Weather warnings for Newcastle area tomorrow", type: "warning", icon: AlertTriangle }
   ]);
   const [topRoutes, setTopRoutes] = useState<RouteItem[]>([]);
@@ -365,7 +370,10 @@ export default function PremiumSupplierDashboard() {
         const active = typedLoads.filter((load) => load.status === "active" || load.status === "booked" || load.status === "in-transit").length;
         const completed = typedLoads.filter((load) => load.status === "delivered" || load.status === "completed").length;
         const total = typedLoads.length;
-        const totalRev = typedLoads.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+        const totalRev = typedLoads.reduce(
+          (acc, curr) => acc + calculateSupplierTotal(Number(curr.price) || 0, market.currency).totalPayable,
+          0
+        );
 
         setActiveShipments(active);
         setCompletedLoads(completed);
@@ -376,7 +384,7 @@ export default function PremiumSupplierDashboard() {
           id: load.id,
           route: `${getCity(load.origin)} → ${getCity(load.destination)}`,
           carrier: load.carrier_id?.slice(0, 8) || "Unassigned",
-          price: Number(load.price) || 0,
+          price: calculateSupplierTotal(Number(load.price) || 0, market.currency).totalPayable,
           status: load.status,
           date: new Date(load.created_at).toLocaleDateString("en-GB", {
             day: "2-digit",
@@ -395,11 +403,13 @@ export default function PremiumSupplierDashboard() {
         }));
         setActivityTimeline(activities);
 
-        setRevenueData(buildRollingMonthlySpendData(typedLoads));
+        setRevenueData(buildRollingMonthlySpendData(typedLoads, market.currency));
 
         const pendingBidsCount = allBids.filter((bid) => bid.status === "pending").length;
         const bookedLoadsCount = typedLoads.filter((load) => load.status === "booked").length;
-        const highValueLoadsCount = typedLoads.filter((load) => Number(load.price) >= 1000).length;
+        const highValueLoadsCount = typedLoads.filter(
+          (load) => Number(load.price) >= market.market.commissionMediumMin
+        ).length;
         const averageRevenue = total ? Math.round(totalRev / total) : 0;
 
         setAiInsights([
@@ -417,13 +427,13 @@ export default function PremiumSupplierDashboard() {
           },
           {
             title: "Average Load Value",
-            description: total > 0 ? `Current average freight value is £${averageRevenue.toLocaleString()} per load.` : "Post your first load to generate live value insights.",
+            description: total > 0 ? `Current average freight value is ${market.formatMoney(averageRevenue)} per load.` : "Post your first load to generate live value insights.",
             type: "saving",
             icon: DollarSign,
           },
           {
             title: "High Value Freight",
-            description: highValueLoadsCount > 0 ? `${highValueLoadsCount} premium shipment${highValueLoadsCount === 1 ? "" : "s"} exceed the £1,000 mark.` : "No premium-value loads detected yet in your active board.",
+            description: highValueLoadsCount > 0 ? `${highValueLoadsCount} premium shipment${highValueLoadsCount === 1 ? "" : "s"} exceed the ${market.formatMoney(market.market.commissionMediumMin)} mark.` : "No premium-value loads detected yet in your active board.",
             type: highValueLoadsCount > 0 ? "trend" : "warning",
             icon: highValueLoadsCount > 0 ? Sparkles : AlertTriangle,
           },
@@ -436,7 +446,7 @@ export default function PremiumSupplierDashboard() {
           routeMap.set(routeKey, {
             name: routeKey,
             shipments: current.shipments + 1,
-            revenue: current.revenue + (Number(load.price) || 0),
+            revenue: current.revenue + calculateSupplierTotal(Number(load.price) || 0, market.currency).totalPayable,
           });
         });
         const sortedRoutes = Array.from(routeMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 3);
@@ -444,10 +454,10 @@ export default function PremiumSupplierDashboard() {
 
         const uk = typedLoads
           .filter((load) => load.origin?.includes("UK") || load.destination?.includes("UK") || !load.origin?.includes(","))
-          .reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+          .reduce((acc, curr) => acc + calculateSupplierTotal(Number(curr.price) || 0, market.currency).totalPayable, 0);
         const eu = typedLoads
           .filter((load) => !load.origin?.includes("UK") && !load.destination?.includes("UK") && (load.origin?.includes("Europe") || load.origin?.includes(",") || load.destination?.includes(",")))
-          .reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+          .reduce((acc, curr) => acc + calculateSupplierTotal(Number(curr.price) || 0, market.currency).totalPayable, 0);
         setRevenueBreakdown([
           { key: "uk", name: "UK", value: uk },
           { key: "eu", name: "EU", value: eu },
@@ -489,7 +499,7 @@ export default function PremiumSupplierDashboard() {
         setActivityTimeline([]);
         
         // Initialize chart data with zeros
-        setRevenueData(buildRollingMonthlySpendData([]));
+        setRevenueData(buildRollingMonthlySpendData([], market.currency));
         
         setTopRoutes([]);
         setRevenueBreakdown(ZERO_REVENUE_BREAKDOWN);
@@ -511,7 +521,7 @@ export default function PremiumSupplierDashboard() {
       setRecentLoads([]);
       setActivityTimeline([]);
       
-      setRevenueData(buildRollingMonthlySpendData([]));
+      setRevenueData(buildRollingMonthlySpendData([], market.currency));
       
       setTopRoutes([]);
       setRevenueBreakdown(ZERO_REVENUE_BREAKDOWN);
@@ -641,7 +651,7 @@ export default function PremiumSupplierDashboard() {
           <KpiCard title="Active shipments" value={activeShipments} sub="Live, booked & in transit" tone="text-blue-600 bg-blue-50" icon={Boxes} />
           <KpiCard title="Completed" value={completedLoads} sub="Delivered or closed" tone="text-emerald-600 bg-emerald-50" icon={CheckCircle2} />
           <KpiCard title="Total loads" value={totalFreight} sub="All postings" tone="text-violet-600 bg-violet-50" icon={Package} />
-          <KpiCard title="Freight spend" value={formatMoney(revenue)} sub="Lifetime posted value" tone="text-slate-700 bg-slate-100" icon={Wallet} />
+          <KpiCard title="Freight spend" value={market.formatMoney(revenue)} sub={`Lifetime spend (${market.currency})`} tone="text-slate-700 bg-slate-100" icon={Wallet} />
         </div>
       </motion.div>
 
@@ -695,13 +705,13 @@ export default function PremiumSupplierDashboard() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 11 }} dy={8} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 11 }} tickFormatter={(v) => `£${v}`} width={48} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 11 }} tickFormatter={(v) => market.formatMoney(Number(v))} width={64} />
                 <Tooltip
                   content={({ active, payload }) =>
                     active && payload?.length ? (
                       <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg">
                         <p className="text-[10px] text-slate-500">{payload[0].payload.name}</p>
-                        <p className="text-[13px] font-bold text-slate-900">{formatMoney(Number(payload[0].value) || 0)}</p>
+                        <p className="text-[13px] font-bold text-slate-900">{market.formatMoney(Number(payload[0].value) || 0)}</p>
                       </div>
                     ) : null
                   }
@@ -775,7 +785,7 @@ export default function PremiumSupplierDashboard() {
               >
                 <div className="min-w-0">
                   <p className="text-[13px] font-semibold text-slate-900">
-                    {formatMoney(Number(bid.amount) || 0)}
+                    {market.formatMoney(Number(bid.amount) || 0)}
                   </p>
                   <p className="mt-0.5 text-[11px] text-slate-500">
                     Load {bid.load_id ? getShortCode(bid.load_id) : "—"} · Carrier{" "}
@@ -953,7 +963,7 @@ export default function PremiumSupplierDashboard() {
                     <p className="truncate text-[12px] font-semibold text-slate-900">{route.name}</p>
                     <p className="text-[10px] text-slate-500">{route.shipments} shipment{route.shipments === 1 ? "" : "s"}</p>
                   </div>
-                  <p className="shrink-0 text-[12px] font-bold text-slate-900">{formatMoney(route.revenue)}</p>
+                  <p className="shrink-0 text-[12px] font-bold text-slate-900">{market.formatMoney(route.revenue)}</p>
                 </div>
               ))
             ) : (
@@ -987,7 +997,7 @@ export default function PremiumSupplierDashboard() {
                       active && payload?.length ? (
                         <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg">
                           <p className="text-[10px] text-slate-500">{payload[0].name}</p>
-                          <p className="text-[13px] font-bold text-slate-900">{formatMoney(Number(payload[0].value) || 0)}</p>
+                          <p className="text-[13px] font-bold text-slate-900">{market.formatMoney(Number(payload[0].value) || 0)}</p>
                         </div>
                       ) : null
                     }
@@ -1072,7 +1082,7 @@ export default function PremiumSupplierDashboard() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-4 pl-12 sm:pl-0">
-                  <p className="text-[13px] font-bold text-slate-900">{formatMoney(load.price)}</p>
+                  <p className="text-[13px] font-bold text-slate-900">{market.formatMoney(load.price)}</p>
                   <StatusBadge status={load.status} />
                 </div>
               </div>

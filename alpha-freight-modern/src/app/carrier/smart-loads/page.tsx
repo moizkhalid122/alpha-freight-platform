@@ -19,6 +19,8 @@ import {
   Route,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import NothingLottie from "@/components/ui/NothingLottie";
 
 type LoadRow = {
@@ -41,10 +43,6 @@ type SmartMatch = LoadRow & {
 
 const DISMISSED_KEY = "alpha-smart-loads-dismissed";
 const FILTERS = ["all", "high-match", "new"] as const;
-
-function formatMoney(value: number | string | null | undefined) {
-  return `£${(Number(value) || 0).toLocaleString("en-GB")}`;
-}
 
 function formatDate(value?: string | null) {
   if (!value) return "TBC";
@@ -99,7 +97,7 @@ function computeMatchScore(load: LoadRow, preferredEquipment?: string | null) {
 }
 
 function computeProfitDelta(load: LoadRow) {
-  const base = Number(load.price) || 0;
+  const base = getCarrierDisplayPrice(load);
   if (!base) return 0;
   return Math.round((hashString(`${load.id}-profit`) % 18) + 6);
 }
@@ -140,6 +138,7 @@ function writeDismissedIds(ids: Set<string>) {
 }
 
 export default function SmartLoadsPage() {
+  const market = useMarketCurrency("carrier");
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState<SmartMatch[]>([]);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
@@ -362,7 +361,7 @@ export default function SmartLoadsPage() {
                 <div className="grid gap-4 p-4 pl-5 lg:grid-cols-[200px_minmax(0,1fr)_168px] lg:items-center lg:gap-6">
                   <div className="space-y-2">
                     <p className="text-2xl font-bold tracking-tight text-slate-900">
-                      {formatMoney(load.price)}
+                      {market.formatMoney(getCarrierDisplayPrice(load, market.currency))}
                     </p>
                     <p className="font-mono text-[11px] font-semibold text-slate-400">
                       {getLoadCode(load.id)}

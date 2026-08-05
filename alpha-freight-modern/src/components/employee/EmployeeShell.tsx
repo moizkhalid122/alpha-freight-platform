@@ -4,8 +4,9 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, Clock, Menu, Search, Sparkles, X } from "lucide-react";
+import { Clock, Menu, Search, Sparkles, X } from "lucide-react";
 import EmployeeSidebar from "@/components/employee/EmployeeSidebar";
+import TeamNotificationBell from "@/components/employee/TeamNotificationsPanel";
 import { employeeRoute } from "@/lib/employee-path";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,7 @@ export function EmployeePageHeader({
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Employee workspace</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Team workspace</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
         {description ? <p className="mt-2 max-w-2xl text-sm text-slate-500">{description}</p> : null}
       </div>
@@ -151,10 +152,7 @@ export default function EmployeeLayoutShell({ children }: { children: ReactNode 
                 <Sparkles className="h-3.5 w-3.5" />
                 Team AI
               </Link>
-              <button type="button" className="relative rounded-xl border border-gray-100 bg-white p-2.5 text-gray-600">
-                <Bell className="h-4 w-4" />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-              </button>
+              <TeamNotificationBell />
               <div className="hidden items-center gap-2 rounded-xl border border-gray-100 bg-white px-3 py-2 text-xs font-semibold text-gray-500 sm:flex">
                 <Clock className="h-3.5 w-3.5" />
                 Live

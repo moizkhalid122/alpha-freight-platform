@@ -17,6 +17,7 @@ import {
   deriveCarrierWalletPayoutTotals,
   deriveCarrierWalletRevenue,
 } from "@/lib/carrier-wallet-metrics";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import {
   Wallet,
   ArrowUpRight,
@@ -52,10 +53,6 @@ type WalletTransaction = {
   arriveBy: string;
 };
 
-function formatMoney(value: number) {
-  return `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
 function getTransactionStatusMeta(status: string) {
   if (status === "completed") {
     return { label: "Completed", pill: "bg-emerald-50 text-emerald-700", accent: "from-emerald-500 to-teal-500" };
@@ -70,6 +67,7 @@ function getTransactionStatusMeta(status: string) {
 }
 
 export default function WalletPage() {
+  const market = useMarketCurrency("carrier");
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [incomingBalance, setIncomingBalance] = useState(0);
@@ -223,7 +221,7 @@ export default function WalletPage() {
 
     if (requestedAmount > balance) {
       setPayoutError(
-        `Insufficient balance. You currently have ${formatMoney(balance)} available to withdraw.`
+        `Insufficient balance. You currently have ${market.formatMoney(balance)} available to withdraw.`
       );
       return;
     }
@@ -273,7 +271,7 @@ export default function WalletPage() {
       setBalance((current) => Math.max(current - payoutRecord.amount, 0));
       setTransactions((current) => [nextTransaction, ...current]);
       setPayoutSuccessMessage(
-        `Payout request for ${formatMoney(payoutRecord.amount)} submitted to ${payoutRecord.bankName}.`
+        `Payout request for ${market.formatMoney(payoutRecord.amount)} submitted to ${payoutRecord.bankName}.`
       );
       setIsPayoutModalOpen(false);
       setInternalNote("");
@@ -392,12 +390,12 @@ export default function WalletPage() {
 
           <div className="rounded-xl bg-slate-50 px-4 py-3">
             <p className="text-[11px] text-slate-500">Available balance</p>
-            <p className="text-xl font-bold text-slate-900">{formatMoney(availableBalance)}</p>
+            <p className="text-xl font-bold text-slate-900">{market.formatMoney(availableBalance)}</p>
           </div>
 
           <div>
             <label htmlFor="payout-amount" className="mb-1.5 block text-[11px] font-semibold text-slate-600">
-              Amount to pay out (£)
+              Amount to pay out ({market.currency})
             </label>
             <input
               id="payout-amount"
@@ -445,7 +443,7 @@ export default function WalletPage() {
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[12px] font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
           >
             {isSubmittingPayout ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Pay out {formatMoney(Number(payoutAmount) || 0)}
+            Pay out {market.formatMoney(Number(payoutAmount) || 0)}
           </button>
         </div>
       </motion.div>
@@ -515,17 +513,17 @@ export default function WalletPage() {
                   Available balance
                 </p>
                 <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                  {formatMoney(availableBalance)}
+                  {market.formatMoney(availableBalance)}
                 </p>
                 <p className="mt-2 text-[12px] text-slate-500">
-                  {formatMoney(incomingBalance)} incoming · {completedLoadsCount} completed loads
+                  {market.formatMoney(incomingBalance)} incoming · {completedLoadsCount} completed loads
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[320px]">
                 {[
-                  { label: "Gross revenue", value: formatMoney(grossRevenue) },
-                  { label: "Pending payouts", value: formatMoney(pendingPayoutsTotal) },
-                  { label: "Avg / load", value: formatMoney(avgPerLoad) },
+                  { label: "Gross revenue", value: market.formatMoney(grossRevenue) },
+                  { label: "Pending payouts", value: market.formatMoney(pendingPayoutsTotal) },
+                  { label: "Avg / load", value: market.formatMoney(avgPerLoad) },
                 ].map((item) => (
                   <div key={item.label} className="rounded-xl bg-slate-50 px-3 py-2.5">
                     <p className="text-[10px] text-slate-500">{item.label}</p>
@@ -550,9 +548,9 @@ export default function WalletPage() {
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "Available", value: formatMoney(availableBalance), icon: Banknote },
-              { label: "Incoming", value: formatMoney(incomingBalance), icon: Clock },
-              { label: "Pending", value: formatMoney(pendingPayoutsTotal), icon: PiggyBank },
+              { label: "Available", value: market.formatMoney(availableBalance), icon: Banknote },
+              { label: "Incoming", value: market.formatMoney(incomingBalance), icon: Clock },
+              { label: "Pending", value: market.formatMoney(pendingPayoutsTotal), icon: PiggyBank },
               { label: "Payout requests", value: String(transactions.length), icon: TrendingUp },
             ].map((stat) => (
               <div key={stat.label} className="rounded-xl bg-slate-50/80 px-4 py-3">
@@ -623,7 +621,7 @@ export default function WalletPage() {
                       <div className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${statusMeta.accent}`} />
                       <div className="grid gap-3 p-4 pl-5 sm:grid-cols-[140px_minmax(0,1fr)_100px] sm:items-center">
                         <div>
-                          <p className="text-lg font-bold text-slate-900">{formatMoney(tx.amount)}</p>
+                          <p className="text-lg font-bold text-slate-900">{market.formatMoney(tx.amount)}</p>
                           <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusMeta.pill}`}>
                             {statusMeta.label}
                           </span>

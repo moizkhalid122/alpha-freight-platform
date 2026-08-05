@@ -1,6 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import LoadCommissionBreakdown from "@/components/marketplace/LoadCommissionBreakdown";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
+import { mergeLoadNotesWithMarketMeta } from "@/lib/load-market-meta";
+import { calculateSupplierTotal } from "@/lib/load-commission";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from 'next/dynamic';
 import { createPortal } from "react-dom";
@@ -45,9 +49,6 @@ const DATETIME_INPUT =
 
 const LABEL = "mb-1.5 block text-[12px] font-semibold text-slate-700";
 
-const formatMoney = (value: number | null | undefined) =>
-  value == null ? "—" : `£${value.toLocaleString("en-GB")}`;
-
 // Mapbox Token — env first, project fallback for local dev
 import { MAPBOX_TOKEN } from "@/lib/mapbox";
 
@@ -82,6 +83,7 @@ const MapMarker = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Ma
 
 export default function PostLoadPage() {
   const router = useRouter();
+  const market = useMarketCurrency("supplier");
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -130,6 +132,18 @@ export default function PostLoadPage() {
   const [isPaymentChoiceOpen, setIsPaymentChoiceOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [liveLoadMarkers, setLiveLoadMarkers] = useState<LiveLoadMarker[]>([]);
+
+  const loadBudget = useMemo(() => {
+    const parsed = parseFloat(formData.max_budget);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    if (suggestedPrice && suggestedPrice > 0) return suggestedPrice;
+    return 0;
+  }, [formData.max_budget, suggestedPrice]);
+
+  const commissionSummary = useMemo(
+    () => calculateSupplierTotal(loadBudget, market.currency),
+    [loadBudget, market.currency]
+  );
 
   const setSafeMapViewState = (next: { longitude: number; latitude: number; zoom: number }) => {
     if (!isValidCoord(next.longitude, next.latitude) || !Number.isFinite(next.zoom)) return;
@@ -400,7 +414,7 @@ export default function PostLoadPage() {
       console.log("User data:", user);
       if (!user) throw new Error("No user found");
 
-      const price = formData.max_budget ? parseFloat(formData.max_budget) : suggestedPrice || 0;
+      const price = loadBudget;
 
       console.log("Inserting load with data:", {
         status: 'pending-payment',
@@ -427,7 +441,11 @@ export default function PostLoadPage() {
           supplier_id: user.id,
           title: formData.title || `${formData.cargo_type || 'Freight'} Load`,
           commodity: formData.cargo_type,
-          notes: formData.description,
+          notes: mergeLoadNotesWithMarketMeta(
+            [formData.description, formData.additional_notes].filter(Boolean).join("\n"),
+            market.countryCode,
+            market.currency
+          ),
           payment_route: paymentTiming,
           payment_state: 'pending',
         }])
@@ -454,7 +472,7 @@ export default function PostLoadPage() {
           supplierId: user.id,
           paymentRoute: paymentTiming,
           paymentState: "pending",
-          amount: price,
+          amount: commissionSummary.totalPayable,
           title: formData.title || `${formData.cargo_type || "Freight"} Load`,
           origin: formData.origin,
           destination: formData.destination,
@@ -573,6 +591,16 @@ export default function PostLoadPage() {
                       <X className="h-4 w-4" />
                     </button>
                   </div>
+
+                  {commissionSummary.loadValue > 0 ? (
+                    <div className="mt-5">
+                      <LoadCommissionBreakdown
+                        loadValue={commissionSummary.loadValue}
+                        currency={market.currency}
+                        countryCode={market.countryCode}
+                      />
+                    </div>
+                  ) : null}
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     <button
@@ -996,7 +1024,7 @@ export default function PostLoadPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className={LABEL}>Cargo value (£)</label>
+                      <label className={LABEL}>Cargo value ({market.currency})</label>
                       <div className="relative">
                         <PoundSterling className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input
@@ -1112,7 +1140,7 @@ export default function PostLoadPage() {
                       ) : (
                         <>
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Recommended</p>
-                          <p className="text-2xl font-bold text-slate-900">{formatMoney(suggestedPrice ?? undefined)}</p>
+                          <p className="text-2xl font-bold text-slate-900">{market.formatMoney(suggestedPrice ?? 0)}</p>
                         </>
                       )}
                     </div>
@@ -1123,7 +1151,7 @@ export default function PostLoadPage() {
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Set your budget</p>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="space-y-2">
-                      <label className={LABEL}>Min budget (£)</label>
+                      <label className={LABEL}>Min budget ({market.currency})</label>
                       <div className="relative">
                         <PoundSterling className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input
@@ -1136,7 +1164,7 @@ export default function PostLoadPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className={LABEL}>Max budget (£)</label>
+                      <label className={LABEL}>Max budget ({market.currency})</label>
                       <div className="relative">
                         <PoundSterling className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input
@@ -1165,6 +1193,14 @@ export default function PostLoadPage() {
                       </div>
                     </div>
                   </div>
+
+                  {loadBudget > 0 ? (
+                    <LoadCommissionBreakdown
+                      loadValue={loadBudget}
+                      currency={market.currency}
+                      countryCode={market.countryCode}
+                    />
+                  ) : null}
                 </section>
 
                 {/* Additional Notes & Agreement */}

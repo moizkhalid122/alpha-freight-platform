@@ -28,48 +28,59 @@ import {
   type CarrierReferralRow,
   type CarrierReferralStats,
 } from "@/lib/carrier-referrals";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 
 type TierKey = "member" | "silver" | "gold" | "platinum";
 
 const CARD =
   "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:shadow-md";
 
+const TIER_REWARD_AMOUNTS: Record<TierKey, number> = {
+  member: CARRIER_REFERRAL_BASE_REWARD,
+  silver: 65,
+  gold: 80,
+  platinum: 100,
+};
+
+const TIER_REWARD_EXTRAS: Record<TierKey, string> = {
+  member: "per qualified referral",
+  silver: "per referral + priority support",
+  gold: "per referral + reduced platform fees",
+  platinum: "per referral + dedicated account manager",
+};
+
 const TIERS: Record<
   TierKey,
-  { label: string; minReferrals: number; reward: string; iconBg: string; iconColor: string }
+  { label: string; minReferrals: number; iconBg: string; iconColor: string }
 > = {
   member: {
     label: "Member",
     minReferrals: 0,
-    reward: `£${CARRIER_REFERRAL_BASE_REWARD} per qualified referral`,
     iconBg: "bg-slate-100",
     iconColor: "text-slate-600",
   },
   silver: {
     label: "Silver",
     minReferrals: 3,
-    reward: "£65 per referral + priority support",
     iconBg: "bg-slate-100",
     iconColor: "text-slate-700",
   },
   gold: {
     label: "Gold",
     minReferrals: 8,
-    reward: "£80 per referral + reduced platform fees",
     iconBg: "bg-blue-50",
     iconColor: "text-blue-600",
   },
   platinum: {
     label: "Platinum",
     minReferrals: 15,
-    reward: "£100 per referral + dedicated account manager",
     iconBg: "bg-indigo-50",
     iconColor: "text-indigo-600",
   },
 };
 
-function formatMoney(value: number) {
-  return `£${value.toLocaleString("en-GB")}`;
+function tierRewardLabel(tier: TierKey, formatMoney: (value: number) => string) {
+  return `${formatMoney(TIER_REWARD_AMOUNTS[tier])} ${TIER_REWARD_EXTRAS[tier]}`;
 }
 
 function resolveTier(totalReferrals: number): TierKey {
@@ -100,6 +111,7 @@ function nextTierProgress(totalReferrals: number) {
 }
 
 export default function CarrierReferralsPage() {
+  const market = useMarketCurrency("carrier");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -234,8 +246,8 @@ export default function CarrierReferralsPage() {
           {[
             { label: "Total referrals", value: String(stats.totalReferrals), sub: `${stats.pendingReferrals} pending` },
             { label: "Active carriers", value: String(stats.activeReferrals), sub: "Currently hauling" },
-            { label: "Total earned", value: formatMoney(stats.totalEarned), sub: "Lifetime credits" },
-            { label: "Pending rewards", value: formatMoney(stats.pendingRewards), sub: "Awaiting approval" },
+            { label: "Total earned", value: market.formatMoney(stats.totalEarned), sub: "Lifetime credits" },
+            { label: "Pending rewards", value: market.formatMoney(stats.pendingRewards), sub: "Awaiting approval" },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -265,11 +277,11 @@ export default function CarrierReferralsPage() {
           <div className="relative p-5 pl-6 sm:p-6 sm:pl-7">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-600">Your invitation</p>
             <h2 className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              Share Alpha Freight, get {formatMoney(CARRIER_REFERRAL_BASE_REWARD)} credit
+              Share Alpha Freight, get {market.formatMoney(CARRIER_REFERRAL_BASE_REWARD)} credit
             </h2>
             <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-slate-500">
               When a referred carrier is approved by admin and completes their first{" "}
-              {CARRIER_REFERRAL_MILESTONE_LOADS} loads, {formatMoney(CARRIER_REFERRAL_BASE_REWARD)} is added to your
+              {CARRIER_REFERRAL_MILESTONE_LOADS} loads, {market.formatMoney(CARRIER_REFERRAL_BASE_REWARD)} is added to your
               referral balance.
             </p>
 
@@ -334,7 +346,7 @@ export default function CarrierReferralsPage() {
               <Sparkles className={`h-4 w-4 ${TIERS[tierProgress.current].iconColor}`} />
             </div>
           </div>
-          <p className="mt-2 text-[12px] leading-relaxed text-slate-500">{TIERS[tierProgress.current].reward}</p>
+          <p className="mt-2 text-[12px] leading-relaxed text-slate-500">{tierRewardLabel(tierProgress.current, market.formatMoney)}</p>
 
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between text-[11px]">
@@ -433,7 +445,7 @@ export default function CarrierReferralsPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-[13px] font-bold text-slate-900">
-                      {referral.earned > 0 ? formatMoney(referral.earned) : "—"}
+                      {referral.earned > 0 ? market.formatMoney(referral.earned) : "—"}
                     </p>
                     <p className="text-[10px] text-slate-400">Earned</p>
                   </div>
@@ -552,7 +564,7 @@ export default function CarrierReferralsPage() {
                 </div>
                 <p className="text-[14px] font-bold text-slate-900">{tier.label}</p>
                 <p className="mt-0.5 text-[11px] text-slate-500">{tier.minReferrals}+ referrals</p>
-                <p className="mt-2.5 text-[12px] leading-relaxed text-slate-600">{tier.reward}</p>
+                <p className="mt-2.5 text-[12px] leading-relaxed text-slate-600">{tierRewardLabel(key, market.formatMoney)}</p>
                 <p className="mt-3 flex items-center gap-1 text-[11px] font-medium text-slate-500">
                   {unlocked ? "Unlocked" : "Locked"}
                   <ChevronRight className="h-3 w-3" />

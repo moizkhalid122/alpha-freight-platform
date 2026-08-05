@@ -1,4 +1,4 @@
-"use client";
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
 
 import type { CarrierPaymentRecord } from "@/lib/carrier-payments";
 import type { CarrierPodUploadRecord } from "@/lib/carrier-pod-uploads";
@@ -36,7 +36,7 @@ export function deriveCarrierWalletRevenue(
     (summary, load) => {
       if (!isDeliveredLoadStatus(load.status)) return summary;
 
-      const amount = toNumber(load.price);
+      const amount = getCarrierDisplayPrice(load);
       const paymentOrder = paymentOrderByLoadId.get(load.id);
       const paymentStatus = normalizeStatus(paymentOrder?.status);
       const podStatus = normalizeStatus(podUploads[load.id]?.verificationStatus);

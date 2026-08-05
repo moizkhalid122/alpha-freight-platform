@@ -1,10 +1,11 @@
 import type { EmployeePolicyDocument as PolicyDoc } from "@/lib/employee-policies";
+import { COMPANY_LEGAL_NAME } from "@/lib/employee-policies";
 
 export default function EmployeePolicyDocument({ policy }: { policy: PolicyDoc }) {
   return (
     <article className="space-y-6 text-sm leading-relaxed text-slate-700">
       <header className="border-b border-slate-100 pb-4">
-        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">Alpha Freight UK</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">{COMPANY_LEGAL_NAME}</p>
         <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-900">{policy.title}</h1>
         <p className="mt-2 text-slate-500">{policy.summary}</p>
         <p className="mt-3 text-xs font-semibold text-slate-400">Last updated: {policy.lastUpdated}</p>

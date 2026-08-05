@@ -8,6 +8,9 @@ import { sendChatMessage, saveChatFeedback, loadChatHistory, createNewConversati
 import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration, shouldShowInstantReply } from "@/lib/chat-ui";
 import AssistantMessageActions from "@/components/chat/AssistantMessageActions";
 import PreChatComposer from "@/components/chat/PreChatComposer";
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import { formatMarketMoney } from "@/lib/market-currency";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { supabase } from "@/lib/supabase";
 import CopilotResponseCard from "@/components/chat/CopilotResponseCard";
 import AssistantMessageHeader from "@/components/chat/AssistantMessageHeader";
@@ -191,7 +194,7 @@ function scoreCarrierLoad(load: any, structuredReply: StructuredAssistantReply, 
   const pickup = String(load.pickup_location || load.origin || "").toLowerCase();
   const delivery = String(load.delivery_location || load.destination || "").toLowerCase();
   const equipment = String(load.equipment || load.vehicle_type || "").toLowerCase();
-  const price = Number(load.price || load.max_budget || 0);
+  const price = getCarrierDisplayPrice(load);
   const promptNormalized = prompt.toLowerCase();
 
   if (equipmentHint && equipment.includes(equipmentHint)) score += 12;
@@ -204,7 +207,12 @@ function scoreCarrierLoad(load: any, structuredReply: StructuredAssistantReply, 
   return Math.min(score, 99);
 }
 
-function buildCarrierLoadReasons(load: any, structuredReply: StructuredAssistantReply, prompt: string): string[] {
+function buildCarrierLoadReasons(
+  load: any,
+  structuredReply: StructuredAssistantReply,
+  prompt: string,
+  currency?: string
+): string[] {
   const reasons: string[] = [];
   const equipmentHint = String(
     structuredReply.platformIntent?.equipmentType ||
@@ -221,7 +229,7 @@ function buildCarrierLoadReasons(load: any, structuredReply: StructuredAssistant
   const pickup = String(load.pickup_location || load.origin || "").toLowerCase();
   const delivery = String(load.delivery_location || load.destination || "").toLowerCase();
   const equipment = String(load.equipment || load.vehicle_type || "").toLowerCase();
-  const price = Number(load.price || load.max_budget || 0);
+  const price = getCarrierDisplayPrice(load, currency);
   const promptNormalized = prompt.toLowerCase();
 
   if (equipmentHint && equipment.includes(equipmentHint)) {
@@ -237,11 +245,11 @@ function buildCarrierLoadReasons(load: any, structuredReply: StructuredAssistant
   }
 
   if (price > 0 && (promptNormalized.includes("highest paying") || promptNormalized.includes("best load"))) {
-    reasons.push(`strong payout at ${priceToDisplay(load)}`);
+    reasons.push(`strong payout at ${priceToDisplay(load, currency)}`);
   }
 
   if (!reasons.length && price > 0) {
-    reasons.push(`good rate signal at ${priceToDisplay(load)}`);
+    reasons.push(`good rate signal at ${priceToDisplay(load, currency)}`);
   }
 
   if (!reasons.length) {
@@ -253,7 +261,8 @@ function buildCarrierLoadReasons(load: any, structuredReply: StructuredAssistant
 
 async function enrichCarrierPlatformData(
   structuredReply: StructuredAssistantReply | undefined,
-  prompt: string
+  prompt: string,
+  currency?: string
 ): Promise<StructuredAssistantReply | undefined> {
   if (!structuredReply) {
     return structuredReply;
@@ -292,7 +301,7 @@ async function enrichCarrierPlatformData(
           subtitle: `${load.equipment || load.vehicle_type || "General"} load now marked ${formatLoadStatus(load.status)}.`,
           metrics: [
             { label: "Status", value: formatLoadStatus(load.status) },
-            { label: "Rate", value: priceToDisplay(load) },
+            { label: "Rate", value: priceToDisplay(load, currency) },
             { label: "Equipment", value: load.equipment || load.vehicle_type || "General" },
             { label: "Next", value: "Track, deliver, or review payout" },
           ],
@@ -318,7 +327,7 @@ async function enrichCarrierPlatformData(
                 destination: load.delivery_location || load.destination || "",
                 equipment: load.equipment || load.vehicle_type || "General",
                 status: load.status || "active",
-                rate: Number(load.price || load.max_budget || 0),
+                rate: getCarrierDisplayPrice(load, currency),
               },
             },
           ],
@@ -353,7 +362,9 @@ async function enrichCarrierPlatformData(
   const bestLoad = topLoads[0];
   const bestLoadPickup = (bestLoad?.load.pickup_location || bestLoad?.load.origin || "Pickup").split(",")[0];
   const bestLoadDelivery = (bestLoad?.load.delivery_location || bestLoad?.load.destination || "Delivery").split(",")[0];
-  const bestLoadReasons = bestLoad ? buildCarrierLoadReasons(bestLoad.load, structuredReply, prompt) : [];
+  const bestLoadReasons = bestLoad
+    ? buildCarrierLoadReasons(bestLoad.load, structuredReply, prompt, currency)
+    : [];
 
   return {
     ...structuredReply,
@@ -389,7 +400,7 @@ async function enrichCarrierPlatformData(
         score,
         metrics: [
           { label: "Profitability", value: score >= 90 ? "High" : score >= 82 ? "Good" : "Moderate" },
-          { label: "RPM", value: priceToDisplay(load) },
+          { label: "RPM", value: priceToDisplay(load, currency) },
           { label: "Deadhead", value: structuredReply.memory?.userLocation ? "Low if pickup is nearby" : "Need exact location" },
           { label: "Fuel Cost", value: "Use route map for exact estimate" },
         ],
@@ -420,7 +431,7 @@ async function enrichCarrierPlatformData(
               destination: load.delivery_location || load.destination || "",
               equipment: load.equipment || load.vehicle_type || "General",
               status: load.status || "active",
-              rate: Number(load.price || load.max_budget || 0),
+              rate: getCarrierDisplayPrice(load),
             },
           },
         ],
@@ -429,12 +440,13 @@ async function enrichCarrierPlatformData(
   };
 }
 
-function priceToDisplay(load: any): string {
-  const amount = Number(load.price || load.max_budget || 0);
-  return amount ? `£${amount.toLocaleString()}` : "Request exact rate";
+function priceToDisplay(load: any, currency?: string): string {
+  const amount = getCarrierDisplayPrice(load, currency);
+  return amount ? formatMarketMoney(amount, currency) : "Request exact rate";
 }
 
 export default function CarrierAIAssistant() {
+  const market = useMarketCurrency("carrier");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -749,7 +761,7 @@ export default function CarrierAIAssistant() {
         : aiResponse.structuredMessage?.knowledgeSource === "platform-fast" ||
             aiResponse.structuredMessage?.knowledgeSource === "instant"
           ? aiResponse.structuredMessage
-          : await enrichCarrierPlatformData(aiResponse.structuredMessage, trimmedText);
+          : await enrichCarrierPlatformData(aiResponse.structuredMessage, trimmedText, market.currency);
       await waitForMinimumDuration(
         thinkingStartedAt,
         shouldShowInstantReply(enrichedStructuredReply) ? 0 : 80
@@ -841,7 +853,8 @@ export default function CarrierAIAssistant() {
 
       const enrichedStructuredReply = await enrichCarrierPlatformData(
         aiResponse.structuredMessage,
-        prompt
+        prompt,
+        market.currency
       );
       await waitForMinimumDuration(
         thinkingStartedAt,

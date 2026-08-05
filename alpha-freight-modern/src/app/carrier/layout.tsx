@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { usePathname } from "next/navigation";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import ProfileCompletionBanner from "@/components/marketplace/ProfileCompletionBanner";
 import ProfileExtrasHydrator from "@/components/platform/ProfileExtrasHydrator";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -99,6 +100,7 @@ export default function CarrierLayout({
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 min-w-0 w-full min-h-screen flex flex-col bg-[#FDFDFD] overflow-x-hidden overflow-y-auto">
+        <ProfileCompletionBanner role="carrier" />
         {children}
       </div>
     </div>

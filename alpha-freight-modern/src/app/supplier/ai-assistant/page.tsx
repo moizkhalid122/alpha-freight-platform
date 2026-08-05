@@ -8,6 +8,8 @@ import { sendChatMessage, saveChatFeedback, loadChatHistory, createNewConversati
 import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration, shouldShowInstantReply } from "@/lib/chat-ui";
 import AssistantMessageActions from "@/components/chat/AssistantMessageActions";
 import PreChatComposer from "@/components/chat/PreChatComposer";
+import { formatMarketMoney } from "@/lib/market-currency";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { supabase } from "@/lib/supabase";
 import CopilotResponseCard from "@/components/chat/CopilotResponseCard";
 import AssistantMessageHeader from "@/components/chat/AssistantMessageHeader";
@@ -46,8 +48,8 @@ const suggestedPrompts = getSuggestedPrompts("supplier");
 const getTimestamp = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-function formatMoney(amount: number): string {
-  return amount ? `£${amount.toLocaleString()}` : "Pending rate";
+function formatPrice(amount: number, currency?: string): string {
+  return amount ? formatMarketMoney(amount, currency) : "Pending rate";
 }
 
 function formatLoadStatus(status: string | null | undefined): string {
@@ -79,7 +81,8 @@ function buildStructuredText(reply: StructuredAssistantReply | undefined, fallba
 
 async function enrichSupplierPlatformData(
   structuredReply: StructuredAssistantReply | undefined,
-  prompt: string
+  prompt: string,
+  currency?: string
 ): Promise<StructuredAssistantReply | undefined> {
   if (!structuredReply) {
     return structuredReply;
@@ -117,7 +120,7 @@ async function enrichSupplierPlatformData(
           subtitle: `${load.equipment || "General"} shipment now marked ${formatLoadStatus(load.status)}.`,
           metrics: [
             { label: "Status", value: formatLoadStatus(load.status) },
-            { label: "Budget", value: formatMoney(Number(load.price || 0)) },
+            { label: "Budget", value: formatPrice(Number(load.price || 0), currency) },
             { label: "Equipment", value: load.equipment || "Not set" },
             { label: "Action", value: "Track or review bids" },
           ],
@@ -184,7 +187,7 @@ async function enrichSupplierPlatformData(
             title: `${(relatedLoad?.origin || "Pickup").split(",")[0]} -> ${(relatedLoad?.destination || "Delivery").split(",")[0]}`,
             subtitle: `${relatedLoad?.equipment || "General"} load with a ${formatLoadStatus(bid.status)} bid.`,
             metrics: [
-              { label: "Bid", value: formatMoney(Number(bid.amount || 0)) },
+              { label: "Bid", value: formatPrice(Number(bid.amount || 0), currency) },
               { label: "Status", value: formatLoadStatus(bid.status) },
               { label: "Equipment", value: relatedLoad?.equipment || "Not set" },
               { label: "Next", value: "Review and accept best carrier" },
@@ -223,7 +226,8 @@ async function enrichSupplierPlatformData(
 }
 
 async function executeSupplierAction(
-  structuredReply: StructuredAssistantReply | undefined
+  structuredReply: StructuredAssistantReply | undefined,
+  currency?: string
 ): Promise<{ structuredReply?: StructuredAssistantReply; message?: string }> {
   if (structuredReply?.actionRequest?.type !== "create_load" || structuredReply.actionRequest.status !== "ready") {
     return { structuredReply };
@@ -306,7 +310,7 @@ async function executeSupplierAction(
           subtitle: `${equipment} load created by AI action engine.`,
           metrics: [
             { label: "Status", value: formatLoadStatus(data.status) },
-            { label: "Budget", value: formatMoney(Number(data.price || 0)) },
+            { label: "Budget", value: formatPrice(Number(data.price || 0), currency) },
             { label: "Equipment", value: equipment },
             { label: "Route", value: `${origin} -> ${destination}` },
           ],
@@ -337,6 +341,7 @@ async function executeSupplierAction(
 }
 
 export default function SupplierAIAssistant() {
+  const market = useMarketCurrency("supplier");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -642,11 +647,11 @@ export default function SupplierAIAssistant() {
         aiResponse.structuredMessage?.knowledgeSource === "platform-fast" ||
         aiResponse.structuredMessage?.knowledgeSource === "instant"
           ? aiResponse.structuredMessage
-          : await enrichSupplierPlatformData(aiResponse.structuredMessage, trimmedText);
+          : await enrichSupplierPlatformData(aiResponse.structuredMessage, trimmedText, market.currency);
       const actionResult =
         aiResponse.structuredMessage?.actionRequest?.status === "completed"
           ? { structuredReply: enrichedReply }
-          : await executeSupplierAction(enrichedReply);
+          : await executeSupplierAction(enrichedReply, market.currency);
       if (aiResponse.conversationId) setConversationId(aiResponse.conversationId);
       const finalStructuredReply = actionResult.structuredReply || enrichedReply;
       await waitForMinimumDuration(
@@ -729,8 +734,8 @@ export default function SupplierAIAssistant() {
         history,
       });
 
-      const enrichedReply = await enrichSupplierPlatformData(aiResponse.structuredMessage, prompt);
-      const actionResult = await executeSupplierAction(enrichedReply);
+      const enrichedReply = await enrichSupplierPlatformData(aiResponse.structuredMessage, prompt, market.currency);
+      const actionResult = await executeSupplierAction(enrichedReply, market.currency);
       const finalStructuredReply = actionResult.structuredReply || enrichedReply;
       await waitForMinimumDuration(
         thinkingStartedAt,

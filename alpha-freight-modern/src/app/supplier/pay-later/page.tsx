@@ -15,6 +15,8 @@ import {
   Timer,
   Truck,
 } from "lucide-react";
+import { calculateSupplierTotal } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { supabase } from "@/lib/supabase";
 import {
   getSupplierPaymentOrdersForUser,
@@ -44,10 +46,6 @@ type PaymentQueueItem = SupplierPaymentRecord & {
   weight?: string | number | null;
 };
 
-function formatMoney(value: number | string | null | undefined) {
-  return `£${(Number(value) || 0).toLocaleString("en-GB")}`;
-}
-
 function formatDate(value?: string | null) {
   if (!value || value === "Schedule pending") return "To be scheduled";
   const parsed = new Date(value);
@@ -70,6 +68,7 @@ function getLoadCode(loadId: string) {
 }
 
 function SupplierPayLaterPageContent() {
+  const market = useMarketCurrency("supplier");
   const router = useRouter();
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
@@ -124,7 +123,7 @@ function SupplierPayLaterPageContent() {
           supplierId: user.id,
           paymentRoute: (load.payment_route as "pay-now" | "pay-later") || "pay-later",
           paymentState: "pending" as const,
-          amount: load.price ? Number(load.price) : 0,
+          amount: calculateSupplierTotal(load.price ? Number(load.price) : 0, market.currency).totalPayable,
           title: load.title || `${load.origin || "Origin"} → ${load.destination || "Destination"}`,
           origin: load.origin || "",
           destination: load.destination || "",
@@ -141,7 +140,9 @@ function SupplierPayLaterPageContent() {
         const load = loadMap.get(order.loadId);
         return {
           ...order,
-          amount: load?.price ? Number(load.price) : order.amount,
+          amount: load?.price
+            ? calculateSupplierTotal(Number(load.price), market.currency).totalPayable
+            : order.amount,
           origin: load?.origin || order.origin,
           destination: load?.destination || order.destination,
           equipment: load?.equipment || order.equipment,
@@ -218,7 +219,7 @@ function SupplierPayLaterPageContent() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { label: "Queued loads", value: stats.queued },
-            { label: "Pending value", value: formatMoney(stats.pendingValue) },
+            { label: "Pending value", value: market.formatMoney(stats.pendingValue) },
             { label: "Paid", value: stats.paid },
             { label: "Total in queue", value: stats.total },
           ].map((stat) => (
@@ -278,7 +279,7 @@ function SupplierPayLaterPageContent() {
                     {/* Amount */}
                     <div className="lg:border-r lg:border-slate-100 lg:pr-4">
                       <p className="text-[22px] font-bold leading-none tracking-tight text-slate-900">
-                        {formatMoney(order.amount)}
+                        {market.formatMoney(order.amount)}
                       </p>
                       <p className="mt-1 text-[11px] font-medium text-slate-400">{getLoadCode(order.loadId)}</p>
                       <p className="mt-1 text-[11px] text-slate-500">{order.dueLabel || "Due when ready"}</p>

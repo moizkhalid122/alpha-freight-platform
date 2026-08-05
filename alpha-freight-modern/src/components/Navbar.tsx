@@ -363,7 +363,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                 isDark ? "border-slate-200 text-slate-900 hover:bg-slate-50" : "border-white/20 text-white hover:bg-white hover:text-black"
               }`}
             >
-              Login
+              Sign up
             </Link>
             <Link
               href="/contact"
@@ -532,7 +532,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     }`}
                     onClick={closeMobileMenu}
                   >
-                    Login
+                    Sign up
                   </Link>
                   <Link
                     href="/contact"

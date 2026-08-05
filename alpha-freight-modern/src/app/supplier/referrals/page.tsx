@@ -28,48 +28,59 @@ import {
   type SupplierReferralRow,
   type SupplierReferralStats,
 } from "@/lib/supplier-referrals";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 
 type TierKey = "member" | "silver" | "gold" | "platinum";
 
 const CARD =
   "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:shadow-md";
 
+const TIER_REWARD_AMOUNTS: Record<TierKey, number> = {
+  member: REFERRAL_BASE_REWARD,
+  silver: 125,
+  gold: 150,
+  platinum: 200,
+};
+
+const TIER_REWARD_EXTRAS: Record<TierKey, string> = {
+  member: "per qualified referral",
+  silver: "per referral + priority support",
+  gold: "per referral + fee reduction",
+  platinum: "per referral + concierge onboarding",
+};
+
 const TIERS: Record<
   TierKey,
-  { label: string; minReferrals: number; reward: string; iconBg: string; iconColor: string }
+  { label: string; minReferrals: number; iconBg: string; iconColor: string }
 > = {
   member: {
     label: "Member",
     minReferrals: 0,
-    reward: "£100 per qualified referral",
     iconBg: "bg-slate-100",
     iconColor: "text-slate-600",
   },
   silver: {
     label: "Silver",
     minReferrals: 3,
-    reward: "£125 per referral + priority support",
     iconBg: "bg-slate-100",
     iconColor: "text-slate-700",
   },
   gold: {
     label: "Gold",
     minReferrals: 8,
-    reward: "£150 per referral + fee reduction",
     iconBg: "bg-blue-50",
     iconColor: "text-blue-600",
   },
   platinum: {
     label: "Platinum",
     minReferrals: 15,
-    reward: "£200 per referral + concierge onboarding",
     iconBg: "bg-indigo-50",
     iconColor: "text-indigo-600",
   },
 };
 
-function formatMoney(value: number) {
-  return `£${value.toLocaleString("en-GB")}`;
+function tierRewardLabel(tier: TierKey, formatMoney: (value: number) => string) {
+  return `${formatMoney(TIER_REWARD_AMOUNTS[tier])} ${TIER_REWARD_EXTRAS[tier]}`;
 }
 
 function resolveTier(totalReferrals: number): TierKey {
@@ -100,6 +111,7 @@ function nextTierProgress(totalReferrals: number) {
 }
 
 export default function SupplierReferrals() {
+  const market = useMarketCurrency("supplier");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -236,8 +248,8 @@ export default function SupplierReferrals() {
           {[
             { label: "Total referrals", value: String(stats.totalReferrals), sub: `${stats.pendingReferrals} pending` },
             { label: "Active partners", value: String(stats.activeReferrals), sub: "Currently shipping" },
-            { label: "Total earned", value: formatMoney(stats.totalEarned), sub: "Lifetime credits" },
-            { label: "Pending rewards", value: formatMoney(stats.pendingRewards), sub: "Awaiting approval" },
+            { label: "Total earned", value: market.formatMoney(stats.totalEarned), sub: "Lifetime credits" },
+            { label: "Pending rewards", value: market.formatMoney(stats.pendingRewards), sub: "Awaiting approval" },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -268,11 +280,11 @@ export default function SupplierReferrals() {
           <div className="relative p-5 pl-6 sm:p-6 sm:pl-7">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-600">Your invitation</p>
             <h2 className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              Share Alpha Freight, get {formatMoney(100)} credit
+              Share Alpha Freight, get {market.formatMoney(100)} credit
             </h2>
             <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-slate-500">
               When a referred supplier is approved by admin and completes their first {REFERRAL_MILESTONE_LOADS}{" "}
-              shipments, {formatMoney(REFERRAL_BASE_REWARD)} is added to your referral balance.
+              shipments, {market.formatMoney(REFERRAL_BASE_REWARD)} is added to your referral balance.
             </p>
 
             <div className="mt-5 space-y-3">
@@ -337,7 +349,7 @@ export default function SupplierReferrals() {
               <Sparkles className={`h-4 w-4 ${TIERS[tierProgress.current].iconColor}`} />
             </div>
           </div>
-          <p className="mt-2 text-[12px] leading-relaxed text-slate-500">{TIERS[tierProgress.current].reward}</p>
+          <p className="mt-2 text-[12px] leading-relaxed text-slate-500">{tierRewardLabel(tierProgress.current, market.formatMoney)}</p>
 
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between text-[11px]">
@@ -437,7 +449,7 @@ export default function SupplierReferrals() {
                 </div>
                 <div className="text-right">
                   <p className="text-[13px] font-bold text-slate-900">
-                    {referral.earned > 0 ? formatMoney(referral.earned) : "—"}
+                    {referral.earned > 0 ? market.formatMoney(referral.earned) : "—"}
                   </p>
                   <p className="text-[10px] text-slate-400">Earned</p>
                 </div>
@@ -559,7 +571,7 @@ export default function SupplierReferrals() {
                 </div>
                 <p className="text-[14px] font-bold text-slate-900">{tier.label}</p>
                 <p className="mt-0.5 text-[11px] text-slate-500">{tier.minReferrals}+ referrals</p>
-                <p className="mt-2.5 text-[12px] leading-relaxed text-slate-600">{tier.reward}</p>
+                <p className="mt-2.5 text-[12px] leading-relaxed text-slate-600">{tierRewardLabel(key, market.formatMoney)}</p>
                 <p className="mt-3 flex items-center gap-1 text-[11px] font-medium text-slate-500">
                   {unlocked ? "Unlocked" : "Locked"}
                   <ChevronRight className="h-3 w-3" />

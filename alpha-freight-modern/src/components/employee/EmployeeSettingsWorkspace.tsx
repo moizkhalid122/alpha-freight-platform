@@ -449,7 +449,7 @@ export default function EmployeeSettingsWorkspace() {
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900">Policies accepted</h2>
-                <p className="text-xs text-slate-500">Recorded when you completed onboarding</p>
+                <p className="text-xs text-slate-500">Recorded when you completed team onboarding · open View then Save as PDF</p>
               </div>
             </div>
             <div className="space-y-2">

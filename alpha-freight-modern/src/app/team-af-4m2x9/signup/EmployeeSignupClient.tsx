@@ -103,7 +103,7 @@ export default function EmployeeSignupClient() {
     <div className="w-full">
       <div className={AUTH.header}>
         <h2 className={AUTH.title}>Join the team</h2>
-        <p className={AUTH.subtitle}>Create your Alpha Freight employee account in under a minute.</p>
+        <p className={AUTH.subtitle}>Create your Alpha Freight Solutions team account in under a minute.</p>
       </div>
 
       {prefilledPosition ? (
@@ -215,7 +215,7 @@ export default function EmployeeSignupClient() {
           {isLoading ? (
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-900/20 border-t-slate-900" />
           ) : (
-            "Create employee account"
+            "Create team account"
           )}
         </motion.button>
       </form>

@@ -78,7 +78,7 @@ function OnboardingCard({ row }: { row: AdminEmployeeOnboardingRow }) {
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-black text-slate-900">{row.full_name ?? "Unnamed employee"}</h3>
+              <h3 className="text-lg font-black text-slate-900">{row.full_name ?? "Unnamed team member"}</h3>
               <OnboardingBadge completed={row.onboarding_completed} />
             </div>
             <p className="mt-1 text-sm text-slate-500">{row.email ?? "No email"}</p>
@@ -119,7 +119,7 @@ function OnboardingCard({ row }: { row: AdminEmployeeOnboardingRow }) {
             <p className="mt-0.5 text-xs text-slate-500">{formatWhen(row.accepted_nda_at)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-600">Employment agreement</p>
+            <p className="text-xs font-semibold text-slate-600">Founding team agreement</p>
             <p className="mt-0.5 text-xs text-slate-500">{formatWhen(row.accepted_employment_at)}</p>
           </div>
           <div>
@@ -149,7 +149,7 @@ export default function AdminEmployeeOnboardingPage() {
     <div>
       <AdminHrHeader
         title="Employee onboarding"
-        description="Review profile details, documents, and policy acceptances submitted by team members."
+        description="Review profile details, documents, and policy acceptances submitted by founding team members."
       />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/onboarding" />
 

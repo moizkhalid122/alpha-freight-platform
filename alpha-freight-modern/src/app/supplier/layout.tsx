@@ -6,6 +6,7 @@ import SupplierSidebar from "@/components/supplier/SupplierSidebar";
 import { Menu, X, Bell, Search, Clock, Zap, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FeedSidebar from "@/components/feed/FeedSidebar";
+import ProfileCompletionBanner from "@/components/marketplace/ProfileCompletionBanner";
 import ProfileExtrasHydrator from "@/components/platform/ProfileExtrasHydrator";
 import BrandMark from "@/components/BrandMark";
 
@@ -99,6 +100,7 @@ export default function SupplierLayout({
       </AnimatePresence>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <ProfileCompletionBanner role="supplier" />
         {/* Top Header */}
         <header className="h-20 bg-[#FDFDFD]/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 sm:px-8 shrink-0 z-40 sticky top-0">
           <div className="flex min-w-0 items-center gap-3">

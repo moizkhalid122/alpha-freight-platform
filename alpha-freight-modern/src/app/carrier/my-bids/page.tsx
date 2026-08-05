@@ -15,6 +15,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 
 type BidRow = {
   id: string;
@@ -51,10 +52,6 @@ const BID_STATUS_STYLES: Record<string, { pill: string; accent: string }> = {
   withdrawn: { pill: "bg-slate-100 text-slate-600", accent: "from-slate-400 to-slate-500" },
 };
 
-function formatMoney(value: number | string | null | undefined) {
-  return `£${(Number(value) || 0).toLocaleString("en-GB")}`;
-}
-
 function formatDate(value?: string | null) {
   if (!value) return "TBC";
   const date = new Date(value);
@@ -86,6 +83,7 @@ function getCarrierInitials(name: string) {
 }
 
 export default function CarrierMyBidsPage() {
+  const market = useMarketCurrency("carrier");
   const [bids, setBids] = useState<BidRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
@@ -387,15 +385,15 @@ export default function CarrierMyBidsPage() {
                   <div className="flex flex-col gap-2 border-t border-slate-100 pt-3 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
                     <div>
                       <p className="text-[11px] text-slate-400">Bid amount</p>
-                      <p className="text-[20px] font-bold leading-tight text-slate-900">{formatMoney(bidAmount)}</p>
+                      <p className="text-[20px] font-bold leading-tight text-slate-900">{market.formatMoney(bidAmount)}</p>
                       {listedPrice > 0 ? (
                         <>
-                          <p className="mt-0.5 text-[11px] text-slate-500">Listed {formatMoney(listedPrice)}</p>
+                          <p className="mt-0.5 text-[11px] text-slate-500">Listed {market.formatMoney(listedPrice)}</p>
                           {priceDiff !== 0 && (
                             <p className={`mt-0.5 text-[11px] font-medium ${priceDiff > 0 ? "text-emerald-600" : "text-amber-600"}`}>
                               {priceDiff > 0
-                                ? `${formatMoney(priceDiff)} below list`
-                                : `${formatMoney(Math.abs(priceDiff))} above list`}
+                                ? `${market.formatMoney(priceDiff)} below list`
+                                : `${market.formatMoney(Math.abs(priceDiff))} above list`}
                             </p>
                           )}
                         </>
