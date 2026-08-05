@@ -20,6 +20,7 @@ export type CarrierProfileExtras = {
   directoryListing?: boolean | null;
   maxCapacityKg?: string | null;
   countryCode?: string | null;
+  currency?: string | null;
   phone?: string | null;
   alternatePhone?: string | null;
   email?: string | null;
@@ -72,6 +73,8 @@ export type SupplierProfileExtras = {
   averageValue?: string | null;
   invoicingEmail?: string | null;
   countryCode?: string | null;
+  currency?: string | null;
+  countryName?: string | null;
   phone?: string | null;
   email?: string | null;
   avatarUrl?: string | null;

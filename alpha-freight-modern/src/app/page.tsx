@@ -402,16 +402,15 @@ export default function Home() {
                 </p>
               </motion.div>
               
-              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tighter mb-6 sm:mb-8 md:mb-12">
+              <h1 className="mb-6 flex flex-col gap-1.5 text-3xl font-bold leading-none tracking-tighter text-white sm:mb-8 sm:gap-2 sm:text-4xl md:mb-12 md:gap-2.5 md:text-6xl lg:gap-3 lg:text-7xl">
                 <StaggerWords text="Logistics that" className="block" delay={0.15} as="span" />
-                <br />
                 <span className="block">
                   <StaggerWords text="move with" className="inline" delay={0.45} as="span" />{" "}
                   <motion.span
                     initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.85, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40 italic font-serif font-light"
+                    className="bg-gradient-to-r from-white via-white/80 to-white/40 bg-clip-text font-serif text-transparent font-light italic"
                   >
                     precision.
                   </motion.span>

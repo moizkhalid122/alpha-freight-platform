@@ -14,6 +14,11 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
 import type { MapRef } from "react-map-gl/mapbox";
 import {
+  getCarrierDisplayPrice,
+} from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
+import { fetchSupplierCountryMap, filterLoadsByCountry } from "@/lib/load-region-filter";
+import {
   Search,
   MapPin,
   Truck,
@@ -72,6 +77,7 @@ type LoadRow = {
   status?: string | null;
   notes?: string | null;
   special_instructions?: string | null;
+  supplier_id?: string | null;
 };
 
 const MapComponent = dynamic(
@@ -110,10 +116,6 @@ const MapMarker = dynamic(() => import("react-map-gl/mapbox").then((mod) => mod.
   ssr: false,
 });
 
-function formatMoney(value: number | string | null | undefined) {
-  return `£${(Number(value) || 0).toLocaleString("en-GB")}`;
-}
-
 function formatDate(value?: string | null) {
   if (!value) return "TBC";
   const date = new Date(value);
@@ -144,7 +146,7 @@ function getLoadDestination(load: LoadRow) {
 }
 
 function getLoadPrice(load: LoadRow) {
-  return Number(load.price || load.max_budget || 0);
+  return getCarrierDisplayPrice(load);
 }
 
 function getLoadCode(id: string) {
@@ -207,7 +209,9 @@ function calculateFuel(distanceMeters: number | null) {
 }
 
 export default function AvailableLoadsPage() {
+  const market = useMarketCurrency("carrier");
   const [loads, setLoads] = useState<LoadRow[]>([]);
+  const [includeAllRegions, setIncludeAllRegions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>("all");
   const [sortBy, setSortBy] = useState<(typeof SORT_OPTIONS)[number]["id"]>("newest");
@@ -256,14 +260,23 @@ export default function AvailableLoadsPage() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setLoads(data || []);
+      const rows = (data || []) as LoadRow[];
+      const supplierIds = rows.map((load) => load.supplier_id).filter(Boolean) as string[];
+      const supplierCountries = await fetchSupplierCountryMap(supplierIds);
+      const filtered = filterLoadsByCountry(
+        rows,
+        market.countryCode,
+        supplierCountries,
+        includeAllRegions
+      );
+      setLoads(filtered);
     } catch (error) {
       console.error("Error fetching loads:", error);
       showToast("error", "Unable to load marketplace shipments right now.");
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, market.countryCode, includeAllRegions]);
 
   useEffect(() => {
     setSavedIds(readSavedIds());
@@ -524,7 +537,7 @@ export default function AvailableLoadsPage() {
       setInstantBookSuccess({
         loadCode: getLoadCode(selectedLoad.id),
         routeLabel: `${getCity(getLoadOrigin(selectedLoad))} → ${getCity(getLoadDestination(selectedLoad))}`,
-        amountLabel: formatMoney(amount),
+        amountLabel: market.formatMoney(amount),
       });
       setSelectedLoad(null);
       setShowBidModal(false);
@@ -569,7 +582,7 @@ export default function AvailableLoadsPage() {
           <div className="p-4 pl-5">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p className="text-xl font-bold text-slate-900">{formatMoney(price)}</p>
+                <p className="text-xl font-bold text-slate-900">{market.formatLoadMoney(load)}</p>
                 <p className="font-mono text-[10px] font-semibold text-slate-400">{getLoadCode(load.id)}</p>
               </div>
               <button
@@ -596,7 +609,7 @@ export default function AvailableLoadsPage() {
               ) : null}
               {ratePerMile ? (
                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                  £{ratePerMile}/mi est.
+                  {market.market.symbol}{ratePerMile}/mi est.
                 </span>
               ) : null}
             </div>
@@ -635,12 +648,12 @@ export default function AvailableLoadsPage() {
 
         <div className="grid gap-4 p-4 pl-5 lg:grid-cols-[200px_minmax(0,1fr)_188px] lg:items-center lg:gap-6">
           <div className="space-y-2">
-            <p className="text-2xl font-bold tracking-tight text-slate-900">{formatMoney(price)}</p>
+            <p className="text-2xl font-bold tracking-tight text-slate-900">{market.formatLoadMoney(load)}</p>
             <p className="font-mono text-[11px] font-semibold text-slate-400">{getLoadCode(load.id)}</p>
             <div className="flex flex-wrap gap-1.5">
               {ratePerMile ? (
                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                  £{ratePerMile}/mi
+                  {market.market.symbol}{ratePerMile}/mi
                 </span>
               ) : null}
               <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
@@ -857,7 +870,7 @@ export default function AvailableLoadsPage() {
                   },
                   {
                     label: "Listed rate",
-                    value: formatMoney(getLoadPrice(selectedLoad)),
+                    value: selectedLoad ? market.formatLoadMoney(selectedLoad) : "—",
                     icon: TrendingUp,
                   },
                 ].map((item) => (
@@ -966,11 +979,11 @@ export default function AvailableLoadsPage() {
             <div className="space-y-4">
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Listed rate</p>
-                <p className="mt-1 text-lg font-bold text-slate-900">{formatMoney(getLoadPrice(selectedLoad))}</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{selectedLoad ? market.formatLoadMoney(selectedLoad) : "—"}</p>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-[11px] font-semibold text-slate-600">Your bid (£)</label>
+                <label className="mb-1.5 block text-[11px] font-semibold text-slate-600">Your bid ({market.currency})</label>
                 <input
                   type="number"
                   placeholder="e.g. 500"
@@ -1038,8 +1051,15 @@ export default function AvailableLoadsPage() {
               </div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900">Available loads</h1>
               <p className="mt-0.5 text-[13px] text-slate-500">
-                Paid, live shipments ready for bid or instant booking
+                Paid, live shipments in {market.countryName} ({market.currency})
               </p>
+              <button
+                type="button"
+                onClick={() => setIncludeAllRegions((current) => !current)}
+                className="mt-2 text-[12px] font-semibold text-blue-600 hover:text-blue-700"
+              >
+                {includeAllRegions ? "Show my country only" : "Show all regions"}
+              </button>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -1076,7 +1096,7 @@ export default function AvailableLoadsPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { label: "Live loads", value: stats.total, icon: Truck },
-              { label: "Avg rate", value: stats.avgRate ? formatMoney(stats.avgRate) : "—", icon: TrendingUp },
+              { label: "Avg rate", value: stats.avgRate ? market.formatMoney(stats.avgRate) : "—", icon: TrendingUp },
               { label: "New today", value: stats.newToday, icon: Star },
               { label: "Pickup soon", value: stats.pickupSoonCount, icon: Clock },
             ].map((stat) => (

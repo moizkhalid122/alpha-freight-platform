@@ -14,6 +14,8 @@ import {
 import {
   normalizePodVerificationStatus,
 } from "@/lib/load-pod-verification";
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { 
   Truck, 
   Clock, 
@@ -44,10 +46,6 @@ const TAB_STYLES: Record<string, { pill: string; accent: string }> = {
   pending: { pill: "bg-amber-50 text-amber-700", accent: "from-amber-500 to-orange-500" },
   completed: { pill: "bg-emerald-50 text-emerald-700", accent: "from-emerald-500 to-teal-500" },
 };
-
-function formatMoney(value: number) {
-  return `£${value.toLocaleString("en-GB")}`;
-}
 
 function formatLabel(value: string | null | undefined) {
   if (!value) return "—";
@@ -158,7 +156,7 @@ function buildBaseLoad(load: any, podCase?: any, paymentOrder?: any) {
     ...load,
     origin: load.origin || "Unknown origin",
     destination: load.destination || "Unknown destination",
-    price: Number(load.price) || 0,
+    price: getCarrierDisplayPrice(load),
     equipment: load.equipment || "General",
     shortCode: getShortCode(load.id),
     supplierRef: load.supplier_id ? `SUP-${String(load.supplier_id).slice(0, 6).toUpperCase()}` : "Supplier Pending",
@@ -251,6 +249,7 @@ function transformLoadForTab(load: any, podCase?: any, paymentOrder?: any) {
 
 export default function MyLoadsPage() {
   const router = useRouter();
+  const market = useMarketCurrency("carrier");
   const [activeTab, setActiveTab] = useState("pending");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLoad, setSelectedLoad] = useState<any>(null);
@@ -816,7 +815,7 @@ export default function MyLoadsPage() {
                   <div className="grid gap-4 p-4 pl-5 lg:grid-cols-[108px_minmax(0,1fr)_168px] lg:items-center lg:gap-6">
                     <div className="flex shrink-0 items-center gap-4 lg:flex-col lg:items-start lg:gap-0.5">
                       <p className="text-[22px] font-bold leading-none tracking-tight text-slate-900">
-                        {formatMoney(load.price)}
+                        {market.formatMoney(load.price)}
                       </p>
                       <p className="text-[11px] font-medium text-slate-400">{load.shortCode}</p>
                       <p className="mt-1 hidden text-[10px] text-slate-500 lg:block">{load.paymentStatus}</p>
@@ -1272,7 +1271,7 @@ export default function MyLoadsPage() {
                           <p className="mt-1 text-[15px] font-bold text-slate-900">{selectedLoad.status}</p>
                           <p className="mt-0.5 text-[12px] text-slate-600">{selectedLoad.paymentStatus}</p>
                         </div>
-                        <p className="text-right text-[22px] font-bold text-slate-900">{formatMoney(selectedLoad.price)}</p>
+                        <p className="text-right text-[22px] font-bold text-slate-900">{market.formatMoney(selectedLoad.price)}</p>
                       </div>
                     </div>
 

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import {
   ClipboardList,
   Package,
@@ -106,10 +107,6 @@ const STATUS_STYLES: Record<string, { pill: string; accent: string; surface: str
     label: "Delivered — Review POD",
   },
 };
-
-function formatMoney(value: number | string | null | undefined) {
-  return `£${(Number(value) || 0).toLocaleString()}`;
-}
 
 function formatDate(value?: string | null) {
   if (!value) return "TBC";
@@ -229,6 +226,7 @@ function getPostStatusMeta(post: LoadPost, paymentState: string) {
 }
 
 export default function MyPostsPage() {
+  const market = useMarketCurrency("supplier");
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<LoadPost[]>([]);
   const [payments, setPayments] = useState<SupplierPaymentRecord[]>([]);
@@ -580,7 +578,7 @@ export default function MyPostsPage() {
                     {/* Price block */}
                     <div className="flex shrink-0 items-center gap-4 lg:w-[108px] lg:flex-col lg:items-start lg:gap-0.5">
                       <p className="text-[22px] font-bold leading-none tracking-tight text-slate-900">
-                        {formatMoney(post.price)}
+                        {market.formatMoney(post.price)}
                       </p>
                       <p className="text-[11px] font-medium text-slate-400">{getShortCode(post.id)}</p>
                     </div>
@@ -815,7 +813,7 @@ export default function MyPostsPage() {
                   <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                     <p className="text-[11px] font-medium text-slate-500">Shipment value</p>
                     <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-                      {formatMoney(selectedPost.price)}
+                      {market.formatMoney(selectedPost.price)}
                     </p>
                     <p className="mt-2 text-[12px] text-slate-500">{getStatusSummary(selectedPost.status, detailPaymentState, selectedPost)}</p>
                   </div>

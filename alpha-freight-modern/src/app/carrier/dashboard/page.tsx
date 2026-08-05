@@ -122,13 +122,14 @@ const insights = [
 // Replace with your Mapbox Public Token
 import { MAPBOX_TOKEN } from "@/lib/mapbox";
 
+import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
+
 const CARRIER_ACTIVE_STATUSES = ["active", "booked", "assigned", "pending", "in-transit", "loading"];
 const CARRIER_COMPLETED_STATUSES = ["completed", "delivered"];
 
 const CARD =
   "relative w-full rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]";
-
-const formatMoney = (value: number) => `£${value.toLocaleString("en-GB")}`;
 
 type RevenuePeriod = "1W" | "1M" | "3M";
 
@@ -146,7 +147,7 @@ const buildRevenueChartData = (loads: RevenueLoad[], period: RevenuePeriod): Cha
     loads.reduce((sum, load) => {
       const created = new Date(load.created_at);
       if (created >= start && created <= end) {
-        return sum + (Number(load.price) || 0);
+        return sum + getCarrierDisplayPrice(load);
       }
       return sum;
     }, 0);
@@ -223,6 +224,7 @@ const OPTIMIZATION_STEPS = [
 
 export default function CarrierDashboard() {
   const router = useRouter();
+  const market = useMarketCurrency("carrier");
   const [viewState, setViewState] = useState({
     latitude: 52.4862,
     longitude: -1.8904,
@@ -318,6 +320,8 @@ export default function CarrierDashboard() {
   useEffect(() => () => clearOptimizeTimeouts(), []);
 
   useEffect(() => {
+    if (market.loading) return;
+
     async function getDashboardData() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -342,7 +346,10 @@ export default function CarrierDashboard() {
           const active = safeAssignedLoads.filter((load) => CARRIER_ACTIVE_STATUSES.includes(load.status)).length;
           const completedLoads = safeAssignedLoads.filter((load) => CARRIER_COMPLETED_STATUSES.includes(load.status));
           const completedCount = completedLoads.length;
-          const totalBalance = completedLoads.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+          const totalBalance = completedLoads.reduce(
+            (acc, curr) => acc + getCarrierDisplayPrice(curr, market.currency),
+            0
+          );
 
           setStats({
             totalLoads: total || 0,
@@ -402,16 +409,19 @@ export default function CarrierDashboard() {
               id: load.id,
               origin: load.origin,
               dest: load.destination,
-              price: `£${load.price}`,
+              priceAmount: getCarrierDisplayPrice(load, market.currency),
               weight: load.weight,
               type: load.equipment || 'General',
-              match: `${Math.floor(Math.random() * (99 - 85 + 1) + 85)}%` // AI Match logic placeholder
+              match: `${Math.floor(Math.random() * (99 - 85 + 1) + 85)}%`
             })));
           }
 
           // Calculate Fuel & Profit based on assigned/completed loads
           if (safeAssignedLoads.length > 0) {
-            const totalRevenue = safeAssignedLoads.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+            const totalRevenue = safeAssignedLoads.reduce(
+              (acc, curr) => acc + getCarrierDisplayPrice(curr, market.currency),
+              0
+            );
             const estimatedFuel = totalRevenue * 0.35; // 35% fuel cost assumption
             const overheads = totalRevenue * 0.10; // 10% overheads
             const profit = totalRevenue - estimatedFuel - overheads;
@@ -445,7 +455,7 @@ export default function CarrierDashboard() {
           setRevenueLoads(
             safeAssignedLoads.map((load) => ({
               created_at: load.created_at,
-              price: load.price,
+              price: getCarrierDisplayPrice(load, market.currency),
             }))
           );
         }
@@ -486,7 +496,7 @@ export default function CarrierDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [market.loading, market.currency]);
 
   if (loading) {
     return (
@@ -525,6 +535,11 @@ export default function CarrierDashboard() {
                 {Math.round(80 + carrierStats.level * 2)}%
               </span>
               {" "}· {stats.activeLoads} active load{stats.activeLoads === 1 ? "" : "s"}
+              {!market.loading ? (
+                <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                  {market.countryName} · {market.currency}
+                </span>
+              ) : null}
             </p>
           </div>
 
@@ -575,8 +590,8 @@ export default function CarrierDashboard() {
               <div className="rounded-lg bg-amber-50 p-1.5 text-amber-600"><Wallet className="h-3.5 w-3.5" /></div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Balance</p>
             </div>
-            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{formatMoney(stats.balance)}</p>
-            <p className="mt-0.5 text-[11px] text-slate-500">Total earnings</p>
+            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{market.formatMoney(stats.balance)}</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">Total earnings ({market.currency})</p>
           </div>
           <div className={`${CARD} min-h-[92px] p-3 sm:p-4`}>
             <div className="mb-2 flex items-center gap-2">
@@ -603,8 +618,8 @@ export default function CarrierDashboard() {
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-emerald-900">AI route optimization active</p>
                       <p className="mt-0.5 text-[12px] leading-relaxed text-emerald-700/90">
-                        Your fleet is running on fuel-efficient paths. Estimated savings{" "}
-                        <span className="font-semibold">£420/week</span>.
+                        Estimated savings{" "}
+                        <span className="font-semibold">{market.formatMoney(420)}/week</span>.
                       </p>
                     </div>
                   </div>
@@ -679,7 +694,7 @@ export default function CarrierDashboard() {
                             return (
                               <div className="rounded-xl border border-white/10 bg-slate-900 p-3 text-white shadow-2xl">
                                 <p className="mb-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">{payload[0].payload.day}</p>
-                                <p className="text-base font-black text-blue-400">{formatMoney(Number(payload[0].value) || 0)}</p>
+                                <p className="text-base font-black text-blue-400">{market.formatMoney(Number(payload[0].value) || 0)}</p>
                               </div>
                             );
                           }
@@ -893,7 +908,7 @@ export default function CarrierDashboard() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-black text-slate-900">{rec.price}</p>
+                          <p className="text-sm font-black text-slate-900">{market.formatMoney(rec.priceAmount)}</p>
                           <div className="flex items-center gap-1 justify-end">
                              <span className="text-[8px] text-slate-400 font-bold">EXCELLENT MATCH</span>
                              <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors" />
@@ -1001,9 +1016,9 @@ export default function CarrierDashboard() {
                   <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3.5">
                     <div className="mb-2 flex items-center justify-between">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-500">Fuel cost</p>
-                      <span className="text-[10px] font-medium text-slate-400">£1.42/L avg</span>
+                      <span className="text-[10px] font-medium text-slate-400">{market.formatMoney(1.42)}/L avg</span>
                     </div>
-                    <p className="text-xl font-bold text-indigo-900">£{fuelProfitStats.fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    <p className="text-xl font-bold text-indigo-900">{market.formatMoney(fuelProfitStats.fuelCost)}</p>
                     <div className="mt-4 w-full bg-indigo-200/30 h-2 rounded-full overflow-hidden border border-indigo-100/20">
                       <div
                         className="bg-gradient-to-r from-indigo-400 to-indigo-600 h-full shadow-[0_0_10px_rgba(79,70,229,0.3)] transition-[width] duration-700 ease-out"
@@ -1014,7 +1029,7 @@ export default function CarrierDashboard() {
                   </div>
                   <div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-emerald-50/50 p-3.5">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-500">Net profit</p>
-                    <p className="mt-1 text-xl font-bold text-emerald-900">£{fuelProfitStats.netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    <p className="mt-1 text-xl font-bold text-emerald-900">{market.formatMoney(fuelProfitStats.netProfit)}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
                       <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600">{fuelProfitStats.margin > 20 ? 'HIGH MARGIN' : 'STABLE'}</span>
                       <span className="text-[10px] font-medium text-emerald-600">{fuelProfitStats.margin.toFixed(1)}% margin</span>

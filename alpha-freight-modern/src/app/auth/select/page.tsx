@@ -6,7 +6,7 @@ import { AUTH } from "@/components/auth/auth-styles";
 
 const accountOptions = [
   {
-    href: "/auth/login?role=carrier",
+    href: "/auth/signup?role=carrier",
     title: "Carrier account",
     description: "Manage fleet and accept loads",
     icon: Truck,
@@ -14,7 +14,7 @@ const accountOptions = [
     hoverClass: "group-hover:text-blue-600",
   },
   {
-    href: "/auth/login?role=supplier",
+    href: "/auth/signup?role=supplier",
     title: "Supplier account",
     description: "Post freight and track shipments",
     icon: Building2,
@@ -27,8 +27,8 @@ export default function SelectAccountPage() {
   return (
     <div className="w-full">
       <div className={AUTH.header}>
-        <h2 className={AUTH.title}>Choose account</h2>
-        <p className={AUTH.subtitle}>Select how you want to access Alpha Freight.</p>
+        <h2 className={AUTH.title}>Create your account</h2>
+        <p className={AUTH.subtitle}>Choose whether you are a carrier or a supplier.</p>
       </div>
 
       <div className="space-y-3 sm:space-y-4">
@@ -64,9 +64,9 @@ export default function SelectAccountPage() {
 
       <div className="mt-6 border-t border-slate-100 pt-5 sm:mt-8 sm:pt-6">
         <p className={AUTH.footerText}>
-          New to Alpha Freight?{" "}
-          <Link href="/auth/signup" className="font-bold text-slate-900 hover:underline underline-offset-4">
-            Create an account
+          Already have an account?{" "}
+          <Link href="/auth/login" className="font-bold text-slate-900 hover:underline underline-offset-4">
+            Sign in
           </Link>
         </p>
       </div>

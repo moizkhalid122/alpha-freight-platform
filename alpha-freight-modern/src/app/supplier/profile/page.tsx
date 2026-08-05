@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { calculateSupplierTotal } from "@/lib/load-commission";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { supabase } from "@/lib/supabase";
 import {
   SupplierProfileExtras,
@@ -55,8 +57,6 @@ type PendingImageCrop = {
   offsetX: number;
   offsetY: number;
 };
-
-const formatMoney = (value: number) => `£${value.toLocaleString("en-GB")}`;
 
 const formatSince = (dateString?: string | null) => {
   if (!dateString) return "Recently joined";
@@ -246,6 +246,7 @@ const getReadableError = (error: unknown) => {
 };
 
 export default function SupplierProfile() {
+  const market = useMarketCurrency("supplier");
   const [activeSection, setActiveSection] = useState<"overview" | "details" | "stats">("overview");
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<SupplierProfileRecord | null>(null);
@@ -322,7 +323,11 @@ export default function SupplierProfile() {
         const completedLoads = safeLoads.filter(
           (load) => load.status === "completed" || load.status === "delivered"
         ).length;
-        const totalSpend = safeLoads.reduce((sum, load) => sum + (Number(load.price) || 0), 0);
+        const totalSpend = safeLoads.reduce(
+          (sum, load) =>
+            sum + calculateSupplierTotal(Number(load.price) || 0, market.currency).totalPayable,
+          0
+        );
 
         setStats({
           totalLoads: safeLoads.length,
@@ -435,7 +440,7 @@ export default function SupplierProfile() {
   const quickStats = [
     { icon: Package, label: "Total loads", value: stats.totalLoads.toLocaleString("en-GB") },
     { icon: CheckCircle2, label: "Completed", value: stats.completedLoads.toLocaleString("en-GB") },
-    { icon: Wallet, label: "Freight spend", value: formatMoney(stats.totalSpend) },
+    { icon: Wallet, label: "Freight spend", value: market.formatMoney(stats.totalSpend) },
   ];
 
   const openEditModal = () => {
@@ -789,7 +794,7 @@ export default function SupplierProfile() {
                 </div>
                 <div className="rounded-lg bg-slate-50/80 px-3 py-2.5">
                   <p className="text-[10px] text-slate-500">Spend</p>
-                  <p className="mt-0.5 text-lg font-bold text-slate-900">{loading ? "…" : formatMoney(stats.totalSpend)}</p>
+                  <p className="mt-0.5 text-lg font-bold text-slate-900">{loading ? "…" : market.formatMoney(stats.totalSpend)}</p>
                 </div>
               </div>
 
@@ -1002,7 +1007,7 @@ export default function SupplierProfile() {
                   {[
                     { label: "Total loads", value: stats.totalLoads.toLocaleString("en-GB"), icon: Package, tone: "text-blue-600" },
                     { label: "Completed loads", value: stats.completedLoads.toLocaleString("en-GB"), icon: CheckCircle2, tone: "text-emerald-600" },
-                    { label: "Freight spend", value: formatMoney(stats.totalSpend), icon: Wallet, tone: "text-violet-600" },
+                    { label: "Freight spend", value: market.formatMoney(stats.totalSpend), icon: Wallet, tone: "text-violet-600" },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl bg-slate-50/80 px-4 py-3">
                       <div className="flex items-center gap-2">

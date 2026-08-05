@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, MapPin, Navigation } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import {
   canSupplierTrackShipment,
   getSupplierPaymentStateForLoad,
@@ -17,12 +18,8 @@ import {
 const CARD =
   "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]";
 
-function formatMoney(value: number | string | null | undefined) {
-  const amount = Number(value || 0);
-  return `£${amount.toLocaleString("en-GB")}`;
-}
-
 export default function SupplierTrackPickerPage() {
+  const market = useMarketCurrency("supplier");
   const [loads, setLoads] = useState<TrackableLoad[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -133,7 +130,7 @@ export default function SupplierTrackPickerPage() {
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
                     {load.pickup_date ? `Pickup ${load.pickup_date}` : "Pickup pending"} ·{" "}
-                    {formatMoney(load.price)}
+                    {market.formatLoadMoney(load)}
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">

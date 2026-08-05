@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import BrandMark from "@/components/BrandMark";
 import EmployeePolicyDocument from "@/components/employee/EmployeePolicyDocument";
+import EmployeePolicySaveButton from "@/components/employee/EmployeePolicySaveButton";
 import { employeeRoute } from "@/lib/employee-path";
 import { getEmployeePolicy } from "@/lib/employee-policies";
 
@@ -38,6 +39,13 @@ export default async function EmployeePolicyPage({
       </header>
 
       <main className="mx-auto max-w-3xl px-6 py-10">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+          <p className="text-xs text-slate-500">
+            To save your copy: click <strong className="text-slate-700">Save as PDF</strong>, then choose{" "}
+            <strong className="text-slate-700">Save as PDF</strong> or <strong className="text-slate-700">Microsoft Print to PDF</strong> as the printer.
+          </p>
+          <EmployeePolicySaveButton />
+        </div>
         <EmployeePolicyDocument policy={policy} />
       </main>
     </div>

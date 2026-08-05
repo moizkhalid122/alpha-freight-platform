@@ -71,31 +71,48 @@ export const readSupplierExtras = (userId: string): SupplierProfileExtras => {
   return local;
 };
 
+export function mergeProfileExtrasMarketFields<T extends CarrierProfileExtras | SupplierProfileExtras>(
+  local: T,
+  remote: T
+): T {
+  return {
+    ...local,
+    ...remote,
+    countryCode: remote.countryCode || local.countryCode || null,
+    currency: remote.currency || local.currency || null,
+    countryName: remote.countryName || local.countryName || null,
+  };
+}
+
 export function resolveCarrierExtras(
   userId: string,
   profileExtras?: unknown
 ): CarrierProfileExtras {
+  const fromLocal = readCarrierExtras(userId);
   const fromDb = parseProfileExtras<CarrierProfileExtras>(profileExtras);
-  if (Object.keys(fromDb).length > 0) {
-    setCarrierCache(userId, fromDb);
-    return fromDb;
+  if (Object.keys(fromDb).length === 0) {
+    return fromLocal;
   }
-  return readCarrierExtras(userId);
+  const merged = mergeProfileExtrasMarketFields(fromLocal, fromDb);
+  setCarrierCache(userId, merged);
+  return merged;
 }
 
 export function resolveSupplierExtras(
   userId: string,
   profileExtras?: unknown
 ): SupplierProfileExtras {
+  const fromLocal = readSupplierExtras(userId);
   const fromDb = parseProfileExtras<SupplierProfileExtras>(profileExtras);
-  if (Object.keys(fromDb).length > 0) {
-    setSupplierCache(userId, fromDb);
-    return fromDb;
+  if (Object.keys(fromDb).length === 0) {
+    return fromLocal;
   }
-  return readSupplierExtras(userId);
+  const merged = mergeProfileExtrasMarketFields(fromLocal, fromDb);
+  setSupplierCache(userId, merged);
+  return merged;
 }
 
-async function persistProfileExtras(userId: string, extras: Record<string, unknown>) {
+export async function persistProfileExtras(userId: string, extras: Record<string, unknown>) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -184,30 +201,36 @@ export async function hydrateProfileExtras(userId: string, roleHint?: "carrier" 
 
     const role = roleHint ?? (data.role === "supplier" ? "supplier" : "carrier");
     const dbExtras = parseProfileExtras(data.profile_extras);
-
-    if (Object.keys(dbExtras).length > 0) {
-      if (role === "supplier") {
-        setSupplierCache(userId, dbExtras as SupplierProfileExtras);
-      } else {
-        setCarrierCache(userId, dbExtras as CarrierProfileExtras);
-      }
-      return;
-    }
-
     const local =
       role === "supplier"
         ? readLocalExtras<SupplierProfileExtras>(getSupplierExtrasKey(userId))
         : readLocalExtras<CarrierProfileExtras>(getCarrierExtrasKey(userId));
 
-    if (Object.keys(local).length === 0) return;
+    if (Object.keys(dbExtras).length > 0 || Object.keys(local).length > 0) {
+      const merged =
+        role === "supplier"
+          ? mergeProfileExtrasMarketFields(
+              (local || {}) as SupplierProfileExtras,
+              dbExtras as SupplierProfileExtras
+            )
+          : mergeProfileExtrasMarketFields(
+              (local || {}) as CarrierProfileExtras,
+              dbExtras as CarrierProfileExtras
+            );
 
-    if (role === "supplier") {
-      setSupplierCache(userId, local as SupplierProfileExtras);
-    } else {
-      setCarrierCache(userId, local as CarrierProfileExtras);
+      if (role === "supplier") {
+        setSupplierCache(userId, merged as SupplierProfileExtras);
+        writeLocalExtras(getSupplierExtrasKey(userId), merged);
+      } else {
+        setCarrierCache(userId, merged as CarrierProfileExtras);
+        writeLocalExtras(getCarrierExtrasKey(userId), merged);
+      }
+
+      if (Object.keys(dbExtras).length === 0 && Object.keys(local).length > 0) {
+        await persistProfileExtras(userId, local as Record<string, unknown>);
+      }
+      return;
     }
-
-    await persistProfileExtras(userId, local as Record<string, unknown>);
   })();
 
   hydrationPromises.set(cacheKey, task);

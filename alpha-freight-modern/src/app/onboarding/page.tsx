@@ -25,6 +25,7 @@ import { supabase } from "@/lib/supabase";
 import { recordCarrierReferralFromSignup, validateCarrierReferralCode } from "@/lib/carrier-referrals";
 import { recordSupplierReferralFromSignup, validateSupplierReferralCode } from "@/lib/supplier-referrals";
 import { carrierOnboardingCountryOptions } from "@/lib/country-options";
+import { getCurrencyForCountry, getCountryName } from "@/lib/market-currency";
 import { cn } from "@/lib/utils";
 import {
   CarrierProfileExtras,
@@ -118,142 +119,79 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
   {
     id: "country",
     question: "Select your country",
-    description: "This will help us set your default currency and region.",
+    description: "We will set your currency, load region, and dashboard prices automatically.",
     options: countryOptions,
-    icon: <Globe className="w-5 h-5" />
-  },
-  {
-    id: "referral_code",
-    question: "Were you referred by someone?",
-    description: "Optional. Enter a carrier referral code if someone invited you to Alpha Freight.",
-    type: "form",
-    fields: [
-      {
-        id: "referral_code",
-        label: "Referral code (optional)",
-        type: "text",
-        placeholder: "AF-CAR-XXXXXXXX",
-        required: false,
-      },
-    ],
-    icon: <Gift className="w-5 h-5" />,
+    icon: <Globe className="w-5 h-5" />,
   },
   {
     id: "contact_info",
-    question: accountType === "individual" ? "Your contact details" : "Your company contact details",
-    description:
-      accountType === "individual"
-        ? "Keep this step short with the key details we need for your driver profile."
-        : "Add the person and phone number we should use for carrier operations.",
+    question: accountType === "individual" ? "Your contact details" : "Company contact",
+    description: "Just the essentials — name, phone, and city.",
     type: "form",
     fields: [
       {
         id: accountType === "individual" ? "full_name" : "contact_person",
-        label: accountType === "individual" ? "Full Name" : "Contact Person",
+        label: accountType === "individual" ? "Full name" : "Contact person",
         type: "text",
         placeholder: accountType === "individual" ? "John Doe" : "John Smith",
       },
       {
         id: "phone",
-        label: accountType === "individual" ? "Phone Number" : "Business Phone",
+        label: "Phone number",
         type: "tel",
-        placeholder: "+44 7123 456789",
+        placeholder: countryCode === "PK" ? "+92 300 1234567" : "+44 7123 456789",
       },
       {
         id: "city",
         label: "City",
         type: "text",
-        placeholder: accountType === "individual" ? "Manchester" : "Birmingham",
+        placeholder: countryCode === "PK" ? "Karachi" : "Manchester",
       },
     ],
     icon: accountType === "individual" ? <User className="w-5 h-5" /> : <Building2 className="w-5 h-5" />,
   },
   accountType === "individual"
     ? {
-        id: "identity_info",
-        question: "Driver verification details",
-        description: "These details help the admin team review and verify local owner-operators faster.",
+        id: "quick_profile",
+        question: "What do you drive?",
+        description: "One last step. Add licence, insurance, and fleet details later from your profile.",
         type: "form",
         fields: [
-          { id: "driver_license", label: "Driver License No.", type: "text", placeholder: "UK-12345678" },
-          { id: "national_id", label: "National ID / Passport", type: "text", placeholder: "A1234567" },
-          { id: "emergency_contact", label: "Emergency Contact", type: "tel", placeholder: "+44 7000 111222" },
+          {
+            id: "primary_vehicle",
+            label: "Primary vehicle",
+            type: "text",
+            placeholder: "Curtain-sider, Reefer, Box truck…",
+          },
         ],
-        icon: <Shield className="w-5 h-5" />,
+        icon: <Truck className="w-5 h-5" />,
       }
     : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
       ? {
-        id: "company_lookup",
-        question: "Find your registered company",
-        description: "Search Companies House first, then we will preload your business details in the next step.",
-        type: "form",
-        fields: [
-          { id: "company_name", label: "Company Name", type: "text", placeholder: "Alpha Logistics Ltd" },
-        ],
-        icon: <Search className="w-5 h-5" />,
-      }
-      : null,
-  accountType === "individual"
-    ? null
-    : {
-        id: "business_info",
-        question: "Registered business details",
-        description:
-          countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
-            ? "Review the prefilled company details and complete the remaining carrier verification fields."
-            : "Add your business details manually so the carrier account is ready for verification.",
-        type: "form",
-        fields: [
-          { id: "company_name", label: "Company Name", type: "text", placeholder: "Alpha Logistics Ltd" },
-          { id: "registration_no", label: "Company Registration No.", type: "text", placeholder: "UK12345678" },
-          { id: "business_address", label: "Business Address", type: "text", placeholder: "45 Industrial Park, Manchester" },
-          { id: "operator_licence", label: "Operator Licence No.", type: "text", placeholder: "O-LIC-2026-9988" },
-        ],
-        icon: <Building2 className="w-5 h-5" />,
-      },
-  {
-    id: "operations_profile",
-    question: accountType === "individual" ? "Your operating profile" : "Your fleet profile",
-    description:
-      accountType === "individual"
-        ? "Tell us what you drive and where you mainly operate."
-        : "Tell us about the fleet capacity and coverage you want matched to loads.",
-    type: "form",
-    fields: [
-      accountType === "individual"
-        ? { id: "primary_vehicle", label: "Primary Vehicle", type: "text", placeholder: "Curtain-sider van" }
-        : { id: "fleet_size", label: "Fleet Size", type: "text", placeholder: "12 vehicles" },
-      accountType === "individual"
-        ? { id: "max_capacity_kg", label: "Max Capacity (kg)", type: "text", placeholder: "18000" }
-        : { id: "vehicle_types", label: "Vehicle Types", type: "text", placeholder: "Curtain-sider, Reefer" },
-      { id: "operating_region", label: "Operating Region", type: "text", placeholder: "London, Manchester, Birmingham" },
-    ],
-    icon: <Truck className="w-5 h-5" />,
-  },
-  accountType === "individual"
-    ? {
-        id: "availability",
-        question: "Your availability?",
-        description: "One quick step to define how often you want to take local or long-haul work.",
-        options: [
-          { label: "Full-Time", value: "full", sub: "Available most weekdays" },
-          { label: "Weekends Only", value: "weekends", sub: "Part-time local work" },
-          { label: "On-Call", value: "on_call", sub: "Flexible schedule" },
-        ],
-        icon: <Clock className="w-5 h-5" />,
-      }
-    : {
-        id: "verification_preferences",
-        question: "Final verification details",
-        description: "Add the last business checks so the carrier account is ready for admin review.",
-        type: "form",
-        fields: [
-          { id: "insurance_expiry", label: "Insurance Expiry", type: "date", placeholder: "" },
-          { id: "vat_no", label: "VAT / Tax No.", type: "text", placeholder: "GB123456789" },
-          { id: "directory_listing", label: "Directory Listing", type: "text", placeholder: "Yes or No" },
-        ],
-        icon: <Shield className="w-5 h-5" />,
-      },
+          id: "company_lookup",
+          question: "Find your registered company",
+          description: "Search Companies House — verification documents can be added later.",
+          type: "form",
+          fields: [
+            { id: "company_name", label: "Company name", type: "text", placeholder: "Alpha Logistics Ltd" },
+          ],
+          icon: <Search className="w-5 h-5" />,
+        }
+      : {
+          id: "quick_profile",
+          question: "Your business name",
+          description: "One last step. Full verification can be completed later from your profile.",
+          type: "form",
+          fields: [
+            {
+              id: "company_name",
+              label: "Company / business name",
+              type: "text",
+              placeholder: "Alpha Logistics",
+            },
+          ],
+          icon: <Building2 className="w-5 h-5" />,
+        },
 ].filter(Boolean) as Question[];
 
 const getSupplierQuestions = (accountType: string, countryCode?: string): Question[] => [
@@ -261,141 +199,59 @@ const getSupplierQuestions = (accountType: string, countryCode?: string): Questi
   {
     id: "country",
     question: "Select your country",
-    description: "This will help us set your default currency and region.",
+    description: "We will set your currency, load region, and dashboard prices automatically.",
     options: countryOptions,
-    icon: <Globe className="w-5 h-5" />
-  },
-  {
-    id: "referral_code",
-    question: "Were you referred by someone?",
-    description: "Optional. Enter a supplier referral code if someone invited you to Alpha Freight.",
-    type: "form",
-    fields: [
-      {
-        id: "referral_code",
-        label: "Referral code (optional)",
-        type: "text",
-        placeholder: "AF-SUP-XXXXXXXX",
-        required: false,
-      },
-    ],
-    icon: <Gift className="w-5 h-5" />,
+    icon: <Globe className="w-5 h-5" />,
   },
   {
     id: "contact_info",
-    description:
-      accountType === "individual"
-        ? "Keep the shipper profile simple with a short personal contact step."
-        : "Add the person and contact line your logistics team uses every day.",
+    question: accountType === "individual" ? "Your contact details" : "Company contact",
+    description: "Just the essentials — name, phone, and city.",
     type: "form",
     fields: [
       {
         id: accountType === "individual" ? "full_name" : "contact_person",
-        label: accountType === "individual" ? "Full Name" : "Contact Person",
+        label: accountType === "individual" ? "Full name" : "Contact person",
         type: "text",
         placeholder: accountType === "individual" ? "John Doe" : "Sarah Khan",
       },
-      { id: "phone", label: "Phone Number", type: "tel", placeholder: "+44 7123 456789" },
-      { id: "city", label: "City", type: "text", placeholder: "London" },
+      { id: "phone", label: "Phone number", type: "tel", placeholder: countryCode === "PK" ? "+92 300 1234567" : "+44 7123 456789" },
+      { id: "city", label: "City", type: "text", placeholder: countryCode === "PK" ? "Lahore" : "London" },
     ],
     icon: accountType === "individual" ? <User className="w-5 h-5" /> : <Building2 className="w-5 h-5" />,
   },
-  {
-    id:
-      accountType === "individual"
-        ? "business_info"
-        : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
-          ? "company_lookup"
-          : "business_info",
-    question:
-      accountType === "individual"
-        ? "Billing details"
-        : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
-          ? "Find your registered company"
-          : "Business details",
-    description:
-      accountType === "individual"
-        ? "Add the billing identity used for your shipping activity."
-        : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
-          ? "Search Companies House first, then we will preload your business details in the next step."
-          : "Add your business details manually for supplier verification.",
-    type: "form",
-    fields: [
-      {
-        id: "company_name",
-        label: accountType === "individual" ? "Trading Name" : "Company Name",
-        type: "text",
-        placeholder: accountType === "individual" ? "Retail Hub" : "Retail Hub Ltd",
-      },
-    ],
-    icon:
-      accountType === "individual"
-        ? <Building2 className="w-5 h-5" />
-        : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
-          ? <Search className="w-5 h-5" />
-          : <Building2 className="w-5 h-5" />,
-  },
   accountType === "individual"
-    ? null
-    : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
-      ? {
-        id: "business_info",
-        question: "Business details",
-        description: "Review the prefilled company details and complete the remaining supplier billing information.",
+    ? {
+        id: "quick_profile",
+        question: "Trading name",
+        description: "One last step. Billing and tax details can be added later from your profile.",
         type: "form",
         fields: [
-          {
-            id: "company_name",
-            label: "Company Name",
-            type: "text",
-            placeholder: "Retail Hub Ltd",
-          },
-          {
-            id: "registration_no",
-            label: "Company Registration No.",
-            type: "text",
-            placeholder: "UK12345678",
-          },
-          { id: "billing_address", label: "Billing Address", type: "text", placeholder: "45 Market Road, London" },
+          { id: "company_name", label: "Trading / business name", type: "text", placeholder: "Retail Hub" },
         ],
         icon: <Building2 className="w-5 h-5" />,
       }
-      : null,
-  {
-    id: "shipping_profile",
-    question: "Your shipping profile",
-    description: "Three small inputs so we can match the right carrier capacity and service level.",
-    type: "form",
-    fields: [
-      { id: "industry", label: "Industry", type: "text", placeholder: "Retail" },
-      { id: "monthly_volume", label: "Monthly Volume", type: "text", placeholder: "25 shipments" },
-      { id: "primary_commodity", label: "Primary Commodity", type: "text", placeholder: "Consumer goods" },
-    ],
-    icon: <BarChart className="w-5 h-5" />,
-  },
-  {
-    id: "finance_profile",
-    question: "Verification and finance details",
-    description: "These details help the admin team verify supplier accounts and billing setup faster.",
-    type: "form",
-    fields: [
-      { id: "tax_id", label: "VAT / Tax ID", type: "text", placeholder: "GB123456789" },
-      { id: "average_weight", label: "Average Shipment Weight", type: "text", placeholder: "850 kg" },
-      { id: "invoicing_email", label: "Invoicing Email", type: "email", placeholder: "billing@company.com" },
-    ],
-    icon: <Shield className="w-5 h-5" />,
-  },
-  {
-    id: "supplier_preferences",
-    question: "How do you usually ship?",
-    description: "One last step to define your supplier preference before we complete setup.",
-    options: [
-      { label: "Scheduled Freight", value: "scheduled", sub: "Recurring contracted shipments" },
-      { label: "Spot Loads", value: "spot", sub: "Flexible load-by-load booking" },
-      { label: "Mixed Mode", value: "mixed", sub: "Both scheduled and spot work" },
-    ],
-    icon: <Package className="w-5 h-5" />,
-  },
+    : countryCode === COMPANIES_HOUSE_SUPPORTED_COUNTRY
+      ? {
+          id: "company_lookup",
+          question: "Find your registered company",
+          description: "Search Companies House — billing details can be added later from your profile.",
+          type: "form",
+          fields: [
+            { id: "company_name", label: "Company name", type: "text", placeholder: "Retail Hub Ltd" },
+          ],
+          icon: <Search className="w-5 h-5" />,
+        }
+      : {
+          id: "quick_profile",
+          question: "Business name",
+          description: "One last step. Verification can be completed later from your profile.",
+          type: "form",
+          fields: [
+            { id: "company_name", label: "Company name", type: "text", placeholder: "Retail Hub Ltd" },
+          ],
+          icon: <Building2 className="w-5 h-5" />,
+        },
 ].filter(Boolean) as Question[];
 
 const writeOnboardingExtras = async (
@@ -411,14 +267,15 @@ const writeOnboardingExtras = async (
     const existing = readCarrierExtras(userId);
     const contactInfo = answers.contact_info ?? {};
     const businessInfo = answers.business_info ?? {};
-    const identityInfo = answers.identity_info ?? {};
-    const operationsProfile = answers.operations_profile ?? {};
-    const verificationPreferences = answers.verification_preferences ?? {};
+    const quickProfile = answers.quick_profile ?? {};
+    const countryCode = answers.country ?? existing.countryCode ?? "GB";
     const nextValue: CarrierProfileExtras = {
       ...existing,
       accountType,
       email: userEmail ?? existing.email ?? null,
-      countryCode: answers.country ?? existing.countryCode ?? null,
+      countryCode,
+      countryName: getCountryName(countryCode),
+      currency: getCurrencyForCountry(countryCode),
       phone: contactInfo.phone ?? existing.phone ?? null,
       city: contactInfo.city ?? existing.city ?? null,
       contactPerson:
@@ -427,53 +284,14 @@ const writeOnboardingExtras = async (
           : contactInfo.full_name ?? existing.contactPerson ?? null,
       companyName:
         accountType === "company"
-          ? businessInfo.company_name ?? existing.companyName ?? null
+          ? businessInfo.company_name ?? quickProfile.company_name ?? existing.companyName ?? null
           : contactInfo.full_name ?? existing.companyName ?? null,
-      address:
-        accountType === "company"
-          ? businessInfo.business_address ?? existing.address ?? null
-          : existing.address ?? null,
-      operatorId:
-        accountType === "company"
-          ? businessInfo.operator_licence ?? existing.operatorId ?? null
-          : identityInfo.driver_license ?? existing.operatorId ?? null,
-      registrationNo:
-        accountType === "company"
-          ? businessInfo.registration_no ?? existing.registrationNo ?? null
-          : null,
-      nationalId:
-        accountType === "individual"
-          ? identityInfo.national_id ?? existing.nationalId ?? null
-          : existing.nationalId ?? null,
-      insuranceExpiry:
-        accountType === "company"
-          ? verificationPreferences.insurance_expiry ?? existing.insuranceExpiry ?? null
-          : existing.insuranceExpiry ?? null,
+      address: businessInfo.business_address ?? existing.address ?? null,
+      registrationNo: businessInfo.registration_no ?? existing.registrationNo ?? null,
       primaryVehicle:
         accountType === "individual"
-          ? operationsProfile.primary_vehicle ?? existing.primaryVehicle ?? null
+          ? quickProfile.primary_vehicle ?? existing.primaryVehicle ?? null
           : existing.primaryVehicle ?? null,
-      vehicleTypes:
-        accountType === "company"
-          ? operationsProfile.vehicle_types ?? existing.vehicleTypes ?? null
-          : existing.vehicleTypes ?? null,
-      fleetSize:
-        accountType === "company"
-          ? operationsProfile.fleet_size ?? existing.fleetSize ?? null
-          : existing.fleetSize ?? null,
-      operatingRegion: operationsProfile.operating_region ?? existing.operatingRegion ?? null,
-      availability:
-        accountType === "individual"
-          ? answers.availability ?? existing.availability ?? null
-          : existing.availability ?? null,
-      directoryListing:
-        accountType === "company"
-          ? String(verificationPreferences.directory_listing ?? "").toLowerCase().includes("y")
-          : existing.directoryListing ?? null,
-      maxCapacityKg:
-        accountType === "individual"
-          ? operationsProfile.max_capacity_kg ?? existing.maxCapacityKg ?? null
-          : existing.maxCapacityKg ?? null,
     };
     await writeCarrierExtrasAsync(userId, nextValue);
     return;
@@ -482,13 +300,15 @@ const writeOnboardingExtras = async (
   const existing = readSupplierExtras(userId);
   const contactInfo = answers.contact_info ?? {};
   const businessInfo = answers.business_info ?? {};
-  const shippingProfile = answers.shipping_profile ?? {};
-  const financeProfile = answers.finance_profile ?? {};
+  const quickProfile = answers.quick_profile ?? {};
+  const countryCode = answers.country ?? existing.countryCode ?? "GB";
   const nextValue: SupplierProfileExtras = {
     ...existing,
     accountType,
     email: userEmail ?? existing.email ?? null,
-    countryCode: answers.country ?? existing.countryCode ?? null,
+    countryCode,
+    countryName: getCountryName(countryCode),
+    currency: getCurrencyForCountry(countryCode),
     phone: contactInfo.phone ?? existing.phone ?? null,
     city: contactInfo.city ?? existing.city ?? null,
     contactPerson:
@@ -496,17 +316,11 @@ const writeOnboardingExtras = async (
         ? contactInfo.contact_person ?? existing.contactPerson ?? null
         : contactInfo.full_name ?? existing.contactPerson ?? null,
     companyName:
+      quickProfile.company_name ??
       businessInfo.company_name ??
       (accountType === "individual" ? contactInfo.full_name ?? existing.companyName ?? null : existing.companyName ?? null),
     address: businessInfo.billing_address ?? existing.address ?? null,
     registrationNo: businessInfo.registration_no ?? existing.registrationNo ?? null,
-    taxId: financeProfile.tax_id ?? existing.taxId ?? null,
-    industry: shippingProfile.industry ?? existing.industry ?? null,
-    monthlyVolume: shippingProfile.monthly_volume ?? existing.monthlyVolume ?? null,
-    commodity: shippingProfile.primary_commodity ?? existing.commodity ?? null,
-    averageWeight: financeProfile.average_weight ?? existing.averageWeight ?? null,
-    averageValue: financeProfile.average_value ?? existing.averageValue ?? null,
-    invoicingEmail: financeProfile.invoicing_email ?? existing.invoicingEmail ?? null,
   };
   await writeSupplierExtrasAsync(userId, nextValue);
 };
@@ -684,23 +498,30 @@ function SetupContent() {
       company_name: nextBusinessInfo.company_name ?? suggestion.companyName,
     });
     setCompanySuggestions([]);
-    setAnswers((currentAnswers) => ({
-      ...currentAnswers,
-      company_lookup: {
-        company_name: nextBusinessInfo.company_name ?? suggestion.companyName,
-      },
-      business_info: nextBusinessInfo,
-      contact_info: {
-        ...(currentAnswers.contact_info ?? {}),
-        city:
-          currentAnswers.contact_info?.city ??
-          suggestion.address?.locality ??
-          "",
-      },
-    }));
-    setTimeout(() => {
-      setCurrentStep((step) => Math.min(step + 1, questions.length - 1));
-    }, 200);
+    setAnswers((currentAnswers) => {
+      const mergedAnswers = {
+        ...currentAnswers,
+        company_lookup: {
+          company_name: nextBusinessInfo.company_name ?? suggestion.companyName,
+        },
+        business_info: nextBusinessInfo,
+        contact_info: {
+          ...(currentAnswers.contact_info ?? {}),
+          city:
+            currentAnswers.contact_info?.city ??
+            suggestion.address?.locality ??
+            "",
+        },
+      };
+      setTimeout(() => {
+        if (currentStep >= questions.length - 1) {
+          void saveOnboardingData(mergedAnswers);
+        } else {
+          setCurrentStep((step) => step + 1);
+        }
+      }, 200);
+      return mergedAnswers;
+    });
   };
 
   const handleSelect = (value: string) => {
@@ -782,40 +603,33 @@ function SetupContent() {
     }, 400);
   };
 
-  const saveOnboardingData = async () => {
+  const saveOnboardingData = async (answersOverride?: Record<string, any>) => {
     setIsSubmitting(true);
+    const payload = answersOverride ?? answers;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const accountType = answers.account_type;
-        const contactInfo = answers.contact_info ?? {};
-        const businessInfo = answers.business_info ?? {};
-        const operationsProfile = answers.operations_profile ?? {};
-        const shippingProfile = answers.shipping_profile ?? {};
+        const accountType = payload.account_type;
+        const contactInfo = payload.contact_info ?? {};
+        const businessInfo = payload.business_info ?? {};
+        const quickProfile = payload.quick_profile ?? {};
         const phone = contactInfo.phone ?? null;
         const fullName =
           accountType === "company"
             ? contactInfo.contact_person ?? null
             : contactInfo.full_name ?? null;
 
-        await writeOnboardingExtras(role, user.id, user.email ?? null, accountType, answers);
+        await writeOnboardingExtras(role, user.id, user.email ?? null, accountType, payload);
 
         const updatePayload: Record<string, string | null> = {
           full_name: fullName,
           company_name:
             role === "carrier"
               ? accountType === "company"
-                ? businessInfo.company_name ?? null
+                ? businessInfo.company_name ?? quickProfile.company_name ?? null
                 : null
-              : businessInfo.company_name ?? null,
-          fleet_size:
-            role === "carrier" && accountType === "company"
-              ? operationsProfile.fleet_size ?? null
-              : null,
-          industry:
-            role === "supplier"
-              ? shippingProfile.industry ?? null
-              : null,
+              : businessInfo.company_name ?? quickProfile.company_name ?? null,
+          phone,
         };
 
         const { error } = await supabase
@@ -825,8 +639,7 @@ function SetupContent() {
 
         if (error) throw error;
 
-        const referralInfo = answers.referral_code ?? {};
-        const referralCode = (referralInfo.referral_code || searchParams.get("ref") || "")
+        const referralCode = (searchParams.get("ref") || "")
           .trim()
           .toUpperCase();
 

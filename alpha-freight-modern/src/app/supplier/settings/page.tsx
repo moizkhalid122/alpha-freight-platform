@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import {
   Settings,
   Bell,
@@ -76,6 +77,7 @@ function Toggle({
 }
 
 export default function SupplierSettings() {
+  const market = useMarketCurrency("supplier");
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
@@ -353,14 +355,14 @@ export default function SupplierSettings() {
           </div>
           <div>
             <h2 className="text-[14px] font-bold text-slate-900">Regional</h2>
-            <p className="text-[11px] text-slate-500">Fixed for UK marketplace</p>
+            <p className="text-[11px] text-slate-500">Based on your account country</p>
           </div>
         </div>
         <div className="divide-y divide-slate-100">
           {[
-            { label: "Language", value: "English (United Kingdom)" },
-            { label: "Currency", value: "GBP (£)" },
-            { label: "Timezone", value: "Europe/London (GMT/BST)" },
+            { label: "Country", value: market.countryName },
+            { label: "Currency", value: `${market.currency} (${market.market.symbol})` },
+            { label: "Language", value: market.market.locale.replace("-", " · ") },
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between px-5 py-4 sm:px-6">
               <div>
