@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { ExternalLink, FileText, ShieldCheck, User } from "lucide-react";
+import { ExternalLink, FileText, ShieldCheck } from "lucide-react";
 
+import AdminProfilePhotoPreview from "@/components/admin/AdminProfilePhotoPreview";
 import { AdminHrHeader, AdminHrTabs, AdminPanel } from "@/components/admin/AdminHrShell";
 import { useAdminEmployeeOnboarding, type AdminEmployeeOnboardingRow } from "@/hooks/useAdminEmployeeData";
 
@@ -61,21 +61,10 @@ function OnboardingCard({ row }: { row: AdminEmployeeOnboardingRow }) {
     <AdminPanel className="overflow-hidden">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         <div className="flex shrink-0 items-start gap-4">
-          <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">
-            {row.profile_photo_url ? (
-              <Image
-                src={row.profile_photo_url}
-                alt={row.full_name ?? "Employee photo"}
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-slate-400">
-                <User className="h-8 w-8" />
-              </div>
-            )}
-          </div>
+          <AdminProfilePhotoPreview
+            src={row.profile_photo_url}
+            alt={row.full_name ?? "Employee photo"}
+          />
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-lg font-black text-slate-900">{row.full_name ?? "Unnamed team member"}</h3>
