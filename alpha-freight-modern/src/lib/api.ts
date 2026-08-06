@@ -172,6 +172,7 @@ export async function streamPublicChatMessage(
     language?: string;
     sessionMemory?: SendChatMessageOptions["sessionMemory"];
     assistantType?: AssistantKind;
+    imageDataUrl?: string;
   } = {},
   callbacks: PublicChatStreamCallbacks = {}
 ): Promise<ChatApiExtendedResponse> {
@@ -186,6 +187,7 @@ export async function streamPublicChatMessage(
       signal: controller.signal,
       body: JSON.stringify({
         message,
+        imageDataUrl: options.imageDataUrl,
         history: options.history || [],
         language: options.language,
         sessionMemory: options.sessionMemory,
