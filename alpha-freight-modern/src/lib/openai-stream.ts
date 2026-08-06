@@ -4,6 +4,20 @@ import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
 import { buildEmployeeTeamAiSystemPrompt } from "@/lib/employee-team-ai-prompt";
 import { generalKnowledgeCategory } from "@/lib/public-ai-live-search";
 import { fetchWithTimeout, OPENAI_STREAM_TIMEOUT_MS } from "@/lib/copilot/fetch-utils";
+import { isValidImageDataUrl } from "@/lib/chat-image-upload";
+import { VISION_ANALYSIS_CONTEXT } from "@/lib/openai-vision";
+
+type OpenAiTextPart = { type: "text"; text: string };
+type OpenAiImagePart = {
+  type: "image_url";
+  image_url: { url: string; detail?: "auto" | "low" | "high" };
+};
+type OpenAiUserContent = string | Array<OpenAiTextPart | OpenAiImagePart>;
+
+type OpenAiStreamMessage = {
+  role: "system" | "user" | "assistant";
+  content: OpenAiUserContent;
+};
 
 const ROLE_LABELS: Record<AssistantKind, string> = {
   general: "Alpha Freight AI",
@@ -132,13 +146,25 @@ export function inferPublicSuggestedQuestions(message: string, history: ChatHist
   return ["How do I find loads in the UK?", "What is RPM in haulage?", "Explain a general topic"];
 }
 
+function buildVisionUserContent(message: string, imageDataUrl: string): OpenAiUserContent {
+  const parts: Array<OpenAiTextPart | OpenAiImagePart> = [
+    { type: "text", text: message.trim().slice(0, 2000) },
+    {
+      type: "image_url",
+      image_url: { url: imageDataUrl, detail: "auto" },
+    },
+  ];
+  return parts;
+}
+
 export function buildPublicStreamMessages(options: {
   message: string;
   history?: ChatHistoryItem[];
   extraContext?: string;
   detectedIntent?: DetectedIntent;
   assistantType?: AssistantKind;
-}): Array<{ role: "system" | "user" | "assistant"; content: string }> {
+  imageDataUrl?: string;
+}): OpenAiStreamMessage[] {
   const history = normalizeHistory(options.history || []);
   const userMessage = options.message.trim().slice(0, 2000);
   const last = history[history.length - 1];
@@ -153,17 +179,27 @@ export function buildPublicStreamMessages(options: {
       })}`
     : "";
   const assistantType = options.assistantType ?? "general";
+  const hasImage = Boolean(options.imageDataUrl && isValidImageDataUrl(options.imageDataUrl));
+  const visionContext = hasImage ? `\n\n${VISION_ANALYSIS_CONTEXT}` : "";
 
   return [
     {
       role: "system",
-      content: buildPublicStreamSystemPrompt((options.extraContext || "") + intentHint, assistantType),
+      content: buildPublicStreamSystemPrompt(
+        (options.extraContext || "") + intentHint + visionContext,
+        assistantType
+      ),
     },
     ...historyForApi.map((item) => ({
       role: item.role as "user" | "assistant",
       content: item.content,
     })),
-    { role: "user", content: userMessage },
+    {
+      role: "user",
+      content: hasImage
+        ? buildVisionUserContent(userMessage, options.imageDataUrl!)
+        : userMessage,
+    },
   ];
 }
 
@@ -208,11 +244,16 @@ export async function* streamPublicOpenAiReply(options: {
   extraContext?: string;
   detectedIntent?: DetectedIntent;
   assistantType?: AssistantKind;
+  imageDataUrl?: string;
 }): AsyncGenerator<string> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return;
 
-  const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  const hasImage = Boolean(options.imageDataUrl && isValidImageDataUrl(options.imageDataUrl));
+  const model =
+    process.env.OPENAI_VISION_MODEL?.trim() ||
+    process.env.OPENAI_MODEL?.trim() ||
+    "gpt-4o-mini";
   const messages = buildPublicStreamMessages(options);
 
   try {
@@ -228,7 +269,7 @@ export async function* streamPublicOpenAiReply(options: {
           model,
           messages,
           temperature: 0.72,
-          max_tokens: 1600,
+          max_tokens: hasImage ? 1800 : 1600,
           stream: true,
         }),
       },
@@ -250,4 +291,57 @@ export async function* streamPublicOpenAiReply(options: {
 
 export function isOpenAiStreamConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY?.trim());
+}
+
+export async function getOpenAiVisionFallbackReply(options: {
+  message: string;
+  history?: ChatHistoryItem[];
+  extraContext?: string;
+  assistantType?: AssistantKind;
+  imageDataUrl: string;
+}): Promise<string | null> {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey || !isValidImageDataUrl(options.imageDataUrl)) return null;
+
+  const model =
+    process.env.OPENAI_VISION_MODEL?.trim() ||
+    process.env.OPENAI_MODEL?.trim() ||
+    "gpt-4o-mini";
+  const messages = buildPublicStreamMessages({
+    message: options.message,
+    history: options.history,
+    extraContext: options.extraContext,
+    assistantType: options.assistantType,
+    imageDataUrl: options.imageDataUrl,
+  });
+
+  try {
+    const response = await fetchWithTimeout(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.65,
+          max_tokens: 1600,
+        }),
+      },
+      OPENAI_STREAM_TIMEOUT_MS
+    );
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  } catch {
+    return null;
+  }
 }

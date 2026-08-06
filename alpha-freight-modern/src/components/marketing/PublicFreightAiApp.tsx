@@ -13,7 +13,6 @@ import {
   Home,
   PanelLeftClose,
   PanelLeft,
-  Plus,
   Search,
   Share2,
   SquarePen,
@@ -49,7 +48,13 @@ import EmailCaptureBar from "@/components/marketing/EmailCaptureBar";
 import AiRichMarkdown from "@/components/marketing/AiRichMarkdown";
 import AiPageBackground from "@/components/marketing/ai/AiPageBackground";
 import AiInputSuggestions from "@/components/marketing/ai/AiInputSuggestions";
+import AiAttachMenu, { AiImagePreview } from "@/components/marketing/ai/AiAttachMenu";
 import AiConfidenceFooter from "@/components/marketing/ai/AiConfidenceFooter";
+import {
+  CHAT_IMAGE_ACCEPT,
+  DEFAULT_CHAT_IMAGE_PROMPT,
+  readChatImageFile,
+} from "@/lib/chat-image-upload";
 import PublicAiMessageExtras from "@/components/marketing/ai/PublicAiMessageExtras";
 import { prependPersonality, getPersonalityPrefix } from "@/lib/ai-personality";
 import { playAiCompleteSound } from "@/lib/ai-complete-sound";
@@ -72,6 +77,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
   structuredMessage?: StructuredAssistantReply;
   meta?: {
     responseTimeMs?: number;
@@ -199,9 +205,12 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const [userRole, setUserRole] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [sessionMemory, setSessionMemory] = useState<PublicAiSessionMemory>(() => loadPublicAiMemory());
+  const [pendingImageUrl, setPendingImageUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const initialQueryHandled = useRef(false);
 
   const hasConversation = messages.some((m) => m.role === "user");
@@ -291,6 +300,8 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const handleNewChat = () => {
     setMessages([]);
     setInput("");
+    setPendingImageUrl(null);
+    setImageError(null);
     setActiveChatId(null);
     setMobileSidebar(false);
     setSessionMemory({});
@@ -314,32 +325,57 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     if (firstQ) updateShareUrl(firstQ);
   };
 
-  const handleSend = async (text: string = input, e?: React.FormEvent) => {
+  const handleImageSelected = async (file: File | null) => {
+    if (!file) return;
+    setImageError(null);
+    try {
+      const dataUrl = await readChatImageFile(file);
+      setPendingImageUrl(dataUrl);
+      textareaRef.current?.focus();
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : "Could not upload image.");
+    }
+  };
+
+  const handleSend = async (
+    text: string = input,
+    e?: React.FormEvent,
+    options?: { imageDataUrl?: string | null }
+  ) => {
     e?.preventDefault();
     const trimmedText = text.trim();
-    if (!trimmedText || isTyping) return;
+    const imageDataUrl = options?.imageDataUrl ?? pendingImageUrl;
+    if ((!trimmedText && !imageDataUrl) || isTyping) return;
+
+    const effectiveText = trimmedText || DEFAULT_CHAT_IMAGE_PROMPT;
+    const displayText = trimmedText || "📷 Image uploaded";
 
     const chatId = activeChatId || Date.now().toString();
     if (!activeChatId) setActiveChatId(chatId);
 
-    updateShareUrl(trimmedText);
+    updateShareUrl(effectiveText);
 
     const priorHistory = buildHistory(messages);
-    const instantSocial = buildPublicInstantSocialReply(trimmedText, priorHistory);
+    const instantSocial = imageDataUrl
+      ? null
+      : buildPublicInstantSocialReply(effectiveText, priorHistory);
 
-    const nextMemory = extractMemoryFromText(trimmedText, sessionMemory);
+    const nextMemory = extractMemoryFromText(effectiveText, sessionMemory);
     setSessionMemory(nextMemory);
     savePublicAiMemory(nextMemory);
 
     const userMessage: Message = {
       id: `${Date.now()}-user`,
       role: "user",
-      content: trimmedText,
+      content: displayText,
+      imageUrl: imageDataUrl || undefined,
     };
 
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setInput("");
+    setPendingImageUrl(null);
+    setImageError(null);
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -349,7 +385,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       const aiMessageId = `${Date.now()}-assistant`;
       const body = prependPersonality(
         buildDisplayText(instantSocial.structuredMessage, instantSocial.message),
-        trimmedText
+        effectiveText
       );
       const withAssistant = [
         ...nextMessages,
@@ -358,7 +394,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
           role: "assistant" as const,
           content: body,
           structuredMessage: { ...instantSocial.structuredMessage, rawText: body, shortExplanation: body },
-          meta: { userQuery: trimmedText, responseTimeMs: 120 },
+          meta: { userQuery: effectiveText, responseTimeMs: 120 },
         },
       ];
       setMessages(withAssistant);
@@ -370,19 +406,23 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       return;
     }
 
-    setPendingQuery(trimmedText);
+    setPendingQuery(effectiveText);
     const aiMessageId = `${Date.now()}-assistant`;
     const requestStartedAt = Date.now();
     setIsTyping(true);
     setStreamingMessageId(null);
 
     let streamStarted = false;
-    const personalityPrefix = getPersonalityPrefix(trimmedText);
+    const personalityPrefix = getPersonalityPrefix(effectiveText);
 
     try {
       const aiResponse = await streamPublicChatMessage(
-        trimmedText,
-        { history: buildHistory(nextMessages), sessionMemory: nextMemory },
+        effectiveText,
+        {
+          history: buildHistory(nextMessages),
+          sessionMemory: nextMemory,
+          imageDataUrl: imageDataUrl || undefined,
+        },
         {
           onToken: (_delta, fullText) => {
             setIsTyping(false);
@@ -400,7 +440,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                   id: aiMessageId,
                   role: "assistant" as const,
                   content: display,
-                  meta: { userQuery: trimmedText },
+                  meta: { userQuery: effectiveText },
                 },
               ]);
               return;
@@ -436,7 +476,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
       setMessages((current) => {
         const exists = current.some((m) => m.id === aiMessageId);
-        const finalContent = prependPersonality(aiResponse.message || "", trimmedText);
+        const finalContent = prependPersonality(aiResponse.message || "", effectiveText);
         const updated = exists
           ? current.map((msg) =>
               msg.id === aiMessageId
@@ -450,7 +490,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                           shortExplanation: finalContent || msg.content,
                         }
                       : msg.structuredMessage,
-                    meta: { userQuery: trimmedText, responseTimeMs },
+                    meta: { userQuery: effectiveText, responseTimeMs },
                   }
                 : msg
             )
@@ -461,7 +501,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                 role: "assistant" as const,
                 content: finalContent,
                 structuredMessage: aiResponse.structuredMessage,
-                meta: { userQuery: trimmedText, responseTimeMs },
+                meta: { userQuery: effectiveText, responseTimeMs },
               },
             ];
         persistChat(chatId, updated);
@@ -663,6 +703,23 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
   const inputBox = (
     <div className="mx-auto w-full max-w-3xl">
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept={CHAT_IMAGE_ACCEPT}
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0] || null;
+          void handleImageSelected(file);
+          event.target.value = "";
+        }}
+      />
+      {pendingImageUrl ? (
+        <div className="mb-2 px-1">
+          <AiImagePreview imageUrl={pendingImageUrl} onRemove={() => setPendingImageUrl(null)} />
+        </div>
+      ) : null}
+      {imageError ? <p className="mb-2 px-1 text-xs text-red-600">{imageError}</p> : null}
       <motion.form
         initial={false}
         whileHover={{ scale: 1.005 }}
@@ -676,15 +733,19 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             void handleSend(value);
           }}
         />
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          className="mb-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#666] transition hover:bg-[#f4f4f4]/80"
-          aria-label="Attach"
-        >
-          <Plus className="h-5 w-5" />
-        </motion.button>
+        <AiAttachMenu
+          disabled={isTyping}
+          onPickImage={() => imageInputRef.current?.click()}
+          onQuickPrompt={(prompt) => {
+            setInput(prompt);
+            void handleSend(prompt);
+          }}
+          onWebSearch={() => {
+            const prompt = "UK diesel price today";
+            setInput(prompt);
+            void handleSend(prompt);
+          }}
+        />
 
         <textarea
           ref={textareaRef}
@@ -720,11 +781,11 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
           )}
           <motion.button
             type="submit"
-            whileHover={{ scale: input.trim() ? 1.08 : 1 }}
+            whileHover={{ scale: input.trim() || pendingImageUrl ? 1.08 : 1 }}
             whileTap={{ scale: 0.95 }}
-            disabled={isTyping || !input.trim()}
+            disabled={isTyping || (!input.trim() && !pendingImageUrl)}
             className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              input.trim() ? "bg-[#0d0d0d] text-white shadow-md hover:bg-[#333]" : "bg-[#f4f4f4] text-[#bbb]"
+              input.trim() || pendingImageUrl ? "bg-[#0d0d0d] text-white shadow-md hover:bg-[#333]" : "bg-[#f4f4f4] text-[#bbb]"
             } disabled:opacity-50`}
             aria-label="Send"
           >
@@ -886,6 +947,16 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                             whileHover={{ scale: 1.01 }}
                             className="max-w-[85%] rounded-[20px] border border-white/60 bg-white/70 px-5 py-3.5 text-[15px] leading-relaxed text-[#0d0d0d] shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl"
                           >
+                            {message.imageUrl ? (
+                              <div className="mb-3 overflow-hidden rounded-xl border border-[#ececec]">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={message.imageUrl}
+                                  alt="Uploaded"
+                                  className="max-h-56 w-full object-cover"
+                                />
+                              </div>
+                            ) : null}
                             {message.content}
                           </motion.div>
                         </div>

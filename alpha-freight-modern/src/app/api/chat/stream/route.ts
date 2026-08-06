@@ -7,7 +7,7 @@ import { checkPublicAiRateLimit, getClientIp, PUBLIC_AI_MESSAGE_LIMIT } from "@/
 import { createAuthedSupabaseFromRequest } from "@/lib/admin-api-db";
 import { detectIntent } from "@/lib/copilot/intent-detector";
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
-import { buildPublicPlainReply, inferPublicSuggestedQuestions, streamPublicOpenAiReply } from "@/lib/openai-stream";
+import { buildPublicPlainReply, inferPublicSuggestedQuestions, streamPublicOpenAiReply, getOpenAiVisionFallbackReply } from "@/lib/openai-stream";
 import { getOpenAiChatReply } from "@/lib/openai-chat";
 
 export const runtime = "nodejs";
@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const message = typeof body.message === "string" ? body.message.trim() : "";
+    const imageDataUrl =
+      typeof body.imageDataUrl === "string" && body.imageDataUrl.trim().startsWith("data:image/")
+        ? body.imageDataUrl.trim()
+        : "";
     const history = Array.isArray(body.history) ? body.history : [];
     const language = typeof body.language === "string" ? (body.language as LanguagePreference) : undefined;
     const assistantType: AssistantKind =
@@ -29,9 +33,13 @@ export async function POST(request: NextRequest) {
         ? body.assistantType
         : "general";
 
-    if (!message) {
-      return new Response(JSON.stringify({ error: "Message is required" }), { status: 400 });
+    if (!message && !imageDataUrl) {
+      return new Response(JSON.stringify({ error: "Message or image is required" }), { status: 400 });
     }
+
+    const effectiveMessage =
+      message ||
+      "Please analyze this image and explain what you see. If it relates to UK freight, POD, or delivery documents, tell me what looks complete or missing.";
 
     const supabase = createAuthedSupabaseFromRequest(request);
     const {
@@ -85,17 +93,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const prepared = await preparePublicStreamChat({
-      message,
-      assistantType,
-      history: history as ChatHistoryItem[],
-      language,
-      publicMode: true,
-      sessionMemory:
-        body.sessionMemory && typeof body.sessionMemory === "object"
-          ? (body.sessionMemory as CopilotContextMemory)
-          : undefined,
-    });
+    const prepared = imageDataUrl
+      ? {
+          mode: "stream" as const,
+          message: effectiveMessage,
+          history: history as ChatHistoryItem[],
+          assistantType,
+          extraContext: "",
+        }
+      : await preparePublicStreamChat({
+          message: effectiveMessage,
+          assistantType,
+          history: history as ChatHistoryItem[],
+          language,
+          publicMode: true,
+          sessionMemory:
+            body.sessionMemory && typeof body.sessionMemory === "object"
+              ? (body.sessionMemory as CopilotContextMemory)
+              : undefined,
+        });
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -115,7 +131,7 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const detected = detectIntent(message, prepared.assistantType);
+          const detected = detectIntent(effectiveMessage, prepared.assistantType);
           let fullText = "";
           let gotToken = false;
 
@@ -125,6 +141,7 @@ export async function POST(request: NextRequest) {
             extraContext: prepared.extraContext,
             detectedIntent: detected,
             assistantType: prepared.assistantType,
+            imageDataUrl: imageDataUrl || undefined,
           })) {
             gotToken = true;
             fullText += delta;
@@ -133,6 +150,35 @@ export async function POST(request: NextRequest) {
 
           if (!gotToken || !fullText.trim()) {
             markOpenAiUnreachable();
+
+            if (imageDataUrl) {
+              const visionReply = await getOpenAiVisionFallbackReply({
+                message: prepared.message,
+                history: prepared.history,
+                extraContext: prepared.extraContext,
+                assistantType: prepared.assistantType,
+                imageDataUrl,
+              });
+
+              if (visionReply?.trim()) {
+                const suggestedQuestions = inferPublicSuggestedQuestions(effectiveMessage, prepared.history);
+                let structuredMessage = buildPublicPlainReply(
+                  visionReply.trim(),
+                  prepared.assistantType,
+                  suggestedQuestions
+                );
+                structuredMessage = enrichPublicAiReply(structuredMessage, effectiveMessage);
+                structuredMessage.knowledgeSource = "openai+vision";
+                send("done", {
+                  message: visionReply.trim(),
+                  structuredMessage,
+                  source: "openai+vision",
+                  remaining: guestRemaining,
+                });
+                controller.close();
+                return;
+              }
+            }
 
             const retry = await getOpenAiChatReply({
               message: prepared.message,
@@ -144,7 +190,7 @@ export async function POST(request: NextRequest) {
             });
 
             if (retry?.message?.trim()) {
-              const suggestedQuestions = inferPublicSuggestedQuestions(message, prepared.history);
+              const suggestedQuestions = inferPublicSuggestedQuestions(effectiveMessage, prepared.history);
               let structuredMessage = buildPublicPlainReply(
                 retry.message.trim(),
                 prepared.assistantType,
@@ -152,7 +198,7 @@ export async function POST(request: NextRequest) {
                   ? retry.structuredMessage.suggestedQuestions
                   : suggestedQuestions
               );
-              structuredMessage = enrichPublicAiReply(structuredMessage, message);
+              structuredMessage = enrichPublicAiReply(structuredMessage, effectiveMessage);
               structuredMessage.knowledgeSource = prepared.extraContext.includes("Live web data")
                 ? "openai+web"
                 : "openai";
@@ -167,7 +213,7 @@ export async function POST(request: NextRequest) {
             }
 
             const fallback = await buildPublicChatStreamFallback(
-              message,
+              effectiveMessage,
               prepared.history,
               prepared.assistantType
             );
@@ -181,13 +227,13 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const suggestedQuestions = inferPublicSuggestedQuestions(message, prepared.history);
+          const suggestedQuestions = inferPublicSuggestedQuestions(effectiveMessage, prepared.history);
           let structuredMessage = buildPublicPlainReply(
             fullText.trim(),
             prepared.assistantType,
             suggestedQuestions
           );
-          structuredMessage = enrichPublicAiReply(structuredMessage, message);
+          structuredMessage = enrichPublicAiReply(structuredMessage, effectiveMessage);
           structuredMessage.knowledgeSource =
             prepared.extraContext.includes("Live web data") ? "openai+web" : "openai";
 
