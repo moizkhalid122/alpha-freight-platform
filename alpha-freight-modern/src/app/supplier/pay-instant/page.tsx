@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
+  Building2,
   CheckCircle2,
   CircleHelp,
   CreditCard,
@@ -13,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import PayInstantStripeCheckout from "@/components/payments/PayInstantStripeCheckout";
+import AlphaFreightBankTransferDetails from "@/components/payments/AlphaFreightBankTransferDetails";
 import CountrySelectField from "@/components/payments/CountrySelectField";
 import BillingAddressField from "@/components/payments/BillingAddressField";
 import { supabase } from "@/lib/supabase";
@@ -23,6 +25,7 @@ import {
   migrateLocalPaymentsToSupabase,
   moveSupplierPaymentToPayLater,
   resolveSupplierPaymentState,
+  upsertSupplierPaymentOrder,
   type SupplierPaymentRecord,
 } from "@/lib/supplier-payments";
 import { calculateSupplierTotal } from "@/lib/load-commission";
@@ -80,7 +83,7 @@ function SupplierPayInstantPageContent() {
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal" | "bank-transfer">("card");
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -190,6 +193,11 @@ function SupplierPayInstantPageContent() {
       .join("");
   }, [userName, activeOrder?.title]);
 
+  const loadReference = useMemo(() => {
+    if (!activeOrder?.loadId) return "";
+    return `AF-${activeOrder.loadId.slice(0, 8).toUpperCase()}`;
+  }, [activeOrder?.loadId]);
+
   const formatCardNumber = (value: string) =>
     value
       .replace(/\D/g, "")
@@ -207,7 +215,11 @@ function SupplierPayInstantPageContent() {
     if (!activeOrder || !supplierId) return;
 
     if (paymentMethod === "paypal") {
-      setFlashMessage("PayPal checkout is coming soon. Please use card for now.");
+      setFlashMessage("PayPal checkout is coming soon. Please use card or bank transfer for now.");
+      return;
+    }
+
+    if (paymentMethod === "bank-transfer") {
       return;
     }
 
@@ -291,6 +303,32 @@ function SupplierPayInstantPageContent() {
     setPaymentCompleted(true);
     setShowSuccessOverlay(true);
     await fetchCheckoutOrder();
+  };
+
+  const handleBankTransferSubmit = async () => {
+    if (!activeOrder || !supplierId || isPaid) return;
+
+    setIsProcessing(true);
+    setFlashMessage(null);
+
+    try {
+      await upsertSupplierPaymentOrder({
+        ...activeOrder,
+        paymentMethod: "bank-transfer",
+        paymentRoute: "pay-now",
+        paymentState: "pending",
+        dueLabel: "Awaiting bank transfer",
+      });
+
+      setFlashMessage(
+        "Bank transfer details saved. Send the payment using the reference above and our team will confirm within 1 business day."
+      );
+    } catch (error) {
+      console.error("Bank transfer save error:", error);
+      setFlashMessage("Could not save bank transfer details. Please try again or contact support.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleExitCheckout = async (destination: "pay-later" | "my-posts" = "pay-later") => {
@@ -382,7 +420,7 @@ function SupplierPayInstantPageContent() {
 
             <div className="mt-6">
               <p className={labelClass}>Payment method</p>
-              <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+              <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 <button
                   type="button"
                   onClick={() => setPaymentMethod("card")}
@@ -394,6 +432,18 @@ function SupplierPayInstantPageContent() {
                 >
                   <CreditCard className="h-4 w-4" />
                   Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("bank-transfer")}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-md border text-[14px] font-medium transition ${
+                    paymentMethod === "bank-transfer"
+                      ? "border-slate-900 bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                      : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                  }`}
+                >
+                  <Building2 className="h-4 w-4" />
+                  Bank transfer
                 </button>
                 <button
                   type="button"
@@ -538,12 +588,44 @@ function SupplierPayInstantPageContent() {
             {paymentMethod === "paypal" && (
               <div className="mt-6 rounded-md border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
                 <p className="text-[13px] font-medium text-slate-600">
-                  PayPal checkout is coming soon. Switch to card to complete this payment.
+                  PayPal checkout is coming soon. Switch to card or bank transfer to complete this payment.
                 </p>
               </div>
             )}
 
+            {paymentMethod === "bank-transfer" && (
+              <div className="mt-6 space-y-4">
+                <p className="text-[13px] leading-6 text-slate-500">
+                  Transfer <span className="font-semibold text-slate-800">{market.formatMoney(amount)}</span> to the
+                  official Alpha Freight business account below.
+                </p>
+                <AlphaFreightBankTransferDetails
+                  reference={loadReference}
+                  amountLabel={market.formatMoney(amount)}
+                />
+                <button
+                  type="button"
+                  onClick={handleBankTransferSubmit}
+                  disabled={isProcessing || isPaid}
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#6d28d9] text-[14px] font-semibold text-white transition hover:bg-[#5b21b6] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Building2 className="h-4 w-4" />
+                      I have sent the bank transfer
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
             {paymentMethod !== "card" || !isLiveCardCheckoutEnabled() ? (
+              paymentMethod === "bank-transfer" ? null : (
               <>
             <p className="mt-6 text-[13px] leading-6 text-slate-500">
               You will pay <span className="font-semibold text-slate-800">{market.formatMoney(amount)}</span> for this load.
@@ -586,6 +668,7 @@ function SupplierPayInstantPageContent() {
               )}
             </button>
               </>
+              )
             ) : null}
 
             <div className="mt-6 flex items-center gap-4 text-[13px] text-slate-400">
