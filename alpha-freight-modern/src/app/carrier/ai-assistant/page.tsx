@@ -19,7 +19,6 @@ import AiAssistantToolbar from "@/components/chat/AiAssistantToolbar";
 import ChatHistorySidebar from "@/components/chat/ChatHistorySidebar";
 import ProactiveAlertsBar from "@/components/chat/ProactiveAlertsBar";
 import PodUploadPanel from "@/components/chat/PodUploadPanel";
-import type { LanguagePreference } from "@/lib/copilot/language";
 import {
   buildCarrierWelcomeReply,
   isGreetingOnlyMessage,
@@ -460,7 +459,6 @@ export default function CarrierAIAssistant() {
   const [messageFeedback, setMessageFeedback] = useState<Record<string, "up" | "down" | null>>({});
   const [moreMessageId, setMoreMessageId] = useState<string | null>(null);
   const [sessionMemory, setSessionMemory] = useState<CopilotContextMemory | null>(null);
-  const [language, setLanguage] = useState<LanguagePreference>("english");
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [showPodPanel, setShowPodPanel] = useState(false);
@@ -752,7 +750,7 @@ export default function CarrierAIAssistant() {
       const aiResponse = await sendChatMessage(trimmedText, {
         assistantType: "carrier",
         history: buildHistory(nextMessages),
-        language,
+        language: "english",
         conversationId,
         confirmAction: /\bconfirm post load\b/i.test(trimmedText),
       });
@@ -954,8 +952,6 @@ export default function CarrierAIAssistant() {
 
                 <div className="mx-auto mt-8 max-w-3xl">
                   <AiAssistantToolbar
-                    language={language}
-                    onLanguageChange={setLanguage}
                     onOpenHistory={() => setHistoryOpen(true)}
                     onHandoff={handleHandoff}
                   />

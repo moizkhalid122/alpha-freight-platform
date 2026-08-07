@@ -263,6 +263,31 @@ export const marketingSeo = {
       "How Alpha Freight collects, uses, and protects personal data for carriers, suppliers, and platform users in the United Kingdom.",
     path: "/privacy-policy",
   }),
+  securityCentre: createPageMetadata({
+    title: "Security & Verification Centre | Alpha Freight",
+    description:
+      "Verify official Alpha Freight employees, communication channels, and payment methods. Learn how to protect yourself from fraud and report suspicious activity.",
+    path: "/security",
+    keywords: [
+      "Alpha Freight security",
+      "verify employee",
+      "freight fraud prevention",
+      "secure payments UK",
+      "Alpha Freight verification",
+    ],
+  }),
+  verifyEmployee: createPageMetadata({
+    title: "Verify Alpha Freight Employee | Official ID Check",
+    description:
+      "Instantly verify an Alpha Freight employee using their official Employee ID (AF-EMP-) or @alphafreightuk.com email before sharing information or making payments.",
+    path: "/verify-employee",
+    keywords: [
+      "verify Alpha Freight employee",
+      "employee ID check",
+      "AF-EMP verification",
+      "Alpha Freight employee lookup",
+    ],
+  }),
   termsOfService: createPageMetadata({
     title: "Terms of Service | Alpha Freight",
     description:

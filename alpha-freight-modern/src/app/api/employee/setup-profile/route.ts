@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 import { getAdminSupabase, isAdminServiceConfigured } from "@/lib/supabase-admin";
+import { generateEmployeeCode } from "@/lib/employee-code";
 
 type SetupBody = {
   fullName?: string;
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
   const { error: hrError } = await db.from("employee_profiles").upsert(
     {
       id: user.id,
+      employee_code: generateEmployeeCode(user.id),
       job_title: position,
       department,
       status: "active",

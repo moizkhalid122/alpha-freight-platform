@@ -64,6 +64,7 @@ async function ensureEmployeeAccountViaApi(
 }
 
 import { formatAuthError } from "@/lib/format-error";
+import { generateEmployeeCode } from "@/lib/employee-code";
 
 async function upsertEmployeeRows(
   supabase: SupabaseClient,
@@ -89,6 +90,7 @@ async function upsertEmployeeRows(
   const { error: hrError } = await supabase.from("employee_profiles").upsert(
     {
       id: userId,
+      employee_code: generateEmployeeCode(userId),
       job_title: identity.position,
       department: identity.department,
       status: "active",

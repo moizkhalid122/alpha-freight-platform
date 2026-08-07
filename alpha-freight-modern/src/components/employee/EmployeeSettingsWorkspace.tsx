@@ -20,6 +20,7 @@ import {
 import { EmployeePageHeader, EmployeePanel } from "@/components/employee/EmployeeShell";
 import { useEmployeeProfile } from "@/hooks/useEmployeeData";
 import { employeeOnboardingPath, employeePolicyPath } from "@/lib/employee-path";
+import { generateEmployeeCode } from "@/lib/employee-code";
 import { EMPLOYEE_POLICIES } from "@/lib/employee-policies";
 import {
   clearLocalOnboardingComplete,
@@ -181,6 +182,7 @@ export default function EmployeeSettingsWorkspace() {
   const initial = (displayName || "T").charAt(0).toUpperCase();
   const jobTitle = hr?.job_title ?? profile?.job_title ?? "Team Member";
   const department = hr?.department ?? profile?.department ?? "—";
+  const employeeCode = hr?.employee_code ?? (userId ? generateEmployeeCode(userId) : null);
 
   const handleRetryOnboarding = () => {
     if (userId) clearLocalOnboardingComplete(userId);
@@ -282,6 +284,9 @@ export default function EmployeeSettingsWorkspace() {
             <p className="mt-1 text-sm text-slate-500">
               {jobTitle} · {department}
             </p>
+            {employeeCode ? (
+              <p className="mt-2 font-mono text-sm font-semibold text-indigo-700">{employeeCode}</p>
+            ) : null}
             <p className="mt-2 text-sm text-slate-400">{displayEmail ?? "—"}</p>
             {hr?.onboarding_completed ? (
               <p className="mt-2 inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">

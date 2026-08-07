@@ -16,7 +16,6 @@ import {
   Gift,
   Clock,
   Sparkles,
-  Newspaper,
   MapPin,
 } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
@@ -26,7 +25,6 @@ const sidebarCategories = [
     name: "OVERVIEW",
     items: [
       { name: "Dashboard", path: "/supplier/dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-      { name: "Feed", path: "/supplier/feed", icon: <Newspaper className="w-4 h-4" />, badge: "NEW" },
       { name: "AI Assistant", path: "/supplier/ai-assistant", icon: <Sparkles className="w-4 h-4" />, badge: "NEW" },
     ]
   },
