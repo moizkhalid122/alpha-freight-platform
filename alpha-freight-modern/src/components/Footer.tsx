@@ -192,6 +192,8 @@ export function Footer() {
           <div className="flex flex-wrap justify-center gap-x-12 gap-y-3 md:justify-end">
             {[
               { name: "Privacy Policy", href: "/privacy-policy" },
+              { name: "Security Centre", href: "/security" },
+              { name: "Verify Employee", href: "/verify-employee" },
               { name: "Account Deletion", href: "/account-deletion" },
               { name: "Terms of Service", href: "/terms-of-service" },
               { name: "Cookies", href: "/cookie-policy" },

@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 export type EmployeeOnboardingRecord = {
   id: string;
+  employee_code: string | null;
   job_title: string | null;
   department: string | null;
   phone: string | null;
@@ -52,6 +53,7 @@ export function isOnboardingCookieComplete(userId: string, cookieValue?: string 
 function normalizeOnboardingRecord(row: Record<string, unknown>): EmployeeOnboardingRecord {
   return {
     id: String(row.id),
+    employee_code: (row.employee_code as string | null) ?? null,
     job_title: (row.job_title as string | null) ?? null,
     department: (row.department as string | null) ?? null,
     phone: (row.phone as string | null) ?? null,

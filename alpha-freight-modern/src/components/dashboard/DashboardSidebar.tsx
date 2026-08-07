@@ -20,7 +20,6 @@ import {
   Clock,
   Gift,
   Sparkles,
-  Newspaper,
 } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 
@@ -29,7 +28,6 @@ const sidebarCategories = [
     name: "OVERVIEW",
     items: [
       { name: "Dashboard", path: "/carrier/dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-      { name: "Feed", path: "/carrier/feed", icon: <Newspaper className="w-4 h-4" />, badge: "NEW" },
       { name: "AI Assistant", path: "/carrier/ai-assistant", icon: <Sparkles className="w-4 h-4" />, badge: "NEW" },
     ]
   },
