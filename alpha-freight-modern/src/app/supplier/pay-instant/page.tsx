@@ -727,7 +727,7 @@ function SupplierPayInstantPageContent() {
                     <span className="font-medium text-slate-800">{market.formatMoney(commissionBreakdown.loadValue)}</span>
                   </div>
                   <div className="flex justify-between text-[14px] text-slate-500">
-                    <span>Platform commission ({commissionBreakdown.tierLabel})</span>
+                    <span>Platform commission (4%)</span>
                     <span className="font-medium text-slate-800">{market.formatMoney(commissionBreakdown.commissionAmount)}</span>
                   </div>
                 </>

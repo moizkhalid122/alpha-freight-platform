@@ -21,6 +21,10 @@ import Navbar from "@/components/Navbar";
 import JsonLd from "@/components/seo/JsonLd";
 import { CinematicCTA, Footer } from "@/components/Footer";
 import { useMarketingSmoothScroll } from "@/hooks/useMarketingSmoothScroll";
+import {
+  CARRIER_COMMISSION_RATE,
+  SUPPLIER_COMMISSION_RATE,
+} from "@/lib/load-commission";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,6 +38,9 @@ const alwaysFree = [
   "Free freight tools & lane calculators",
 ];
 
+const supplierCommissionPercent = Math.round(SUPPLIER_COMMISSION_RATE * 100);
+const carrierCommissionPercent = Math.round(CARRIER_COMMISSION_RATE * 100);
+
 const pricingPlans = [
   {
     id: "supplier",
@@ -41,10 +48,10 @@ const pricingPlans = [
     name: "Supplier",
     price: "£0",
     period: "to join",
-    commission: "3–5%",
-    commissionNote: "due before delivery",
+    commission: `${supplierCommissionPercent}%`,
+    commissionNote: "fixed service fee before delivery",
     description:
-      "Post loads, receive verified carrier bids, and pay load value plus commission when you assign a carrier — before delivery starts.",
+      "Post loads, receive verified carrier bids, and pay load value plus a fixed 4% service fee when you assign a carrier — before delivery starts.",
     icon: Package,
     highlighted: false,
     cta: { label: "Post loads free", href: "/auth/signup?role=supplier" },
@@ -63,10 +70,10 @@ const pricingPlans = [
     name: "Carrier",
     price: "£0",
     period: "forever",
-    commission: "0%",
-    commissionNote: "no platform fee on earnings",
+    commission: `${carrierCommissionPercent}%`,
+    commissionNote: "deducted from displayed load rate",
     description:
-      "Find loads, submit bids, and get paid through the marketplace with zero membership or bidding fees.",
+      "Find loads, submit bids, and get paid through the marketplace with zero membership or bidding fees. Load rates shown are net after a fixed 3% platform fee.",
     icon: Truck,
     highlighted: true,
     cta: { label: "Find loads free", href: "/auth/signup?role=carrier" },
@@ -85,7 +92,7 @@ const pricingPlans = [
     name: "Enterprise",
     price: "Custom",
     period: "volume pricing",
-    commission: "From 3%",
+    commission: `From ${carrierCommissionPercent}%`,
     commissionNote: "negotiated by lane & volume",
     description:
       "Dedicated support, API access, and tailored commission for fleets, 3PLs, and high-volume shippers.",
@@ -104,17 +111,18 @@ const pricingPlans = [
 ];
 
 const commissionExamples = [
-  { loadValue: 500, rate: 3, fee: 15 },
-  { loadValue: 1000, rate: 4, fee: 40 },
-  { loadValue: 2500, rate: 5, fee: 125 },
-  { loadValue: 5000, rate: 3, fee: 150 },
+  { loadValue: 500, rate: supplierCommissionPercent, fee: 20 },
+  { loadValue: 1000, rate: supplierCommissionPercent, fee: 40 },
+  { loadValue: 2500, rate: supplierCommissionPercent, fee: 100 },
+  { loadValue: 5000, rate: supplierCommissionPercent, fee: 200 },
 ];
 
 const comparison = [
   { label: "Monthly subscription", alpha: "£0", traditional: "£99–£499/mo" },
   { label: "Load posting", alpha: "Free", traditional: "Per-seat or capped" },
   { label: "Carrier bidding", alpha: "Free", traditional: "Often extra" },
-  { label: "Commission model", alpha: "3–5% per load", traditional: "Hidden margins" },
+  { label: "Supplier service fee", alpha: "4% fixed", traditional: "Hidden margins" },
+  { label: "Carrier platform fee", alpha: "3% fixed", traditional: "Opaque deductions" },
   { label: "When you pay", alpha: "Before delivery", traditional: "After delivery + fees" },
 ];
 
@@ -124,16 +132,16 @@ const faqs = [
     a: "Yes. Suppliers and carriers can sign up, post loads, browse freight, and use core marketplace features at no monthly cost.",
   },
   {
-    q: "When is the 3–5% commission charged?",
-    a: "When you assign a carrier to your load, payment — including the 3–5% platform commission — is taken before delivery begins. No charge for posting loads or cancelled bookings before a carrier is confirmed.",
+    q: "When is the supplier commission charged?",
+    a: "When you assign a carrier to your load, payment — including the fixed 4% Alpha Freight service fee — is taken before delivery begins. No charge for posting loads or cancelled bookings before a carrier is confirmed.",
   },
   {
-    q: "Do carriers pay any platform fee?",
-    a: "No. Carriers join free, bid free, and keep their agreed load rate. Alpha Freight earns a supplier-side commission collected before delivery when a carrier is assigned.",
+    q: "Do carriers pay a platform fee?",
+    a: "Carriers join and bid free. A fixed 3% platform fee is deducted from the load rate shown on the board — carriers see and receive the net amount.",
   },
   {
-    q: "Why does commission vary between 3% and 5%?",
-    a: "The rate depends on load value, lane, volume, and account tier. High-volume shippers may qualify for lower rates — contact us for enterprise pricing.",
+    q: "Why are supplier and carrier rates different?",
+    a: "Suppliers pay a 4% service fee on top of the load price at checkout. Carriers see net rates after a 3% platform fee. Both are fixed — no small/medium/large tiers.",
   },
   {
     q: "Are there hidden fees?",
@@ -146,9 +154,9 @@ export default function PricingPage() {
   const pageRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [calcLoad, setCalcLoad] = useState(1000);
-  const [calcRate, setCalcRate] = useState(4);
 
-  const estimatedFee = Math.round((calcLoad * calcRate) / 100);
+  const estimatedFee = Math.round(calcLoad * SUPPLIER_COMMISSION_RATE);
+  const estimatedTotal = calcLoad + estimatedFee;
 
   useEffect(() => {
     if (!pageRef.current) return;
@@ -186,7 +194,7 @@ export default function PricingPage() {
           "@type": "WebPage",
           name: "Alpha Freight Pricing",
           description:
-            "Free to join, post loads, and find freight. Pay 3–5% commission before delivery when you assign a carrier.",
+            "Free to join, post loads, and find freight. Suppliers pay a fixed 4% service fee before delivery when you assign a carrier.",
           url: "https://www.alphafreightuk.com/pricing",
         }}
       />
@@ -220,8 +228,8 @@ export default function PricingPage() {
               </h1>
               <p className="pricing-hero-item mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg">
                 Create an account, post loads, and find haulage — all free. When you assign a carrier, payment
-                including a simple{" "}
-                <strong className="font-semibold text-slate-800">3–5% commission</strong> is collected before
+                including a fixed{" "}
+                <strong className="font-semibold text-slate-800">{supplierCommissionPercent}% supplier service fee</strong> is collected before
                 delivery. No monthly subscriptions. No bidding fees for carriers.
               </p>
 
@@ -398,11 +406,11 @@ export default function PricingPage() {
                   Commission calculator
                 </p>
                 <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                  See what 3–5% looks like in practice
+                  See what {supplierCommissionPercent}% looks like in practice
                 </h2>
                 <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-600">
-                  Supplier commission is calculated on the agreed load value when you assign a carrier.
-                  Payment — including commission — is collected before delivery. Adjust the sliders to
+                  Supplier commission is a fixed {supplierCommissionPercent}% on the agreed load value when you assign a carrier.
+                  Payment — including the service fee — is collected before delivery. Adjust the slider to
                   estimate your cost per shipment.
                 </p>
 
@@ -425,28 +433,13 @@ export default function PricingPage() {
                       className="mt-3 h-2 w-full cursor-pointer accent-[#7da600]"
                     />
                   </div>
-                  <div>
-                    <label className="flex items-center justify-between text-sm font-semibold text-slate-700">
-                      <span>Commission rate</span>
-                      <span>{calcRate}%</span>
-                    </label>
-                    <input
-                      type="range"
-                      min={3}
-                      max={5}
-                      step={0.5}
-                      value={calcRate}
-                      onChange={(e) => setCalcRate(Number(e.target.value))}
-                      className="mt-3 h-2 w-full cursor-pointer accent-[#7da600]"
-                    />
-                  </div>
                   <div className="rounded-2xl border border-[#BFFF07]/30 bg-[#BFFF07]/8 px-5 py-5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7da600]">
-                      Estimated commission
+                      Estimated service fee ({supplierCommissionPercent}%)
                     </p>
                     <p className="mt-2 text-4xl font-bold text-slate-900">£{estimatedFee}</p>
                     <p className="mt-2 text-sm text-slate-500">
-                      On a £{calcLoad.toLocaleString()} load at {calcRate}% — paid before delivery when carrier is assigned.
+                      Total payable: £{estimatedTotal.toLocaleString()} on a £{calcLoad.toLocaleString()} load — paid before delivery when carrier is assigned.
                     </p>
                   </div>
                 </div>

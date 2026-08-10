@@ -46,7 +46,7 @@ export default function LoadCommissionBreakdown({
         <div>
           <p className="text-[13px] font-bold text-slate-900">Platform commission</p>
           <p className="mt-0.5 text-[12px] text-slate-600">
-            Tiered by load value in your local currency — same fair rates for carriers and suppliers.
+            Fixed 4% Alpha Freight service fee on your load price — added to your total at checkout.
           </p>
         </div>
       </div>

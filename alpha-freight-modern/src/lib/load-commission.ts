@@ -1,50 +1,18 @@
-import { getCommissionThresholds, type MarketCurrencyCode } from "@/lib/market-currency";
+import type { MarketCurrencyCode } from "@/lib/market-currency";
 import { parseLoadMarketMeta } from "@/lib/load-market-meta";
 import { parseLoadFormMeta } from "@/lib/load-form-meta";
 
-export type LoadCommissionTier = "small" | "medium" | "large";
+/** Fixed supplier-side platform fee (added on top of load price). */
+export const SUPPLIER_COMMISSION_RATE = 0.04;
 
-export const LOAD_COMMISSION_TIER_RATES: Record<LoadCommissionTier, number> = {
-  small: 0.05,
-  medium: 0.04,
-  large: 0.03,
-};
-
-export const LOAD_COMMISSION_TIER_LABELS: Record<LoadCommissionTier, string> = {
-  small: "Small (5%)",
-  medium: "Medium (4%)",
-  large: "Large (3%)",
-};
-
-export function getLoadCommissionRate(
-  loadValue: number,
-  currency: MarketCurrencyCode | string = "GBP"
-): number {
-  const value = Math.max(0, Number(loadValue) || 0);
-  const { mediumMin, largeMin } = getCommissionThresholds(currency);
-  if (value > largeMin) return LOAD_COMMISSION_TIER_RATES.large;
-  if (value > mediumMin) return LOAD_COMMISSION_TIER_RATES.medium;
-  return LOAD_COMMISSION_TIER_RATES.small;
-}
-
-export function getLoadCommissionTier(
-  loadValue: number,
-  currency: MarketCurrencyCode | string = "GBP"
-): LoadCommissionTier {
-  const value = Math.max(0, Number(loadValue) || 0);
-  const { mediumMin, largeMin } = getCommissionThresholds(currency);
-  if (value > largeMin) return "large";
-  if (value > mediumMin) return "medium";
-  return "small";
-}
+/** Fixed carrier-side platform fee (deducted from displayed load price). */
+export const CARRIER_COMMISSION_RATE = 0.03;
 
 export type LoadCommissionBreakdown = {
   loadValue: number;
   commissionRate: number;
   commissionRatePercent: number;
   commissionAmount: number;
-  tier: LoadCommissionTier;
-  tierLabel: string;
   currency: MarketCurrencyCode | string;
 };
 
@@ -56,44 +24,48 @@ export type CarrierCommissionResult = LoadCommissionBreakdown & {
   carrierReceives: number;
 };
 
-export function calculateLoadCommission(
+export function getSupplierCommissionRate(): number {
+  return SUPPLIER_COMMISSION_RATE;
+}
+
+export function getCarrierCommissionRate(): number {
+  return CARRIER_COMMISSION_RATE;
+}
+
+function buildCommissionBreakdown(
   loadValue: number,
+  commissionRate: number,
   currency: MarketCurrencyCode | string = "GBP"
 ): LoadCommissionBreakdown {
   const load = Math.max(0, Number(loadValue) || 0);
-  const commissionRate = getLoadCommissionRate(load, currency);
-  const tier = getLoadCommissionTier(load, currency);
-  const commissionAmount = load * commissionRate;
 
   return {
     loadValue: load,
     commissionRate,
     commissionRatePercent: commissionRate * 100,
-    commissionAmount,
-    tier,
-    tierLabel: LOAD_COMMISSION_TIER_LABELS[tier],
+    commissionAmount: load * commissionRate,
     currency,
   };
 }
 
-/** Supplier pays load budget plus platform commission. */
+/** Supplier pays load price plus a fixed 4% platform commission. */
 export function calculateSupplierTotal(
   loadValue: number,
   currency: MarketCurrencyCode | string = "GBP"
 ): SupplierCommissionResult {
-  const breakdown = calculateLoadCommission(loadValue, currency);
+  const breakdown = buildCommissionBreakdown(loadValue, SUPPLIER_COMMISSION_RATE, currency);
   return {
     ...breakdown,
     totalPayable: breakdown.loadValue + breakdown.commissionAmount,
   };
 }
 
-/** Carrier sees and receives load budget minus platform commission. */
+/** Carrier sees and receives load price minus a fixed 3% platform commission. */
 export function calculateCarrierPayout(
   loadValue: number,
   currency: MarketCurrencyCode | string = "GBP"
 ): CarrierCommissionResult {
-  const breakdown = calculateLoadCommission(loadValue, currency);
+  const breakdown = buildCommissionBreakdown(loadValue, CARRIER_COMMISSION_RATE, currency);
   return {
     ...breakdown,
     carrierReceives: breakdown.loadValue - breakdown.commissionAmount,

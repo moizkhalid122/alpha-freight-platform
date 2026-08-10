@@ -28,9 +28,9 @@ export const marketingSeo = {
     path: "/services",
   }),
   pricing: createPageMetadata({
-    title: "Pricing | Free to Join — 3–5% Commission per Load | Alpha Freight",
+    title: "Pricing | Free to Join — 4% Supplier / 3% Carrier Fee | Alpha Freight",
     description:
-      "Alpha Freight pricing: free account, free load posting, and free load board access. Pay 3–5% commission before delivery when you assign a carrier — no monthly subscriptions.",
+      "Alpha Freight pricing: free account, free load posting, and free load board access. Suppliers pay a fixed 4% service fee before delivery; carriers see net rates after a 3% platform fee — no monthly subscriptions.",
     path: "/pricing",
     keywords: [
       "freight marketplace pricing UK",
