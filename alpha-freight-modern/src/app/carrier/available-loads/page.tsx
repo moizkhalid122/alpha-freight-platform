@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
-import { MAPBOX_TOKEN } from "@/lib/mapbox";
 import NothingLottie from "@/components/ui/NothingLottie";
 import { LoadCardSkeleton } from "@/components/motion/LoadCardSkeleton";
 import InstantBookSuccessOverlay from "@/components/carrier/InstantBookSuccessOverlay";
-import "mapbox-gl/dist/mapbox-gl.css";
-import mapboxgl from "mapbox-gl";
-import type { MapRef } from "react-map-gl/mapbox";
+import LoadRoutePreviewMap from "@/components/maps/LoadRoutePreviewMap";
+import CarrierLoadDetailsPanel from "@/components/carrier/CarrierLoadDetailsPanel";
 import {
   getCarrierDisplayPrice,
 } from "@/lib/load-commission";
@@ -79,42 +76,6 @@ type LoadRow = {
   special_instructions?: string | null;
   supplier_id?: string | null;
 };
-
-const MapComponent = dynamic(
-  () =>
-    import("react-map-gl/mapbox").then((mod) => {
-      const { Map } = mod;
-      const MapWrapper = React.forwardRef<MapRef, React.ComponentProps<typeof Map>>(function MapWrapper(
-        props,
-        ref
-      ) {
-        return (
-          <Map ref={ref} {...props}>
-            {props.children}
-          </Map>
-        );
-      });
-      return MapWrapper;
-    }),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-slate-50 text-[11px] font-medium text-slate-400">
-        Loading map…
-      </div>
-    ),
-  }
-);
-
-const MapSource = dynamic(() => import("react-map-gl/mapbox").then((mod) => mod.Source), {
-  ssr: false,
-});
-const MapLayer = dynamic(() => import("react-map-gl/mapbox").then((mod) => mod.Layer), {
-  ssr: false,
-});
-const MapMarker = dynamic(() => import("react-map-gl/mapbox").then((mod) => mod.Marker), {
-  ssr: false,
-});
 
 function formatDate(value?: string | null) {
   if (!value) return "TBC";
@@ -232,17 +193,16 @@ export default function AvailableLoadsPage() {
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [portalReady, setPortalReady] = useState(false);
 
-  const [originCoords, setOriginCoords] = useState<{ lng: number; lat: number } | null>(null);
-  const [destCoords, setDestCoords] = useState<{ lng: number; lat: number } | null>(null);
-  const [routeData, setRouteData] = useState<GeoJSON.Geometry | null>(null);
   const [estimatedDuration, setEstimatedDuration] = useState<number | null>(null);
   const [estimatedDistance, setEstimatedDistance] = useState<number | null>(null);
-  const [mapViewState, setMapViewState] = useState({
-    longitude: -2.5,
-    latitude: 54.5,
-    zoom: 5.5,
-  });
-  const mapRef = useRef<MapRef>(null);
+
+  const handleRouteMetrics = useCallback(
+    (metrics: { distanceMeters: number; durationSeconds: number } | null) => {
+      setEstimatedDuration(metrics?.durationSeconds ?? null);
+      setEstimatedDistance(metrics?.distanceMeters ?? null);
+    },
+    []
+  );
 
   const showToast = useCallback((type: "success" | "error", text: string) => {
     setToast({ type, text });
@@ -307,77 +267,10 @@ export default function AvailableLoadsPage() {
 
   useEffect(() => {
     if (!selectedLoad) {
-      setOriginCoords(null);
-      setDestCoords(null);
-      setRouteData(null);
       setEstimatedDuration(null);
       setEstimatedDistance(null);
-      return;
     }
-
-    const origin = getLoadOrigin(selectedLoad);
-    const destination = getLoadDestination(selectedLoad);
-
-    const geocode = async (query: string, setCoords: (coords: { lng: number; lat: number }) => void) => {
-      if (!query || query.length < 3) return;
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&limit=1`
-        );
-        const data = await res.json();
-        if (data.features?.length) {
-          const [lng, lat] = data.features[0].center;
-          setCoords({ lng, lat });
-        }
-      } catch (error) {
-        console.error("Geocoding error:", error);
-      }
-    };
-
-    void geocode(origin, setOriginCoords);
-    void geocode(destination, setDestCoords);
   }, [selectedLoad]);
-
-  useEffect(() => {
-    const fetchRoute = async () => {
-      if (!originCoords || !destCoords) {
-        setRouteData(null);
-        setEstimatedDuration(null);
-        setEstimatedDistance(null);
-        return;
-      }
-
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/directions/v5/mapbox/driving/${originCoords.lng},${originCoords.lat};${destCoords.lng},${destCoords.lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`
-        );
-        const data = await res.json();
-        if (data.routes?.[0]) {
-          setRouteData(data.routes[0].geometry);
-          setEstimatedDuration(data.routes[0].duration);
-          setEstimatedDistance(data.routes[0].distance);
-        }
-      } catch (error) {
-        console.error("Route error:", error);
-      }
-    };
-
-    void fetchRoute();
-  }, [originCoords, destCoords]);
-
-  useEffect(() => {
-    if (!mapRef.current || !originCoords || !destCoords) return;
-
-    const bounds = new mapboxgl.LngLatBounds();
-    bounds.extend([originCoords.lng, originCoords.lat]);
-    bounds.extend([destCoords.lng, destCoords.lat]);
-
-    mapRef.current.fitBounds(bounds, {
-      padding: { top: 88, bottom: 48, left: 48, right: 48 },
-      duration: 700,
-      maxZoom: 8,
-    });
-  }, [originCoords, destCoords, routeData]);
 
   const toggleSaved = (loadId: string, event?: React.MouseEvent) => {
     event?.stopPropagation();
@@ -756,77 +649,32 @@ export default function AvailableLoadsPage() {
           onClick={(event) => event.stopPropagation()}
         >
           <div className="grid min-h-0 flex-1 lg:grid-cols-2">
-            <div className="relative h-[280px] overflow-hidden border-b border-slate-100 bg-slate-50 lg:h-auto lg:border-b-0 lg:border-r">
-              <div className="absolute left-4 right-4 top-4 z-10 flex items-center justify-between">
-                <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-sm backdrop-blur">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Route preview</p>
-                  <p className="text-[12px] font-semibold text-slate-900">Live lane map</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedLoad(null)}
-                  className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-50"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <MapComponent
-                ref={mapRef}
-                {...mapViewState}
-                onMove={(evt: { viewState: typeof mapViewState }) => setMapViewState(evt.viewState)}
-                style={{ width: "100%", height: "100%" }}
-                mapStyle="mapbox://styles/mapbox/light-v11"
-                mapboxAccessToken={MAPBOX_TOKEN}
-                attributionControl={false}
+            <div className="relative min-h-[320px] lg:min-h-[420px] lg:border-r lg:border-slate-100">
+              <button
+                type="button"
+                onClick={() => setSelectedLoad(null)}
+                className="absolute right-4 top-4 z-20 rounded-lg border border-slate-200 bg-white p-2 text-slate-500 shadow-md transition hover:bg-slate-50"
               >
-                {routeData ? (
-                  <MapSource
-                    id="selected-load-route"
-                    type="geojson"
-                    data={{ type: "Feature", geometry: routeData, properties: {} }}
-                  >
-                    <MapLayer
-                      id="selected-load-route-layer"
-                      type="line"
-                      paint={{
-                        "line-color": "#2563eb",
-                        "line-width": 4,
-                        "line-opacity": 0.85,
-                      }}
-                      layout={{ "line-cap": "round", "line-join": "round" }}
-                    />
-                  </MapSource>
-                ) : null}
-                {originCoords ? (
-                  <MapMarker longitude={originCoords.lng} latitude={originCoords.lat} anchor="bottom">
-                    <div className="flex flex-col items-center">
-                      <div className="mb-1 rounded-md border border-white bg-blue-600 px-2 py-0.5 shadow-md">
-                        <span className="whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-white">
-                          Pickup
-                        </span>
-                      </div>
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-blue-600 shadow-lg">
-                        <MapPin className="h-3 w-3 text-white" />
-                      </div>
-                    </div>
-                  </MapMarker>
-                ) : null}
-                {destCoords ? (
-                  <MapMarker longitude={destCoords.lng} latitude={destCoords.lat} anchor="bottom">
-                    <div className="flex flex-col items-center">
-                      <div className="mb-1 rounded-md border border-white bg-emerald-500 px-2 py-0.5 shadow-md">
-                        <span className="whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-white">
-                          Delivery
-                        </span>
-                      </div>
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-lg">
-                        <MapPin className="h-3 w-3 text-white" />
-                      </div>
-                    </div>
-                  </MapMarker>
-                ) : null}
-              </MapComponent>
+                <X className="h-4 w-4" />
+              </button>
+
+              <LoadRoutePreviewMap
+                origin={getLoadOrigin(selectedLoad)}
+                destination={getLoadDestination(selectedLoad)}
+                notes={selectedLoad.notes}
+                enabled={Boolean(selectedLoad)}
+                className="h-full min-h-[320px] lg:min-h-[420px]"
+                minHeight="100%"
+                onMetrics={handleRouteMetrics}
+                overlayTopLeft={
+                  <div className="pointer-events-none rounded-xl border border-white/80 bg-white/95 px-3 py-2 shadow-md backdrop-blur">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Route preview</p>
+                    <p className="text-[12px] font-semibold text-slate-900">
+                      {getCity(getLoadOrigin(selectedLoad))} → {getCity(getLoadDestination(selectedLoad))}
+                    </p>
+                  </div>
+                }
+              />
             </div>
 
             <div className="overflow-y-auto p-5 sm:p-6">
@@ -884,29 +732,15 @@ export default function AvailableLoadsPage() {
                 ))}
               </div>
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-slate-200 px-3 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Equipment</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-900">
-                    {formatLabel(selectedLoad.equipment || selectedLoad.vehicle_type)}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-slate-200 px-3 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Weight</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-900">
-                    {selectedLoad.weight || selectedLoad.cargo_weight || "TBC"} kg
-                  </p>
-                </div>
-              </div>
-
-              {(selectedLoad.notes || selectedLoad.special_instructions) && (
-                <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/60 px-3 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700">Load notes</p>
-                  <p className="mt-1 text-[12px] leading-relaxed text-amber-900">
-                    {selectedLoad.notes || selectedLoad.special_instructions}
-                  </p>
-                </div>
-              )}
+              <CarrierLoadDetailsPanel
+                notes={selectedLoad.notes || selectedLoad.special_instructions}
+                origin={getLoadOrigin(selectedLoad)}
+                destination={getLoadDestination(selectedLoad)}
+                equipment={formatLabel(selectedLoad.equipment || selectedLoad.vehicle_type)}
+                weight={String(selectedLoad.weight || selectedLoad.cargo_weight || "")}
+                commodity={selectedLoad.commodity || selectedLoad.title || undefined}
+                className="mt-5"
+              />
 
               <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                 <button

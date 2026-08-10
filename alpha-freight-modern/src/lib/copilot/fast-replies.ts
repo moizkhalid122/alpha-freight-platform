@@ -3,6 +3,12 @@ import type { DetectedIntent } from "@/lib/copilot/intent-detector";
 import type { CopilotUserContext } from "@/lib/copilot/user-context";
 import { enrichPlatformReply } from "@/lib/copilot/platform-enrichment";
 import { calculateProfit, extractProfitFromMessage } from "@/lib/copilot/profit-calculator";
+import {
+  buildCarrierIntelligenceReply,
+  fetchMarketRateLoads,
+  buildSupplierAdviseReply,
+  buildCarrierProfitReply,
+} from "@/lib/copilot/carrier-intelligence";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
 import { inferPublicSuggestedQuestions } from "@/lib/openai-stream";
 import { buildEmployeeKnowledgeReply } from "@/lib/employee-team-ai-knowledge";
@@ -138,6 +144,10 @@ export function buildPlatformFastReply(
 
   if (intent.type === "loads_search" && userCtx.availableLoads.length > 0) {
     base.shortExplanation = `I found ${userCtx.availableLoads.length} active loads on the platform — ranked below.`;
+  } else if (intent.type === "bid_strategy") {
+    base.shortExplanation = "Reviewing your bid against corridor benchmarks.";
+  } else if (intent.type === "backhaul_search") {
+    base.shortExplanation = "Scanning return and corridor lanes to reduce empty miles.";
   } else if (intent.type === "active_loads_lookup" && userCtx.myLoads.length > 0) {
     base.shortExplanation = `You have ${userCtx.myLoads.length} load(s) on your account.`;
   } else if (intent.type === "earnings_lookup" && userCtx.wallet) {
@@ -173,6 +183,14 @@ export function buildProfitFastReply(
 ): { message: string; structuredMessage: StructuredAssistantReply } | null {
   const inputs = extractProfitFromMessage(message);
   if (!inputs?.rate || !inputs?.loadedMiles) return null;
+
+  if (assistantType === "carrier") {
+    const structured = buildCarrierProfitReply({
+      rate: inputs.rate,
+      loadedMiles: inputs.loadedMiles,
+    });
+    return { message: structured.shortExplanation, structuredMessage: structured };
+  }
 
   const result = calculateProfit({ rate: inputs.rate, loadedMiles: inputs.loadedMiles });
   const label = ROLE_LABELS[assistantType];

@@ -16,8 +16,19 @@ import { buildKbContext } from "@/lib/copilot/knowledge-base";
 import { fetchCopilotUserContext, formatUserContextForPrompt } from "@/lib/copilot/user-context";
 import { enrichPlatformReply, executeCreateLoad } from "@/lib/copilot/platform-enrichment";
 import { calculateProfit, extractProfitFromMessage } from "@/lib/copilot/profit-calculator";
-import { detectLanguage, getLanguageInstruction, buildGlossaryContext, type LanguagePreference } from "@/lib/copilot/language";
+import {
+  buildCarrierIntelligenceReply,
+  buildSupplierAdviseReply,
+  fetchMarketRateLoads,
+} from "@/lib/copilot/carrier-intelligence";
+import { detectLanguage, getLanguageInstruction, buildGlossaryContext, prefersNaturalLanguageReply, type LanguagePreference } from "@/lib/copilot/language";
 import { buildHandoffReply, logHandoffRequest } from "@/lib/copilot/handoff";
+import { parseRouteQuery } from "@/lib/public-ai-widgets";
+import {
+  buildObservationPromptBlock,
+  observeCarrierAiAssistantPage,
+  observeSupplierAiAssistantPage,
+} from "@/lib/copilot/page-observer";
 import { buildProactiveAlerts } from "@/lib/copilot/notifications";
 import { analyzePodText, buildPodHelpReply } from "@/lib/copilot/pod-analyzer";
 import { withTimeout } from "@/lib/copilot/timeout";
@@ -56,6 +67,7 @@ export type CopilotEngineInput = {
   conversationId?: string;
   publicMode?: boolean;
   sessionMemory?: CopilotContextMemory;
+  pageContext?: import("@/lib/chat-types").CopilotPageContext;
 };
 
 export type CopilotEngineResult = {
@@ -571,6 +583,7 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
   const supabase = input.request ? createAuthedSupabaseFromRequest(input.request) : null;
 
   const lang = detectLanguage(message, explicitLang);
+  const skipEnglishFastPaths = prefersNaturalLanguageReply(lang);
   const detected = detectIntent(message, assistantType);
   const fetchCtx = Boolean(supabase && needsUserContext(detected, Boolean(confirmAction)));
 
@@ -618,6 +631,32 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
   ]);
 
   const alerts = buildProactiveAlerts(userCtx);
+  let advisoryContextForLang: string | null = null;
+
+  if (userCtx && supabase && assistantType === "carrier") {
+    const marketLoads = await fetchMarketRateLoads(supabase);
+    const carrierIntel = buildCarrierIntelligenceReply(userCtx, detected, message, marketLoads);
+    if (carrierIntel) {
+      if (skipEnglishFastPaths) {
+        advisoryContextForLang = [
+          carrierIntel.title,
+          carrierIntel.shortExplanation,
+          ...(carrierIntel.keyPoints || []).slice(0, 5),
+          carrierIntel.recommendation,
+        ]
+          .filter(Boolean)
+          .join("\n");
+      } else {
+        saveChatMessagesAsync(supabase, inputConvId, message, carrierIntel, assistantType);
+        return {
+          message: [carrierIntel.title, carrierIntel.shortExplanation].filter(Boolean).join("\n\n"),
+          structuredMessage: carrierIntel,
+          source: "carrier-intelligence",
+          alerts,
+        };
+      }
+    }
+  }
 
   const profitFast = buildProfitFastReply(message, assistantType);
   if (profitFast && detected.needsProfitCalc) {
@@ -625,7 +664,49 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
     return { ...profitFast, source: "instant", alerts };
   }
 
-  if (userCtx && detected.platformIntent) {
+  if (userCtx && supabase && assistantType === "supplier") {
+    const routeFromMessage = parseRouteQuery(message);
+    const isPriceQuery =
+      detected.platformIntent?.type === "load_advise" ||
+      (/\b(price|rate|budget|offer|charge|cost|kitna|hinta|tarjous|budjetti|maksaa|paljonko)\b/i.test(message) &&
+        routeFromMessage);
+
+    if (isPriceQuery) {
+      const marketLoads = await fetchMarketRateLoads(supabase);
+      const draft = {
+        origin:
+          (detected.platformIntent?.type === "load_advise" && detected.platformIntent.origin) ||
+          routeFromMessage?.origin ||
+          undefined,
+        destination:
+          (detected.platformIntent?.type === "load_advise" && detected.platformIntent.destination) ||
+          routeFromMessage?.destination ||
+          undefined,
+      };
+      const supplierAdvise = buildSupplierAdviseReply(draft, marketLoads);
+
+      if (skipEnglishFastPaths) {
+        advisoryContextForLang = [
+          supplierAdvise.title,
+          supplierAdvise.shortExplanation,
+          ...(supplierAdvise.keyPoints || []).slice(0, 4),
+          supplierAdvise.recommendation,
+        ]
+          .filter(Boolean)
+          .join("\n");
+      } else {
+        saveChatMessagesAsync(supabase, inputConvId, message, supplierAdvise, assistantType);
+        return {
+          message: [supplierAdvise.title, supplierAdvise.shortExplanation].filter(Boolean).join("\n\n"),
+          structuredMessage: supplierAdvise,
+          source: "supplier-load-advisor",
+          alerts,
+        };
+      }
+    }
+  }
+
+  if (userCtx && detected.platformIntent && !skipEnglishFastPaths) {
     const platformFast = buildPlatformFastReply(userCtx, detected, message, assistantType);
     if (platformFast) {
       if (supabase) saveChatMessagesAsync(supabase, inputConvId, message, platformFast.structuredMessage, assistantType);
@@ -639,15 +720,18 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
     return { ...fast, alerts };
   }
 
-  if (isGreetingOrThanks(message, history)) {
+  if (isGreetingOrThanks(message, history) && !skipEnglishFastPaths) {
     const instant = buildInstantMarketingReply(message, assistantType, history);
     if (supabase) saveChatMessagesAsync(supabase, inputConvId, message, instant.structuredMessage, assistantType);
     return { ...instant, source: "instant", alerts };
   }
 
   const extraContext: string[] = [getLanguageInstruction(lang)];
-  const glossary = buildGlossaryContext(message);
+  const glossary = buildGlossaryContext(message, lang);
   if (glossary) extraContext.push(glossary);
+  if (advisoryContextForLang) {
+    extraContext.push(`Live market/platform data — weave into your reply:\n${advisoryContextForLang}`);
+  }
   if (needsKbContext(message)) extraContext.push(buildKbContext(message));
   if (userCtx) extraContext.push(formatUserContextForPrompt(userCtx));
   if (detected.platformIntent) {
@@ -655,6 +739,24 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
   }
   if (webSearch?.ok && webSearch.answer) {
     extraContext.push(`Web: ${webSearch.answer.slice(0, 400)}`);
+  }
+
+  if (input.pageContext?.pageId === "supplier_ai_assistant") {
+    const observation = observeSupplierAiAssistantPage({
+      hasStarted: input.pageContext.hasStarted,
+      messageCount: input.pageContext.messageCount,
+      lastUserMessage: input.pageContext.lastUserMessage || message,
+      idleMs: input.pageContext.idleMs,
+    });
+    extraContext.push(`Page observation:\n${buildObservationPromptBlock(observation)}`);
+  } else if (input.pageContext?.pageId === "carrier_ai_assistant") {
+    const observation = observeCarrierAiAssistantPage({
+      hasStarted: input.pageContext.hasStarted,
+      messageCount: input.pageContext.messageCount,
+      lastUserMessage: input.pageContext.lastUserMessage || message,
+      idleMs: input.pageContext.idleMs,
+    });
+    extraContext.push(`Page observation:\n${buildObservationPromptBlock(observation)}`);
   }
 
   if (!isOpenAiConfigured()) {

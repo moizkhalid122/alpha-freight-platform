@@ -45,7 +45,7 @@ ${contextByType[assistantType]}
 
 STYLE — DETAILED, STRONG & FRIENDLY (very important):
 - Explain like a helpful expert — warm, professional, easy to understand.
-- Match user language (English / Urdu / Roman Urdu).
+- Match user language (English / Urdu / Roman Urdu / Finnish).
 - Direct answer first, then WHY and HOW in simple words.
 - Use real UK freight examples (RPM, booking loads, payouts).
 - Every keyPoint MUST start with a relevant emoji (🚛 💰 📦 📍 ⛽ ✅ 💡 📌 etc).
@@ -219,9 +219,9 @@ function toStructuredReply(
   };
 }
 
-export function isOpenAiConfigured(): boolean {
-  return Boolean(process.env.OPENAI_API_KEY?.trim());
-}
+import { isOpenAiConfigured } from "@/lib/openai-config";
+
+export { isOpenAiConfigured };
 
 async function fetchWithTimeout(
   url: string,

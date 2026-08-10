@@ -1,5 +1,6 @@
 import { getCommissionThresholds, type MarketCurrencyCode } from "@/lib/market-currency";
 import { parseLoadMarketMeta } from "@/lib/load-market-meta";
+import { parseLoadFormMeta } from "@/lib/load-form-meta";
 
 export type LoadCommissionTier = "small" | "medium" | "large";
 
@@ -102,8 +103,11 @@ export function calculateCarrierPayout(
 export function getLoadBudget(load: {
   price?: number | string | null;
   max_budget?: number | string | null;
+  load_price?: number | string | null;
+  notes?: string | null;
 }): number {
-  return Number(load.price || load.max_budget || 0);
+  const fromNotes = load.notes ? parseLoadFormMeta(load.notes)?.load_price : undefined;
+  return Number(load.price || load.load_price || fromNotes || load.max_budget || 0);
 }
 
 export function getCarrierDisplayPrice(

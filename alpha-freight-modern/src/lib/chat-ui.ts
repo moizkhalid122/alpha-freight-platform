@@ -1,3 +1,5 @@
+import type { StructuredAssistantReply } from "@/lib/chat-types";
+
 export type AssistantKind = "general" | "carrier" | "supplier" | "employee";
 
 const THINKING_STATES: Record<AssistantKind, string[]> = {
@@ -86,6 +88,40 @@ export function getTypingDelay(word: string): number {
   return 6;
 }
 
+export function hasStructuredCardContent(
+  structured?: StructuredAssistantReply | null
+): boolean {
+  if (!structured) return false;
+  return Boolean(
+    structured.title?.trim() ||
+      structured.shortExplanation?.trim() ||
+      (structured.keyPoints?.length ?? 0) > 0 ||
+      (structured.metrics?.length ?? 0) > 0 ||
+      (structured.quickActions?.length ?? 0) > 0 ||
+      structured.platformResult?.loads?.length ||
+      structured.actionRequest
+  );
+}
+
+export function shouldRenderStructuredCard(
+  structured?: StructuredAssistantReply | null
+): boolean {
+  if (!structured) return false;
+  if (!hasStructuredCardContent(structured)) return false;
+  return (
+    structured.displayStyle === "card" ||
+    structured.knowledgeSource === "openai" ||
+    structured.knowledgeSource === "carrier-intelligence" ||
+    structured.knowledgeSource === "supplier-load-advisor" ||
+    structured.knowledgeSource === "web_search" ||
+    (structured.keyPoints?.length ?? 0) > 0 ||
+    (structured.metrics?.length ?? 0) > 0 ||
+    Boolean(structured.platformResult?.loads?.length) ||
+    (structured.quickActions?.length ?? 0) > 0 ||
+    Boolean(structured.actionRequest)
+  );
+}
+
 /** Skip typewriter for instant local replies only — OpenAI streams like ChatGPT */
 export function shouldShowInstantReply(
   structured?: { knowledgeSource?: string } | null
@@ -94,7 +130,10 @@ export function shouldShowInstantReply(
   return (
     source === "platform-fast" ||
     source === "openai-retry" ||
-    source === "public-instant-social"
+    source === "public-instant-social" ||
+    source === "carrier-intelligence" ||
+    source === "supplier-load-advisor" ||
+    source === "instant"
   );
 }
 

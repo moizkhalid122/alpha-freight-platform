@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { AssistantKind, ChatHistoryItem } from "@/lib/chat-types";
+import type { AssistantKind, ChatHistoryItem, CopilotPageContext } from "@/lib/chat-types";
 import { runCopilotEngine } from "@/lib/copilot-engine";
 import type { LanguagePreference } from "@/lib/copilot/language";
 import { checkPublicAiRateLimit, getClientIp, PUBLIC_AI_MESSAGE_LIMIT } from "@/lib/public-ai-rate-limit";
@@ -18,6 +18,10 @@ export async function POST(request: NextRequest) {
     const confirmAction = Boolean(body.confirmAction);
     const conversationId = typeof body.conversationId === "string" ? body.conversationId : undefined;
     const publicMode = Boolean(body.publicMode);
+    const pageContext =
+      body.pageContext && typeof body.pageContext === "object"
+        ? (body.pageContext as CopilotPageContext)
+        : undefined;
 
     if (!message) {
       return NextResponse.json(
@@ -78,6 +82,7 @@ export async function POST(request: NextRequest) {
       confirmAction,
       conversationId,
       publicMode,
+      pageContext,
     });
 
     return NextResponse.json({

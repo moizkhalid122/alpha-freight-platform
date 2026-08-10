@@ -50,10 +50,16 @@ export interface CopilotPlatformIntent {
     | "support_lookup"
     | "bids_lookup"
     | "post_load_lookup"
-    | "earnings_lookup";
+    | "earnings_lookup"
+    | "bid_strategy"
+    | "backhaul_search"
+    | "load_advise";
   equipmentType?: string | null;
   location?: string | null;
   route?: string | null;
+  origin?: string | null;
+  destination?: string | null;
+  proposedBid?: number | null;
 }
 
 export interface CopilotPlatformLoad {
@@ -128,10 +134,20 @@ export interface ChatApiResponse {
   structuredMessage?: StructuredAssistantReply;
 }
 
+export type CopilotPageContext = {
+  pageId: "supplier_ai_assistant" | "carrier_ai_assistant" | "supplier_post_load";
+  hasStarted?: boolean;
+  messageCount?: number;
+  lastUserMessage?: string;
+  idleMs?: number;
+  currentStep?: number;
+};
+
 export type SendChatMessageOptions = {
   assistantType?: AssistantKind;
   mode?: CopilotMode;
   history?: ChatHistoryItem[];
   publicMode?: boolean;
   sessionMemory?: CopilotContextMemory;
+  pageContext?: CopilotPageContext;
 };

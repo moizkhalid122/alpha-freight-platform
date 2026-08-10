@@ -8,6 +8,7 @@ interface LanguageSelectorProps {
 }
 
 const OPTIONS: { value: LanguagePreference; label: string }[] = [
+  { value: "finnish", label: "Suomi" },
   { value: "english", label: "English" },
   { value: "roman_urdu", label: "Roman Urdu" },
   { value: "urdu", label: "اردو" },

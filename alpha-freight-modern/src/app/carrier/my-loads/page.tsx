@@ -15,6 +15,8 @@ import {
   normalizePodVerificationStatus,
 } from "@/lib/load-pod-verification";
 import { getCarrierDisplayPrice } from "@/lib/load-commission";
+import CarrierLoadDetailsPanel from "@/components/carrier/CarrierLoadDetailsPanel";
+import LoadRoutePreviewMap from "@/components/maps/LoadRoutePreviewMap";
 import { useMarketCurrency } from "@/hooks/useMarketCurrency";
 import { 
   Truck, 
@@ -166,7 +168,7 @@ function buildBaseLoad(load: any, podCase?: any, paymentOrder?: any) {
     paymentStatus: getPaymentStatus(load.status, podCase, paymentOrder),
     commodityLabel: load.commodity || load.load_type || "General freight",
     bookingSource: load.bid_id ? "Accepted Bid" : "Booked Load",
-    notes: load.notes || load.special_instructions || "No special instructions shared yet.",
+    notes: load.notes || load.special_instructions || "",
     podUrl: podCase?.url || load.pod_url || null,
     podName: podCase?.name || load.pod_name || null,
     podUploadedAt: podCase?.uploadedAt || load.pod_uploaded_at || null,
@@ -1232,7 +1234,7 @@ export default function MyLoadsPage() {
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
                   transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                  className="fixed inset-y-0 right-0 z-[201] flex h-[100dvh] w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-2xl"
+                  className="fixed inset-y-0 right-0 z-[201] flex h-[100dvh] w-full max-w-lg flex-col border-l border-slate-200 bg-white shadow-2xl"
                 >
                   <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
                     <div className="flex items-start justify-between gap-4">
@@ -1260,6 +1262,23 @@ export default function MyLoadsPage() {
                   </div>
 
                   <div className="flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+                    <LoadRoutePreviewMap
+                      origin={selectedLoad.origin}
+                      destination={selectedLoad.destination}
+                      notes={selectedLoad.notes}
+                      enabled={Boolean(selectedLoad)}
+                      className="mb-4 overflow-hidden rounded-xl border border-slate-200"
+                      minHeight={260}
+                      overlayTopLeft={
+                        <div className="pointer-events-none rounded-xl border border-white/80 bg-white/95 px-3 py-2 shadow-md backdrop-blur">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Route map</p>
+                          <p className="text-[12px] font-semibold text-slate-900">
+                            {getCity(selectedLoad.origin)} → {getCity(selectedLoad.destination)}
+                          </p>
+                        </div>
+                      }
+                    />
+
                     <div className={`rounded-xl border p-4 ${
                       activeTab === "active" ? "border-blue-100 bg-blue-50/60" :
                       activeTab === "pending" ? "border-amber-100 bg-amber-50/60" :
@@ -1338,10 +1357,15 @@ export default function MyLoadsPage() {
                       </dl>
                     </div>
 
-                    <div className="mt-4 rounded-xl border border-slate-200 p-4">
-                      <p className="text-[12px] font-semibold text-slate-900">Load notes</p>
-                      <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{selectedLoad.notes}</p>
-                    </div>
+                    <CarrierLoadDetailsPanel
+                      notes={selectedLoad.notes}
+                      origin={selectedLoad.origin}
+                      destination={selectedLoad.destination}
+                      equipment={formatLabel(selectedLoad.equipment)}
+                      weight={selectedLoad.weight ? String(selectedLoad.weight).replace(/\s*kg/i, "") : undefined}
+                      commodity={selectedLoad.commodityLabel}
+                      className="mt-4"
+                    />
                   </div>
 
                   <div className="border-t border-slate-100 px-5 py-4 sm:px-6">

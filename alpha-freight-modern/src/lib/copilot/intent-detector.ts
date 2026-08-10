@@ -1,4 +1,5 @@
 import type { AssistantKind, CopilotPlatformIntent, CopilotActionRequest } from "@/lib/chat-types";
+import { parseRouteQuery } from "@/lib/public-ai-widgets";
 
 export type DetectedIntent = {
   platformIntent?: CopilotPlatformIntent;
@@ -104,6 +105,34 @@ export function detectIntent(message: string, assistantType: AssistantKind): Det
       };
     } else if (/\b(wallet|payout|earnings|balance|payment|paisa|kamai)\b/i.test(lower)) {
       result.platformIntent = { type: "earnings_lookup" };
+    } else if (
+      /\b(backhaul|return load|empty miles|after delivery|delivery ke baad)\b/i.test(lower)
+    ) {
+      const locationMatch = lower.match(
+        /\b(?:from|near|in|after|around)\s+([a-z\s]{3,30}?)(?:\?|$|,|\band\b|\bto\b)/i
+      );
+      const routeMatch = lower.match(/([a-z\s]+?)\s*(?:to|->|→)\s*([a-z\s]+)/i);
+      result.platformIntent = {
+        type: "backhaul_search",
+        location: locationMatch?.[1]?.trim() || routeMatch?.[2]?.trim() || null,
+      };
+    } else if (
+      /\b(good bid|fair bid|should i bid|bid strategy|kitna bid|worth bidding|too low|too high|what rate|what price|how much should i bid|market rate for)\b/i.test(
+        lower
+      ) ||
+      (/\b(price|rate|bid|offer)\b/i.test(lower) &&
+        /\b(to|from|→|-)\b/i.test(lower) &&
+        parseRouteQuery(message))
+    ) {
+      const route = parseRouteQuery(message);
+      const bidMatch = lower.match(/£?\s*(\d+(?:\.\d+)?)/);
+      result.platformIntent = {
+        type: "bid_strategy",
+        origin: route?.origin || null,
+        destination: route?.destination || null,
+        proposedBid: bidMatch ? Number(bidMatch[1]) : null,
+        equipmentType: lower.match(/\b(artic|flatbed|reefer|curtain|box truck|sprinter)\b/i)?.[1] || null,
+      };
     }
   }
 
@@ -148,6 +177,20 @@ export function detectIntent(message: string, assistantType: AssistantKind): Det
       };
     } else if (/\b(my posts?|posted loads?|active shipments?)\b/i.test(lower)) {
       result.platformIntent = { type: "active_loads_lookup" };
+    } else if (
+      /\b(price suggest|suggest price|market rate|fair price|budget advice|validate load|check load|kya price|rate suggest|what price|how much should i|how much to pay|how much to offer|offer price|pricing for|estimate pric|rate for|kitna charge|kitna offer|kitna doon|kitna lagao|hinta|tarjous|budjetti|paljonko|kuinka paljon)\b/i.test(
+        lower
+      ) ||
+      (/\b(price|rate|budget|offer|charge|cost|bid)\b/i.test(lower) &&
+        /\b(to|from|→|-)\b/i.test(lower) &&
+        parseRouteQuery(message))
+    ) {
+      const route = parseRouteQuery(message);
+      result.platformIntent = {
+        type: "load_advise",
+        origin: route?.origin || null,
+        destination: route?.destination || null,
+      };
     }
   }
 

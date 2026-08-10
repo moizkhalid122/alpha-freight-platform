@@ -25,7 +25,13 @@ import {
   Eye,
   XCircle,
   Navigation,
+  Ban,
 } from "lucide-react";
+import CancelLoadModal from "@/components/supplier/CancelLoadModal";
+import {
+  canSupplierCancelLoad,
+  canSupplierDisputeLoad,
+} from "@/lib/load-cancellation";
 import { getSupplierPaymentOrdersForUser, resolveSupplierPaymentState, type SupplierPaymentRecord } from "@/lib/supplier-payments";
 import {
   canSupplierTrackShipment,
@@ -58,7 +64,7 @@ type LoadPost = LoadPodFields & {
   special_instructions?: string | null;
 };
 
-const FILTERS = ["all", "active", "booked", "in-transit", "pod-review", "completed"] as const;
+const FILTERS = ["all", "active", "booked", "in-transit", "pod-review", "completed", "cancelled"] as const;
 
 const OVERLAY_CLASS =
   "fixed inset-0 z-[200] min-h-[100dvh] w-screen bg-slate-900/45 backdrop-blur-[6px]";
@@ -105,6 +111,18 @@ const STATUS_STYLES: Record<string, { pill: string; accent: string; surface: str
     accent: "from-cyan-500 to-blue-500",
     surface: "bg-cyan-50/70",
     label: "Delivered — Review POD",
+  },
+  cancelled: {
+    pill: "bg-rose-50 text-rose-700 border border-rose-100",
+    accent: "from-rose-500 to-red-500",
+    surface: "bg-rose-50/70",
+    label: "Cancelled",
+  },
+  cancellation_requested: {
+    pill: "bg-orange-50 text-orange-700 border border-orange-100",
+    accent: "from-orange-500 to-amber-500",
+    surface: "bg-orange-50/70",
+    label: "Cancellation Pending",
   },
 };
 
@@ -158,7 +176,9 @@ function getStatusSummary(status: string, paymentState = "pending", load?: LoadP
   if (status === "booked") return "Capacity is locked. Carrier handoff can now begin.";
   if (status === "in-transit") return "The shipment is currently moving through execution.";
   if (status === "delivered") return "Carrier marked delivery complete. Review POD to close the shipment.";
-  if (status === "completed" || status === "delivered") return "Shipment cycle is complete and archived in history.";
+  if (status === "cancelled") return "This load was cancelled.";
+  if (status === "cancellation_requested") return "Cancellation request is under review by Alpha Freight.";
+  if (status === "completed") return "Shipment cycle is complete and archived in history.";
   return "Shipment record is live in your network.";
 }
 
@@ -210,6 +230,9 @@ function matchesFilter(post: LoadPost, filter: string, paymentState: string) {
     if (needsSupplierPodReview(post)) return false;
     return post.status === "completed" || post.status === "delivered";
   }
+  if (filter === "cancelled") {
+    return post.status === "cancelled" || post.status === "cancellation_requested";
+  }
   if (filter === "active") {
     return post.status === "active" && paymentState === "paid";
   }
@@ -242,6 +265,8 @@ export default function MyPostsPage() {
     canReview: boolean;
   } | null>(null);
   const [podConfirm, setPodConfirm] = useState<"approve" | "reject" | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<LoadPost | null>(null);
+  const [cancelMode, setCancelMode] = useState<"cancel" | "dispute">("cancel");
 
   useEffect(() => {
     setPortalReady(true);
@@ -349,6 +374,68 @@ export default function MyPostsPage() {
       "rejected",
       "POD rejected — carrier must reupload a signed delivery document."
     );
+  };
+
+  const openCancelModal = (post: LoadPost, mode: "cancel" | "dispute") => {
+    setCancelTarget(post);
+    setCancelMode(mode);
+  };
+
+  const submitCancelLoad = async (payload: { reason: string; reasonDetail?: string }) => {
+    if (!cancelTarget) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error("Please sign in again.");
+    }
+
+    const response = await fetch("/api/supplier/cancel-load", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        loadId: cancelTarget.id,
+        reason: payload.reason,
+        reasonDetail: payload.reasonDetail,
+        requestType: cancelMode === "dispute" ? "dispute" : "cancellation",
+      }),
+    });
+
+    const result = (await response.json()) as {
+      error?: string;
+      message?: string;
+      load?: LoadPost;
+    };
+
+    if (!response.ok) {
+      throw new Error(result.error || "Unable to process cancellation.");
+    }
+
+    if (result.load) {
+      setPosts((prev) => prev.map((post) => (post.id === cancelTarget.id ? { ...post, ...result.load } : post)));
+      setSelectedPost((prev) =>
+        prev?.id === cancelTarget.id ? { ...prev, ...result.load } : prev
+      );
+    } else {
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === cancelTarget.id
+            ? {
+                ...post,
+                status: cancelMode === "dispute" ? post.status : "cancelled",
+              }
+            : post
+        )
+      );
+    }
+
+    setCancelTarget(null);
+    showToast("success", result.message || "Request submitted successfully.");
   };
 
   const updateLoadStatus = async (loadId: string, newStatus: string) => {
@@ -555,6 +642,14 @@ export default function MyPostsPage() {
 
               const paymentBadge = getPaymentBadge(paymentState, paymentRoute, post.status);
               const paymentAction = showPaymentAction(paymentState, post.status);
+              const cancelEligibility = canSupplierCancelLoad({
+                ...post,
+                payment_state: paymentState,
+              });
+              const canDispute = canSupplierDisputeLoad({
+                ...post,
+                payment_state: paymentState,
+              });
 
               return (
                 <motion.div
@@ -703,6 +798,26 @@ export default function MyPostsPage() {
                         </button>
                       ) : null}
 
+                      {cancelEligibility.allowed ? (
+                        <button
+                          type="button"
+                          onClick={() => openCancelModal(post, "cancel")}
+                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700 transition hover:bg-rose-100 lg:flex-none"
+                        >
+                          <Ban className="h-3.5 w-3.5" />
+                          Cancel
+                        </button>
+                      ) : canDispute ? (
+                        <button
+                          type="button"
+                          onClick={() => openCancelModal(post, "dispute")}
+                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-700 transition hover:bg-amber-100 lg:flex-none"
+                        >
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          Dispute
+                        </button>
+                      ) : null}
+
                       <button
                         onClick={() => setSelectedPost(post)}
                         className="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50 lg:flex-none"
@@ -760,6 +875,14 @@ export default function MyPostsPage() {
                 selectedPost,
                 getSupplierPaymentStateForLoad(selectedPost, detailPayment?.paymentState)
               );
+              const detailCancelEligibility = canSupplierCancelLoad({
+                ...selectedPost,
+                payment_state: detailPaymentState,
+              });
+              const detailCanDispute = canSupplierDisputeLoad({
+                ...selectedPost,
+                payment_state: detailPaymentState,
+              });
 
               return (
                 <>
@@ -997,6 +1120,26 @@ export default function MyPostsPage() {
                     </button>
                   ) : null}
 
+                  {detailCancelEligibility.allowed ? (
+                    <button
+                      type="button"
+                      onClick={() => openCancelModal(selectedPost, "cancel")}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] font-semibold text-rose-700 transition hover:bg-rose-100"
+                    >
+                      <Ban className="h-4 w-4" />
+                      Cancel load
+                    </button>
+                  ) : detailCanDispute ? (
+                    <button
+                      type="button"
+                      onClick={() => openCancelModal(selectedPost, "dispute")}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] font-semibold text-amber-700 transition hover:bg-amber-100"
+                    >
+                      <AlertCircle className="h-4 w-4" />
+                      Raise dispute
+                    </button>
+                  ) : null}
+
                   {detailCanTrack ? (
                     <Link
                       href={`/supplier/track/${selectedPost.id}`}
@@ -1182,6 +1325,31 @@ export default function MyPostsPage() {
           </AnimatePresence>,
           document.body
         )}
+
+      {cancelTarget ? (
+        <CancelLoadModal
+          open={Boolean(cancelTarget)}
+          load={cancelTarget}
+          mode={cancelMode}
+          policyMessage={
+            cancelMode === "dispute"
+              ? "Submit a payment dispute for review. Include supporting details where possible."
+              : canSupplierCancelLoad({
+                  ...cancelTarget,
+                  payment_state: getPostPaymentState(cancelTarget),
+                }).message
+          }
+          autoRefund={
+            cancelMode === "cancel" &&
+            canSupplierCancelLoad({
+              ...cancelTarget,
+              payment_state: getPostPaymentState(cancelTarget),
+            }).autoRefund
+          }
+          onClose={() => setCancelTarget(null)}
+          onConfirm={submitCancelLoad}
+        />
+      ) : null}
     </div>
   );
 }

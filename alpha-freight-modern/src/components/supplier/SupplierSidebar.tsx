@@ -17,6 +17,7 @@ import {
   Clock,
   Sparkles,
   MapPin,
+  RotateCcw,
 } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 
@@ -41,6 +42,7 @@ const sidebarCategories = [
     name: "BUSINESS",
     items: [
       { name: "Pay Later", path: "/supplier/pay-later", icon: <Clock className="w-4 h-4" /> },
+      { name: "Refunds", path: "/supplier/refunds", icon: <RotateCcw className="w-4 h-4" /> },
       { name: "Referrals", path: "/supplier/referrals", icon: <Gift className="w-4 h-4" /> },
       { name: "Support", path: "/supplier/support", icon: <HelpCircle className="w-4 h-4" /> },
     ]

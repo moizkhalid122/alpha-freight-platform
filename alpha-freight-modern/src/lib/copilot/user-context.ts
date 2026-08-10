@@ -56,8 +56,9 @@ export async function fetchCopilotUserContext(
         .limit(6),
       supabase
         .from("loads")
-        .select("id,origin,destination,pickup_location,delivery_location,price,max_budget,equipment,vehicle_type,status")
+        .select("id,origin,destination,pickup_location,delivery_location,price,max_budget,equipment,vehicle_type,status,payment_state")
         .eq("status", "active")
+        .eq("payment_state", "paid")
         .order("created_at", { ascending: false })
         .limit(8),
       supabase

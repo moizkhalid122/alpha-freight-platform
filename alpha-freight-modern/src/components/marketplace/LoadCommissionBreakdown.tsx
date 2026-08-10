@@ -53,15 +53,17 @@ export default function LoadCommissionBreakdown({
 
       <div className="space-y-2 text-[12px]">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-slate-600">Load budget</span>
+          <span className="text-slate-600">Load price</span>
           <span className="font-semibold text-slate-900">{formatMoney(breakdown.loadValue)}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span className="text-slate-600">Commission ({breakdown.tierLabel})</span>
+          <span className="text-slate-600">
+            Alpha Freight service fee ({formatLoadCommissionRate(breakdown.commissionRate)})
+          </span>
           <span className="font-semibold text-slate-900">{formatMoney(breakdown.commissionAmount)}</span>
         </div>
         <div className="flex items-center justify-between gap-3 border-t border-blue-100 pt-2">
-          <span className="font-semibold text-slate-900">Total you pay</span>
+          <span className="font-semibold text-slate-900">Total to pay</span>
           <span className="text-[15px] font-bold text-slate-900">{formatMoney(breakdown.totalPayable)}</span>
         </div>
       </div>

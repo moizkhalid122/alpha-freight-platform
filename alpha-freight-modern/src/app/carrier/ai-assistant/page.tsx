@@ -5,7 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Copy, PenLine, Send, User, Sparkles, Route, Wallet } from "lucide-react";
 import Image from "next/image";
 import { sendChatMessage, saveChatFeedback, loadChatHistory, createNewConversation } from "@/lib/api";
-import { getSuggestedPrompts, getThinkingStates, getTypingDelay, waitForMinimumDuration, shouldShowInstantReply } from "@/lib/chat-ui";
+import {
+  getSuggestedPrompts,
+  getThinkingStates,
+  getTypingDelay,
+  shouldRenderStructuredCard,
+  waitForMinimumDuration,
+  shouldShowInstantReply,
+} from "@/lib/chat-ui";
 import AssistantMessageActions from "@/components/chat/AssistantMessageActions";
 import PreChatComposer from "@/components/chat/PreChatComposer";
 import { getCarrierDisplayPrice } from "@/lib/load-commission";
@@ -700,9 +707,16 @@ export default function CarrierAIAssistant() {
     await typeMessage(fullText, messageId);
     if (!structuredMessage) return;
 
+    const renderAsCard = shouldRenderStructuredCard(structuredMessage);
     setMessages((current) =>
       current.map((message) =>
-        message.id === messageId ? { ...message, structuredMessage, content: "" } : message
+        message.id === messageId
+          ? {
+              ...message,
+              structuredMessage,
+              content: renderAsCard ? "" : fullText,
+            }
+          : message
       )
     );
   };
@@ -750,9 +764,14 @@ export default function CarrierAIAssistant() {
       const aiResponse = await sendChatMessage(trimmedText, {
         assistantType: "carrier",
         history: buildHistory(nextMessages),
-        language: "english",
         conversationId,
         confirmAction: /\bconfirm post load\b/i.test(trimmedText),
+        pageContext: {
+          pageId: "carrier_ai_assistant",
+          hasStarted: true,
+          messageCount: nextMessages.length,
+          lastUserMessage: trimmedText,
+        },
       });
       const enrichedStructuredReply = aiResponse.structuredMessage?.platformResult
         ? aiResponse.structuredMessage
@@ -847,6 +866,12 @@ export default function CarrierAIAssistant() {
       const aiResponse = await sendChatMessage(prompt, {
         assistantType: "carrier",
         history,
+        pageContext: {
+          pageId: "carrier_ai_assistant",
+          hasStarted: true,
+          messageCount: userIndex + 1,
+          lastUserMessage: prompt,
+        },
       });
 
       const enrichedStructuredReply = await enrichCarrierPlatformData(
@@ -1079,17 +1104,7 @@ export default function CarrierAIAssistant() {
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
                 {messages.map((message, index) => (
                   (() => {
-                    const shouldRenderCard = Boolean(
-                      message.structuredMessage &&
-                        (
-                          message.structuredMessage.displayStyle === "card" ||
-                          message.structuredMessage.knowledgeSource === "openai" ||
-                          (message.structuredMessage.keyPoints?.length ?? 0) > 0 ||
-                          message.structuredMessage.platformResult?.loads?.length ||
-                          message.structuredMessage.quickActions?.length ||
-                          message.structuredMessage.actionRequest
-                        )
-                    );
+                    const shouldRenderCard = shouldRenderStructuredCard(message.structuredMessage);
 
                     return (
                   <motion.div

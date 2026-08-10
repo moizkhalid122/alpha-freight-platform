@@ -46,6 +46,19 @@ export default function CopilotResponseCard({
     );
   }
 
+  const displayTitle = response.title?.trim() || "";
+  const displayExplanation = response.shortExplanation?.trim() || fallbackText?.trim() || "";
+  const keyPoints = response.keyPoints ?? [];
+  const quickActions = response.quickActions ?? [];
+
+  if (!displayTitle && !displayExplanation && keyPoints.length === 0 && !response.metrics?.length) {
+    return (
+      <div className="px-0 py-1 text-slate-900">
+        <p className="text-sm leading-7 whitespace-pre-line">{fallbackText || "No response content available. Please try again."}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="px-0 py-1">
       <div className="flex flex-wrap items-start justify-between gap-3 pb-2">
@@ -61,10 +74,16 @@ export default function CopilotResponseCard({
               </span>
             ) : null}
           </div>
-          <h3 className="mt-3 text-[1.05rem] font-semibold leading-[1.28] tracking-[-0.03em] text-slate-950 sm:text-[1.16rem]">
-            {response.title}
-          </h3>
-          <p className="mt-2 text-sm leading-7 text-slate-700">{response.shortExplanation}</p>
+          {displayTitle ? (
+            <h3 className="mt-3 text-[1.05rem] font-semibold leading-[1.28] tracking-[-0.03em] text-slate-950 sm:text-[1.16rem]">
+              {displayTitle}
+            </h3>
+          ) : null}
+          {displayExplanation ? (
+            <p className={`${displayTitle ? "mt-2" : "mt-3"} text-sm leading-7 text-slate-700`}>
+              {displayExplanation}
+            </p>
+          ) : null}
         </div>
         {response.knowledgeSource ? (
           <p className="text-[11px] font-medium text-slate-400">
@@ -107,13 +126,13 @@ export default function CopilotResponseCard({
           </div>
         )}
 
-        {!!response.keyPoints.length && (
+        {!!keyPoints.length && (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
               Key Points
             </p>
             <div className="mt-3 space-y-2">
-              {response.keyPoints.map((point) => (
+              {keyPoints.map((point) => (
                 <p key={point} className="text-sm leading-7 text-slate-700">
                   <span className="mr-2 text-slate-400">•</span>
                   {point}
@@ -307,13 +326,13 @@ export default function CopilotResponseCard({
           </div>
         ) : null}
 
-        {!!response.quickActions.length && (
+        {!!quickActions.length && (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
               Quick Actions
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {response.quickActions.map((action) =>
+              {quickActions.map((action) =>
                 action.href ? (
                   <Link
                     key={`${action.label}-${action.href}`}

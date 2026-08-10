@@ -51,6 +51,7 @@ export async function sendChatMessage(
         conversationId: options.conversationId,
         confirmAction: options.confirmAction,
         publicMode: options.publicMode,
+        pageContext: options.pageContext,
       }),
     });
 

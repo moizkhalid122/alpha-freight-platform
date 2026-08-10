@@ -74,9 +74,10 @@ export function buildCarrierWelcomeReply(displayName?: string): StructuredAssist
       },
     ],
     suggestedQuestions: [
-      "Find loads near Dallas",
-      "Show my active bids",
-      "How can I reduce deadhead miles?",
+      "Find loads near Birmingham",
+      "Calculate profit £1200 for 204 miles",
+      "Is £950 a good bid for Birmingham to Manchester?",
+      "Find backhaul from London after delivery",
     ],
     actionRequest: null,
     memory: {
@@ -137,7 +138,8 @@ export function buildSupplierWelcomeReply(displayName?: string): StructuredAssis
       },
     ],
     suggestedQuestions: [
-      "Help me post a load",
+      "What price should I offer Manchester to London?",
+      "Review my load before posting",
       "Show my latest bids",
       "Track my active shipment",
     ],

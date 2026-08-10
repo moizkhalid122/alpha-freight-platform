@@ -196,6 +196,7 @@ export function Footer() {
               { name: "Verify Employee", href: "/verify-employee" },
               { name: "Account Deletion", href: "/account-deletion" },
               { name: "Terms of Service", href: "/terms-of-service" },
+              { name: "Refund & Cancellation", href: "/refund-cancellation-policy" },
               { name: "Cookies", href: "/cookie-policy" },
             ].map((item) => (
               <Link

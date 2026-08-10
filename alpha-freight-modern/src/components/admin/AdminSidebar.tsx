@@ -116,6 +116,11 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
         path: "/ops-af-7x9k2/post-load",
         icon: <PackagePlus className="h-4 w-4" />,
       },
+      {
+        name: "Refunds",
+        path: "/ops-af-7x9k2/refunds",
+        icon: <CreditCard className="h-4 w-4" />,
+      },
     ],
   },
   {

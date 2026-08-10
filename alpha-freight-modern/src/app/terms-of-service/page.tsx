@@ -282,6 +282,9 @@ export default function TermsOfServicePage() {
                 <Link href="/privacy-policy" className="inline-block text-sm text-violet-700 hover:underline">
                   Privacy Policy →
                 </Link>
+                <Link href="/refund-cancellation-policy" className="inline-block text-sm text-violet-700 hover:underline">
+                  Refund & Cancellation Policy →
+                </Link>
                 <Link href="/cookie-policy" className="inline-block text-sm text-violet-700 hover:underline">
                   Cookie Policy →
                 </Link>
