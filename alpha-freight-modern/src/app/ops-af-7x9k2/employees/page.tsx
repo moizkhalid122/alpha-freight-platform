@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { AdminHrHeader, AdminHrTabs, AdminPanel } from "@/components/admin/AdminHrShell";
 import EmployeePortalLinkCard from "@/components/admin/EmployeePortalLinkCard";
 import { useAdminEmployees } from "@/hooks/useAdminEmployeeData";
+import { adminRoute } from "@/lib/admin-path";
 
 function StatusPill({ status }: { status: string }) {
   const tone =
@@ -26,7 +29,7 @@ export default function AdminEmployeesPage() {
     <div>
       <AdminHrHeader
         title="Employees"
-        description="View and manage all Alpha Freight team members."
+        description="View and manage all Alpha Freight team members. Open any employee for their full A–Z record."
       />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees" />
       <EmployeePortalLinkCard />
@@ -48,18 +51,19 @@ export default function AdminEmployeesPage() {
                 <th className="px-5 py-4">Role</th>
                 <th className="px-5 py-4">Commission %</th>
                 <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-slate-400">
+                  <td colSpan={7} className="px-5 py-8 text-center text-slate-400">
                     Loading…
                   </td>
                 </tr>
               ) : employees.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-slate-400">
+                  <td colSpan={7} className="px-5 py-8 text-center text-slate-400">
                     No employees yet. Team members appear here after employee signup and onboarding.
                   </td>
                 </tr>
@@ -76,6 +80,15 @@ export default function AdminEmployeesPage() {
                     <td className="px-5 py-4 font-semibold text-slate-800">{emp.commission_rate}%</td>
                     <td className="px-5 py-4">
                       <StatusPill status={emp.status} />
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Link
+                        href={adminRoute(`/employees/${emp.id}`)}
+                        className="inline-flex items-center gap-1 text-sm font-bold text-blue-600 hover:underline"
+                      >
+                        Full record
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
                     </td>
                   </tr>
                 ))

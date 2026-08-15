@@ -1,15 +1,35 @@
-import type { EmployeeLead, LeadActivity } from "@/lib/employee-types";
+import { supabase } from "@/lib/supabase";
+import type { LeadActivity } from "@/lib/employee-types";
 
-const ACT_KEY = "af_lead_activities";
+const LEGACY_KEY = "af_lead_activities";
 
-function storageKey(userId: string) {
-  return `${ACT_KEY}_${userId}`;
+function legacyStorageKey(userId: string) {
+  return `${LEGACY_KEY}_${userId}`;
 }
 
-export function loadLeadActivities(userId: string, leadId: string): LeadActivity[] {
+function rowToActivity(row: {
+  id: string;
+  lead_id: string;
+  activity_type: string;
+  summary: string;
+  created_at: string;
+}): LeadActivity {
+  return {
+    id: row.id,
+    lead_id: row.lead_id,
+    activity_type: row.activity_type as LeadActivity["activity_type"],
+    summary: row.summary,
+    created_at: row.created_at,
+  };
+}
+
+function loadLegacyActivities(userId: string, leadId: string): LeadActivity[] {
   if (typeof window === "undefined") return [];
   try {
-    const all = JSON.parse(localStorage.getItem(storageKey(userId)) || "{}") as Record<string, LeadActivity[]>;
+    const all = JSON.parse(localStorage.getItem(legacyStorageKey(userId)) || "{}") as Record<
+      string,
+      LeadActivity[]
+    >;
     return (all[leadId] ?? []).sort(
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
@@ -18,35 +38,91 @@ export function loadLeadActivities(userId: string, leadId: string): LeadActivity
   }
 }
 
-export function loadAllLeadActivities(userId: string): Record<string, LeadActivity[]> {
-  if (typeof window === "undefined") return {};
+async function migrateLegacyActivities(userId: string, leadId: string): Promise<void> {
+  const legacy = loadLegacyActivities(userId, leadId);
+  if (!legacy.length) return;
+
+  const payload = legacy.map((item) => ({
+    lead_id: leadId,
+    employee_id: userId,
+    activity_type: item.activity_type,
+    summary: item.summary,
+    created_at: item.created_at,
+  }));
+
+  const { error } = await supabase.from("employee_lead_activities").insert(payload);
+  if (error) {
+    console.warn("Legacy activity migration skipped:", error.message);
+    return;
+  }
+
   try {
-    return JSON.parse(localStorage.getItem(storageKey(userId)) || "{}");
+    const all = JSON.parse(localStorage.getItem(legacyStorageKey(userId)) || "{}") as Record<
+      string,
+      LeadActivity[]
+    >;
+    delete all[leadId];
+    localStorage.setItem(legacyStorageKey(userId), JSON.stringify(all));
   } catch {
-    return {};
+    /* ignore */
   }
 }
 
-export function appendLeadActivity(
+export async function loadLeadActivities(userId: string, leadId: string): Promise<LeadActivity[]> {
+  const { data, error } = await supabase
+    .from("employee_lead_activities")
+    .select("id, lead_id, activity_type, summary, created_at")
+    .eq("employee_id", userId)
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("loadLeadActivities:", error.message);
+    return loadLegacyActivities(userId, leadId);
+  }
+
+  if ((data ?? []).length === 0) {
+    const legacy = loadLegacyActivities(userId, leadId);
+    if (legacy.length) {
+      await migrateLegacyActivities(userId, leadId);
+      return legacy;
+    }
+  }
+
+  return (data ?? []).map(rowToActivity);
+}
+
+export async function appendLeadActivity(
   userId: string,
   leadId: string,
   activity: Omit<LeadActivity, "id" | "lead_id" | "created_at"> & { created_at?: string }
-): LeadActivity {
-  const entry: LeadActivity = {
-    id: `act_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    lead_id: leadId,
-    activity_type: activity.activity_type,
-    summary: activity.summary,
-    created_at: activity.created_at ?? new Date().toISOString(),
-  };
+): Promise<LeadActivity | null> {
+  const createdAt = activity.created_at ?? new Date().toISOString();
 
-  if (typeof window !== "undefined") {
-    const all = loadAllLeadActivities(userId);
-    all[leadId] = [entry, ...(all[leadId] ?? [])];
-    localStorage.setItem(storageKey(userId), JSON.stringify(all));
+  const { data, error } = await supabase
+    .from("employee_lead_activities")
+    .insert({
+      lead_id: leadId,
+      employee_id: userId,
+      activity_type: activity.activity_type,
+      summary: activity.summary,
+      created_at: createdAt,
+    })
+    .select("id, lead_id, activity_type, summary, created_at")
+    .single();
+
+  if (error) {
+    console.error("appendLeadActivity:", error.message);
+    return null;
   }
 
-  return entry;
+  await supabase
+    .from("employee_leads")
+    .update({ last_activity_at: createdAt })
+    .eq("id", leadId)
+    .eq("employee_id", userId);
+
+  return rowToActivity(data);
 }
 
 export function formatActivityTime(iso: string): string {
@@ -58,7 +134,10 @@ export function formatActivityTime(iso: string): string {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-export function lastActivityLabel(lead: EmployeeLead, activities: LeadActivity[]): string {
+export function lastActivityLabel(
+  lead: { last_activity_at?: string | null },
+  activities: LeadActivity[]
+): string {
   if (activities[0]) return formatActivityTime(activities[0].created_at);
   if (lead.last_activity_at) return formatActivityTime(lead.last_activity_at);
   return "No activity";

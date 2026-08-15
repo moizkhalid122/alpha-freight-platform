@@ -10,6 +10,7 @@ const ALLOWED_TABLES = new Set([
   "employee_documents",
   "employee_training",
   "employee_leave_requests",
+  "employee_lead_activities",
 ]);
 
 export async function GET(request: NextRequest) {

@@ -2,6 +2,8 @@
 
 import { AdminHrHeader, AdminHrTabs, AdminPanel } from "@/components/admin/AdminHrShell";
 import { useAdminEmployees, useAdminTeamStats } from "@/hooks/useAdminEmployeeData";
+import { adminRoute } from "@/lib/admin-path";
+import Link from "next/link";
 
 export default function AdminEmployeePerformancePage() {
   const { employees, loading: employeesLoading } = useAdminEmployees();
@@ -63,7 +65,14 @@ export default function AdminEmployeePerformancePage() {
               ) : (
                 performance.map((row) => (
                   <tr key={row.id}>
-                    <td className="px-5 py-4 font-semibold text-slate-900">{row.name}</td>
+                    <td className="px-5 py-4">
+                      <Link
+                        href={adminRoute(`/employees/${row.id}`)}
+                        className="font-semibold text-blue-600 hover:underline"
+                      >
+                        {row.name}
+                      </Link>
+                    </td>
                     <td className="px-5 py-4 text-slate-600">{row.leads}</td>
                     <td className="px-5 py-4 text-slate-600">{row.calls}</td>
                     <td className="px-5 py-4 text-slate-600">{row.tasksDone}</td>

@@ -50,7 +50,7 @@ import {
   whatsAppHref,
   type LeadFilters,
 } from "@/lib/employee-leads-utils";
-import type { EmployeeLead } from "@/lib/employee-types";
+import type { EmployeeLead, LeadActivity } from "@/lib/employee-types";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -100,7 +100,21 @@ export default function EmployeeLeadsWorkspace() {
   const stats = useMemo(() => computeLeadStats(rows), [rows]);
   const filtered = useMemo(() => filterLeads(rows, filters), [rows, filters]);
   const selected = rows.find((l) => l.id === selectedId) ?? null;
-  const activities = selected && userId ? loadLeadActivities(userId, selected.id) : [];
+  const [activities, setActivities] = useState<LeadActivity[]>([]);
+
+  useEffect(() => {
+    if (!selected || !userId) {
+      setActivities([]);
+      return;
+    }
+    let cancelled = false;
+    void loadLeadActivities(userId, selected.id).then((acts) => {
+      if (!cancelled) setActivities(acts);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected?.id, userId, activityTick]);
 
   const dueToday = useMemo(
     () => rows.filter((l) => isFollowUpToday(l.next_follow_up) && !["won", "lost"].includes(l.status)),
@@ -134,7 +148,7 @@ export default function EmployeeLeadsWorkspace() {
     }
 
     if (logStatus && patch.status && prev && patch.status !== prev.status) {
-      appendLeadActivity(userId, id, {
+      await appendLeadActivity(userId, id, {
         activity_type: patch.status === "won" ? "won" : "status",
         summary: `Status changed to ${String(patch.status).replace(/_/g, " ")}`,
       });
@@ -150,10 +164,10 @@ export default function EmployeeLeadsWorkspace() {
     summary: string
   ) => {
     if (!userId) return;
-    appendLeadActivity(userId, leadId, { activity_type: type, summary });
+    await appendLeadActivity(userId, leadId, { activity_type: type, summary });
     setActivityTick((n) => n + 1);
     const now = new Date().toISOString();
-    await updateLead(leadId, { last_activity_at: now }, false);
+    await supabase.from("employee_leads").update({ last_activity_at: now }).eq("id", leadId);
   };
 
   const handleStatusChange = (id: string, status: EmployeeLead["status"]) => {
@@ -208,7 +222,7 @@ export default function EmployeeLeadsWorkspace() {
         setSaving(false);
         return;
       }
-      appendLeadActivity(userId, selectedId, { activity_type: "note", summary: "Lead details updated" });
+      await appendLeadActivity(userId, selectedId, { activity_type: "note", summary: "Lead details updated" });
       setActivityTick((n) => n + 1);
       await refetch();
     } else {
@@ -236,7 +250,7 @@ export default function EmployeeLeadsWorkspace() {
         return;
       }
       const newLead = data as EmployeeLead;
-      appendLeadActivity(userId, newLead.id, { activity_type: "note", summary: "Lead created" });
+      await appendLeadActivity(userId, newLead.id, { activity_type: "note", summary: "Lead created" });
       setSelectedId(newLead.id);
       await refetch();
     }
@@ -255,16 +269,20 @@ export default function EmployeeLeadsWorkspace() {
     if (!imported.length) return;
     setActionError(null);
 
-    const { error } = await supabase.from("employee_leads").insert(
-      imported.map(({ id: _id, ...rest }) => rest)
-    );
+    const { data: inserted, error } = await supabase
+      .from("employee_leads")
+      .insert(imported.map(({ id: _id, ...rest }) => rest))
+      .select("id, company_name");
     if (error) {
       setActionError(error.message);
       return;
     }
 
-    for (const l of imported) {
-      appendLeadActivity(userId, l.id, { activity_type: "import", summary: "Imported via CSV" });
+    for (const row of inserted ?? []) {
+      await appendLeadActivity(userId, row.id, {
+        activity_type: "import",
+        summary: `Imported via CSV — ${row.company_name}`,
+      });
     }
     await refetch();
     setImportText("");
@@ -285,7 +303,7 @@ export default function EmployeeLeadsWorkspace() {
       return;
     }
 
-    appendLeadActivity(userId, selected.id, {
+    await appendLeadActivity(userId, selected.id, {
       activity_type: "won",
       summary: `Deal won — £${value.toLocaleString()} (est. commission £${comm.toLocaleString()})`,
     });

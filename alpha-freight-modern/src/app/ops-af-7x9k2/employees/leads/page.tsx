@@ -7,10 +7,12 @@ import {
   AdminHrTabs,
   AdminPanel,
 } from "@/components/admin/AdminHrShell";
-import { useAdminEmployees, useAdminTable } from "@/hooks/useAdminEmployeeData";
+import { useAdminEmployees, useAdminTable, useEmployeeNameLookup } from "@/hooks/useAdminEmployeeData";
 import { LEAD_TYPES } from "@/lib/employee-leads";
 import { downloadCsv, leadsToCsv, parseLeadsCsv, UK_REGIONS } from "@/lib/employee-leads-utils";
 import type { EmployeeLead } from "@/lib/employee-types";
+import Link from "next/link";
+import { adminRoute } from "@/lib/admin-path";
 import { supabase } from "@/lib/supabase";
 
 type LeadRow = EmployeeLead;
@@ -18,6 +20,7 @@ type LeadRow = EmployeeLead;
 export default function AdminEmployeeLeadsPage() {
   const { employees } = useAdminEmployees();
   const { rows, loading } = useAdminTable<LeadRow>("employee_leads");
+  const nameFor = useEmployeeNameLookup(employees);
 
   const [employeeId, setEmployeeId] = useState("");
   const [form, setForm] = useState({
@@ -129,6 +132,7 @@ export default function AdminEmployeeLeadsPage() {
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-400">
                 <tr>
+                  <th className="px-5 py-4">Employee</th>
                   <th className="px-5 py-4">Company</th>
                   <th className="px-5 py-4">Contact</th>
                   <th className="px-5 py-4">Type</th>
@@ -139,12 +143,20 @@ export default function AdminEmployeeLeadsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
-                  <tr><td colSpan={6} className="px-5 py-8 text-center text-slate-400">Loading…</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-8 text-center text-slate-400">Loading…</td></tr>
                 ) : rows.length === 0 ? (
-                  <tr><td colSpan={6} className="px-5 py-8 text-center text-slate-400">No leads yet</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-8 text-center text-slate-400">No leads yet</td></tr>
                 ) : (
                   rows.map((lead) => (
                     <tr key={lead.id} className="hover:bg-slate-50/50">
+                      <td className="px-5 py-4">
+                        <Link
+                          href={adminRoute(`/employees/${lead.employee_id}`)}
+                          className="font-semibold text-blue-600 hover:underline"
+                        >
+                          {nameFor(lead.employee_id)}
+                        </Link>
+                      </td>
                       <td className="px-5 py-4 font-semibold text-slate-900">{lead.company_name}</td>
                       <td className="px-5 py-4 text-slate-600">{lead.contact_name ?? "—"}</td>
                       <td className="px-5 py-4 capitalize text-slate-600">{lead.lead_type ?? "—"}</td>

@@ -1,7 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Users, UserCheck, FileText, CircleDollarSign, Target, TrendingUp, BarChart3, ListTodo, ClipboardList } from "lucide-react";
+import {
+  Users,
+  UserCheck,
+  FileText,
+  CircleDollarSign,
+  Target,
+  TrendingUp,
+  BarChart3,
+  ListTodo,
+  ClipboardList,
+  Phone,
+  Activity,
+  CalendarOff,
+} from "lucide-react";
 import { adminRoute } from "@/lib/admin-path";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +22,9 @@ const tabs = [
   { name: "Employees", path: "/ops-af-7x9k2/employees", icon: Users },
   { name: "Onboarding", path: "/ops-af-7x9k2/employees/onboarding", icon: ClipboardList },
   { name: "Tasks", path: "/ops-af-7x9k2/employees/tasks", icon: ListTodo },
+  { name: "Calls", path: "/ops-af-7x9k2/employees/calls", icon: Phone },
+  { name: "Activity", path: "/ops-af-7x9k2/employees/activity", icon: Activity },
+  { name: "Leave", path: "/ops-af-7x9k2/employees/leave", icon: CalendarOff },
   { name: "Status", path: "/ops-af-7x9k2/employees/status", icon: UserCheck },
   { name: "Documents", path: "/ops-af-7x9k2/employees/documents", icon: FileText },
   { name: "Commission", path: "/ops-af-7x9k2/employees/commission", icon: CircleDollarSign },

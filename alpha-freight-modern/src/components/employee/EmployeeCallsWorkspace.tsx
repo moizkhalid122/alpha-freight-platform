@@ -135,7 +135,7 @@ export default function EmployeeCallsWorkspace() {
     const newCall = data as EmployeeCall;
 
     if (newCall.lead_id) {
-      appendLeadActivity(userId, newCall.lead_id, {
+      await appendLeadActivity(userId, newCall.lead_id, {
         activity_type: "call",
         summary: `${newCall.outcome}${newCall.notes ? ` — ${newCall.notes.slice(0, 80)}` : ""}`,
       });

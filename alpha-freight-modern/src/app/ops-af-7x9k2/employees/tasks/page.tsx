@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ListTodo, Plus } from "lucide-react";
 import {
   AdminHrHeader,
@@ -8,12 +9,19 @@ import {
   AdminPanel,
 } from "@/components/admin/AdminHrShell";
 import EmployeePortalLinkCard from "@/components/admin/EmployeePortalLinkCard";
-import { useAdminEmployees } from "@/hooks/useAdminEmployeeData";
+import {
+  useAdminEmployees,
+  useAdminTable,
+  useEmployeeNameLookup,
+} from "@/hooks/useAdminEmployeeData";
 import type { EmployeeTask } from "@/lib/employee-types";
+import { adminRoute } from "@/lib/admin-path";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminEmployeeTasksPage() {
   const { employees, loading } = useAdminEmployees();
+  const { rows: allTasks, loading: tasksLoading, refetch } = useAdminTable<EmployeeTask>("employee_tasks");
+  const nameFor = useEmployeeNameLookup(employees);
   const [employeeId, setEmployeeId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -63,16 +71,85 @@ export default function AdminEmployeeTasksPage() {
     setTitle("");
     setDescription("");
     setSaving(false);
+    void refetch();
   };
+
+  const pending = allTasks.filter((t) => t.status === "pending").length;
+  const completed = allTasks.filter((t) => t.status === "completed").length;
 
   return (
     <div>
       <AdminHrHeader
-        title="Assign Tasks"
-        description="Managers assign one-off tasks to employees — calls, follow-ups, training, etc."
+        title="Tasks"
+        description="Assign tasks and view every task across the team — admin, daily targets, and personal."
       />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/tasks" />
       <EmployeePortalLinkCard />
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        <AdminPanel>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">All tasks</p>
+          <p className="mt-1 text-3xl font-black text-slate-900">{tasksLoading ? "—" : allTasks.length}</p>
+        </AdminPanel>
+        <AdminPanel>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending</p>
+          <p className="mt-1 text-3xl font-black text-amber-600">{tasksLoading ? "—" : pending}</p>
+        </AdminPanel>
+        <AdminPanel>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Completed</p>
+          <p className="mt-1 text-3xl font-black text-emerald-600">{tasksLoading ? "—" : completed}</p>
+        </AdminPanel>
+      </div>
+
+      <AdminPanel className="mb-6 overflow-hidden p-0">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-400">
+              <tr>
+                <th className="px-5 py-4">Employee</th>
+                <th className="px-5 py-4">Title</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Priority</th>
+                <th className="px-5 py-4">Due</th>
+                <th className="px-5 py-4">Source</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {tasksLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-slate-400">
+                    Loading…
+                  </td>
+                </tr>
+              ) : allTasks.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-slate-400">
+                    No tasks yet
+                  </td>
+                </tr>
+              ) : (
+                allTasks.map((task) => (
+                  <tr key={task.id} className="hover:bg-slate-50/50">
+                    <td className="px-5 py-4">
+                      <Link
+                        href={adminRoute(`/employees/${task.employee_id}`)}
+                        className="font-semibold text-blue-600 hover:underline"
+                      >
+                        {nameFor(task.employee_id)}
+                      </Link>
+                    </td>
+                    <td className="px-5 py-4 font-medium text-slate-900">{task.title}</td>
+                    <td className="px-5 py-4 capitalize text-slate-700">{task.status.replace(/_/g, " ")}</td>
+                    <td className="px-5 py-4 capitalize text-slate-600">{task.priority}</td>
+                    <td className="px-5 py-4 text-slate-600">{task.due_date ?? "—"}</td>
+                    <td className="px-5 py-4 capitalize text-slate-500">{task.task_source ?? "—"}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminPanel>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
         <AdminPanel>

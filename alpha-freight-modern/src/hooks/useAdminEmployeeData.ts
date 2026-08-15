@@ -98,3 +98,42 @@ export function useAdminEmployeeOnboarding() {
     refetch: query.refetch,
   };
 }
+
+export type AdminEmployeeRecord = {
+  profile: EmployeeProfile & { full_name?: string | null; email?: string | null };
+  leads: import("@/lib/employee-types").EmployeeLead[];
+  calls: import("@/lib/employee-types").EmployeeCall[];
+  tasks: import("@/lib/employee-types").EmployeeTask[];
+  commissions: import("@/lib/employee-types").EmployeeCommission[];
+  activities: (import("@/lib/employee-types").LeadActivity & { employee_id?: string })[];
+  training: import("@/lib/employee-types").EmployeeTraining[];
+  leave: import("@/lib/employee-types").EmployeeLeaveRequest[];
+  documents: import("@/lib/employee-types").EmployeeDocument[];
+};
+
+export function useAdminEmployeeRecord(employeeId: string | null) {
+  const query = useQuery({
+    queryKey: ["admin", "employee-record", employeeId],
+    queryFn: () =>
+      adminFetch<AdminEmployeeRecord>(
+        `/api/admin/employee-record?employeeId=${encodeURIComponent(employeeId!)}`
+      ),
+    enabled: Boolean(employeeId),
+    staleTime: 30_000,
+  });
+
+  return {
+    record: query.data ?? null,
+    loading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : query.error ? String(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+export function useEmployeeNameLookup(employees: EmployeeProfile[]) {
+  const map = new Map<string, string>();
+  for (const e of employees) {
+    map.set(e.id, e.full_name ?? e.email ?? `${e.id.slice(0, 8)}…`);
+  }
+  return (id: string | null | undefined) => (id ? map.get(id) ?? `${id.slice(0, 8)}…` : "—");
+}
