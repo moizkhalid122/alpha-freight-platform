@@ -83,6 +83,8 @@ export function Footer() {
               {[
                 { name: "Find Loads UK", href: "/find-loads" },
                 { name: "Post Loads UK", href: "/post-loads" },
+                { name: "Supplier Information", href: "/supplier-information" },
+                { name: "Carrier / Haulier Information", href: "/carrier-information" },
                 { name: "Carrier Directory", href: "/directory" },
                 { name: "Supplier Directory", href: "/suppliers" },
                 { name: "Free UK Freight AI", href: "/ai" },

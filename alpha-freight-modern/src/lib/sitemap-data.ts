@@ -37,6 +37,8 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/available-loads",
   "/find-loads",
   "/post-loads",
+  "/supplier-information",
+  "/carrier-information",
   "/auth/carrier-signup",
   "/auth/supplier-signup",
   "/directory",
@@ -76,6 +78,7 @@ export function getPathPriority(path: string): number {
   if (path === "/directory" || path === "/suppliers") return 0.85;
   if (path.startsWith("/products/")) return 0.8;
   if (path === "/available-loads" || path === "/find-loads" || path === "/post-loads") return 0.88;
+  if (path === "/supplier-information" || path === "/carrier-information") return 0.84;
   if (
     path === "/tools" ||
     path === "/tools/lane-rates" ||

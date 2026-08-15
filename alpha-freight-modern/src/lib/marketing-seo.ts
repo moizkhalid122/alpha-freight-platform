@@ -124,6 +124,30 @@ export const marketingSeo = {
       "load posting platform",
     ],
   }),
+  supplierInformation: createPageMetadata({
+    title: "Supplier Information & Process | How to Post Loads | Alpha Freight",
+    description:
+      "Supplier information and step-by-step process for Alpha Freight UK — sign up free, post loads, pay 4% service fee, receive carrier bids, track shipments, and approve POD.",
+    path: "/supplier-information",
+    keywords: [
+      "supplier freight process UK",
+      "how to post loads UK",
+      "shipper information Alpha Freight",
+      "supplier marketplace guide",
+    ],
+  }),
+  carrierInformation: createPageMetadata({
+    title: "Carrier / Haulier Information & Process | Find Loads | Alpha Freight",
+    description:
+      "Carrier and haulier information and process for Alpha Freight UK — join free, browse loads, bid, deliver, upload POD, and get paid within 7 days with a 3% platform fee.",
+    path: "/carrier-information",
+    keywords: [
+      "carrier haulier process UK",
+      "how to find loads UK",
+      "haulier information Alpha Freight",
+      "carrier marketplace guide",
+    ],
+  }),
   support: createPageMetadata({
     title: "Support & Help | Alpha Freight",
     description:
