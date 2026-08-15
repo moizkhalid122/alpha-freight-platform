@@ -8,6 +8,10 @@ import Image from "next/image";
 
 import { Bookmark } from "lucide-react";
 
+import NavbarAiLottie from "@/components/NavbarAiLottie";
+
+const AI_NAV_LABEL = "Alpha AI";
+
 interface NavItem {
   name: string;
   href: string;
@@ -89,7 +93,7 @@ const navLinks: NavItem[] = [
   },
   { name: "Services", href: "/services" },
   { name: "Pricing", href: "/pricing" },
-  { name: "Free AI", href: "/ai" },
+  { name: AI_NAV_LABEL, href: "/ai" },
   { name: "About us", href: "/about" },
   { name: "Investor", href: "/investor" },
   { name: "Blog", href: "/blog" },
@@ -349,13 +353,14 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
 
             <Link
               href="/ai"
-              className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] xl:px-4 xl:py-2 xl:text-[12px] font-bold uppercase tracking-wide transition-all ${
+              className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] xl:px-5 xl:py-2 xl:text-[13px] font-medium transition-all ${
                 isDark
-                  ? "border-[#BFFF07]/40 bg-[#BFFF07]/10 text-[#3d5a00] hover:bg-[#BFFF07] hover:text-black"
-                  : "border-[#BFFF07]/50 bg-[#BFFF07]/15 text-[#BFFF07] hover:bg-[#BFFF07] hover:text-black"
+                  ? "border-slate-200 text-slate-900 hover:bg-slate-50"
+                  : "border-white/20 text-white hover:bg-white hover:text-black"
               }`}
             >
-              Free AI
+              <NavbarAiLottie className="h-7 w-7 shrink-0 -mr-0.5" />
+              <span className="-ml-0.5">{AI_NAV_LABEL}</span>
             </Link>
             <Link
               href="/auth/select"
@@ -429,14 +434,25 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                         href={link.href === "#" ? "/products/supplier-portal" : link.href}
                         className={
                           link.href === "/ai"
-                            ? "inline-flex w-fit items-center rounded-full border border-[#BFFF07]/50 bg-[#BFFF07]/15 px-5 py-3 text-sm font-bold uppercase tracking-wide text-[#BFFF07]"
+                            ? `inline-flex w-fit items-center gap-1 rounded-full border px-5 py-3 text-sm font-medium transition-all ${
+                                isDark
+                                  ? "border-slate-200 text-slate-900 hover:bg-slate-50"
+                                  : "border-white/20 text-white hover:bg-white hover:text-black"
+                              }`
                             : `text-2xl sm:text-3xl font-bold tracking-tight uppercase ${
                                 isDark ? "text-slate-900 hover:text-blue-600" : "text-white hover:text-[#BFFF07]"
                               }`
                         }
                         onClick={() => !(link.dropdown || link.megaMenu) && closeMobileMenu()}
                       >
-                        {link.name}
+                        {link.href === "/ai" ? (
+                          <>
+                            <NavbarAiLottie className="h-8 w-8 shrink-0 -mr-0.5" />
+                            <span className="-ml-0.5">{AI_NAV_LABEL}</span>
+                          </>
+                        ) : (
+                          link.name
+                        )}
                       </Link>
                       {(link.dropdown || link.megaMenu) && (
                         <button 

@@ -26,9 +26,12 @@ const ROLE_LABELS: Record<AssistantKind, string> = {
   employee: "Team AI",
 };
 
+const PUBLIC_HISTORY_TURNS = 14;
+const PUBLIC_HISTORY_CHARS = 1400;
+
 function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
   return history
-    .slice(-8)
+    .slice(-PUBLIC_HISTORY_TURNS)
     .filter(
       (item) =>
         (item.role === "user" || item.role === "assistant") &&
@@ -37,7 +40,7 @@ function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
     )
     .map((item) => ({
       role: item.role,
-      content: item.content.trim().slice(0, 900),
+      content: item.content.trim().slice(0, PUBLIC_HISTORY_CHARS),
     }));
 }
 
@@ -268,8 +271,8 @@ export async function* streamPublicOpenAiReply(options: {
         body: JSON.stringify({
           model,
           messages,
-          temperature: 0.72,
-          max_tokens: hasImage ? 1800 : 1600,
+          temperature: 0.68,
+          max_tokens: hasImage ? 2000 : 2200,
           stream: true,
         }),
       },

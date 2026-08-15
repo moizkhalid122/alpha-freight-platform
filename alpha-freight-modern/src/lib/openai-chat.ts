@@ -68,9 +68,12 @@ Reply JSON only:
 {"title":"🚛 Clear title","shortExplanation":"2-4 sentences here.","keyPoints":["📌 Step 1","💡 Tip 2","✅ Step 3","🚛 Step 4"],"recommendation":"💡 Pro tip here.","nextStep":"Clear next action.","suggestedQuestions":["Follow up 1?","Follow up 2?"],"platformIntent":null,"actionRequest":null,"metrics":[]}`;
 }
 
-function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
+function normalizeHistory(history: ChatHistoryItem[], publicMode?: boolean): ChatHistoryItem[] {
+  const turnLimit = publicMode ? 12 : 4;
+  const charLimit = publicMode ? 1200 : 600;
+
   return history
-    .slice(-4)
+    .slice(-turnLimit)
     .filter(
       (item) =>
         (item.role === "user" || item.role === "assistant") &&
@@ -79,7 +82,7 @@ function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
     )
     .map((item) => ({
       role: item.role,
-      content: item.content.trim().slice(0, 600),
+      content: item.content.trim().slice(0, charLimit),
     }));
 }
 
@@ -258,7 +261,7 @@ export async function getOpenAiChatReply(options: {
 
   const publicMode = Boolean(options.publicMode);
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
-  const history = normalizeHistory(options.history || []);
+  const history = normalizeHistory(options.history || [], publicMode);
 
   const intentHint = options.detectedIntent
     ? `\nPre-detected intent: ${JSON.stringify({ platformIntent: options.detectedIntent.platformIntent, actionRequest: options.detectedIntent.actionRequest })}`
@@ -277,7 +280,7 @@ export async function getOpenAiChatReply(options: {
   ];
 
   const timeouts = publicMode ? [7000, 12000] : [10000];
-  const maxTokens = publicMode ? 1400 : 780;
+  const maxTokens = publicMode ? 1800 : 780;
 
   for (let attempt = 0; attempt < timeouts.length; attempt += 1) {
     try {

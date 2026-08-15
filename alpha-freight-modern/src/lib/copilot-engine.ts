@@ -47,7 +47,7 @@ import { buildEmployeeKnowledgeReply, buildEmployeeFastReply } from "@/lib/emplo
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
 import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
-import { formatMemoryForPrompt } from "@/lib/public-ai-memory";
+import { formatMemoryForPrompt, buildConversationRecap } from "@/lib/public-ai-memory";
 import {
   buildWeatherOfflineReply,
   buildWeatherToolReply,
@@ -190,6 +190,9 @@ export async function preparePublicStreamChat(
 
   const memoryHint = formatMemoryForPrompt(sessionMemory || {});
   if (memoryHint) extraContext.push(memoryHint);
+
+  const conversationRecap = buildConversationRecap(history);
+  if (conversationRecap) extraContext.push(conversationRecap);
 
   const garbled = inferGarbledQueryHint(message);
   if (garbled) extraContext.push(garbled);
@@ -460,7 +463,7 @@ function saveChatMessagesAsync(
   })();
 }
 
-const PUBLIC_AI_CONTEXT = `Public /ai guest chat. You are Alpha Freight AI — UK freight expert AND a capable general assistant. Answer science, history, business, coding, English, health, and geography fully. Use live web data when provided. Never refuse reasonable general questions. Never mention OpenAI.`;
+const PUBLIC_AI_CONTEXT = `Public /ai guest chat. You are Alpha Freight AI — UK freight expert AND a capable general assistant. Read full conversation history and session memory every time. Answer science, history, business, coding, English, health, and geography fully. Explain in depth so the user truly understands — warm, natural, strong. Reuse facts they already shared. Use live web data when provided. Never refuse reasonable general questions. Never mention OpenAI.`;
 
 const EMPLOYEE_TEAM_AI_CONTEXT = `Internal Team AI for Alpha Freight employees. You are a senior sales coach — give copy-paste scripts, email templates, CRM steps, objection handling, commission info, and UK freight knowledge. Never say you are "Alpha Freight AI" public bot. Never mention OpenAI. Always answer the employee's question directly with actionable content.`;
 

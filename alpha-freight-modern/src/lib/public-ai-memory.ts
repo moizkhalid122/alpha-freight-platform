@@ -87,5 +87,25 @@ export function formatMemoryForPrompt(memory: PublicAiSessionMemory): string {
   if (memory.activeTopic) lines.push(`Recent topic: ${memory.activeTopic}`);
 
   if (!lines.length) return "";
-  return `Session memory (weave in naturally — e.g. "Since you run ${memory.fleetSize} trucks…" — don't list this block back to the user):\n${lines.join("\n")}`;
+  return `Session memory (remember across the whole chat — weave in naturally, e.g. "Since you run ${memory.fleetSize ?? "your"} trucks from ${memory.userLocation ?? "your area"}…" — never ask again for facts already given):\n${lines.join("\n")}`;
+}
+
+export function buildConversationRecap(history: ChatHistoryItem[]): string {
+  if (history.length < 2) return "";
+
+  const recent = history.slice(-8);
+  const lines = recent.map((item) => {
+    const label = item.role === "user" ? "User" : "Assistant";
+    const preview = item.content.trim().replace(/\s+/g, " ").slice(0, 220);
+    return `- ${label}: ${preview}${item.content.length > 220 ? "…" : ""}`;
+  });
+
+  return `CONVERSATION SO FAR — read every line before replying:
+${lines.join("\n")}
+
+Continuity rules:
+- The latest message often continues the thread ("what about that?", "and?", "more detail", "same load") — answer in that context.
+- Reuse numbers, routes, prices, and names the user already gave — do NOT ask again.
+- Reference earlier points naturally ("You mentioned Birmingham to London…").
+- Do NOT restart with a generic intro if you already explained the topic.`;
 }

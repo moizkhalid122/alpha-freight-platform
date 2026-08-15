@@ -42,6 +42,7 @@ import {
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { supabase } from "@/lib/supabase";
 import AiThinkingIndicator from "@/components/marketing/AiThinkingIndicator";
+import NavbarAiLottie from "@/components/NavbarAiLottie";
 import LimitReachedModal from "@/components/marketing/LimitReachedModal";
 import CopilotUpgradeBanner from "@/components/marketing/CopilotUpgradeBanner";
 import EmailCaptureBar from "@/components/marketing/EmailCaptureBar";
@@ -292,9 +293,9 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   };
 
   const buildHistory = (items: Message[]): ChatHistoryItem[] =>
-    items.slice(-8).map((item) => ({
+    items.slice(-14).map((item) => ({
       role: item.role,
-      content: item.content || buildDisplayText(item.structuredMessage),
+      content: (item.content || buildDisplayText(item.structuredMessage)).slice(0, 1400),
     }));
 
   const handleNewChat = () => {
@@ -899,9 +900,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
           {!hasConversation ? (
             <div className="flex flex-1 flex-col items-center justify-center px-4 pb-8">
               <div className="mb-6 flex items-center justify-center">
-                <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-[#ececec] shadow-sm">
-                  <Image src="/logo.png" alt="Alpha Freight AI" width={40} height={40} className="object-contain p-1.5" />
-                </div>
+                <NavbarAiLottie className="h-20 w-20" />
               </div>
               <motion.h1
                 initial={{ opacity: 0, y: 8 }}
@@ -962,12 +961,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                         </div>
                       ) : (
                         <div className="group flex gap-4">
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="relative mt-0.5 h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/80 ring-1 ring-[#ececec] shadow-sm backdrop-blur-sm"
-                          >
-                            <Image src="/logo.png" alt="" fill className="object-contain p-1" />
-                          </motion.div>
+                          <NavbarAiLottie className="mt-0.5 h-9 w-9 shrink-0" />
                           <div className="min-w-0 flex-1 pt-0.5">
                             <AssistantReply
                               reply={message.structuredMessage}
