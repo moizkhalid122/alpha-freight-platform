@@ -79,20 +79,49 @@ export function buildPublicPlainReply(
 
 export function inferPublicSuggestedQuestions(message: string, history: ChatHistoryItem[] = []): string[] {
   const lower = message.toLowerCase();
+  const trimmed = message.trim();
   const lastUser = [...history].reverse().find((h) => h.role === "user")?.content?.toLowerCase() || "";
   const lastAssistant = [...history].reverse().find((h) => h.role === "assistant")?.content?.toLowerCase() || "";
+  const thread = `${lastUser} ${lastAssistant} ${lower}`;
 
-  if (/^(ok|okay|thanks?|thank you|see+\s*ya|see+\s*you|bye+|got it|take care|cool|sure|alright)[.!?\s]*$/i.test(message.trim())) {
-    if (/rpm|profit|margin/i.test(lastUser) || /rpm|profit/i.test(lastAssistant)) {
-      return ["Calculate profit for another load", "How do I find higher RPM loads?", "What is a good RPM in the UK?"];
+  if (/^(ok|okay|thanks?|thank you|see+\s*ya|see+\s*you|bye+|got it|take care|cool|sure|alright|shukriya|theek)[.!?\s]*$/i.test(trimmed)) {
+    if (/rpm|profit|margin/i.test(thread)) {
+      return ["Calculate profit for another load", "What is a good RPM in the UK?", "How do I find higher RPM loads?"];
     }
-    if (/diesel|fuel/i.test(lastUser) || /diesel|fuel/i.test(lastAssistant)) {
-      return ["What is RPM?", "Calculate fuel cost for a trip", "How do carrier payouts work?"];
+    if (/diesel|fuel/i.test(thread)) {
+      return ["Calculate fuel cost for a trip", "What is RPM?", "How do carrier payouts work?"];
     }
-    if (/load|haul/i.test(lastUser) || /load/i.test(lastAssistant)) {
-      return ["How do carrier payouts work?", "What is backhaul?", "How do I find loads in the UK?"];
+    if (/alpha freight|platform|supplier|carrier proposition/i.test(thread)) {
+      return ["Supplier pricing detail?", "Carrier sign-up process?", "What is the 7-day payout?"];
+    }
+    if (/load|haul/i.test(thread)) {
+      return ["How do carrier payouts work?", "What is backhaul?", "Find loads near me"];
     }
     return [];
+  }
+
+  if (/detail|zayada|zyada|explain|roman urdu|urdu men|samjha|samjh/i.test(lower)) {
+    if (/alpha freight|platform|what is alpha/i.test(thread)) {
+      return [
+        "Supplier proposition detail?",
+        "Carrier proposition detail?",
+        "Pricing & commission explain karo",
+      ];
+    }
+    if (/rpm|profit|margin/i.test(thread)) {
+      return ["Example with £800 and 320 miles", "What RPM is good in UK?", "Fuel cost ka effect?"];
+    }
+    if (/sign up|signup|register|account/i.test(thread)) {
+      return ["Carrier sign-up steps", "Supplier sign-up steps", "Is it free?"];
+    }
+  }
+
+  if (/what is alpha|alpha freight|platform overview|introduction/i.test(lower + lastUser)) {
+    return [
+      "Supplier proposition kya hai?",
+      "Carrier proposition kya hai?",
+      "Pricing & commission kaise kaam karti hai?",
+    ];
   }
 
   if (/rpm|rate per mile|revenue per mile|profit|margin/i.test(lower)) {
@@ -115,6 +144,12 @@ export function inferPublicSuggestedQuestions(message: string, history: ChatHist
   }
   if (/sign up|signup|register|account/i.test(lower)) {
     return ["How do I sign up as a carrier?", "How do I sign up as a supplier?", "Is Alpha Freight free?"];
+  }
+  if (/pricing|commission|fee|cost/i.test(lower)) {
+    return ["Supplier commission kitni hai?", "Carrier side fees?", "Deal calculation example"];
+  }
+  if (/roadmap|air|sea|multimodal/i.test(lower)) {
+    return ["Road freight abhi kaise kaam karta hai?", "Air freight kab aa raha hai?", "Enterprise offering kya hai?"];
   }
 
   const category = generalKnowledgeCategory(message);
@@ -146,7 +181,11 @@ export function inferPublicSuggestedQuestions(message: string, history: ChatHist
     return ["UK diesel price today", "London weather today", "What is RPM?"];
   }
 
-  return ["How do I find loads in the UK?", "What is RPM in haulage?", "Explain a general topic"];
+  if (/alpha freight|platform|supplier|carrier/i.test(lastAssistant)) {
+    return ["Supplier side detail?", "Carrier side detail?", "Sign up ka process?"];
+  }
+
+  return ["What is Alpha Freight?", "What is RPM in haulage?", "How do I find loads in the UK?"];
 }
 
 function buildVisionUserContent(message: string, imageDataUrl: string): OpenAiUserContent {

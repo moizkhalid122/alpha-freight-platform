@@ -57,7 +57,6 @@ import {
   readChatImageFile,
 } from "@/lib/chat-image-upload";
 import PublicAiMessageExtras from "@/components/marketing/ai/PublicAiMessageExtras";
-import { prependPersonality, getPersonalityPrefix } from "@/lib/ai-personality";
 import { playAiCompleteSound } from "@/lib/ai-complete-sound";
 import { matchInputSuggestions } from "@/lib/ai-input-suggestions";
 import {
@@ -384,10 +383,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
     if (instantSocial) {
       const aiMessageId = `${Date.now()}-assistant`;
-      const body = prependPersonality(
-        buildDisplayText(instantSocial.structuredMessage, instantSocial.message),
-        effectiveText
-      );
+      const body = buildDisplayText(instantSocial.structuredMessage, instantSocial.message);
       const withAssistant = [
         ...nextMessages,
         {
@@ -414,7 +410,6 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     setStreamingMessageId(null);
 
     let streamStarted = false;
-    const personalityPrefix = getPersonalityPrefix(effectiveText);
 
     try {
       const aiResponse = await streamPublicChatMessage(
@@ -428,10 +423,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
           onToken: (_delta, fullText) => {
             setIsTyping(false);
             setPendingQuery("");
-            const display =
-              personalityPrefix && !fullText.startsWith(personalityPrefix)
-                ? `${personalityPrefix}\n\n${fullText}`
-                : fullText;
+            const display = fullText;
             if (!streamStarted) {
               streamStarted = true;
               setStreamingMessageId(aiMessageId);
@@ -477,7 +469,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
       setMessages((current) => {
         const exists = current.some((m) => m.id === aiMessageId);
-        const finalContent = prependPersonality(aiResponse.message || "", effectiveText);
+        const finalContent = aiResponse.message || "";
         const updated = exists
           ? current.map((msg) =>
               msg.id === aiMessageId

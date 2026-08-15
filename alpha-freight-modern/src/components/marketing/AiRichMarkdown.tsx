@@ -49,11 +49,19 @@ const SECTION_ICONS: Record<string, typeof Sparkles> = {
   "quick answer": Sparkles,
   explanation: BookOpen,
   example: Calculator,
+  "for example": Calculator,
   "next step": ArrowRightCircle,
+  "is mein": ListOrdered,
+  "in this": ListOrdered,
+  "key points": ListOrdered,
+  "main points": ListOrdered,
+  steps: ListOrdered,
+  overview: BookOpen,
+  summary: BookOpen,
 };
 
 function headingIcon(text: string) {
-  const key = text.toLowerCase().trim();
+  const key = text.toLowerCase().trim().replace(/:$/, "");
   return SECTION_ICONS[key] || null;
 }
 
