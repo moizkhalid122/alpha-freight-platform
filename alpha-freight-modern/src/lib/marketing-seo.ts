@@ -59,6 +59,18 @@ export const marketingSeo = {
       "Open roles in design, engineering, operations, product, and growth at Alpha Freight — building the UK's modern freight marketplace.",
     path: "/career",
   }),
+  leadership: createPageMetadata({
+    title: "Leadership | CEO & Commercial Director | Alpha Freight",
+    description:
+      "Meet the executive leadership team at Alpha Freight — guiding the UK's trusted freight marketplace with vision, commercial excellence, and industry expertise.",
+    path: "/leadership",
+    keywords: [
+      "Alpha Freight leadership",
+      "CEO Alpha Freight",
+      "commercial director logistics UK",
+      "freight company executives",
+    ],
+  }),
   academy: createPageMetadata({
     title: "Alpha Freight Academy | CPC & Compliance Training UK",
     description:

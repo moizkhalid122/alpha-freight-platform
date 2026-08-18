@@ -7,6 +7,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/",
   "/ai",
   "/about",
+  "/leadership",
   "/company-overview",
   "/contact",
   "/career",

@@ -95,6 +95,7 @@ const navLinks: NavItem[] = [
   { name: "Pricing", href: "/pricing" },
   { name: AI_NAV_LABEL, href: "/ai" },
   { name: "About us", href: "/about" },
+  { name: "Leadership", href: "/leadership" },
   { name: "Investor", href: "/investor" },
   { name: "Blog", href: "/blog" },
   { name: "Career", href: "/career" },
@@ -363,7 +364,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               <span className="-ml-0.5">{AI_NAV_LABEL}</span>
             </Link>
             <Link
-              href="/auth/select"
+              href="/auth/modes"
               className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] xl:px-5 xl:py-2 xl:text-[13px] font-medium transition-all ${
                 isDark ? "border-slate-200 text-slate-900 hover:bg-slate-50" : "border-white/20 text-white hover:bg-white hover:text-black"
               }`}
@@ -540,7 +541,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                 
                 <div className="pt-6 flex flex-col gap-3">
                   <Link
-                    href="/auth/select"
+                    href="/auth/modes"
                     className={`w-full py-4 rounded-2xl text-center font-bold uppercase tracking-widest border ${
                       isDark
                         ? "bg-slate-100 text-slate-900 border-slate-200"
