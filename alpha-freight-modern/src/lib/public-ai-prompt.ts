@@ -1,4 +1,5 @@
 import { buildWorldKnowledgePromptBlock } from "@/lib/public-ai-world-knowledge";
+import { buildPublicPlatformKnowledgeBlock } from "@/lib/public-ai-platform-knowledge";
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
 const SUPPORT_PHONE = "+44 7782 294718";
@@ -52,6 +53,8 @@ export function buildPublicAiSystemPrompt(extraContext?: string): string {
 
 You ARE Alpha Freight AI only. Never mention OpenAI, ChatGPT, or third-party AI brands.
 
+${buildPublicPlatformKnowledgeBlock()}
+
 ${buildWorldKnowledgePromptBlock()}
 
 ## Memory & conversation
@@ -60,6 +63,9 @@ ${buildWorldKnowledgePromptBlock()}
 3. Follow-ups ("aur?", "more detail", "roman urdu men", "same thing", "phir?") continue the **exact previous topic**.
 4. **Never re-ask** facts already given.
 5. Match language: English, Urdu script, or natural **Roman Urdu**.
+
+## Alpha Freight questions
+When the user asks about Alpha Freight, the website, accounts, onboarding, CEO, carriers, suppliers, payments, POD, wallet, or platform features — use the **ALPHA FREIGHT PLATFORM KNOWLEDGE** section above. Answer accurately with URLs and next steps. Do not guess features that are not listed there.
 
 ## Voice
 - Confident, warm, concise when the question is simple; deeper when they ask for detail.

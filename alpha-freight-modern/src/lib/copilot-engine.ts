@@ -12,7 +12,7 @@ import {
 } from "@/lib/copilot/query-clarifier";
 import { inferGarbledQueryHint, normalizeUserQuery } from "@/lib/copilot/query-normalizer";
 import { buildPublicRagContext, inferRagSourceLabel, shouldUsePublicRag } from "@/lib/copilot/public-rag";
-import { buildKbContext } from "@/lib/copilot/knowledge-base";
+import { searchKnowledgeBase } from "@/lib/copilot/knowledge-base";
 import { fetchCopilotUserContext, formatUserContextForPrompt } from "@/lib/copilot/user-context";
 import { enrichPlatformReply, executeCreateLoad } from "@/lib/copilot/platform-enrichment";
 import { calculateProfit, extractProfitFromMessage } from "@/lib/copilot/profit-calculator";
@@ -59,6 +59,7 @@ import {
 import { isOpenAiReachable, markOpenAiUnreachable } from "@/lib/copilot/connectivity";
 import { needsLiveWebSearch, isGeneralKnowledgeQuery } from "@/lib/public-ai-live-search";
 import { buildDomainHint } from "@/lib/public-ai-world-knowledge";
+import { isAlphaFreightPlatformQuery } from "@/lib/public-ai-platform-knowledge";
 
 export type CopilotEngineInput = {
   message: string;
@@ -263,7 +264,8 @@ function needsUserContext(
 }
 
 function needsKbContext(message: string): boolean {
-  return /\b(alpha freight|sign up|signup|policy|terms|pod|proof of delivery|how do i|kaise|kya hai|what is)\b/i.test(
+  if (isAlphaFreightPlatformQuery(message)) return true;
+  return /\b(alpha freight|sign up|signup|policy|terms|pod|proof of delivery|how do i|kaise|kya hai|what is|onboarding|wallet|payout|verification|vetting|post load|bid|carrier|supplier)\b/i.test(
     message
   );
 }
@@ -482,7 +484,7 @@ function saveChatMessagesAsync(
   })();
 }
 
-const PUBLIC_AI_CONTEXT = `Public /ai chat. Alpha Freight AI = universal expert + UK freight specialist. NEVER say "I only help with freight". Reply naturally — no Khulasa/section labels. Use selective emoji (2–5 on medium answers, not every line). Bullets only for long answers. Read history + memory. Roman Urdu when asked. Never mention OpenAI.`;
+const PUBLIC_AI_CONTEXT = `Public /ai chat. Alpha Freight AI = universal expert + deep Alpha Freight platform knowledge (accounts, onboarding, CEO, suppliers, carriers, payments, POD, wallet, URLs). NEVER say "I only help with freight". Reply naturally. Use selective emoji on key points. Read history + memory. Roman Urdu when asked. Never mention OpenAI.`;
 
 const EMPLOYEE_TEAM_AI_CONTEXT = `Internal Team AI for Alpha Freight employees. You are a senior sales coach — give copy-paste scripts, email templates, CRM steps, objection handling, commission info, and UK freight knowledge. Never say you are "Alpha Freight AI" public bot. Never mention OpenAI. Always answer the employee's question directly with actionable content.`;
 
@@ -542,7 +544,14 @@ async function runPublicCopilotEngine(
   if (conversationRecap) extraContext.push(conversationRecap);
   const glossary = buildGlossaryContext(message);
   if (glossary) extraContext.push(glossary);
-  if (needsKbContext(message)) extraContext.push(buildKbContext(message));
+  if (needsKbContext(message)) {
+    const kbHits = isAlphaFreightPlatformQuery(message)
+      ? searchKnowledgeBase(message, 5)
+      : searchKnowledgeBase(message, 3);
+    if (kbHits.length) {
+      extraContext.push(`Alpha Freight knowledge base:\n\n${kbHits.join("\n\n---\n\n")}`);
+    }
+  }
 
   const webSearch = detected.needsWebSearch
     ? await withTimeout(searchWeb(message), 2500, null)
@@ -789,7 +798,14 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
   if (advisoryContextForLang) {
     extraContext.push(`Live market/platform data — weave into your reply:\n${advisoryContextForLang}`);
   }
-  if (needsKbContext(message)) extraContext.push(buildKbContext(message));
+  if (needsKbContext(message)) {
+    const kbHits = isAlphaFreightPlatformQuery(message)
+      ? searchKnowledgeBase(message, 5)
+      : searchKnowledgeBase(message, 3);
+    if (kbHits.length) {
+      extraContext.push(`Alpha Freight knowledge base:\n\n${kbHits.join("\n\n---\n\n")}`);
+    }
+  }
   if (userCtx) extraContext.push(formatUserContextForPrompt(userCtx));
   if (detected.platformIntent) {
     extraContext.push(`Intent: ${JSON.stringify(detected.platformIntent)}`);
