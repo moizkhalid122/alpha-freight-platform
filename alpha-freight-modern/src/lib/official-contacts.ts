@@ -11,11 +11,6 @@ export const VERIFIED_OFFICIAL_CONTACTS: OfficialContact[] = [
     role: "Verified Employee",
   },
   {
-    name: "Alastair",
-    email: "alastair@alphafreightuk.com",
-    role: "Commercial Director",
-  },
-  {
     name: "Company Support",
     email: "support@alphafreightuk.com",
     role: "Official Support Team",

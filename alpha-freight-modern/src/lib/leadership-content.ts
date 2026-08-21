@@ -25,19 +25,6 @@ export const leadershipProfiles: LeadershipProfile[] = [
       "Partnerships and long-term growth",
     ],
   },
-  {
-    id: "commercial-director",
-    name: "Alastair James Massey",
-    title: "Commercial Director",
-    image: "/leadership/commercial-director.jpg",
-    imageAlt: "Commercial Director — Alpha Freight",
-    bio: "Oversees commercial strategy, supplier and carrier relationships, and revenue growth across the Alpha Freight network. Focused on building durable partnerships, transparent pricing, and scalable UK freight operations.",
-    highlights: [
-      "Commercial strategy and revenue growth",
-      "Carrier and supplier relationships",
-      "Market expansion and client success",
-    ],
-  },
 ];
 
 export const leadershipIntro = {
@@ -85,8 +72,5 @@ export const leadershipImpactSection = {
     "Limited network growth",
   ],
   cta: { label: "Contact Our Team", href: "/contact" },
-  images: {
-    back: { src: "/leadership/ceo-impact.png", alt: "Khalid Mehmood — CEO" },
-    front: { src: "/leadership/commercial-director-impact.png", alt: "Alastair James Massey — Commercial Director" },
-  },
+  image: { src: "/leadership/ceo-impact.png", alt: "Khalid Mehmood — CEO" },
 };
