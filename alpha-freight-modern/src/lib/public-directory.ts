@@ -26,10 +26,14 @@ type ProfileRecord = {
   profile_extras?: unknown;
 };
 
+export type PublicDirectoryProfileRecord = ProfileRecord;
+
 type LoadRecord = {
   carrier_id: string | null;
   status: string | null;
 };
+
+export type PublicCarrierLoadRecord = LoadRecord;
 
 const DELIVERED = new Set(["completed", "delivered"]);
 
@@ -142,6 +146,8 @@ type SupplierLoadRecord = {
   supplier_id: string | null;
   status: string | null;
 };
+
+export type PublicSupplierLoadRecord = SupplierLoadRecord;
 
 function isVerifiedSupplier(profile: ProfileRecord) {
   return (

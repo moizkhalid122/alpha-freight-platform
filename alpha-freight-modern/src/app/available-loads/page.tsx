@@ -91,9 +91,9 @@ function estimateDistance(load: PublicLoad) {
 
 async function fetchPublicLoads(): Promise<PublicLoadsResponse> {
   const response = await fetch("/api/public/loads", { credentials: "same-origin" });
-  const payload = await response.json().catch(() => ({}));
+  const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   if (!response.ok) {
-    throw new Error(typeof payload?.error === "string" ? payload.error : "Unable to load marketplace data.");
+    throw new Error(typeof payload.error === "string" ? payload.error : "Unable to load marketplace data.");
   }
   return payload as PublicLoadsResponse;
 }

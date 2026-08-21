@@ -147,9 +147,9 @@ export async function persistProfileExtras(userId: string, extras: Record<string
     });
 
     if (!response.ok) {
-      const payload = await response.json().catch(() => ({}));
+      const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
       throw new Error(
-        typeof payload?.error === "string" ? payload.error : "Unable to save profile extras."
+        typeof payload.error === "string" ? payload.error : "Unable to save profile extras."
       );
     }
   } catch (error) {

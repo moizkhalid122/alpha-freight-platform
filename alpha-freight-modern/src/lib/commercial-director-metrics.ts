@@ -74,8 +74,22 @@ function safeCount(rows: unknown[] | null | undefined) {
   return rows?.length ?? 0;
 }
 
-function sumAmount(rows: Array<{ amount_gbp?: number | null; amount?: number | null; price?: number | null }>) {
-  return rows.reduce((acc, row) => acc + Number(row.amount_gbp ?? row.amount ?? row.price ?? 0), 0);
+function sumAmount(
+  rows: Array<{
+    amount_gbp?: number | null;
+    amount?: number | null;
+    price?: number | null;
+    value_gbp?: number | null;
+  }>
+) {
+  return rows.reduce(
+    (acc, row) => acc + Number(row.amount_gbp ?? row.amount ?? row.price ?? row.value_gbp ?? 0),
+    0
+  );
+}
+
+function tableCell(value: string | number | null | undefined): string | number | null {
+  return value ?? null;
 }
 
 type MetricsRowsInput = {
@@ -161,9 +175,9 @@ export function buildCommercialMetricsFromRows(input: MetricsRowsInput): Commerc
           { key: "value_gbp", label: "Value" },
         ],
         rows: leads.slice(0, 12).map((row) => ({
-          company_name: row.company_name,
-          contact_name: row.contact_name,
-          status: row.status,
+          company_name: tableCell(row.company_name),
+          contact_name: tableCell(row.contact_name),
+          status: tableCell(row.status),
           value_gbp: row.value_gbp ? fmtMoney(Number(row.value_gbp)) : "—",
         })),
       },
@@ -183,7 +197,7 @@ export function buildCommercialMetricsFromRows(input: MetricsRowsInput): Commerc
         rows: bids.slice(0, 12).map((row) => ({
           load_id: row.load_id?.slice(0, 8) ?? "—",
           amount: row.amount ? fmtMoney(Number(row.amount)) : "—",
-          status: row.status,
+          status: tableCell(row.status),
           created_at: row.created_at ? new Date(row.created_at).toLocaleDateString("en-GB") : "—",
         })),
       },
@@ -202,8 +216,8 @@ export function buildCommercialMetricsFromRows(input: MetricsRowsInput): Commerc
         ],
         rows: activeBookings.slice(0, 12).map((row) => ({
           route: `${row.origin ?? "—"} → ${row.destination ?? "—"}`,
-          title: row.title ?? "—",
-          status: row.status,
+          title: tableCell(row.title ?? "—"),
+          status: tableCell(row.status),
           price: row.price ? fmtMoney(Number(row.price)) : "—",
         })),
       },
@@ -221,10 +235,10 @@ export function buildCommercialMetricsFromRows(input: MetricsRowsInput): Commerc
           { key: "due_date", label: "Due" },
         ],
         rows: openTasks.slice(0, 12).map((row) => ({
-          title: row.title,
-          priority: row.priority,
-          status: row.status,
-          due_date: row.due_date ?? "—",
+          title: tableCell(row.title),
+          priority: tableCell(row.priority),
+          status: tableCell(row.status),
+          due_date: tableCell(row.due_date ?? "—"),
         })),
       },
       revenue: {
@@ -242,8 +256,8 @@ export function buildCommercialMetricsFromRows(input: MetricsRowsInput): Commerc
         ],
         rows: commissions.slice(0, 12).map((row) => ({
           amount_gbp: fmtMoney(Number(row.amount_gbp ?? 0)),
-          status: row.status,
-          period_month: row.period_month ?? "—",
+          status: tableCell(row.status),
+          period_month: tableCell(row.period_month ?? "—"),
           created_at: row.created_at ? new Date(row.created_at).toLocaleDateString("en-GB") : "—",
         })),
       },
@@ -323,15 +337,15 @@ export function buildCommercialMetricsFromRows(input: MetricsRowsInput): Commerc
         ],
         rows: [
           ...openLeads.slice(0, 4).map((row) => ({
-            alert: row.company_name,
+            alert: tableCell(row.company_name),
             type: "Lead",
             priority: "Medium",
             time: "Today",
           })),
           ...dueTodayTasks.slice(0, 4).map((row) => ({
-            alert: row.title,
+            alert: tableCell(row.title),
             type: "Task",
-            priority: row.priority ?? "Medium",
+            priority: tableCell(row.priority ?? "Medium"),
             time: "Due today",
           })),
         ],

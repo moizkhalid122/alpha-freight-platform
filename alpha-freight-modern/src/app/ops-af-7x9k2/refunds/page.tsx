@@ -110,7 +110,7 @@ export default function AdminRefundsPage() {
         {[
           { label: "Open queue", value: pendingCount },
           { label: "Total requests", value: requests.length },
-          { label: "Processed", value: requests.filter((r) => r.status === "refunded" || r.status === "rejected").length },
+          { label: "Processed", value: requests.filter((r) => r.status === "completed" || r.status === "rejected").length },
         ].map((item) => (
           <div key={item.label} className={`${ADMIN_CARD} p-4`}>
             <p className="text-[11px] font-semibold text-slate-500">{item.label}</p>

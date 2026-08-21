@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
             message: fullText.trim(),
             structuredMessage,
             source: "openai",
-            remaining: guestRemaining,
+            remaining: rateRemaining,
           });
           controller.close();
         } catch (error) {

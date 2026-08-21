@@ -3,19 +3,16 @@ import { verifyAdminApiAccess } from "@/lib/admin-api-auth";
 import { deleteMarketplaceProfiles } from "@/lib/admin-delete-profile";
 import { fetchAdminProfilesRest } from "@/lib/admin-rest";
 import { isAdminServiceConfigured } from "@/lib/supabase-admin";
+import {
+  ADMIN_API_CACHE_HEADERS,
+  getAdminProfilesCache,
+  getStaleAdminProfilesCache,
+  invalidateAdminProfilesCache,
+  setAdminProfilesCache,
+} from "@/lib/admin-api-cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const CACHE_HEADERS = { "Cache-Control": "private, max-age=60" };
-const SERVER_CACHE_MS = 5 * 60_000;
-
-type CacheEntry = { expiresAt: number; profiles: Awaited<ReturnType<typeof fetchAdminProfilesRest>> };
-const profileCache = new Map<string, CacheEntry>();
-
-export function invalidateAdminProfilesCache() {
-  profileCache.clear();
-}
 
 export async function GET(request: NextRequest) {
   const access = await verifyAdminApiAccess(request);
@@ -35,21 +32,22 @@ export async function GET(request: NextRequest) {
 
   const cacheKey = `${role ?? "all"}:${ids.join(",")}`;
   const now = Date.now();
-  const cached = profileCache.get(cacheKey);
-  if (cached && cached.expiresAt > now) {
-    return NextResponse.json({ profiles: cached.profiles }, { headers: CACHE_HEADERS });
+  const cached = getAdminProfilesCache(cacheKey, now);
+  if (cached) {
+    return NextResponse.json({ profiles: cached.profiles }, { headers: ADMIN_API_CACHE_HEADERS });
   }
 
   try {
     const profiles = await fetchAdminProfilesRest({ role, ids });
-    profileCache.set(cacheKey, { expiresAt: now + SERVER_CACHE_MS, profiles });
-    return NextResponse.json({ profiles }, { headers: CACHE_HEADERS });
+    setAdminProfilesCache(cacheKey, profiles, now);
+    return NextResponse.json({ profiles }, { headers: ADMIN_API_CACHE_HEADERS });
   } catch (restError) {
     console.warn("[admin/profiles] REST failed:", restError);
-    if (cached) {
-      return NextResponse.json({ profiles: cached.profiles }, { headers: CACHE_HEADERS });
+    const stale = getStaleAdminProfilesCache(cacheKey);
+    if (stale) {
+      return NextResponse.json({ profiles: stale.profiles }, { headers: ADMIN_API_CACHE_HEADERS });
     }
-    return NextResponse.json({ profiles: [] }, { headers: CACHE_HEADERS });
+    return NextResponse.json({ profiles: [] }, { headers: ADMIN_API_CACHE_HEADERS });
   }
 }
 

@@ -144,9 +144,10 @@ export async function adminFetch<T>(path: string, init?: RequestInit & { timeout
   }
 
   if (!response.ok) {
+    const errorField = (payload as Record<string, unknown>).error;
     const message =
-      typeof payload?.error === "string"
-        ? payload.error
+      typeof errorField === "string"
+        ? errorField
         : `Admin request failed (${response.status})`;
     throw new Error(message);
   }

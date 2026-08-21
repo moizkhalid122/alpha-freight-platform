@@ -17,6 +17,7 @@ import {
 } from "@/lib/feedback-content";
 import { AdminKpiCard, AdminPageHero, AdminPageShell, AdminPanel } from "@/components/admin/AdminPageShell";
 import { ADMIN_CARD, ADMIN_INPUT } from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 
 type FeedbackResponse = {
   feedback: FeedbackRecord[];

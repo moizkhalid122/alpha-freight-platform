@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminApiAccess } from "@/lib/admin-api-auth";
 import { getSupabaseForAdminApi } from "@/lib/admin-api-db";
-import { invalidateAdminOverviewCache } from "@/app/api/admin/overview/route";
+import {
+  ADMIN_API_CACHE_HEADERS,
+  getAdminLoadsCache,
+  getStaleAdminLoadsCache,
+  invalidateAdminLoadsCache,
+  invalidateAdminOverviewCache,
+  setAdminLoadsCache,
+} from "@/lib/admin-api-cache";
 import { fetchAdminLoadsBundleRest } from "@/lib/admin-rest";
 import { isAdminServiceConfigured } from "@/lib/supabase-admin";
 
@@ -11,18 +18,6 @@ export const dynamic = "force-dynamic";
 const LOAD_LIST_SELECT =
   "id, supplier_id, carrier_id, origin, destination, pickup_location, delivery_location, price, status, created_at, title, commodity, equipment, weight, pickup_date, delivery_date, payment_route, payment_state";
 
-const CACHE_HEADERS = { "Cache-Control": "private, max-age=60" };
-const SERVER_CACHE_MS = 5 * 60_000;
-
-let loadsCache: {
-  expiresAt: number;
-  body: Awaited<ReturnType<typeof fetchAdminLoadsBundleRest>>;
-} | null = null;
-
-export function invalidateAdminLoadsCache() {
-  loadsCache = null;
-}
-
 export async function GET(request: NextRequest) {
   const access = await verifyAdminApiAccess(request);
   if (!access.ok) {
@@ -30,20 +25,22 @@ export async function GET(request: NextRequest) {
   }
 
   const now = Date.now();
-  if (loadsCache && loadsCache.expiresAt > now) {
-    return NextResponse.json(loadsCache.body, { headers: CACHE_HEADERS });
+  const cached = getAdminLoadsCache(now);
+  if (cached) {
+    return NextResponse.json(cached.body, { headers: ADMIN_API_CACHE_HEADERS });
   }
 
   try {
     const body = await fetchAdminLoadsBundleRest();
-    loadsCache = { expiresAt: now + SERVER_CACHE_MS, body };
-    return NextResponse.json(body, { headers: CACHE_HEADERS });
+    setAdminLoadsCache(body, now);
+    return NextResponse.json(body, { headers: ADMIN_API_CACHE_HEADERS });
   } catch (restError) {
     console.warn("[admin/loads] REST failed:", restError);
-    if (loadsCache) {
-      return NextResponse.json(loadsCache.body, { headers: CACHE_HEADERS });
+    const stale = getStaleAdminLoadsCache();
+    if (stale) {
+      return NextResponse.json(stale.body, { headers: ADMIN_API_CACHE_HEADERS });
     }
-    return NextResponse.json({ loads: [], profiles: [], bids: [] }, { headers: CACHE_HEADERS });
+    return NextResponse.json({ loads: [], profiles: [], bids: [] }, { headers: ADMIN_API_CACHE_HEADERS });
   }
 }
 
@@ -113,7 +110,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    loadsCache = null;
+    invalidateAdminLoadsCache();
     invalidateAdminOverviewCache();
     return NextResponse.json({ load: data, message: "Load published to the marketplace." });
   } catch (error) {

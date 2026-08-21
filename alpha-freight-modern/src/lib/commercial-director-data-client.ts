@@ -72,11 +72,12 @@ export async function commercialDirectorFetch<T>(path: string, init?: RequestIni
   }
 
   if (!response.ok) {
+    const payloadRecord = payload as Record<string, unknown>;
     const message =
-      typeof payload?.error === "string"
-        ? payload.error
-        : typeof payload?.message === "string"
-          ? payload.message
+      typeof payloadRecord.error === "string"
+        ? payloadRecord.error
+        : typeof payloadRecord.message === "string"
+          ? payloadRecord.message
           : `Request failed (${response.status})`;
     throw new Error(message);
   }

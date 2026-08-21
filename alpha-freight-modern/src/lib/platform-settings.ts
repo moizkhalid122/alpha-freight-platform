@@ -48,17 +48,17 @@ async function fetchSettingsFromSupabase(): Promise<PlatformSettingsResponse> {
     credentials: "same-origin",
   });
 
-  const payload = await response.json().catch(() => ({}));
+  const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
 
   if (!response.ok) {
     throw new Error(
-      typeof payload?.error === "string" ? payload.error : "Unable to load platform settings."
+      typeof payload.error === "string" ? payload.error : "Unable to load platform settings."
     );
   }
 
   return {
     settings: parsePlatformSettings(payload.settings),
-    updated_at: payload.updated_at ?? null,
+    updated_at: typeof payload.updated_at === "string" ? payload.updated_at : null,
   };
 }
 

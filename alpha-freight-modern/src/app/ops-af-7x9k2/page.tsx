@@ -1,11 +1,11 @@
-import AdminDashboardClient from "./AdminDashboardClient";
+import AdminDashboardClient, { type AdminOverviewRaw } from "./AdminDashboardClient";
 import { getAdminOverviewServer } from "@/lib/admin-server-data";
 
 export default async function AdminDashboardPage() {
-  let initialOverviewRaw = null;
+  let initialOverviewRaw: AdminOverviewRaw | null = null;
 
   try {
-    initialOverviewRaw = await getAdminOverviewServer();
+    initialOverviewRaw = (await getAdminOverviewServer()) as AdminOverviewRaw;
   } catch (error) {
     console.error("[admin dashboard prefetch]", error);
   }
