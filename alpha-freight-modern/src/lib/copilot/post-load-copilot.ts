@@ -1,5 +1,6 @@
 import type { SupplierLoadAdvisory, SupplierLoadDraft } from "@/lib/copilot/supplier-load-advisor";
 import { buildObservationPromptBlock } from "@/lib/copilot/page-observer";
+import { resolveOpenAiModel } from "@/lib/openai-model-router";
 import { isOpenAiConfigured } from "@/lib/openai-config";
 import {
   detectBrowserLanguage,
@@ -42,7 +43,7 @@ export async function getPostLoadCopilotReply(options: {
 
   const observation = instant.observation;
   const fallback = instant;
-  const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  const model = resolveOpenAiModel({ aiTier: "member" });
   const observationBlock = buildObservationPromptBlock(observation);
 
   const systemPrompt = `You are Supplier Co-Pilot on Alpha Freight UK — observing a supplier on the Post Load page in real time.

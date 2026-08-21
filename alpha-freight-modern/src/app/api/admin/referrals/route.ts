@@ -7,6 +7,7 @@ import {
   releaseReferralReward,
   type AdminReferralType,
 } from "@/lib/admin-referrals";
+import { withTimeout } from "@/lib/employee-auth-utils";
 
 export async function GET(request: NextRequest) {
   const access = await verifyAdminApiAccess(request);
@@ -19,14 +20,14 @@ export async function GET(request: NextRequest) {
 
   try {
     const db = getSupabaseForAdminApi(request);
-    const payload = await fetchAdminReferrals(db, type);
+    const payload = await withTimeout(fetchAdminReferrals(db, type), 12_000, "Admin referrals");
     return NextResponse.json(payload);
   } catch (error) {
     console.error("[admin/referrals GET]", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to fetch referrals." },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      referrals: [],
+      stats: { total: 0, pendingApproval: 0, pendingReward: 0, released: 0 },
+    });
   }
 }
 

@@ -36,8 +36,14 @@ import {
   type StoredVehicleRow,
 } from "@/lib/carrier-vehicle-storage";
 import { readCarrierExtras } from "@/lib/profile-extras";
-import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { ADMIN_CARD } from "@/lib/admin-ui";
+import {
+  adminProfilesQueryFn,
+  adminProfilesQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
+import { fetchVehiclesDirect } from "@/lib/admin-client-data";
 
 type CarrierProfileRecord = {
   id: string;
@@ -216,19 +222,14 @@ function prioritySortValue(priority: PriorityLevel) {
   return 1;
 }
 
-async function fetchVehicleVerificationOverview(): Promise<VehicleVerificationRow[]> {
-  const [profilesResult, vehiclesResult] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, company_name, role, created_at").eq("role", "carrier"),
-    supabase.from("vehicles").select("*"),
-  ]);
-
-  const profiles = (profilesResult.error ? [] : (profilesResult.data ?? [])) as CarrierProfileRecord[];
-  const supabaseVehicles = ((vehiclesResult.error ? [] : (vehiclesResult.data ?? [])) as StoredVehicleRow[]).map(
-    (vehicle) => ({
-      ...vehicle,
-      source: "supabase" as const,
-    })
-  );
+function buildVehicleVerificationOverview(
+  profiles: CarrierProfileRecord[],
+  vehiclesResult: StoredVehicleRow[]
+): VehicleVerificationRow[] {
+  const supabaseVehicles = vehiclesResult.map((vehicle) => ({
+    ...vehicle,
+    source: "supabase" as const,
+  }));
 
   const localVehicles = readAllLocalVehicles();
   const allVehicles = mergeStoredVehicleRows(supabaseVehicles, localVehicles);
@@ -286,10 +287,28 @@ export default function AdminCarrierVehicleVerificationPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { data = [], isLoading, isFetching } = useQuery({
-    queryKey: ["admin-carrier-vehicle-verification"],
-    queryFn: fetchVehicleVerificationOverview,
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("carrier"),
+    queryFn: adminProfilesQueryFn("carrier"),
+    ...adminQueryDefaults,
   });
+
+  const vehiclesQuery = useQuery({
+    queryKey: ["admin-vehicles"],
+    queryFn: fetchVehiclesDirect,
+    ...adminQueryDefaults,
+  });
+
+  const data = useMemo(() => {
+    const profiles = (profilesQuery.data?.profiles ?? []) as CarrierProfileRecord[];
+    const vehicles = (vehiclesQuery.data ?? []) as StoredVehicleRow[];
+    if (!profilesQuery.data && !vehiclesQuery.data) return [];
+    return buildVehicleVerificationOverview(profiles, vehicles);
+  }, [profilesQuery.data, vehiclesQuery.data]);
+
+  const isLoading =
+    (profilesQuery.isLoading && !profilesQuery.data) || (vehiclesQuery.isLoading && !vehiclesQuery.data);
+  const isFetching = profilesQuery.isFetching || vehiclesQuery.isFetching;
 
   const selectedRow = useMemo(
     () => data.find((row) => row.id === selectedVehicleId) || null,
@@ -428,7 +447,8 @@ export default function AdminCarrierVehicleVerificationPage() {
   }, [data]);
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-vehicle-verification"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: ["admin-vehicles"] });
     toast.success("Vehicle verification queue refreshed.");
   };
 
@@ -438,7 +458,8 @@ export default function AdminCarrierVehicleVerificationPage() {
     successMessage: string
   ) => {
     mergeVehicleProfile(vehicleId, patch);
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-vehicle-verification"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: ["admin-vehicles"] });
     toast.success(successMessage);
   };
 
@@ -468,7 +489,7 @@ export default function AdminCarrierVehicleVerificationPage() {
           verificationStatus: "verified",
           verificationNotes: rowNotes,
           rejectionReason: "",
-          verifiedBy: "Admin - Khalid",
+          verifiedBy: "Admin",
           verifiedAt: new Date().toISOString(),
           requestedInfoAt: "",
         },
@@ -642,7 +663,7 @@ export default function AdminCarrierVehicleVerificationPage() {
           verificationStatus: "verified",
           verificationNotes: verificationNotes || row.profile.verificationNotes || "",
           rejectionReason: "",
-          verifiedBy: "Admin - Khalid",
+          verifiedBy: "Admin",
           verifiedAt: new Date().toISOString(),
           requestedInfoAt: "",
         });
@@ -666,7 +687,8 @@ export default function AdminCarrierVehicleVerificationPage() {
       });
     });
 
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-vehicle-verification"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: ["admin-vehicles"] });
     setSelectedIds([]);
 
     if (action === "verify") toast.success("Selected vehicles verified.");
@@ -700,8 +722,8 @@ export default function AdminCarrierVehicleVerificationPage() {
     : [];
 
   return (
-    <div className="space-y-6 pb-8">
-      <section className="rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+    <div className="admin-page-stack space-y-4 pb-6">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400">
@@ -959,7 +981,7 @@ export default function AdminCarrierVehicleVerificationPage() {
                           </p>
                           <div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className="h-full rounded-full bg-slate-900"
+                              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"
                               style={{
                                 width: `${Math.max(
                                   8,
@@ -1113,7 +1135,7 @@ export default function AdminCarrierVehicleVerificationPage() {
             className="absolute inset-0"
             onClick={() => setSelectedVehicleId(null)}
           />
-          <div className="relative z-10 max-h-[92vh] w-full max-w-7xl overflow-y-auto rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.18)]">
+          <div className="relative z-10 max-h-[92vh] w-full max-w-7xl overflow-y-auto rounded-xl border border-slate-200/90 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
             <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-6 py-6 backdrop-blur">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-2">
@@ -1150,7 +1172,7 @@ export default function AdminCarrierVehicleVerificationPage() {
               <div className="space-y-6">
                 <section className="rounded-[28px] border border-slate-200 bg-slate-50/70 px-5 py-5">
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="admin-icon-box flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-blue-600 ring-1 ring-blue-100/70">
                     <Truck className="h-5 w-5" />
                   </div>
                   <div>
@@ -1191,7 +1213,7 @@ export default function AdminCarrierVehicleVerificationPage() {
 
               <section className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_48px_rgba(15,23,42,0.05)]">
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="admin-icon-box flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-blue-600 ring-1 ring-blue-100/70">
                     <FileCheck className="h-5 w-5" />
                   </div>
                   <div>
@@ -1262,7 +1284,7 @@ export default function AdminCarrierVehicleVerificationPage() {
               <div className="space-y-6">
                 <section className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_48px_rgba(15,23,42,0.05)]">
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="admin-icon-box flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-blue-600 ring-1 ring-blue-100/70">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
@@ -1312,7 +1334,7 @@ export default function AdminCarrierVehicleVerificationPage() {
 
               <section className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_48px_rgba(15,23,42,0.05)]">
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="admin-icon-box flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-blue-600 ring-1 ring-blue-100/70">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
@@ -1413,7 +1435,7 @@ export default function AdminCarrierVehicleVerificationPage() {
 
                 <section className="rounded-[28px] border border-slate-200 bg-slate-50/70 px-5 py-5">
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="admin-icon-box flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-blue-600 ring-1 ring-blue-100/70">
                     <Phone className="h-5 w-5" />
                   </div>
                   <div>

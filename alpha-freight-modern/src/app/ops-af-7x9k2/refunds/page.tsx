@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Loader2, CheckCircle2, XCircle, Clock, RotateCcw } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, RotateCcw, CreditCard } from "lucide-react";
+import { AdminPageHero, AdminPageShell } from "@/components/admin/AdminPageShell";
+import { ADMIN_CARD, ADMIN_INPUT } from "@/lib/admin-ui";
 import { adminFetch } from "@/lib/admin-data-client";
 import { adminRoute } from "@/lib/admin-path";
 import type { LoadCancellationRequest } from "@/lib/load-cancellation";
+import { Button } from "@/components/ui/button";
 
 function formatMoney(value: number) {
   return `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -88,57 +91,43 @@ export default function AdminRefundsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">
-          Refunds &amp; Cancellations
-        </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">
-          Supplier refund review queue
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm text-slate-500">
-          Review cancellation requests submitted after carrier acceptance, payment disputes, and manual
-          refund cases.
-        </p>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-[26px] border border-slate-200 bg-slate-50 p-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Pending review
-            </p>
-            <p className="mt-4 text-3xl font-black tracking-tight text-slate-900">{pendingCount}</p>
+    <AdminPageShell>
+      <AdminPageHero
+        eyebrow="Refunds & cancellations"
+        title="Supplier refund review queue"
+        description="Review cancellation requests submitted after carrier acceptance, payment disputes, and manual refund approvals."
+        icon={CreditCard}
+        accent="rose"
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => void loadRequests()} disabled={loading}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-2 h-4 w-4" />}
+            Refresh
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          { label: "Open queue", value: pendingCount },
+          { label: "Total requests", value: requests.length },
+          { label: "Processed", value: requests.filter((r) => r.status === "refunded" || r.status === "rejected").length },
+        ].map((item) => (
+          <div key={item.label} className={`${ADMIN_CARD} p-4`}>
+            <p className="text-[11px] font-semibold text-slate-500">{item.label}</p>
+            <p className="mt-2 text-2xl font-bold text-slate-900">{item.value}</p>
           </div>
-          <div className="rounded-[26px] border border-slate-200 bg-slate-50 p-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Total requests
-            </p>
-            <p className="mt-4 text-3xl font-black tracking-tight text-slate-900">{requests.length}</p>
-          </div>
-          <div className="rounded-[26px] border border-slate-200 bg-slate-50 p-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Policy
-            </p>
-            <Link
-              href="/refund-cancellation-policy"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-violet-700 hover:underline"
-            >
-              <RotateCcw className="h-4 w-4" />
-              View refund policy
-            </Link>
-          </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
       {loading ? (
-        <div className="rounded-[32px] border border-slate-200 bg-white py-16 text-center">
+        <div className={`${ADMIN_CARD} py-16 text-center`}>
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-slate-400" />
         </div>
       ) : error ? (
-        <div className="rounded-[32px] border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
-          {error}
-        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">{error}</div>
       ) : requests.length === 0 ? (
-        <div className="rounded-[32px] border border-slate-200 bg-white px-6 py-16 text-center">
-          <p className="text-lg font-black text-slate-900">No cancellation requests yet</p>
+        <div className={`${ADMIN_CARD} px-6 py-16 text-center`}>
+          <p className="text-lg font-bold text-slate-900">No cancellation requests yet</p>
           <p className="mt-2 text-sm text-slate-500">
             Auto-refunds before carrier acceptance are processed immediately and may not appear here.
           </p>
@@ -150,23 +139,20 @@ export default function AdminRefundsPage() {
             const defaultRefund = request.original_amount ?? request.refund_amount ?? 0;
 
             return (
-              <div
-                key={request.id}
-                className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm"
-              >
+              <div key={request.id} className={`${ADMIN_CARD} p-6`}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
                         href={adminRoute(`/loads/${request.load_id}`)}
-                        className="text-lg font-black tracking-tight text-slate-900 hover:text-violet-700"
+                        className="text-lg font-bold tracking-tight text-slate-900 hover:text-blue-700"
                       >
                         {getShortCode(request.load_id)}
                       </Link>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
                         {request.status}
                       </span>
-                      <span className="rounded-full bg-violet-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-violet-700">
+                      <span className="rounded-full bg-violet-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-violet-700">
                         {request.request_type}
                       </span>
                     </div>
@@ -205,7 +191,7 @@ export default function AdminRefundsPage() {
                 {isPending ? (
                   <div className="mt-5 grid gap-3 border-t border-slate-100 pt-5 md:grid-cols-3">
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                      <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                         Refund amount
                       </label>
                       <input
@@ -216,11 +202,11 @@ export default function AdminRefundsPage() {
                         onChange={(event) =>
                           setRefundAmounts((prev) => ({ ...prev, [request.id]: event.target.value }))
                         }
-                        className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                        className={`${ADMIN_INPUT} mt-2`}
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                      <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                         Deduction
                       </label>
                       <input
@@ -231,11 +217,11 @@ export default function AdminRefundsPage() {
                         onChange={(event) =>
                           setDeductionAmounts((prev) => ({ ...prev, [request.id]: event.target.value }))
                         }
-                        className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                        className={`${ADMIN_INPUT} mt-2`}
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                      <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                         Admin note
                       </label>
                       <input
@@ -244,7 +230,7 @@ export default function AdminRefundsPage() {
                         onChange={(event) =>
                           setAdminNotes((prev) => ({ ...prev, [request.id]: event.target.value }))
                         }
-                        className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                        className={`${ADMIN_INPUT} mt-2`}
                       />
                     </div>
                   </div>
@@ -258,28 +244,29 @@ export default function AdminRefundsPage() {
 
                 {isPending ? (
                   <div className="mt-5 flex flex-wrap gap-2">
-                    <button
+                    <Button
                       type="button"
                       disabled={processingId === request.id}
                       onClick={() => void handleDecision(request, "approve")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                      className="bg-emerald-600 hover:bg-emerald-700"
                     >
                       {processingId === request.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4" />
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
                       )}
                       Approve refund
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="secondary"
                       disabled={processingId === request.id}
                       onClick={() => void handleDecision(request, "reject")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-60"
+                      className="border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
                     >
-                      <XCircle className="h-4 w-4" />
+                      <XCircle className="mr-2 h-4 w-4" />
                       Reject
-                    </button>
+                    </Button>
                   </div>
                 ) : request.status === "completed" ? (
                   <p className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
@@ -297,6 +284,6 @@ export default function AdminRefundsPage() {
           })}
         </section>
       )}
-    </div>
+    </AdminPageShell>
   );
 }

@@ -6,6 +6,14 @@ import { generalKnowledgeCategory } from "@/lib/public-ai-live-search";
 import { fetchWithTimeout, OPENAI_STREAM_TIMEOUT_MS } from "@/lib/copilot/fetch-utils";
 import { isValidImageDataUrl } from "@/lib/chat-image-upload";
 import { VISION_ANALYSIS_CONTEXT } from "@/lib/openai-vision";
+import {
+  type AiTier,
+  resolveAiTier,
+  resolveHistoryLimits,
+  resolveOpenAiMaxTokens,
+  resolveOpenAiModel,
+  resolveOpenAiTemperature,
+} from "@/lib/openai-model-router";
 
 type OpenAiTextPart = { type: "text"; text: string };
 type OpenAiImagePart = {
@@ -26,12 +34,12 @@ const ROLE_LABELS: Record<AssistantKind, string> = {
   employee: "Team AI",
 };
 
-const PUBLIC_HISTORY_TURNS = 14;
-const PUBLIC_HISTORY_CHARS = 1400;
 
-function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
+function normalizeHistory(history: ChatHistoryItem[], aiTier: AiTier = "guest"): ChatHistoryItem[] {
+  const { turnLimit, charLimit } = resolveHistoryLimits(aiTier, true);
+
   return history
-    .slice(-PUBLIC_HISTORY_TURNS)
+    .slice(-turnLimit)
     .filter(
       (item) =>
         (item.role === "user" || item.role === "assistant") &&
@@ -40,7 +48,7 @@ function normalizeHistory(history: ChatHistoryItem[]): ChatHistoryItem[] {
     )
     .map((item) => ({
       role: item.role,
-      content: item.content.trim().slice(0, PUBLIC_HISTORY_CHARS),
+      content: item.content.trim().slice(0, charLimit),
     }));
 }
 
@@ -206,8 +214,17 @@ export function buildPublicStreamMessages(options: {
   detectedIntent?: DetectedIntent;
   assistantType?: AssistantKind;
   imageDataUrl?: string;
+  aiTier?: AiTier;
+  isGuest?: boolean;
 }): OpenAiStreamMessage[] {
-  const history = normalizeHistory(options.history || []);
+  const assistantType = options.assistantType ?? "general";
+  const aiTier =
+    options.aiTier ??
+    resolveAiTier({
+      isGuest: options.isGuest ?? true,
+      assistantType,
+    });
+  const history = normalizeHistory(options.history || [], aiTier);
   const userMessage = options.message.trim().slice(0, 2000);
   const last = history[history.length - 1];
   const historyForApi =
@@ -220,7 +237,6 @@ export function buildPublicStreamMessages(options: {
         actionRequest: options.detectedIntent.actionRequest,
       })}`
     : "";
-  const assistantType = options.assistantType ?? "general";
   const hasImage = Boolean(options.imageDataUrl && isValidImageDataUrl(options.imageDataUrl));
   const visionContext = hasImage ? `\n\n${VISION_ANALYSIS_CONTEXT}` : "";
 
@@ -287,16 +303,24 @@ export async function* streamPublicOpenAiReply(options: {
   detectedIntent?: DetectedIntent;
   assistantType?: AssistantKind;
   imageDataUrl?: string;
+  aiTier?: AiTier;
+  isGuest?: boolean;
 }): AsyncGenerator<string> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return;
 
+  const assistantType = options.assistantType ?? "general";
+  const aiTier =
+    options.aiTier ??
+    resolveAiTier({
+      isGuest: options.isGuest ?? true,
+      assistantType,
+    });
   const hasImage = Boolean(options.imageDataUrl && isValidImageDataUrl(options.imageDataUrl));
-  const model =
-    process.env.OPENAI_VISION_MODEL?.trim() ||
-    process.env.OPENAI_MODEL?.trim() ||
-    "gpt-4o-mini";
+  const model = resolveOpenAiModel({ aiTier, hasImage });
   const messages = buildPublicStreamMessages(options);
+  const maxTokens = resolveOpenAiMaxTokens({ aiTier, publicMode: true, hasImage });
+  const timeoutMs = aiTier === "guest" ? OPENAI_STREAM_TIMEOUT_MS : OPENAI_STREAM_TIMEOUT_MS + 8000;
 
   try {
     const response = await fetchWithTimeout(
@@ -310,12 +334,12 @@ export async function* streamPublicOpenAiReply(options: {
         body: JSON.stringify({
           model,
           messages,
-          temperature: 0.68,
-          max_tokens: hasImage ? 2000 : 2200,
+          temperature: resolveOpenAiTemperature(aiTier),
+          max_tokens: maxTokens,
           stream: true,
         }),
       },
-      OPENAI_STREAM_TIMEOUT_MS
+      timeoutMs
     );
 
     if (!response.ok || !response.body) {
@@ -341,21 +365,30 @@ export async function getOpenAiVisionFallbackReply(options: {
   extraContext?: string;
   assistantType?: AssistantKind;
   imageDataUrl: string;
+  aiTier?: AiTier;
+  isGuest?: boolean;
 }): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey || !isValidImageDataUrl(options.imageDataUrl)) return null;
 
-  const model =
-    process.env.OPENAI_VISION_MODEL?.trim() ||
-    process.env.OPENAI_MODEL?.trim() ||
-    "gpt-4o-mini";
+  const assistantType = options.assistantType ?? "general";
+  const aiTier =
+    options.aiTier ??
+    resolveAiTier({
+      isGuest: options.isGuest ?? true,
+      assistantType,
+    });
+  const model = resolveOpenAiModel({ aiTier, hasImage: true });
   const messages = buildPublicStreamMessages({
     message: options.message,
     history: options.history,
     extraContext: options.extraContext,
     assistantType: options.assistantType,
     imageDataUrl: options.imageDataUrl,
+    aiTier,
+    isGuest: options.isGuest,
   });
+  const maxTokens = resolveOpenAiMaxTokens({ aiTier, publicMode: true, hasImage: true });
 
   try {
     const response = await fetchWithTimeout(
@@ -369,11 +402,11 @@ export async function getOpenAiVisionFallbackReply(options: {
         body: JSON.stringify({
           model,
           messages,
-          temperature: 0.65,
-          max_tokens: 1600,
+          temperature: resolveOpenAiTemperature(aiTier),
+          max_tokens: maxTokens,
         }),
       },
-      OPENAI_STREAM_TIMEOUT_MS
+      OPENAI_STREAM_TIMEOUT_MS + (aiTier === "guest" ? 0 : 8000)
     );
 
     if (!response.ok) return null;

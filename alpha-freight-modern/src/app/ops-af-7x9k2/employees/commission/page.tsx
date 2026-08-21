@@ -19,7 +19,7 @@ export default function AdminEmployeeCommissionPage() {
   const pending = rows.filter((r) => r.status === "pending").reduce((s, r) => s + Number(r.amount_gbp), 0);
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader title="Commission" description="Review and approve employee commission payouts." />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/commission" />
 

@@ -113,6 +113,8 @@ export function resolveSupplierExtras(
 }
 
 export async function persistProfileExtras(userId: string, extras: Record<string, unknown>) {
+  let lastError: string | null = null;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -124,6 +126,7 @@ export async function persistProfileExtras(userId: string, extras: Record<string
       .eq("id", userId);
 
     if (!error) return;
+    lastError = error.message;
   }
 
   try {
@@ -150,7 +153,12 @@ export async function persistProfileExtras(userId: string, extras: Record<string
       );
     }
   } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : lastError || "Unable to save profile extras.";
     console.error("[profile-extras] persist failed", error);
+    throw new Error(message);
   }
 }
 

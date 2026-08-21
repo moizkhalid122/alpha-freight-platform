@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminApiAccess } from "@/lib/admin-api-auth";
-import { getSupabaseForAdminApi } from "@/lib/admin-api-db";
+import { deleteMarketplaceProfiles } from "@/lib/admin-delete-profile";
+import { fetchAdminProfilesRest } from "@/lib/admin-rest";
+import { isAdminServiceConfigured } from "@/lib/supabase-admin";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const CACHE_HEADERS = { "Cache-Control": "private, max-age=60" };
+const SERVER_CACHE_MS = 5 * 60_000;
+
+type CacheEntry = { expiresAt: number; profiles: Awaited<ReturnType<typeof fetchAdminProfilesRest>> };
+const profileCache = new Map<string, CacheEntry>();
+
+export function invalidateAdminProfilesCache() {
+  profileCache.clear();
+}
 
 export async function GET(request: NextRequest) {
   const access = await verifyAdminApiAccess(request);
@@ -18,29 +33,76 @@ export async function GET(request: NextRequest) {
         .filter(Boolean)
     : [];
 
+  const cacheKey = `${role ?? "all"}:${ids.join(",")}`;
+  const now = Date.now();
+  const cached = profileCache.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return NextResponse.json({ profiles: cached.profiles }, { headers: CACHE_HEADERS });
+  }
+
   try {
-    const db = getSupabaseForAdminApi(request);
-    let query = db.from("profiles").select("*");
-
-    if (role && role !== "all") {
-      query = query.eq("role", role);
+    const profiles = await fetchAdminProfilesRest({ role, ids });
+    profileCache.set(cacheKey, { expiresAt: now + SERVER_CACHE_MS, profiles });
+    return NextResponse.json({ profiles }, { headers: CACHE_HEADERS });
+  } catch (restError) {
+    console.warn("[admin/profiles] REST failed:", restError);
+    if (cached) {
+      return NextResponse.json({ profiles: cached.profiles }, { headers: CACHE_HEADERS });
     }
+    return NextResponse.json({ profiles: [] }, { headers: CACHE_HEADERS });
+  }
+}
 
-    if (ids.length) {
-      query = query.in("id", ids);
-    }
+export async function DELETE(request: NextRequest) {
+  const access = await verifyAdminApiAccess(request);
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
+  }
 
-    const { data, error } = await query.order("created_at", { ascending: false });
+  let ids: string[] = [];
+  try {
+    const body = (await request.json()) as { ids?: string[] };
+    ids = Array.isArray(body.ids)
+      ? body.ids.map((value) => String(value).trim()).filter(Boolean)
+      : [];
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+  if (ids.length === 0) {
+    return NextResponse.json({ error: "Select at least one account to delete." }, { status: 400 });
+  }
 
-    return NextResponse.json({ profiles: data ?? [] });
-  } catch (error) {
-    console.error("[admin/profiles]", error);
+  if (ids.length > 50) {
+    return NextResponse.json({ error: "Delete up to 50 accounts at a time." }, { status: 400 });
+  }
+
+  if (!isAdminServiceConfigured()) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to fetch profiles." },
+      {
+        error:
+          "SUPABASE_SERVICE_ROLE_KEY is missing. Add it to .env.local and restart the dev server before deleting accounts.",
+      },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const result = await deleteMarketplaceProfiles(ids);
+    invalidateAdminProfilesCache();
+
+    return NextResponse.json(result, {
+      status: result.failed.length > 0 && result.deleted.length === 0 ? 500 : 200,
+    });
+  } catch (error) {
+    console.error("[admin/profiles] DELETE failed:", error);
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to delete accounts. Check SUPABASE_SERVICE_ROLE_KEY in .env.local.",
+      },
       { status: 500 }
     );
   }

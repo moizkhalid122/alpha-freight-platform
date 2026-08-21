@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
   ClipboardList,
@@ -22,139 +22,77 @@ import {
   Users,
   BarChart3,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import BrandMark from "@/components/BrandMark";
 import { cn } from "@/lib/utils";
-import { adminRoute } from "@/lib/admin-path";
+import { ADMIN_PANEL_PATH, adminRoute } from "@/lib/admin-path";
 import { supabase } from "@/lib/supabase";
+import {
+  prefetchAdminEmployees,
+  prefetchAdminLoads,
+  prefetchAdminOverview,
+  prefetchAdminProfiles,
+} from "@/lib/use-admin-prefetch";
 
 type AdminNavItem = {
   name: string;
   path: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
+  prefetch?: "suppliers" | "carriers" | "loads" | "employees" | "all-profiles";
 };
 
 const adminSections: { label: string; items: AdminNavItem[] }[] = [
   {
     label: "OVERVIEW",
     items: [
-      {
-        name: "Overview",
-        path: "/ops-af-7x9k2",
-        icon: <LayoutDashboard className="h-4 w-4" />,
-      },
-      {
-        name: "Quick Stats",
-        path: "/ops-af-7x9k2/quick-stats",
-        icon: <Gauge className="h-4 w-4" />,
-      },
-      {
-        name: "Referrals",
-        path: "/ops-af-7x9k2/referrals",
-        icon: <Gift className="h-4 w-4" />,
-      },
-      {
-        name: "User Feedback",
-        path: "/ops-af-7x9k2/feedback",
-        icon: <MessageSquare className="h-4 w-4" />,
-      },
+      { name: "Overview", path: adminRoute(), icon: LayoutDashboard },
+      { name: "Quick Stats", path: adminRoute("/quick-stats"), icon: Gauge },
+      { name: "Referrals", path: adminRoute("/referrals"), icon: Gift },
+      { name: "User Feedback", path: adminRoute("/feedback"), icon: MessageSquare },
     ],
   },
   {
     label: "CARRIERS",
     items: [
-      {
-        name: "All Carriers",
-        path: "/ops-af-7x9k2/carriers",
-        icon: <Truck className="h-4 w-4" />,
-      },
-      {
-        name: "Pending Verification",
-        path: "/ops-af-7x9k2/carriers/pending-verifications",
-        icon: <ShieldCheck className="h-4 w-4" />,
-      },
-      {
-        name: "Verified Carriers",
-        path: "/ops-af-7x9k2/carriers/verified",
-        icon: <UserRoundCheck className="h-4 w-4" />,
-      },
-      {
-        name: "Add Carrier",
-        path: "/ops-af-7x9k2/carriers/add",
-        icon: <UserPlus className="h-4 w-4" />,
-      },
-      {
-        name: "POD Verification",
-        path: "/ops-af-7x9k2/carriers/pod-verification",
-        icon: <FileText className="h-4 w-4" />,
-      },
-      {
-        name: "Carrier Payments",
-        path: "/ops-af-7x9k2/carriers/payments",
-        icon: <CreditCard className="h-4 w-4" />,
-      },
+      { name: "All Carriers", path: adminRoute("/carriers"), icon: Truck, prefetch: "carriers" },
+      { name: "Pending Verification", path: adminRoute("/carriers/pending-verifications"), icon: ShieldCheck, prefetch: "carriers" },
+      { name: "Verified Carriers", path: adminRoute("/carriers/verified"), icon: UserRoundCheck, prefetch: "carriers" },
+      { name: "Add Carrier", path: adminRoute("/carriers/add"), icon: UserPlus },
+      { name: "POD Verification", path: adminRoute("/carriers/pod-verification"), icon: FileText, prefetch: "carriers" },
+      { name: "Carrier Payments", path: adminRoute("/carriers/payments"), icon: CreditCard, prefetch: "carriers" },
     ],
   },
   {
     label: "SUPPLIERS",
     items: [
-      {
-        name: "All Suppliers",
-        path: "/ops-af-7x9k2/suppliers",
-        icon: <Building2 className="h-4 w-4" />,
-      },
+      { name: "All Suppliers", path: adminRoute("/suppliers"), icon: Building2, prefetch: "suppliers" },
     ],
   },
   {
     label: "LOADS",
     items: [
-      {
-        name: "All Loads",
-        path: "/ops-af-7x9k2/loads",
-        icon: <ClipboardList className="h-4 w-4" />,
-      },
-      {
-        name: "Post Load",
-        path: "/ops-af-7x9k2/post-load",
-        icon: <PackagePlus className="h-4 w-4" />,
-      },
-      {
-        name: "Refunds",
-        path: "/ops-af-7x9k2/refunds",
-        icon: <CreditCard className="h-4 w-4" />,
-      },
+      { name: "All Loads", path: adminRoute("/loads"), icon: ClipboardList, prefetch: "loads" },
+      { name: "Post Load", path: adminRoute("/post-load"), icon: PackagePlus },
+      { name: "Refunds", path: adminRoute("/refunds"), icon: CreditCard, prefetch: "loads" },
     ],
   },
   {
     label: "HR & EMPLOYEES",
     items: [
-      {
-        name: "Employees",
-        path: "/ops-af-7x9k2/employees",
-        icon: <Users className="h-4 w-4" />,
-      },
-      {
-        name: "Employee KPIs",
-        path: "/ops-af-7x9k2/employees/kpis",
-        icon: <BarChart3 className="h-4 w-4" />,
-      },
+      { name: "Employees", path: adminRoute("/employees"), icon: Users, prefetch: "employees" },
+      { name: "Employee KPIs", path: adminRoute("/employees/kpis"), icon: BarChart3, prefetch: "employees" },
     ],
   },
   {
     label: "SETTINGS",
-    items: [
-      {
-        name: "Settings",
-        path: "/ops-af-7x9k2/settings",
-        icon: <Settings className="h-4 w-4" />,
-      },
-    ],
+    items: [{ name: "Settings", path: adminRoute("/settings"), icon: Settings }],
   },
 ];
 
 function isItemActive(pathname: string, itemPath: string) {
-  if (itemPath === "/ops-af-7x9k2") {
-    return pathname === "/ops-af-7x9k2";
+  if (itemPath === ADMIN_PANEL_PATH) {
+    return pathname === ADMIN_PANEL_PATH;
   }
-
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 }
 
@@ -167,6 +105,16 @@ export default function AdminSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const prefetchRoute = (prefetch?: AdminNavItem["prefetch"]) => {
+    if (prefetch === "suppliers") void prefetchAdminProfiles(queryClient, "supplier");
+    if (prefetch === "carriers") void prefetchAdminProfiles(queryClient, "carrier");
+    if (prefetch === "loads") void prefetchAdminLoads(queryClient);
+    if (prefetch === "employees") void prefetchAdminEmployees(queryClient);
+    if (prefetch === "all-profiles") void prefetchAdminProfiles(queryClient);
+    void prefetchAdminOverview(queryClient);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -177,45 +125,36 @@ export default function AdminSidebar({
   return (
     <aside
       className={cn(
-        "flex h-full flex-col border-r border-white/60 bg-[#f8fbff]/90 backdrop-blur-xl transition-all duration-300",
-        collapsed ? "w-[92px]" : "w-[294px]"
+        "admin-sidebar flex h-full flex-col overflow-y-auto transition-all duration-300 ease-out",
+        collapsed ? "w-[84px]" : "w-[280px]"
       )}
     >
-      <div className={cn("border-b border-slate-200/70", collapsed ? "px-4 py-5" : "px-5 py-5")}>
-        <Link href="/ops-af-7x9k2" onClick={onClose} className="flex items-center gap-3">
-          <div className="relative h-10 w-10 overflow-hidden rounded-2xl bg-white shadow-[0_14px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
-            <Image
-              src="/logo.png"
-              alt="Alpha Freight"
-              fill
-              sizes="40px"
-              className="object-contain p-1.5"
-              priority
-            />
+      <div className={cn("mb-2 flex flex-col gap-4 py-5", collapsed ? "px-3" : "px-5")}>
+        <BrandMark
+          href={adminRoute()}
+          textClassName={cn(
+            "font-bold tracking-tight text-gray-900",
+            collapsed ? "sr-only" : "text-base"
+          )}
+        />
+        {!collapsed ? (
+          <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Operations</p>
+            <p className="text-sm font-semibold text-slate-900">Premium Admin</p>
           </div>
-          {!collapsed ? (
-            <div>
-              <p className="text-sm font-black tracking-tight text-slate-900">
-                Alpha Freight
-              </p>
-              <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-                Premium Admin
-              </p>
-            </div>
-          ) : null}
-        </Link>
+        ) : null}
+        {!collapsed ? <div className="h-px w-full bg-slate-100" /> : null}
       </div>
 
-      <nav className={cn("flex-1 space-y-6 overflow-y-auto", collapsed ? "px-3 py-4" : "px-4 py-5")}>
+      <nav className={cn("flex-1 space-y-5 pb-4", collapsed ? "px-2" : "px-3")}>
         {adminSections.map((section) => (
           <div key={section.label}>
             {!collapsed ? (
-              <p className="px-3 text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                {section.label}
-              </p>
+              <p className="mb-2 px-3 text-[10px] font-bold tracking-[0.18em] text-slate-400">{section.label}</p>
             ) : null}
-            <div className="mt-3 space-y-1">
+            <div className="space-y-1">
               {section.items.map((item) => {
+                const Icon = item.icon;
                 const active = isItemActive(pathname, item.path);
 
                 return (
@@ -223,23 +162,29 @@ export default function AdminSidebar({
                     key={item.path}
                     href={item.path}
                     onClick={onClose}
-                    className={cn(
-                      "group flex items-center rounded-2xl text-sm font-semibold transition-all duration-200",
-                      collapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-3",
-                      active
-                        ? "bg-[#151B24] text-white shadow-[0_16px_34px_rgba(15,23,42,0.16)]"
-                        : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-[0_10px_28px_rgba(15,23,42,0.06)]"
-                    )}
+                    onMouseEnter={() => prefetchRoute(item.prefetch)}
+                    onFocus={() => prefetchRoute(item.prefetch)}
+                    title={item.name}
                   >
-                    <span
+                    <div
                       className={cn(
-                        "shrink-0",
-                        active ? "text-[#BFFF07]" : "text-slate-400 group-hover:text-slate-700"
+                        "group flex items-center rounded-xl transition-all duration-200 ease-out",
+                        collapsed ? "justify-center px-2.5 py-2.5" : "gap-3 px-3 py-2.5",
+                        active
+                          ? "admin-nav-active"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.98]"
                       )}
                     >
-                      {item.icon}
-                    </span>
-                    {!collapsed ? <span className="truncate">{item.name}</span> : null}
+                      <Icon
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-colors duration-200",
+                          active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-700"
+                        )}
+                      />
+                      {!collapsed ? (
+                        <span className="truncate text-[13px] font-medium">{item.name}</span>
+                      ) : null}
+                    </div>
                   </Link>
                 );
               })}
@@ -248,24 +193,16 @@ export default function AdminSidebar({
         ))}
       </nav>
 
-      <div className={cn("border-t border-slate-200/70", collapsed ? "px-3 py-4" : "px-4 py-5")}>
-        {!collapsed ? (
-          <div className="rounded-[28px] border border-white/80 bg-white/90 p-4 shadow-[0_14px_34px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-black text-slate-900">Platform Control</p>
-            <p className="mt-1 text-[11px] leading-5 text-slate-500">
-              Monitor users, loads, approvals, and finance from one clean control layer.
-            </p>
-          </div>
-        ) : null}
+      <div className={cn("border-t border-slate-100", collapsed ? "px-2 py-4" : "px-3 py-4")}>
         <button
           type="button"
           onClick={handleLogout}
           className={cn(
-            "mt-3 flex w-full rounded-2xl text-sm font-bold text-red-500 transition-colors hover:bg-red-50 hover:text-red-600",
-            collapsed ? "justify-center px-2 py-3" : "items-center gap-3 px-4 py-3"
+            "flex w-full items-center rounded-xl text-[13px] font-medium text-red-500 transition-all duration-200 hover:bg-red-50 active:scale-[0.98]",
+            collapsed ? "justify-center px-2.5 py-2.5" : "gap-2.5 px-3 py-2.5"
           )}
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed ? <span>Logout</span> : null}
         </button>
       </div>

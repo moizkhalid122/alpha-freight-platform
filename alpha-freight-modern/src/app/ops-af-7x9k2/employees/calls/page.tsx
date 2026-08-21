@@ -16,7 +16,7 @@ export default function AdminEmployeeCallsPage() {
   const outbound = rows.filter((c) => c.direction === "outbound").length;
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader
         title="Calls"
         description="Every call logged by the team — outbound, inbound, notes, and outcomes."

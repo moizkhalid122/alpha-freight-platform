@@ -27,7 +27,7 @@ export default function AdminEmployeeActivityPage() {
   const nameFor = useEmployeeNameLookup(employees);
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader
         title="CRM Activity"
         description="Full timeline — every note, call log, status change, and follow-up across the team."

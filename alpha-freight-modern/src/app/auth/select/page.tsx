@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Truck, Building2, ChevronRight } from "lucide-react";
 import { AUTH } from "@/components/auth/auth-styles";
+import { getTransportMode } from "@/lib/transport-modes";
 
 const accountOptions = [
   {
-    href: "/auth/signup?role=carrier",
+    role: "carrier",
     title: "Carrier account",
     description: "Manage fleet and accept loads",
     icon: Truck,
@@ -14,7 +16,7 @@ const accountOptions = [
     hoverClass: "group-hover:text-blue-600",
   },
   {
-    href: "/auth/signup?role=supplier",
+    role: "supplier",
     title: "Supplier account",
     description: "Post freight and track shipments",
     icon: Building2,
@@ -24,21 +26,37 @@ const accountOptions = [
 ] as const;
 
 export default function SelectAccountPage() {
+  const searchParams = useSearchParams();
+  const modeParam = searchParams.get("mode");
+  const mode = getTransportMode(modeParam);
+
   return (
     <div className="w-full">
       <div className={AUTH.header}>
+        {mode ? (
+          <p className="mb-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+            {mode.label} freight
+          </p>
+        ) : null}
         <h2 className={AUTH.title}>Create your account</h2>
-        <p className={AUTH.subtitle}>Choose whether you are a carrier or a supplier.</p>
+        <p className={AUTH.subtitle}>
+          {mode
+            ? `Choose whether you are a carrier or supplier for ${mode.label.toLowerCase()} freight.`
+            : "Choose whether you are a carrier or a supplier."}
+        </p>
       </div>
 
       <div className="space-y-3 sm:space-y-4">
         {accountOptions.map((option) => {
           const Icon = option.icon;
+          const params = new URLSearchParams({ role: option.role });
+          if (modeParam) params.set("mode", modeParam);
+          const href = `/auth/signup?${params.toString()}`;
 
           return (
             <Link
-              key={option.href}
-              href={option.href}
+              key={option.role}
+              href={href}
               className="group block rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-4"
             >
               <div className="flex items-center gap-3.5 sm:gap-4">
@@ -65,10 +83,20 @@ export default function SelectAccountPage() {
       <div className="mt-6 border-t border-slate-100 pt-5 sm:mt-8 sm:pt-6">
         <p className={AUTH.footerText}>
           Already have an account?{" "}
-          <Link href="/auth/login" className="font-bold text-slate-900 hover:underline underline-offset-4">
+          <Link
+            href={modeParam ? `/auth/login?mode=${modeParam}` : "/auth/login"}
+            className="font-bold text-slate-900 hover:underline underline-offset-4"
+          >
             Sign in
           </Link>
         </p>
+        {!mode ? (
+          <p className={`${AUTH.footerText} mt-3`}>
+            <Link href="/auth/modes" className="font-bold text-slate-900 hover:underline underline-offset-4">
+              Choose road, air, or sea first
+            </Link>
+          </p>
+        ) : null}
       </div>
     </div>
   );

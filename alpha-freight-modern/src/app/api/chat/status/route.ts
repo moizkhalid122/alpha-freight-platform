@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { isOpenAiConfigured } from "@/lib/openai-chat";
 import { isOpenAiReachable } from "@/lib/copilot/connectivity";
+import {
+  DEFAULT_GUEST_MODEL,
+  DEFAULT_MEMBER_MODEL,
+  getModelLabelForTier,
+} from "@/lib/openai-model-router";
 
 export const runtime = "nodejs";
 
@@ -23,7 +28,13 @@ export async function GET() {
       ok: true,
       openai: "connected",
       live: true,
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: getModelLabelForTier("guest"),
+      guestModel: getModelLabelForTier("guest"),
+      memberModel: getModelLabelForTier("member"),
+      defaults: {
+        guest: DEFAULT_GUEST_MODEL,
+        member: DEFAULT_MEMBER_MODEL,
+      },
     });
   }
 

@@ -271,8 +271,7 @@ function resolveCarrierStatus(
 
   if (
     verificationStatus === "rejected" ||
-    profileStatus === "rejected" ||
-    profile.is_approved === false
+    profileStatus === "rejected"
   ) {
     return "Rejected";
   }
@@ -741,9 +740,6 @@ export default function AdminCarrierDetailPage() {
     queryKey: ["admin-carrier-detail", carrierId],
     queryFn: () => fetchCarrierDetail(carrierId),
     enabled: Boolean(carrierId),
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
   });
 
   const carrier = data?.carrier ?? null;
@@ -840,7 +836,7 @@ export default function AdminCarrierDetailPage() {
 
   if (!carrier) {
     return (
-      <div className="mx-auto max-w-[1400px] space-y-6">
+      <div className="space-y-6">
         <section className={cn(CARD_CLASS, "p-8")}>
           <Link href="/ops-af-7x9k2/carriers">
             <Button variant="secondary" size="sm">
@@ -974,7 +970,7 @@ export default function AdminCarrierDetailPage() {
               className={cn(
                 "whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all ring-1 ring-slate-200/60",
                 activeTab === tab.id
-                  ? "bg-slate-900 text-white ring-slate-900"
+                  ? "bg-blue-600 text-white shadow-sm ring-slate-900"
                   : "bg-white text-slate-600"
               )}
             >

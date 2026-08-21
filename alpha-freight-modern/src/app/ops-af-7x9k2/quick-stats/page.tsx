@@ -37,7 +37,12 @@ import type { LucideIcon } from "lucide-react";
 import MeasuredChart from "@/components/charts/MeasuredChart";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { ADMIN_CARD, ADMIN_SECTION_LABEL, ADMIN_SECTION_TITLE } from "@/lib/admin-ui";
+import {
+  adminLoadsQueryFn,
+  adminLoadsQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
 
 type RangeOption = 7 | 30 | 90;
 
@@ -197,28 +202,12 @@ function createChartBuckets(range: RangeOption) {
   });
 }
 
-async function fetchQuickStats(range: RangeOption): Promise<OverviewData> {
-  const [profilesResult, loadsResult, bidsResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, full_name, role, created_at")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("loads")
-      .select(
-        "id, supplier_id, carrier_id, origin, destination, pickup_location, delivery_location, price, status, created_at"
-      )
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("bids")
-      .select("id, load_id, carrier_id, amount, status, created_at")
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const profiles = (profilesResult.error ? [] : (profilesResult.data ?? [])) as ProfileRecord[];
-  const loads = (loadsResult.error ? [] : (loadsResult.data ?? [])) as LoadRecord[];
-  const bids = (bidsResult.error ? [] : (bidsResult.data ?? [])) as BidRecord[];
-
+function buildQuickStats(
+  range: RangeOption,
+  profiles: ProfileRecord[],
+  loads: LoadRecord[],
+  bids: BidRecord[]
+): OverviewData {
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
   const carriers = profiles.filter((profile) => profile.role === "carrier");
   const suppliers = profiles.filter((profile) => profile.role === "supplier");
@@ -604,13 +593,21 @@ export default function AdminQuickStatsPage() {
   const queryClient = useQueryClient();
   const [range, setRange] = useState<RangeOption>(30);
 
-  const { data, isFetching } = useQuery({
-    queryKey: ["admin-quick-stats", range],
-    queryFn: () => fetchQuickStats(range),
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
   });
+
+  const data = useMemo(() => {
+    if (!loadsQuery.data) return undefined;
+    const profiles = (loadsQuery.data.profiles ?? []) as ProfileRecord[];
+    const loads = (loadsQuery.data.loads ?? []) as LoadRecord[];
+    const bids = (loadsQuery.data.bids ?? []) as BidRecord[];
+    return buildQuickStats(range, profiles, loads, bids);
+  }, [loadsQuery.data, range]);
+
+  const isFetching = loadsQuery.isFetching;
 
   const cards = data?.cards ?? [];
   const revenueTrend = data?.revenueTrend ?? [];
@@ -628,7 +625,7 @@ export default function AdminQuickStatsPage() {
   }, [loadActivity]);
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-quick-stats"] });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
   };
 
   const handleExport = () => {
@@ -657,17 +654,15 @@ export default function AdminQuickStatsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <div className="admin-page-stack space-y-4">
+      <section className={cn(ADMIN_CARD, "p-5")}>
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
-              Quick Stats
-            </p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+            <p className={ADMIN_SECTION_LABEL}>Quick Stats</p>
+            <h2 className={cn(ADMIN_SECTION_TITLE, "mt-1")}>
               Platform snapshot with live operational signals
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500">
               Track carrier growth, supplier momentum, marketplace activity, and revenue movement in one dense executive surface.
             </p>
           </div>
@@ -681,7 +676,7 @@ export default function AdminQuickStatsPage() {
                   onClick={() => setRange(option.value)}
                   className={cn(
                     "rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.2em]",
-                    range === option.value ? "bg-[#151B24] text-white" : "text-slate-500"
+                    range === option.value ? "bg-blue-600 text-white shadow-sm" : "text-slate-500"
                   )}
                 >
                   {option.label}
@@ -837,7 +832,7 @@ export default function AdminQuickStatsPage() {
         <LeaderboardCard title="Trending Lanes" items={trendingLanes} />
       </section>
 
-      <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">

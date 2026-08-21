@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import type { AssistantKind, ChatHistoryItem, CopilotPageContext } from "@/lib/chat-types";
 import { runCopilotEngine } from "@/lib/copilot-engine";
 import type { LanguagePreference } from "@/lib/copilot/language";
-import { checkPublicAiRateLimit, getClientIp, PUBLIC_AI_MESSAGE_LIMIT } from "@/lib/public-ai-rate-limit";
+import {
+  checkPublicAiGuestRateLimit,
+  checkPublicAiMemberRateLimit,
+  getClientIp,
+  PUBLIC_AI_GUEST_LIMIT,
+} from "@/lib/public-ai-rate-limit";
 import { createAuthedSupabaseFromRequest } from "@/lib/admin-api-db";
 
 export const runtime = "nodejs";
@@ -42,20 +47,20 @@ export async function POST(request: NextRequest) {
 
     if (publicMode && isGuest) {
       const ip = getClientIp(request);
-      const limit = checkPublicAiRateLimit(ip);
+      const limit = checkPublicAiGuestRateLimit(ip);
       guestRemaining = limit.remaining;
 
       if (!limit.allowed) {
         return NextResponse.json({
           success: false,
           limitReached: true,
-          message: `Free limit reached (${PUBLIC_AI_MESSAGE_LIMIT} messages/hour). Sign up free for unlimited Alpha Freight AI + live loads.`,
+          message: `Free limit reached (${PUBLIC_AI_GUEST_LIMIT} questions). Sign up free to continue.`,
           structuredMessage: {
             mode: "logistics_copilot",
             displayStyle: "card",
             title: "🔓 Sign Up for Unlimited AI",
             shortExplanation:
-              "You've used your free guest messages for this hour. Create a free Alpha Freight account for unlimited AI, live load board, bids, and wallet.",
+              "You've used your free AI questions. Create a free Alpha Freight account to keep chatting and access live loads.",
             keyPoints: [
               "✅ Free carrier or supplier account",
               "🚛 Live UK load board & smart matching",
@@ -71,6 +76,20 @@ export async function POST(request: NextRequest) {
         });
       }
 
+    }
+
+    if (publicMode && user) {
+      const memberLimit = checkPublicAiMemberRateLimit(user.id);
+      guestRemaining = memberLimit.remaining;
+      if (!memberLimit.allowed) {
+        return NextResponse.json({
+          success: false,
+          limitReached: true,
+          limitType: "member",
+          message: "Hourly AI limit reached. Please try again shortly.",
+          remaining: 0,
+        });
+      }
     }
 
     const result = await runCopilotEngine({

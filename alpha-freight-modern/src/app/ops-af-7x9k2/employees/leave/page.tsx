@@ -30,7 +30,7 @@ export default function AdminEmployeeLeavePage() {
   };
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader
         title="Leave Requests"
         description="Review and approve employee annual, sick, and unpaid leave."

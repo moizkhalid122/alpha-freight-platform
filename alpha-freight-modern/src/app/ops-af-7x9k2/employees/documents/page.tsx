@@ -15,7 +15,7 @@ export default function AdminEmployeeDocumentsPage() {
   const { rows, loading } = useAdminTable<DocRow>("employee_documents");
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader title="Documents" description="Company and employee document library." />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/documents" />
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfDay, subDays } from "date-fns";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import toast from "react-hot-toast";
 import {
   Building2,
@@ -34,7 +34,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { readCarrierExtras, writeCarrierExtras } from "@/lib/profile-extras";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import {
+  ADMIN_CARD,
+  ADMIN_CARD_INTERACTIVE,
+  ADMIN_SECTION_LABEL,
+  ADMIN_SECTION_TITLE,
+  adminSelectStyles,
+} from "@/lib/admin-ui";
+import {
+  adminLoadsQueryFn,
+  adminLoadsQueryKey,
+  adminProfilesQueryFn,
+  adminProfilesQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
 
 type ViewMode = "table" | "grid";
 type SortValue = "name" | "rating" | "loads_completed" | "joined_date";
@@ -136,10 +149,9 @@ const rowsPerPageOptions = [
   { value: 100, label: "100 rows" },
 ];
 
-const CARD_CLASS =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
-const SECTION_LABEL = "text-[11px] font-semibold text-slate-500";
-const SECTION_TITLE = "text-xl font-bold text-slate-900";
+const CARD_CLASS = `${ADMIN_CARD} ${ADMIN_CARD_INTERACTIVE}`;
+const SECTION_LABEL = ADMIN_SECTION_LABEL;
+const SECTION_TITLE = ADMIN_SECTION_TITLE;
 
 function getDateOrNull(value: string | null | undefined) {
   if (!value) return null;
@@ -188,15 +200,7 @@ function buildRating(totalLoads: number, completedLoads: number) {
 }
 
 function selectStyles() {
-  return {
-    control: () =>
-      "flex min-h-10 items-center rounded-xl bg-slate-50/80 px-3 ring-1 ring-slate-200/60",
-    menu: () => "mt-2 rounded-xl bg-white p-2 shadow-lg ring-1 ring-slate-200/60",
-    option: ({ isFocused }: { isFocused: boolean }) =>
-      `cursor-pointer rounded-lg px-3 py-2 text-sm ${isFocused ? "bg-slate-100" : ""}`,
-    placeholder: () => "text-sm text-slate-400",
-    singleValue: () => "text-sm font-semibold text-slate-900",
-  };
+  return adminSelectStyles();
 }
 
 function ChipList({ items, emptyLabel }: { items: string[]; emptyLabel: string }) {
@@ -219,18 +223,10 @@ function activeBadgeClass(status: ActiveState) {
     : "bg-slate-100 text-slate-700 border-slate-200";
 }
 
-async function fetchVerifiedCarriers(): Promise<VerifiedCarriersOverview> {
-  const [profilesResult, loadsResult] = await Promise.all([
-    supabase.from("profiles").select("*").eq("role", "carrier").order("created_at", { ascending: false }),
-    supabase
-      .from("loads")
-      .select("id, carrier_id, status, created_at")
-      .not("carrier_id", "is", null)
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const profiles = (profilesResult.error ? [] : (profilesResult.data ?? [])) as CarrierProfileRecord[];
-  const loads = (loadsResult.error ? [] : (loadsResult.data ?? [])) as LoadRecord[];
+function buildVerifiedOverview(
+  profiles: CarrierProfileRecord[],
+  loads: LoadRecord[]
+): VerifiedCarriersOverview {
 
   const loadGroups = new Map<string, LoadRecord[]>();
   loads.forEach((load) => {
@@ -408,7 +404,7 @@ function VerifiedCarrierActionButtons({
         <Link
           href={`/ops-af-7x9k2/carriers/${row.id}`}
           title="View profile"
-          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-slate-900 px-2 text-[10px] font-semibold text-white hover:bg-slate-800"
+          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-2 text-[10px] font-semibold text-white hover:bg-blue-700"
         >
           <Eye className="h-3 w-3" />
           View
@@ -443,7 +439,7 @@ function VerifiedCarrierActionButtons({
     <div className="flex flex-col gap-1.5">
       <Link
         href={`/ops-af-7x9k2/carriers/${row.id}`}
-        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-2.5 text-[11px] font-semibold text-white hover:bg-slate-800"
+        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-2.5 text-[11px] font-semibold text-white hover:bg-blue-700"
       >
         <Eye className="h-3.5 w-3.5" />
         View profile
@@ -489,13 +485,28 @@ export default function AdminVerifiedCarriersPage() {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const { data, isFetching, isLoading } = useQuery({
-    queryKey: ["admin-carriers-verified"],
-    queryFn: fetchVerifiedCarriers,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("carrier"),
+    queryFn: adminProfilesQueryFn("carrier"),
+    ...adminQueryDefaults,
   });
+
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
+  });
+
+  const data = useMemo(() => {
+    const profiles = (profilesQuery.data?.profiles ?? []) as CarrierProfileRecord[];
+    const loads = (loadsQuery.data?.loads ?? []) as LoadRecord[];
+    if (!profilesQuery.data && !loadsQuery.data) return undefined;
+    return buildVerifiedOverview(profiles, loads);
+  }, [profilesQuery.data, loadsQuery.data]);
+
+  const isLoading =
+    (profilesQuery.isLoading && !profilesQuery.data) || (loadsQuery.isLoading && !loadsQuery.data);
+  const isFetching = profilesQuery.isFetching || loadsQuery.isFetching;
 
   const rows = data?.rows ?? [];
   const stats = data?.stats ?? {
@@ -604,7 +615,8 @@ export default function AdminVerifiedCarriersPage() {
   };
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-carriers-verified"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
   };
 
   const handleStatusChange = async (row: VerifiedCarrierRow) => {
@@ -617,7 +629,8 @@ export default function AdminVerifiedCarriersPage() {
           ? `${row.companyName} reactivated successfully.`
           : `${row.companyName} suspended successfully.`
       );
-      await queryClient.invalidateQueries({ queryKey: ["admin-carriers-verified"] });
+      await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to update carrier status.");
     }
@@ -661,12 +674,13 @@ export default function AdminVerifiedCarriersPage() {
     }
 
     selectedRows.forEach((row) => persistCarrierStatus(row.id, "Inactive"));
-    void queryClient.invalidateQueries({ queryKey: ["admin-carriers-verified"] });
+    void queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    void queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success("Selected carriers suspended successfully.");
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="admin-page-stack space-y-4">
       <section className={cn(CARD_CLASS, "relative overflow-hidden p-6")}>
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-emerald-500 to-slate-300" />
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
@@ -722,7 +736,7 @@ export default function AdminVerifiedCarriersPage() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:w-[860px]">
-            <Select
+            <AdminSelect
               options={serviceAreaOptions}
               value={serviceAreaFilter}
               onChange={(option) => {
@@ -732,7 +746,7 @@ export default function AdminVerifiedCarriersPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={vehicleTypeOptions}
               value={vehicleTypeFilter}
               onChange={(option) => {
@@ -742,7 +756,7 @@ export default function AdminVerifiedCarriersPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={ratingOptions}
               value={ratingFilter}
               onChange={(option) => {
@@ -752,7 +766,7 @@ export default function AdminVerifiedCarriersPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={loadsOptions}
               value={loadsFilter}
               onChange={(option) => {
@@ -767,7 +781,7 @@ export default function AdminVerifiedCarriersPage() {
 
         <div className="mt-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="w-full xl:max-w-[360px]">
-            <Select
+            <AdminSelect
               options={sortOptions}
               value={sortBy}
               onChange={(option) => {
@@ -1034,7 +1048,7 @@ export default function AdminVerifiedCarriersPage() {
             <p className="text-sm text-slate-600">
               Showing <span className="font-semibold text-slate-900">{filteredRows.length === 0 ? 0 : (page - 1) * rowsPerPage.value + 1}-{Math.min(page * rowsPerPage.value, filteredRows.length)}</span> of <span className="font-semibold text-slate-900">{filteredRows.length}</span>
             </p>
-            <Select
+            <AdminSelect
               options={rowsPerPageOptions}
               value={rowsPerPage}
               onChange={(option) => {
@@ -1068,7 +1082,7 @@ export default function AdminVerifiedCarriersPage() {
                   key={pageNumber}
                   type="button"
                   onClick={() => setPage(pageNumber)}
-                  className={cn("h-9 min-w-9 rounded-lg px-3 text-sm font-semibold transition-all", page === pageNumber ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200/60")}
+                  className={cn("h-9 min-w-9 rounded-lg px-3 text-sm font-semibold transition-all", page === pageNumber ? "bg-blue-600 text-white shadow-sm" : "bg-white text-slate-600 ring-1 ring-slate-200/60")}
                 >
                   {pageNumber}
                 </button>

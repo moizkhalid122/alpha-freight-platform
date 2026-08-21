@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfDay, subDays } from "date-fns";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import toast from "react-hot-toast";
 import {
   ArrowDownRight,
@@ -39,7 +39,14 @@ import MeasuredChart from "@/components/charts/MeasuredChart";
 import { Button } from "@/components/ui/button";
 import { readCarrierExtras } from "@/lib/profile-extras";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { ADMIN_CARD } from "@/lib/admin-ui";
+import {
+  adminLoadsQueryFn,
+  adminLoadsQueryKey,
+  adminProfilesQueryFn,
+  adminProfilesQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
 
 type DateRangeValue = "7d" | "30d" | "90d" | "custom";
 type MetricFilterValue = "all" | "rating" | "loads" | "on_time" | "revenue";
@@ -402,7 +409,7 @@ function buildMetricRow(
           : onTimePercent >= 88
             ? "Stable service consistency"
             : "Delivery consistency needs attention",
-      admin: "Khalid",
+      admin: "Admin",
     },
     {
       date: format(subDays(new Date(), 2), "dd/MM/yy"),
@@ -450,20 +457,7 @@ function buildMetricRow(
   } satisfies CarrierMetricRow;
 }
 
-async function fetchCarrierPerformanceData(): Promise<CarrierPerformanceData> {
-  const [profilesResult, loadsResult] = await Promise.all([
-    supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-    supabase
-      .from("loads")
-      .select(
-        "id, supplier_id, carrier_id, origin, destination, pickup_location, delivery_location, price, status, created_at"
-      )
-      .not("carrier_id", "is", null)
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const profiles = (profilesResult.error ? [] : (profilesResult.data ?? [])) as ProfileRecord[];
-  const loads = (loadsResult.error ? [] : (loadsResult.data ?? [])) as LoadRecord[];
+function buildCarrierPerformanceData(profiles: ProfileRecord[], loads: LoadRecord[]): CarrierPerformanceData {
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
 
   const carrierLoads = new Map<string, CarrierLoad[]>();
@@ -597,10 +591,28 @@ export default function CarrierPerformancePage() {
   const [page, setPage] = useState(1);
   const [selectedCarrierId, setSelectedCarrierId] = useState<string | null>(null);
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["admin-carrier-performance"],
-    queryFn: fetchCarrierPerformanceData,
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("carrier"),
+    queryFn: adminProfilesQueryFn("carrier"),
+    ...adminQueryDefaults,
   });
+
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
+  });
+
+  const data = useMemo(() => {
+    const profiles = (profilesQuery.data?.profiles ?? []) as ProfileRecord[];
+    const loads = (loadsQuery.data?.loads ?? []) as LoadRecord[];
+    if (!profilesQuery.data && !loadsQuery.data) return undefined;
+    return buildCarrierPerformanceData(profiles, loads);
+  }, [profilesQuery.data, loadsQuery.data]);
+
+  const isLoading =
+    (profilesQuery.isLoading && !profilesQuery.data) || (loadsQuery.isLoading && !loadsQuery.data);
+  const isFetching = profilesQuery.isFetching || loadsQuery.isFetching;
 
   const currentStart = useMemo(
     () => getRangeStart(dateRange, customStart, customEnd),
@@ -841,13 +853,14 @@ export default function CarrierPerformancePage() {
   }, [filteredRows]);
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-performance"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success("Carrier performance refreshed.");
   };
 
   return (
-    <div className="space-y-6 pb-8">
-      <section className="rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+    <div className="admin-page-stack space-y-4 pb-6">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400">
@@ -903,7 +916,7 @@ export default function CarrierPerformancePage() {
           </div>
 
           <div>
-            <Select
+            <AdminSelect
               instanceId="carrier-performance-range"
               isSearchable={false}
               options={RANGE_OPTIONS}
@@ -917,7 +930,7 @@ export default function CarrierPerformancePage() {
           </div>
 
           <div>
-            <Select
+            <AdminSelect
               instanceId="carrier-performance-filter"
               isSearchable={false}
               options={FILTER_OPTIONS}
@@ -931,7 +944,7 @@ export default function CarrierPerformancePage() {
           </div>
 
           <div>
-            <Select
+            <AdminSelect
               instanceId="carrier-performance-sort"
               isSearchable={false}
               options={SORT_OPTIONS}
@@ -1093,7 +1106,7 @@ export default function CarrierPerformancePage() {
           </div>
 
           <div>
-            <Select
+            <AdminSelect
               instanceId="carrier-performance-rows"
               isSearchable={false}
               options={ROWS_PER_PAGE_OPTIONS}

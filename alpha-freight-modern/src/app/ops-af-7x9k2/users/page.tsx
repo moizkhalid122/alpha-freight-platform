@@ -8,16 +8,37 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import { format } from "date-fns";
-import { Search, ShieldAlert } from "lucide-react";
+import { Loader2, Search, ShieldAlert } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  ADMIN_CARD,
+  ADMIN_CARD_INTERACTIVE,
+  ADMIN_INPUT,
+  ADMIN_SECTION_LABEL,
+  ADMIN_SECTION_TITLE,
+  adminSelectStyles,
+} from "@/lib/admin-ui";
+import { adminProfilesQueryFn, adminProfilesQueryKey, adminQueryDefaults } from "@/lib/admin-query";
+import { readCarrierExtras, readSupplierExtras } from "@/lib/profile-extras";
 
 type UserRow = {
   name: string;
-  role: "Carrier" | "Supplier" | "Admin";
+  role: "Carrier" | "Supplier" | "Admin" | "Other";
   status: "Active" | "Pending Verification" | "Review Required";
   joinedAt: string;
-  score: string;
+};
+
+type ProfileRecord = {
+  id: string;
+  full_name?: string | null;
+  company_name?: string | null;
+  role?: string | null;
+  created_at?: string | null;
+  status?: string | null;
+  verification_status?: string | null;
+  is_approved?: boolean | null;
 };
 
 const roleOptions = [
@@ -34,55 +55,103 @@ const statusOptions = [
   { value: "Review Required", label: "Review required" },
 ];
 
-const fetchUsers = async (): Promise<UserRow[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 120));
+function normalizeStatus(value: string | null | undefined) {
+  return String(value || "").trim().toLowerCase();
+}
 
-  return [
-    {
-      name: "Horizon Route Ltd",
-      role: "Carrier",
-      status: "Pending Verification",
-      joinedAt: "2026-06-25",
-      score: "92%",
-    },
-    {
-      name: "NorthPort Supply",
-      role: "Supplier",
-      status: "Active",
-      joinedAt: "2026-06-22",
-      score: "96%",
-    },
-    {
-      name: "Atlas Distribution",
-      role: "Carrier",
-      status: "Review Required",
-      joinedAt: "2026-06-20",
-      score: "73%",
-    },
-    {
-      name: "Alpha Internal Ops",
-      role: "Admin",
-      status: "Active",
-      joinedAt: "2026-06-14",
-      score: "100%",
-    },
-  ];
-};
+function formatRole(role: string | null | undefined): UserRow["role"] {
+  const normalized = normalizeStatus(role);
+  if (normalized === "carrier") return "Carrier";
+  if (normalized === "supplier") return "Supplier";
+  if (normalized === "admin") return "Admin";
+  return "Other";
+}
+
+function deriveStatus(
+  profile: ProfileRecord,
+  extras: { verificationStatus?: string; accountStatus?: string } | Record<string, unknown>
+) {
+  const verificationStatus =
+    "verificationStatus" in extras ? String(extras.verificationStatus ?? "") : "";
+  const accountStatus = "accountStatus" in extras ? String(extras.accountStatus ?? "") : "";
+  const verification = normalizeStatus(verificationStatus || profile.verification_status);
+  const account = normalizeStatus(accountStatus || profile.status);
+
+  if (verification === "verified" || profile.is_approved === true || account === "active") {
+    return "Active" as const;
+  }
+  if (verification === "pending" || account === "pending" || account === "pending_verification") {
+    return "Pending Verification" as const;
+  }
+  return "Review Required" as const;
+}
+
+function buildUserRows(profiles: ProfileRecord[]): UserRow[] {
+  return profiles
+    .filter((profile) => normalizeStatus(profile.role) !== "employee")
+    .map((profile) => {
+      const role = formatRole(profile.role);
+      const extras =
+        role === "Carrier"
+          ? readCarrierExtras(profile.id)
+          : role === "Supplier"
+            ? readSupplierExtras(profile.id)
+            : {};
+
+      const name =
+        role === "Carrier"
+          ? extras.companyName?.trim() ||
+            profile.company_name?.trim() ||
+            profile.full_name?.trim() ||
+            `Carrier ${profile.id.slice(0, 8)}`
+          : role === "Supplier"
+            ? extras.companyName?.trim() ||
+              profile.company_name?.trim() ||
+              profile.full_name?.trim() ||
+              `Supplier ${profile.id.slice(0, 8)}`
+            : profile.full_name?.trim() ||
+              profile.company_name?.trim() ||
+              `Account ${profile.id.slice(0, 8)}`;
+
+      return {
+        name,
+        role,
+        status: deriveStatus(profile, extras),
+        joinedAt: profile.created_at ?? new Date(0).toISOString(),
+      };
+    });
+}
 
 export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState(roleOptions[0]);
   const [status, setStatus] = useState(statusOptions[0]);
-  const { data = [] } = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: fetchUsers,
+
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("all"),
+    queryFn: adminProfilesQueryFn(),
+    ...adminQueryDefaults,
   });
 
-  const metrics = [
-    { label: "Total accounts", value: "12,480" },
-    { label: "Pending verification", value: "54" },
-    { label: "Restricted profiles", value: "11" },
-  ];
+  const data = useMemo(() => {
+    if (!profilesQuery.data) return [];
+    return buildUserRows((profilesQuery.data.profiles ?? []) as ProfileRecord[]);
+  }, [profilesQuery.data]);
+
+  const metrics = useMemo(
+    () => [
+      { label: "Total accounts", value: String(data.length) },
+      {
+        label: "Pending verification",
+        value: String(data.filter((row) => row.status === "Pending Verification").length),
+      },
+      {
+        label: "Review required",
+        value: String(data.filter((row) => row.status === "Review Required").length),
+      },
+    ],
+    [data]
+  );
 
   const filteredData = useMemo(() => {
     return data.filter((row) => {
@@ -90,8 +159,7 @@ export default function AdminUsersPage() {
         row.name.toLowerCase().includes(search.toLowerCase()) ||
         row.role.toLowerCase().includes(search.toLowerCase());
       const matchesRole = role.value === "All" || row.role === role.value;
-      const matchesStatus =
-        status.value === "All" || row.status === status.value;
+      const matchesStatus = status.value === "All" || row.status === status.value;
 
       return matchesSearch && matchesRole && matchesStatus;
     });
@@ -104,11 +172,12 @@ export default function AdminUsersPage() {
         header: "Account",
         cell: ({ row }) => (
           <div>
-            <p className="font-black tracking-tight text-slate-950">
-              {row.original.name}
-            </p>
+            <p className="font-black tracking-tight text-slate-950">{row.original.name}</p>
             <p className="mt-1 text-xs text-slate-500">
-              Joined {format(new Date(row.original.joinedAt), "dd MMM yyyy")}
+              Joined{" "}
+              {row.original.joinedAt
+                ? format(new Date(row.original.joinedAt), "dd MMM yyyy")
+                : "Unknown"}
             </p>
           </div>
         ),
@@ -134,15 +203,6 @@ export default function AdminUsersPage() {
           );
         },
       },
-      {
-        accessorKey: "score",
-        header: "Health Score",
-        cell: ({ getValue }) => (
-          <span className="text-sm font-black text-slate-950">
-            {String(getValue())}
-          </span>
-        ),
-      },
     ],
     []
   );
@@ -154,128 +214,113 @@ export default function AdminUsersPage() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const isLoading = profilesQuery.isLoading && !profilesQuery.data;
+
   return (
-    <div className="mx-auto max-w-[1500px] space-y-6">
-      <section className="rounded-[34px] border border-white/70 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-8">
+    <div className="admin-page-stack space-y-4">
+      <section className={cn(ADMIN_CARD, "p-5 sm:p-6")}>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
-              User Management
-            </p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
-              Premium user control across carriers, suppliers, and admins
+            <p className={ADMIN_SECTION_LABEL}>User Management</p>
+            <h2 className={cn(ADMIN_SECTION_TITLE, "mt-1")}>
+              Live accounts across carriers, suppliers, and admins
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-              Filter users faster, identify risky accounts, and keep verification
-              operations under one clean control layer.
+            <p className="mt-2 max-w-3xl text-[13px] leading-6 text-slate-500">
+              Employee accounts are managed under HR. This view shows marketplace and admin profiles from Supabase.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-2.5 sm:grid-cols-3">
             {metrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4"
-              >
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  {metric.label}
-                </p>
-                <p className="mt-3 text-2xl font-black tracking-tight text-slate-950">
-                  {metric.value}
-                </p>
+              <div key={metric.label} className={cn(ADMIN_CARD, "px-3.5 py-3")}>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{metric.label}</p>
+                <p className="mt-1.5 text-xl font-bold tracking-tight text-slate-900">{metric.value}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="rounded-[34px] border border-white/70 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-1 items-center gap-3 rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-3">
-            <Search className="h-4 w-4 text-slate-400" />
+      <section className={cn(ADMIN_CARD, ADMIN_CARD_INTERACTIVE, "p-5")}>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-1 items-center gap-2.5 rounded-lg border border-slate-200/90 bg-slate-50/80 px-3 py-2">
+            <Search className="h-3.5 w-3.5 text-slate-400" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search account name or role"
-              className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+              className={cn(ADMIN_INPUT, "h-auto border-0 bg-transparent p-0 ring-0 focus:ring-0")}
             />
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:w-[460px]">
-            <Select
+          <div className="grid gap-2.5 md:grid-cols-2 xl:w-[420px]">
+            <AdminSelect
               options={roleOptions}
               value={role}
               onChange={(option) => setRole(option ?? roleOptions[0])}
               unstyled
-              classNames={{
-                control: () =>
-                  "flex min-h-12 items-center rounded-[20px] border border-slate-200 bg-slate-50 px-3",
-                menu: () =>
-                  "mt-2 rounded-[20px] border border-slate-200 bg-white p-2 shadow-xl",
-                option: ({ isFocused }) =>
-                  `cursor-pointer rounded-2xl px-3 py-2 text-sm ${isFocused ? "bg-slate-100" : ""}`,
-                placeholder: () => "text-sm text-slate-400",
-                singleValue: () => "text-sm font-semibold text-slate-900",
-              }}
+              classNames={adminSelectStyles()}
             />
-            <Select
+            <AdminSelect
               options={statusOptions}
               value={status}
               onChange={(option) => setStatus(option ?? statusOptions[0])}
               unstyled
-              classNames={{
-                control: () =>
-                  "flex min-h-12 items-center rounded-[20px] border border-slate-200 bg-slate-50 px-3",
-                menu: () =>
-                  "mt-2 rounded-[20px] border border-slate-200 bg-white p-2 shadow-xl",
-                option: ({ isFocused }) =>
-                  `cursor-pointer rounded-2xl px-3 py-2 text-sm ${isFocused ? "bg-slate-100" : ""}`,
-                placeholder: () => "text-sm text-slate-400",
-                singleValue: () => "text-sm font-semibold text-slate-900",
-              }}
+              classNames={adminSelectStyles()}
             />
           </div>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-[28px] border border-slate-200">
-          <table className="min-w-full border-collapse">
-            <thead className="bg-slate-50">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="px-5 py-4 text-left text-[11px] font-black uppercase tracking-[0.22em] text-slate-400"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="bg-white">
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-t border-slate-100">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-5 py-4 align-middle">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        {isLoading ? (
+          <div className="mt-6 flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading live accounts...
+          </div>
+        ) : (
+          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200/90">
+            <table className="min-w-full border-collapse">
+              <thead className="border-b border-slate-100 bg-slate-50/90">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="bg-white">
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-10 text-center text-sm text-slate-500">
+                      No accounts match your filters.
                     </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr key={row.id} className="border-t border-slate-100">
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="px-4 py-2.5 align-middle text-[13px]">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-        <div className="mt-5 flex items-center gap-2 rounded-[24px] border border-amber-100 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50/90 px-3.5 py-3 text-[13px] text-amber-900">
           <ShieldAlert className="h-4 w-4" />
-          Focus first on pending verification and review required accounts to keep
-          the marketplace clean.
+          Focus first on pending verification and review required accounts to keep the marketplace clean.
         </div>
       </section>
     </div>

@@ -11,7 +11,7 @@ export default function AdminEmployeeStatusPage() {
   const inactive = employees.filter((e) => e.status === "inactive").length;
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader title="Employee Status" description="Team availability and attendance overview." />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/status" />
 

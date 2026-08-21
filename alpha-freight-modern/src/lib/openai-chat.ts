@@ -3,6 +3,14 @@ import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply, CopilotP
 import type { DetectedIntent } from "@/lib/copilot/intent-detector";
 import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
 import { buildEmployeeTeamAiSystemPrompt } from "@/lib/employee-team-ai-prompt";
+import {
+  type AiTier,
+  resolveAiTier,
+  resolveHistoryLimits,
+  resolveOpenAiMaxTokens,
+  resolveOpenAiModel,
+  resolveOpenAiTemperature,
+} from "@/lib/openai-model-router";
 
 // Prefer IPv4 — fixes intermittent OpenAI timeouts on some Windows networks
 dns.setDefaultResultOrder("ipv4first");
@@ -68,9 +76,12 @@ Reply JSON only:
 {"title":"🚛 Clear title","shortExplanation":"2-4 sentences here.","keyPoints":["📌 Step 1","💡 Tip 2","✅ Step 3","🚛 Step 4"],"recommendation":"💡 Pro tip here.","nextStep":"Clear next action.","suggestedQuestions":["Follow up 1?","Follow up 2?"],"platformIntent":null,"actionRequest":null,"metrics":[]}`;
 }
 
-function normalizeHistory(history: ChatHistoryItem[], publicMode?: boolean): ChatHistoryItem[] {
-  const turnLimit = publicMode ? 12 : 4;
-  const charLimit = publicMode ? 1200 : 600;
+function normalizeHistory(
+  history: ChatHistoryItem[],
+  publicMode?: boolean,
+  aiTier: AiTier = "guest"
+): ChatHistoryItem[] {
+  const { turnLimit, charLimit } = resolveHistoryLimits(aiTier, publicMode);
 
   return history
     .slice(-turnLimit)
@@ -248,6 +259,8 @@ export async function getOpenAiChatReply(options: {
   extraContext?: string;
   detectedIntent?: DetectedIntent;
   publicMode?: boolean;
+  aiTier?: AiTier;
+  isGuest?: boolean;
 }): Promise<{ message: string; structuredMessage: StructuredAssistantReply } | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
@@ -260,8 +273,14 @@ export async function getOpenAiChatReply(options: {
       : "general";
 
   const publicMode = Boolean(options.publicMode);
-  const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
-  const history = normalizeHistory(options.history || [], publicMode);
+  const aiTier =
+    options.aiTier ??
+    resolveAiTier({
+      isGuest: options.isGuest ?? publicMode,
+      assistantType,
+    });
+  const model = resolveOpenAiModel({ aiTier });
+  const history = normalizeHistory(options.history || [], publicMode, aiTier);
 
   const intentHint = options.detectedIntent
     ? `\nPre-detected intent: ${JSON.stringify({ platformIntent: options.detectedIntent.platformIntent, actionRequest: options.detectedIntent.actionRequest })}`
@@ -279,8 +298,8 @@ export async function getOpenAiChatReply(options: {
     { role: "user", content: options.message.trim().slice(0, 2000) },
   ];
 
-  const timeouts = publicMode ? [7000, 12000] : [10000];
-  const maxTokens = publicMode ? 1800 : 780;
+  const timeouts = publicMode ? (aiTier === "guest" ? [7000, 12000] : [9000, 16000, 22000]) : [10000, 16000];
+  const maxTokens = resolveOpenAiMaxTokens({ aiTier, publicMode });
 
   for (let attempt = 0; attempt < timeouts.length; attempt += 1) {
     try {
@@ -295,7 +314,7 @@ export async function getOpenAiChatReply(options: {
           body: JSON.stringify({
             model,
             messages,
-            temperature: publicMode ? 0.65 : 0.6,
+            temperature: resolveOpenAiTemperature(aiTier),
             max_tokens: maxTokens,
             response_format: { type: "json_object" },
           }),

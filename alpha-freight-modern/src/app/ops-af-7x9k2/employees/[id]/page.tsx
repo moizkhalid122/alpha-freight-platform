@@ -57,7 +57,7 @@ export default function AdminEmployeeRecordPage() {
   const name = profile?.full_name ?? profile?.email ?? "Employee";
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <Link
         href={adminRoute("/employees")}
         className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900"
@@ -82,7 +82,7 @@ export default function AdminEmployeeRecordPage() {
           <p className="text-center text-slate-400">Loading full employee record…</p>
         </AdminPanel>
       ) : record ? (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <AdminPanel>
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Leads</p>

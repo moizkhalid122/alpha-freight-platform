@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   ArrowLeft,
@@ -19,9 +19,11 @@ import {
   PoundSterling,
   Receipt,
   Route,
+  Trash2,
   Truck,
 } from "lucide-react";
 import { adminFetch } from "@/lib/admin-data-client";
+import { deleteMarketplaceLoads } from "@/lib/admin-delete-loads-client";
 import { readCarrierExtras, readSupplierExtras } from "@/lib/profile-extras";
 import { cn } from "@/lib/utils";
 
@@ -246,6 +248,8 @@ function SectionCard({
 
 export default function AdminLoadDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const loadId = String(params?.id ?? "");
   const [activeTab, setActiveTab] = useState<LoadTab>("overview");
 
@@ -253,8 +257,6 @@ export default function AdminLoadDetailPage() {
     queryKey: ["admin-load-detail", loadId],
     queryFn: () => fetchLoadDetail(loadId),
     enabled: Boolean(loadId),
-    staleTime: 0,
-    refetchOnMount: "always",
   });
 
   const viewModel = useMemo(() => {
@@ -310,7 +312,7 @@ export default function AdminLoadDetailPage() {
 
   if (error || !viewModel) {
     return (
-      <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-6 py-4">
         <Link
           href="/ops-af-7x9k2/loads"
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900"
@@ -332,7 +334,7 @@ export default function AdminLoadDetailPage() {
     viewModel;
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/ops-af-7x9k2/loads"
@@ -360,6 +362,23 @@ export default function AdminLoadDetailPage() {
               Carrier
             </Link>
           ) : null}
+          <button
+            type="button"
+            onClick={async () => {
+              const deleted = await deleteMarketplaceLoads({
+                ids: [load.id],
+                queryClient,
+                assignedCount: carrierId ? 1 : 0,
+              });
+              if (deleted) {
+                router.push("/ops-af-7x9k2/loads");
+              }
+            }}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-red-50 px-3 text-sm font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete load
+          </button>
         </div>
       </div>
 

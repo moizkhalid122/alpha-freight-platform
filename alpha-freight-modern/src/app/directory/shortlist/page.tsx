@@ -17,6 +17,7 @@ import {
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import type { PublicCarrierListing, PublicSupplierListing } from "@/lib/public-directory";
+import { readJsonResponse } from "@/lib/safe-json-response";
 
 const FALLBACK_IMAGE = "/alpha freight truck.jpg";
 
@@ -48,8 +49,12 @@ export default function ShortlistPage() {
           fetch("/api/public/suppliers"),
         ]);
 
-        const carriersPayload = (await carriersResponse.json()) as { carriers?: PublicCarrierListing[] };
-        const suppliersPayload = (await suppliersResponse.json()) as { suppliers?: PublicSupplierListing[] };
+        const carriersPayload = await readJsonResponse<{ carriers?: PublicCarrierListing[] }>(
+          carriersResponse
+        );
+        const suppliersPayload = await readJsonResponse<{ suppliers?: PublicSupplierListing[] }>(
+          suppliersResponse
+        );
 
         const carriers = (carriersPayload.carriers ?? [])
           .filter((carrier) => carrierIds.includes(carrier.id))

@@ -17,8 +17,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminFetch } from "@/lib/admin-data-client";
+import { adminFetchResilient } from "@/lib/admin-fetch-resilient";
+import { adminQueryDefaults } from "@/lib/admin-query";
 import type { AdminReferralRow } from "@/lib/admin-referrals";
 import { cn } from "@/lib/utils";
+import { AdminKpiCard, AdminPageHero, AdminPageShell } from "@/components/admin/AdminPageShell";
+import { ADMIN_CARD, ADMIN_INPUT } from "@/lib/admin-ui";
 
 type ReferralsResponse = {
   referrals: AdminReferralRow[];
@@ -33,8 +37,7 @@ type ReferralsResponse = {
 type FilterValue = "all" | "carrier" | "supplier";
 type QueueFilter = "all" | "needs_approval" | "ready_reward" | "rewarded";
 
-const CARD =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
+const CARD = ADMIN_CARD;
 
 function formatMoney(value: number) {
   return `£${value.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -48,7 +51,10 @@ function formatDate(value: string | null) {
 }
 
 async function fetchReferrals(type: FilterValue) {
-  return adminFetch<ReferralsResponse>(`/api/admin/referrals?type=${type}`);
+  return adminFetchResilient<ReferralsResponse>(`/api/admin/referrals?type=${type}`, async () => ({
+    referrals: [],
+    stats: { total: 0, pendingApproval: 0, readyToRelease: 0, rewarded: 0 },
+  }));
 }
 
 export default function AdminReferralsPage() {
@@ -61,6 +67,7 @@ export default function AdminReferralsPage() {
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["admin-referrals", typeFilter],
     queryFn: () => fetchReferrals(typeFilter),
+    ...adminQueryDefaults,
   });
 
   const referrals = data?.referrals ?? [];
@@ -139,52 +146,35 @@ export default function AdminReferralsPage() {
   };
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-2 flex items-center gap-2">
-            <div className="rounded-lg bg-slate-900 p-2 text-[#BFFF07]">
-              <Gift className="h-4 w-4" />
-            </div>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-              Referral control
-            </span>
-          </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Referral approvals</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500">
-            Review referred users, approve their accounts, and release referral rewards once milestones
-            are complete.
-          </p>
-        </div>
-
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => void refetch()}
-          disabled={isFetching}
-          className="rounded-xl"
-        >
-          {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-          Refresh
-        </Button>
-      </div>
+    <AdminPageShell>
+      <AdminPageHero
+        eyebrow="Referral control"
+        title="Referral approvals"
+        description="Review referred users, approve their accounts, and release referral rewards once milestones are complete."
+        icon={Gift}
+        accent="violet"
+        actions={
+          <Button type="button" variant="secondary" size="sm" onClick={() => void refetch()} disabled={isFetching}>
+            {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
+            Refresh
+          </Button>
+        }
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Total referrals", value: stats.total, icon: Users },
-          { label: "Needs approval", value: stats.pendingApproval, icon: ShieldCheck },
-          { label: "Ready to release", value: stats.readyToRelease, icon: Sparkles },
-          { label: "Rewards released", value: stats.rewarded, icon: CheckCircle2 },
+          { label: "Total referrals", value: stats.total, icon: Users, accent: "slate" as const },
+          { label: "Needs approval", value: stats.pendingApproval, icon: ShieldCheck, accent: "amber" as const },
+          { label: "Ready to release", value: stats.readyToRelease, icon: Sparkles, accent: "blue" as const },
+          { label: "Rewards released", value: stats.rewarded, icon: CheckCircle2, accent: "emerald" as const },
         ].map((item) => (
-          <div key={item.label} className={`${CARD} p-4`}>
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                {item.label}
-              </p>
-              <item.icon className="h-4 w-4 text-slate-400" />
-            </div>
-            <p className="mt-2 text-2xl font-black text-slate-900">{item.value}</p>
-          </div>
+          <AdminKpiCard
+            key={item.label}
+            label={item.label}
+            value={item.value}
+            icon={item.icon}
+            accent={item.accent}
+          />
         ))}
       </div>
 
@@ -216,7 +206,7 @@ export default function AdminReferralsPage() {
                 className={cn(
                   "rounded-full px-3 py-1.5 text-[12px] font-semibold transition",
                   queueFilter === value
-                    ? "bg-slate-900 text-white"
+                    ? "bg-blue-600 text-white shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 )}
               >
@@ -355,7 +345,7 @@ export default function AdminReferralsPage() {
                             size="sm"
                             disabled={!row.canReleaseReward || approveBusy || releaseBusy}
                             onClick={() => void handleReleaseReward(row)}
-                            className="justify-start rounded-lg bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50"
+                            className="justify-start rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                           >
                             {releaseBusy ? (
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -374,6 +364,6 @@ export default function AdminReferralsPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

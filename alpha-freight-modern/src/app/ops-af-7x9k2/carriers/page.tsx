@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfDay, subDays } from "date-fns";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import toast from "react-hot-toast";
 import {
   ArrowRight,
@@ -40,6 +40,24 @@ import { mergeCarrierExtras, readCarrierExtras, resolveCarrierExtras, type Carri
 import { readLocalVehicles } from "@/lib/carrier-vehicle-storage";
 import { cn } from "@/lib/utils";
 import { adminFetch } from "@/lib/admin-data-client";
+import { deleteMarketplaceAccounts } from "@/lib/admin-delete-accounts-client";
+import {
+  ADMIN_BTN_PRIMARY_SM,
+  ADMIN_CARD,
+  ADMIN_CARD_INTERACTIVE,
+  ADMIN_ICON_BOX,
+  ADMIN_ICON_BOX_MD,
+  ADMIN_SECTION_LABEL,
+  ADMIN_SECTION_TITLE,
+  adminSelectStyles,
+} from "@/lib/admin-ui";
+import {
+  adminLoadsQueryFn,
+  adminLoadsQueryKey,
+  adminProfilesQueryFn,
+  adminProfilesQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
 
 type DateRangeValue = "all" | "7d" | "30d" | "90d";
 type StatusFilterValue = "all" | "verified" | "pending" | "rejected" | "active";
@@ -111,10 +129,9 @@ type CarriersOverview = {
   };
 };
 
-const CARD_CLASS =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
-const SECTION_LABEL = "text-[11px] font-semibold text-slate-500";
-const SECTION_TITLE = "text-xl font-bold text-slate-900";
+const CARD_CLASS = `${ADMIN_CARD} ${ADMIN_CARD_INTERACTIVE}`;
+const SECTION_LABEL = ADMIN_SECTION_LABEL;
+const SECTION_TITLE = ADMIN_SECTION_TITLE;
 
 const DELIVERED_LOAD_STATUSES = new Set(["completed", "delivered"]);
 const ACTIVE_LOAD_STATUSES = new Set([
@@ -256,8 +273,7 @@ function resolveCarrierStatus(
 
   if (
     verificationStatus === "rejected" ||
-    profileStatus === "rejected" ||
-    profile.is_approved === false
+    profileStatus === "rejected"
   ) {
     return "Rejected";
   }
@@ -290,14 +306,11 @@ function buildRating(totalLoads: number, completedLoads: number) {
   };
 }
 
-async function fetchCarriers(): Promise<CarriersOverview> {
-  const [profilesResponse, loadsResponse] = await Promise.all([
-    adminFetch<{ profiles: CarrierProfileRecord[] }>("/api/admin/profiles?role=carrier"),
-    adminFetch<{ loads: LoadRecord[] }>("/api/admin/loads"),
-  ]);
-
-  const profiles = profilesResponse.profiles ?? [];
-  const loads = (loadsResponse.loads ?? []).filter((load) => load.carrier_id);
+function buildCarriersOverview(
+  profiles: CarrierProfileRecord[],
+  rawLoads: LoadRecord[]
+): CarriersOverview {
+  const loads = rawLoads.filter((load) => load.carrier_id);
 
   const loadGroups = new Map<string, LoadRecord[]>();
   loads.forEach((load) => {
@@ -398,15 +411,7 @@ function statusBadgeClass(status: CarrierStatus) {
 }
 
 function selectStyles() {
-  return {
-    control: () =>
-      "flex min-h-10 items-center rounded-xl bg-slate-50/80 px-3 ring-1 ring-slate-200/60",
-    menu: () => "mt-2 rounded-xl bg-white p-2 shadow-lg ring-1 ring-slate-200/60",
-    option: ({ isFocused }: { isFocused: boolean }) =>
-      `cursor-pointer rounded-lg px-3 py-2 text-sm ${isFocused ? "bg-slate-100" : ""}`,
-    placeholder: () => "text-sm text-slate-400",
-    singleValue: () => "text-sm font-semibold text-slate-900",
-  };
+  return adminSelectStyles();
 }
 
 function ChipList({ items, emptyLabel }: { items: string[]; emptyLabel: string }) {
@@ -473,7 +478,7 @@ function CarrierActionButtons({
     <div className="flex flex-col gap-1.5">
       <Link
         href={`/ops-af-7x9k2/carriers/${row.id}`}
-        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-2.5 text-[11px] font-semibold text-white transition-colors hover:bg-slate-800"
+        className={ADMIN_BTN_PRIMARY_SM}
       >
         <Eye className="h-3.5 w-3.5" />
         View profile
@@ -521,13 +526,28 @@ export default function AdminCarriersPage() {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const { data, isFetching, isLoading } = useQuery({
-    queryKey: ["admin-carriers"],
-    queryFn: fetchCarriers,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("carrier"),
+    queryFn: adminProfilesQueryFn("carrier"),
+    ...adminQueryDefaults,
   });
+
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
+  });
+
+  const data = useMemo(() => {
+    const profiles = (profilesQuery.data?.profiles ?? []) as CarrierProfileRecord[];
+    const loads = (loadsQuery.data?.loads ?? []) as LoadRecord[];
+    if (!profilesQuery.data && !loadsQuery.data) return undefined;
+    return buildCarriersOverview(profiles, loads);
+  }, [profilesQuery.data, loadsQuery.data]);
+
+  const isLoading =
+    (profilesQuery.isLoading && !profilesQuery.data) || (loadsQuery.isLoading && !loadsQuery.data);
+  const isFetching = profilesQuery.isFetching || loadsQuery.isFetching;
 
   const rows = data?.rows ?? [];
   const stats = data?.stats ?? {
@@ -631,7 +651,8 @@ export default function AdminCarriersPage() {
   const selectedRows = filteredRows.filter((row) => selectedIds.includes(row.id));
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-carriers"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
   };
 
   const exportRows = (targetRows: CarrierRow[], fileLabel: string) => {
@@ -703,6 +724,16 @@ export default function AdminCarriersPage() {
   };
 
   const handleUnsupportedAction = (action: string, carrier: CarrierRow) => {
+    if (action === "delete") {
+      void deleteMarketplaceAccounts({
+        ids: [carrier.id],
+        label: "carrier",
+        queryClient,
+        role: "carrier",
+      });
+      return;
+    }
+
     const actionLabel = action.charAt(0).toUpperCase() + action.slice(1);
     toast(`${actionLabel} workflow for ${carrier.companyName} is ready for backend wiring.`, {
       icon: "i",
@@ -712,7 +743,7 @@ export default function AdminCarriersPage() {
   const verifyCarrier = async (carrier: CarrierRow) => {
     mergeCarrierExtras(carrier.id, {
       verificationStatus: "Verified",
-      verifiedBy: "Admin - Khalid",
+      verifiedBy: "Admin",
       verifiedDate: new Date().toLocaleDateString("en-GB"),
       verificationNotes: "Carrier verified from the all carriers control page.",
       accountStatus: "Active",
@@ -723,7 +754,8 @@ export default function AdminCarriersPage() {
     try {
       await verifyCarrier(carrier);
       toast.success(`${carrier.companyName} verified successfully.`);
-      await queryClient.invalidateQueries({ queryKey: ["admin-carriers"] });
+      await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to verify carrier.");
     }
@@ -741,8 +773,11 @@ export default function AdminCarriersPage() {
     }
 
     if (action === "delete") {
-      toast("Delete selected workflow is ready for backend wiring.", {
-        icon: "i",
+      void deleteMarketplaceAccounts({
+        ids: selectedRows.map((carrier) => carrier.id),
+        label: "carrier",
+        queryClient,
+        role: "carrier",
       });
       return;
     }
@@ -751,7 +786,8 @@ export default function AdminCarriersPage() {
       try {
         await Promise.all(selectedRows.map((carrier) => verifyCarrier(carrier)));
         toast.success("Selected carriers verified successfully.");
-        await queryClient.invalidateQueries({ queryKey: ["admin-carriers"] });
+        await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("carrier") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Unable to verify selected carriers.");
       }
@@ -759,12 +795,12 @@ export default function AdminCarriersPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="admin-page-stack space-y-4">
       <section className={cn(CARD_CLASS, "relative overflow-hidden p-6")}>
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-emerald-500 to-slate-300" />
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+            <div className={cn(ADMIN_ICON_BOX, ADMIN_ICON_BOX_MD)}>
               <Truck className="h-5 w-5" />
             </div>
             <div>
@@ -853,7 +889,7 @@ export default function AdminCarriersPage() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:w-[860px]">
-            <Select
+            <AdminSelect
               options={statusOptions}
               value={statusFilter}
               onChange={(option) => {
@@ -863,7 +899,7 @@ export default function AdminCarriersPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={dateRangeOptions}
               value={dateRangeFilter}
               onChange={(option) => {
@@ -873,7 +909,7 @@ export default function AdminCarriersPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={sortOptions}
               value={sortBy}
               onChange={(option) => {
@@ -1238,7 +1274,7 @@ export default function AdminCarriersPage() {
               </span>{" "}
               of <span className="font-semibold text-slate-900">{filteredRows.length}</span>
             </p>
-            <Select
+            <AdminSelect
               options={rowsPerPageOptions}
               value={rowsPerPage}
               onChange={(option) => {
@@ -1275,7 +1311,7 @@ export default function AdminCarriersPage() {
                   className={cn(
                     "h-9 min-w-9 rounded-lg px-3 text-sm font-semibold transition-all",
                     page === pageNumber
-                      ? "bg-slate-900 text-white"
+                      ? "bg-blue-600 text-white shadow-sm"
                       : "bg-white text-slate-600 ring-1 ring-slate-200/60"
                   )}
                 >

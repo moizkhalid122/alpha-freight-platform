@@ -1,3 +1,5 @@
+import { ADMIN_CARD } from "@/lib/admin-ui";
+
 const paymentCards = [
   { label: "Processed today", value: "GBP 84,320" },
   { label: "Held payouts", value: "4" },
@@ -27,8 +29,8 @@ const paymentRows = [
 
 export default function AdminPaymentsPage() {
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <div className="admin-page-stack space-y-4">
+      <section className={`${ADMIN_CARD} p-6 sm:p-8`}>
         <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">
           Payments
         </p>
@@ -39,7 +41,7 @@ export default function AdminPaymentsPage() {
           {paymentCards.map((card) => (
             <div
               key={card.label}
-              className="rounded-[26px] border border-slate-200 bg-slate-50 p-5"
+              className={`${ADMIN_CARD} p-4`}
             >
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
                 {card.label}
@@ -52,12 +54,12 @@ export default function AdminPaymentsPage() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className={`${ADMIN_CARD} p-6 sm:p-8`}>
         <div className="space-y-4">
           {paymentRows.map((row) => (
             <div
               key={row.title}
-              className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-slate-50 px-5 py-5 lg:flex-row lg:items-center lg:justify-between"
+              className={`${ADMIN_CARD} flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between`}
             >
               <div>
                 <p className="text-lg font-black tracking-tight text-slate-900">

@@ -23,6 +23,7 @@ export type ChatApiExtendedResponse = ChatApiResponse & {
   alerts?: Array<{ id: string; title: string; message: string; action?: string }>;
   remaining?: number;
   limitReached?: boolean;
+  limitType?: "guest" | "member";
 };
 
 export async function sendChatMessage(
@@ -233,6 +234,7 @@ export async function streamPublicChatMessage(
             message: String(payload.message || ""),
             structuredMessage: payload.structuredMessage as StructuredAssistantReply | undefined,
             limitReached: true,
+            limitType: payload.limitType === "member" ? "member" : "guest",
             remaining: 0,
           };
           callbacks.onLimit?.(finalResult);

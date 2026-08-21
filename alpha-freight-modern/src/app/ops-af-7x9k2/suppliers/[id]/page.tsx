@@ -521,9 +521,6 @@ export default function AdminSupplierDetailPage() {
     queryKey: ["admin-supplier-detail", supplierId],
     queryFn: () => fetchSupplierDetail(supplierId),
     enabled: Boolean(supplierId),
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
   });
 
   const supplier = data?.supplier ?? null;
@@ -590,7 +587,7 @@ export default function AdminSupplierDetailPage() {
 
   if (!supplier) {
     return (
-      <div className="mx-auto max-w-[1400px] space-y-6">
+      <div className="space-y-6">
         <section className={cn(CARD_CLASS, "p-8")}>
           <Link href="/ops-af-7x9k2/suppliers">
             <Button variant="secondary" size="sm">
@@ -608,7 +605,7 @@ export default function AdminSupplierDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="space-y-6">
       <section className={cn(CARD_CLASS, "overflow-hidden")}>
         {supplier.bannerUrl ? (
           <div className="h-28 overflow-hidden border-b border-slate-200 bg-slate-100">
@@ -719,7 +716,7 @@ export default function AdminSupplierDetailPage() {
               onClick={() => setActiveTab(tab.id)}
               className={cn(
                 "whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all ring-1 ring-slate-200/60",
-                activeTab === tab.id ? "bg-slate-900 text-white ring-slate-900" : "bg-white text-slate-600"
+                activeTab === tab.id ? "bg-blue-600 text-white shadow-sm ring-slate-900" : "bg-white text-slate-600"
               )}
             >
               {tab.label}

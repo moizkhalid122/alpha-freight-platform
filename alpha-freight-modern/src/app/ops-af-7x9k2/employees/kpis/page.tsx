@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminHrHeader, AdminHrTabs, AdminPanel } from "@/components/admin/AdminHrShell";
+import { ADMIN_PROGRESS, ADMIN_SECTION_TITLE } from "@/lib/admin-ui";
 import { useAdminEmployees, useAdminTeamStats } from "@/hooks/useAdminEmployeeData";
 
 export default function AdminEmployeeKpisPage() {
@@ -71,25 +72,25 @@ export default function AdminEmployeeKpisPage() {
   ];
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader title="KPIs" description="Key performance indicators for the sales and ops team." />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/kpis" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {kpis.map((kpi) => (
-          <AdminPanel key={kpi.label}>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{kpi.label}</p>
-            <p className="mt-1 text-3xl font-black text-slate-900">
+          <AdminPanel key={kpi.label} className="!p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{kpi.label}</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
               {loading ? "—" : kpi.value}
             </p>
-            <p className="mt-1 text-xs text-slate-500">{kpi.note}</p>
+            <p className="mt-1.5 text-xs text-slate-500">{kpi.note}</p>
           </AdminPanel>
         ))}
       </div>
 
-      <AdminPanel className="mt-6">
-        <h2 className="mb-4 text-lg font-black text-slate-900">Monthly targets</h2>
-        <div className="space-y-4">
+      <AdminPanel>
+        <h2 className={ADMIN_SECTION_TITLE}>Monthly targets</h2>
+        <div className="mt-4 space-y-4">
           {monthlyTargets.map((item) => {
             const pct = Math.min(100, Math.round((item.current / item.target) * 100));
             return (
@@ -108,7 +109,7 @@ export default function AdminEmployeeKpisPage() {
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-slate-900" style={{ width: loading ? "0%" : `${pct}%` }} />
+                  <div className={ADMIN_PROGRESS} style={{ width: loading ? "0%" : `${pct}%` }} />
                 </div>
               </div>
             );

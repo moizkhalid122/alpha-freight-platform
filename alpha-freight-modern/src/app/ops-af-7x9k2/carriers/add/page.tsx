@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { mergeCarrierExtras } from "@/lib/profile-extras";
 import { cn } from "@/lib/utils";
+import { ADMIN_CARD, ADMIN_SECTION_LABEL, ADMIN_SECTION_TITLE } from "@/lib/admin-ui";
 import { supabase } from "@/lib/supabase";
 
 type AddCarrierForm = {
@@ -399,7 +400,7 @@ export default function AdminAddCarrierPage() {
         vehicleRegistrationUrl: formState.vehicleRegistrationUrl,
         backgroundCheckUrl: formState.backgroundCheckUrl,
         accountStatus: formState.verificationStatus === "Rejected" ? "Suspended" : "Active",
-        verifiedBy: formState.verificationStatus === "Verified" ? "Admin - Khalid" : null,
+        verifiedBy: formState.verificationStatus === "Verified" ? "Admin" : null,
         verifiedDate: formState.verificationStatus === "Verified" ? new Date().toLocaleDateString("en-GB") : null,
       });
 
@@ -419,23 +420,23 @@ export default function AdminAddCarrierPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1660px] space-y-6">
-      <section className="overflow-hidden rounded-[34px] border border-white/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
-        <div className="border-b border-slate-200 bg-[radial-gradient(circle_at_top_right,_rgba(191,255,7,0.14),_transparent_40%),linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-slate-100 text-slate-700 shadow-sm">
+    <div className="admin-page-stack space-y-4">
+      <section className={cn(ADMIN_CARD, "overflow-hidden")}>
+        <div className="border-b border-slate-200/90 bg-gradient-to-b from-white to-slate-50/80 p-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm">
                 {formState.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={formState.logoUrl} alt="Carrier logo" className="h-full w-full rounded-[28px] object-cover" />
+                  <img src={formState.logoUrl} alt="Carrier logo" className="h-full w-full rounded-xl object-cover" />
                 ) : (
-                  <Plus className="h-9 w-9" />
+                  <Plus className="h-7 w-7" />
                 )}
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Add Carrier</p>
-                <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950">Add Carrier</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+                <p className={ADMIN_SECTION_LABEL}>Add Carrier</p>
+                <h1 className={cn(ADMIN_SECTION_TITLE, "mt-1")}>Add Carrier</h1>
+                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">
                   Create a new carrier record with business details, contact information, and verification documents from one admin form.
                 </p>
               </div>
@@ -460,7 +461,7 @@ export default function AdminAddCarrierPage() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="mb-6 flex items-center gap-3">
           <div className="rounded-2xl bg-slate-100 p-2.5 text-slate-700">
             <Building2 className="h-4 w-4" />
@@ -484,7 +485,7 @@ export default function AdminAddCarrierPage() {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             <UploadTile label="Company Logo" value={formState.logoUrl} onUpload={(event) => void handleFileUpload(event, "logoUrl")} />
             <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 space-y-5">
               <MultiSelectChips label="Services Offered *" options={SERVICE_OPTIONS} values={formState.servicesOffered} onToggle={(value) => toggleArrayValue("servicesOffered", value)} />
@@ -496,7 +497,7 @@ export default function AdminAddCarrierPage() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="mb-6 flex items-center gap-3">
           <div className="rounded-2xl bg-slate-100 p-2.5 text-slate-700">
             <MapPin className="h-4 w-4" />
@@ -531,7 +532,7 @@ export default function AdminAddCarrierPage() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="mb-6 flex items-center gap-3">
           <div className="rounded-2xl bg-slate-100 p-2.5 text-slate-700">
             <ShieldCheck className="h-4 w-4" />
@@ -559,7 +560,7 @@ export default function AdminAddCarrierPage() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-start gap-3">
             <div className="rounded-2xl bg-slate-100 p-2.5 text-slate-700">

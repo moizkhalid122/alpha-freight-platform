@@ -50,6 +50,7 @@ export default function LoginPage() {
           redirectPath &&
           (redirectPath.startsWith("/supplier/") ||
             redirectPath.startsWith("/carrier/") ||
+            redirectPath.startsWith("/employee") ||
             redirectPath === "/supplier/dashboard" ||
             redirectPath === "/carrier/dashboard");
 

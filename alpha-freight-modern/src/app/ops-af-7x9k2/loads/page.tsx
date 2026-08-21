@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfDay, subDays } from "date-fns";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import toast from "react-hot-toast";
 import {
   ArrowRight,
@@ -33,6 +33,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminFetch } from "@/lib/admin-data-client";
+import { deleteMarketplaceLoads } from "@/lib/admin-delete-loads-client";
+import { adminLoadsQueryFn, adminLoadsQueryKey, adminQueryDefaults } from "@/lib/admin-query";
+import {
+  ADMIN_CARD,
+  ADMIN_CARD_INTERACTIVE,
+  ADMIN_SECTION_LABEL,
+  ADMIN_SECTION_TITLE,
+  adminSelectStyles,
+} from "@/lib/admin-ui";
 import { readCarrierExtras, readSupplierExtras, resolveCarrierExtras, resolveSupplierExtras } from "@/lib/profile-extras";
 import { cn } from "@/lib/utils";
 
@@ -111,10 +120,9 @@ type LoadsOverview = {
   };
 };
 
-const CARD_CLASS =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
-const SECTION_LABEL = "text-[11px] font-semibold text-slate-500";
-const SECTION_TITLE = "text-xl font-bold text-slate-900";
+const CARD_CLASS = `${ADMIN_CARD} ${ADMIN_CARD_INTERACTIVE}`;
+const SECTION_LABEL = ADMIN_SECTION_LABEL;
+const SECTION_TITLE = ADMIN_SECTION_TITLE;
 
 const DELIVERED_LOAD_STATUSES = new Set(["completed", "delivered"]);
 const IN_TRANSIT_LOAD_STATUSES = new Set(["loading", "in-transit", "assigned", "booked"]);
@@ -217,15 +225,7 @@ function paymentBadgeClass(state: string) {
 }
 
 function selectStyles() {
-  return {
-    control: () =>
-      "flex min-h-10 items-center rounded-xl bg-slate-50/80 px-3 ring-1 ring-slate-200/60",
-    menu: () => "mt-2 rounded-xl bg-white p-2 shadow-lg ring-1 ring-slate-200/60",
-    option: ({ isFocused }: { isFocused: boolean }) =>
-      `cursor-pointer rounded-lg px-3 py-2 text-sm ${isFocused ? "bg-slate-100" : ""}`,
-    placeholder: () => "text-sm text-slate-400",
-    singleValue: () => "text-sm font-semibold text-slate-900",
-  };
+  return adminSelectStyles();
 }
 
 function Chip({ label }: { label: string }) {
@@ -243,10 +243,15 @@ type AdminLoadsApiResponse = {
 };
 
 async function fetchLoadsOverview(): Promise<LoadsOverview> {
-  const { loads: rawLoads, profiles, bids } = await adminFetch<AdminLoadsApiResponse>(
-    "/api/admin/loads"
-  );
+  const bundle = await adminFetch<AdminLoadsApiResponse>("/api/admin/loads");
+  return buildLoadsOverview(bundle);
+}
 
+function buildLoadsOverview({
+  loads: rawLoads,
+  profiles,
+  bids,
+}: AdminLoadsApiResponse): LoadsOverview {
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
   const bidCountByLoad = new Map<string, number>();
   bids.forEach((bid: { load_id?: string | null }) => {
@@ -333,7 +338,7 @@ function LoadActionButtons({
         <Link
           href={`/ops-af-7x9k2/loads/${row.id}`}
           title="View load"
-          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-slate-900 px-2 text-[10px] font-semibold text-white hover:bg-slate-800"
+          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-2 text-[10px] font-semibold text-white hover:bg-blue-700"
         >
           <Eye className="h-3 w-3" />
           View
@@ -354,9 +359,13 @@ function LoadActionButtons({
         ) : null}
         <button
           type="button"
-          title="Delete"
+          title={row.carrierId ? "Delete load (carrier assigned)" : "Delete load"}
           onClick={() => onUnsupportedAction("delete", row)}
-          className={cn(iconClass, "hover:bg-red-50 hover:text-red-700")}
+          className={cn(
+            iconClass,
+            "hover:bg-red-50 hover:text-red-700",
+            row.carrierId && "ring-red-200/80"
+          )}
         >
           <Trash2 className="h-3 w-3" />
         </button>
@@ -368,7 +377,7 @@ function LoadActionButtons({
     <div className="flex flex-col gap-1.5">
       <Link
         href={`/ops-af-7x9k2/loads/${row.id}`}
-        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-2.5 text-[11px] font-semibold text-white hover:bg-slate-800"
+        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-2.5 text-[11px] font-semibold text-white hover:bg-blue-700"
       >
         <Eye className="h-3.5 w-3.5" />
         View load
@@ -390,9 +399,9 @@ function LoadActionButtons({
         ) : null}
         <button
           type="button"
-          title="Delete"
+          title={row.carrierId ? "Delete load (carrier assigned)" : "Delete load"}
           onClick={() => onUnsupportedAction("delete", row)}
-          className={cn(iconClass, "h-8 w-8 hover:bg-red-50 hover:text-red-700")}
+          className={cn(iconClass, "h-8 w-8 hover:bg-red-50 hover:text-red-700", row.carrierId && "ring-red-200/80")}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -412,13 +421,19 @@ export default function AdminLoadsPage() {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const { data, isFetching, isLoading } = useQuery({
-    queryKey: ["admin-loads"],
-    queryFn: fetchLoadsOverview,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
   });
+
+  const data = useMemo(() => {
+    if (!loadsQuery.data) return undefined;
+    return buildLoadsOverview(loadsQuery.data as AdminLoadsApiResponse);
+  }, [loadsQuery.data]);
+
+  const isLoading = loadsQuery.isLoading && !loadsQuery.data;
+  const isFetching = loadsQuery.isFetching;
 
   const rows = data?.rows ?? [];
   const stats = data?.stats ?? {
@@ -576,6 +591,15 @@ export default function AdminLoadsPage() {
   };
 
   const handleUnsupportedAction = (action: string, load: LoadRow) => {
+    if (action === "delete") {
+      void deleteMarketplaceLoads({
+        ids: [load.id],
+        queryClient,
+        assignedCount: load.carrierId ? 1 : 0,
+      });
+      return;
+    }
+
     toast(`${action} workflow for ${load.loadCode} is ready for backend wiring.`, { icon: "i" });
   };
 
@@ -588,11 +612,15 @@ export default function AdminLoadsPage() {
       toast.error("Select at least one load first.");
       return;
     }
-    toast("Delete selected workflow is ready for backend wiring.", { icon: "i" });
+    void deleteMarketplaceLoads({
+      ids: selectedRows.map((load) => load.id),
+      queryClient,
+      assignedCount: selectedRows.filter((load) => Boolean(load.carrierId)).length,
+    });
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="admin-page-stack space-y-4">
       <section className={cn(CARD_CLASS, "relative overflow-hidden p-6")}>
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-violet-500 to-slate-300" />
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
@@ -680,7 +708,7 @@ export default function AdminLoadsPage() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:w-[860px]">
-            <Select
+            <AdminSelect
               options={stageOptions}
               value={stageFilter}
               onChange={(option) => {
@@ -690,7 +718,7 @@ export default function AdminLoadsPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={dateRangeOptions}
               value={dateRangeFilter}
               onChange={(option) => {
@@ -700,7 +728,7 @@ export default function AdminLoadsPage() {
               unstyled
               classNames={selectStyles()}
             />
-            <Select
+            <AdminSelect
               options={sortOptions}
               value={sortBy}
               onChange={(option) => {
@@ -1023,7 +1051,7 @@ export default function AdminLoadsPage() {
               </span>{" "}
               of <span className="font-semibold text-slate-900">{filteredRows.length}</span>
             </p>
-            <Select
+            <AdminSelect
               options={rowsPerPageOptions}
               value={rowsPerPage}
               onChange={(option) => {
@@ -1060,7 +1088,7 @@ export default function AdminLoadsPage() {
                   className={cn(
                     "h-9 min-w-9 rounded-lg px-3 text-sm font-semibold transition-all",
                     page === pageNumber
-                      ? "bg-slate-900 text-white"
+                      ? "bg-blue-600 text-white shadow-sm"
                       : "bg-white text-slate-600 ring-1 ring-slate-200/60"
                   )}
                 >

@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminApiAccess } from "@/lib/admin-api-auth";
 import { getSupabaseForAdminApi } from "@/lib/admin-api-db";
+import { invalidateAdminOverviewCache } from "@/app/api/admin/overview/route";
+import { fetchAdminLoadsBundleRest } from "@/lib/admin-rest";
+import { isAdminServiceConfigured } from "@/lib/supabase-admin";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const LOAD_LIST_SELECT =
   "id, supplier_id, carrier_id, origin, destination, pickup_location, delivery_location, price, status, created_at, title, commodity, equipment, weight, pickup_date, delivery_date, payment_route, payment_state";
+
+const CACHE_HEADERS = { "Cache-Control": "private, max-age=60" };
+const SERVER_CACHE_MS = 5 * 60_000;
+
+let loadsCache: {
+  expiresAt: number;
+  body: Awaited<ReturnType<typeof fetchAdminLoadsBundleRest>>;
+} | null = null;
+
+export function invalidateAdminLoadsCache() {
+  loadsCache = null;
+}
 
 export async function GET(request: NextRequest) {
   const access = await verifyAdminApiAccess(request);
@@ -11,29 +29,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: access.error }, { status: access.status });
   }
 
+  const now = Date.now();
+  if (loadsCache && loadsCache.expiresAt > now) {
+    return NextResponse.json(loadsCache.body, { headers: CACHE_HEADERS });
+  }
+
   try {
-    const db = getSupabaseForAdminApi(request);
-    const [loadsResult, profilesResult, bidsResult] = await Promise.all([
-      db.from("loads").select(LOAD_LIST_SELECT).order("created_at", { ascending: false }),
-      db.from("profiles").select("id, full_name, company_name, role, profile_extras"),
-      db.from("bids").select("id, load_id, carrier_id, amount, status, created_at"),
-    ]);
-
-    if (loadsResult.error) {
-      return NextResponse.json({ error: loadsResult.error.message }, { status: 500 });
+    const body = await fetchAdminLoadsBundleRest();
+    loadsCache = { expiresAt: now + SERVER_CACHE_MS, body };
+    return NextResponse.json(body, { headers: CACHE_HEADERS });
+  } catch (restError) {
+    console.warn("[admin/loads] REST failed:", restError);
+    if (loadsCache) {
+      return NextResponse.json(loadsCache.body, { headers: CACHE_HEADERS });
     }
-
-    return NextResponse.json({
-      loads: loadsResult.data ?? [],
-      profiles: profilesResult.error ? [] : (profilesResult.data ?? []),
-      bids: bidsResult.error ? [] : (bidsResult.data ?? []),
-    });
-  } catch (error) {
-    console.error("[admin/loads]", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to fetch loads." },
-      { status: 500 }
-    );
+    return NextResponse.json({ loads: [], profiles: [], bids: [] }, { headers: CACHE_HEADERS });
   }
 }
 
@@ -103,11 +113,65 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    loadsCache = null;
+    invalidateAdminOverviewCache();
     return NextResponse.json({ load: data, message: "Load published to the marketplace." });
   } catch (error) {
     console.error("[admin/loads POST]", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to post load." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const access = await verifyAdminApiAccess(request);
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
+  }
+
+  let ids: string[] = [];
+  try {
+    const body = (await request.json()) as { ids?: string[] };
+    ids = Array.isArray(body.ids)
+      ? body.ids.map((value) => String(value).trim()).filter(Boolean)
+      : [];
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (ids.length === 0) {
+    return NextResponse.json({ error: "Select at least one load to delete." }, { status: 400 });
+  }
+
+  if (ids.length > 50) {
+    return NextResponse.json({ error: "Delete up to 50 loads at a time." }, { status: 400 });
+  }
+
+  if (!isAdminServiceConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "SUPABASE_SERVICE_ROLE_KEY is missing. Add it to .env.local and restart the dev server before deleting loads.",
+      },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const { deleteAdminLoads } = await import("@/lib/admin-delete-load");
+    const result = await deleteAdminLoads(ids);
+    invalidateAdminLoadsCache();
+    invalidateAdminOverviewCache();
+
+    return NextResponse.json(result, {
+      status: result.failed.length > 0 && result.deleted.length === 0 ? 500 : 200,
+    });
+  } catch (error) {
+    console.error("[admin/loads DELETE]", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to delete loads." },
       { status: 500 }
     );
   }

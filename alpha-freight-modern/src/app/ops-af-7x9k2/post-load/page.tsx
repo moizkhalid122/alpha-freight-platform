@@ -18,9 +18,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { adminFetch } from "@/lib/admin-data-client";
 import { cn } from "@/lib/utils";
+import { ADMIN_CARD, ADMIN_CARD_INTERACTIVE } from "@/lib/admin-ui";
 
-const CARD_CLASS =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
+const CARD_CLASS = `${ADMIN_CARD} ${ADMIN_CARD_INTERACTIVE}`;
 
 const EQUIPMENT_OPTIONS = [
   "Curtain-sider",
@@ -150,7 +150,7 @@ export default function AdminPostLoadPage() {
 
   if (postedLoadId) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6">
+      <div className="mx-auto max-w-2xl admin-page-stack space-y-4">
         <section className={cn(CARD_CLASS, "p-8 text-center")}>
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="h-7 w-7" />
@@ -180,7 +180,7 @@ export default function AdminPostLoadPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[920px] space-y-6">
+    <div className="admin-page-stack space-y-4">
       <section className={cn(CARD_CLASS, "relative overflow-hidden p-6")}>
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-violet-500 to-slate-300" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -205,7 +205,7 @@ export default function AdminPostLoadPage() {
         </div>
       </section>
 
-      <form onSubmit={handleSubmit} className={cn(CARD_CLASS, "space-y-6 p-6")}>
+      <form onSubmit={handleSubmit} className={cn(CARD_CLASS, "space-y-4 p-5")}>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block md:col-span-2">
             <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">

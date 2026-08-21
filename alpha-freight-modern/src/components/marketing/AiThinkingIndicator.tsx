@@ -11,15 +11,14 @@ interface AiThinkingIndicatorProps {
 export default function AiThinkingIndicator({ query }: AiThinkingIndicatorProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
-      className="flex items-start gap-3 py-1"
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="flex items-center gap-3 py-1"
     >
-      <NavbarAiLottie className="mt-0.5 h-9 w-9 shrink-0" />
-      <div className="min-w-0 flex-1 rounded-[20px] border border-white/60 bg-white/60 px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.06)] backdrop-blur-md">
-        <AiSearchEffect query={query} />
-      </div>
+      <NavbarAiLottie className="h-9 w-9 shrink-0" />
+      <AiSearchEffect query={query} />
     </motion.div>
   );
 }

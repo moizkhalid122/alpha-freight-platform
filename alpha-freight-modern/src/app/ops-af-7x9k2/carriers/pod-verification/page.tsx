@@ -30,8 +30,15 @@ import {
   type CarrierPodUploadRecord,
 } from "@/lib/carrier-pod-uploads";
 import { readCarrierExtras } from "@/lib/profile-extras";
-import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { ADMIN_CARD } from "@/lib/admin-ui";
+import {
+  adminLoadsQueryFn,
+  adminLoadsQueryKey,
+  adminProfilesQueryFn,
+  adminProfilesQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
 
 type ProfileRecord = {
   id: string;
@@ -138,18 +145,7 @@ function getPodLabel(status: CarrierPodUploadRecord["verificationStatus"]) {
   return "Pending Review";
 }
 
-async function fetchPodVerificationRows(): Promise<PodVerificationRow[]> {
-  const [profilesResult, loadsResult] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, company_name"),
-    supabase
-      .from("loads")
-      .select("id, carrier_id, supplier_id, origin, destination, pickup_location, delivery_location, price, status, created_at")
-      .not("carrier_id", "is", null)
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const profiles = (profilesResult.error ? [] : (profilesResult.data ?? [])) as ProfileRecord[];
-  const loads = (loadsResult.error ? [] : (loadsResult.data ?? [])) as LoadRecord[];
+function buildPodVerificationRows(profiles: ProfileRecord[], loads: LoadRecord[]): PodVerificationRow[] {
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
   const paymentOrdersByLoadId = new Map(readCarrierPaymentOrders().map((order) => [order.loadId, order]));
   const podUploads = readCarrierPodUploads();
@@ -213,10 +209,28 @@ export default function CarrierPodVerificationPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [podPreview, setPodPreview] = useState<{ url: string; name: string } | null>(null);
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["admin-carrier-pod-verification"],
-    queryFn: fetchPodVerificationRows,
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("all"),
+    queryFn: adminProfilesQueryFn(),
+    ...adminQueryDefaults,
   });
+
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
+  });
+
+  const data = useMemo(() => {
+    const profiles = (profilesQuery.data?.profiles ?? []) as ProfileRecord[];
+    const loads = (loadsQuery.data?.loads ?? []) as LoadRecord[];
+    if (!profilesQuery.data && !loadsQuery.data) return undefined;
+    return buildPodVerificationRows(profiles, loads);
+  }, [profilesQuery.data, loadsQuery.data]);
+
+  const isLoading =
+    (profilesQuery.isLoading && !profilesQuery.data) || (loadsQuery.isLoading && !loadsQuery.data);
+  const isFetching = profilesQuery.isFetching || loadsQuery.isFetching;
 
   const rows = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
@@ -253,8 +267,8 @@ export default function CarrierPodVerificationPage() {
   };
 
   const refresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-pod-verification"] });
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-payments"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("all") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success("POD verification queue refreshed.");
   };
 
@@ -268,9 +282,9 @@ export default function CarrierPodVerificationPage() {
     mergeCarrierPodUpload(row.loadId, {
       verificationStatus: nextStatus,
       reviewedAt: timestamp,
-      reviewedBy: "Admin - Khalid",
+      reviewedBy: "Admin",
       verifiedAt: nextStatus === "verified" ? timestamp : null,
-      verifiedBy: nextStatus === "verified" ? "Admin - Khalid" : null,
+      verifiedBy: nextStatus === "verified" ? "Admin" : null,
       requestedInfoAt: nextStatus === "info_required" ? timestamp : null,
       rejectedAt: nextStatus === "rejected" ? timestamp : null,
       reviewNote:
@@ -331,14 +345,14 @@ export default function CarrierPodVerificationPage() {
       });
     }
 
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-pod-verification"] });
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-payments"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("all") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success(successMessage);
   };
 
   return (
-    <div className="space-y-6 pb-8">
-      <section className="rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+    <div className="admin-page-stack space-y-4 pb-6">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400">
@@ -464,7 +478,7 @@ export default function CarrierPodVerificationPage() {
 
                   <Button
                     type="button"
-                    className="h-11 w-full rounded-2xl bg-slate-950 text-white hover:bg-slate-800"
+                    className="h-11 w-full rounded-2xl bg-slate-950 text-white hover:bg-blue-700"
                     onClick={() => void updatePodState(row, "verified", "POD verified. Carrier funds will move into available balance.")}
                   >
                     <CheckCircle2 className="mr-2 h-4 w-4" />

@@ -31,7 +31,7 @@ function OnboardingBadge({ completed }: { completed: boolean }) {
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
       <p className="mt-1 text-sm font-semibold text-slate-800">{value || "—"}</p>
     </div>
@@ -135,7 +135,7 @@ export default function AdminEmployeeOnboardingPage() {
   const pending = onboarding.filter((row) => !row.onboarding_completed);
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader
         title="Employee onboarding"
         description="Review profile details, documents, and policy acceptances submitted by founding team members."

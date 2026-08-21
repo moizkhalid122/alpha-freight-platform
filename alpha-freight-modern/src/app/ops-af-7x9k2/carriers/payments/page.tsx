@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfDay, subDays } from "date-fns";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import toast from "react-hot-toast";
 import {
   AlertCircle,
@@ -46,7 +46,14 @@ import {
   readCarrierPodUploads,
 } from "@/lib/carrier-pod-uploads";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { ADMIN_CARD } from "@/lib/admin-ui";
+import {
+  adminLoadsQueryFn,
+  adminLoadsQueryKey,
+  adminProfilesQueryFn,
+  adminProfilesQueryKey,
+  adminQueryDefaults,
+} from "@/lib/admin-query";
 
 type DateRangeValue = "today" | "7d" | "30d" | "custom";
 type StatusFilterValue = "all" | CarrierPaymentStatus;
@@ -281,20 +288,7 @@ function getLoadPaymentStatus(loadId: string, podStatus?: string | null): Carrie
   return existing?.status || "pending_review";
 }
 
-async function fetchCarrierPayments(): Promise<CarrierPaymentsData> {
-  const [profilesResult, loadsResult] = await Promise.all([
-    supabase.from("profiles").select("*"),
-    supabase
-      .from("loads")
-      .select(
-        "id, supplier_id, carrier_id, origin, destination, pickup_location, delivery_location, price, status, created_at"
-      )
-      .not("carrier_id", "is", null)
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const profiles = (profilesResult.error ? [] : (profilesResult.data ?? [])) as ProfileRecord[];
-  const loads = (loadsResult.error ? [] : (loadsResult.data ?? [])) as LoadRecord[];
+function buildCarrierPayments(profiles: ProfileRecord[], loads: LoadRecord[]): CarrierPaymentsData {
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
   const storedOrders = new Map(readCarrierPaymentOrders().map((item) => [item.transactionId, item]));
   const podUploads = readCarrierPodUploads();
@@ -553,10 +547,28 @@ export default function CarrierPaymentsPage() {
   const [verificationNotes, setVerificationNotes] = useState("");
   const [disputeReason, setDisputeReason] = useState("");
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["admin-carrier-payments"],
-    queryFn: fetchCarrierPayments,
+  const profilesQuery = useQuery({
+    queryKey: adminProfilesQueryKey("all"),
+    queryFn: adminProfilesQueryFn(),
+    ...adminQueryDefaults,
   });
+
+  const loadsQuery = useQuery({
+    queryKey: adminLoadsQueryKey(),
+    queryFn: adminLoadsQueryFn(),
+    ...adminQueryDefaults,
+  });
+
+  const data = useMemo(() => {
+    const profiles = (profilesQuery.data?.profiles ?? []) as ProfileRecord[];
+    const loads = (loadsQuery.data?.loads ?? []) as LoadRecord[];
+    if (!profilesQuery.data && !loadsQuery.data) return undefined;
+    return buildCarrierPayments(profiles, loads);
+  }, [profilesQuery.data, loadsQuery.data]);
+
+  const isLoading =
+    (profilesQuery.isLoading && !profilesQuery.data) || (loadsQuery.isLoading && !loadsQuery.data);
+  const isFetching = profilesQuery.isFetching || loadsQuery.isFetching;
 
   const rangeStart = useMemo(
     () => getRangeStart(dateRange, customStart),
@@ -643,7 +655,8 @@ export default function CarrierPaymentsPage() {
   }, [filteredRows]);
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-payments"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("all") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success("Carrier payments refreshed.");
   };
 
@@ -665,9 +678,9 @@ export default function CarrierPaymentsPage() {
       mergeCarrierPodUpload(row.loadId, {
         verificationStatus: "verified",
         verifiedAt: updates.verifiedAt ?? new Date().toISOString(),
-        verifiedBy: "Admin - Khalid",
+        verifiedBy: "Admin",
         reviewedAt: new Date().toISOString(),
-        reviewedBy: "Admin - Khalid",
+        reviewedBy: "Admin",
         reviewNote: updates.verificationNotes ?? row.verificationNotes ?? null,
       });
     }
@@ -676,7 +689,7 @@ export default function CarrierPaymentsPage() {
       mergeCarrierPodUpload(row.loadId, {
         verificationStatus: "on_hold",
         reviewedAt: new Date().toISOString(),
-        reviewedBy: "Admin - Khalid",
+        reviewedBy: "Admin",
         reviewNote: updates.disputeReason ?? row.disputeReason ?? "POD review placed on hold.",
       });
     }
@@ -686,12 +699,13 @@ export default function CarrierPaymentsPage() {
         verificationStatus: "rejected",
         rejectedAt: new Date().toISOString(),
         reviewedAt: new Date().toISOString(),
-        reviewedBy: "Admin - Khalid",
+        reviewedBy: "Admin",
         reviewNote: updates.disputeReason ?? row.disputeReason ?? "POD review rejected.",
       });
     }
 
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-payments"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("all") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success(successMessage);
   };
 
@@ -724,9 +738,9 @@ export default function CarrierPaymentsPage() {
         mergeCarrierPodUpload(row.loadId, {
           verificationStatus: "verified",
           verifiedAt: new Date().toISOString(),
-          verifiedBy: "Admin - Khalid",
+          verifiedBy: "Admin",
           reviewedAt: new Date().toISOString(),
-          reviewedBy: "Admin - Khalid",
+          reviewedBy: "Admin",
           reviewNote: verificationNotes || row.verificationNotes || null,
         });
       }
@@ -735,14 +749,15 @@ export default function CarrierPaymentsPage() {
         mergeCarrierPodUpload(row.loadId, {
           verificationStatus: "on_hold",
           reviewedAt: new Date().toISOString(),
-          reviewedBy: "Admin - Khalid",
+          reviewedBy: "Admin",
           reviewNote: disputeReason || row.disputeReason || "POD review placed on hold.",
         });
       }
     });
 
     setSelectedIds([]);
-    await queryClient.invalidateQueries({ queryKey: ["admin-carrier-payments"] });
+    await queryClient.invalidateQueries({ queryKey: adminProfilesQueryKey("all") });
+    await queryClient.invalidateQueries({ queryKey: adminLoadsQueryKey() });
     toast.success(successMessage);
   };
 
@@ -750,11 +765,11 @@ export default function CarrierPaymentsPage() {
     <>
     <div
       className={cn(
-        "space-y-6 pb-8 transition duration-200",
+        "admin-page-stack space-y-4 pb-6 transition duration-200",
         selectedRow ? "pointer-events-none select-none blur-[4px]" : ""
       )}
     >
-      <section className="rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+      <section className={cn(ADMIN_CARD, "p-5")}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400">
@@ -809,7 +824,7 @@ export default function CarrierPaymentsPage() {
             />
           </div>
 
-          <Select
+          <AdminSelect
             instanceId="carrier-payments-range"
             isSearchable={false}
             options={DATE_RANGE_OPTIONS}
@@ -821,7 +836,7 @@ export default function CarrierPaymentsPage() {
             classNames={buildSelectStyles()}
           />
 
-          <Select
+          <AdminSelect
             instanceId="carrier-payments-status"
             isSearchable={false}
             options={STATUS_OPTIONS}
@@ -833,7 +848,7 @@ export default function CarrierPaymentsPage() {
             classNames={buildSelectStyles()}
           />
 
-          <Select
+          <AdminSelect
             instanceId="carrier-payments-priority"
             isSearchable={false}
             options={PRIORITY_OPTIONS}
@@ -845,7 +860,7 @@ export default function CarrierPaymentsPage() {
             classNames={buildSelectStyles()}
           />
 
-          <Select
+          <AdminSelect
             instanceId="carrier-payments-sort"
             isSearchable={false}
             options={SORT_OPTIONS}
@@ -901,7 +916,7 @@ export default function CarrierPaymentsPage() {
             </h2>
           </div>
 
-          <Select
+          <AdminSelect
             instanceId="carrier-payments-rows"
             isSearchable={false}
             options={ROWS_PER_PAGE_OPTIONS}
@@ -1156,7 +1171,7 @@ export default function CarrierPaymentsPage() {
           className="absolute inset-0 cursor-default"
           onClick={() => setSelectedTransactionId(null)}
         />
-        <section className="relative z-10 max-h-[92vh] w-full max-w-7xl overflow-hidden rounded-[32px] border border-white/60 bg-white/95 shadow-[0_32px_120px_rgba(15,23,42,0.26)]">
+        <section className={cn(ADMIN_CARD, "relative z-10 max-h-[92vh] w-full max-w-7xl overflow-hidden p-0")}>
           <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
@@ -1332,7 +1347,7 @@ export default function CarrierPaymentsPage() {
                   <div className="mt-4 grid gap-3">
                     <Button
                       type="button"
-                      className="h-11 justify-start rounded-2xl bg-slate-950 text-white hover:bg-slate-800"
+                      className="h-11 justify-start rounded-2xl bg-slate-950 text-white hover:bg-blue-700"
                       onClick={() =>
                         void updatePaymentState(
                           selectedRow,

@@ -27,7 +27,11 @@ import {
 } from "lucide-react";
 import { streamPublicChatMessage } from "@/lib/api";
 import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
-import { PUBLIC_AI_MESSAGE_LIMIT } from "@/lib/public-ai-rate-limit";
+import {
+  PUBLIC_AI_MESSAGE_LIMIT,
+  PUBLIC_AI_ACCOUNT_HUB_PATH,
+  getMemberDashboardPath,
+} from "@/lib/public-ai-rate-limit";
 import { buildWhatsAppShareBody } from "@/lib/public-ai-growth";
 import {
   loadRecentChats,
@@ -202,8 +206,11 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const [recentChats, setRecentChats] = useState<StoredChat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [pendingQuery, setPendingQuery] = useState("");
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitModalVariant, setLimitModalVariant] = useState<"guest" | "member">("guest");
   const [sessionMemory, setSessionMemory] = useState<PublicAiSessionMemory>(() => loadPublicAiMemory());
   const [pendingImageUrl, setPendingImageUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -214,6 +221,9 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const initialQueryHandled = useRef(false);
 
   const hasConversation = messages.some((m) => m.role === "user");
+  const memberDashboardHref = getMemberDashboardPath(userRole);
+  const accountHubHref = PUBLIC_AI_ACCOUNT_HUB_PATH;
+
   const inputSuggestions = matchInputSuggestions(input);
   const firstUserQuery = messages.find((m) => m.role === "user")?.content || "";
 
@@ -229,15 +239,53 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   }, []);
 
   useEffect(() => {
-    void supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session?.user) return;
+    const syncAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        setIsSignedIn(false);
+        setUserRole(null);
+        setAuthReady(true);
+        return;
+      }
+
+      setIsSignedIn(true);
       const { data } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", session.user.id)
         .maybeSingle();
       if (data?.role) setUserRole(String(data.role));
+      setAuthReady(true);
+    };
+
+    void syncAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        setIsSignedIn(false);
+        setUserRole(null);
+        setAuthReady(true);
+        return;
+      }
+
+      setIsSignedIn(true);
+      void supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.role) setUserRole(String(data.role));
+          setAuthReady(true);
+        });
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -292,9 +340,9 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   };
 
   const buildHistory = (items: Message[]): ChatHistoryItem[] =>
-    items.slice(-14).map((item) => ({
+    items.slice(isSignedIn ? -22 : -16).map((item) => ({
       role: item.role,
-      content: (item.content || buildDisplayText(item.structuredMessage)).slice(0, 1400),
+      content: (item.content || buildDisplayText(item.structuredMessage)).slice(0, isSignedIn ? 1800 : 1500),
     }));
 
   const handleNewChat = () => {
@@ -442,10 +490,11 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               prev.map((msg) => (msg.id === aiMessageId ? { ...msg, content: display } : msg))
             );
           },
-          onLimit: () => {
+          onLimit: (result) => {
             setIsTyping(false);
             setStreamingMessageId(null);
             setRemaining(0);
+            setLimitModalVariant(result?.limitType === "member" ? "member" : "guest");
             setShowLimitModal(true);
           },
         }
@@ -623,27 +672,6 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       {sidebarOpen && (
         <>
           <div className="mt-4 px-4">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">AI guides</p>
-          </div>
-          <nav className="space-y-0.5 px-2">
-            {[
-              { label: "RPM calculator", href: "/ai/rpm-calculator" },
-              { label: "UK diesel price", href: "/ai/diesel-price-uk" },
-              { label: "Find loads", href: "/ai/find-loads" },
-              { label: "Post loads", href: "/ai/post-load" },
-              { label: "POD guide", href: "/ai/pod-guide" },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block rounded-lg px-3 py-1.5 text-xs text-[#666] transition hover:bg-[#ececec] hover:text-[#0d0d0d]"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="mt-4 px-4">
             <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">Explore</p>
           </div>
           <nav className="space-y-0.5 px-2">
@@ -668,12 +696,11 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       <div className="mt-auto border-t border-[#e5e5e5] p-3">
         {sidebarOpen ? (
           <div className="space-y-3">
-            <div className="rounded-xl bg-[#ececec]/60 px-3 py-2.5">
-              <p className="text-xs font-medium text-[#666]">Free guest</p>
-              <p className="text-sm font-semibold text-[#0d0d0d]">
-                {remaining} / {PUBLIC_AI_MESSAGE_LIMIT} msgs · hr
+            {!isSignedIn ? (
+              <p className="px-1 text-xs text-[#666]">
+                {remaining} free question{remaining === 1 ? "" : "s"} left
               </p>
-            </div>
+            ) : null}
             <Link
               href="/"
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#e5e5e5] bg-white px-4 py-2.5 text-sm font-medium text-[#444] transition hover:bg-[#f7f7f8]"
@@ -681,13 +708,30 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               <Home className="h-4 w-4" />
               Back to Home
             </Link>
-            <Link
-              href="/auth/select"
-              className="flex w-full items-center justify-center rounded-xl bg-[#0d0d0d] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#333]"
-            >
-              Find live loads — sign up free
-            </Link>
-            <EmailCaptureBar />
+            {authReady && isSignedIn ? (
+              <Link
+                href={accountHubHref}
+                className="flex w-full items-center justify-center rounded-xl bg-[#0d0d0d] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#333]"
+              >
+                Dashboard
+              </Link>
+            ) : authReady ? (
+              <>
+                <Link
+                  href={accountHubHref}
+                  className="flex w-full items-center justify-center rounded-xl bg-[#0d0d0d] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#333]"
+                >
+                  Sign up free
+                </Link>
+                <Link
+                  href={accountHubHref}
+                  className="flex w-full items-center justify-center rounded-xl border border-[#e5e5e5] bg-white px-4 py-2.5 text-sm font-medium text-[#444] transition hover:bg-[#f7f7f8]"
+                >
+                  Sign in
+                </Link>
+              </>
+            ) : null}
+            {!isSignedIn && authReady ? <EmailCaptureBar /> : null}
           </div>
         ) : null}
       </div>
@@ -802,7 +846,12 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     >
       <AiPageBackground />
       <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
-      <LimitReachedModal open={showLimitModal} onClose={() => setShowLimitModal(false)} />
+      <LimitReachedModal
+        open={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        variant={limitModalVariant}
+        dashboardHref={memberDashboardHref}
+      />
       {userRole && (userRole === "carrier" || userRole === "supplier") ? (
         <CopilotUpgradeBanner role={userRole} />
       ) : null}
@@ -879,12 +928,21 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             >
               Find loads
             </Link>
-            <Link
-              href="/auth/select"
-              className="rounded-full bg-[#0d0d0d] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#333]"
-            >
-              Sign up free
-            </Link>
+            {authReady && isSignedIn ? (
+              <Link
+                href={accountHubHref}
+                className="rounded-full bg-[#0d0d0d] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#333]"
+              >
+                Dashboard
+              </Link>
+            ) : authReady ? (
+              <Link
+                href={accountHubHref}
+                className="rounded-full bg-[#0d0d0d] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#333]"
+              >
+                Sign up free
+              </Link>
+            ) : null}
           </div>
         </header>
 
@@ -935,8 +993,10 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                       {message.role === "user" ? (
                         <div className="flex justify-end">
                           <motion.div
-                            whileHover={{ scale: 1.01 }}
-                            className="max-w-[85%] rounded-[20px] border border-white/60 bg-white/70 px-5 py-3.5 text-[15px] leading-relaxed text-[#0d0d0d] shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.28, ease: "easeOut" }}
+                            className="max-w-[85%] rounded-2xl bg-[#f4f4f5] px-4 py-3 text-[15px] leading-relaxed text-[#0d0d0d]"
                           >
                             {message.imageUrl ? (
                               <div className="mb-3 overflow-hidden rounded-xl border border-[#ececec]">
@@ -954,7 +1014,16 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                       ) : (
                         <div className="group flex gap-4">
                           <NavbarAiLottie className="mt-0.5 h-9 w-9 shrink-0" />
-                          <div className="min-w-0 flex-1 pt-0.5">
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative min-w-0 flex-1 pt-0.5"
+                          >
+                            <div
+                              className="pointer-events-none absolute inset-x-0 -top-5 h-12 bg-gradient-to-b from-[#fafafa] via-white/70 to-transparent"
+                              aria-hidden
+                            />
                             <AssistantReply
                               reply={message.structuredMessage}
                               content={message.content}
@@ -977,7 +1046,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                             ) : null}
 
                             {message.content && streamingMessageId !== message.id && (
-                              <div className="mt-3 flex flex-wrap items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
+                              <div className="mt-3 flex flex-wrap items-center gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
                                 <button
                                   type="button"
                                   onClick={() => void handleCopy(message.id)}
@@ -1045,7 +1114,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                                   {q}
                                 </button>
                               ))}
-                          </div>
+                          </motion.div>
                         </div>
                       )}
                     </motion.div>

@@ -111,7 +111,7 @@ export default function AdminEmployeeLeadsPage() {
   };
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader title="Leads" description="Team pipeline, assign leads to employees, bulk import." />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees/leads" />
 
@@ -205,7 +205,7 @@ export default function AdminEmployeeLeadsPage() {
               <input type="number" placeholder="Deal value £" value={form.value_gbp} onChange={(e) => setForm({ ...form, value_gbp: e.target.value })} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
               <input type="date" value={form.next_follow_up} onChange={(e) => setForm({ ...form, next_follow_up: e.target.value })} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
               <textarea placeholder="Notes for employee" rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-              <button type="button" onClick={assignLead} disabled={!employeeId || !form.company_name.trim()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50">
+              <button type="button" onClick={assignLead} disabled={!employeeId || !form.company_name.trim()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50">
                 <Plus className="h-4 w-4" /> Assign Lead
               </button>
               {message ? <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{message}</p> : null}

@@ -48,6 +48,8 @@ import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
 import { buildPublicInstantSocialReply } from "@/lib/public-ai-instant-replies";
 import { formatMemoryForPrompt, buildConversationRecap } from "@/lib/public-ai-memory";
+import { fetchPublicMemberPromptContext } from "@/lib/public-ai-member-context";
+import { type AiTier, resolveAiTier } from "@/lib/openai-model-router";
 import {
   buildWeatherOfflineReply,
   buildWeatherToolReply,
@@ -56,6 +58,7 @@ import {
 } from "@/lib/copilot/weather-provider";
 import { isOpenAiReachable, markOpenAiUnreachable } from "@/lib/copilot/connectivity";
 import { needsLiveWebSearch, isGeneralKnowledgeQuery } from "@/lib/public-ai-live-search";
+import { buildDomainHint } from "@/lib/public-ai-world-knowledge";
 
 export type CopilotEngineInput = {
   message: string;
@@ -68,6 +71,9 @@ export type CopilotEngineInput = {
   publicMode?: boolean;
   sessionMemory?: CopilotContextMemory;
   pageContext?: import("@/lib/chat-types").CopilotPageContext;
+  isGuest?: boolean;
+  aiTier?: AiTier;
+  memberPromptContext?: string;
 };
 
 export type CopilotEngineResult = {
@@ -91,8 +97,14 @@ export type PublicStreamPrepareResult =
 export async function preparePublicStreamChat(
   input: CopilotEngineInput
 ): Promise<PublicStreamPrepareResult> {
-  const { assistantType, history, language: explicitLang, sessionMemory } = input;
+  const { assistantType, history, language: explicitLang, sessionMemory, isGuest, aiTier, memberPromptContext } = input;
   const message = normalizeUserQuery(input.message);
+  const tier =
+    aiTier ??
+    resolveAiTier({
+      isGuest: isGuest ?? true,
+      assistantType,
+    });
 
   const socialInstant = buildPublicInstantSocialReply(message, history);
   if (socialInstant) {
@@ -182,16 +194,23 @@ export async function preparePublicStreamChat(
     assistantType === "employee" ? EMPLOYEE_TEAM_AI_CONTEXT : PUBLIC_AI_CONTEXT,
   ];
 
+  if (tier !== "guest" && memberPromptContext) {
+    extraContext.push(memberPromptContext);
+  }
+
   if (isGeneralKnowledgeQuery(message)) {
     extraContext.push(
-      "User asked a general knowledge question — give a full helpful answer (science/history/business/coding/English/health/geography). Do not refuse or redirect to freight only."
+      "User asked a general / universal knowledge question — answer with FULL A–Z expert depth for that topic and industry. Do NOT refuse or redirect to freight unless they asked about freight."
     );
   }
 
-  const memoryHint = formatMemoryForPrompt(sessionMemory || {});
+  const domainHint = buildDomainHint(message);
+  if (domainHint) extraContext.push(domainHint);
+
+  const memoryHint = formatMemoryForPrompt(sessionMemory || {}, tier);
   if (memoryHint) extraContext.push(memoryHint);
 
-  const conversationRecap = buildConversationRecap(history);
+  const conversationRecap = buildConversationRecap(history, tier);
   if (conversationRecap) extraContext.push(conversationRecap);
 
   const garbled = inferGarbledQueryHint(message);
@@ -463,14 +482,20 @@ function saveChatMessagesAsync(
   })();
 }
 
-const PUBLIC_AI_CONTEXT = `Public /ai guest chat. Alpha Freight AI — UK freight + general knowledge. Read full chat history. Never use template openers ("Great question", etc.). Structure answers with **Is mein:** bullet lists, numbered steps, **Example:** blocks, and emoji where helpful. Natural Roman Urdu when user asks. Reuse facts they shared. Use live web data when provided. Never mention OpenAI.`;
+const PUBLIC_AI_CONTEXT = `Public /ai chat. Alpha Freight AI = universal A–Z expert (ANY topic, ANY industry, ANY country) + UK freight specialist. NEVER say "I only help with freight". ALWAYS use blueprint: Khulasa → Is mein (emoji bullets) → Misaal → Pro tip → Agla qadam. Read history + memory. Default: comprehensive expert depth. Roman Urdu when asked. Never mention OpenAI.`;
 
 const EMPLOYEE_TEAM_AI_CONTEXT = `Internal Team AI for Alpha Freight employees. You are a senior sales coach — give copy-paste scripts, email templates, CRM steps, objection handling, commission info, and UK freight knowledge. Never say you are "Alpha Freight AI" public bot. Never mention OpenAI. Always answer the employee's question directly with actionable content.`;
 
 async function runPublicCopilotEngine(
   input: CopilotEngineInput
 ): Promise<CopilotEngineResult | null> {
-  const { message, assistantType, history, language: explicitLang } = input;
+  const { message, assistantType, history, language: explicitLang, isGuest, aiTier, memberPromptContext } = input;
+  const tier =
+    aiTier ??
+    resolveAiTier({
+      isGuest: isGuest ?? true,
+      assistantType,
+    });
 
   const socialInstant = buildPublicInstantSocialReply(message, history);
   if (socialInstant) {
@@ -510,6 +535,11 @@ async function runPublicCopilotEngine(
   }
 
   const extraContext: string[] = [getLanguageInstruction(lang), PUBLIC_AI_CONTEXT];
+  if (tier !== "guest" && memberPromptContext) extraContext.push(memberPromptContext);
+  const memoryHint = formatMemoryForPrompt(input.sessionMemory || {}, tier);
+  if (memoryHint) extraContext.push(memoryHint);
+  const conversationRecap = buildConversationRecap(history, tier);
+  if (conversationRecap) extraContext.push(conversationRecap);
   const glossary = buildGlossaryContext(message);
   if (glossary) extraContext.push(glossary);
   if (needsKbContext(message)) extraContext.push(buildKbContext(message));
@@ -529,8 +559,10 @@ async function runPublicCopilotEngine(
       extraContext: extraContext.filter(Boolean).join("\n"),
       detectedIntent: detected,
       publicMode: true,
+      aiTier: tier,
+      isGuest: tier === "guest",
     }),
-    20000,
+    tier === "guest" ? 20000 : 28000,
     null
   );
 
@@ -569,6 +601,28 @@ async function runPublicCopilotEngine(
 
 export async function runCopilotEngine(input: CopilotEngineInput): Promise<CopilotEngineResult> {
   const { message, assistantType, history, language: explicitLang, confirmAction, conversationId: inputConvId, publicMode } = input;
+  let aiTier = input.aiTier;
+  let isGuest = input.isGuest;
+  let memberPromptContext = input.memberPromptContext;
+
+  if (input.request && (publicMode || aiTier == null || isGuest == null)) {
+    const supabase = createAuthedSupabaseFromRequest(input.request);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isGuest = !user;
+    aiTier = resolveAiTier({ isGuest, assistantType });
+    if (user && !memberPromptContext && publicMode) {
+      memberPromptContext = await fetchPublicMemberPromptContext(supabase, user.id);
+    }
+  }
+
+  const engineInput: CopilotEngineInput = {
+    ...input,
+    isGuest,
+    aiTier,
+    memberPromptContext,
+  };
 
   if (publicMode) {
     const socialInstant = buildPublicInstantSocialReply(message, history);
@@ -576,7 +630,7 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
       return flattenPublicReply({ ...socialInstant, source: "instant" });
     }
 
-    const publicResult = await runPublicCopilotEngine(input);
+    const publicResult = await runPublicCopilotEngine(engineInput);
     if (publicResult) return publicResult;
 
     const knowledge = buildPublicKnowledgeReply(message, history, assistantType);
@@ -787,8 +841,9 @@ export async function runCopilotEngine(input: CopilotEngineInput): Promise<Copil
       history,
       extraContext: extraContext.filter(Boolean).join("\n"),
       detectedIntent: detected,
+      aiTier: aiTier ?? resolveAiTier({ isGuest: false, assistantType }),
     }),
-    10000,
+    12000,
     null
   );
 

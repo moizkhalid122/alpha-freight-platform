@@ -193,8 +193,7 @@ function resolveCarrierStatus(
 
   if (
     verificationStatus === "rejected" ||
-    profileStatus === "rejected" ||
-    profile.is_approved === false
+    profileStatus === "rejected"
   ) {
     return "Rejected";
   }
@@ -287,7 +286,7 @@ async function fetchCarrierEditData(carrierId: string): Promise<CarrierEditData 
       id: "verified",
       date: extras.verifiedDate ?? profile.created_at ?? null,
       action: derivedStatus === "Verified" ? "Carrier verified" : "Carrier verification pending",
-      actor: extras.verifiedBy ?? "Admin - Khalid",
+      actor: extras.verifiedBy ?? "Admin",
     },
   ].sort((a, b) => (getDateOrNull(b.date)?.getTime() ?? 0) - (getDateOrNull(a.date)?.getTime() ?? 0));
 
@@ -331,7 +330,7 @@ async function fetchCarrierEditData(carrierId: string): Promise<CarrierEditData 
     verificationStatus:
       (extras.verificationStatus as "Verified" | "Pending" | "Rejected" | undefined) ||
       (derivedStatus === "Active" ? "Pending" : derivedStatus),
-    verifiedBy: extras.verifiedBy?.trim() || "Admin - Khalid",
+    verifiedBy: extras.verifiedBy?.trim() || "Admin",
     verifiedDate: extras.verifiedDate?.trim() || formatDisplayDate(profile.created_at),
     verificationNotes: extras.verificationNotes?.trim() || "All documents verified",
     insuranceCertificateUrl: extras.insuranceCertificateUrl ?? null,
@@ -562,9 +561,6 @@ export default function AdminCarrierEditPage() {
     queryKey: ["admin-carrier-edit", carrierId],
     queryFn: () => fetchCarrierEditData(carrierId),
     enabled: Boolean(carrierId),
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
   });
 
   const current = formState ?? data ?? null;
@@ -717,7 +713,7 @@ export default function AdminCarrierEditPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1660px] space-y-6">
+    <div className="space-y-6">
       <section className="overflow-hidden rounded-[34px] border border-white/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl">
         <div className="border-b border-slate-200 bg-[radial-gradient(circle_at_top_right,_rgba(191,255,7,0.16),_transparent_40%),linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6">
           <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">

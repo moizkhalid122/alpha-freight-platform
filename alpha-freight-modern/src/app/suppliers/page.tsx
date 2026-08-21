@@ -24,6 +24,7 @@ import {
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import type { PublicSupplierListing } from "@/lib/public-directory";
+import { readJsonResponse } from "@/lib/safe-json-response";
 
 const FALLBACK_IMAGE = "/alpha freight truck.jpg";
 
@@ -42,7 +43,9 @@ export default function SupplierDirectoryPage() {
 
       try {
         const response = await fetch("/api/public/suppliers");
-        const payload = (await response.json()) as { suppliers?: PublicSupplierListing[]; error?: string };
+        const payload = await readJsonResponse<{ suppliers?: PublicSupplierListing[]; error?: string }>(
+          response
+        );
 
         if (!response.ok) {
           throw new Error(payload.error || "Unable to load verified suppliers.");

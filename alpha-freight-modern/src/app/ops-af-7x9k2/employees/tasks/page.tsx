@@ -78,7 +78,7 @@ export default function AdminEmployeeTasksPage() {
   const completed = allTasks.filter((t) => t.status === "completed").length;
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader
         title="Tasks"
         description="Assign tasks and view every task across the team — admin, daily targets, and personal."
@@ -240,7 +240,7 @@ export default function AdminEmployeeTasksPage() {
               type="button"
               onClick={assignTask}
               disabled={saving || !employeeId || !title.trim()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
             >
               <Plus className="h-4 w-4" />
               Assign Task

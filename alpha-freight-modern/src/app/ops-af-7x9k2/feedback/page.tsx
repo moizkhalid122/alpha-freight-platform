@@ -7,13 +7,16 @@ import toast from "react-hot-toast";
 import { Loader2, MessageSquare, RefreshCcw, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminFetch } from "@/lib/admin-data-client";
+import { adminFetchResilient } from "@/lib/admin-fetch-resilient";
+import { adminQueryDefaults } from "@/lib/admin-query";
 import {
   getFeedbackRoleLabel,
   getFeedbackTypeLabel,
   type FeedbackRecord,
   type FeedbackStatus,
 } from "@/lib/feedback-content";
-import { cn } from "@/lib/utils";
+import { AdminKpiCard, AdminPageHero, AdminPageShell, AdminPanel } from "@/components/admin/AdminPageShell";
+import { ADMIN_CARD, ADMIN_INPUT } from "@/lib/admin-ui";
 
 type FeedbackResponse = {
   feedback: FeedbackRecord[];
@@ -27,8 +30,7 @@ type FeedbackResponse = {
 
 type StatusFilter = "all" | FeedbackStatus;
 
-const CARD =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
+const CARD = ADMIN_CARD;
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -38,7 +40,10 @@ function formatDate(value: string | null) {
 }
 
 async function fetchFeedback() {
-  return adminFetch<FeedbackResponse>("/api/admin/feedback");
+  return adminFetchResilient<FeedbackResponse>("/api/admin/feedback", async () => ({
+    feedback: [],
+    stats: { total: 0, new: 0, reviewed: 0, resolved: 0 },
+  }));
 }
 
 export default function AdminFeedbackPage() {
@@ -52,6 +57,7 @@ export default function AdminFeedbackPage() {
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["admin-feedback"],
     queryFn: fetchFeedback,
+    ...adminQueryDefaults,
   });
 
   const rows = data?.feedback ?? [];
@@ -99,43 +105,46 @@ export default function AdminFeedbackPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Community</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">User Feedback</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-500">
-            Product feedback from carriers, suppliers, and website visitors submitted through /feedback.
-          </p>
-        </div>
-        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-          Refresh
-        </Button>
-      </div>
+    <AdminPageShell>
+      <AdminPageHero
+        eyebrow="Community"
+        title="User Feedback"
+        description="Product feedback from carriers, suppliers, and website visitors submitted through /feedback."
+        icon={MessageSquare}
+        accent="violet"
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
+            Refresh
+          </Button>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Total", value: stats.total },
-          { label: "New", value: stats.new },
-          { label: "Reviewed", value: stats.reviewed },
-          { label: "Resolved", value: stats.resolved },
+          { label: "Total", value: stats.total, accent: "slate" as const },
+          { label: "New", value: stats.new, accent: "blue" as const },
+          { label: "Reviewed", value: stats.reviewed, accent: "amber" as const },
+          { label: "Resolved", value: stats.resolved, accent: "emerald" as const },
         ].map((item) => (
-          <div key={item.label} className={`${CARD} p-5`}>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
-            <p className="mt-2 text-3xl font-bold text-slate-900">{item.value}</p>
-          </div>
+          <AdminKpiCard
+            key={item.label}
+            label={item.label}
+            value={item.value}
+            icon={MessageSquare}
+            accent={item.accent}
+          />
         ))}
       </div>
 
-      <div className={`${CARD} flex flex-col gap-4 p-4 lg:flex-row lg:items-center`}>
+      <AdminPanel className="flex flex-col gap-4 lg:flex-row lg:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, email, message..."
-            className="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-3 text-sm outline-none focus:border-slate-400"
+            className={cn(ADMIN_INPUT, "pl-10")}
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -147,7 +156,7 @@ export default function AdminFeedbackPage() {
               className={cn(
                 "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em]",
                 statusFilter === status
-                  ? "bg-slate-900 text-white"
+                  ? "bg-blue-600 text-white shadow-sm"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200",
               )}
             >
@@ -155,7 +164,7 @@ export default function AdminFeedbackPage() {
             </button>
           ))}
         </div>
-      </div>
+      </AdminPanel>
 
       {isLoading ? (
         <div className={`${CARD} flex items-center justify-center py-20`}>
@@ -279,6 +288,6 @@ export default function AdminFeedbackPage() {
           ) : null}
         </div>
       )}
-    </div>
+    </AdminPageShell>
   );
 }

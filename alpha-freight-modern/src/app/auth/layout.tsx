@@ -9,11 +9,20 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const role = searchParams.get("role");
-  const bgImage = role === "supplier" ? "/alpha-box.jpg" : "/alpha freight truck.jpg";
-  const isMarketingSignup =
-    pathname === "/auth/supplier-signup" || pathname === "/auth/carrier-signup";
+  const mode = searchParams.get("mode");
+  const bgImage =
+    mode === "ship"
+      ? "/alpha-box.jpg"
+      : role === "supplier"
+        ? "/alpha-box.jpg"
+        : "/alpha freight truck.jpg";
+  const isStandaloneAuth =
+    pathname === "/auth/supplier-signup" ||
+    pathname === "/auth/carrier-signup" ||
+    pathname === "/auth/modes" ||
+    pathname.startsWith("/auth/air");
 
-  if (isMarketingSignup) {
+  if (isStandaloneAuth) {
     return <>{children}</>;
   }
 
@@ -82,11 +91,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
 function AuthLayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isMarketingSignup =
-    pathname === "/auth/supplier-signup" || pathname === "/auth/carrier-signup";
 
-  if (isMarketingSignup) {
+  if (pathname === "/auth/supplier-signup" || pathname === "/auth/carrier-signup") {
     return <div className="min-h-[100dvh] bg-black font-sans">{children}</div>;
+  }
+
+  if (pathname === "/auth/modes" || pathname.startsWith("/auth/air")) {
+    return <div className="min-h-[100dvh] bg-[#FAF9F6] font-sans">{children}</div>;
   }
 
   return (

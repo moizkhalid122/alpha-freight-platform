@@ -3,12 +3,20 @@ import type { AssistantKind, ChatHistoryItem, CopilotContextMemory } from "@/lib
 import { preparePublicStreamChat, buildPublicChatStreamFallback } from "@/lib/copilot-engine";
 import { markOpenAiUnreachable } from "@/lib/copilot/connectivity";
 import type { LanguagePreference } from "@/lib/copilot/language";
-import { checkPublicAiRateLimit, getClientIp, PUBLIC_AI_MESSAGE_LIMIT } from "@/lib/public-ai-rate-limit";
+import {
+  checkPublicAiGuestRateLimit,
+  checkPublicAiMemberRateLimit,
+  getClientIp,
+  PUBLIC_AI_GUEST_LIMIT,
+  PUBLIC_AI_MEMBER_LIMIT,
+} from "@/lib/public-ai-rate-limit";
 import { createAuthedSupabaseFromRequest } from "@/lib/admin-api-db";
 import { detectIntent } from "@/lib/copilot/intent-detector";
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { buildPublicPlainReply, inferPublicSuggestedQuestions, streamPublicOpenAiReply, getOpenAiVisionFallbackReply } from "@/lib/openai-stream";
 import { getOpenAiChatReply } from "@/lib/openai-chat";
+import { resolveAiTier } from "@/lib/openai-model-router";
+import { fetchPublicMemberPromptContext } from "@/lib/public-ai-member-context";
 
 export const runtime = "nodejs";
 
@@ -46,12 +54,44 @@ export async function POST(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
     const isGuest = !user;
-    let guestRemaining: number | undefined;
+    const aiTier = resolveAiTier({ isGuest, assistantType });
+    let rateRemaining: number | undefined;
+    let memberPromptContext = "";
+
+    if (user) {
+      memberPromptContext = await fetchPublicMemberPromptContext(supabase, user.id);
+      const memberLimit = checkPublicAiMemberRateLimit(user.id);
+      rateRemaining = memberLimit.remaining;
+
+      if (!memberLimit.allowed) {
+        const limitStream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              sseEncode("limit", {
+                limitReached: true,
+                limitType: "member",
+                remaining: 0,
+                message: `Hourly AI limit reached (${PUBLIC_AI_MEMBER_LIMIT} messages/hour). Please try again shortly.`,
+              })
+            );
+            controller.close();
+          },
+        });
+
+        return new Response(limitStream, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+          },
+        });
+      }
+    }
 
     if (isGuest) {
       const ip = getClientIp(request);
-      const limit = checkPublicAiRateLimit(ip);
-      guestRemaining = limit.remaining;
+      const limit = checkPublicAiGuestRateLimit(ip);
+      rateRemaining = limit.remaining;
 
       if (!limit.allowed) {
         const limitStream = new ReadableStream<Uint8Array>({
@@ -59,14 +99,15 @@ export async function POST(request: NextRequest) {
             controller.enqueue(
               sseEncode("limit", {
                 limitReached: true,
+                limitType: "guest",
                 remaining: 0,
-                message: `Free limit reached (${PUBLIC_AI_MESSAGE_LIMIT} messages/hour). Sign up free for unlimited Alpha Freight AI + live loads.`,
+                message: `Free limit reached (${PUBLIC_AI_GUEST_LIMIT} questions). Sign up free to continue.`,
                 structuredMessage: {
                   mode: "logistics_copilot",
                   displayStyle: "plain",
-                  title: "Sign up for unlimited AI",
+                  title: "Sign up to continue",
                   shortExplanation:
-                    "You've used your free guest messages for this hour. Create a free Alpha Freight account for unlimited AI, live load board, bids, and wallet.",
+                    "You've used your free AI questions. Create a free Alpha Freight account to keep chatting, save history, and access live loads.",
                   keyPoints: [],
                   quickActions: [
                     {
@@ -111,6 +152,9 @@ export async function POST(request: NextRequest) {
             body.sessionMemory && typeof body.sessionMemory === "object"
               ? (body.sessionMemory as CopilotContextMemory)
               : undefined,
+          isGuest,
+          aiTier,
+          memberPromptContext,
         });
 
     const stream = new ReadableStream<Uint8Array>({
@@ -125,7 +169,7 @@ export async function POST(request: NextRequest) {
               message: prepared.result.message,
               structuredMessage: prepared.result.structuredMessage,
               source: prepared.result.source,
-              remaining: guestRemaining,
+              remaining: rateRemaining,
             });
             controller.close();
             return;
@@ -142,6 +186,8 @@ export async function POST(request: NextRequest) {
             detectedIntent: detected,
             assistantType: prepared.assistantType,
             imageDataUrl: imageDataUrl || undefined,
+            aiTier,
+            isGuest,
           })) {
             gotToken = true;
             fullText += delta;
@@ -158,6 +204,8 @@ export async function POST(request: NextRequest) {
                 extraContext: prepared.extraContext,
                 assistantType: prepared.assistantType,
                 imageDataUrl,
+                aiTier,
+                isGuest,
               });
 
               if (visionReply?.trim()) {
@@ -173,7 +221,7 @@ export async function POST(request: NextRequest) {
                   message: visionReply.trim(),
                   structuredMessage,
                   source: "openai+vision",
-                  remaining: guestRemaining,
+                  remaining: rateRemaining,
                 });
                 controller.close();
                 return;
@@ -187,6 +235,8 @@ export async function POST(request: NextRequest) {
               detectedIntent: detected,
               assistantType: prepared.assistantType,
               publicMode: true,
+              aiTier,
+              isGuest,
             });
 
             if (retry?.message?.trim()) {
@@ -206,7 +256,7 @@ export async function POST(request: NextRequest) {
                 message: retry.message.trim(),
                 structuredMessage,
                 source: "openai",
-                remaining: guestRemaining,
+                remaining: rateRemaining,
               });
               controller.close();
               return;
@@ -221,7 +271,7 @@ export async function POST(request: NextRequest) {
               message: fallback.message,
               structuredMessage: fallback.structuredMessage,
               source: fallback.source,
-              remaining: guestRemaining,
+              remaining: rateRemaining,
             });
             controller.close();
             return;

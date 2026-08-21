@@ -16,7 +16,14 @@ import {
 
 } from "@/lib/admin-path";
 
+import {
+  COMMERCIAL_DIRECTOR_PANEL_PATH,
+  commercialDirectorRoute,
+  isCommercialDirectorLoginPath,
+  isCommercialDirectorPanelPath,
+} from "@/lib/commercial-director-path";
 import { userHasAdminAccess } from "@/lib/admin-session";
+import { userHasCommercialDirectorAccess } from "@/lib/commercial-director-session";
 import { isEmployeeMetadata } from "@/lib/employee-auth-utils";
 import { EMPLOYEE_ONBOARDING_COOKIE } from "@/lib/employee-onboarding";
 
@@ -77,9 +84,85 @@ export async function middleware(request: NextRequest) {
 
 
 
-  if (pathname.startsWith("/api/admin")) {
+  if (pathname.startsWith("/api/admin") || pathname.startsWith("/api/commercial-director")) {
 
     return NextResponse.next();
+
+  }
+
+
+
+  if (isCommercialDirectorPanelPath(pathname)) {
+
+    const response = NextResponse.next({ request });
+
+    const supabase = createSupabaseMiddlewareClient(request, response);
+
+
+
+    if (isCommercialDirectorLoginPath(pathname)) {
+
+      const user = await getMiddlewareSessionUser(supabase);
+
+
+
+      if (user && (await userHasCommercialDirectorAccess(supabase, user))) {
+
+        return NextResponse.redirect(new URL(COMMERCIAL_DIRECTOR_PANEL_PATH, request.url));
+
+      }
+
+
+
+      return response;
+
+    }
+
+
+
+    const user = await getMiddlewareSessionUser(supabase);
+
+
+
+    if (!user) {
+
+      const loginUrl = new URL(commercialDirectorRoute("/login"), request.url);
+
+      loginUrl.searchParams.set("redirect", pathname);
+
+      return NextResponse.redirect(loginUrl);
+
+    }
+
+
+
+    const allowed = await userHasCommercialDirectorAccess(supabase, user);
+
+    if (!allowed) {
+
+      await supabase.auth.signOut();
+
+      const loginUrl = new URL(commercialDirectorRoute("/login"), request.url);
+
+      loginUrl.searchParams.set("error", "access_denied");
+
+      return NextResponse.redirect(loginUrl);
+
+    }
+
+
+
+    response.headers.set("X-Frame-Options", "DENY");
+
+    response.headers.set("X-Content-Type-Options", "nosniff");
+
+    response.headers.set("Referrer-Policy", "same-origin");
+
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+
+
+
+    return response;
 
   }
 
@@ -254,6 +337,12 @@ export const config = {
     "/api/admin/:path*",
 
     "/ops-af-7x9k2/:path*",
+
+    "/comm-af-8k3m7",
+
+    "/comm-af-8k3m7/:path*",
+
+    "/api/commercial-director/:path*",
 
     "/team-af-4m2x9",
 

@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-500">
+        <div className="admin-portal-bg flex min-h-[100dvh] items-center justify-center text-[13px] text-gray-500">
           Loading secure login...
         </div>
       }

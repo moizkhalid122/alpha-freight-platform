@@ -336,6 +336,7 @@ function SetupContent() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [companySuggestions, setCompanySuggestions] = useState<CompaniesHouseSuggestion[]>([]);
   const [isCompanySearchLoading, setIsCompanySearchLoading] = useState(false);
@@ -605,62 +606,68 @@ function SetupContent() {
 
   const saveOnboardingData = async (answersOverride?: Record<string, any>) => {
     setIsSubmitting(true);
+    setSaveError(null);
     const payload = answersOverride ?? answers;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const accountType = payload.account_type;
-        const contactInfo = payload.contact_info ?? {};
-        const businessInfo = payload.business_info ?? {};
-        const quickProfile = payload.quick_profile ?? {};
-        const phone = contactInfo.phone ?? null;
-        const fullName =
-          accountType === "company"
-            ? contactInfo.contact_person ?? null
-            : contactInfo.full_name ?? null;
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-        await writeOnboardingExtras(role, user.id, user.email ?? null, accountType, payload);
+      if (userError) throw userError;
+      if (!user) throw new Error("Please sign in again to finish onboarding.");
 
-        const updatePayload: Record<string, string | null> = {
-          full_name: fullName,
-          company_name:
-            role === "carrier"
-              ? accountType === "company"
-                ? businessInfo.company_name ?? quickProfile.company_name ?? null
-                : null
-              : businessInfo.company_name ?? quickProfile.company_name ?? null,
-          phone,
-        };
+      const accountType = payload.account_type;
+      const contactInfo = payload.contact_info ?? {};
+      const businessInfo = payload.business_info ?? {};
+      const quickProfile = payload.quick_profile ?? {};
+      const fullName =
+        accountType === "company"
+          ? contactInfo.contact_person ?? null
+          : contactInfo.full_name ?? null;
 
-        const { error } = await supabase
-          .from('profiles')
-          .update(updatePayload)
-          .eq('id', user.id);
+      await writeOnboardingExtras(role, user.id, user.email ?? null, accountType, payload);
 
-        if (error) throw error;
+      const updatePayload: Record<string, string | null> = {
+        full_name: fullName,
+        company_name:
+          role === "carrier"
+            ? accountType === "company"
+              ? businessInfo.company_name ?? quickProfile.company_name ?? null
+              : null
+            : businessInfo.company_name ?? quickProfile.company_name ?? null,
+      };
 
-        const referralCode = (searchParams.get("ref") || "")
-          .trim()
-          .toUpperCase();
+      const { error } = await supabase.from("profiles").update(updatePayload).eq("id", user.id);
 
-        if (referralCode) {
-          if (role === "carrier") {
-            await recordCarrierReferralFromSignup({
-              referredUserId: user.id,
-              referralCode,
-            });
-          } else if (role === "supplier") {
-            await recordSupplierReferralFromSignup({
-              referredUserId: user.id,
-              referralCode,
-            });
-          }
+      if (error) throw error;
+
+      const referralCode = (searchParams.get("ref") || "").trim().toUpperCase();
+
+      if (referralCode) {
+        if (role === "carrier") {
+          await recordCarrierReferralFromSignup({
+            referredUserId: user.id,
+            referralCode,
+          });
+        } else if (role === "supplier") {
+          await recordSupplierReferralFromSignup({
+            referredUserId: user.id,
+            referralCode,
+          });
         }
       }
+
       setShowSuccess(true);
     } catch (err) {
+      const message =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message?: string }).message || "Unable to save onboarding.")
+          : err instanceof Error
+            ? err.message
+            : "Unable to save onboarding. Please try again.";
       console.error("Error saving onboarding data:", err);
-      setShowSuccess(true);
+      setSaveError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -819,6 +826,12 @@ function SetupContent() {
                       </p>
                     ) : null}
                   </div>
+                ) : null}
+
+                {saveError ? (
+                  <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                    {saveError}
+                  </p>
                 ) : null}
 
                 <button 

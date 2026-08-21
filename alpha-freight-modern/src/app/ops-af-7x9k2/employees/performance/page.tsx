@@ -30,7 +30,7 @@ export default function AdminEmployeePerformancePage() {
   });
 
   return (
-    <div>
+    <div className="admin-page-stack space-y-4">
       <AdminHrHeader
         title="Performance"
         description="Individual performance scores based on leads, calls, and task completion."

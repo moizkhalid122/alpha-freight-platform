@@ -19,6 +19,7 @@ import {
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import type { PublicCarrierListing } from "@/lib/public-directory";
+import { readJsonResponse } from "@/lib/safe-json-response";
 
 const FALLBACK_IMAGE = "/alpha freight truck.jpg";
 
@@ -39,7 +40,9 @@ export default function DirectoryPage() {
 
       try {
         const response = await fetch("/api/public/carriers");
-        const payload = (await response.json()) as { carriers?: PublicCarrierListing[]; error?: string };
+        const payload = await readJsonResponse<{ carriers?: PublicCarrierListing[]; error?: string }>(
+          response
+        );
 
         if (!response.ok) {
           throw new Error(payload.error || "Unable to load verified carriers.");

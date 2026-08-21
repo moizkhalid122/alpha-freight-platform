@@ -3,13 +3,23 @@
 import Link from "next/link";
 import { ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PUBLIC_AI_GUEST_LIMIT } from "@/lib/public-ai-rate-limit";
 
 interface LimitReachedModalProps {
   open: boolean;
   onClose: () => void;
+  variant?: "guest" | "member";
+  dashboardHref?: string;
 }
 
-export default function LimitReachedModal({ open, onClose }: LimitReachedModalProps) {
+export default function LimitReachedModal({
+  open,
+  onClose,
+  variant = "guest",
+  dashboardHref = "/auth/select",
+}: LimitReachedModalProps) {
+  const isGuest = variant === "guest";
+
   return (
     <AnimatePresence>
       {open && (
@@ -35,28 +45,41 @@ export default function LimitReachedModal({ open, onClose }: LimitReachedModalPr
             >
               <X className="h-5 w-5" />
             </button>
-            <div className="mb-4 text-center text-3xl">🚀</div>
+            <div className="mb-4 text-center text-3xl">{isGuest ? "🚀" : "⏳"}</div>
             <h2 className="text-center text-xl font-semibold text-[#0d0d0d]">
-              Unlimited AI + load board
+              {isGuest ? "Sign up to keep chatting" : "Hourly limit reached"}
             </h2>
             <p className="mt-3 text-center text-sm leading-relaxed text-[#666]">
-              You&apos;ve used your 15 free guest messages this hour. Sign up free for unlimited
-              Alpha Freight AI, live UK loads, bids, wallet &amp; 7-day payouts.
+              {isGuest
+                ? `You've used your ${PUBLIC_AI_GUEST_LIMIT} free AI questions. Create a free account to continue chatting, save history, and access live loads.`
+                : "You've reached your hourly AI message limit. Please wait a bit and try again, or continue from your dashboard."}
             </p>
             <div className="mt-6 space-y-2">
-              <Link
-                href="/auth/select"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0d0d0d] py-3 text-sm font-semibold text-white hover:bg-[#333]"
-              >
-                Sign up free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/find-loads"
-                className="flex w-full items-center justify-center rounded-xl border border-[#e5e5e5] py-3 text-sm font-medium text-[#444] hover:bg-[#f7f7f8]"
-              >
-                Browse load board
-              </Link>
+              {isGuest ? (
+                <>
+                  <Link
+                    href="/auth/select"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0d0d0d] py-3 text-sm font-semibold text-white hover:bg-[#333]"
+                  >
+                    Sign up free
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/find-loads"
+                    className="flex w-full items-center justify-center rounded-xl border border-[#e5e5e5] py-3 text-sm font-medium text-[#444] hover:bg-[#f7f7f8]"
+                  >
+                    Browse load board
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href={dashboardHref}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0d0d0d] py-3 text-sm font-semibold text-white hover:bg-[#333]"
+                >
+                  Go to dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           </motion.div>
         </>

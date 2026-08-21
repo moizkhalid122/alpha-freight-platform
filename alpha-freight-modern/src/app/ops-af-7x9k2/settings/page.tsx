@@ -7,7 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useDropzone } from "react-dropzone";
-import Select from "react-select";
+import AdminSelect from "@/components/admin/AdminSelect";
 import toast from "react-hot-toast";
 import {
   Bell,
@@ -26,6 +26,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  ADMIN_CARD,
+  ADMIN_CARD_INTERACTIVE,
+  ADMIN_INPUT,
+  ADMIN_SECTION_LABEL,
+  ADMIN_SECTION_TITLE,
+  adminSelectStyles,
+} from "@/lib/admin-ui";
 import {
   DEFAULT_PLATFORM_SETTINGS,
   LOCAL_LOGO_KEY,
@@ -61,10 +69,9 @@ type SettingsValues = PlatformSettings;
 type SettingsFormInput = z.input<typeof settingsSchema>;
 type SettingsTab = "company" | "commission" | "verification" | "payments" | "notifications" | "api";
 
-const CARD_CLASS =
-  "rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60";
-const SECTION_LABEL = "text-[11px] font-semibold text-slate-500";
-const SECTION_TITLE = "text-xl font-bold text-slate-900";
+const CARD_CLASS = `${ADMIN_CARD} ${ADMIN_CARD_INTERACTIVE}`;
+const SECTION_LABEL = ADMIN_SECTION_LABEL;
+const SECTION_TITLE = ADMIN_SECTION_TITLE;
 
 const DEFAULT_VALUES = DEFAULT_PLATFORM_SETTINGS;
 
@@ -116,15 +123,7 @@ function writeStoredSettings(_values: SettingsValues) {
 }
 
 function selectStyles() {
-  return {
-    control: () =>
-      "flex min-h-10 items-center rounded-xl bg-slate-50/80 px-3 ring-1 ring-slate-200/60",
-    menu: () => "mt-2 rounded-xl bg-white p-2 shadow-lg ring-1 ring-slate-200/60",
-    option: ({ isFocused }: { isFocused: boolean }) =>
-      `cursor-pointer rounded-lg px-3 py-2 text-sm ${isFocused ? "bg-slate-100" : ""}`,
-    placeholder: () => "text-sm text-slate-400",
-    singleValue: () => "text-sm font-semibold text-slate-900",
-  };
+  return adminSelectStyles();
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -135,10 +134,7 @@ function FieldInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={cn(
-        "h-10 w-full rounded-xl bg-slate-50/80 px-3 text-sm font-medium text-slate-900 ring-1 ring-slate-200/60 outline-none placeholder:text-slate-400 focus:bg-white focus:ring-slate-300",
-        props.className
-      )}
+      className={cn(ADMIN_INPUT, props.className)}
     />
   );
 }
@@ -172,7 +168,7 @@ function ToggleRow({
         onClick={() => onChange(!checked)}
         className={cn(
           "relative h-6 w-11 shrink-0 rounded-full transition-colors",
-          checked ? "bg-slate-900" : "bg-slate-300"
+          checked ? "bg-blue-600" : "bg-slate-300"
         )}
       >
         <span
@@ -226,8 +222,6 @@ export default function AdminSettingsPage() {
   const { data: settingsData, isLoading: isSettingsLoading } = useQuery({
     queryKey: ["admin-platform-settings"],
     queryFn: loadPlatformSettings,
-    staleTime: 0,
-    refetchOnMount: "always",
   });
 
   const {
@@ -354,12 +348,12 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="admin-page-stack space-y-4">
       <section className={cn(CARD_CLASS, "relative overflow-hidden p-6")}>
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-slate-700 to-slate-300" />
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+            <div className="admin-icon-box flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-blue-600 ring-1 ring-blue-100/70">
               <Settings2 className="h-5 w-5" />
             </div>
             <div>
@@ -420,7 +414,7 @@ export default function AdminSettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   "inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all ring-1 ring-slate-200/60",
-                  activeTab === tab.id ? "bg-slate-900 text-white ring-slate-900" : "bg-white text-slate-600"
+                  activeTab === tab.id ? "bg-blue-600 text-white shadow-sm ring-blue-600" : "bg-white text-slate-600"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -523,7 +517,7 @@ export default function AdminSettingsPage() {
                     control={control}
                     name="currency"
                     render={({ field }) => (
-                      <Select
+                      <AdminSelect
                         options={currencyOptions}
                         value={currencyOptions.find((option) => option.value === field.value) ?? currencyOptions[0]}
                         onChange={(option) => field.onChange(option?.value)}
@@ -559,7 +553,7 @@ export default function AdminSettingsPage() {
                     control={control}
                     name="verificationMode"
                     render={({ field }) => (
-                      <Select
+                      <AdminSelect
                         options={verificationOptions}
                         value={
                           verificationOptions.find((option) => option.value === field.value) ??
@@ -616,7 +610,7 @@ export default function AdminSettingsPage() {
                     control={control}
                     name="payoutSchedule"
                     render={({ field }) => (
-                      <Select
+                      <AdminSelect
                         options={payoutOptions}
                         value={
                           payoutOptions.find((option) => option.value === field.value) ?? payoutOptions[1]
@@ -634,7 +628,7 @@ export default function AdminSettingsPage() {
                     control={control}
                     name="defaultPaymentTerms"
                     render={({ field }) => (
-                      <Select
+                      <AdminSelect
                         options={paymentTermsOptions}
                         value={
                           paymentTermsOptions.find((option) => option.value === field.value) ??
@@ -718,7 +712,7 @@ export default function AdminSettingsPage() {
                     control={control}
                     name="stripeMode"
                     render={({ field }) => (
-                      <Select
+                      <AdminSelect
                         options={stripeModeOptions}
                         value={
                           stripeModeOptions.find((option) => option.value === field.value) ??
