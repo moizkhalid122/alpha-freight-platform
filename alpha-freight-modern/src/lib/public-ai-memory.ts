@@ -160,8 +160,8 @@ export function formatMemoryForPrompt(
 
   const instruction =
     aiTier === "guest"
-      ? "Use ALL facts below in your **Khulasa** and bullets — never ask for them again."
-      : "Personalise every section using ALL facts below. Reference name, route, fleet, and numbers naturally — never re-ask.";
+      ? "Use ALL facts below naturally in your reply — never ask for them again."
+      : "Personalise using ALL facts below. Reference name, route, fleet, and numbers naturally — never re-ask.";
 
   return `USER MEMORY — ${instruction}\n${lines.join("\n")}`;
 }

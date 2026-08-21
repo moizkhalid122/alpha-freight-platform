@@ -83,10 +83,10 @@ export function resolveHistoryLimits(aiTier: AiTier = "guest", publicMode?: bool
 }
 
 export function buildMemberProPromptBlock(): string {
-  return `PRO MEMBER — personalised, detailed replies:
-- Use the full RESPONSE BLUEPRINT: Khulasa → Is mein (emoji bullets) → Misaal → Pro tip → Agla qadam.
-- Read session memory + conversation recap — reference name, fleet, route, rates in **Khulasa** opening.
-- Never re-ask for facts already given. Follow-ups continue the same thread with MORE depth.
+  return `PRO MEMBER — personalised, natural replies:
+- Write like a trusted advisor in chat — direct first, structured only when the answer is long or technical.
+- Read session memory + conversation recap — weave name, fleet, route, and rates into the opening naturally (no section labels).
+- Never re-ask for facts already given. Follow-ups continue the same thread with more depth.
 - Roman Urdu when preferred. Worked £ examples for freight maths.
 - Do NOT mention AI model names or "Pro" tier.`;
 }

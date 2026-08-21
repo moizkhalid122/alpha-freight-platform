@@ -37,7 +37,7 @@ function buildSystemPrompt(assistantType: AssistantKind, extraContext?: string, 
     return `${basePrompt}
 
 Reply JSON only:
-{"message":"Full markdown response using the structure above.","suggestedQuestions":["Follow up 1?","Follow up 2?","Follow up 3?"]}`;
+{"message":"Natural conversational markdown. No Khulasa/section labels unless the answer is long and technical.","suggestedQuestions":["Follow up 1?","Follow up 2?"]}`;
   }
 
   const contextByType: Record<AssistantKind, string> = {

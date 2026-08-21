@@ -14,36 +14,9 @@ function isLatexBlock(inner: string): boolean {
   return /\\frac|\\text|\\times|\\cdot|\\[a-zA-Z]/.test(inner);
 }
 
-const SECTION_LABELS = [
-  "Khulasa",
-  "Summary",
-  "Is mein",
-  "In this",
-  "Key points",
-  "Main points",
-  "Misaal",
-  "Example",
-  "For example",
-  "Pro tip",
-  "Agla qadam",
-  "Next step",
-  "Steps",
-  "Calculation",
-  "Hisaab",
-  "Comparison",
-  "Faida",
-  "Nuksan",
-];
-
-/** Normalize OpenAI markdown so tables, callouts, section icons, and maths render in the UI. */
+/** Normalize OpenAI markdown so tables, callouts, and maths render in the UI. */
 export function normalizeAiMarkdown(source: string): string {
   let text = source;
-
-  for (const label of SECTION_LABELS) {
-    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    text = text.replace(new RegExp(`^\\*\\*${escaped}:?\\*\\*\\s*$`, "gim"), `### ${label}:`);
-    text = text.replace(new RegExp(`^${escaped}:\\s*$`, "gim"), `### ${label}:`);
-  }
 
   text = text.replace(/\n{3,}/g, "\n\n").trim();
 

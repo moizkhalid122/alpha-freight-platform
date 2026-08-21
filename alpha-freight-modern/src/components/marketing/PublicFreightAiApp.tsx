@@ -1020,10 +1020,6 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                             transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
                             className="relative min-w-0 flex-1 pt-0.5"
                           >
-                            <div
-                              className="pointer-events-none absolute inset-x-0 -top-5 h-12 bg-gradient-to-b from-[#fafafa] via-white/70 to-transparent"
-                              aria-hidden
-                            />
                             <AssistantReply
                               reply={message.structuredMessage}
                               content={message.content}
@@ -1038,7 +1034,9 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                               onAskFollowUp={(q) => void handleSend(q)}
                             />
 
-                            {message.content && streamingMessageId !== message.id ? (
+                            {message.content &&
+                            streamingMessageId !== message.id &&
+                            message.content.trim().length > 220 ? (
                               <AiConfidenceFooter
                                 responseTimeMs={message.meta?.responseTimeMs}
                                 knowledgeSource={message.structuredMessage?.knowledgeSource}

@@ -11,12 +11,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Truck,
-  Sparkles,
-  BookOpen,
-  Calculator,
-  ArrowRightCircle,
-  ChevronRight,
-  ListOrdered,
   ExternalLink,
 } from "lucide-react";
 
@@ -44,38 +38,6 @@ const CALLOUT_ICONS = {
 } as const;
 
 type CalloutKind = keyof typeof CALLOUT_ICONS;
-
-const SECTION_ICONS: Record<string, typeof Sparkles> = {
-  "quick answer": Sparkles,
-  khulasa: Sparkles,
-  summary: Sparkles,
-  explanation: BookOpen,
-  example: Calculator,
-  misaal: Calculator,
-  "for example": Calculator,
-  "next step": ArrowRightCircle,
-  "agla qadam": ArrowRightCircle,
-  "is mein": ListOrdered,
-  "in this": ListOrdered,
-  "key points": ListOrdered,
-  "main points": ListOrdered,
-  steps: ListOrdered,
-  overview: BookOpen,
-  calculation: Calculator,
-  hisaab: Calculator,
-  comparison: ListOrdered,
-  faida: Lightbulb,
-  "pro tip": Lightbulb,
-};
-
-function headingIcon(text: string) {
-  const key = text
-    .toLowerCase()
-    .trim()
-    .replace(/^[^\w\s]+/u, "")
-    .replace(/:$/, "");
-  return SECTION_ICONS[key] || null;
-}
 
 const CALLOUT_STYLES: Record<CalloutKind, string> = {
   tip: "border-[#BFFF07]/50 bg-[#f7ffe8] text-[#3d4d00]",
@@ -174,33 +136,21 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
           <h2 className="mb-3 mt-6 text-xl font-bold tracking-tight text-[#0d0d0d] first:mt-0">{children}</h2>
         ),
         h2: ({ children }) => (
-          <h3 className="mb-2.5 mt-5 flex items-center gap-2 text-lg font-semibold text-[#0d0d0d] first:mt-0">
-            <Sparkles className="h-4 w-4 shrink-0 text-[#7a9900]" strokeWidth={2.25} />
-            {children}
-          </h3>
+          <h3 className="mb-2.5 mt-5 text-lg font-semibold text-[#0d0d0d] first:mt-0">{children}</h3>
         ),
-        h3: ({ children }) => {
-          const label = nodeToText(children).trim();
-          const Icon = headingIcon(label);
-          return (
-            <h4 className="mb-2 mt-5 flex items-center gap-2 text-base font-semibold text-[#222] first:mt-0">
-              {Icon ? <Icon className="h-4 w-4 shrink-0 text-[#7a9900]" /> : (
-                <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[#BFFF07]" />
-              )}
-              {children}
-            </h4>
-          );
-        },
-        p: ({ children }) => <p className="mb-3 leading-[1.8] text-[#1a1a1a] last:mb-0">{children}</p>,
+        h3: ({ children }) => (
+          <h4 className="mb-2 mt-4 text-base font-semibold text-[#222] first:mt-0">{children}</h4>
+        ),
+        h4: ({ children }) => (
+          <h5 className="mb-2 mt-3 text-[15px] font-semibold text-[#333] first:mt-0">{children}</h5>
+        ),
+        p: ({ children }) => <p className="mb-3 leading-[1.75] text-[#1a1a1a] last:mb-0">{children}</p>,
         strong: ({ children }) => <strong className="font-semibold text-[#0d0d0d]">{children}</strong>,
-        ul: ({ children }) => <ul className="my-3 space-y-2.5 pl-0">{children}</ul>,
-        ol: ({ children }) => <ol className="my-3 list-decimal space-y-2.5 pl-5 marker:text-[#7a9900] marker:font-semibold">{children}</ol>,
-        li: ({ children }) => (
-          <li className="flex gap-2.5 text-[15px] leading-relaxed text-[#1a1a1a] [&>span]:min-w-0 [&>span]:flex-1">
-            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[#7a9900] [.list-decimal_&]:hidden" strokeWidth={2.5} />
-            <span>{children}</span>
-          </li>
+        ul: ({ children }) => <ul className="my-3 list-disc space-y-2 pl-5 marker:text-[#666]">{children}</ul>,
+        ol: ({ children }) => (
+          <ol className="my-3 list-decimal space-y-2 pl-5 marker:font-medium marker:text-[#666]">{children}</ol>
         ),
+        li: ({ children }) => <li className="text-[15px] leading-relaxed text-[#1a1a1a]">{children}</li>,
         blockquote: ({ children }) => {
           const text = nodeToText(children).trim();
           const callout = parseCalloutKind(text);
@@ -224,11 +174,8 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
         ),
         thead: ({ children }) => <thead className="bg-[#f7f7f8] text-[#0d0d0d]">{children}</thead>,
         th: ({ children }) => (
-          <th className="border-b border-[#ececec] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">
-            <span className="inline-flex items-center gap-1.5">
-              <ListOrdered className="h-3 w-3 text-[#7a9900]" />
-              {children}
-            </span>
+          <th className="border-b border-[#ececec] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-[#0d0d0d]">
+            {children}
           </th>
         ),
         td: ({ children }) => (
