@@ -8,7 +8,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { leadershipImpactSection } from "@/lib/leadership-content";
 
 export default function LeadershipImpactSection() {
-  const { headlineLead, headlineRest, paragraphs, checklist, cta, image } = leadershipImpactSection;
+  const { headlineLead, headlineRest, paragraphs, checklist, cta, images } = leadershipImpactSection;
 
   return (
     <section className="overflow-hidden bg-white py-20 md:py-28 lg:py-32">
@@ -88,13 +88,23 @@ export default function LeadershipImpactSection() {
           </div>
 
           <div className="relative mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md lg:max-w-none lg:min-h-[520px]">
-            <div className="relative h-full w-full overflow-hidden rounded-[1.75rem] shadow-2xl md:rounded-[2rem]">
+            <div className="absolute left-0 top-0 z-10 h-[78%] w-[62%] overflow-hidden rounded-[1.75rem] shadow-xl md:rounded-[2rem]">
               <Image
-                src={image.src}
-                alt={image.alt}
+                src={images.back.src}
+                alt={images.back.alt}
                 fill
                 className="object-cover object-top"
-                sizes="(max-width: 1024px) 80vw, 36vw"
+                sizes="(max-width: 1024px) 55vw, 28vw"
+              />
+            </div>
+
+            <div className="absolute bottom-0 right-0 z-20 h-[72%] w-[58%] overflow-hidden rounded-[1.75rem] border-4 border-white shadow-2xl md:rounded-[2rem]">
+              <Image
+                src={images.front.src}
+                alt={images.front.alt}
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 1024px) 50vw, 26vw"
               />
             </div>
           </div>
