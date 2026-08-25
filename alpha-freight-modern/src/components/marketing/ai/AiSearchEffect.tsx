@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { resolveThinkingPresentation } from "@/lib/public-ai-thinking";
+import { publicAiReplyFontClass } from "@/lib/public-ai-fonts";
 
 function AnimatedThinkingDots() {
   return (
@@ -60,7 +61,7 @@ export default function AiSearchEffect({ query }: { query: string }) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 6 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
-          className="text-[15px] font-medium leading-none text-[#444]"
+          className={`text-[17px] font-medium leading-none text-[#1a1a1a] ${publicAiReplyFontClass}`}
         >
           {presentation.topicLabel}
         </motion.p>
@@ -71,7 +72,7 @@ export default function AiSearchEffect({ query }: { query: string }) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 6 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
-          className="text-[15px] font-medium leading-none text-[#555]"
+          className={`text-[17px] font-medium leading-none text-[#262626] ${publicAiReplyFontClass}`}
         >
           <ThinkingIntroLabel label={presentation.introLabel} />
         </motion.p>

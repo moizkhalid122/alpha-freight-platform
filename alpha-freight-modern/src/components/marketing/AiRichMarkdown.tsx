@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { normalizeAiMarkdown } from "@/lib/ai-markdown-normalize";
+import { publicAiReplyFontClass } from "@/lib/public-ai-fonts";
 import {
   ChevronDown,
   Info,
@@ -92,15 +93,24 @@ function splitCollapsibleBlocks(source: string): BlockPart[] {
   return parts.filter((p) => (p.kind === "markdown" ? p.content.length > 0 : true));
 }
 
-function CollapsibleBlock({ title, content }: { title: string; content: string }) {
+function CollapsibleBlock({
+  title,
+  content,
+  serif = false,
+}: {
+  title: string;
+  content: string;
+  serif?: boolean;
+}) {
   const [open, setOpen] = useState(false);
+  const titleClass = serif ? `${publicAiReplyFontClass} font-semibold` : "text-[15px] font-medium";
 
   return (
     <div className="my-4 overflow-hidden rounded-xl border border-[#e5e5e5] bg-white">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-[15px] font-medium text-[#0d0d0d] transition hover:bg-[#fafafa]"
+        className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-[#0d0d0d] transition hover:bg-[#fafafa] ${titleClass}`}
       >
         <span className="flex items-center gap-2">
           <Truck className="h-4 w-4 shrink-0 text-[#7a9900]" />
@@ -110,7 +120,7 @@ function CollapsibleBlock({ title, content }: { title: string; content: string }
       </button>
       {open ? (
         <div className="border-t border-[#ececec] px-4 py-3">
-          <MarkdownBody content={content} />
+          <MarkdownBody content={content} serif={serif} />
         </div>
       ) : null}
     </div>
@@ -127,42 +137,53 @@ function CalloutBox({ kind, children }: { kind: CalloutKind; children: ReactNode
   );
 }
 
-function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
+function MarkdownBody({
+  content,
+  isStreaming,
+  serif = false,
+}: {
+  content: string;
+  isStreaming?: boolean;
+  serif?: boolean;
+}) {
+  const bodyText = serif ? publicAiReplyFontClass : "text-[15px] leading-[1.75] text-[#1a1a1a]";
+  const headingBase = serif ? `${publicAiReplyFontClass} font-semibold text-[#050505]` : "";
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
-          <h2 className="mb-3 mt-6 text-xl font-bold tracking-tight text-[#0d0d0d] first:mt-0">{children}</h2>
+          <h2 className={`mb-3 mt-6 text-xl tracking-tight first:mt-0 ${headingBase || "font-bold text-[#0d0d0d]"}`}>{children}</h2>
         ),
         h2: ({ children }) => (
-          <h3 className="mb-2.5 mt-5 text-lg font-semibold text-[#0d0d0d] first:mt-0">{children}</h3>
+          <h3 className={`mb-2.5 mt-5 text-lg first:mt-0 ${headingBase || "font-semibold text-[#0d0d0d]"}`}>{children}</h3>
         ),
         h3: ({ children }) => (
-          <h4 className="mb-2 mt-4 text-base font-semibold text-[#222] first:mt-0">{children}</h4>
+          <h4 className={`mb-2 mt-4 text-base first:mt-0 ${headingBase || "font-semibold text-[#222]"}`}>{children}</h4>
         ),
         h4: ({ children }) => (
-          <h5 className="mb-2 mt-3 text-[15px] font-semibold text-[#333] first:mt-0">{children}</h5>
+          <h5 className={`mb-2 mt-3 text-[15px] first:mt-0 ${headingBase || "font-semibold text-[#333]"}`}>{children}</h5>
         ),
-        p: ({ children }) => <p className="mb-3 leading-[1.75] text-[#1a1a1a] last:mb-0">{children}</p>,
-        strong: ({ children }) => <strong className="font-semibold text-[#0d0d0d]">{children}</strong>,
+        p: ({ children }) => <p className={`mb-3 last:mb-0 ${bodyText}`}>{children}</p>,
+        strong: ({ children }) => <strong className={`font-semibold ${serif ? "text-[#050505]" : "text-[#0d0d0d]"}`}>{children}</strong>,
         ul: ({ children }) => <ul className="my-3 list-disc space-y-2 pl-5 marker:text-[#666]">{children}</ul>,
         ol: ({ children }) => (
           <ol className="my-3 list-decimal space-y-2 pl-5 marker:font-medium marker:text-[#666]">{children}</ol>
         ),
-        li: ({ children }) => <li className="text-[15px] leading-relaxed text-[#1a1a1a]">{children}</li>,
+        li: ({ children }) => <li className={`leading-relaxed ${bodyText}`}>{children}</li>,
         blockquote: ({ children }) => {
           const text = nodeToText(children).trim();
           const callout = parseCalloutKind(text);
           if (callout) {
             return (
               <CalloutBox kind={callout.kind}>
-                <MarkdownBody content={callout.body} />
+                <MarkdownBody content={callout.body} serif={serif} />
               </CalloutBox>
             );
           }
           return (
-            <blockquote className="my-4 border-l-4 border-[#BFFF07] bg-[#fafafa] py-2 pl-4 pr-3 text-[#444] italic">
+            <blockquote className={`my-4 border-l-4 border-[#BFFF07] bg-[#fafafa] py-2 pl-4 pr-3 italic text-[#222] ${serif ? publicAiReplyFontClass : ""}`}>
               {children}
             </blockquote>
           );
@@ -219,24 +240,31 @@ function MarkdownBody({ content, isStreaming }: { content: string; isStreaming?:
 export default function AiRichMarkdown({
   content,
   isStreaming,
+  serif = false,
 }: {
   content: string;
   isStreaming?: boolean;
+  serif?: boolean;
 }) {
   const normalized = isStreaming ? content : normalizeAiMarkdown(content);
   const blocks = splitCollapsibleBlocks(normalized);
+  const serifClass = serif ? publicAiReplyFontClass : "";
 
   if (!blocks.length) {
-    return <MarkdownBody content={normalized} isStreaming={isStreaming} />;
+    return (
+      <div className={serifClass}>
+        <MarkdownBody content={normalized} isStreaming={isStreaming} serif={serif} />
+      </div>
+    );
   }
 
   return (
-    <div className={`ai-rich-markdown space-y-1 text-[15px] ${isStreaming ? "streaming-cursor" : ""}`}>
+    <div className={`ai-rich-markdown space-y-1 text-[15px] ${serifClass} ${isStreaming ? "streaming-cursor" : ""}`}>
       {blocks.map((block, i) =>
         block.kind === "collapse" ? (
-          <CollapsibleBlock key={`c-${i}`} title={block.title} content={block.content} />
+          <CollapsibleBlock key={`c-${i}`} title={block.title} content={block.content} serif={serif} />
         ) : (
-          <MarkdownBody key={`m-${i}`} content={block.content} isStreaming={isStreaming} />
+          <MarkdownBody key={`m-${i}`} content={block.content} isStreaming={isStreaming} serif={serif} />
         )
       )}
       {isStreaming ? (

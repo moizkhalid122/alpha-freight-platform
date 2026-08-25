@@ -36,8 +36,8 @@ function buildSystemPrompt(assistantType: AssistantKind, extraContext?: string, 
 
     return `${basePrompt}
 
-Reply JSON only:
-{"message":"Natural conversational markdown with selective emoji on key points (not every line). No Khulasa/section labels unless long and technical.","suggestedQuestions":["Follow up 1?","Follow up 2?"]}`;
+Reply JSON only. Put the **full long detailed answer** in "message" (markdown, friendly, thorough — default 4–8 paragraphs or paragraphs + bullets unless user asked for short/medium):
+{"message":"Full friendly detailed markdown answer here.","suggestedQuestions":["Follow up 1?","Follow up 2?"]}`;
   }
 
   const contextByType: Record<AssistantKind, string> = {

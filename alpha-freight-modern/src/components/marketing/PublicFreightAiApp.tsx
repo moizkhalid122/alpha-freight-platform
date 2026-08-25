@@ -6,23 +6,17 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
-  Copy,
-  Link2,
   Menu,
   Mic,
   Home,
   PanelLeftClose,
   PanelLeft,
   Search,
-  Share2,
   SquarePen,
-  ThumbsDown,
-  ThumbsUp,
   Trash2,
   Truck,
   X,
   ArrowRight,
-  MessageCircle,
   Lightbulb,
 } from "lucide-react";
 import { streamPublicChatMessage } from "@/lib/api";
@@ -51,10 +45,11 @@ import LimitReachedModal from "@/components/marketing/LimitReachedModal";
 import CopilotUpgradeBanner from "@/components/marketing/CopilotUpgradeBanner";
 import EmailCaptureBar from "@/components/marketing/EmailCaptureBar";
 import AiRichMarkdown from "@/components/marketing/AiRichMarkdown";
+import { publicAiReplyFontClass } from "@/lib/public-ai-fonts";
 import AiPageBackground from "@/components/marketing/ai/AiPageBackground";
 import AiInputSuggestions from "@/components/marketing/ai/AiInputSuggestions";
 import AiAttachMenu, { AiImagePreview } from "@/components/marketing/ai/AiAttachMenu";
-import AiConfidenceFooter from "@/components/marketing/ai/AiConfidenceFooter";
+import AiReplyActions from "@/components/marketing/ai/AiReplyActions";
 import {
   CHAT_IMAGE_ACCEPT,
   DEFAULT_CHAT_IMAGE_PROMPT,
@@ -88,13 +83,6 @@ interface Message {
     userQuery?: string;
   };
 }
-
-const SUGGESTED_PROMPTS = [
-  "What is RPM in haulage?",
-  "UK diesel price today",
-  "How do I find loads?",
-  "Calculate profit £800 for 320 miles",
-];
 
 const SIDEBAR_LINKS = [
   { label: "Home", href: "/", icon: Home },
@@ -147,13 +135,15 @@ function QuickActionLinks({ actions }: { actions: NonNullable<StructuredAssistan
   );
 }
 
+const AI_REPLY_TEXT = publicAiReplyFontClass;
+
 function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAssistantReply; content: string; isStreaming?: boolean }) {
   const markdown = (reply?.rawText || reply?.shortExplanation || content).trim();
 
   if (isStreaming || !reply || reply.displayStyle === "plain") {
     return (
-      <div className="space-y-3 text-[15px] leading-[1.75] text-[#0d0d0d]">
-        <AiRichMarkdown content={markdown} isStreaming={isStreaming} />
+      <div className={`space-y-3 ${AI_REPLY_TEXT}`}>
+        <AiRichMarkdown content={markdown} isStreaming={isStreaming} serif />
         {!isStreaming && reply?.quickActions && reply.quickActions.length > 0 ? (
           <QuickActionLinks actions={reply.quickActions} />
         ) : null}
@@ -162,31 +152,31 @@ function AssistantReply({ reply, content, isStreaming }: { reply?: StructuredAss
   }
 
   return (
-    <div className="space-y-3 text-[15px] leading-[1.75] text-[#0d0d0d]">
-      {reply.title ? <p className="font-semibold text-[#0d0d0d]">{reply.title}</p> : null}
-      {reply.shortExplanation ? <AiRichMarkdown content={reply.shortExplanation} /> : null}
+    <div className={`space-y-3 ${AI_REPLY_TEXT}`}>
+      {reply.title ? <p className="font-semibold text-[#050505]">{reply.title}</p> : null}
+      {reply.shortExplanation ? <AiRichMarkdown content={reply.shortExplanation} serif /> : null}
       {reply.keyPoints && reply.keyPoints.length > 0 ? (
         <ul className="space-y-2 pl-1">
           {reply.keyPoints.map((point, i) => (
             <li key={i} className="flex gap-2">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#BFFF07]" />
+              <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#BFFF07]" />
               <span>{point}</span>
             </li>
           ))}
         </ul>
       ) : null}
       {reply.recommendation ? (
-        <div className="flex gap-2.5 rounded-xl border border-[#BFFF07]/40 bg-[#f7ffe8] px-4 py-3 text-sm text-[#3d4d00]">
-          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#7a9900]" />
+        <div className={`flex gap-2.5 rounded-xl border border-[#BFFF07]/40 bg-[#f7ffe8] px-4 py-3 text-[#3d4d00] ${publicAiReplyFontClass}`}>
+          <Lightbulb className="mt-1 h-4 w-4 shrink-0 text-[#7a9900]" />
           <span>{reply.recommendation}</span>
         </div>
       ) : null}
-      {reply.nextStep ? <p className="text-sm text-[#666]">{reply.nextStep}</p> : null}
+      {reply.nextStep ? <p className="text-[16px] text-[#333]">{reply.nextStep}</p> : null}
       {reply.quickActions && reply.quickActions.length > 0 ? (
         <QuickActionLinks actions={reply.quickActions} />
       ) : null}
       {!reply.shortExplanation && !reply.keyPoints?.length && content ? (
-        <AiRichMarkdown content={content} />
+        <AiRichMarkdown content={content} serif />
       ) : null}
     </div>
   );
@@ -197,7 +187,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [remaining, setRemaining] = useState(PUBLIC_AI_MESSAGE_LIMIT);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -226,6 +216,8 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
   const inputSuggestions = matchInputSuggestions(input);
   const firstUserQuery = messages.find((m) => m.role === "user")?.content || "";
+  const latestAssistantMessageId =
+    [...messages].reverse().find((message) => message.role === "assistant" && message.content)?.id ?? null;
 
   const { isListening, supported: voiceSupported, toggle: toggleVoice } = useVoiceInput(
     useCallback((text: string) => {
@@ -609,13 +601,154 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     window.open(`https://wa.me/?text=${encodeURIComponent(body)}`, "_blank", "noopener,noreferrer");
   };
 
+  const handleRegenerate = async (assistantId: string) => {
+    if (isTyping) return;
+
+    const assistantIdx = messages.findIndex((message) => message.id === assistantId);
+    if (assistantIdx <= 0) return;
+
+    let userIdx = assistantIdx - 1;
+    while (userIdx >= 0 && messages[userIdx].role !== "user") userIdx -= 1;
+    if (userIdx < 0) return;
+
+    const userMsg = messages[userIdx];
+    const truncated = messages.slice(0, assistantIdx);
+    const effectiveText =
+      userMsg.meta?.userQuery ||
+      (userMsg.content === "📷 Image uploaded" ? DEFAULT_CHAT_IMAGE_PROMPT : userMsg.content);
+    const imageDataUrl = userMsg.imageUrl || null;
+    const chatId = activeChatId || Date.now().toString();
+
+    setMessages(truncated);
+    setPendingQuery(effectiveText);
+    setIsTyping(true);
+    setStreamingMessageId(null);
+
+    const aiMessageId = `${Date.now()}-assistant`;
+    const requestStartedAt = Date.now();
+    let streamStarted = false;
+
+    try {
+      const aiResponse = await streamPublicChatMessage(
+        effectiveText,
+        {
+          history: buildHistory(truncated.slice(0, userIdx)),
+          sessionMemory,
+          imageDataUrl: imageDataUrl || undefined,
+        },
+        {
+          onToken: (_delta, fullText) => {
+            setIsTyping(false);
+            setPendingQuery("");
+            const display = fullText;
+            if (!streamStarted) {
+              streamStarted = true;
+              setStreamingMessageId(aiMessageId);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: aiMessageId,
+                  role: "assistant" as const,
+                  content: display,
+                  meta: { userQuery: effectiveText },
+                },
+              ]);
+              return;
+            }
+            setMessages((prev) =>
+              prev.map((msg) => (msg.id === aiMessageId ? { ...msg, content: display } : msg))
+            );
+          },
+          onLimit: (result) => {
+            setIsTyping(false);
+            setStreamingMessageId(null);
+            setRemaining(0);
+            setLimitModalVariant(result?.limitType === "member" ? "member" : "guest");
+            setShowLimitModal(true);
+          },
+        }
+      );
+
+      if (aiResponse.limitReached) {
+        setIsTyping(false);
+        return;
+      }
+
+      if (typeof aiResponse.remaining === "number") {
+        setRemaining(aiResponse.remaining);
+      }
+
+      setIsTyping(false);
+      setPendingQuery("");
+      setStreamingMessageId(null);
+
+      const responseTimeMs = Date.now() - requestStartedAt;
+      playAiCompleteSound();
+
+      setMessages((current) => {
+        const exists = current.some((message) => message.id === aiMessageId);
+        const finalContent = aiResponse.message || "";
+        const updated = exists
+          ? current.map((message) =>
+              message.id === aiMessageId
+                ? {
+                    ...message,
+                    content: finalContent || message.content,
+                    structuredMessage: aiResponse.structuredMessage
+                      ? {
+                          ...aiResponse.structuredMessage,
+                          rawText: finalContent || message.content,
+                          shortExplanation: finalContent || message.content,
+                        }
+                      : message.structuredMessage,
+                    meta: { userQuery: effectiveText, responseTimeMs },
+                  }
+                : message
+            )
+          : [
+              ...current,
+              {
+                id: aiMessageId,
+                role: "assistant" as const,
+                content: finalContent,
+                structuredMessage: aiResponse.structuredMessage,
+                meta: { userQuery: effectiveText, responseTimeMs },
+              },
+            ];
+        persistChat(chatId, updated);
+        return updated;
+      });
+    } catch {
+      setIsTyping(false);
+      setPendingQuery("");
+      setStreamingMessageId(null);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: aiMessageId,
+          role: "assistant" as const,
+          content: "Sorry, something went wrong. Please try again.",
+        },
+      ]);
+    }
+  };
+
+  const handleBranchNewChat = (userQuery?: string) => {
+    handleNewChat();
+    if (userQuery?.trim()) {
+      window.setTimeout(() => void handleSend(userQuery.trim()), 200);
+    }
+  };
+
+  const sidebarExpanded = sidebarOpen || mobileSidebar;
+
   const sidebarContent = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 px-3 py-4">
+    <div className="flex h-full flex-col overflow-y-auto">
+      <div className="flex items-center gap-3 px-3 py-4 pr-10 md:pr-3">
         <Link href="/" className="relative h-8 w-8 shrink-0 transition hover:opacity-80" title="Home">
           <Image src="/logo.png" alt="Alpha Freight — Home" fill className="object-contain" />
         </Link>
-        {sidebarOpen && (
+        {sidebarExpanded && (
           <Link href="/" className="text-sm font-semibold text-[#0d0d0d] transition hover:text-[#666]">
             Alpha Freight AI
           </Link>
@@ -625,51 +758,61 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       <div className="space-y-1 px-2">
         <button
           type="button"
-          onClick={handleNewChat}
+          onClick={() => {
+            handleNewChat();
+            setMobileSidebar(false);
+          }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#0d0d0d] transition hover:bg-[#ececec]"
         >
           <SquarePen className="h-4 w-4 shrink-0" />
-          {sidebarOpen && (
+          {sidebarExpanded && (
             <span className="flex-1 text-left">
               New chat{" "}
-              <span className="text-[10px] text-[#999]">Ctrl+K</span>
+              <span className="hidden text-[10px] text-[#999] md:inline">Ctrl+K</span>
             </span>
           )}
         </button>
       </div>
 
-      {sidebarOpen && recentChats.length > 0 && (
+      {sidebarExpanded ? (
         <div className="mt-4 flex-1 overflow-hidden px-2">
           <p className="mb-2 px-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">
             Recent chats
           </p>
-          <div className="max-h-[220px] space-y-0.5 overflow-y-auto">
-            {recentChats.map((chat) => (
-              <div key={chat.id} className="group flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => loadChat(chat)}
-                  className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-[#ececec] ${
-                    activeChatId === chat.id ? "bg-[#ececec] font-medium text-[#0d0d0d]" : "text-[#666]"
-                  }`}
-                >
-                  <span className="block truncate">{chat.title}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRecentChats(deleteRecentChat(chat.id))}
-                  className="rounded p-1.5 text-[#ccc] opacity-0 transition hover:bg-[#ececec] hover:text-[#666] group-hover:opacity-100"
-                  aria-label="Delete chat"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+          {recentChats.length > 0 ? (
+            <div className="max-h-[min(320px,40vh)] space-y-0.5 overflow-y-auto">
+              {recentChats.map((chat) => (
+                <div key={chat.id} className="group flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      loadChat(chat);
+                      setMobileSidebar(false);
+                    }}
+                    className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-[#ececec] ${
+                      activeChatId === chat.id ? "bg-[#ececec] font-medium text-[#0d0d0d]" : "text-[#666]"
+                    }`}
+                  >
+                    <span className="block truncate">{chat.title}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecentChats(deleteRecentChat(chat.id))}
+                    className="rounded p-1.5 text-[#ccc] opacity-100 transition hover:bg-[#ececec] hover:text-[#666] sm:opacity-0 sm:group-hover:opacity-100"
+                    aria-label="Delete chat"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="px-3 py-2 text-sm text-[#999]">No chats yet — start a conversation.</p>
+          )}
         </div>
-      )}
+      ) : null}
 
-      {sidebarOpen && (
+      {sidebarExpanded && (
         <>
           <div className="mt-4 px-4">
             <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">Explore</p>
@@ -694,7 +837,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       )}
 
       <div className="mt-auto border-t border-[#e5e5e5] p-3">
-        {sidebarOpen ? (
+        {sidebarExpanded ? (
           <div className="space-y-3">
             {!isSignedIn ? (
               <p className="px-1 text-xs text-[#666]">
@@ -738,8 +881,8 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
     </div>
   );
 
-  const inputBox = (
-    <div className="mx-auto w-full max-w-3xl">
+  const renderInputBox = (menuOpensUp: boolean) => (
+    <div className="mx-auto w-full max-w-2xl">
       <input
         ref={imageInputRef}
         type="file"
@@ -752,95 +895,111 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
         }}
       />
       {pendingImageUrl ? (
-        <div className="mb-2 px-1">
+        <div className="mb-3 px-2">
           <AiImagePreview imageUrl={pendingImageUrl} onRemove={() => setPendingImageUrl(null)} />
         </div>
       ) : null}
-      {imageError ? <p className="mb-2 px-1 text-xs text-red-600">{imageError}</p> : null}
-      <motion.form
-        initial={false}
-        whileHover={{ scale: 1.005 }}
-        onSubmit={(e) => void handleSend(input, e)}
-        className="relative flex items-end gap-2 rounded-[20px] border border-white/70 bg-white/75 px-3 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl transition focus-within:border-[#BFFF07]/40 focus-within:shadow-[0_12px_40px_rgba(191,255,7,0.12)]"
-      >
-        <AiInputSuggestions
-          suggestions={inputSuggestions}
-          onSelect={(value) => {
-            setInput(value);
-            void handleSend(value);
-          }}
+      {imageError ? <p className="mb-2 px-2 text-xs text-red-600">{imageError}</p> : null}
+
+      <div className="relative">
+        <div
+          aria-hidden
+          className="absolute inset-x-3 -bottom-1 top-3 rounded-full bg-[#dbeafe]/40 blur-2xl"
         />
-        <AiAttachMenu
-          disabled={isTyping}
-          onPickImage={() => imageInputRef.current?.click()}
-          onQuickPrompt={(prompt) => {
-            setInput(prompt);
-            void handleSend(prompt);
-          }}
-          onWebSearch={() => {
-            const prompt = "UK diesel price today";
-            setInput(prompt);
-            void handleSend(prompt);
-          }}
+        <div
+          aria-hidden
+          className="absolute inset-x-6 bottom-0 top-5 rounded-full bg-black/[0.04] blur-xl"
         />
 
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void handleSend(input);
-            }
-          }}
-          placeholder="Ask anything..."
-          disabled={isTyping}
-          className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent py-3 text-[15px] text-[#0d0d0d] placeholder:text-[#999] focus:outline-none disabled:opacity-60"
-        />
+        <form
+          onSubmit={(e) => void handleSend(input, e)}
+          className="public-ai-input-shell relative flex items-end gap-0.5 overflow-visible rounded-full border border-[#e8eaed] bg-white px-1.5 py-1.5 shadow-[0_6px_24px_rgba(15,23,42,0.07),0_2px_6px_rgba(15,23,42,0.04)] sm:gap-1 sm:px-2 focus-within:border-[#c7d2fe] focus-within:shadow-[0_10px_32px_rgba(59,130,246,0.1),0_3px_10px_rgba(15,23,42,0.05)]"
+        >
+          <AiInputSuggestions
+            suggestions={inputSuggestions}
+            onSelect={(value) => {
+              setInput(value);
+              void handleSend(value);
+            }}
+          />
+          <AiAttachMenu
+            disabled={isTyping}
+            menuPlacement={menuOpensUp ? "up" : "down"}
+            onPickImage={() => imageInputRef.current?.click()}
+            onQuickPrompt={(prompt) => {
+              setInput(prompt);
+              void handleSend(prompt);
+            }}
+            onWebSearch={() => {
+              const prompt = "UK diesel price today";
+              setInput(prompt);
+              void handleSend(prompt);
+            }}
+          />
 
-        <div className="mb-1.5 flex shrink-0 items-center gap-1">
-          {voiceSupported && (
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleVoice}
-              disabled={isTyping}
-              className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                isListening ? "bg-red-50 text-red-600" : "text-[#666] hover:bg-[#f4f4f4]/80"
-              }`}
-              aria-label="Voice input"
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void handleSend(input);
+              }
+            }}
+            placeholder="Ask Alpha Freight AI"
+            disabled={isTyping}
+            className="max-h-36 min-h-[44px] flex-1 resize-none bg-transparent px-1.5 py-2.5 text-[15px] leading-relaxed text-[#0d0d0d] placeholder:text-[#9aa0a6] focus:outline-none disabled:opacity-60 sm:min-h-[42px] sm:px-2 sm:text-[14px]"
+          />
+
+          <div className="mb-1 flex shrink-0 items-center gap-0.5 pr-1">
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={toggleVoice}
+                disabled={isTyping}
+                className={`flex h-10 w-10 items-center justify-center rounded-full transition sm:h-9 sm:w-9 ${
+                  isListening ? "bg-red-50 text-red-600" : "text-[#5f6368] hover:bg-[#f1f3f4] active:scale-95"
+                }`}
+                aria-label="Voice input"
+              >
+                <Mic className="h-5 w-5" />
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isTyping || (!input.trim() && !pendingImageUrl)}
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95 sm:h-9 sm:w-9 ${
+                input.trim() || pendingImageUrl
+                  ? "bg-[#0d0d0d] text-white hover:bg-[#333]"
+                  : "bg-[#f1f3f4] text-[#bdc1c6]"
+              } disabled:opacity-50`}
+              aria-label="Send"
             >
-              <Mic className="h-5 w-5" />
-            </motion.button>
-          )}
-          <motion.button
-            type="submit"
-            whileHover={{ scale: input.trim() || pendingImageUrl ? 1.08 : 1 }}
-            whileTap={{ scale: 0.95 }}
-            disabled={isTyping || (!input.trim() && !pendingImageUrl)}
-            className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              input.trim() || pendingImageUrl ? "bg-[#0d0d0d] text-white shadow-md hover:bg-[#333]" : "bg-[#f4f4f4] text-[#bbb]"
-            } disabled:opacity-50`}
-            aria-label="Send"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-              <path d="M12 2L4 12h6v10l8-12h-6V2z" />
-            </svg>
-          </motion.button>
-        </div>
-      </motion.form>
-      <p className="mt-3 text-center text-xs text-[#999]">
-        Alpha Freight AI · Enter to send · Shift+Enter new line · Ctrl+K new chat
-      </p>
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M12 2L4 12h6v10l8-12h-6V2z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {!hasConversation ? (
+        <p className="mt-4 text-center text-xs text-[#9aa0a6]">
+          Enter to send · Shift+Enter new line
+        </p>
+      ) : (
+        <p className="mt-3 text-center text-xs text-[#9aa0a6]">
+          Alpha Freight AI · Ctrl+K new chat
+        </p>
+      )}
     </div>
   );
 
   return (
     <div
-      className={`relative flex overflow-hidden bg-white text-[#0d0d0d] ${
+      className={`public-ai-app relative flex overflow-hidden bg-[#fafafa] text-[#0d0d0d] ${
         embedded ? "h-full min-h-0" : "h-[100dvh]"
       }`}
     >
@@ -870,7 +1029,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/30 md:hidden"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:hidden"
               onClick={() => setMobileSidebar(false)}
             />
             <motion.aside
@@ -878,7 +1037,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", damping: 28, stiffness: 320 }}
-              className="fixed inset-y-0 left-0 z-50 w-[280px] border-r border-[#e5e5e5] bg-[#f9f9f9] md:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[min(88vw,280px)] border-r border-[#e5e5e5]/80 bg-[#f9f9f9]/95 shadow-2xl backdrop-blur-xl md:hidden"
             >
               <button
                 type="button"
@@ -894,12 +1053,12 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#ececec] px-4">
-          <div className="flex items-center gap-2">
+        <header className="public-ai-header flex h-14 shrink-0 items-center justify-between border-b border-[#ececec]/80 px-3 sm:px-4">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setMobileSidebar(true)}
-              className="rounded-lg p-2 text-[#666] hover:bg-[#f4f4f4] md:hidden"
+              className="rounded-xl p-2.5 text-[#666] transition hover:bg-[#f4f4f4] active:scale-95 md:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
@@ -907,82 +1066,86 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             <button
               type="button"
               onClick={() => setSidebarOpen((v) => !v)}
-              className="hidden rounded-lg p-2 text-[#666] hover:bg-[#f4f4f4] md:flex"
+              className="hidden rounded-xl p-2 text-[#666] transition hover:bg-[#f4f4f4] md:flex"
               aria-label="Toggle sidebar"
             >
               {sidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
             </button>
             <Link
               href="/"
-              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f4f4f4]"
+              className="flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f4f4f4] active:scale-[0.98] sm:py-1.5"
             >
-              <Home className="h-4 w-4 text-[#666]" />
-              Home
+              <Home className="h-4 w-4 shrink-0 text-[#666]" />
+              <span className="hidden sm:inline">Home</span>
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <Link
               href="/find-loads"
-              className="hidden rounded-full border border-[#e5e5e5] px-4 py-1.5 text-sm font-medium text-[#444] transition hover:bg-[#f7f7f8] sm:inline-flex"
+              className="rounded-full border border-[#e5e5e5] px-3 py-1.5 text-xs font-medium text-[#444] transition hover:bg-[#f7f7f8] active:scale-[0.98] sm:px-4 sm:text-sm"
             >
-              Find loads
+              <span className="sm:hidden">Loads</span>
+              <span className="hidden sm:inline">Find loads</span>
             </Link>
             {authReady && isSignedIn ? (
               <Link
                 href={accountHubHref}
-                className="rounded-full bg-[#0d0d0d] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#333]"
+                className="rounded-full bg-[#0d0d0d] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#333] active:scale-[0.98] sm:px-4 sm:text-sm"
               >
                 Dashboard
               </Link>
             ) : authReady ? (
               <Link
                 href={accountHubHref}
-                className="rounded-full bg-[#0d0d0d] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#333]"
+                className="rounded-full bg-[#0d0d0d] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#333] active:scale-[0.98] sm:px-4 sm:text-sm"
               >
-                Sign up free
+                <span className="sm:hidden">Sign up</span>
+                <span className="hidden sm:inline">Sign up free</span>
               </Link>
             ) : null}
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className={`flex flex-1 flex-col ${hasConversation ? "overflow-hidden" : "overflow-visible"}`}>
+          <AnimatePresence mode="wait">
           {!hasConversation ? (
-            <div className="flex flex-1 flex-col items-center justify-center px-4 pb-8">
-              <div className="mb-6 flex items-center justify-center">
-                <NavbarAiLottie className="h-20 w-20" />
-              </div>
+            <motion.div
+              key="empty-state"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-1 flex-col items-center justify-center overflow-visible px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 sm:px-4 sm:pb-8 sm:pt-4"
+            >
               <motion.h1
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-10 text-center text-[28px] font-normal tracking-tight text-[#0d0d0d] sm:text-[32px]"
+                transition={{ duration: 0.45, ease: "easeOut", delay: 0.05 }}
+                className="public-ai-empty-title mb-6 max-w-lg text-center text-[clamp(1.35rem,3vw,1.75rem)] font-normal tracking-[-0.02em] text-[#1f1f1f] sm:mb-8"
               >
-                Where should we begin?
+                Any freight questions to explore?
               </motion.h1>
-              <div className="w-full max-w-3xl">{inputBox}</div>
-              <div className="mt-6 flex flex-wrap justify-center gap-2 px-4">
-                {SUGGESTED_PROMPTS.map((prompt, i) => (
-                  <motion.button
-                    key={prompt}
-                    type="button"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    whileHover={{ scale: 1.04, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => void handleSend(prompt)}
-                    disabled={isTyping}
-                    className="rounded-full border border-[#e5e5e5]/80 bg-white/80 px-4 py-2 text-sm text-[#444] shadow-sm backdrop-blur-sm transition hover:border-[#BFFF07]/40 hover:shadow-md disabled:opacity-50"
-                  >
-                    {prompt}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                className="w-full max-w-2xl"
+              >
+                {renderInputBox(false)}
+              </motion.div>
+            </motion.div>
           ) : (
-            <>
-              <div className="flex-1 overflow-y-auto">
-                <div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
+            <motion.div
+              key="chat-state"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <div className="public-ai-scroll flex-1 overflow-y-auto">
+                <div className="public-ai-message-list mx-auto max-w-3xl space-y-6 px-3 py-5 sm:space-y-8 sm:px-4 sm:py-8">
                   {messages.map((message) => (
                     <motion.div
                       key={message.id}
@@ -996,7 +1159,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.28, ease: "easeOut" }}
-                            className="max-w-[85%] rounded-2xl bg-[#f4f4f5] px-4 py-3 text-[15px] leading-relaxed text-[#0d0d0d]"
+                            className="public-ai-user-bubble max-w-[min(92%,28rem)] rounded-[20px] bg-[#e8e8ec] px-3.5 py-2.5 text-[15px] leading-relaxed text-[#0d0d0d] sm:max-w-[85%] sm:px-4 sm:py-3"
                           >
                             {message.imageUrl ? (
                               <div className="mb-3 overflow-hidden rounded-xl border border-[#ececec]">
@@ -1012,8 +1175,8 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                           </motion.div>
                         </div>
                       ) : (
-                        <div className="group flex gap-4">
-                          <NavbarAiLottie className="mt-0.5 h-9 w-9 shrink-0" />
+                        <div className="group flex gap-2.5 sm:gap-4">
+                          <NavbarAiLottie className="mt-0.5 h-8 w-8 shrink-0 sm:h-9 sm:w-9" />
                           <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -1034,84 +1197,30 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                               onAskFollowUp={(q) => void handleSend(q)}
                             />
 
-                            {message.content &&
-                            streamingMessageId !== message.id &&
-                            message.content.trim().length > 220 ? (
-                              <AiConfidenceFooter
+                            {message.content && streamingMessageId !== message.id && (
+                              <AiReplyActions
+                                messageId={message.id}
+                                isLatest={message.id === latestAssistantMessageId}
+                                copied={copiedId === message.id}
+                                shared={sharedId === message.id}
+                                feedback={feedback[message.id] ?? null}
                                 responseTimeMs={message.meta?.responseTimeMs}
                                 knowledgeSource={message.structuredMessage?.knowledgeSource}
+                                userQuery={message.meta?.userQuery}
+                                onFeedback={(value) =>
+                                  setFeedback((current) => ({
+                                    ...current,
+                                    [message.id]: current[message.id] === value ? null : value,
+                                  }))
+                                }
+                                onCopy={() => void handleCopy(message.id)}
+                                onRegenerate={() => void handleRegenerate(message.id)}
+                                onWhatsAppShare={() => handleWhatsAppShare(message.id)}
+                                onCopyShareLink={() => void handleCopyShareLink(message.id)}
+                                onBranchNewChat={() => handleBranchNewChat(message.meta?.userQuery)}
                               />
-                            ) : null}
-
-                            {message.content && streamingMessageId !== message.id && (
-                              <div className="mt-3 flex flex-wrap items-center gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
-                                <button
-                                  type="button"
-                                  onClick={() => void handleCopy(message.id)}
-                                  className="rounded-lg p-1.5 text-[#999] hover:bg-[#f4f4f4] hover:text-[#666]"
-                                  title={copiedId === message.id ? "Copied!" : "Copy answer"}
-                                >
-                                  <Copy className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleWhatsAppShare(message.id)}
-                                  className="rounded-lg p-1.5 text-[#999] hover:bg-[#f4f4f4] hover:text-[#25D366]"
-                                  title="Share on WhatsApp"
-                                >
-                                  <Share2 className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => void handleCopyShareLink(message.id)}
-                                  className="rounded-lg p-1.5 text-[#999] hover:bg-[#f4f4f4] hover:text-[#666]"
-                                  title={sharedId === message.id ? "Link copied!" : "Copy share link"}
-                                >
-                                  <Link2 className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFeedback((f) => ({
-                                      ...f,
-                                      [message.id]: f[message.id] === "up" ? null : "up",
-                                    }))
-                                  }
-                                  className={`rounded-lg p-1.5 hover:bg-[#f4f4f4] ${
-                                    feedback[message.id] === "up" ? "text-[#0d0d0d]" : "text-[#999]"
-                                  }`}
-                                >
-                                  <ThumbsUp className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFeedback((f) => ({
-                                      ...f,
-                                      [message.id]: f[message.id] === "down" ? null : "down",
-                                    }))
-                                  }
-                                  className={`rounded-lg p-1.5 hover:bg-[#f4f4f4] ${
-                                    feedback[message.id] === "down" ? "text-[#0d0d0d]" : "text-[#999]"
-                                  }`}
-                                >
-                                  <ThumbsDown className="h-4 w-4" />
-                                </button>
-                              </div>
                             )}
 
-                            {(message.structuredMessage?.suggestedQuestions?.length ?? 0) > 0 &&
-                              message.structuredMessage?.suggestedQuestions?.map((q) => (
-                                <button
-                                  key={q}
-                                  type="button"
-                                  onClick={() => void handleSend(q.replace(/^[^\w]+/, "").trim() || q)}
-                                  className="mt-2 mr-2 inline-flex items-center gap-1.5 rounded-full border border-[#e5e5e5] px-3 py-1.5 text-sm text-[#666] hover:bg-[#f7f7f8]"
-                                >
-                                  <MessageCircle className="h-3.5 w-3.5 shrink-0 text-[#7a9900]" />
-                                  {q}
-                                </button>
-                              ))}
                           </motion.div>
                         </div>
                       )}
@@ -1127,11 +1236,18 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                 </div>
               </div>
 
-              <div className="shrink-0 border-t border-[#ececec] bg-white px-4 py-4">
-                {inputBox}
+              <div className="public-ai-composer-dock shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-4 sm:py-5">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {renderInputBox(true)}
+                </motion.div>
               </div>
-            </>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
       </div>
       </div>

@@ -1,4 +1,6 @@
 import { createPageMetadata } from "@/lib/seo";
+import { publicAiReplyFont } from "@/lib/public-ai-fonts";
+import "./public-ai.css";
 
 export const metadata = createPageMetadata({
   title: "Free UK Freight AI | Ask Haulage & Logistics Questions | Alpha Freight",
@@ -20,5 +22,5 @@ export const metadata = createPageMetadata({
 });
 
 export default function FreeFreightAiLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div className={publicAiReplyFont.variable}>{children}</div>;
 }

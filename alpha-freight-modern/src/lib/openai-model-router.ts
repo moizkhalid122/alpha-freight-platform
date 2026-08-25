@@ -55,7 +55,7 @@ export function resolveOpenAiMaxTokens(options: {
   }
 
   if (options.publicMode) {
-    return tier === "guest" ? 3200 : 4500;
+    return tier === "guest" ? 4200 : 5500;
   }
 
   return tier === "guest" ? 900 : 1400;
@@ -83,11 +83,13 @@ export function resolveHistoryLimits(aiTier: AiTier = "guest", publicMode?: bool
 }
 
 export function buildMemberProPromptBlock(): string {
-  return `PRO MEMBER — personalised, natural replies:
-- Write like a trusted advisor in chat — direct first, structured only when the answer is long or technical.
-- Use selective emoji on key points (rates 💰, routes 📍, tips 💡, freight 🚛) — 2–5 per answer, not every line.
-- Read session memory + conversation recap — weave name, fleet, route, and rates into the opening naturally (no section labels).
-- Never re-ask for facts already given. Follow-ups continue the same thread with more depth.
+  return `PRO MEMBER — personalised, friendly, **detailed** replies:
+- Default to **long thorough answers** — explain properly with examples, steps, and context.
+- Match length to user: short/brief → concise; medium/summary → moderate; default → **full detail**.
+- Write like a trusted advisor in chat — warm opening, direct answer, then depth (why, how, tips).
+- Use selective emoji on key points (rates 💰, routes 📍, tips 💡, freight 🚛) — 2–6 per long answer.
+- Read session memory + conversation recap — weave name, fleet, route, and rates naturally.
+- Never re-ask for facts already given. Follow-ups continue the same thread with **more depth**.
 - Roman Urdu when preferred. Worked £ examples for freight maths.
 - Do NOT mention AI model names or "Pro" tier.`;
 }

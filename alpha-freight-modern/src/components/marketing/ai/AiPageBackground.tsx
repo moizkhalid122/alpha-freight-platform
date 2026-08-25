@@ -2,34 +2,26 @@
 
 import { motion } from "framer-motion";
 
-const ORBS = [
-  { size: 280, x: "8%", y: "12%", delay: 0 },
-  { size: 200, x: "78%", y: "18%", delay: 1.2 },
-  { size: 160, x: "62%", y: "72%", delay: 0.6 },
-  { size: 120, x: "18%", y: "68%", delay: 1.8 },
-];
-
 export default function AiPageBackground() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fafafa] via-white to-[#f7ffe8]/30" />
-      {ORBS.map((orb, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-[#BFFF07]/[0.07] blur-3xl"
-          style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y }}
-          animate={{ y: [0, -18, 0], x: [0, i % 2 ? 12 : -10, 0], scale: [1, 1.06, 1] }}
-          transition={{ duration: 14 + i * 2, repeat: Infinity, ease: "easeInOut", delay: orb.delay }}
-        />
-      ))}
-      <svg className="absolute inset-0 h-full w-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="ai-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-            <path d="M48 0H0V48" fill="none" stroke="#0d0d0d" strokeWidth="0.5" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#ai-grid)" />
-      </svg>
+    <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#fafafa]" aria-hidden>
+      <motion.div
+        className="public-ai-bg-glow absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        style={{
+          background:
+            "radial-gradient(circle at 50% 42%, rgba(186, 218, 255, 0.45) 0%, rgba(220, 235, 255, 0.2) 28%, rgba(255, 255, 255, 0) 62%)",
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-[0.35]"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 55%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 55%)",
+        }}
+      />
     </div>
   );
 }
