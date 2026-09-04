@@ -15,6 +15,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/partners",
   "/success-stories",
   "/solution",
+  "/industries",
   "/services",
   "/pricing",
   "/awards",
@@ -70,6 +71,15 @@ export const PUBLIC_SITEMAP_PATHS = [
 
 export const SERVICE_DETAIL_IDS = ["01", "02", "03", "04", "05"] as const;
 
+export const INDUSTRY_SLUGS = [
+  "construction",
+  "retail",
+  "food",
+  "pharmaceuticals",
+  "automotive",
+  "general-freight",
+] as const;
+
 export type SitemapChangeFrequency = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 
 export function getPathPriority(path: string): number {
@@ -93,6 +103,7 @@ export function getPathPriority(path: string): number {
   )
     return 0.86;
   if (path === "/solution" || path === "/contact" || path === "/pricing" || path === "/awards") return 0.75;
+  if (path === "/industries" || path.startsWith("/industries/")) return 0.82;
   if (path.startsWith("/privacy") || path.startsWith("/terms") || path.startsWith("/cookie")) return 0.4;
   return 0.65;
 }

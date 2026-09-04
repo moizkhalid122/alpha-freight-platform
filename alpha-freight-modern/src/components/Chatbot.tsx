@@ -66,6 +66,10 @@ export default function Chatbot() {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/auth") ||
+    pathname.startsWith("/directors-agreement") ||
+    pathname.startsWith("/executive-agreement") ||
+    pathname.startsWith("/master-plan") ||
+    pathname.startsWith("/revenue-model") ||
     pathname === "/ai" ||
     pathname.startsWith("/ai/");
 

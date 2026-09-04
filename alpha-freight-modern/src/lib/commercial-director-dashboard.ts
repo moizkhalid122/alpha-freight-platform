@@ -63,6 +63,20 @@ export function getCommercialTools(): CommercialTool[] {
     },
     {
       category: "Performance",
+      name: "Revenue Tasks",
+      description: "Daily plan + AI tasks · tick or dismiss.",
+      path: commercialDirectorRoute("/tasks"),
+      badge: "Daily",
+    },
+    {
+      category: "Performance",
+      name: "Revenue Command Center",
+      description: "44 streams · monthly plan · actions · targets.",
+      path: commercialDirectorRoute("/revenue-plan"),
+      badge: "44 streams",
+    },
+    {
+      category: "Performance",
       name: "Revenue view",
       description: "Read-only revenue and commission insights.",
       path: commercialDirectorRoute("/revenue"),

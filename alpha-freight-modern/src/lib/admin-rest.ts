@@ -97,6 +97,13 @@ export async function fetchAdminFeedbackRest() {
   );
 }
 
+export async function fetchAdminInquiriesRest() {
+  return supabaseRest<Record<string, unknown>[]>(
+    "website_inquiries",
+    "select=*&order=created_at.desc&limit=200"
+  );
+}
+
 export async function fetchAdminEmployeeStatsRest() {
   const [leads, calls, commissions, tasks] = await Promise.all([
     supabaseRest<Record<string, unknown>[]>(

@@ -15,7 +15,7 @@ import { TOOL_FOOTER_LINKS } from "@/lib/tools-hub-data";
 
 export function Footer() {
   return (
-    <footer className="bg-black pt-32 pb-12 overflow-hidden relative">
+    <footer className="relative overflow-hidden bg-black pb-12 pt-32">
       <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
         {/* Big Animated Logo Background */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 opacity-[0.02] select-none pointer-events-none">
@@ -138,6 +138,7 @@ export function Footer() {
                 { name: "Learning Series", href: "/learning-series" },
                 { name: "Help Center", href: "/support" },
                 { name: "Send Feedback", href: "/feedback" },
+                { name: "The Library", href: "/library" },
                 { name: "Company Blog", href: "/blog" },
                 { name: "Success Stories", href: "/success-stories" },
               ].map((item) => (
@@ -230,7 +231,7 @@ export function CinematicCTA({
   buttonHref = "/contact"
 }: CinematicCTAProps) {
   return (
-    <section className="relative h-[600px] w-full overflow-hidden flex flex-col items-center justify-center text-center group">
+    <section className="group relative block h-[600px] w-full overflow-hidden bg-black leading-none">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -238,13 +239,13 @@ export function CinematicCTA({
           alt={title}
           fill
           sizes="100vw"
-          className="object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105"
+          className="object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 scale-[1.03]"
         />
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 space-y-8 px-6">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center space-y-8 px-6 text-center">
         <div className="flex items-center justify-center space-x-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/70">
           <span>+</span>
           <span>{subtitle === "LET'S GET TO WORK" ? subtitle : "GET STARTED"}</span>

@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import {
   Building2,
   ClipboardList,
-  ShieldCheck,
   TrendingUp,
   Truck,
   Users,
@@ -20,10 +19,7 @@ import {
   getCommercialFocusItems,
   getCommercialTools,
 } from "@/lib/commercial-director-dashboard";
-import {
-  COMMERCIAL_DIRECTOR_PROFILE,
-  COMMERCIAL_RESTRICTED_NOTICE,
-} from "@/lib/commercial-director-permissions";
+import { COMMERCIAL_DIRECTOR_PROFILE } from "@/lib/commercial-director-permissions";
 import type { CommercialMetricsPayload } from "@/lib/commercial-director-metrics";
 import { useCommercialMetrics } from "@/lib/use-commercial-metrics";
 
@@ -73,7 +69,9 @@ export default function CommercialDirectorDashboard({
   const showSkeleton = !overview && isLoading;
 
   const quickActions = [
-    { label: "Leads", href: commercialDirectorRoute("/leads"), primary: true },
+    { label: "Today's Tasks", href: commercialDirectorRoute("/tasks"), primary: true },
+    { label: "Revenue Plan", href: commercialDirectorRoute("/revenue-plan") },
+    { label: "Leads", href: commercialDirectorRoute("/leads") },
     { label: "Shippers", href: commercialDirectorRoute("/shippers") },
     { label: "Forwarders", href: commercialDirectorRoute("/forwarders") },
     { label: "Reports", href: commercialDirectorRoute("/reports") },
@@ -99,11 +97,6 @@ export default function CommercialDirectorDashboard({
             {action.label}
           </Link>
         ))}
-      </div>
-
-      <div className="inline-flex items-start gap-2 rounded-xl border border-amber-200/70 bg-amber-50/70 px-3.5 py-2.5 text-[11px] leading-relaxed text-amber-900">
-        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <span>{COMMERCIAL_RESTRICTED_NOTICE}</span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

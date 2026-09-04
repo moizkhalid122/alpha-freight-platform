@@ -1,5 +1,6 @@
 "use client";
 
+import SupportInquiryForm from "@/components/support/SupportInquiryForm";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -264,6 +265,14 @@ export default function SupplierSupport() {
           </motion.section>
         </div>
       </div>
+
+      <SupportInquiryForm
+        inquiryType="supplier_support"
+        sourcePage="/supplier/support"
+        title="Send a support message"
+        description="Need help with loads, bids, or billing? Message our team directly."
+        showPhone
+      />
     </div>
   );
 }

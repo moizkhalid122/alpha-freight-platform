@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import SupportInquiryForm from "@/components/support/SupportInquiryForm";
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -304,6 +305,16 @@ function CarrierSupportPageContent() {
           </section>
         </div>
       </div>
+
+      <SupportInquiryForm
+        inquiryType="carrier_support"
+        sourcePage="/carrier/support"
+        title="Send a support message"
+        description="Need help with your carrier account? Message our team directly."
+        showPhone
+        metadata={shipment ? { shipment, route: route || undefined, status: status || undefined } : undefined}
+        defaultSubject={shipment ? `Support for ${shipment}` : ""}
+      />
     </div>
   );
 }

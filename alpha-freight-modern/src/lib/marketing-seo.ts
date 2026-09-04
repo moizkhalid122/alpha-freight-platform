@@ -21,6 +21,22 @@ export const marketingSeo = {
       "End-to-end UK freight solutions: post loads, match verified carriers, track shipments live, and settle with digital POD and fast payouts.",
     path: "/solution",
   }),
+  industriesHub: createPageMetadata({
+    title: "Industry Freight Solutions UK | Construction, Retail, Food & More | Alpha Freight",
+    description:
+      "Specialist UK freight solutions by industry — construction haulage, retail distribution, food & beverage, pharmaceuticals, automotive parts, and general freight on Alpha Freight's verified carrier marketplace.",
+    path: "/industries",
+    keywords: [
+      "industry freight UK",
+      "sector haulage solutions",
+      "construction freight UK",
+      "retail distribution UK",
+      "food haulage UK",
+      "pharmaceutical logistics UK",
+      "automotive parts freight",
+      "general freight UK",
+    ],
+  }),
   services: createPageMetadata({
     title: "Freight Services UK | Haulage, Distribution & Logistics | Alpha Freight",
     description:

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -132,6 +132,32 @@ function QuickActionLinks({ actions }: { actions: NonNullable<StructuredAssistan
         ) : null
       )}
     </div>
+  );
+}
+
+function SidebarReveal({
+  show,
+  children,
+  className = "",
+}: {
+  show: boolean;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={false}
+      animate={{
+        opacity: show ? 1 : 0,
+        maxWidth: show ? 220 : 0,
+        marginRight: show ? 0 : -6,
+      }}
+      transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+      className={`min-w-0 overflow-hidden whitespace-nowrap ${className}`}
+      aria-hidden={!show}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -743,16 +769,16 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
   const sidebarExpanded = sidebarOpen || mobileSidebar;
 
   const sidebarContent = (
-    <div className="flex h-full flex-col overflow-y-auto">
+    <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden">
       <div className="flex items-center gap-3 px-3 py-4 pr-10 md:pr-3">
         <Link href="/" className="relative h-8 w-8 shrink-0 transition hover:opacity-80" title="Home">
           <Image src="/logo.png" alt="Alpha Freight — Home" fill className="object-contain" />
         </Link>
-        {sidebarExpanded && (
-          <Link href="/" className="text-sm font-semibold text-[#0d0d0d] transition hover:text-[#666]">
+        <SidebarReveal show={sidebarExpanded} className="flex-1">
+          <Link href="/" className="block truncate text-sm font-semibold text-[#0d0d0d] transition hover:text-[#666]">
             Alpha Freight AI
           </Link>
-        )}
+        </SidebarReveal>
       </div>
 
       <div className="space-y-1 px-2">
@@ -762,20 +788,21 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             handleNewChat();
             setMobileSidebar(false);
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#0d0d0d] transition hover:bg-[#ececec]"
+          className="public-ai-sidebar-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#0d0d0d]"
+          title="New chat"
         >
           <SquarePen className="h-4 w-4 shrink-0" />
-          {sidebarExpanded && (
-            <span className="flex-1 text-left">
+          <SidebarReveal show={sidebarExpanded} className="flex-1">
+            <span className="block text-left">
               New chat{" "}
               <span className="hidden text-[10px] text-[#999] md:inline">Ctrl+K</span>
             </span>
-          )}
+          </SidebarReveal>
         </button>
       </div>
 
-      {sidebarExpanded ? (
-        <div className="mt-4 flex-1 overflow-hidden px-2">
+      <SidebarReveal show={sidebarExpanded} className="mt-4 flex-1 px-2">
+        <div className="flex h-full flex-col overflow-hidden">
           <p className="mb-2 px-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">
             Recent chats
           </p>
@@ -789,8 +816,8 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                       loadChat(chat);
                       setMobileSidebar(false);
                     }}
-                    className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-[#ececec] ${
-                      activeChatId === chat.id ? "bg-[#ececec] font-medium text-[#0d0d0d]" : "text-[#666]"
+                    className={`public-ai-sidebar-item min-w-0 flex-1 rounded-xl px-3 py-2 text-left text-sm ${
+                      activeChatId === chat.id ? "bg-neutral-100 font-medium text-neutral-900" : "text-neutral-500"
                     }`}
                   >
                     <span className="block truncate">{chat.title}</span>
@@ -798,7 +825,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                   <button
                     type="button"
                     onClick={() => setRecentChats(deleteRecentChat(chat.id))}
-                    className="rounded p-1.5 text-[#ccc] opacity-100 transition hover:bg-[#ececec] hover:text-[#666] sm:opacity-0 sm:group-hover:opacity-100"
+                    className="rounded-lg p-1.5 text-neutral-300 opacity-100 transition hover:bg-neutral-100 hover:text-neutral-600 sm:opacity-0 sm:group-hover:opacity-100"
                     aria-label="Delete chat"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -810,34 +837,32 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             <p className="px-3 py-2 text-sm text-[#999]">No chats yet — start a conversation.</p>
           )}
         </div>
-      ) : null}
+      </SidebarReveal>
 
-      {sidebarExpanded && (
-        <>
-          <div className="mt-4 px-4">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">Explore</p>
-          </div>
-          <nav className="space-y-0.5 px-2">
-            {SIDEBAR_LINKS.map(({ label, href, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#444] transition hover:bg-[#ececec] hover:text-[#0d0d0d]"
-              >
-                {Icon ? (
-                  <Icon className="h-4 w-4 shrink-0 opacity-60" />
-                ) : (
-                  <Truck className="h-4 w-4 shrink-0 opacity-40" />
-                )}
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </>
-      )}
+      <SidebarReveal show={sidebarExpanded}>
+        <div className="mt-4 px-4">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#999]">Explore</p>
+        </div>
+        <nav className="space-y-0.5 px-2">
+          {SIDEBAR_LINKS.map(({ label, href, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="public-ai-sidebar-item flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[#444] hover:text-[#0d0d0d]"
+            >
+              {Icon ? (
+                <Icon className="h-4 w-4 shrink-0 opacity-60" />
+              ) : (
+                <Truck className="h-4 w-4 shrink-0 opacity-40" />
+              )}
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </SidebarReveal>
 
-      <div className="mt-auto border-t border-[#e5e5e5] p-3">
-        {sidebarExpanded ? (
+      <div className="mt-auto border-t border-neutral-200/80 p-3">
+        <SidebarReveal show={sidebarExpanded}>
           <div className="space-y-3">
             {!isSignedIn ? (
               <p className="px-1 text-xs text-[#666]">
@@ -846,7 +871,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             ) : null}
             <Link
               href="/"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#e5e5e5] bg-white px-4 py-2.5 text-sm font-medium text-[#444] transition hover:bg-[#f7f7f8]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50"
             >
               <Home className="h-4 w-4" />
               Back to Home
@@ -868,7 +893,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                 </Link>
                 <Link
                   href={accountHubHref}
-                  className="flex w-full items-center justify-center rounded-xl border border-[#e5e5e5] bg-white px-4 py-2.5 text-sm font-medium text-[#444] transition hover:bg-[#f7f7f8]"
+                  className="flex w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50"
                 >
                   Sign in
                 </Link>
@@ -876,7 +901,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             ) : null}
             {!isSignedIn && authReady ? <EmailCaptureBar /> : null}
           </div>
-        ) : null}
+        </SidebarReveal>
       </div>
     </div>
   );
@@ -902,18 +927,9 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       {imageError ? <p className="mb-2 px-2 text-xs text-red-600">{imageError}</p> : null}
 
       <div className="relative">
-        <div
-          aria-hidden
-          className="absolute inset-x-3 -bottom-1 top-3 rounded-full bg-[#dbeafe]/40 blur-2xl"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-x-6 bottom-0 top-5 rounded-full bg-black/[0.04] blur-xl"
-        />
-
         <form
           onSubmit={(e) => void handleSend(input, e)}
-          className="public-ai-input-shell relative flex items-end gap-0.5 overflow-visible rounded-full border border-[#e8eaed] bg-white px-1.5 py-1.5 shadow-[0_6px_24px_rgba(15,23,42,0.07),0_2px_6px_rgba(15,23,42,0.04)] sm:gap-1 sm:px-2 focus-within:border-[#c7d2fe] focus-within:shadow-[0_10px_32px_rgba(59,130,246,0.1),0_3px_10px_rgba(15,23,42,0.05)]"
+          className="public-ai-input-shell relative flex items-end gap-0.5 overflow-visible rounded-full border border-neutral-200 bg-white px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] sm:gap-1 sm:px-2 focus-within:border-neutral-300 focus-within:shadow-[0_12px_40px_rgba(0,0,0,0.08)]"
         >
           <AiInputSuggestions
             suggestions={inputSuggestions}
@@ -999,7 +1015,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
 
   return (
     <div
-      className={`public-ai-app relative flex overflow-hidden bg-[#fafafa] text-[#0d0d0d] ${
+      className={`public-ai-app relative flex overflow-hidden bg-white text-neutral-900 ${
         embedded ? "h-full min-h-0" : "h-[100dvh]"
       }`}
     >
@@ -1014,13 +1030,14 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
       {userRole && (userRole === "carrier" || userRole === "supplier") ? (
         <CopilotUpgradeBanner role={userRole} />
       ) : null}
-      <aside
-        className={`hidden shrink-0 flex-col border-r border-[#e5e5e5]/80 bg-[#f9f9f9]/80 backdrop-blur-md transition-all duration-300 md:flex ${
-          sidebarOpen ? "w-[260px]" : "w-[52px]"
-        }`}
+      <motion.aside
+        initial={false}
+        animate={{ width: sidebarOpen ? 260 : 52 }}
+        transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.85 }}
+        className="public-ai-sidebar hidden shrink-0 overflow-hidden md:flex md:flex-col"
       >
         {sidebarContent}
-      </aside>
+      </motion.aside>
 
       <AnimatePresence>
         {mobileSidebar && (
@@ -1029,20 +1046,21 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:hidden"
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[3px] md:hidden"
               onClick={() => setMobileSidebar(false)}
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: "spring", damping: 28, stiffness: 320 }}
-              className="fixed inset-y-0 left-0 z-50 w-[min(88vw,280px)] border-r border-[#e5e5e5]/80 bg-[#f9f9f9]/95 shadow-2xl backdrop-blur-xl md:hidden"
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 360, damping: 36 }}
+              className="public-ai-sidebar public-ai-sidebar-mobile fixed inset-y-0 left-0 z-50 w-[min(88vw,280px)] md:hidden"
             >
               <button
                 type="button"
                 onClick={() => setMobileSidebar(false)}
-                className="absolute right-3 top-3 rounded-lg p-2 text-[#666] hover:bg-[#ececec]"
+                className="absolute right-3 top-3 rounded-xl p-2 text-neutral-500 transition hover:bg-neutral-100 active:scale-95"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1052,13 +1070,17 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
         )}
       </AnimatePresence>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="public-ai-header flex h-14 shrink-0 items-center justify-between border-b border-[#ececec]/80 px-3 sm:px-4">
+      <motion.div
+        layout
+        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+        className="flex min-w-0 flex-1 flex-col"
+      >
+        <header className="public-ai-header public-ai-header-bar relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-neutral-200/80 bg-white px-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setMobileSidebar(true)}
-              className="rounded-xl p-2.5 text-[#666] transition hover:bg-[#f4f4f4] active:scale-95 md:hidden"
+              className="public-ai-header-btn rounded-xl p-2.5 md:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
@@ -1066,24 +1088,36 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
             <button
               type="button"
               onClick={() => setSidebarOpen((v) => !v)}
-              className="hidden rounded-xl p-2 text-[#666] transition hover:bg-[#f4f4f4] md:flex"
-              aria-label="Toggle sidebar"
+              className="public-ai-header-btn hidden rounded-xl p-2 md:flex"
+              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={sidebarOpen}
             >
-              {sidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={sidebarOpen ? "close" : "open"}
+                  initial={{ opacity: 0, rotate: -90, scale: 0.85 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: 90, scale: 0.85 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex items-center justify-center"
+                >
+                  {sidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
+                </motion.span>
+              </AnimatePresence>
             </button>
             <Link
               href="/"
-              className="flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-[#0d0d0d] transition hover:bg-[#f4f4f4] active:scale-[0.98] sm:py-1.5"
+              className="public-ai-header-link flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium sm:py-1.5"
             >
-              <Home className="h-4 w-4 shrink-0 text-[#666]" />
+              <Home className="h-4 w-4 shrink-0 text-neutral-500" />
               <span className="hidden sm:inline">Home</span>
             </Link>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
             <Link
               href="/find-loads"
-              className="rounded-full border border-[#e5e5e5] px-3 py-1.5 text-xs font-medium text-[#444] transition hover:bg-[#f7f7f8] active:scale-[0.98] sm:px-4 sm:text-sm"
+              className="public-ai-header-pill rounded-full border px-3 py-1.5 text-xs font-medium sm:px-4 sm:text-sm"
             >
               <span className="sm:hidden">Loads</span>
               <span className="hidden sm:inline">Find loads</span>
@@ -1122,7 +1156,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: 0.05 }}
-                className="public-ai-empty-title mb-6 max-w-lg text-center text-[clamp(1.35rem,3vw,1.75rem)] font-normal tracking-[-0.02em] text-[#1f1f1f] sm:mb-8"
+                className="public-ai-empty-title mb-6 max-w-lg text-center text-[clamp(1.5rem,3vw,2rem)] font-medium tracking-[-0.03em] text-neutral-900 sm:mb-8"
               >
                 Any freight questions to explore?
               </motion.h1>
@@ -1249,7 +1283,7 @@ export default function PublicFreightAiApp({ embedded = false, initialPrompt }: 
           )}
           </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
       </div>
     </div>
   );

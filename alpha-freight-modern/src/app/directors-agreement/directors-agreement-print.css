@@ -1,0 +1,206 @@
+/* Directors Agreement — PDF / print (A4) */
+
+/* Allow long sections & tables to flow across pages (fixes blank schedule pages) */
+.directors-agreement-print .revenue-plan-section,
+.directors-agreement-print .legal-clause,
+.directors-agreement-print .schedule-section,
+.directors-agreement-print .schedule-content,
+.directors-agreement-print .revenue-plan-table,
+.directors-agreement-print .revenue-plan-table table {
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+  overflow: visible !important;
+}
+
+.directors-agreement-print .revenue-plan-table tr,
+.directors-agreement-print .legal-signature-card,
+.directors-agreement-print .legal-callout,
+.directors-agreement-print .legal-confirmation {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.directors-agreement-print .revenue-plan-table thead {
+  display: table-header-group;
+}
+
+.directors-agreement-print .schedule-section--start {
+  break-before: page;
+  page-break-before: always;
+}
+
+.directors-agreement-print .schedule-heading {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.directors-agreement-print .revenue-plan-cover {
+  break-after: page;
+  page-break-after: always;
+}
+
+.directors-agreement-print .revenue-plan-contents {
+  break-after: page;
+  page-break-after: always;
+}
+
+body.pdf-exporting .revenue-plan-no-print {
+  display: none !important;
+}
+
+body.pdf-exporting {
+  background: #fff !important;
+}
+
+body.pdf-exporting .directors-agreement-print {
+  background: #fff !important;
+  min-height: auto !important;
+}
+
+body.pdf-exporting .directors-agreement-print main {
+  max-width: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 14mm 14mm;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide site chatbot / fixed widgets — they repeat on every PDF page */
+  body > button.fixed,
+  body > div.fixed,
+  [aria-label="Open Alpha Freight AI"],
+  .revenue-plan-no-print {
+    display: none !important;
+  }
+
+  .directors-agreement-print {
+    min-height: auto !important;
+    background: #fff !important;
+  }
+
+  .directors-agreement-print main {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  /* Override shared revenue-plan-print avoid-page on long sections */
+  .directors-agreement-print .revenue-plan-section {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow: visible !important;
+  }
+
+  .directors-agreement-print .revenue-plan-cover {
+    position: relative !important;
+    min-height: auto !important;
+    padding: 0 0 8mm !important;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .directors-agreement-print .revenue-plan-cover h1 {
+    font-size: 21pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .directors-agreement-print .revenue-plan-contents {
+    padding-top: 0 !important;
+    padding-bottom: 6mm !important;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .directors-agreement-print .revenue-plan-contents .sm\:columns-2 {
+    columns: 2 !important;
+    column-gap: 8mm;
+  }
+
+  .directors-agreement-print .legal-clause {
+    padding-top: 5mm !important;
+    padding-bottom: 5mm !important;
+    background: transparent !important;
+  }
+
+  .directors-agreement-print .legal-clause-header {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .directors-agreement-print .schedule-section {
+    background: #fff !important;
+    padding-top: 0 !important;
+  }
+
+  .directors-agreement-print .schedule-section--start {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .directors-agreement-print .revenue-plan-table {
+    font-size: 8.5pt;
+    overflow: visible !important;
+  }
+
+  .directors-agreement-print .revenue-plan-table td,
+  .directors-agreement-print .revenue-plan-table th {
+    color: #171717 !important;
+  }
+
+  .directors-agreement-print .revenue-plan-table thead th {
+    color: #fff !important;
+    background: #171717 !important;
+  }
+
+  .directors-agreement-print .legal-body,
+  .directors-agreement-print .legal-callout__text {
+    font-size: 10pt !important;
+    line-height: 1.65 !important;
+    color: #262626 !important;
+  }
+
+  .directors-agreement-print .revenue-plan-cover table {
+    font-size: 9pt !important;
+  }
+
+  .directors-agreement-print .revenue-plan-cover table td {
+    padding: 2.5mm 3mm !important;
+  }
+
+  .directors-agreement-print .revenue-plan-cover .text-xl {
+    font-size: 12pt !important;
+  }
+
+  .directors-agreement-print footer.revenue-plan-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding-top: 6mm !important;
+  }
+
+  .directors-agreement-print a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}

@@ -3,7 +3,6 @@
 import { useState, useRef, type FormEvent } from "react";
 import Navbar from "@/components/Navbar";
 import SupportLiveChat, { SUPPORT_EMAIL } from "@/components/SupportLiveChat";
-import NetworkCanvas3D from "@/components/NetworkCanvas3D";
 import Counter from "@/components/Counter";
 import FeatureIcon3D from "@/components/FeatureIcon3D";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -25,10 +24,7 @@ import Image from "next/image";
 
 import { Footer, CinematicCTA } from "@/components/Footer";
 import { getSupportArticleHref } from "@/lib/support-links";
-
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_mvxwoue";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_21isokf";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "f5bWSTVw5Z8mVVwTu";
+import { submitWebsiteInquiry } from "@/lib/submit-website-inquiry";
 
 type QuickForm = {
   name: string;
@@ -41,34 +37,6 @@ const initialQuickForm: QuickForm = {
   email: "",
   message: "",
 };
-
-async function sendQuickSupportEmail(form: QuickForm) {
-  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_TEMPLATE_ID,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: {
-        customer_name: form.name,
-        customer_email: form.email,
-        pickup_location: "Support Page Quick Assistance",
-        delivery_location: "Not provided",
-        additional_requirements: form.message,
-        from_name: form.name,
-        from_email: form.email,
-        reply_to: form.email,
-        to_name: "Alpha Freight Support",
-        to_email: SUPPORT_EMAIL,
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Unable to send support request.");
-  }
-}
 
 const supportCategories = [
   {
@@ -142,22 +110,18 @@ export default function SupportPage() {
     setQuickSubmitting(true);
     setQuickStatus(null);
 
-    const hasEmailJs =
-      Boolean(EMAILJS_SERVICE_ID) &&
-      Boolean(EMAILJS_TEMPLATE_ID) &&
-      Boolean(EMAILJS_PUBLIC_KEY) &&
-      !EMAILJS_PUBLIC_KEY.startsWith("YOUR_");
-
     try {
-      if (hasEmailJs) {
-        await sendQuickSupportEmail(quickForm);
-        setQuickForm(initialQuickForm);
-        setQuickStatus("Request sent. Our team will reply within 2 hours.");
-      } else {
-        window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Support Request")}&body=${encodeURIComponent(`Name: ${quickForm.name}\nEmail: ${quickForm.email}\n\n${quickForm.message}`)}`;
-        setQuickForm(initialQuickForm);
-        setQuickStatus("Opening your email app...");
-      }
+      await submitWebsiteInquiry({
+        inquiryType: "support",
+        sourcePage: "/support",
+        name: quickForm.name,
+        email: quickForm.email,
+        message: quickForm.message,
+        subject: "Support Page Quick Assistance",
+      });
+
+      setQuickForm(initialQuickForm);
+      setQuickStatus("Request sent. Our team will reply within 2 hours.");
     } catch {
       setQuickStatus("Could not send request. Please email support@alphafreightuk.com directly.");
     } finally {

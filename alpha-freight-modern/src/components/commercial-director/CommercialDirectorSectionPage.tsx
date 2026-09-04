@@ -76,8 +76,13 @@ const RELATED: Record<string, Array<{ label: string; href: string }>> = {
     { label: "Shippers", href: commercialDirectorRoute("/shippers") },
   ],
   revenue: [
+    { label: "Revenue Command Center", href: commercialDirectorRoute("/revenue-plan") },
     { label: "Targets", href: commercialDirectorRoute("/targets") },
     { label: "Reports", href: commercialDirectorRoute("/reports") },
+  ],
+  targets: [
+    { label: "Revenue Command Center", href: commercialDirectorRoute("/revenue-plan") },
+    { label: "Revenue", href: commercialDirectorRoute("/revenue") },
   ],
 };
 

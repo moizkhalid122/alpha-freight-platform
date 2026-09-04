@@ -14,15 +14,25 @@ import {
 } from "@/components/revenue-model/GrowthEngineDiagram";
 import {
   ALL_REVENUE_STREAMS,
+  DAILY_EFFORT_TARGETS,
   EXECUTIVE_SUMMARY,
+  formatRevenueGbp,
   PLAN_PHASES,
+  REVENUE_ASSUMPTIONS,
+  REVENUE_BREAKDOWN_TARGET,
   REVENUE_FUNNEL_STAGES,
   REVENUE_MODEL_SUMMARY,
+  REVENUE_MONTHLY_FORECAST,
   REVENUE_PILLARS,
   REVENUE_PROJECTIONS,
+  REVENUE_SCENARIOS,
   REVENUE_TYPE_LABELS,
+  STREAM_ACTIVATION_SCHEDULE,
+  STREAM_MONTHLY_TARGETS_TOTAL,
+  TWELVE_MONTH_EXECUTION,
   type RevenueStreamType,
 } from "@/lib/revenue-model-content";
+import RevenueStreamsTargetBox from "@/components/revenue-model/RevenueStreamsTargetBox";
 
 const TYPE_STYLES: Record<RevenueStreamType, string> = {
   transaction: "bg-neutral-900 text-white",
@@ -122,9 +132,9 @@ export default function RevenuePlanDocument() {
           <div className="mt-20 grid grid-cols-2 gap-px border-2 border-neutral-900 bg-neutral-900 sm:grid-cols-4">
             {[
               { k: "Revenue streams", v: "44" },
-              { k: "12-mo target", v: "£242k" },
-              { k: "Monthly (Y1)", v: "£20.2k" },
-              { k: "Prepared", v: String(year) },
+              { k: "12-mo target", v: REVENUE_MODEL_SUMMARY.yearOneTargetAnnual },
+              { k: "Monthly (M12)", v: REVENUE_MODEL_SUMMARY.yearOneTargetMonthly },
+              { k: "Year 1 collected", v: REVENUE_MODEL_SUMMARY.yearOneCumulative },
             ].map((s) => (
               <div key={s.k} className="bg-white px-6 py-8 sm:px-8 sm:py-10">
                 <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-neutral-400">{s.k}</p>
@@ -149,8 +159,12 @@ export default function RevenuePlanDocument() {
               ["03", "Growth engine diagram"],
               ["04", "Revenue pillars & stream map"],
               ["05", "Complete index — 44 streams"],
+              ["05B", "44 streams · monthly targets box"],
               ["06", "Execution pipeline"],
               ["07", "Financial waterfall"],
+              ["08", "12-month revenue forecast"],
+              ["09", "Monthly execution plan"],
+              ["10", "Stream activation calendar"],
             ].map(([num, label], i) => (
               <div
                 key={num}
@@ -284,6 +298,18 @@ export default function RevenuePlanDocument() {
           </div>
         </section>
 
+        {/* ═══ 05B 44 STREAM TARGET BOX ═══ */}
+        <section className="revenue-plan-section revenue-plan-section--break px-6 py-16 sm:px-14 sm:py-20">
+          <SectionTitle
+            number="05B"
+            title="44 streams · monthly targets"
+            subtitle={`Har revenue stream ka 1 mahine ka target · combined ${formatRevenueGbp(STREAM_MONTHLY_TARGETS_TOTAL)}/mo at M12`}
+          />
+          <div className="mt-12">
+            <RevenueStreamsTargetBox />
+          </div>
+        </section>
+
         {/* ═══ 06 EXECUTION PIPELINE ═══ */}
         <section className="revenue-plan-section revenue-plan-section--break px-6 py-16 sm:px-14 sm:py-20">
           <SectionTitle number="06" title="Execution pipeline" subtitle="Phased delivery · 30 / 90 / 365 days" />
@@ -322,8 +348,10 @@ export default function RevenuePlanDocument() {
 
         {/* ═══ 07 WATERFALL ═══ */}
         <section className="revenue-plan-section revenue-plan-section--break border-t-2 border-neutral-900 px-6 py-16 sm:px-14 sm:py-20">
-          <SectionTitle number="07" title="Financial waterfall" subtitle="Conservative month-12 projection · £20,200 / month" />
-          <p className="mt-4 text-sm text-neutral-500">Illustrative model — assumes product launch + growing load volume.</p>
+          <SectionTitle number="07" title="Financial waterfall" subtitle="Target scenario · £1.15M / month at M12" />
+          <p className="mt-4 text-sm text-neutral-500">
+            Full-effort model — assumes product launches on schedule + consistent daily outreach.
+          </p>
           <div className="mt-12 border-2 border-neutral-900 p-8 sm:p-12">
             <RevenueWaterfall />
           </div>
@@ -344,6 +372,180 @@ export default function RevenuePlanDocument() {
                     <td className="px-6 py-4 text-right font-mono">{row.m12}</td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* ═══ 08 MONTHLY FORECAST ═══ */}
+        <section className="revenue-plan-section revenue-plan-section--break bg-neutral-50 px-6 py-16 sm:px-14 sm:py-20">
+          <SectionTitle number="08" title="12-month revenue forecast" subtitle="Conservative · target · stretch" />
+          <div className="mt-10 grid gap-px border-2 border-neutral-900 bg-neutral-900 sm:grid-cols-3">
+            {REVENUE_SCENARIOS.map((s) => (
+              <div key={s.id} className={`bg-white p-8 ${s.id === "target" ? "ring-2 ring-inset ring-neutral-900" : ""}`}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">{s.label}</p>
+                <p className="revenue-plan-display mt-4 text-3xl font-semibold">{formatRevenueGbp(s.m12Monthly)}</p>
+                <p className="text-xs text-neutral-500">/ month at M12</p>
+                <p className="mt-4 text-sm text-neutral-600">{s.description}</p>
+                <div className="mt-6 space-y-2 border-t border-neutral-200 pt-4 text-sm">
+                  <p>
+                    <span className="text-neutral-400">Run-rate:</span> {formatRevenueGbp(s.yearRunRate)}/yr
+                  </p>
+                  <p>
+                    <span className="text-neutral-400">Year 1 collected:</span> {formatRevenueGbp(s.yearCumulative)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 border-2 border-neutral-900">
+            <table className="revenue-plan-table w-full text-sm">
+              <thead className="bg-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                <tr>
+                  <th className="px-4 py-3 text-left">Month</th>
+                  <th className="px-4 py-3 text-right">Conservative</th>
+                  <th className="px-4 py-3 text-right">Target</th>
+                  <th className="px-4 py-3 text-right">Stretch</th>
+                  <th className="hidden px-4 py-3 text-right sm:table-cell">Loads</th>
+                  <th className="hidden px-4 py-3 text-left lg:table-cell">Focus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {REVENUE_MONTHLY_FORECAST.map((row, i) => (
+                  <tr key={row.month} className={`border-t border-neutral-200 ${i % 2 === 0 ? "bg-white" : "bg-neutral-50"}`}>
+                    <td className="px-4 py-3 font-medium">{row.label}</td>
+                    <td className="px-4 py-3 text-right font-mono text-neutral-500">{formatRevenueGbp(row.conservative)}</td>
+                    <td className="px-4 py-3 text-right font-mono font-bold">{formatRevenueGbp(row.target)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-neutral-600">{formatRevenueGbp(row.stretch)}</td>
+                    <td className="hidden px-4 py-3 text-right font-mono sm:table-cell">{row.loadsCompleted}</td>
+                    <td className="hidden px-4 py-3 text-xs text-neutral-500 lg:table-cell">{row.focus}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="border-t-2 border-neutral-900 bg-neutral-900 font-bold text-white">
+                <tr>
+                  <td className="px-4 py-4">Year 1 total</td>
+                  <td className="px-4 py-4 text-right font-mono">£2.8M</td>
+                  <td className="px-4 py-4 text-right font-mono">£6.8M</td>
+                  <td className="px-4 py-4 text-right font-mono">£9.5M</td>
+                  <td className="hidden px-4 py-4 sm:table-cell" colSpan={2} />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div className="mt-10 border-2 border-neutral-900 bg-white p-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500">Daily effort targets</p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Object.entries(DAILY_EFFORT_TARGETS).map(([key, value]) => (
+                <div key={key} className="border border-neutral-200 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">{key}</p>
+                  <p className="mt-2 text-sm text-neutral-700">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ 09 EXECUTION PLAN ═══ */}
+        <section className="revenue-plan-section revenue-plan-section--break px-6 py-16 sm:px-14 sm:py-20">
+          <SectionTitle number="09" title="Monthly execution plan" subtitle="What to ship · sell · measure each month" />
+          <div className="mt-12 space-y-0 border-2 border-neutral-900">
+            {TWELVE_MONTH_EXECUTION.map((plan, i) => (
+              <div key={plan.month} className={`border-b border-neutral-200 last:border-b-0 ${i % 2 === 0 ? "bg-white" : "bg-neutral-50"}`}>
+                <div className="flex flex-col gap-4 border-b border-neutral-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                  <div className="flex items-center gap-4">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-neutral-900 font-mono text-sm font-bold">
+                      M{plan.month}
+                    </span>
+                    <div>
+                      <h3 className="revenue-plan-display text-lg font-semibold">{plan.title}</h3>
+                      <p className="text-xs text-neutral-500">Revenue target · {formatRevenueGbp(plan.revenueTarget)}</p>
+                    </div>
+                  </div>
+                  <p className="font-mono text-sm text-neutral-500">
+                    Streams: {plan.streamsToLaunch.map((id) => String(id).padStart(2, "0")).join(", ")}
+                  </p>
+                </div>
+                <div className="grid gap-px bg-neutral-200 sm:grid-cols-3">
+                  {[
+                    { label: "Sales & outreach", items: plan.salesActions },
+                    { label: "Product & launch", items: plan.productActions },
+                    { label: "KPIs", items: plan.kpis },
+                  ].map((col) => (
+                    <div key={col.label} className="bg-white p-5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">{col.label}</p>
+                      <ul className="mt-3 space-y-2">
+                        {col.items.map((item) => (
+                          <li key={item} className="flex gap-2 text-sm text-neutral-600">
+                            <span className="font-bold text-neutral-900">→</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 border-2 border-neutral-900 p-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500">Key assumptions</p>
+            <ul className="mt-6 space-y-3">
+              {REVENUE_ASSUMPTIONS.map((a) => (
+                <li key={a} className="flex gap-3 text-sm text-neutral-600">
+                  <span className="font-bold text-neutral-900">·</span>
+                  {a}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ═══ 10 STREAM CALENDAR ═══ */}
+        <section className="revenue-plan-section revenue-plan-section--break bg-neutral-900 px-6 py-16 text-white sm:px-14 sm:py-20">
+          <SectionTitle number="10" title="Stream activation calendar" subtitle="When each of 44 streams goes live" inverted />
+          <div className="mt-10 grid gap-3 sm:grid-cols-4 lg:grid-cols-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => {
+              const count = STREAM_ACTIVATION_SCHEDULE.filter((s) => s.launchMonth === m).length;
+              return (
+                <div key={m} className="border border-neutral-700 p-4 text-center">
+                  <p className="font-mono text-xs text-neutral-500">M{m}</p>
+                  <p className="revenue-plan-display mt-2 text-2xl font-semibold">{count}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-neutral-400">streams</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="revenue-plan-table mt-10 border border-neutral-700">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-neutral-700 text-[10px] uppercase tracking-wider text-neutral-400">
+                <tr>
+                  <th className="px-4 py-3">#</th>
+                  <th className="px-4 py-3">Stream</th>
+                  <th className="px-4 py-3">Launch</th>
+                  <th className="px-4 py-3">Priority</th>
+                  <th className="hidden px-4 py-3 sm:table-cell">Effort</th>
+                  <th className="hidden px-4 py-3 lg:table-cell">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {STREAM_ACTIVATION_SCHEDULE.map((row, i) => {
+                  const stream = ALL_REVENUE_STREAMS.find((s) => s.id === row.streamId);
+                  return (
+                    <tr key={row.streamId} className={`border-b border-neutral-800 ${i % 2 === 0 ? "bg-neutral-900" : "bg-neutral-950"}`}>
+                      <td className="px-4 py-2.5 font-mono text-xs text-neutral-500">{String(row.streamId).padStart(2, "0")}</td>
+                      <td className="px-4 py-2.5 font-medium">{stream?.name ?? "—"}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs">Month {row.launchMonth}</td>
+                      <td className="px-4 py-2.5">
+                        <span className={`text-[10px] font-bold uppercase ${row.priority === "P1" ? "text-white" : "text-neutral-400"}`}>
+                          {row.priority}
+                        </span>
+                      </td>
+                      <td className="hidden px-4 py-2.5 text-neutral-400 sm:table-cell">{row.effort}</td>
+                      <td className="hidden px-4 py-2.5 text-xs text-neutral-500 lg:table-cell">{row.note ?? "—"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -14,6 +14,8 @@ import {
   Phone,
   Send,
 } from "lucide-react";
+import { mapContactSubjectToInquiryType } from "@/lib/inquiry-content";
+import { submitWebsiteInquiry } from "@/lib/submit-website-inquiry";
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
 const PHONE = "+44 7782 294718";
@@ -116,16 +118,6 @@ async function sendViaEmailJs(form: FormState) {
   }
 }
 
-function openMailtoFallback(form: FormState) {
-  const subjectLabel =
-    subjectOptions.find((option) => option.value === form.subject)?.label || "General Inquiry";
-  const subject = encodeURIComponent(`Contact Form: ${subjectLabel}`);
-  const body = encodeURIComponent(
-    `Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone || "Not provided"}\n\n${form.message}`,
-  );
-  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
-}
-
 export default function ContactPage() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,34 +135,36 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setStatus(null);
 
-    const hasEmailJs =
-      Boolean(EMAILJS_SERVICE_ID) &&
-      Boolean(EMAILJS_TEMPLATE_ID) &&
-      Boolean(EMAILJS_PUBLIC_KEY) &&
-      !EMAILJS_PUBLIC_KEY.startsWith("YOUR_");
+    const subjectLabel =
+      subjectOptions.find((option) => option.value === form.subject)?.label || "General Inquiry";
 
     try {
+      await submitWebsiteInquiry({
+        inquiryType: mapContactSubjectToInquiryType(form.subject),
+        sourcePage: "/contact",
+        name: form.name,
+        email: form.email,
+        phone: form.phone || undefined,
+        subject: subjectLabel,
+        message: form.message,
+        metadata: { contactSubject: form.subject },
+      });
+
+      const hasEmailJs =
+        Boolean(EMAILJS_SERVICE_ID) &&
+        Boolean(EMAILJS_TEMPLATE_ID) &&
+        Boolean(EMAILJS_PUBLIC_KEY) &&
+        !EMAILJS_PUBLIC_KEY.startsWith("YOUR_");
+
       if (hasEmailJs) {
-        await Promise.race([
-          sendViaEmailJs(form),
-          new Promise((_, reject) => {
-            setTimeout(() => reject(new Error("Request timed out.")), 15000);
-          }),
-        ]);
-        setForm(initialForm);
-        setStatus({
-          type: "success",
-          message: "Thank you! Your message has been sent. We will get back to you within 24 hours.",
-        });
-      } else {
-        openMailtoFallback(form);
-        setForm(initialForm);
-        setStatus({
-          type: "info",
-          message:
-            "We opened your email client to send your message. If it did not open, please email support@alphafreightuk.com directly.",
-        });
+        void sendViaEmailJs(form).catch(() => undefined);
       }
+
+      setForm(initialForm);
+      setStatus({
+        type: "success",
+        message: "Thank you! Your message has been sent. We will get back to you within 24 hours.",
+      });
     } catch {
       setStatus({
         type: "error",

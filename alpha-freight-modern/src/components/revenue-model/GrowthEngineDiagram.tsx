@@ -1,5 +1,7 @@
 "use client";
 
+import { REVENUE_BREAKDOWN_TARGET, formatRevenueGbp } from "@/lib/revenue-model-content";
+
 /** Enterprise pipeline diagram — white/black, heavy connector lines */
 export function GrowthEngineDiagram() {
   const leftSteps = [
@@ -186,13 +188,12 @@ export function RevenuePipelineOverview() {
 }
 
 export function RevenueWaterfall() {
-  const rows = [
-    { label: "Transaction commission", m12: 11200, width: 100 },
-    { label: "Pro subscriptions", m12: 3500, width: 31 },
-    { label: "Instant payout fees", m12: 2000, width: 18 },
-    { label: "Featured + directory", m12: 1500, width: 13 },
-    { label: "Affiliates + academy", m12: 2000, width: 18 },
-  ];
+  const rows = REVENUE_BREAKDOWN_TARGET.map((row) => ({
+    label: row.category,
+    m12: row.m12,
+  }));
+  const total = rows.reduce((sum, row) => sum + row.m12, 0);
+  const max = Math.max(...rows.map((r) => r.m12));
 
   return (
     <div className="space-y-4">
@@ -202,18 +203,18 @@ export function RevenueWaterfall() {
           <div className="h-8 border border-neutral-200 bg-neutral-50">
             <div
               className="revenue-plan-waterfall-bar flex h-full items-center bg-neutral-900 px-3"
-              style={{ width: `${row.width}%` }}
+              style={{ width: `${Math.round((row.m12 / max) * 100)}%` }}
             >
-              <span className="hidden text-[10px] font-bold text-white sm:inline">£{row.m12.toLocaleString()}</span>
+              <span className="hidden text-[10px] font-bold text-white sm:inline">{formatRevenueGbp(row.m12)}</span>
             </div>
           </div>
-          <p className="text-right font-mono text-sm font-bold">£{row.m12.toLocaleString()}</p>
+          <p className="text-right font-mono text-sm font-bold">{formatRevenueGbp(row.m12)}</p>
         </div>
       ))}
       <div className="grid grid-cols-[140px_1fr_80px] items-center gap-4 border-t-2 border-neutral-900 pt-4 sm:grid-cols-[200px_1fr_100px]">
         <p className="text-sm font-bold">Total / month</p>
         <div className="h-10 bg-neutral-900" />
-        <p className="text-right font-mono text-lg font-bold">£20,200</p>
+        <p className="text-right font-mono text-lg font-bold">{formatRevenueGbp(total)}</p>
       </div>
     </div>
   );

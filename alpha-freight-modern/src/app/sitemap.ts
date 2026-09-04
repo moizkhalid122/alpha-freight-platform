@@ -6,6 +6,7 @@ import { knowledgeBaseArticles } from "@/lib/knowledge-base-content";
 import {
   getPathChangeFrequency,
   getPathPriority,
+  INDUSTRY_SLUGS,
   PUBLIC_SITEMAP_PATHS,
   SERVICE_DETAIL_IDS,
   SITE_URL,
@@ -49,6 +50,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const industryPages: MetadataRoute.Sitemap = INDUSTRY_SLUGS.map((slug) => {
+    const path = `/industries/${slug}`;
+    return {
+      url: `${SITE_URL}${path}`,
+      lastModified,
+      changeFrequency: getPathChangeFrequency(path),
+      priority: getPathPriority(path),
+    };
+  });
+
   const aiTopicPages: MetadataRoute.Sitemap = AI_TOPIC_PAGES.map((topic) => {
     const path = `/ai/${topic.slug}`;
     return {
@@ -66,5 +77,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...careerPages,
     ...knowledgeBasePages,
     ...servicePages,
+    ...industryPages,
   ];
 }

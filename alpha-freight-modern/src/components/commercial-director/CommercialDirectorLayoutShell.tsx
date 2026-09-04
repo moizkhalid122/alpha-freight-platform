@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 import CommercialDirectorHeader from "@/components/commercial-director/CommercialDirectorHeader";
+import CommercialDirectorMotivationBanner from "@/components/commercial-director/CommercialDirectorMotivationBanner";
 import CommercialDirectorPrefetch from "@/components/commercial-director/CommercialDirectorPrefetch";
 import CommercialDirectorSidebar from "@/components/commercial-director/CommercialDirectorSidebar";
 import {
@@ -54,6 +55,7 @@ function CommercialDirectorLayoutShell({ children }: { children: ReactNode }) {
         <div className="hidden lg:block">
           <CommercialDirectorHeader pathname={pathname} />
         </div>
+        <CommercialDirectorMotivationBanner />
         <main className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-8 lg:px-12 lg:py-5">
           {children}
         </main>

@@ -8,6 +8,7 @@ import {
   CircleDollarSign,
   ClipboardList,
   FileBarChart,
+  Layers,
   LayoutDashboard,
   MessageSquare,
   Plane,
@@ -37,6 +38,12 @@ export const COMMERCIAL_DIRECTOR_NAV: CommercialDirectorNavSection[] = [
     label: "OVERVIEW",
     items: [
       { name: "Dashboard", path: commercialDirectorRoute(), icon: LayoutDashboard },
+      {
+        name: "Tasks",
+        path: commercialDirectorRoute("/tasks"),
+        icon: Briefcase,
+        description: "Daily AI tasks · sales · deals · funding",
+      },
     ],
   },
   {
@@ -54,12 +61,17 @@ export const COMMERCIAL_DIRECTOR_NAV: CommercialDirectorNavSection[] = [
     label: "TEAM",
     items: [
       { name: "Employees", path: commercialDirectorRoute("/employees"), icon: Users },
-      { name: "Tasks & Follow-ups", path: commercialDirectorRoute("/tasks"), icon: Briefcase },
     ],
   },
   {
     label: "PERFORMANCE",
     items: [
+      {
+        name: "Revenue Command Center",
+        path: commercialDirectorRoute("/revenue-plan"),
+        icon: Layers,
+        description: "44 streams · plan · actions · monthly targets",
+      },
       {
         name: "Revenue & Commissions",
         path: commercialDirectorRoute("/revenue"),
@@ -172,8 +184,9 @@ export const COMMERCIAL_SECTION_CONFIG: Record<string, CommercialSectionConfig> 
   tasks: {
     slug: "tasks",
     eyebrow: "Tasks & Follow-ups",
-    title: "Team execution tracker",
-    description: "Assign and monitor commercial tasks, callbacks, and follow-ups across the sales team.",
+    title: "Daily revenue tasks",
+    description:
+      "Today's tasks from the 44 Revenue System — plan seed, OpenAI suggestions, tick complete or dismiss.",
     metrics: [
       { label: "Open tasks", value: "—" },
       { label: "Due today", value: "—" },
@@ -181,9 +194,10 @@ export const COMMERCIAL_SECTION_CONFIG: Record<string, CommercialSectionConfig> 
       { label: "Completed (7d)", value: "—" },
     ],
     highlights: [
-      "Create follow-ups linked to leads, shippers, or forwarders.",
-      "Review employee task completion without editing commission rules.",
-      "Keep sales accountability visible to the Commercial Director.",
+      "Auto-loaded daily tasks from the revenue plan and 44 streams.",
+      "OpenAI generates extra tasks based on monthly revenue targets.",
+      "Tick ✓ to complete or ✕ to dismiss — progress tracked live.",
+      "Add manual tasks or reset from plan any time.",
     ],
   },
   revenue: {
@@ -202,6 +216,26 @@ export const COMMERCIAL_SECTION_CONFIG: Record<string, CommercialSectionConfig> 
       "View commission totals and team performance — no payout buttons.",
       "Cannot edit commission rates or release settlements.",
       "Export summaries for board and target reviews.",
+      "Use Revenue Command Center for the full 44-stream plan and monthly actions.",
+    ],
+  },
+  "revenue-plan": {
+    slug: "revenue-plan",
+    eyebrow: "44 Revenue System",
+    title: "Revenue Command Center",
+    description:
+      "Execute the 44-stream strategy — monthly targets, sales actions, product launches, and progress vs plan.",
+    metrics: [
+      { label: "This month target", value: "—" },
+      { label: "Revenue MTD", value: "—" },
+      { label: "Streams live", value: "—" },
+      { label: "M12 run-rate", value: "—" },
+    ],
+    highlights: [
+      "All 44 revenue streams with this-month and M12 targets.",
+      "Auto-generated sales, product, and KPI actions for the current plan month.",
+      "12-month roadmap and daily effort checklist.",
+      "Progress tracked against commission MTD from live data.",
     ],
   },
   targets: {

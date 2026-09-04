@@ -5,13 +5,10 @@ import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { AWARDS_EVENT, COMPANY_TYPES, NOMINATION_CATEGORIES, type CompanyType } from "@/lib/awards-content";
+import { submitWebsiteInquiry } from "@/lib/submit-website-inquiry";
 
 type NominationCategory = (typeof NOMINATION_CATEGORIES)[number];
 import { BlackGlassPanel, MagneticButton, ScrollReveal, SectionShell } from "./awards-shared";
-
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_mvxwoue";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_21isokf";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "f5bWSTVw5Z8mVVwTu";
 
 const inputClass =
   "mt-2 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#3B82F6]/50 focus:ring-2 focus:ring-[#3B82F6]/10";
@@ -49,28 +46,20 @@ export function AwardsRegister() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          service_id: EMAILJS_SERVICE_ID,
-          template_id: EMAILJS_TEMPLATE_ID,
-          user_id: EMAILJS_PUBLIC_KEY,
-          template_params: {
-            customer_name: form.companyName.trim(),
-            customer_email: form.email.trim(),
-            pickup_location: `Awards — ${form.companyType} · ${form.nominationCategory}`,
-            delivery_location: AWARDS_EVENT.title,
-            additional_requirements: form.message.trim() || "Register interest",
-            from_name: form.companyName.trim(),
-            from_email: form.email.trim(),
-            reply_to: form.email.trim(),
-            to_name: "Alpha Freight Awards",
-            to_email: "support@alphafreightuk.com",
-          },
-        }),
+      await submitWebsiteInquiry({
+        inquiryType: "awards",
+        sourcePage: "/awards",
+        name: form.companyName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+        subject: `${form.companyType} · ${form.nominationCategory}`,
+        message: form.message.trim() || "Awards register interest",
+        metadata: {
+          companyType: form.companyType,
+          nominationCategory: form.nominationCategory,
+          event: AWARDS_EVENT.title,
+        },
       });
-      if (!res.ok) throw new Error("fail");
       setSubmitted(true);
     } catch {
       setError("Unable to send. Please email support@alphafreightuk.com");
