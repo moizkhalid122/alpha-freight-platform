@@ -165,9 +165,11 @@ export default function PremiumHomePage() {
                 muted
                 loop
                 playsInline
+                preload="auto"
                 poster="/hero2.png"
                 className="absolute inset-0 h-full w-full object-cover object-center"
               >
+                <source src="/videos/hero-0903.webm" type="video/webm" />
                 <source src="/videos/hero-0903.mp4" type="video/mp4" />
               </video>
             </div>

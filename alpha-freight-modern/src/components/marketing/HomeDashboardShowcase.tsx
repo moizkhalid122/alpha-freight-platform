@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -28,6 +28,7 @@ const panels = [
 
 function ScrollPlayVideo({ className }: { className: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -36,21 +37,42 @@ function ScrollPlayVideo({ className }: { className: string }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          void video.play().catch(() => {});
+          setShouldLoad(true);
         } else {
           video.pause();
         }
       },
-      { threshold: 0.4 },
+      { rootMargin: "240px 0px", threshold: 0.15 },
     );
 
     observer.observe(video);
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!shouldLoad) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.load();
+    void video.play().catch(() => {});
+  }, [shouldLoad]);
+
   return (
-    <video ref={videoRef} muted loop playsInline preload="metadata" className={className}>
-      <source src="/videos/showcase-0903-2.mp4" type="video/mp4" />
+    <video
+      ref={videoRef}
+      muted
+      loop
+      playsInline
+      preload="none"
+      poster="/images/home/showcase-ai-poster.jpg"
+      className={className}
+    >
+      {shouldLoad && (
+        <>
+          <source src="/videos/showcase-0903-2.webm" type="video/webm" />
+          <source src="/videos/showcase-0903-2.mp4" type="video/mp4" />
+        </>
+      )}
     </video>
   );
 }
