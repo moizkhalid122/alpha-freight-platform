@@ -27,10 +27,21 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Invalid profile_extras payload." }, { status: 400 });
     }
 
+    const updates: Record<string, unknown> = { profile_extras: profileExtras };
+    if (typeof body.verification_status === "string") {
+      updates.verification_status = body.verification_status;
+    }
+    if (typeof body.status === "string") {
+      updates.status = body.status;
+    }
+    if (typeof body.is_approved === "boolean") {
+      updates.is_approved = body.is_approved;
+    }
+
     const db = getSupabaseForAdminApi(request);
     const { data, error } = await db
       .from("profiles")
-      .update({ profile_extras: profileExtras })
+      .update(updates)
       .eq("id", userId)
       .select("id, profile_extras")
       .maybeSingle();

@@ -26,7 +26,8 @@ import {
   UserRoundX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mergeCarrierExtras, readCarrierExtras, type CarrierProfileExtras } from "@/lib/profile-extras";
+import { mergeCarrierExtras, type CarrierProfileExtras } from "@/lib/profile-extras";
+import { parseProfileExtras } from "@/lib/platform-data";
 import { cn } from "@/lib/utils";
 import {
   ADMIN_CARD,
@@ -58,6 +59,7 @@ type CarrierProfileRecord = {
   fleet_size?: number | string | null;
   vehicles_count?: number | string | null;
   truck_count?: number | string | null;
+  profile_extras?: unknown;
 };
 
 type VerificationDocumentStatus = "Uploaded" | "Missing" | "In Review";
@@ -297,7 +299,7 @@ function deriveRisk(documents: VerificationDocument[], extras: CarrierProfileExt
 function buildPendingOverview(profiles: CarrierProfileRecord[]): VerificationOverview {
   const rows = profiles
     .map((profile) => {
-      const extras = readCarrierExtras(profile.id);
+      const extras = parseProfileExtras<CarrierProfileExtras>(profile.profile_extras);
       const documents = buildDocuments(extras);
       const uploadedDocuments = documents.filter(
         (doc) => doc.status === "Uploaded" || doc.status === "In Review"
@@ -531,7 +533,8 @@ export default function AdminPendingVerificationPage() {
     nextStatus: "verified" | "rejected" | "pending",
     note?: string
   ) => {
-    mergeCarrierExtras(row.id, {
+    const profileExtras: CarrierProfileExtras = {
+      ...row.extras,
       verificationStatus:
         nextStatus === "verified" ? "Verified" : nextStatus === "rejected" ? "Rejected" : "Pending",
       verificationNotes: note ?? row.verificationNotes,
@@ -540,7 +543,31 @@ export default function AdminPendingVerificationPage() {
         nextStatus === "verified" ? new Date().toLocaleDateString("en-GB") : row.extras.verifiedDate ?? null,
       accountStatus:
         nextStatus === "verified" ? "Active" : nextStatus === "rejected" ? "Suspended" : row.extras.accountStatus ?? null,
+    };
+
+    const response = await fetch(`/api/admin/profiles/${row.id}/extras`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        profile_extras: profileExtras,
+        verification_status:
+          nextStatus === "verified"
+            ? "verified"
+            : nextStatus === "rejected"
+              ? "rejected"
+              : "info_required",
+        status: nextStatus === "verified" ? "verified" : nextStatus === "rejected" ? "suspended" : "pending",
+        is_approved: nextStatus === "verified",
+      }),
     });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      throw new Error(payload.error || "Unable to update verification status.");
+    }
+
+    mergeCarrierExtras(row.id, profileExtras);
   };
 
   const handleSingleAction = async (

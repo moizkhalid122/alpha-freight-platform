@@ -35,6 +35,7 @@ export type CarrierProfileExtras = {
   verificationNotes?: string | null;
   verifiedBy?: string | null;
   verifiedDate?: string | null;
+  onboardingComplete?: boolean | null;
   insuranceCertificateUrl?: string | null;
   operatorLicenseUrl?: string | null;
   vehicleRegistrationUrl?: string | null;
@@ -64,6 +65,7 @@ export type SupplierProfileExtras = {
   contactPerson?: string | null;
   address?: string | null;
   city?: string | null;
+  postcode?: string | null;
   registrationNo?: string | null;
   taxId?: string | null;
   industry?: string | null;
@@ -79,6 +81,11 @@ export type SupplierProfileExtras = {
   email?: string | null;
   avatarUrl?: string | null;
   bannerUrl?: string | null;
+  onboardingComplete?: boolean | null;
+  verificationStatus?: string | null;
+  verificationNotes?: string | null;
+  businessProofUrl?: string | null;
+  vatCertificateUrl?: string | null;
 };
 
 export const getCarrierExtrasKey = (userId: string) => `carrier-profile-extras:${userId}`;

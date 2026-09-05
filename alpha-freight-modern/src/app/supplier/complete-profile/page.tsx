@@ -1,5 +1,14 @@
-import CompleteProfileWorkspace from "@/components/marketplace/CompleteProfileWorkspace";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SupplierCompleteProfilePage() {
-  return <CompleteProfileWorkspace role="supplier" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/supplier/dashboard");
+  }, [router]);
+
+  return null;
 }

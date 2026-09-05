@@ -19,7 +19,8 @@ import {
   Search,
   User,
   Clock,
-  Gift
+  Gift,
+  FileText,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { recordCarrierReferralFromSignup, validateCarrierReferralCode } from "@/lib/carrier-referrals";
@@ -35,6 +36,11 @@ import {
   writeCarrierExtrasAsync,
   writeSupplierExtrasAsync,
 } from "@/lib/profile-extras";
+import OnboardingDocumentStep, {
+  mapDocumentUrlsToExtras,
+  validateOnboardingDocuments,
+} from "@/components/marketplace/OnboardingDocumentStep";
+import { updateProfileVerificationFields } from "@/lib/profile-verification";
 
 interface QuestionOption {
   label: string;
@@ -54,7 +60,7 @@ interface Question {
   id: string;
   question: string;
   description: string;
-  type?: "form";
+  type?: "form" | "documents";
   fields?: QuestionField[];
   options?: QuestionOption[];
   icon: React.ReactNode;
@@ -103,6 +109,123 @@ const formatCompaniesHouseAddress = (address?: CompaniesHouseAddress | null) => 
 
 const countryOptions: QuestionOption[] = carrierOnboardingCountryOptions;
 
+const getCarrierBusinessDetailsStep = (accountType: string): Question => ({
+  id: "business_details",
+  question: "Business & operating details",
+  description: "Required for verification — registered address, operating region, and insurance expiry.",
+  type: "form",
+  fields: [
+    {
+      id: "business_address",
+      label: "Business address",
+      type: "text",
+      placeholder: "Unit 4, Trafford Park, Manchester",
+      required: true,
+    },
+    {
+      id: "postcode",
+      label: "Postcode",
+      type: "text",
+      placeholder: "M17 1WA",
+      required: true,
+    },
+    {
+      id: "operating_region",
+      label: "Operating region",
+      type: "text",
+      placeholder: "North West, UK-wide",
+      required: true,
+    },
+    ...(accountType === "company"
+      ? [
+          {
+            id: "registration_no",
+            label: "Company registration number",
+            type: "text",
+            placeholder: "12345678",
+            required: true,
+          },
+        ]
+      : [
+          {
+            id: "operator_id",
+            label: "Driver licence number",
+            type: "text",
+            placeholder: "SMITH901015AB9CD",
+            required: true,
+          },
+        ]),
+    {
+      id: "insurance_expiry",
+      label: "Insurance expiry date",
+      type: "date",
+      placeholder: "",
+      required: true,
+    },
+  ],
+  icon: <Shield className="w-5 h-5" />,
+});
+
+const getSupplierBusinessDetailsStep = (accountType: string): Question => ({
+  id: "business_details",
+  question: "Business & shipping profile",
+  description: "Required before you can post loads on Alpha Freight.",
+  type: "form",
+  fields: [
+    {
+      id: "billing_address",
+      label: "Billing address",
+      type: "text",
+      placeholder: "10 Industrial Estate, Birmingham",
+      required: true,
+    },
+    {
+      id: "registration_no",
+      label: "Company registration number",
+      type: "text",
+      placeholder: "12345678",
+      required: accountType === "company",
+    },
+    {
+      id: "tax_id",
+      label: "VAT / UTR number",
+      type: "text",
+      placeholder: "GB123456789",
+      required: accountType === "individual",
+    },
+    {
+      id: "industry",
+      label: "Industry",
+      type: "text",
+      placeholder: "Retail, Manufacturing, Food…",
+      required: true,
+    },
+    {
+      id: "commodity",
+      label: "Main commodity shipped",
+      type: "text",
+      placeholder: "Palletised goods, chilled food…",
+      required: true,
+    },
+    {
+      id: "invoicing_email",
+      label: "Invoicing email",
+      type: "email",
+      placeholder: "accounts@company.co.uk",
+      required: false,
+    },
+  ],
+  icon: <Building2 className="w-5 h-5" />,
+});
+
+const verificationDocumentsStep: Question = {
+  id: "verification_documents",
+  question: "Upload verification documents",
+  description: "Required before your account can be reviewed. PDF or image, max 8MB each.",
+  type: "documents",
+  icon: <FileText className="w-5 h-5" />,
+};
+
 const accountTypeQuestion: Question = {
   id: "account_type",
   question: "How will you use Alpha Freight?",
@@ -134,18 +257,21 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
         label: accountType === "individual" ? "Full name" : "Contact person",
         type: "text",
         placeholder: accountType === "individual" ? "John Doe" : "John Smith",
+        required: true,
       },
       {
         id: "phone",
         label: "Phone number",
         type: "tel",
         placeholder: countryCode === "PK" ? "+92 300 1234567" : "+44 7123 456789",
+        required: true,
       },
       {
         id: "city",
         label: "City",
         type: "text",
         placeholder: countryCode === "PK" ? "Karachi" : "Manchester",
+        required: true,
       },
     ],
     icon: accountType === "individual" ? <User className="w-5 h-5" /> : <Building2 className="w-5 h-5" />,
@@ -154,7 +280,7 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
     ? {
         id: "quick_profile",
         question: "What do you drive?",
-        description: "One last step. Add licence, insurance, and fleet details later from your profile.",
+        description: "Tell us your primary vehicle type — required for matching.",
         type: "form",
         fields: [
           {
@@ -162,6 +288,7 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
             label: "Primary vehicle",
             type: "text",
             placeholder: "Curtain-sider, Reefer, Box truck…",
+            required: true,
           },
         ],
         icon: <Truck className="w-5 h-5" />,
@@ -170,17 +297,17 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
       ? {
           id: "company_lookup",
           question: "Find your registered company",
-          description: "Search Companies House — verification documents can be added later.",
+          description: "Search Companies House to auto-fill your registered details.",
           type: "form",
           fields: [
-            { id: "company_name", label: "Company name", type: "text", placeholder: "Alpha Logistics Ltd" },
+            { id: "company_name", label: "Company name", type: "text", placeholder: "Alpha Logistics Ltd", required: true },
           ],
           icon: <Search className="w-5 h-5" />,
         }
       : {
           id: "quick_profile",
           question: "Your business name",
-          description: "One last step. Full verification can be completed later from your profile.",
+          description: "Enter your registered business name.",
           type: "form",
           fields: [
             {
@@ -188,10 +315,13 @@ const getCarrierQuestions = (accountType: string, countryCode?: string): Questio
               label: "Company / business name",
               type: "text",
               placeholder: "Alpha Logistics",
+              required: true,
             },
           ],
           icon: <Building2 className="w-5 h-5" />,
         },
+  getCarrierBusinessDetailsStep(accountType),
+  verificationDocumentsStep,
 ].filter(Boolean) as Question[];
 
 const getSupplierQuestions = (accountType: string, countryCode?: string): Question[] => [
@@ -214,9 +344,22 @@ const getSupplierQuestions = (accountType: string, countryCode?: string): Questi
         label: accountType === "individual" ? "Full name" : "Contact person",
         type: "text",
         placeholder: accountType === "individual" ? "John Doe" : "Sarah Khan",
+        required: true,
       },
-      { id: "phone", label: "Phone number", type: "tel", placeholder: countryCode === "PK" ? "+92 300 1234567" : "+44 7123 456789" },
-      { id: "city", label: "City", type: "text", placeholder: countryCode === "PK" ? "Lahore" : "London" },
+      {
+        id: "phone",
+        label: "Phone number",
+        type: "tel",
+        placeholder: countryCode === "PK" ? "+92 300 1234567" : "+44 7123 456789",
+        required: true,
+      },
+      {
+        id: "city",
+        label: "City",
+        type: "text",
+        placeholder: countryCode === "PK" ? "Lahore" : "London",
+        required: true,
+      },
     ],
     icon: accountType === "individual" ? <User className="w-5 h-5" /> : <Building2 className="w-5 h-5" />,
   },
@@ -224,10 +367,10 @@ const getSupplierQuestions = (accountType: string, countryCode?: string): Questi
     ? {
         id: "quick_profile",
         question: "Trading name",
-        description: "One last step. Billing and tax details can be added later from your profile.",
+        description: "Your trading or business name — required for invoicing.",
         type: "form",
         fields: [
-          { id: "company_name", label: "Trading / business name", type: "text", placeholder: "Retail Hub" },
+          { id: "company_name", label: "Trading / business name", type: "text", placeholder: "Retail Hub", required: true },
         ],
         icon: <Building2 className="w-5 h-5" />,
       }
@@ -235,23 +378,25 @@ const getSupplierQuestions = (accountType: string, countryCode?: string): Questi
       ? {
           id: "company_lookup",
           question: "Find your registered company",
-          description: "Search Companies House — billing details can be added later from your profile.",
+          description: "Search Companies House to auto-fill your registered details.",
           type: "form",
           fields: [
-            { id: "company_name", label: "Company name", type: "text", placeholder: "Retail Hub Ltd" },
+            { id: "company_name", label: "Company name", type: "text", placeholder: "Retail Hub Ltd", required: true },
           ],
           icon: <Search className="w-5 h-5" />,
         }
       : {
           id: "quick_profile",
           question: "Business name",
-          description: "One last step. Verification can be completed later from your profile.",
+          description: "Enter your registered business name.",
           type: "form",
           fields: [
-            { id: "company_name", label: "Company name", type: "text", placeholder: "Retail Hub Ltd" },
+            { id: "company_name", label: "Company name", type: "text", placeholder: "Retail Hub Ltd", required: true },
           ],
           icon: <Building2 className="w-5 h-5" />,
         },
+  getSupplierBusinessDetailsStep(accountType),
+  verificationDocumentsStep,
 ].filter(Boolean) as Question[];
 
 const writeOnboardingExtras = async (
@@ -263,6 +408,14 @@ const writeOnboardingExtras = async (
 ) => {
   if (typeof window === "undefined") return;
 
+  const businessDetails = answers.business_details ?? {};
+  const documentValues = answers.verification_documents ?? {};
+  const documentFields = mapDocumentUrlsToExtras(
+    role as "carrier" | "supplier",
+    accountType,
+    documentValues,
+  );
+
   if (role === "carrier") {
     const existing = readCarrierExtras(userId);
     const contactInfo = answers.contact_info ?? {};
@@ -271,6 +424,7 @@ const writeOnboardingExtras = async (
     const countryCode = answers.country ?? existing.countryCode ?? "GB";
     const nextValue: CarrierProfileExtras = {
       ...existing,
+      ...documentFields,
       accountType,
       email: userEmail ?? existing.email ?? null,
       countryCode,
@@ -286,12 +440,20 @@ const writeOnboardingExtras = async (
         accountType === "company"
           ? businessInfo.company_name ?? quickProfile.company_name ?? existing.companyName ?? null
           : contactInfo.full_name ?? existing.companyName ?? null,
-      address: businessInfo.business_address ?? existing.address ?? null,
-      registrationNo: businessInfo.registration_no ?? existing.registrationNo ?? null,
+      address: businessDetails.business_address ?? businessInfo.business_address ?? existing.address ?? null,
+      postcode: businessDetails.postcode ?? existing.postcode ?? null,
+      operatingRegion: businessDetails.operating_region ?? existing.operatingRegion ?? null,
+      registrationNo:
+        businessDetails.registration_no ?? businessInfo.registration_no ?? existing.registrationNo ?? null,
+      operatorId: businessDetails.operator_id ?? existing.operatorId ?? null,
+      insuranceExpiry: businessDetails.insurance_expiry ?? existing.insuranceExpiry ?? null,
       primaryVehicle:
         accountType === "individual"
           ? quickProfile.primary_vehicle ?? existing.primaryVehicle ?? null
           : existing.primaryVehicle ?? null,
+      onboardingComplete: true,
+      verificationStatus: "Pending",
+      verificationNotes: null,
     };
     await writeCarrierExtrasAsync(userId, nextValue);
     return;
@@ -304,6 +466,7 @@ const writeOnboardingExtras = async (
   const countryCode = answers.country ?? existing.countryCode ?? "GB";
   const nextValue: SupplierProfileExtras = {
     ...existing,
+    ...documentFields,
     accountType,
     email: userEmail ?? existing.email ?? null,
     countryCode,
@@ -319,8 +482,17 @@ const writeOnboardingExtras = async (
       quickProfile.company_name ??
       businessInfo.company_name ??
       (accountType === "individual" ? contactInfo.full_name ?? existing.companyName ?? null : existing.companyName ?? null),
-    address: businessInfo.billing_address ?? existing.address ?? null,
-    registrationNo: businessInfo.registration_no ?? existing.registrationNo ?? null,
+    address: businessDetails.billing_address ?? businessInfo.billing_address ?? existing.address ?? null,
+    postcode: businessDetails.postcode ?? existing.postcode ?? null,
+    registrationNo:
+      businessDetails.registration_no ?? businessInfo.registration_no ?? existing.registrationNo ?? null,
+    taxId: businessDetails.tax_id ?? existing.taxId ?? null,
+    industry: businessDetails.industry ?? existing.industry ?? null,
+    commodity: businessDetails.commodity ?? existing.commodity ?? null,
+    invoicingEmail: businessDetails.invoicing_email ?? existing.invoicingEmail ?? null,
+    onboardingComplete: true,
+    verificationStatus: "Pending",
+    verificationNotes: null,
   };
   await writeSupplierExtrasAsync(userId, nextValue);
 };
@@ -345,6 +517,14 @@ function SetupContent() {
     status: "idle" | "checking" | "valid" | "invalid";
     referrerName?: string | null;
   }>({ status: "idle" });
+  const [userId, setUserId] = useState("");
+  const [documentError, setDocumentError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
 
   useEffect(() => {
     const refFromUrl = (searchParams.get("ref") || "").trim().toUpperCase();
@@ -544,6 +724,23 @@ function SetupContent() {
     proceed();
   };
 
+  const handleDocumentsContinue = () => {
+    const documentValues = answers.verification_documents ?? {};
+    const missing = validateOnboardingDocuments(
+      role as "carrier" | "supplier",
+      accountType,
+      documentValues,
+    );
+
+    if (missing.length > 0) {
+      setDocumentError(`Please upload: ${missing.join(", ")}`);
+      return;
+    }
+
+    setDocumentError(null);
+    void saveOnboardingData();
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formElement = e.currentTarget as HTMLFormElement;
@@ -642,6 +839,12 @@ function SetupContent() {
 
       if (error) throw error;
 
+      await updateProfileVerificationFields(user.id, {
+        verification_status: "pending_review",
+        status: "pending",
+        is_approved: false,
+      });
+
       const referralCode = (searchParams.get("ref") || "").trim().toUpperCase();
 
       if (referralCode) {
@@ -659,6 +862,7 @@ function SetupContent() {
       }
 
       setShowSuccess(true);
+      window.dispatchEvent(new Event("alpha-profile-updated"));
     } catch (err) {
       const message =
         err && typeof err === "object" && "message" in err
@@ -718,7 +922,46 @@ function SetupContent() {
             </div>
 
             {/* Answer Options or Form */}
-            {currentQuestion.type === "form" ? (
+            {currentQuestion.type === "documents" ? (
+              <div className="max-w-xl mx-auto">
+                {userId ? (
+                  <OnboardingDocumentStep
+                    role={role as "carrier" | "supplier"}
+                    accountType={accountType}
+                    userId={userId}
+                    values={(answers.verification_documents as Record<string, string> | undefined) ?? {}}
+                    onChange={(next) => {
+                      setDocumentError(null);
+                      setAnswers((current) => ({ ...current, verification_documents: next }));
+                    }}
+                    onError={setDocumentError}
+                  />
+                ) : (
+                  <p className="text-sm font-medium text-slate-500">Loading account...</p>
+                )}
+
+                {documentError ? (
+                  <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                    {documentError}
+                  </p>
+                ) : null}
+
+                {saveError ? (
+                  <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                    {saveError}
+                  </p>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={handleDocumentsContinue}
+                  disabled={isSubmitting || !userId}
+                  className="mt-6 w-full rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {isSubmitting ? "Submitting for review..." : "Submit account for review"}
+                </button>
+              </div>
+            ) : currentQuestion.type === "form" ? (
               <form onSubmit={handleFormSubmit} className="space-y-4 max-w-sm mx-auto text-left">
                 {currentQuestion.fields?.map((field: QuestionField) => (
                   <div key={field.id} className="space-y-1.5">

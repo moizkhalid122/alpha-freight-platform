@@ -14,8 +14,9 @@ alter table public.loads add column if not exists pod_verified_at timestamptz;
 create index if not exists loads_pod_verification_idx
   on public.loads (supplier_id, pod_verification_status, status);
 
--- Profile avatar/banner uploads use path: {user_id}/profile-media/{target}-{timestamp}.jpg
--- The first folder MUST be auth.uid() for storage RLS (same as POD uploads).
+-- Profile avatar/banner: {user_id}/profile-media/...
+-- Verification docs (onboarding): {user_id}/verification/...
+-- The first folder MUST be auth.uid() for storage RLS.
 insert into storage.buckets (id, name, public, file_size_limit)
 values ('pods', 'pods', true, 15728640)
 on conflict (id) do update
@@ -58,3 +59,11 @@ create policy "Auth delete own pods"
     bucket_id = 'pods'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- Verification status columns (onboarding + admin review)
+alter table public.profiles add column if not exists verification_status text default 'pending';
+alter table public.profiles add column if not exists is_approved boolean default false;
+alter table public.profiles add column if not exists status text default 'pending';
+
+create index if not exists profiles_verification_status_idx
+  on public.profiles (role, verification_status, created_at desc);
