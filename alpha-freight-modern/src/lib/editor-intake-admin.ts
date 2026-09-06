@@ -32,7 +32,7 @@ export function parseEditorIntakeMetadata(metadata: Record<string, unknown> | nu
   const role = data.editor_role ?? "";
   return {
     ...data,
-    roleLabel: editorRoleLabels[role] ?? role.replace(/_/g, " ") || "Editor",
+    roleLabel: editorRoleLabels[role] ?? (role.replace(/_/g, " ") || "Editor"),
     genderLabel: data.gender === "male" ? "Male" : data.gender === "female" ? "Female" : "—",
   };
 }
