@@ -5,15 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
+  Clapperboard,
   ClipboardList,
   CreditCard,
+  Crown,
   FileText,
   Gauge,
   LayoutDashboard,
   LogOut,
   PackagePlus,
+  Plane,
   Settings,
   ShieldCheck,
+  Ship,
   Truck,
   UserPlus,
   UserRoundCheck,
@@ -27,6 +31,7 @@ import type { LucideIcon } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 import { cn } from "@/lib/utils";
 import { ADMIN_PANEL_PATH, adminRoute } from "@/lib/admin-path";
+import { airAdminRoute, hqAdminRoute, seaAdminRoute } from "@/lib/mode-admin-paths";
 import { supabase } from "@/lib/supabase";
 import {
   prefetchAdminEmployees,
@@ -82,7 +87,16 @@ const adminSections: { label: string; items: AdminNavItem[] }[] = [
     label: "HR & EMPLOYEES",
     items: [
       { name: "Employees", path: adminRoute("/employees"), icon: Users, prefetch: "employees" },
+      { name: "Editor Intake", path: adminRoute("/editor-intake"), icon: Clapperboard },
       { name: "Employee KPIs", path: adminRoute("/employees/kpis"), icon: BarChart3, prefetch: "employees" },
+    ],
+  },
+  {
+    label: "COMMAND",
+    items: [
+      { name: "HQ Master Console", path: hqAdminRoute(), icon: Crown },
+      { name: "Air Admin", path: airAdminRoute(), icon: Plane },
+      { name: "Sea Admin", path: seaAdminRoute(), icon: Ship },
     ],
   },
   {

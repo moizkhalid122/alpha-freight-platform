@@ -41,10 +41,15 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
+  const type = searchParams.get("type");
   const now = Date.now();
 
   if (inquiriesCache && inquiriesCache.expiresAt > now) {
-    return NextResponse.json(buildInquiriesPayload(inquiriesCache.rows, status), {
+    const rows =
+      type === "editor_intake"
+        ? inquiriesCache.rows.filter((row) => row.inquiry_type === "editor_intake")
+        : inquiriesCache.rows;
+    return NextResponse.json(buildInquiriesPayload(rows, status), {
       headers: CACHE_HEADERS,
     });
   }
@@ -52,7 +57,9 @@ export async function GET(request: NextRequest) {
   try {
     const rows = (await fetchAdminInquiriesRest()) as InquiryRecord[];
     inquiriesCache = { expiresAt: now + SERVER_CACHE_MS, rows };
-    return NextResponse.json(buildInquiriesPayload(rows, status), { headers: CACHE_HEADERS });
+    const filteredRows =
+      type === "editor_intake" ? rows.filter((row) => row.inquiry_type === "editor_intake") : rows;
+    return NextResponse.json(buildInquiriesPayload(filteredRows, status), { headers: CACHE_HEADERS });
   } catch (restError) {
     console.warn("[admin/inquiries GET] REST failed, trying Supabase client:", restError);
 
@@ -68,11 +75,17 @@ export async function GET(request: NextRequest) {
 
       const rows = (data ?? []) as InquiryRecord[];
       inquiriesCache = { expiresAt: now + SERVER_CACHE_MS, rows };
-      return NextResponse.json(buildInquiriesPayload(rows, status), { headers: CACHE_HEADERS });
+      const filteredRows =
+        type === "editor_intake" ? rows.filter((row) => row.inquiry_type === "editor_intake") : rows;
+      return NextResponse.json(buildInquiriesPayload(filteredRows, status), { headers: CACHE_HEADERS });
     } catch (fallbackError) {
       console.error("[admin/inquiries GET]", fallbackError);
       if (inquiriesCache) {
-        return NextResponse.json(buildInquiriesPayload(inquiriesCache.rows, status), {
+        const rows =
+          type === "editor_intake"
+            ? inquiriesCache.rows.filter((row) => row.inquiry_type === "editor_intake")
+            : inquiriesCache.rows;
+        return NextResponse.json(buildInquiriesPayload(rows, status), {
           headers: CACHE_HEADERS,
         });
       }

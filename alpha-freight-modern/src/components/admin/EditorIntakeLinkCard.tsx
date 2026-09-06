@@ -33,7 +33,7 @@ export default function EditorIntakeLinkCard() {
       <h2 className="text-lg font-bold text-slate-900">Editor details intake</h2>
       <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-600">
         Share this link only with hired editors. Not on the public website. Collects photo, ID, portfolio, and contact
-        details. Submissions appear in <strong>Support Inbox</strong>.
+        details. Submissions appear on the <strong>Editor Intake</strong> page in admin.
       </p>
       <div className="mt-4 rounded-xl border border-violet-200/70 bg-white/90 p-4">
         <div className="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-2.5 font-mono text-[11px] text-slate-700 sm:text-xs">
