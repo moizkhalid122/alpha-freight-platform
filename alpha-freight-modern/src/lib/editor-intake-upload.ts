@@ -1,7 +1,23 @@
+import { createClient } from "@supabase/supabase-js";
 import { EDITOR_INTAKE_BUCKET, editorIntakePath } from "@/lib/editor-intake-path";
-import { supabase } from "@/lib/supabase";
 
 const MAX_BYTES = 8 * 1024 * 1024;
+
+/** Public form — always use anon role (ignore any logged-in site session). */
+function editorIntakeClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    throw new Error("Form is not configured. Contact the team.");
+  }
+  return createClient(url, anonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
+}
 
 export type EditorIntakeUpload = { path: string; url: string };
 
@@ -44,7 +60,8 @@ export async function uploadEditorIntakeFile(
   const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
   const path = `${submissionId}/${kind}-${Date.now()}.${ext}`;
 
-  const { error } = await supabase.storage.from(EDITOR_INTAKE_BUCKET).upload(path, file, {
+  const client = editorIntakeClient();
+  const { error } = await client.storage.from(EDITOR_INTAKE_BUCKET).upload(path, file, {
     contentType: file.type || "application/octet-stream",
     upsert: false,
   });
@@ -53,7 +70,7 @@ export async function uploadEditorIntakeFile(
     throw new Error(uploadErrorMessage(error, kind));
   }
 
-  const { data } = supabase.storage.from(EDITOR_INTAKE_BUCKET).getPublicUrl(path);
+  const { data } = client.storage.from(EDITOR_INTAKE_BUCKET).getPublicUrl(path);
   return { path, url: data.publicUrl };
 }
 
@@ -125,7 +142,7 @@ export async function saveEditorIntakeSubmission(input: SaveEditorIntakeInput) {
     .filter(Boolean)
     .join("\n");
 
-  const { error } = await supabase.from("website_inquiries").insert({
+  const { error } = await editorIntakeClient().from("website_inquiries").insert({
     inquiry_type: "editor_intake",
     source_page: editorIntakePath(),
     full_name: input.fullName,
