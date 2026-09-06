@@ -30,9 +30,14 @@ const editorRoleLabels: Record<string, string> = {
 export function parseEditorIntakeMetadata(metadata: Record<string, unknown> | null | undefined) {
   const data = (metadata ?? {}) as EditorIntakeMetadata;
   const role = data.editor_role ?? "";
+  let roleLabel = editorRoleLabels[role];
+  if (!roleLabel) {
+    const formatted = role.replace(/_/g, " ");
+    roleLabel = formatted || "Editor";
+  }
   return {
     ...data,
-    roleLabel: editorRoleLabels[role] ?? (role.replace(/_/g, " ") || "Editor"),
+    roleLabel,
     genderLabel: data.gender === "male" ? "Male" : data.gender === "female" ? "Female" : "—",
   };
 }
