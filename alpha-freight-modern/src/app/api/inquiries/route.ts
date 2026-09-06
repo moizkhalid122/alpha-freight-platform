@@ -13,6 +13,7 @@ const VALID_TYPES = new Set<InquiryType>([
   "carrier_support",
   "supplier_support",
   "general",
+  "editor_intake",
 ]);
 
 export async function POST(request: NextRequest) {

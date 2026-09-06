@@ -8,6 +8,7 @@ export const inquiryTypes = [
   { value: "carrier_support", label: "Carrier support" },
   { value: "supplier_support", label: "Supplier support" },
   { value: "general", label: "General inquiry" },
+  { value: "editor_intake", label: "Editor details form" },
 ] as const;
 
 export type InquiryType = (typeof inquiryTypes)[number]["value"];

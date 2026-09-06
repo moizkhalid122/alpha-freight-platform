@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           "/auth/select",
           "/auth/forgot-password",
           "/onboarding",
+          "/join/",
           "/enroll",
           "/demo",
           "/api/",

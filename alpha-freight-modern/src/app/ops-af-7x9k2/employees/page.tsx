@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { AdminHrHeader, AdminHrTabs, AdminPanel } from "@/components/admin/AdminHrShell";
 import EmployeePortalLinkCard from "@/components/admin/EmployeePortalLinkCard";
+import EditorIntakeLinkCard from "@/components/admin/EditorIntakeLinkCard";
 import { useAdminEmployees } from "@/hooks/useAdminEmployeeData";
 import { adminRoute } from "@/lib/admin-path";
 
@@ -33,6 +34,7 @@ export default function AdminEmployeesPage() {
       />
       <AdminHrTabs activePath="/ops-af-7x9k2/employees" />
       <EmployeePortalLinkCard />
+      <EditorIntakeLinkCard />
 
       {error ? (
         <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
