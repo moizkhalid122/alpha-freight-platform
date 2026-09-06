@@ -43,12 +43,10 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status");
   const type = searchParams.get("type");
   const now = Date.now();
+  const useCache = !type;
 
-  if (inquiriesCache && inquiriesCache.expiresAt > now) {
-    const rows =
-      type === "editor_intake"
-        ? inquiriesCache.rows.filter((row) => row.inquiry_type === "editor_intake")
-        : inquiriesCache.rows;
+  if (useCache && inquiriesCache && inquiriesCache.expiresAt > now) {
+    const rows = inquiriesCache.rows;
     return NextResponse.json(buildInquiriesPayload(rows, status), {
       headers: CACHE_HEADERS,
     });
@@ -56,10 +54,14 @@ export async function GET(request: NextRequest) {
 
   try {
     const rows = (await fetchAdminInquiriesRest()) as InquiryRecord[];
-    inquiriesCache = { expiresAt: now + SERVER_CACHE_MS, rows };
+    if (useCache) {
+      inquiriesCache = { expiresAt: now + SERVER_CACHE_MS, rows };
+    }
     const filteredRows =
       type === "editor_intake" ? rows.filter((row) => row.inquiry_type === "editor_intake") : rows;
-    return NextResponse.json(buildInquiriesPayload(filteredRows, status), { headers: CACHE_HEADERS });
+    return NextResponse.json(buildInquiriesPayload(filteredRows, status), {
+      headers: type ? { "Cache-Control": "private, no-store" } : CACHE_HEADERS,
+    });
   } catch (restError) {
     console.warn("[admin/inquiries GET] REST failed, trying Supabase client:", restError);
 
@@ -74,17 +76,18 @@ export async function GET(request: NextRequest) {
       if (error) throw new Error(error.message);
 
       const rows = (data ?? []) as InquiryRecord[];
-      inquiriesCache = { expiresAt: now + SERVER_CACHE_MS, rows };
+      if (useCache) {
+        inquiriesCache = { expiresAt: now + SERVER_CACHE_MS, rows };
+      }
       const filteredRows =
         type === "editor_intake" ? rows.filter((row) => row.inquiry_type === "editor_intake") : rows;
-      return NextResponse.json(buildInquiriesPayload(filteredRows, status), { headers: CACHE_HEADERS });
+      return NextResponse.json(buildInquiriesPayload(filteredRows, status), {
+        headers: type ? { "Cache-Control": "private, no-store" } : CACHE_HEADERS,
+      });
     } catch (fallbackError) {
       console.error("[admin/inquiries GET]", fallbackError);
-      if (inquiriesCache) {
-        const rows =
-          type === "editor_intake"
-            ? inquiriesCache.rows.filter((row) => row.inquiry_type === "editor_intake")
-            : inquiriesCache.rows;
+      if (useCache && inquiriesCache) {
+        const rows = inquiriesCache.rows;
         return NextResponse.json(buildInquiriesPayload(rows, status), {
           headers: CACHE_HEADERS,
         });

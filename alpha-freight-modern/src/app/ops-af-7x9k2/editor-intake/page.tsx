@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import EditorIntakeLinkCard from "@/components/admin/EditorIntakeLinkCard";
 import { AdminKpiCard, AdminPageHero, AdminPageShell, AdminPanel } from "@/components/admin/AdminPageShell";
 import { adminFetch } from "@/lib/admin-data-client";
-import { adminFetchResilient } from "@/lib/admin-fetch-resilient";
 import { adminQueryDefaults } from "@/lib/admin-query";
 import { parseEditorIntakeMetadata } from "@/lib/editor-intake-admin";
 import type { InquiryRecord, InquiryStatus } from "@/lib/inquiry-content";
@@ -47,11 +46,7 @@ function formatDate(value: string | null) {
 }
 
 async function fetchEditorIntake() {
-  const data = await adminFetchResilient<InquiriesResponse>("/api/admin/inquiries?type=editor_intake", async () => ({
-    inquiries: [],
-    stats: { total: 0, new: 0, read: 0, replied: 0, resolved: 0 },
-  }));
-  return data;
+  return adminFetch<InquiriesResponse>("/api/admin/inquiries?type=editor_intake");
 }
 
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
