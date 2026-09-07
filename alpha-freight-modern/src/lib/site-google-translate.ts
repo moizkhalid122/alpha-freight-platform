@@ -25,44 +25,102 @@ export function getGoogleTranslateCode(localeId: string): string | null {
   return null;
 }
 
+function normalizeGoogTrans(value: string | null): string | null {
+  if (!value || value === "/en/en") return null;
+  return value;
+}
+
 export function readGoogTransCookie(): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(/(?:^|;\s*)googtrans=([^;]+)/);
-  return match?.[1] ? decodeURIComponent(match[1]) : null;
+  return normalizeGoogTrans(match?.[1] ? decodeURIComponent(match[1]) : null);
 }
 
-export function syncGoogleTranslateCookie(localeId: string, reload = true): boolean {
-  if (typeof document === "undefined") return false;
-
+function expectedGoogTrans(localeId: string): string | null {
   const code = getGoogleTranslateCode(localeId);
+  return code ? `/en/${code}` : null;
+}
+
+export function clearGoogTransCookies(): void {
+  if (typeof document === "undefined") return;
   const host = window.location.hostname;
-  const expected = code ? `/en/${code}` : null;
-  const current = readGoogTransCookie();
-
-  if (expected === current) return false;
-
-  if (expected) {
-    document.cookie = `googtrans=${encodeURIComponent(expected)}; path=/`;
-    if (host && !host.startsWith("localhost")) {
-      document.cookie = `googtrans=${encodeURIComponent(expected)}; path=/; domain=.${host}`;
-    }
-  } else {
-    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    if (host && !host.startsWith("localhost")) {
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${host}`;
+  const expires = "expires=Thu, 01 Jan 1970 00:00:00 UTC";
+  document.cookie = `googtrans=; ${expires}; path=/`;
+  if (host.includes(".")) {
+    document.cookie = `googtrans=; ${expires}; path=/; domain=.${host}`;
+  }
+  if (host && !host.startsWith("localhost")) {
+    const parts = host.split(".");
+    if (parts.length >= 2) {
+      const root = `.${parts.slice(-2).join(".")}`;
+      document.cookie = `googtrans=; ${expires}; path=/; domain=${root}`;
     }
   }
+}
 
-  if (reload) window.location.reload();
+export function setGoogTransCookie(localeId: string): void {
+  if (typeof document === "undefined") return;
+  const expected = expectedGoogTrans(localeId);
+  const host = window.location.hostname;
+
+  if (!expected) {
+    clearGoogTransCookies();
+    return;
+  }
+
+  document.cookie = `googtrans=${encodeURIComponent(expected)}; path=/`;
+  if (host && !host.startsWith("localhost") && host.includes(".")) {
+    document.cookie = `googtrans=${encodeURIComponent(expected)}; path=/; domain=.${host.split(".").slice(-2).join(".")}`;
+  }
+}
+
+/** Apply translation via Google combo — no page reload. */
+export function reapplyGoogleTranslate(localeId?: string): boolean {
+  if (typeof document === "undefined") return false;
+
+  const code = localeId ? getGoogleTranslateCode(localeId) : null;
+  const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+
+  if (!select) return false;
+
+  if (!code) {
+    if (select.value) {
+      select.value = "";
+      select.dispatchEvent(new Event("change"));
+    }
+    return true;
+  }
+
+  if (select.value !== code) {
+    select.value = code;
+    select.dispatchEvent(new Event("change"));
+  }
   return true;
 }
 
-/** Re-apply translate after client-side navigation (no reload). */
-export function reapplyGoogleTranslate(): void {
+const RELOAD_GUARD_KEY = "af-locale-reload";
+
+/** User picked a new locale — translate without reload loops. */
+export function applyGoogleTranslateForLocale(localeId: string): void {
   if (typeof document === "undefined") return;
-  const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-  if (!select?.value) return;
-  select.dispatchEvent(new Event("change"));
+
+  const code = getGoogleTranslateCode(localeId);
+  setGoogTransCookie(localeId);
+
+  if (reapplyGoogleTranslate(localeId)) {
+    hideGoogleTranslateUi();
+    return;
+  }
+
+  // Google widget not ready yet — one controlled reload max per locale change.
+  const guard = sessionStorage.getItem(RELOAD_GUARD_KEY);
+  if (guard === localeId) {
+    sessionStorage.removeItem(RELOAD_GUARD_KEY);
+    return;
+  }
+
+  sessionStorage.setItem(RELOAD_GUARD_KEY, localeId);
+  window.location.reload();
 }
 
 declare global {

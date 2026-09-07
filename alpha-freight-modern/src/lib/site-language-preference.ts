@@ -1,4 +1,4 @@
-import { syncGoogleTranslateCookie } from "@/lib/site-google-translate";
+import { applyGoogleTranslateForLocale } from "@/lib/site-google-translate";
 import { DEFAULT_SITE_LOCALE_ID, findSiteLocale, SITE_LOCALES } from "@/lib/site-languages";
 import type { LanguagePreference } from "@/lib/copilot/language";
 
@@ -17,7 +17,7 @@ export function setSiteLocaleId(id: string) {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, id);
   window.dispatchEvent(new CustomEvent(SITE_LOCALE_CHANGE_EVENT, { detail: { id } }));
-  syncGoogleTranslateCookie(id, true);
+  applyGoogleTranslateForLocale(id);
 }
 
 export function getChatLanguagePreference(): LanguagePreference {

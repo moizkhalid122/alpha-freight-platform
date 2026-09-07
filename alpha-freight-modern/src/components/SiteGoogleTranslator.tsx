@@ -2,12 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { getSiteLocaleId } from "@/lib/site-language-preference";
+import {
+  getSiteLocaleId,
+  SITE_LOCALE_CHANGE_EVENT,
+} from "@/lib/site-language-preference";
 import {
   hideGoogleTranslateUi,
   initGoogleTranslateElement,
   reapplyGoogleTranslate,
-  syncGoogleTranslateCookie,
+  setGoogTransCookie,
 } from "@/lib/site-google-translate";
 
 const GOOGLE_SCRIPT_ID = "google-translate-script";
@@ -23,7 +26,7 @@ function loadGoogleTranslateScript(): Promise<void> {
       initGoogleTranslateElement();
       window.setTimeout(() => {
         hideGoogleTranslateUi();
-        reapplyGoogleTranslate();
+        reapplyGoogleTranslate(getSiteLocaleId());
       }, 300);
       resolve();
     };
@@ -43,38 +46,42 @@ function loadGoogleTranslateScript(): Promise<void> {
 
 export default function SiteGoogleTranslator() {
   const pathname = usePathname();
-  const syncedRef = useRef(false);
   const readyRef = useRef(false);
 
   useEffect(() => {
     let observer: MutationObserver | undefined;
-    let intervalId: number | undefined;
 
     const boot = window.setTimeout(async () => {
+      setGoogTransCookie(getSiteLocaleId());
       await loadGoogleTranslateScript();
       readyRef.current = true;
+      reapplyGoogleTranslate(getSiteLocaleId());
       hideGoogleTranslateUi();
 
       observer = new MutationObserver(() => hideGoogleTranslateUi());
       observer.observe(document.body, { childList: true, subtree: true });
-      intervalId = window.setInterval(hideGoogleTranslateUi, 1200);
-
-      if (!syncedRef.current) {
-        syncedRef.current = true;
-        syncGoogleTranslateCookie(getSiteLocaleId(), true);
-      }
     }, 50);
+
+    const onLocaleChange = () => {
+      const localeId = getSiteLocaleId();
+      setGoogTransCookie(localeId);
+      window.setTimeout(() => {
+        reapplyGoogleTranslate(localeId);
+        hideGoogleTranslateUi();
+      }, 200);
+    };
+    window.addEventListener(SITE_LOCALE_CHANGE_EVENT, onLocaleChange);
 
     return () => {
       window.clearTimeout(boot);
       observer?.disconnect();
-      if (intervalId) window.clearInterval(intervalId);
+      window.removeEventListener(SITE_LOCALE_CHANGE_EVENT, onLocaleChange);
     };
   }, []);
 
   useEffect(() => {
     if (!readyRef.current) return;
-    const timer = window.setTimeout(reapplyGoogleTranslate, 400);
+    const timer = window.setTimeout(() => reapplyGoogleTranslate(getSiteLocaleId()), 400);
     return () => window.clearTimeout(timer);
   }, [pathname]);
 
