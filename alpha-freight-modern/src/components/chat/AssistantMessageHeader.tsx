@@ -12,18 +12,17 @@ export default function AssistantMessageHeader({
   timestamp,
 }: AssistantMessageHeaderProps) {
   return (
-    <div className="mb-2 flex items-center gap-3">
-      <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <Image src="/logo.png" alt="Alpha Freight" fill className="object-contain p-1.5" />
+    <div className="mb-1.5 flex items-center gap-2.5">
+      <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-slate-200/80">
+        <Image src="/logo.png" alt="Alpha Freight" fill className="object-contain p-1" />
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-slate-900">{assistantName}</p>
+          <p className="truncate text-[13px] font-semibold text-slate-900">{assistantName}</p>
           {timestamp ? (
-            <span className="text-[11px] font-medium text-slate-400">{timestamp}</span>
+            <span className="text-[11px] font-normal text-slate-400">{timestamp}</span>
           ) : null}
         </div>
-        <p className="text-[11px] font-medium text-slate-500">AI logistics response</p>
       </div>
     </div>
   );

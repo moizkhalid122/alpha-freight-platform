@@ -12,8 +12,69 @@ import {
   MapPin
 } from "lucide-react";
 import { TOOL_FOOTER_LINKS } from "@/lib/tools-hub-data";
+import { useSiteT } from "@/components/SiteLanguageProvider";
 
 export function Footer() {
+  const t = useSiteT();
+
+  const solutionLinks = [
+    { nameKey: "footer.findLoads", href: "/find-loads" },
+    { nameKey: "footer.postLoads", href: "/post-loads" },
+    { nameKey: "footer.supplierInfo", href: "/supplier-information" },
+    { nameKey: "footer.carrierInfo", href: "/carrier-information" },
+    { nameKey: "mega.carrierDirectory", href: "/directory" },
+    { nameKey: "mega.supplierDirectory", href: "/suppliers" },
+    { nameKey: "footer.freeUkAi", href: "/ai" },
+    { nameKey: "footer.aiAssistant", href: "/products/ai-assistant" },
+    { nameKey: "footer.freightMarketplace", href: "/docs?tab=finding-loads" },
+    { nameKey: "footer.smartBidding", href: "/docs?tab=bidding" },
+    { nameKey: "mega.pod", href: "/products/pod" },
+    { nameKey: "mega.tracking", href: "/docs?tab=tracking" },
+    { nameKey: "footer.carrierVetting", href: "/docs?tab=vetting" },
+    { nameKey: "footer.sevenDayPayouts", href: "/7-day-payouts" },
+    { nameKey: "nav.pricing", href: "/pricing" },
+    { nameKey: "footer.awards", href: "/awards" },
+  ];
+
+  const developerLinks = [
+    { nameKey: "footer.apiDocs", href: "/docs?tab=api-auth" },
+    { nameKey: "footer.sdks", href: "/docs?tab=sdks" },
+    { nameKey: "footer.webhooks", href: "/docs?tab=webhooks" },
+    { nameKey: "footer.systemStatus", href: "/system-status" },
+  ];
+
+  const resourceLinks = [
+    { nameKey: "footer.knowledgeBase", href: "/knowledge-base" },
+    { nameKey: "footer.freeUkAi", href: "/ai" },
+    { nameKey: "footer.findLoadsGuide", href: "/ai/find-loads" },
+    { nameKey: "footer.rpmCalculator", href: "/ai/rpm-calculator" },
+    { nameKey: "mega.learningSeries", href: "/learning-series" },
+    { nameKey: "footer.helpCenter", href: "/support" },
+    { nameKey: "footer.sendFeedback", href: "/feedback" },
+    { nameKey: "footer.library", href: "/library" },
+    { nameKey: "footer.companyBlog", href: "/blog" },
+    { nameKey: "footer.successStories", href: "/success-stories" },
+  ];
+
+  const companyLinks = [
+    { nameKey: "footer.aboutAlpha", href: "/about" },
+    { nameKey: "footer.companyOverview", href: "/company-overview" },
+    { nameKey: "footer.investors", href: "/investor" },
+    { nameKey: "footer.careers", href: "/career" },
+    { nameKey: "footer.contactSales", href: "/contact" },
+    { nameKey: "footer.supportPortal", href: "/support" },
+  ];
+
+  const legalLinks = [
+    { nameKey: "footer.privacy", href: "/privacy-policy" },
+    { nameKey: "footer.security", href: "/security" },
+    { nameKey: "footer.verifyEmployee", href: "/verify-employee" },
+    { nameKey: "footer.accountDeletion", href: "/account-deletion" },
+    { nameKey: "footer.terms", href: "/terms-of-service" },
+    { nameKey: "footer.refund", href: "/refund-cancellation-policy" },
+    { nameKey: "footer.cookies", href: "/cookie-policy" },
+  ];
+
   return (
     <footer className="relative overflow-hidden bg-black pb-12 pt-32">
       <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
@@ -42,25 +103,25 @@ export function Footer() {
               </span>
             </div>
             <p className="text-white/50 text-lg font-medium leading-relaxed italic">
-              "The next generation of logistics powered by AI and precision engineering. Connecting the UK freight industry like never before."
+              {t("footer.tagline")}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/ai"
                 className="inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-[10px] font-bold uppercase tracking-[0.28em] text-black transition-all hover:bg-[#BFFF07]"
               >
-                Free UK Freight AI
+                {t("footer.freeUkAi")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
           <div className="w-full lg:w-auto space-y-10 min-w-[350px]">
-            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.4em]">Stay Updated</h4>
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.4em]">{t("footer.stayUpdated")}</h4>
             <div className="relative group">
               <input 
                 type="email" 
-                placeholder="YOUR EMAIL ADDRESS" 
+                placeholder={t("footer.emailPlaceholder")} 
                 className="w-full bg-transparent border-b border-white/10 py-6 text-white text-sm focus:outline-none focus:border-[#BFFF07] transition-colors placeholder:text-white/10 font-bold tracking-widest uppercase"
               />
               <button className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-[#BFFF07] transition-colors group-hover:translate-x-2 duration-300">
@@ -70,7 +131,7 @@ export function Footer() {
               </button>
             </div>
             <p className="text-white/20 text-[10px] font-medium leading-relaxed uppercase tracking-wider">
-              By subscribing, you agree to our privacy policy and terms of service.
+              {t("footer.subscribeNote")}
             </p>
           </div>
         </div>
@@ -78,29 +139,12 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 mb-32 relative z-10">
           {/* Main Solutions */}
           <div className="col-span-1">
-            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Solutions</h4>
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">{t("footer.solutions")}</h4>
             <ul className="space-y-3">
-              {[
-                { name: "Find Loads UK", href: "/find-loads" },
-                { name: "Post Loads UK", href: "/post-loads" },
-                { name: "Supplier Information", href: "/supplier-information" },
-                { name: "Carrier / Haulier Information", href: "/carrier-information" },
-                { name: "Carrier Directory", href: "/directory" },
-                { name: "Supplier Directory", href: "/suppliers" },
-                { name: "Free UK Freight AI", href: "/ai" },
-                { name: "AI Assistant", href: "/products/ai-assistant" },
-                { name: "Freight Marketplace", href: "/docs?tab=finding-loads" },
-                { name: "Smart Bidding", href: "/docs?tab=bidding" },
-                { name: "Digital POD", href: "/products/pod" },
-                { name: "Real-time Tracking", href: "/docs?tab=tracking" },
-                { name: "Carrier Vetting", href: "/docs?tab=vetting" },
-                { name: "7-Day Payouts", href: "/7-day-payouts" },
-                { name: "Pricing", href: "/pricing" },
-                { name: "Alpha Freight Awards", href: "/awards" },
-              ].map((item) => (
-                <li key={item.name}>
+              {solutionLinks.map((item) => (
+                <li key={item.href}>
                   <Link href={item.href}>
-                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{item.name}</motion.span>
+                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{t(item.nameKey)}</motion.span>
                   </Link>
                 </li>
               ))}
@@ -109,17 +153,12 @@ export function Footer() {
 
           {/* Developer Hub */}
           <div className="col-span-1">
-            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Developers</h4>
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">{t("footer.developers")}</h4>
             <ul className="space-y-3">
-              {[
-                { name: "API Documentation", href: "/docs?tab=api-auth" },
-                { name: "SDKs & Libraries", href: "/docs?tab=sdks" },
-                { name: "Webhooks Guide", href: "/docs?tab=webhooks" },
-                { name: "System Status", href: "/system-status" },
-              ].map((item) => (
-                <li key={item.name}>
+              {developerLinks.map((item) => (
+                <li key={item.href}>
                   <Link href={item.href}>
-                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{item.name}</motion.span>
+                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{t(item.nameKey)}</motion.span>
                   </Link>
                 </li>
               ))}
@@ -128,23 +167,12 @@ export function Footer() {
 
           {/* Resources */}
           <div className="col-span-1">
-            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Resources</h4>
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">{t("footer.resources")}</h4>
             <ul className="space-y-3">
-              {[
-                { name: "Knowledge Base", href: "/knowledge-base" },
-                { name: "Free UK Freight AI", href: "/ai" },
-                { name: "Find Loads AI Guide", href: "/ai/find-loads" },
-                { name: "RPM Calculator AI", href: "/ai/rpm-calculator" },
-                { name: "Learning Series", href: "/learning-series" },
-                { name: "Help Center", href: "/support" },
-                { name: "Send Feedback", href: "/feedback" },
-                { name: "The Library", href: "/library" },
-                { name: "Company Blog", href: "/blog" },
-                { name: "Success Stories", href: "/success-stories" },
-              ].map((item) => (
-                <li key={item.name}>
+              {resourceLinks.map((item) => (
+                <li key={item.href}>
                   <Link href={item.href}>
-                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{item.name}</motion.span>
+                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{t(item.nameKey)}</motion.span>
                   </Link>
                 </li>
               ))}
@@ -153,7 +181,7 @@ export function Footer() {
 
           {/* Free Tools */}
           <div className="col-span-1">
-            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Free Tools</h4>
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">{t("footer.freeTools")}</h4>
             <ul className="space-y-3">
               {TOOL_FOOTER_LINKS.map((item) => (
                 <li key={item.name}>
@@ -167,19 +195,12 @@ export function Footer() {
 
           {/* Company & Connect */}
           <div className="col-span-1">
-            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Company</h4>
+            <h4 className="text-[#BFFF07] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">{t("footer.company")}</h4>
             <ul className="space-y-3">
-              {[
-                { name: "About Alpha Freight", href: "/about" },
-                { name: "Company Overview", href: "/company-overview" },
-                { name: "Investors", href: "/investor" },
-                { name: "Careers", href: "/career" },
-                { name: "Contact Sales", href: "/contact" },
-                { name: "Support Portal", href: "/support" }
-              ].map((item) => (
-                <li key={item.name}>
+              {companyLinks.map((item) => (
+                <li key={item.href}>
                   <Link href={item.href}>
-                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{item.name}</motion.span>
+                    <motion.span whileHover={{ x: 5, color: "#fff" }} className="text-white/40 text-[11px] font-medium transition-colors inline-block cursor-pointer uppercase tracking-wider">{t(item.nameKey)}</motion.span>
                   </Link>
                 </li>
               ))}
@@ -190,24 +211,16 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center relative z-10">
           <p className="text-white/20 text-[10px] font-bold tracking-widest uppercase mb-6 md:mb-0">
-            &copy; 2026 ALPHA FREIGHT SOLUTIONS LIMITED. ALL RIGHTS RESERVED.
+            {t("footer.copyright")}
           </p>
           <div className="flex flex-wrap justify-center gap-x-12 gap-y-3 md:justify-end">
-            {[
-              { name: "Privacy Policy", href: "/privacy-policy" },
-              { name: "Security Centre", href: "/security" },
-              { name: "Verify Employee", href: "/verify-employee" },
-              { name: "Account Deletion", href: "/account-deletion" },
-              { name: "Terms of Service", href: "/terms-of-service" },
-              { name: "Refund & Cancellation", href: "/refund-cancellation-policy" },
-              { name: "Cookies", href: "/cookie-policy" },
-            ].map((item) => (
+            {legalLinks.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className="text-white/20 text-[10px] font-bold tracking-widest uppercase hover:text-white transition-colors"
               >
-                {item.name}
+                {t(item.nameKey)}
               </Link>
             ))}
           </div>

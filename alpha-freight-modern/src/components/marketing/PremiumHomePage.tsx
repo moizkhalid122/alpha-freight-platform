@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
+import { useSiteT } from "@/components/SiteLanguageProvider";
 import JsonLd from "@/components/seo/JsonLd";
 import { CinematicCTA, Footer } from "@/components/Footer";
 import HomeDashboardShowcase from "@/components/marketing/HomeDashboardShowcase";
@@ -44,6 +45,7 @@ gsap.registerPlugin(ScrollTrigger);
 const serif = () => "font-[family-name:var(--font-home-serif)]";
 
 export default function PremiumHomePage() {
+  const t = useSiteT();
   const pageRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const heroMediaRef = useRef<HTMLDivElement>(null);
@@ -186,22 +188,21 @@ export default function PremiumHomePage() {
               <h1
                 className={`home-in mt-5 max-w-[520px] text-[clamp(2.25rem,5.2vw,3.75rem)] font-semibold leading-[1.06] tracking-[-0.025em] text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.35)] ${serif()}`}
               >
-                Be the next
+                {t("home.heroLine1")}
                 <br />
                 <span className="relative mt-1 inline-block min-h-[1.12em] font-normal italic tracking-[-0.015em] text-white/92">
                   <HeroRotatingWords />
                 </span>
               </h1>
               <p className="home-in mt-6 max-w-[420px] text-[16px] font-light leading-[1.65] tracking-[-0.01em] text-white/75 sm:text-[17px]">
-                Dream big and move fast on Alpha Freight. The UK&apos;s marketplace for verified carriers, live
-                tracking, and 7-day payouts.
+                {t("home.heroDesc")}
               </p>
               <div className="home-in mt-9 flex flex-wrap items-center gap-3 sm:gap-4">
                 <Link
                   href="/auth/signup"
                   className="inline-flex h-[52px] items-center justify-center rounded-full bg-white px-9 text-[14px] font-semibold tracking-[-0.01em] text-neutral-900 transition hover:bg-neutral-100"
                 >
-                  Start for free
+                  {t("home.startFree")}
                 </Link>
                 <Link
                   href="/about"
@@ -210,7 +211,7 @@ export default function PremiumHomePage() {
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/12 ring-1 ring-white/10">
                     <Play className="h-3.5 w-3.5 fill-white text-white" />
                   </span>
-                  Why we build Alpha Freight
+                  {t("home.whyWeBuild")}
                 </Link>
               </div>
             </div>

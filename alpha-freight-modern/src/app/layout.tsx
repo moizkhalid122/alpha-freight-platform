@@ -3,6 +3,8 @@ import Script from "next/script";
 import "./globals.css";
 import AnalyticsPageTracker from "@/components/AnalyticsPageTracker";
 import Chatbot from "@/components/Chatbot";
+import SiteGoogleTranslator from "@/components/SiteGoogleTranslator";
+import { SiteLanguageProvider } from "@/components/SiteLanguageProvider";
 import JsonLd from "@/components/seo/JsonLd";
 import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 import { createPageMetadata } from "@/lib/seo";
@@ -42,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-GB" className="antialiased">
+    <html lang="en-GB" className="antialiased" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -51,7 +53,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="flex flex-col font-sans">
+      <body className="flex flex-col font-sans" suppressHydrationWarning>
         <JsonLd
           data={[
             {
@@ -101,8 +103,11 @@ export default function RootLayout({
           `}
         </Script>
         <AnalyticsPageTracker />
-        {children}
-        <Chatbot />
+        <SiteLanguageProvider>
+          <SiteGoogleTranslator />
+          {children}
+          <Chatbot />
+        </SiteLanguageProvider>
       </body>
     </html>
   );

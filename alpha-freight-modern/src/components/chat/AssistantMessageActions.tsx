@@ -21,10 +21,10 @@ interface AssistantMessageActionsProps {
 }
 
 function actionButtonClass(isActive = false): string {
-  return `rounded-full p-1.5 transition ${
+  return `rounded-lg p-1.5 transition-colors duration-200 ${
     isActive
-      ? "bg-slate-900 text-white"
-      : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+      ? "bg-slate-100 text-slate-900"
+      : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
   }`;
 }
 
@@ -39,7 +39,7 @@ export default function AssistantMessageActions({
   onMore,
 }: AssistantMessageActionsProps) {
   return (
-    <div className="mt-2 flex items-center gap-1 text-slate-500">
+    <div className="mt-1.5 flex items-center gap-0.5 text-slate-500">
       <button
         type="button"
         aria-label="Copy reply"

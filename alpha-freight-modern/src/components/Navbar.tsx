@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Image from "next/image";
+import LanguageSelector from "@/components/LanguageSelector";
 
 import {
   ArrowRight,
@@ -41,42 +42,13 @@ import {
 } from "lucide-react";
 
 import NavbarAiLottie from "@/components/NavbarAiLottie";
-
-const AI_NAV_LABEL = "Alpha AI";
-
-const menuItemIcons: Record<string, LucideIcon> = {
-  "/products/supplier-portal": LayoutDashboard,
-  "/products/mobile-app": Smartphone,
-  "/products/white-label": Store,
-  "/products/api": Code2,
-  "/products/tracking": MapPin,
-  "/products/optimizer": Route,
-  "/products/pod": FileCheck,
-  "/products/analytics": BarChart3,
-  "/products/rates": TrendingUp,
-  "/products/ai": Sparkles,
-  "/ai": Bot,
-  "/solution": Package,
-  "/directory": Truck,
-  "/suppliers": Factory,
-  "/available-loads": ClipboardList,
-  "/products/smart-matching": Sparkles,
-  "/industries": Globe2,
-  "/industries/construction": Building2,
-  "/industries/retail": ShoppingBag,
-  "/industries/food": UtensilsCrossed,
-  "/industries/pharmaceuticals": Pill,
-  "/industries/automotive": Car,
-  "/industries/general-freight": Package,
-  "/tools": Calculator,
-  "/academy": GraduationCap,
-  "/learning-series": BookOpen,
-  "/support": Wrench,
-  "/docs": BookOpen,
-  "/brand-kit": Store,
-  "/network": Network,
-  "/partners": Users,
-};
+import { useSiteT } from "@/components/SiteLanguageProvider";
+import {
+  hasFlyoutMenu,
+  menuItemIcons,
+  navLinkDefs,
+  type NavItemDef,
+} from "@/lib/i18n/nav-data";
 
 function menuIcon(href: string): LucideIcon {
   return menuItemIcons[href] ?? ArrowRight;
@@ -98,163 +70,6 @@ function MegaMenuLink({ href, name }: { href: string; name: string }) {
   );
 }
 
-interface NavItem {
-  name: string;
-  href: string;
-  dropdown?: { name: string; href: string; desc: string }[];
-  megaMenu?: {
-    category: string;
-    items: { name: string; href: string; desc: string }[];
-  }[];
-  whyMenu?: {
-    cards: { title: string; desc: string; href: string; image: string }[];
-    sidebarTitle: string;
-    features: {
-      title: string;
-      desc: string;
-      href: string;
-      icon: LucideIcon;
-      useAiLottie?: boolean;
-    }[];
-  };
-}
-
-function hasFlyoutMenu(link: NavItem) {
-  return Boolean(link.megaMenu || link.whyMenu);
-}
-
-const whyAlphaMenu = {
-  cards: [
-    {
-      title: "Get started fast",
-      desc: "You could be moving freight by tomorrow.",
-      href: "/auth/signup?role=supplier",
-      image: "/images/pricing-card-supplier.png",
-    },
-    {
-      title: "Switch to Alpha Freight",
-      desc: "More carriers. Better rates. No monthly fee.",
-      href: "/solution",
-      image: "/images/pricing-card-carrier.jpg",
-    },
-    {
-      title: "Trusted by UK operators",
-      desc: "From owner-drivers to enterprise fleets.",
-      href: "/directory",
-      image: "/images/pricing-card-enterprise.png",
-    },
-  ],
-  sidebarTitle: "Built into every account",
-  features: [
-    {
-      title: "Alpha AI",
-      desc: "Your freight-obsessed AI assistant.",
-      href: "/ai",
-      icon: Bot,
-      useAiLottie: true,
-    },
-    {
-      title: "7-day payout",
-      desc: "Guaranteed carrier payments.",
-      href: "/about",
-      icon: Banknote,
-    },
-  ],
-};
-
-const navLinks: NavItem[] = [
-  { name: "Home", href: "/" },
-  {
-    name: "Why Alpha",
-    href: "/about",
-    whyMenu: whyAlphaMenu,
-  },
-  { 
-    name: "Products", 
-    href: "#",
-    megaMenu: [
-      {
-        category: "Software",
-        items: [
-          { name: "Supplier Portal", href: "/products/supplier-portal", desc: "Command center for shippers" },
-          { name: "Alpha Mobile App", href: "/products/mobile-app", desc: "One app for Carriers & Suppliers" },
-          { name: "White Label", href: "/products/white-label", desc: "Your brand, our tech" },
-          { name: "API Docs", href: "/products/api", desc: "Integrate logistics into your app" },
-        ]
-      },
-      {
-        category: "Fleet Management",
-        items: [
-          { name: "Real-time Tracking", href: "/products/tracking", desc: "GPS & IoT cargo monitoring" },
-          { name: "Route Optimizer", href: "/products/optimizer", desc: "AI-driven fuel & time saving" },
-          { name: "Digital POD", href: "/products/pod", desc: "Paperless proof of delivery" },
-        ]
-      },
-      {
-        category: "Intelligence",
-        items: [
-          { name: "Analytics Dashboard", href: "/products/analytics", desc: "Data-driven shipping insights" },
-          { name: "Market Rates", href: "/products/rates", desc: "Live freight market pricing" },
-          { name: "Predictive AI", href: "/products/ai", desc: "Forecast demand & delays" },
-          { name: "Free UK Freight AI", href: "/ai", desc: "Ask haulage questions — no login" },
-        ]
-      }
-    ]
-  },
-  { 
-    name: "Solution", 
-    href: "/solution",
-    megaMenu: [
-      {
-        category: "Marketplace",
-        items: [
-          { name: "Overview", href: "/solution", desc: "Complete marketplace overview" },
-          { name: "Carrier Directory", href: "/directory", desc: "Browse trusted freight partners" },
-          { name: "Supplier Directory", href: "/suppliers", desc: "Connect with industrial suppliers" },
-          { name: "Available Loads", href: "/available-loads", desc: "Find freight opportunities" },
-          { name: "Smart Matching", href: "/products/smart-matching", desc: "AI-driven load pairing" },
-        ]
-      },
-      {
-        category: "Industries",
-        items: [
-          { name: "All Industries", href: "/industries", desc: "Sector freight solutions UK" },
-          { name: "Construction", href: "/industries/construction", desc: "Aggregates, steel & site haulage" },
-          { name: "Retail", href: "/industries/retail", desc: "Store & DC distribution" },
-          { name: "Food & Beverage", href: "/industries/food", desc: "Chilled & ambient haulage" },
-        ]
-      },
-      {
-        category: "Resources",
-        items: [
-          { name: "All Free Tools", href: "/tools", desc: "UK freight calculators & marketplace utilities" },
-          { name: "Academy", href: "/academy", desc: "Driver training & certification" },
-          { name: "Learning Series", href: "/learning-series", desc: "Free YouTube freight lessons" },
-          { name: "Support Center", href: "/support", desc: "24/7 help and guidance" },
-          { name: "Documentation", href: "/docs", desc: "Platform guides & tutorials" },
-          { name: "Brand Kit", href: "/brand-kit", desc: "Logos, colors, and usage rules" },
-        ]
-      },
-      {
-        category: "Ecosystem",
-        items: [
-          { name: "Network", href: "/network", desc: "Our global infrastructure" },
-          { name: "Technology", href: "/ai", desc: "Free UK freight AI assistant" },
-          { name: "Partners", href: "/partners", desc: "Join our strategic network" },
-        ]
-      }
-    ]
-  },
-  { name: "Services", href: "/services" },
-  { name: "Pricing", href: "/pricing" },
-  { name: AI_NAV_LABEL, href: "/ai" },
-  { name: "About us", href: "/about" },
-  { name: "Leadership", href: "/leadership" },
-  { name: "Investor", href: "/investor" },
-  { name: "Blog", href: "/blog" },
-  { name: "Career", href: "/career" },
-];
-
 export default function Navbar({
   variant = "light",
   solidWhite = false,
@@ -263,6 +78,8 @@ export default function Navbar({
   /** Always show solid white header (e.g. industry landing pages). */
   solidWhite?: boolean;
 }) {
+  const t = useSiteT();
+  const navLinks = navLinkDefs;
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
@@ -274,7 +91,7 @@ export default function Navbar({
   const navRef = useRef<HTMLElement>(null);
 
   const activeFlyoutLink = navLinks.find(
-    (link) => hasFlyoutMenu(link) && hoveredLink === link.name,
+    (link) => hasFlyoutMenu(link) && hoveredLink === link.id,
   );
 
   const openMegaMenu = useCallback((name: string) => {
@@ -384,8 +201,7 @@ export default function Navbar({
           }`}
         >
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 flex justify-between items-center">
-          {/* Logo */}
-          <Link href="/" className="flex items-center group min-w-0">
+          <Link href="/" className="flex items-center group min-w-0 shrink-0">
             <div className="relative w-8 h-8 sm:w-10 sm:h-10 mr-2 sm:mr-3 shrink-0">
               <Image
                 src="/logo.png"
@@ -404,14 +220,14 @@ export default function Navbar({
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center lg:space-x-3 xl:space-x-5 2xl:space-x-8 min-w-0 flex-1 justify-center mx-2 xl:mx-4">
-            {navLinks.filter((link) => link.href !== "/ai").map((link) => (
+            {navLinks.filter((link) => link.href !== "/ai" && link.id !== "investor").map((link) => (
                 <div
-                key={link.name}
-                className={`relative shrink-0 ${link.name === "Investor" || link.name === "Career" ? "hidden xl:block" : ""}`}
+                key={link.id}
+                className={`relative shrink-0 ${link.id === "career" ? "hidden xl:block" : ""}`}
                 onMouseEnter={() => {
                   cancelMegaMenuClose();
                   if (hasFlyoutMenu(link)) {
-                    openMegaMenu(link.name);
+                    openMegaMenu(link.id);
                   } else {
                     setHoveredLink(null);
                   }
@@ -420,7 +236,7 @@ export default function Navbar({
                   if (!hasFlyoutMenu(link)) setHoveredLink(null);
                 }}
               >
-                {hasFlyoutMenu(link) && hoveredLink === link.name ? (
+                {hasFlyoutMenu(link) && hoveredLink === link.id ? (
                   <div className="pointer-events-none absolute inset-x-0 top-full z-20 h-5" aria-hidden />
                 ) : null}
                 {hasFlyoutMenu(link) ? (
@@ -428,20 +244,20 @@ export default function Navbar({
                     type="button"
                     className={`text-[12px] xl:text-[13px] font-medium transition-colors flex items-center gap-1 py-2 whitespace-nowrap ${
                       megaMenuOpen || !isDark
-                        ? hoveredLink === link.name
+                        ? hoveredLink === link.id
                           ? "text-white"
                           : "text-white/70 hover:text-white"
-                        : hoveredLink === link.name
+                        : hoveredLink === link.id
                           ? "text-slate-900"
                           : "text-slate-600 hover:text-slate-900"
                     }`}
-                    aria-expanded={hoveredLink === link.name}
+                    aria-expanded={hoveredLink === link.id}
                     aria-haspopup="true"
                   >
-                    {link.name}
+                    {t(link.nameKey)}
                     <svg
                       className={`w-3 h-3 transition-transform duration-300 ${
-                        hoveredLink === link.name ? "rotate-180" : ""
+                        hoveredLink === link.id ? "rotate-180" : ""
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -459,10 +275,10 @@ export default function Navbar({
                         : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    {link.name}
+                    {t(link.nameKey)}
                     {link.dropdown ? (
                       <svg
-                        className={`w-3 h-3 transition-transform duration-300 ${hoveredLink === link.name ? "rotate-180" : ""}`}
+                        className={`w-3 h-3 transition-transform duration-300 ${hoveredLink === link.id ? "rotate-180" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -475,7 +291,7 @@ export default function Navbar({
 
                 {/* Dropdown Menu (Standard) */}
                 <AnimatePresence>
-                  {link.dropdown && hoveredLink === link.name && (
+                  {link.dropdown && hoveredLink === link.id && (
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -488,7 +304,7 @@ export default function Navbar({
                       }`}>
                         {link.dropdown.map((item) => (
                           <Link
-                            key={item.name}
+                            key={item.nameKey}
                             href={item.href}
                             className={`group/item flex items-start gap-4 p-4 rounded-xl transition-all ${
                               isDark ? "hover:bg-slate-50" : "hover:bg-white/5"
@@ -502,8 +318,8 @@ export default function Navbar({
                               </svg>
                             </div>
                             <div>
-                              <div className={`text-[14px] font-bold mb-1 uppercase tracking-wider ${isDark ? "text-slate-900" : "text-white"}`}>{item.name}</div>
-                              <div className={`text-[12px] font-medium leading-tight ${isDark ? "text-slate-500" : "text-white/40"}`}>{item.desc}</div>
+                              <div className={`text-[14px] font-bold mb-1 uppercase tracking-wider ${isDark ? "text-slate-900" : "text-white"}`}>{t(item.nameKey)}</div>
+                              <div className={`text-[12px] font-medium leading-tight ${isDark ? "text-slate-500" : "text-white/40"}`}>{t(item.descKey)}</div>
                             </div>
                           </Link>
                         ))}
@@ -526,9 +342,9 @@ export default function Navbar({
                     ? "hover:bg-slate-100 text-slate-600"
                     : "hover:bg-white/10 text-white"
               }`}
-              title="View Shortlist"
+              title={t("nav.viewShortlist")}
             >
-              <Bookmark className={`w-5 h-5 ${shortlistCount > 0 ? 'fill-current' : ''}`} />
+              <Bookmark className={`w-5 h-5 ${shortlistCount > 0 ? "fill-current" : ""}`} />
               {shortlistCount > 0 && (
                 <span className="absolute top-0 right-0 w-4 h-4 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center">
                   {shortlistCount}
@@ -546,7 +362,7 @@ export default function Navbar({
                     : "border-white/20 text-white hover:bg-white hover:text-black"
               }`}
             >
-              Sign up
+              {t("nav.signUp")}
             </Link>
             <Link
               href="/contact"
@@ -558,8 +374,9 @@ export default function Navbar({
                     : "bg-white text-black hover:bg-gray-100"
               }`}
             >
-              Contact us
+              {t("nav.contactUs")}
             </Link>
+            <LanguageSelector isDark={isDark} megaMenuOpen={megaMenuOpen} />
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -605,7 +422,7 @@ export default function Navbar({
                     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                       {activeFlyoutLink.whyMenu.cards.map((card, index) => (
                         <motion.div
-                          key={card.title}
+                          key={card.titleKey}
                           initial={{ opacity: 0, y: 14 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{
@@ -618,17 +435,17 @@ export default function Navbar({
                             <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/10">
                               <Image
                                 src={card.image}
-                                alt={card.title}
+                                alt={t(card.titleKey)}
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover/card:scale-105"
                                 sizes="(max-width: 1280px) 33vw, 320px"
                               />
                             </div>
                             <h3 className="mt-4 text-[17px] font-semibold leading-snug text-white">
-                              {card.title}
+                              {t(card.titleKey)}
                             </h3>
                             <p className="mt-1.5 text-[14px] leading-relaxed text-neutral-500">
-                              {card.desc}
+                              {t(card.descKey)}
                             </p>
                           </Link>
                         </motion.div>
@@ -642,14 +459,14 @@ export default function Navbar({
                       className="border-t border-white/10 pt-8 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-2"
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BFFF07]">
-                        {activeFlyoutLink.whyMenu.sidebarTitle}
+                        {t(activeFlyoutLink.whyMenu.sidebarTitleKey)}
                       </p>
                       <div className="mt-6 space-y-5">
                         {activeFlyoutLink.whyMenu.features.map((feature) => {
                           const Icon = feature.icon;
                           return (
                             <Link
-                              key={feature.title}
+                              key={feature.titleKey}
                               href={feature.href}
                               className="group/feature flex items-start gap-4"
                             >
@@ -668,10 +485,10 @@ export default function Navbar({
                               </div>
                               <div className="min-w-0 pt-1">
                                 <p className="text-[15px] font-semibold text-white group-hover/feature:text-white/90">
-                                  {feature.title}
+                                  {t(feature.titleKey)}
                                 </p>
                                 <p className="mt-1 text-[13px] leading-relaxed text-neutral-500">
-                                  {feature.desc}
+                                  {t(feature.descKey)}
                                 </p>
                               </div>
                             </Link>
@@ -687,7 +504,7 @@ export default function Navbar({
 
           {activeFlyoutLink?.megaMenu && (
             <motion.div
-              key={activeFlyoutLink.name}
+              key={activeFlyoutLink.id}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -707,17 +524,17 @@ export default function Navbar({
               <div className="mx-auto w-full max-w-[1600px] px-6 py-10 lg:px-12 xl:px-16">
                 <div
                   className={`grid gap-x-8 gap-y-10 ${
-                    activeFlyoutLink.name === "Solution"
+                    activeFlyoutLink.id === "solution"
                       ? "xl:grid-cols-[minmax(0,1fr)_minmax(220px,1.25fr)_minmax(0,1fr)_minmax(0,1fr)_300px] lg:grid-cols-2"
                       : "xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_300px] lg:grid-cols-3"
                   }`}
                 >
-                  {(activeFlyoutLink.name === "Solution"
+                  {(activeFlyoutLink.id === "solution"
                     ? activeFlyoutLink.megaMenu
                     : activeFlyoutLink.megaMenu.slice(0, 3)
                   ).map((column, columnIndex) => (
                     <motion.div
-                      key={column.category}
+                      key={column.categoryKey}
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
@@ -728,21 +545,21 @@ export default function Navbar({
                       className="relative min-w-0"
                     >
                       <h4 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BFFF07]">
-                        {column.category}
+                        {t(column.categoryKey)}
                       </h4>
-                      {column.category === "Industries" ? (
+                      {column.categoryKey === "mega.industries" ? (
                         <ul className="mt-5 space-y-0.5">
                           {column.items.map((item) => (
-                            <li key={item.name}>
-                              <MegaMenuLink href={item.href} name={item.name} />
+                            <li key={item.nameKey}>
+                              <MegaMenuLink href={item.href} name={t(item.nameKey)} />
                             </li>
                           ))}
                         </ul>
                       ) : (
                         <ul className="mt-5 space-y-0.5">
                           {column.items.map((item) => (
-                            <li key={item.name}>
-                              <MegaMenuLink href={item.href} name={item.name} />
+                            <li key={item.nameKey}>
+                              <MegaMenuLink href={item.href} name={t(item.nameKey)} />
                             </li>
                           ))}
                         </ul>
@@ -757,7 +574,7 @@ export default function Navbar({
                     transition={{ duration: 0.32, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
                     className="relative z-10 min-w-0 space-y-6 border-t border-white/10 pt-8 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0"
                   >
-                    {activeFlyoutLink.name === "Products" ? (
+                    {activeFlyoutLink.id === "products" ? (
                       <>
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BFFF07]">
@@ -788,16 +605,16 @@ export default function Navbar({
                           </p>
                           <ul className="mt-4 space-y-3">
                             {[
-                              { name: "Smart Matching", href: "/products/smart-matching" },
-                              { name: "Free UK Freight AI", href: "/ai" },
-                              { name: "Real-time Tracking", href: "/products/tracking" },
+                              { nameKey: "mega.smartMatching", href: "/products/smart-matching" },
+                              { nameKey: "mega.freeUkAi", href: "/ai" },
+                              { nameKey: "mega.tracking", href: "/products/tracking" },
                             ].map((item) => (
                               <li key={item.href}>
                                 <Link
                                   href={item.href}
                                   className="text-[14px] text-white/75 transition hover:text-white"
                                 >
-                                  {item.name}
+                                  {t(item.nameKey)}
                                 </Link>
                               </li>
                             ))}
@@ -838,16 +655,16 @@ export default function Navbar({
                           </p>
                           <ul className="mt-4 space-y-3">
                             {[
-                              { name: "Pharmaceuticals", href: "/industries/pharmaceuticals" },
-                              { name: "Automotive", href: "/industries/automotive" },
-                              { name: "General freight", href: "/industries/general-freight" },
+                              { nameKey: "mega.pharmaceuticals", href: "/industries/pharmaceuticals" },
+                              { nameKey: "mega.automotive", href: "/industries/automotive" },
+                              { nameKey: "mega.generalFreight", href: "/industries/general-freight" },
                             ].map((item) => (
                               <li key={item.href}>
                                 <Link
                                   href={item.href}
                                   className="text-[14px] text-white/75 transition hover:text-white"
                                 >
-                                  {item.name}
+                                  {t(item.nameKey)}
                                 </Link>
                               </li>
                             ))}
@@ -864,9 +681,9 @@ export default function Navbar({
                 <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 px-6 py-4 lg:px-12 xl:px-16">
                   <div className="flex flex-wrap items-center gap-6">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#BFFF07]">
-                      {activeFlyoutLink.name === "Products" ? "Extend Alpha Freight" : "Explore the platform"}
+                      {activeFlyoutLink.id === "products" ? "Extend Alpha Freight" : "Explore the platform"}
                     </span>
-                    {activeFlyoutLink.name === "Products" ? (
+                    {activeFlyoutLink.id === "products" ? (
                       <>
                         <Link href="/products/roadmap" className="text-[12px] text-white/60 transition hover:text-white">
                           Product roadmap
@@ -954,8 +771,8 @@ export default function Navbar({
 
             <div className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 py-6">
               <div className="flex flex-col space-y-4 w-full max-w-md mx-auto">
-                {navLinks.map((link) => (
-                  <div key={link.name} className="flex flex-col space-y-3 border-b border-white/10 pb-4 last:border-b-0">
+                {navLinks.filter((link) => link.id !== "investor").map((link) => (
+                  <div key={link.id} className="flex flex-col space-y-3 border-b border-white/10 pb-4 last:border-b-0">
                     <div className="flex items-center justify-between gap-3">
                       <Link
                         href={link.href === "#" ? "/products/supplier-portal" : link.href}
@@ -975,27 +792,27 @@ export default function Navbar({
                         {link.href === "/ai" ? (
                           <>
                             <NavbarAiLottie className="h-8 w-8 shrink-0 -mr-0.5" />
-                            <span className="-ml-0.5">{AI_NAV_LABEL}</span>
+                            <span className="-ml-0.5">{t("nav.alphaAi")}</span>
                           </>
                         ) : (
-                          link.name
+                          t(link.nameKey)
                         )}
                       </Link>
                       {(link.dropdown || hasFlyoutMenu(link)) && (
                         <button 
                           type="button"
-                          aria-label={`Expand ${link.name}`}
-                          onClick={() => setHoveredLink(hoveredLink === link.name ? null : link.name)}
+                          aria-label={`Expand ${t(link.nameKey)}`}
+                          onClick={() => setHoveredLink(hoveredLink === link.id ? null : link.id)}
                           className={`p-2 shrink-0 ${isDark ? "text-slate-500" : "text-white/50"}`}
                         >
-                          <svg className={`w-5 h-5 transition-transform ${hoveredLink === link.name ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-5 h-5 transition-transform ${hoveredLink === link.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </button>
                       )}
                     </div>
 
-                    {(link.dropdown || hasFlyoutMenu(link)) && hoveredLink === link.name && (
+                    {(link.dropdown || hasFlyoutMenu(link)) && hoveredLink === link.id && (
                       <motion.div 
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -1005,59 +822,59 @@ export default function Navbar({
                       >
                         {link.whyMenu?.cards.map((card) => (
                           <Link
-                            key={card.title}
+                            key={card.titleKey}
                             href={card.href}
                             className={`text-base font-medium transition-colors ${
                               isDark ? "text-slate-600 hover:text-slate-900" : "text-white/60 hover:text-white"
                             }`}
                             onClick={closeMobileMenu}
                           >
-                            {card.title}
+                            {t(card.titleKey)}
                           </Link>
                         ))}
                         {link.whyMenu?.features.map((feature) => (
                           <Link
-                            key={feature.title}
+                            key={feature.titleKey}
                             href={feature.href}
                             className={`text-base font-medium transition-colors ${
                               isDark ? "text-slate-600 hover:text-slate-900" : "text-white/60 hover:text-white"
                             }`}
                             onClick={closeMobileMenu}
                           >
-                            {feature.title}
+                            {t(feature.titleKey)}
                           </Link>
                         ))}
                         {link.dropdown?.map((item) => (
                           <Link
-                            key={item.name}
+                            key={item.nameKey}
                             href={item.href}
                             className={`text-base font-medium transition-colors ${
                               isDark ? "text-slate-600 hover:text-slate-900" : "text-white/60 hover:text-white"
                             }`}
                             onClick={closeMobileMenu}
                           >
-                            {item.name}
+                            {t(item.nameKey)}
                           </Link>
                         ))}
                         {link.megaMenu?.map((column) => (
-                          <div key={column.category} className="space-y-3">
+                          <div key={column.categoryKey} className="space-y-3">
                             <div className={`text-[10px] font-bold uppercase tracking-widest ${
                               isDark ? "text-blue-600" : "text-[#BFFF07]"
-                            }`}>{column.category}</div>
+                            }`}>{t(column.categoryKey)}</div>
                             <div className="flex flex-col space-y-2">
                               {column.items.map((item) => (
                                 <Link
-                                  key={item.name}
+                                  key={item.nameKey}
                                   href={item.href}
                                   className={`text-base font-medium transition-colors ${
                                     isDark ? "text-slate-600 hover:text-slate-900" : "text-white/60 hover:text-white"
                                   }`}
                                   onClick={closeMobileMenu}
                                 >
-                                  {item.name}
+                                  {t(item.nameKey)}
                                 </Link>
                               ))}
-                              {column.category === "Ecosystem" ? (
+                              {column.categoryKey === "mega.ecosystem" ? (
                                 <Link
                                   href="/awards"
                                   className="group/awards relative mt-5 block overflow-hidden rounded-xl border border-black/10"
@@ -1090,6 +907,19 @@ export default function Navbar({
                 ))}
                 
                 <div className="pt-6 flex flex-col gap-3">
+                  <div className="flex items-center justify-between gap-3 pb-2">
+                    <Link
+                      href="/directory/shortlist"
+                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium ${
+                        isDark ? "border-slate-200 text-slate-900" : "border-white/15 text-white"
+                      }`}
+                      onClick={closeMobileMenu}
+                    >
+                      <Bookmark className="h-4 w-4" />
+                      {t("nav.viewShortlist")}
+                    </Link>
+                    <LanguageSelector isDark={isDark} megaMenuOpen={false} />
+                  </div>
                   <Link
                     href="/auth/modes"
                     className={`w-full py-4 rounded-2xl text-center font-bold uppercase tracking-widest border ${
@@ -1099,14 +929,14 @@ export default function Navbar({
                     }`}
                     onClick={closeMobileMenu}
                   >
-                    Sign up
+                    {t("nav.signUp")}
                   </Link>
                   <Link
                     href="/contact"
                     className="w-full py-4 rounded-2xl bg-[#BFFF07] text-black text-center font-bold uppercase tracking-widest"
                     onClick={closeMobileMenu}
                   >
-                    Contact us
+                    {t("nav.contactUs")}
                   </Link>
                 </div>
               </div>
