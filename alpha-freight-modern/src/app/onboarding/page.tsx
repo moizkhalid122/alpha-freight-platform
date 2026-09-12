@@ -41,6 +41,17 @@ import OnboardingDocumentStep, {
   validateOnboardingDocuments,
 } from "@/components/marketplace/OnboardingDocumentStep";
 import { updateProfileVerificationFields } from "@/lib/profile-verification";
+import {
+  getCarrierDocuments,
+  getSupplierDocuments,
+} from "@/lib/account-verification";
+import {
+  buildOnboardingContextPayload,
+} from "@/lib/concierge/concierge-onboarding";
+import {
+  dispatchConciergeOnboardingContext,
+  dispatchConciergeOnboardingHighlight,
+} from "@/lib/concierge/concierge-companion";
 
 interface QuestionOption {
   label: string;
@@ -574,6 +585,73 @@ function SetupContent() {
   }, [answers, currentQuestion.type, currentQuestionId]);
 
   useEffect(() => {
+    if (!currentQuestion) return;
+
+    const stepType: "form" | "documents" | "choice" =
+      currentQuestion.type === "form"
+        ? "form"
+        : currentQuestion.type === "documents"
+          ? "documents"
+          : "choice";
+
+    let fields =
+      currentQuestion.type === "form"
+        ? currentQuestion.fields?.map((field) => ({
+            id: field.id,
+            label: field.label,
+            required: field.required !== false,
+            filled: Boolean(formValues[field.id]?.trim()),
+          }))
+        : undefined;
+
+    if (currentQuestion.type === "documents") {
+      const docs =
+        role === "carrier"
+          ? getCarrierDocuments(accountType)
+          : getSupplierDocuments();
+      const docValues = (answers.verification_documents as Record<string, string> | undefined) ?? {};
+      fields = docs.map((doc) => ({
+        id: doc.key,
+        label: doc.label,
+        required: doc.required,
+        filled: Boolean(docValues[doc.key]),
+      }));
+    }
+
+    const context = buildOnboardingContextPayload({
+      role,
+      stepIndex: currentStep,
+      totalSteps: questions.length,
+      stepId: currentQuestionId,
+      stepType,
+      question: currentQuestion.question,
+      description: currentQuestion.description,
+      fields,
+      options: currentQuestion.options?.map((option) => ({
+        label: option.label,
+        value: option.value,
+      })),
+    });
+
+    dispatchConciergeOnboardingContext(context);
+
+    const highlightTimer = window.setTimeout(() => {
+      dispatchConciergeOnboardingHighlight(context.nextTarget);
+    }, 900);
+
+    return () => window.clearTimeout(highlightTimer);
+  }, [
+    accountType,
+    answers.verification_documents,
+    currentQuestion,
+    currentQuestionId,
+    currentStep,
+    formValues,
+    questions.length,
+    role,
+  ]);
+
+  useEffect(() => {
     if (!isCompanyLookupStep || !isCompanyLookupEnabled) {
       setCompanySuggestions([]);
       setIsCompanySearchLoading(false);
@@ -956,6 +1034,7 @@ function SetupContent() {
                   type="button"
                   onClick={handleDocumentsContinue}
                   disabled={isSubmitting || !userId}
+                  data-concierge-field="next"
                   className="mt-6 w-full rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800 disabled:opacity-50"
                 >
                   {isSubmitting ? "Submitting for review..." : "Submit account for review"}
@@ -970,6 +1049,7 @@ function SetupContent() {
                       <input 
                         type={field.type}
                         name={field.id}
+                        data-concierge-field={field.id}
                         required={field.required !== false}
                         value={formValues[field.id] ?? ""}
                         onChange={(e) => updateFormValue(field.id, e.target.value)}
@@ -1080,6 +1160,7 @@ function SetupContent() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
+                  data-concierge-field="next"
                   className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2 hover:bg-slate-800 transition-all mt-6 disabled:opacity-50"
                 >
                   {isSubmitting ? "Saving..." : "Continue"}
@@ -1088,6 +1169,7 @@ function SetupContent() {
               </form>
             ) : (
               <div
+                data-concierge-field={`step_${currentQuestionId}`}
                 className={cn(
                   "mx-auto space-y-4",
                   questions[currentStep].id === "account_type" ? "max-w-[760px]" : "max-w-sm"

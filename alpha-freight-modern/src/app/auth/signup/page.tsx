@@ -9,6 +9,14 @@ import { recordSupplierReferralFromSignup } from "@/lib/supplier-referrals";
 import { recordCarrierReferralFromSignup } from "@/lib/carrier-referrals";
 import { Eye, EyeOff } from "lucide-react";
 import { AUTH } from "@/components/auth/auth-styles";
+import { useConciergeAnimatedForm } from "@/hooks/useConciergeAnimatedForm";
+import { dispatchConciergeSignupComplete } from "@/lib/concierge/concierge-companion";
+
+function fieldClass(isActive: boolean): string {
+  const base = AUTH.input;
+  if (!isActive) return base;
+  return `${base} border-sky-300 ring-2 ring-sky-400/30 shadow-[0_0_0_4px_rgba(56,189,248,0.12)] transition-all duration-200`;
+}
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +33,10 @@ export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const role = (searchParams.get("role") || "carrier") as "carrier" | "supplier";
+
+  const { activeField, isAnimating } = useConciergeAnimatedForm(setFormData, undefined, {
+    signupRole: role,
+  });
   const referralFromUrl = (searchParams.get("ref") || "").trim().toUpperCase();
 
   useEffect(() => {
@@ -37,6 +49,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAnimating) return;
     setIsLoading(true);
     setError(null);
 
@@ -75,6 +88,12 @@ export default function SignupPage() {
       ]);
 
       if (profileError) throw profileError;
+
+      dispatchConciergeSignupComplete({
+        role,
+        fullName: formData.fullName,
+        email: formData.email,
+      });
 
       if (role === "supplier" && effectiveReferralCode) {
         await recordSupplierReferralFromSignup({
@@ -127,8 +146,9 @@ export default function SignupPage() {
             required
             placeholder="John Doe"
             value={formData.fullName}
+            data-concierge-field="fullName"
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            className={AUTH.input}
+            className={fieldClass(activeField === "fullName")}
           />
         </div>
 
@@ -139,8 +159,9 @@ export default function SignupPage() {
             required
             placeholder="name@company.com"
             value={formData.email}
+            data-concierge-field="email"
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className={AUTH.input}
+            className={fieldClass(activeField === "email")}
           />
         </div>
 
@@ -152,6 +173,7 @@ export default function SignupPage() {
               required
               placeholder="••••••••••••"
               value={formData.password}
+              data-concierge-field="password"
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className={`${AUTH.input} pr-11`}
             />
@@ -171,16 +193,24 @@ export default function SignupPage() {
             type="text"
             placeholder={role === "supplier" ? "AF-SUP-XXXXXXXX" : "AF-CAR-XXXXXXXX"}
             value={formData.referralCode}
+            data-concierge-field="referralCode"
             onChange={(e) =>
               setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })
             }
-            className={AUTH.input}
+            className={fieldClass(activeField === "referralCode")}
           />
         </div>
 
-        <motion.button whileTap={{ scale: 0.99 }} disabled={isLoading} className={AUTH.btnPrimary}>
+        <motion.button
+          whileTap={{ scale: 0.99 }}
+          disabled={isLoading || isAnimating}
+          data-concierge-field="submit"
+          className={AUTH.btnPrimary}
+        >
           {isLoading ? (
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-900/20 border-t-slate-900" />
+          ) : isAnimating ? (
+            "Alpha is filling your details…"
           ) : (
             "Create account"
           )}

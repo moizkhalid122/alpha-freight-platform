@@ -12,6 +12,9 @@ import {
 } from "@/lib/public-ai-rate-limit";
 import { createAuthedSupabaseFromRequest } from "@/lib/admin-api-db";
 import { detectIntent } from "@/lib/copilot/intent-detector";
+import { enrichConciergeReply } from "@/lib/concierge/concierge-enrich";
+import { shouldEscalateConciergeToAgent } from "@/lib/concierge/concierge-router";
+import { humanizeConciergeText } from "@/lib/concierge/concierge-text";
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { buildPublicPlainReply, inferPublicSuggestedQuestions, streamPublicOpenAiReply, getOpenAiVisionFallbackReply } from "@/lib/openai-stream";
 import { getOpenAiChatReply } from "@/lib/openai-chat";
@@ -34,6 +37,8 @@ export async function POST(request: NextRequest) {
         : "";
     const history = Array.isArray(body.history) ? body.history : [];
     const language = typeof body.language === "string" ? (body.language as LanguagePreference) : undefined;
+    const conciergeMode = body.conciergeMode === true;
+    const pagePath = typeof body.pagePath === "string" ? body.pagePath : "/";
     const assistantType: AssistantKind =
       body.assistantType === "employee" ||
       body.assistantType === "carrier" ||
@@ -148,6 +153,7 @@ export async function POST(request: NextRequest) {
           history: history as ChatHistoryItem[],
           language,
           publicMode: true,
+          conciergeMode,
           sessionMemory:
             body.sessionMemory && typeof body.sessionMemory === "object"
               ? (body.sessionMemory as CopilotContextMemory)
@@ -165,9 +171,22 @@ export async function POST(request: NextRequest) {
 
         try {
           if (prepared.mode === "complete") {
+            let message = prepared.result.message;
+            let structuredMessage = prepared.result.structuredMessage;
+            if (conciergeMode) {
+              message = humanizeConciergeText(message);
+              structuredMessage = enrichConciergeReply(
+                { ...structuredMessage, shortExplanation: message, rawText: message },
+                effectiveMessage,
+                {
+                  history: history as ChatHistoryItem[],
+                  pagePath,
+                },
+              );
+            }
             send("done", {
-              message: prepared.result.message,
-              structuredMessage: prepared.result.structuredMessage,
+              message,
+              structuredMessage,
               source: prepared.result.source,
               remaining: rateRemaining,
             });
@@ -176,6 +195,13 @@ export async function POST(request: NextRequest) {
           }
 
           const detected = detectIntent(effectiveMessage, prepared.assistantType);
+          const conciergeEscalated =
+            conciergeMode &&
+            shouldEscalateConciergeToAgent(
+              effectiveMessage,
+              detected,
+              prepared.history as ChatHistoryItem[],
+            );
           let fullText = "";
           let gotToken = false;
 
@@ -188,6 +214,10 @@ export async function POST(request: NextRequest) {
             imageDataUrl: imageDataUrl || undefined,
             aiTier,
             isGuest,
+            conciergeMode,
+            conciergeEscalated,
+            language,
+            pagePath,
           })) {
             gotToken = true;
             fullText += delta;
@@ -277,20 +307,29 @@ export async function POST(request: NextRequest) {
             return;
           }
 
+          const finalMessage = conciergeMode ? humanizeConciergeText(fullText.trim()) : fullText.trim();
           const suggestedQuestions = inferPublicSuggestedQuestions(effectiveMessage, prepared.history);
           let structuredMessage = buildPublicPlainReply(
-            fullText.trim(),
+            finalMessage,
             prepared.assistantType,
-            suggestedQuestions
+            conciergeMode ? [] : suggestedQuestions,
           );
-          structuredMessage = enrichPublicAiReply(structuredMessage, effectiveMessage);
+          structuredMessage = conciergeMode
+            ? enrichConciergeReply(structuredMessage, effectiveMessage, {
+                history: prepared.history as ChatHistoryItem[],
+                detectedIntent: detected,
+                pagePath,
+                escalated: conciergeEscalated,
+              })
+            : enrichPublicAiReply(structuredMessage, effectiveMessage);
           structuredMessage.knowledgeSource =
-            prepared.extraContext.includes("Live web data") ? "openai+web" : "openai";
+            prepared.extraContext.includes("Live web data") ? "openai+web" : structuredMessage.knowledgeSource || "openai";
 
           send("done", {
-            message: fullText.trim(),
+            message: finalMessage,
             structuredMessage,
-            source: "openai",
+            source: conciergeEscalated ? "openai+agent" : "openai",
+            conciergeEscalated,
             remaining: rateRemaining,
           });
           controller.close();

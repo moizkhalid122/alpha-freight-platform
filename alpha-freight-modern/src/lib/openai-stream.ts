@@ -1,6 +1,8 @@
 import type { AssistantKind, ChatHistoryItem, StructuredAssistantReply } from "@/lib/chat-types";
 import type { DetectedIntent } from "@/lib/copilot/intent-detector";
+import { buildConciergeSystemPrompt } from "@/lib/concierge/concierge-prompt";
 import { buildPublicAiSystemPrompt } from "@/lib/public-ai-prompt";
+import type { LanguagePreference } from "@/lib/copilot/language";
 import { buildEmployeeTeamAiSystemPrompt } from "@/lib/employee-team-ai-prompt";
 import { generalKnowledgeCategory } from "@/lib/public-ai-live-search";
 import { fetchWithTimeout, OPENAI_STREAM_TIMEOUT_MS } from "@/lib/copilot/fetch-utils";
@@ -52,7 +54,18 @@ function normalizeHistory(history: ChatHistoryItem[], aiTier: AiTier = "guest"):
     }));
 }
 
-function buildPublicStreamSystemPrompt(extraContext?: string, assistantType: AssistantKind = "general"): string {
+function buildPublicStreamSystemPrompt(
+  extraContext?: string,
+  assistantType: AssistantKind = "general",
+  options?: { conciergeMode?: boolean; language?: LanguagePreference; pagePath?: string },
+): string {
+  if (options?.conciergeMode) {
+    return buildConciergeSystemPrompt({
+      extraContext,
+      language: options.language,
+      pagePath: options.pagePath,
+    });
+  }
   if (assistantType === "employee") {
     return buildEmployeeTeamAiSystemPrompt(extraContext);
   }
@@ -216,6 +229,10 @@ export function buildPublicStreamMessages(options: {
   imageDataUrl?: string;
   aiTier?: AiTier;
   isGuest?: boolean;
+  conciergeMode?: boolean;
+  conciergeEscalated?: boolean;
+  language?: LanguagePreference;
+  pagePath?: string;
 }): OpenAiStreamMessage[] {
   const assistantType = options.assistantType ?? "general";
   const aiTier =
@@ -245,7 +262,12 @@ export function buildPublicStreamMessages(options: {
       role: "system",
       content: buildPublicStreamSystemPrompt(
         (options.extraContext || "") + intentHint + visionContext,
-        assistantType
+        assistantType,
+        {
+          conciergeMode: options.conciergeMode,
+          language: options.language,
+          pagePath: options.pagePath,
+        },
       ),
     },
     ...historyForApi.map((item) => ({
@@ -305,6 +327,10 @@ export async function* streamPublicOpenAiReply(options: {
   imageDataUrl?: string;
   aiTier?: AiTier;
   isGuest?: boolean;
+  conciergeMode?: boolean;
+  conciergeEscalated?: boolean;
+  language?: LanguagePreference;
+  pagePath?: string;
 }): AsyncGenerator<string> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return;
@@ -316,11 +342,25 @@ export async function* streamPublicOpenAiReply(options: {
       isGuest: options.isGuest ?? true,
       assistantType,
     });
+  const conciergeMode = Boolean(options.conciergeMode);
+  const conciergeEscalated = Boolean(options.conciergeEscalated);
   const hasImage = Boolean(options.imageDataUrl && isValidImageDataUrl(options.imageDataUrl));
-  const model = resolveOpenAiModel({ aiTier, hasImage });
+  const model = resolveOpenAiModel({ aiTier, hasImage, conciergeMode, conciergeEscalated });
   const messages = buildPublicStreamMessages(options);
-  const maxTokens = resolveOpenAiMaxTokens({ aiTier, publicMode: true, hasImage });
-  const timeoutMs = aiTier === "guest" ? OPENAI_STREAM_TIMEOUT_MS : OPENAI_STREAM_TIMEOUT_MS + 8000;
+  const maxTokens = resolveOpenAiMaxTokens({
+    aiTier,
+    publicMode: true,
+    hasImage,
+    conciergeMode,
+    conciergeEscalated,
+  });
+  const timeoutMs = conciergeMode
+    ? conciergeEscalated
+      ? 22000
+      : 12000
+    : aiTier === "guest"
+      ? OPENAI_STREAM_TIMEOUT_MS
+      : OPENAI_STREAM_TIMEOUT_MS + 8000;
 
   try {
     const response = await fetchWithTimeout(
@@ -334,7 +374,7 @@ export async function* streamPublicOpenAiReply(options: {
         body: JSON.stringify({
           model,
           messages,
-          temperature: resolveOpenAiTemperature(aiTier),
+          temperature: resolveOpenAiTemperature(aiTier, conciergeMode, conciergeEscalated),
           max_tokens: maxTokens,
           stream: true,
         }),

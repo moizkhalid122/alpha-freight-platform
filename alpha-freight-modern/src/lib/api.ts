@@ -24,6 +24,7 @@ export type ChatApiExtendedResponse = ChatApiResponse & {
   remaining?: number;
   limitReached?: boolean;
   limitType?: "guest" | "member";
+  conciergeEscalated?: boolean;
 };
 
 export async function sendChatMessage(
@@ -175,6 +176,8 @@ export async function streamPublicChatMessage(
     sessionMemory?: SendChatMessageOptions["sessionMemory"];
     assistantType?: AssistantKind;
     imageDataUrl?: string;
+    conciergeMode?: boolean;
+    pagePath?: string;
   } = {},
   callbacks: PublicChatStreamCallbacks = {}
 ): Promise<ChatApiExtendedResponse> {
@@ -194,6 +197,8 @@ export async function streamPublicChatMessage(
         language: options.language,
         sessionMemory: options.sessionMemory,
         assistantType: options.assistantType || "general",
+        conciergeMode: options.conciergeMode === true,
+        pagePath: options.pagePath,
       }),
     });
 
@@ -247,6 +252,7 @@ export async function streamPublicChatMessage(
             structuredMessage: payload.structuredMessage as StructuredAssistantReply | undefined,
             source: String(payload.source || "openai"),
             remaining: typeof payload.remaining === "number" ? payload.remaining : undefined,
+            conciergeEscalated: payload.conciergeEscalated === true,
           };
           callbacks.onDone?.(finalResult);
         }

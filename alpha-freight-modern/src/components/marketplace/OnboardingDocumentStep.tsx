@@ -75,7 +75,10 @@ export default function OnboardingDocumentStep({
               ) : null}
             </div>
 
-            <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-white">
+            <label
+              data-concierge-field={doc.key}
+              className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-white"
+            >
               {uploadingKey === doc.key ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />

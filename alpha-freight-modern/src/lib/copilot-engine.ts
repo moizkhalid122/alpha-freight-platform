@@ -42,7 +42,9 @@ import {
   buildDieselPriceReply,
   buildPublicKnowledgeReply,
 } from "@/lib/copilot/fast-replies";
+import { getConciergeInstantTurn } from "@/lib/concierge/concierge-instant";
 import { getOpenAiChatReply, isOpenAiConfigured, buildOpenAiRetryReply } from "@/lib/openai-chat";
+import { buildPublicPlainReply } from "@/lib/openai-stream";
 import { buildEmployeeKnowledgeReply, buildEmployeeFastReply } from "@/lib/employee-team-ai-knowledge";
 import { enrichPublicAiReply } from "@/lib/public-ai-growth";
 import { getMarketingChatReply } from "@/lib/marketing-chat";
@@ -75,6 +77,7 @@ export type CopilotEngineInput = {
   isGuest?: boolean;
   aiTier?: AiTier;
   memberPromptContext?: string;
+  conciergeMode?: boolean;
 };
 
 export type CopilotEngineResult = {
@@ -98,7 +101,16 @@ export type PublicStreamPrepareResult =
 export async function preparePublicStreamChat(
   input: CopilotEngineInput
 ): Promise<PublicStreamPrepareResult> {
-  const { assistantType, history, language: explicitLang, sessionMemory, isGuest, aiTier, memberPromptContext } = input;
+  const {
+    assistantType,
+    history,
+    language: explicitLang,
+    sessionMemory,
+    isGuest,
+    aiTier,
+    memberPromptContext,
+    conciergeMode,
+  } = input;
   const message = normalizeUserQuery(input.message);
   const tier =
     aiTier ??
@@ -113,6 +125,21 @@ export async function preparePublicStreamChat(
       mode: "complete",
       result: flattenPublicReply({ ...socialInstant, source: "instant" }),
     };
+  }
+
+  if (conciergeMode) {
+    const conciergeInstant = getConciergeInstantTurn(message, history);
+    if (conciergeInstant) {
+      const structured = buildPublicPlainReply(conciergeInstant.message, assistantType);
+      return {
+        mode: "complete",
+        result: flattenPublicReply({
+          message: conciergeInstant.message,
+          structuredMessage: { ...structured, agentTools: conciergeInstant.agentTools, knowledgeSource: "concierge-instant" },
+          source: "concierge-instant",
+        }),
+      };
+    }
   }
 
   const clarification = detectClarificationNeeded(message, history);
@@ -190,39 +217,52 @@ export async function preparePublicStreamChat(
     }
   }
 
-  const extraContext: string[] = [
-    getLanguageInstruction(lang),
-    assistantType === "employee" ? EMPLOYEE_TEAM_AI_CONTEXT : PUBLIC_AI_CONTEXT,
-  ];
+  const extraContext: string[] = [getLanguageInstruction(lang)];
 
-  if (tier !== "guest" && memberPromptContext) {
-    extraContext.push(memberPromptContext);
-  }
-
-  if (isGeneralKnowledgeQuery(message)) {
+  if (conciergeMode) {
     extraContext.push(
-      "User asked a general / universal knowledge question — answer with FULL A–Z expert depth for that topic and industry. Do NOT refuse or redirect to freight unless they asked about freight."
+      "VOICE CONCIERGE: Keep answers conversational — max 3 sentences unless they asked for detail. No URLs, no numbered lists.",
     );
-  }
+    const memoryHint = formatMemoryForPrompt(sessionMemory || {}, tier);
+    if (memoryHint) extraContext.push(memoryHint);
+    if (shouldUsePublicRag(message)) {
+      const hits = searchKnowledgeBase(message, 1);
+      if (hits.length) {
+        extraContext.push(`One fact if needed (do not read aloud verbatim): ${hits[0].slice(0, 280)}`);
+      }
+    }
+  } else {
+    extraContext.push(assistantType === "employee" ? EMPLOYEE_TEAM_AI_CONTEXT : PUBLIC_AI_CONTEXT);
 
-  const domainHint = buildDomainHint(message);
-  if (domainHint) extraContext.push(domainHint);
+    if (tier !== "guest" && memberPromptContext) {
+      extraContext.push(memberPromptContext);
+    }
 
-  const memoryHint = formatMemoryForPrompt(sessionMemory || {}, tier);
-  if (memoryHint) extraContext.push(memoryHint);
+    if (isGeneralKnowledgeQuery(message)) {
+      extraContext.push(
+        "User asked a general / universal knowledge question — answer with FULL A–Z expert depth for that topic and industry. Do NOT refuse or redirect to freight unless they asked about freight.",
+      );
+    }
 
-  const conversationRecap = buildConversationRecap(history, tier);
-  if (conversationRecap) extraContext.push(conversationRecap);
+    const domainHint = buildDomainHint(message);
+    if (domainHint) extraContext.push(domainHint);
 
-  const garbled = inferGarbledQueryHint(message);
-  if (garbled) extraContext.push(garbled);
+    const memoryHint = formatMemoryForPrompt(sessionMemory || {}, tier);
+    if (memoryHint) extraContext.push(memoryHint);
 
-  const glossary = buildGlossaryContext(message);
-  if (glossary) extraContext.push(glossary);
+    const conversationRecap = buildConversationRecap(history, tier);
+    if (conversationRecap) extraContext.push(conversationRecap);
 
-  if (shouldUsePublicRag(message)) {
-    const rag = buildPublicRagContext(message);
-    if (rag) extraContext.push(rag);
+    const garbled = inferGarbledQueryHint(message);
+    if (garbled) extraContext.push(garbled);
+
+    const glossary = buildGlossaryContext(message);
+    if (glossary) extraContext.push(glossary);
+
+    if (shouldUsePublicRag(message)) {
+      const rag = buildPublicRagContext(message);
+      if (rag) extraContext.push(rag);
+    }
   }
 
   const shouldSearchWeb =

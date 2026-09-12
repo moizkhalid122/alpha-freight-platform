@@ -37,11 +37,11 @@ import {
   Users,
   UtensilsCrossed,
   Wrench,
-  Banknote,
   type LucideIcon,
 } from "lucide-react";
 
 import NavbarAiLottie from "@/components/NavbarAiLottie";
+import NavbarPayoutIcon from "@/components/NavbarPayoutIcon";
 import { useSiteT } from "@/components/SiteLanguageProvider";
 import {
   hasFlyoutMenu,
@@ -468,21 +468,19 @@ export default function Navbar({
                             <Link
                               key={feature.titleKey}
                               href={feature.href}
-                              className="group/feature flex items-start gap-4"
+                              className="group/feature flex items-start gap-4 rounded-xl p-1 transition-colors hover:bg-white/[0.03]"
                             >
-                              <div
-                                className={`flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden ${
-                                  feature.useAiLottie
-                                    ? ""
-                                    : "rounded-xl border border-violet-500/30 bg-violet-950/80"
-                                }`}
-                              >
-                                {feature.useAiLottie ? (
+                              {feature.useAiLottie ? (
+                                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden">
                                   <NavbarAiLottie className="h-12 w-12" />
-                                ) : (
-                                  <Icon className="h-7 w-7 text-violet-300" strokeWidth={1.5} />
-                                )}
-                              </div>
+                                </div>
+                              ) : feature.usePayoutIcon ? (
+                                <NavbarPayoutIcon />
+                              ) : Icon ? (
+                                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-white/10">
+                                  <Icon className="h-7 w-7 text-white/85" strokeWidth={1.5} />
+                                </div>
+                              ) : null}
                               <div className="min-w-0 pt-1">
                                 <p className="text-[15px] font-semibold text-white group-hover/feature:text-white/90">
                                   {t(feature.titleKey)}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import AnalyticsPageTracker from "@/components/AnalyticsPageTracker";
-import Chatbot from "@/components/Chatbot";
+import AlphaConcierge from "@/components/concierge/AlphaConcierge";
 import SiteGoogleTranslator from "@/components/SiteGoogleTranslator";
 import { SiteLanguageProvider } from "@/components/SiteLanguageProvider";
 import JsonLd from "@/components/seo/JsonLd";
@@ -106,7 +106,7 @@ export default function RootLayout({
         <SiteLanguageProvider>
           <SiteGoogleTranslator />
           {children}
-          <Chatbot />
+          <AlphaConcierge />
         </SiteLanguageProvider>
       </body>
     </html>

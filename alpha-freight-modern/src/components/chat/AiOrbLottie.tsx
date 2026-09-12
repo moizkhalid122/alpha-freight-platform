@@ -1,19 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Lottie from "lottie-react";
+import { useEffect, useRef, useState } from "react";
+import Lottie, { type LottieRefCurrentProps } from "lottie-react";
 import { Loader2 } from "lucide-react";
 
 type AiOrbLottieProps = {
   className?: string;
   loop?: boolean;
+  playbackSpeed?: number;
 };
 
 export default function AiOrbLottie({
   className = "h-9 w-9",
   loop = true,
+  playbackSpeed = 1,
 }: AiOrbLottieProps) {
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
   const [animationData, setAnimationData] = useState<object | null>(null);
+
+  useEffect(() => {
+    lottieRef.current?.setSpeed(Math.max(0.5, Math.min(2.2, playbackSpeed)));
+  }, [playbackSpeed]);
 
   useEffect(() => {
     let active = true;
@@ -41,6 +48,7 @@ export default function AiOrbLottie({
 
   return (
     <Lottie
+      lottieRef={lottieRef}
       animationData={animationData}
       loop={loop}
       autoplay

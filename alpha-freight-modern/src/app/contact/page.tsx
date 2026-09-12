@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useConciergeAnimatedForm } from "@/hooks/useConciergeAnimatedForm";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
@@ -120,6 +121,9 @@ async function sendViaEmailJs(form: FormState) {
 
 export default function ContactPage() {
   const [form, setForm] = useState<FormState>(initialForm);
+  useConciergeAnimatedForm(setForm, ["name", "email", "phone", "subject", "message"], {
+    fieldOrder: ["name", "email", "phone", "subject", "message"],
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error" | "info"; message: string } | null>(
     null,
@@ -214,6 +218,7 @@ export default function ContactPage() {
                       id="name"
                       type="text"
                       required
+                      data-concierge-field="name"
                       value={form.name}
                       onChange={(e) => updateField("name", e.target.value)}
                       placeholder="John Doe"
@@ -228,6 +233,7 @@ export default function ContactPage() {
                       id="email"
                       type="email"
                       required
+                      data-concierge-field="email"
                       value={form.email}
                       onChange={(e) => updateField("email", e.target.value)}
                       placeholder="john@example.com"
@@ -241,6 +247,7 @@ export default function ContactPage() {
                     <input
                       id="phone"
                       type="tel"
+                      data-concierge-field="phone"
                       value={form.phone}
                       onChange={(e) => updateField("phone", e.target.value)}
                       placeholder="+44 7782 294718"
@@ -254,6 +261,7 @@ export default function ContactPage() {
                     <select
                       id="subject"
                       required
+                      data-concierge-field="subject"
                       value={form.subject}
                       onChange={(e) => updateField("subject", e.target.value)}
                       className={inputClass}
@@ -276,6 +284,7 @@ export default function ContactPage() {
                     id="message"
                     required
                     rows={6}
+                    data-concierge-field="message"
                     value={form.message}
                     onChange={(e) => updateField("message", e.target.value)}
                     placeholder="Tell us how we can help you..."
@@ -300,6 +309,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
+                  data-concierge-field="submit"
                   className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 text-[14px] font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-8"
                 >
                   {isSubmitting ? (

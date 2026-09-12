@@ -88,6 +88,20 @@ export interface CopilotActionRequest {
   successMessage?: string;
 }
 
+export type ConciergeAgentTool =
+  | { type: "navigate"; path: string; label?: string }
+  | {
+      type: "fill_field";
+      form: "signup" | "contact";
+      role?: "carrier" | "supplier";
+      fields: Record<string, string>;
+      path: string;
+    }
+  | { type: "highlight"; target: string }
+  | { type: "click"; target: string }
+  | { type: "share_referral"; role: "carrier" | "supplier"; code?: string }
+  | { type: "human_handoff" };
+
 export interface CopilotContextMemory {
   truckType?: string | null;
   equipmentType?: string | null;
@@ -127,6 +141,7 @@ export interface StructuredAssistantReply {
   inlineTool?: "rpm_calculator" | "fuel_surcharge" | "load_cards" | "route_map" | "comparison_chart";
   chartType?: "rpm" | "profit" | "fuel";
   rawText?: string;
+  agentTools?: ConciergeAgentTool[];
 }
 
 export interface ChatApiResponse {

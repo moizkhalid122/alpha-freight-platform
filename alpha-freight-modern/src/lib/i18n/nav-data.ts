@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  Banknote,
   BookOpen,
   Bot,
   Building2,
@@ -37,8 +36,9 @@ export type NavWhyFeature = {
   titleKey: string;
   descKey: string;
   href: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   useAiLottie?: boolean;
+  usePayoutIcon?: boolean;
 };
 
 export type NavItemDef = {
@@ -88,8 +88,8 @@ export const whyAlphaMenuDef = {
     {
       titleKey: "why.payout",
       descKey: "why.payoutDesc",
-      href: "/about",
-      icon: Banknote,
+      href: "/7-day-payouts",
+      usePayoutIcon: true,
     },
   ],
 };

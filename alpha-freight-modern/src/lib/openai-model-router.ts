@@ -17,10 +17,44 @@ export function resolveAiTier(input: ResolveAiTierInput = {}): AiTier {
   return "member";
 }
 
+export const DEFAULT_CONCIERGE_MODEL = "gpt-4o-mini";
+export const DEFAULT_AGENT_MODEL = "gpt-4o-mini";
+
+export function resolveConciergeModel(): string {
+  return (
+    process.env.OPENAI_MODEL_CONCIERGE?.trim() ||
+    process.env.OPENAI_MODEL?.trim() ||
+    DEFAULT_CONCIERGE_MODEL
+  );
+}
+
+export function resolveConciergeAgentModel(): string {
+  return (
+    process.env.OPENAI_MODEL_AGENT?.trim() ||
+    process.env.OPENAI_MODEL_GUEST?.trim() ||
+    DEFAULT_AGENT_MODEL
+  );
+}
+
+export function resolveConciergeMaxTokens(escalated?: boolean): number {
+  if (escalated) {
+    const rawAgent = Number(process.env.OPENAI_CONCIERGE_AGENT_MAX_TOKENS || 320);
+    return Number.isFinite(rawAgent) && rawAgent > 0 ? rawAgent : 320;
+  }
+  const raw = Number(process.env.OPENAI_CONCIERGE_MAX_TOKENS || 260);
+  return Number.isFinite(raw) && raw > 0 ? raw : 260;
+}
+
 export function resolveOpenAiModel(options: {
   aiTier?: AiTier;
   hasImage?: boolean;
+  conciergeMode?: boolean;
+  conciergeEscalated?: boolean;
 }): string {
+  if (options.conciergeMode) {
+    if (options.conciergeEscalated) return resolveConciergeAgentModel();
+    return resolveConciergeModel();
+  }
   const tier = options.aiTier ?? "guest";
 
   if (options.hasImage) {
@@ -47,7 +81,13 @@ export function resolveOpenAiMaxTokens(options: {
   aiTier?: AiTier;
   publicMode?: boolean;
   hasImage?: boolean;
+  conciergeMode?: boolean;
+  conciergeEscalated?: boolean;
 }): number {
+  if (options.conciergeMode) {
+    return resolveConciergeMaxTokens(options.conciergeEscalated);
+  }
+
   const tier = options.aiTier ?? "guest";
 
   if (options.hasImage) {
@@ -61,7 +101,12 @@ export function resolveOpenAiMaxTokens(options: {
   return tier === "guest" ? 900 : 1400;
 }
 
-export function resolveOpenAiTemperature(aiTier: AiTier = "guest"): number {
+export function resolveOpenAiTemperature(
+  aiTier: AiTier = "guest",
+  conciergeMode?: boolean,
+  conciergeEscalated?: boolean,
+): number {
+  if (conciergeMode) return conciergeEscalated ? 0.72 : 0.78;
   if (aiTier === "guest") return 0.68;
   if (aiTier === "pro") return 0.58;
   return 0.62;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import gsap from "gsap";
@@ -20,6 +20,8 @@ import HomeNewsroomShowcase from "@/components/marketing/HomeNewsroomShowcase";
 import HomeBookOfWeek from "@/components/marketing/HomeBookOfWeek";
 import HomeInfrastructureShowcase from "@/components/marketing/HomeInfrastructureShowcase";
 import HeroRotatingWords from "@/components/marketing/HeroRotatingWords";
+import HeroBackgroundVideo from "@/components/marketing/HeroBackgroundVideo";
+import HeroStoryVideoModal from "@/components/marketing/HeroStoryVideoModal";
 import { useMarketingSmoothScroll } from "@/hooks/useMarketingSmoothScroll";
 import {
   CARRIER_COMMISSION_RATE,
@@ -46,6 +48,7 @@ const serif = () => "font-[family-name:var(--font-home-serif)]";
 
 export default function PremiumHomePage() {
   const t = useSiteT();
+  const [storyVideoOpen, setStoryVideoOpen] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const heroMediaRef = useRef<HTMLDivElement>(null);
@@ -75,17 +78,11 @@ export default function PremiumHomePage() {
       );
 
       if (heroMediaRef.current) {
-        gsap.fromTo(heroMediaRef.current, { scale: 1.08 }, { scale: 1, duration: 2, ease: "power2.out" });
-        gsap.to(heroMediaRef.current, {
-          scale: 1.12,
-          ease: "none",
-          scrollTrigger: {
-            trigger: heroRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
+        gsap.fromTo(
+          heroMediaRef.current,
+          { opacity: 0.88 },
+          { opacity: 1, duration: 1.6, ease: "power2.out" },
+        );
       }
 
       if (heroCopyRef.current) {
@@ -157,23 +154,18 @@ export default function PremiumHomePage() {
 
       <Navbar />
 
+      <HeroStoryVideoModal
+        open={storyVideoOpen}
+        onClose={() => setStoryVideoOpen(false)}
+        title={t("home.whyWeBuild")}
+      />
+
       <main>
         <div className="relative">
           {/* Sticky hero — content below scrolls up over it */}
           <section ref={heroRef} className="sticky top-0 z-0 h-[100svh] overflow-hidden bg-black">
-            <div ref={heroMediaRef} className="absolute inset-0 will-change-transform">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                poster="/hero2.png"
-                className="absolute inset-0 h-full w-full object-cover object-center"
-              >
-                <source src="/videos/hero-0903.webm" type="video/webm" />
-                <source src="/videos/hero-0903.mp4" type="video/mp4" />
-              </video>
+            <div ref={heroMediaRef} className="absolute inset-0">
+              <HeroBackgroundVideo paused={storyVideoOpen} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-r from-black/88 via-black/50 to-black/20" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/25" />
@@ -204,15 +196,16 @@ export default function PremiumHomePage() {
                 >
                   {t("home.startFree")}
                 </Link>
-                <Link
-                  href="/about"
+                <button
+                  type="button"
+                  onClick={() => setStoryVideoOpen(true)}
                   className="inline-flex h-[52px] items-center gap-3 rounded-full border border-white/30 bg-white/[0.06] px-2 pr-7 text-[14px] font-medium tracking-[-0.01em] text-white backdrop-blur-md transition hover:border-white/50 hover:bg-white/10"
                 >
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/12 ring-1 ring-white/10">
                     <Play className="h-3.5 w-3.5 fill-white text-white" />
                   </span>
                   {t("home.whyWeBuild")}
-                </Link>
+                </button>
               </div>
             </div>
           </section>
