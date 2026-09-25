@@ -19,12 +19,17 @@ import {
   CreditCard,
   Users,
 } from "lucide-react";
+import {
+  SUPPORT_LANDLINE,
+  SUPPORT_LANDLINE_HREF,
+  SUPPORT_PHONE,
+  SUPPORT_PHONE_HREF,
+} from "@/lib/support-contact";
 
 const CARD =
   "rounded-xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:shadow-md";
 
 const SUPPORT_EMAIL = "support@alphafreight.co.uk";
-const SUPPORT_PHONE = "+44 7700 900077";
 const SUPPORT_HOURS = "Mon–Fri, 8am–6pm GMT";
 
 const FAQS = [
@@ -132,31 +137,55 @@ export default function SupplierSupport() {
           {
             icon: Phone,
             title: "Phone",
-            desc: SUPPORT_PHONE,
-            action: "Call now",
-            href: `tel:${SUPPORT_PHONE.replace(/\s/g, "")}`,
+            kind: "phones" as const,
             tone: "bg-emerald-50 text-emerald-600",
           },
-        ].map((channel, i) => (
-          <motion.a
-            key={channel.title}
-            href={channel.href}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={`${CARD} block p-5 sm:p-6`}
-          >
-            <div className={`mb-4 inline-flex rounded-lg p-2.5 ${channel.tone}`}>
-              <channel.icon className="h-4 w-4" />
-            </div>
-            <h3 className="text-[14px] font-bold text-slate-900">{channel.title}</h3>
-            <p className="mt-0.5 text-[12px] text-slate-500">{channel.desc}</p>
-            <span className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-blue-600">
-              {channel.action}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </span>
-          </motion.a>
-        ))}
+        ].map((channel, i) =>
+          "kind" in channel && channel.kind === "phones" ? (
+            <motion.div
+              key={channel.title}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className={`${CARD} block p-5 sm:p-6`}
+            >
+              <div className={`mb-4 inline-flex rounded-lg p-2.5 ${channel.tone}`}>
+                <channel.icon className="h-4 w-4" />
+              </div>
+              <h3 className="text-[14px] font-bold text-slate-900">{channel.title}</h3>
+              <p className="mt-2 space-y-1 text-[12px] text-slate-500">
+                <a href={SUPPORT_PHONE_HREF} className="block font-medium text-slate-700 hover:text-blue-600">
+                  {SUPPORT_PHONE}
+                  <span className="font-normal text-slate-400"> · mobile</span>
+                </a>
+                <a href={SUPPORT_LANDLINE_HREF} className="block font-medium text-slate-700 hover:text-blue-600">
+                  {SUPPORT_LANDLINE}
+                  <span className="font-normal text-slate-400"> · landline</span>
+                </a>
+              </p>
+              <p className="mt-3 text-[11px] text-slate-400">{SUPPORT_HOURS}</p>
+            </motion.div>
+          ) : (
+            <motion.a
+              key={channel.title}
+              href={channel.href}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className={`${CARD} block p-5 sm:p-6`}
+            >
+              <div className={`mb-4 inline-flex rounded-lg p-2.5 ${channel.tone}`}>
+                <channel.icon className="h-4 w-4" />
+              </div>
+              <h3 className="text-[14px] font-bold text-slate-900">{channel.title}</h3>
+              <p className="mt-0.5 text-[12px] text-slate-500">{channel.desc}</p>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-blue-600">
+                {channel.action}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </motion.a>
+          )
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">

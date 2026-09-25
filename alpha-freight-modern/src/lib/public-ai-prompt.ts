@@ -2,7 +2,7 @@ import { buildWorldKnowledgePromptBlock } from "@/lib/public-ai-world-knowledge"
 import { buildPublicPlatformKnowledgeBlock } from "@/lib/public-ai-platform-knowledge";
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
-const SUPPORT_PHONE = "+44 7782 294718";
+const SUPPORT_PHONE = "+44 7300 415363";
 
 export function getPublicAiResponseBlueprint(): string {
   return `## REPLY STYLE — friendly, detailed, human (default: LONG)

@@ -63,7 +63,7 @@ export default function RootLayout({
               url: SITE_URL,
               logo: `${SITE_URL}/favicon-192.png`,
               email: "support@alphafreightuk.com",
-              telephone: "+44 7782 294718",
+              telephone: ["+44 7300 415363", "020 3906 1181"],
               address: {
                 "@type": "PostalAddress",
                 streetAddress: "124 City Road",

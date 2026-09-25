@@ -178,7 +178,7 @@ export const materialGuidelines = [
   },
   {
     title: "Email signature",
-    body: "Logo symbol 32px, name + title, support@alphafreightuk.com, +44 7782 294718, alphafreightuk.com",
+    body: "Logo symbol 32px, name + title, support@alphafreightuk.com, +44 7300 415363, alphafreightuk.com",
   },
   {
     title: "Partner co-brand",

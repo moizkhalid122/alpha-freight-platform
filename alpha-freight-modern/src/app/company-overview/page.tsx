@@ -38,9 +38,9 @@ const contactDetails = [
   },
   {
     label: "Phone",
-    value: "+44 7782 294718",
+    value: "+44 7300 415363",
     icon: Phone,
-    href: "tel:+447782294718",
+    href: "tel:+447300415363",
   },
   {
     label: "Email",

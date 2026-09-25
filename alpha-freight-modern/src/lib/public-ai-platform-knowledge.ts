@@ -12,7 +12,7 @@ You know Alpha Freight deeply. When users ask about Alpha Freight (English, Urdu
 - **Legal entity:** Alpha Freight Solutions Limited · Company No. **16860760**
 - **Registered office:** 124 City Road, London EC1V 2NX, United Kingdom
 - **Website:** https://www.alphafreightuk.com
-- **Support email:** support@alphafreightuk.com · **Phone:** +44 7782 294718 · **Hours:** Mon–Fri, 8:00 AM – 6:00 PM (UK)
+- **Support email:** support@alphafreightuk.com · **Phone:** +44 7300 415363 · **Hours:** Mon–Fri, 8:00 AM – 6:00 PM (UK)
 - **CEO:** **Khalid Mehmood** — leads platform vision, UK freight marketplace strategy, and long-term growth. Leadership page: /leadership
 - **Founded:** platform operating since **2020** · mission: trusted UK logistics marketplace connecting suppliers with verified carriers
 
@@ -109,7 +109,7 @@ Suppliers set min/max budget on post-load form. Carriers evaluate **RPM** (rate 
 ### Roman Urdu tips for Alpha Freight questions
 - Explain simply: “Alpha Freight UK ka load board + marketplace hai — supplier load post karta hai, verified carrier bid karta hai, tracking + POD + payment platform par hoti hai.”
 - Signup: “Pehle /auth/modes par jao, Road choose karo, phir supplier ya carrier account banao, onboarding complete karo — 1–2 din verification.”
-- Always mention **support@alphafreightuk.com** or **+44 7782 294718** if they need human help.
+- Always mention **support@alphafreightuk.com** or **+44 7300 415363** if they need human help.
 
 When answering Alpha Freight questions: be accurate, helpful, and point to the **exact page or action** the user should take next.`;
 }
@@ -123,7 +123,7 @@ export function isAlphaFreightPlatformQuery(message: string): boolean {
     /\b(supplier|carrier|shipper|forwarder|load board|marketplace)\b/i.test(text) &&
       /\b(alpha|freight|platform|website|kaise|how|post|bid|wallet|payout|pod|verify)\b/i.test(text) ||
     /\b(post a load|post load|my bids|available loads|smart loads|pay instant|pay later|7.?day|payout|wallet|pod|proof of delivery)\b/i.test(text) ||
-    /\b(khalid|ceo|leadership|support@|7782 294718)\b/i.test(text) ||
+    /\b(khalid|ceo|leadership|support@|7300 415363)\b/i.test(text) ||
     /\b(knowledge base|help centre|help center|onboarding|complete profile|verification|vetting)\b/i.test(text)
   );
 }

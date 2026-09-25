@@ -379,8 +379,8 @@ const sections = [
           </li>
           <li>
             <span className="font-semibold text-slate-900">Phone:</span>{" "}
-            <a href="tel:+447782294718" className="text-violet-700 hover:underline">
-              +44 7782 294718
+            <a href="tel:+447300415363" className="text-violet-700 hover:underline">
+              +44 7300 415363
             </a>
           </li>
           <li>

@@ -25,6 +25,12 @@ import Image from "next/image";
 import { Footer, CinematicCTA } from "@/components/Footer";
 import { getSupportArticleHref } from "@/lib/support-links";
 import { submitWebsiteInquiry } from "@/lib/submit-website-inquiry";
+import {
+  SUPPORT_LANDLINE,
+  SUPPORT_LANDLINE_HREF,
+  SUPPORT_PHONE,
+  SUPPORT_PHONE_HREF,
+} from "@/lib/support-contact";
 
 type QuickForm = {
   name: string;
@@ -304,7 +310,7 @@ export default function SupportPage() {
         {/* Bento Grid Contact Options */}
         <section className="py-32 bg-white relative z-10">
           <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Card 1: Live Chat */}
               <motion.button
                 type="button"
@@ -357,13 +363,47 @@ export default function SupportPage() {
                 </div>
               </motion.a>
 
-              {/* Card 3: Form/Interactive */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15 }}
+                className="bg-[#FAF9F6] border border-black/5 p-12 rounded-3xl min-h-[450px] flex flex-col justify-between"
+              >
+                <div className="space-y-8">
+                  <div className="w-16 h-16 rounded-2xl bg-black/5 flex items-center justify-center">
+                    <Phone className="w-8 h-8 text-black" />
+                  </div>
+                  <h3 className="text-4xl font-bold text-black uppercase leading-none tracking-tighter">
+                    Call <br /> Us
+                  </h3>
+                  <div className="space-y-3 text-sm font-bold uppercase tracking-widest leading-relaxed text-black/60">
+                    <a href={SUPPORT_PHONE_HREF} className="block hover:text-black transition-colors">
+                      {SUPPORT_PHONE}
+                      <span className="text-black/35 font-semibold normal-case tracking-normal"> · mobile</span>
+                    </a>
+                    <a href={SUPPORT_LANDLINE_HREF} className="block hover:text-black transition-colors">
+                      {SUPPORT_LANDLINE}
+                      <span className="text-black/35 font-semibold normal-case tracking-normal"> · landline</span>
+                    </a>
+                    <p className="text-[10px] text-black/40 pt-1">Mon–Fri, 8am–6pm UK</p>
+                  </div>
+                </div>
+                <Link
+                  href="/contact"
+                  className="flex items-center gap-2 text-black font-black uppercase tracking-widest text-xs border-t border-black/10 pt-8 hover:text-black/70"
+                >
+                  Contact page <ArrowRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
+
+              {/* Card 4: Form/Interactive */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="bg-[#F2F2F0] p-12 rounded-3xl min-h-[450px] flex flex-col justify-between group"
+                className="bg-[#F2F2F0] p-12 rounded-3xl min-h-[450px] flex flex-col justify-between group md:col-span-2 lg:col-span-1"
               >
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold text-black uppercase tracking-tight">

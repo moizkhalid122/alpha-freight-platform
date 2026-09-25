@@ -1,7 +1,7 @@
 import type { ChatApiResponse } from "@/lib/chat-types";
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
-const SUPPORT_PHONE = "+44 7782 294718";
+const SUPPORT_PHONE = "+44 7300 415363";
 
 type ChatHistoryItem = { role: string; content: string };
 

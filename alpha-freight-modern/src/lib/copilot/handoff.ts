@@ -1,8 +1,8 @@
 import type { StructuredAssistantReply } from "@/lib/chat-types";
+import { SUPPORT_PHONE, SUPPORT_PHONES_SHORT } from "@/lib/support-contact";
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
-const SUPPORT_PHONE = "+44 7782 294718";
-const WHATSAPP = "https://wa.me/447782294718";
+const WHATSAPP = "https://wa.me/447300415363";
 
 export function buildHandoffReply(displayName?: string): StructuredAssistantReply {
   const name = displayName ? ` ${displayName}` : "";
@@ -17,7 +17,7 @@ export function buildHandoffReply(displayName?: string): StructuredAssistantRepl
     shortExplanation: `Hi${name}! I'll connect you with a real Alpha Freight support agent who can help with account issues, disputes, or complex requests.`,
     keyPoints: [
       `📧 Email: ${SUPPORT_EMAIL} (reply within 24 hours)`,
-      `📞 Phone: ${SUPPORT_PHONE} (Mon–Fri 9am–6pm UK)`,
+      `📞 Phone: ${SUPPORT_PHONES_SHORT} (Mon–Fri 9am–6pm UK)`,
       `💬 WhatsApp: Tap below for instant chat`,
       "🔒 Have your load ID or account email ready for faster help",
     ],
@@ -30,7 +30,7 @@ export function buildHandoffReply(displayName?: string): StructuredAssistantRepl
     ],
     actionRequest: { type: "human_handoff", status: "ready", successMessage: "Support options shown" },
     suggestedQuestions: ["What info should I have ready?", "How long until someone replies?"],
-    rawText: `Contact Alpha Freight support: ${SUPPORT_EMAIL} · ${SUPPORT_PHONE}`,
+    rawText: `Contact Alpha Freight support: ${SUPPORT_EMAIL} · ${SUPPORT_PHONES_SHORT}`,
   };
 }
 

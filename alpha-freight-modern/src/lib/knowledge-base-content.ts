@@ -32,7 +32,7 @@ export const knowledgeBaseArticles: KnowledgeBaseArticle[] = [
     content: [
       "Alpha Freight is a modern logistics platform that connects UK suppliers with verified carriers through AI-powered load matching, real-time tracking, and digital proof of delivery.",
       "The platform is built for transparency: suppliers post freight, review carrier bids, and monitor shipments from one dashboard. Carriers find lane-fit loads, manage fleet activity, and receive faster settlement through the carrier wallet.",
-      "Alpha Freight Solutions Limited (Company No. 16860760) operates from 124 City Road, London EC1V 2NX. Support is available Mon–Fri, 8:00 AM – 6:00 PM via support@alphafreightuk.com or +44 7782 294718.",
+      "Alpha Freight Solutions Limited (Company No. 16860760) operates from 124 City Road, London EC1V 2NX. Support is available Mon–Fri, 8:00 AM – 6:00 PM via support@alphafreightuk.com or +44 7300 415363.",
     ],
     related: [
       { label: "Platform overview docs", href: "/docs?tab=overview" },
@@ -209,7 +209,7 @@ export const knowledgeBaseArticles: KnowledgeBaseArticle[] = [
     content: [
       "Live chat is the fastest channel for active shipment questions — typical response under 2 minutes during business hours.",
       "Email support@alphafreightuk.com is best for non-urgent account, billing, or operational queries, usually handled within 2 hours.",
-      "Phone +44 7782 294718 is available Mon–Fri, 8:00 AM – 6:00 PM for issues needing direct coordination.",
+      "Phone +44 7300 415363 is available Mon–Fri, 8:00 AM – 6:00 PM for issues needing direct coordination.",
       "Escalation applies when a case affects live shipment execution, missed pickup/delivery risk, tracking failure, payment delay, or unresolved complaints requiring manager review.",
     ],
     related: [

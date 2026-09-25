@@ -17,10 +17,14 @@ import {
 } from "lucide-react";
 import { mapContactSubjectToInquiryType } from "@/lib/inquiry-content";
 import { submitWebsiteInquiry } from "@/lib/submit-website-inquiry";
+import {
+  SUPPORT_LANDLINE,
+  SUPPORT_LANDLINE_HREF,
+  SUPPORT_PHONE,
+  SUPPORT_PHONE_HREF,
+} from "@/lib/support-contact";
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
-const PHONE = "+44 7782 294718";
-const PHONE_HREF = "tel:+447782294718";
 const WHATSAPP_URL = "https://whatsapp.com/channel/0029VbC2bIL4dTnE8v0leE3s";
 const MAP_EMBED_URL =
   "https://maps.google.com/maps?q=124+City+Road,+London+EC1V+2NX,+United+Kingdom&output=embed";
@@ -250,7 +254,7 @@ export default function ContactPage() {
                       data-concierge-field="phone"
                       value={form.phone}
                       onChange={(e) => updateField("phone", e.target.value)}
-                      placeholder="+44 7782 294718"
+                      placeholder={SUPPORT_PHONE}
                       className={inputClass}
                     />
                   </div>
@@ -350,10 +354,21 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Phone</p>
-                      <a href={PHONE_HREF} className="mt-1 block text-sm text-slate-700 hover:text-slate-900 hover:underline">
-                        {PHONE}
+                      <a
+                        href={SUPPORT_PHONE_HREF}
+                        className="mt-1 block text-sm text-slate-700 hover:text-slate-900 hover:underline"
+                      >
+                        {SUPPORT_PHONE}
+                        <span className="text-slate-500"> · mobile</span>
                       </a>
-                      <p className="mt-1 text-xs text-slate-500">Available 24/7</p>
+                      <a
+                        href={SUPPORT_LANDLINE_HREF}
+                        className="mt-1 block text-sm text-slate-700 hover:text-slate-900 hover:underline"
+                      >
+                        {SUPPORT_LANDLINE}
+                        <span className="text-slate-500"> · landline</span>
+                      </a>
+                      <p className="mt-1 text-xs text-slate-500">Mon–Fri, 8am–6pm UK</p>
                     </div>
                   </div>
 

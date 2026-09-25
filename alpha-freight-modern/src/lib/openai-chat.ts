@@ -16,7 +16,7 @@ import {
 dns.setDefaultResultOrder("ipv4first");
 
 const SUPPORT_EMAIL = "support@alphafreightuk.com";
-const SUPPORT_PHONE = "+44 7782 294718";
+const SUPPORT_PHONE = "+44 7300 415363";
 
 const ROLE_LABELS: Record<AssistantKind, string> = {
   general: "Alpha Freight AI",
