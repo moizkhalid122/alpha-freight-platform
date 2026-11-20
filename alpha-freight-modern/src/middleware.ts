@@ -50,6 +50,11 @@ import {
 } from "@/lib/employee-path";
 
 import {
+  isPathAllowedInWarningMode,
+  isPlatformWarningOnlyMode,
+  OFFICIAL_PUBLIC_WARNING_PATH,
+} from "@/lib/platform-public-mode";
+import {
   createSupabaseMiddlewareClient,
   getMiddlewareSessionUser,
 } from "@/lib/supabase-middleware";
@@ -66,7 +71,23 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  if (isPlatformWarningOnlyMode() && !isPathAllowedInWarningMode(pathname)) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        {
+          error: "unavailable",
+          message: "Alpha Freight public platform is locked. Read the official public warning.",
+          warningPath: OFFICIAL_PUBLIC_WARNING_PATH,
+        },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      );
+    }
 
+    const warningUrl = request.nextUrl.clone();
+    warningUrl.pathname = OFFICIAL_PUBLIC_WARNING_PATH;
+    warningUrl.search = "";
+    return NextResponse.redirect(warningUrl);
+  }
 
   if (isLegacyAdminPath(pathname)) {
 
@@ -329,29 +350,7 @@ export async function middleware(request: NextRequest) {
 
 
 export const config = {
-
   matcher: [
-
-    "/admin/:path*",
-
-    "/api/admin/:path*",
-
-    "/ops-af-7x9k2/:path*",
-
-    "/comm-af-8k3m7",
-
-    "/comm-af-8k3m7/:path*",
-
-    "/api/commercial-director/:path*",
-
-    "/team-af-4m2x9",
-
-    "/team-af-4m2x9/:path*",
-
-    "/employee",
-
-    "/employee/:path*",
-
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?)$).*)",
   ],
-
 };

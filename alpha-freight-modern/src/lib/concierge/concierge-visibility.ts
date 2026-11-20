@@ -14,6 +14,7 @@ const INTERNAL_EXACT_PATHS = new Set([
   "/executive-agreement",
   "/master-plan",
   "/revenue-model",
+  "/official-public-warning",
 ]);
 
 /**

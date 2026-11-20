@@ -1,3 +1,4 @@
+import { officialPublicWarningSeoDescription } from "@/lib/official-public-warning-content";
 import { createPageMetadata } from "@/lib/seo";
 
 export const marketingSeo = {
@@ -85,6 +86,26 @@ export const marketingSeo = {
       "CEO Alpha Freight",
       "commercial director logistics UK",
       "freight company executives",
+    ],
+  }),
+  officialPublicWarning: createPageMetadata({
+    title:
+      "Official Public Warning — Alpha Freight Solutions Limited | Do Not Use | Public Notice UK",
+    description: officialPublicWarningSeoDescription,
+    path: "/official-public-warning",
+    type: "article",
+    image: "/leadership/commercial-director.jpg",
+    keywords: [
+      "Alpha Freight Solutions Limited warning",
+      "Alpha Freight public warning",
+      "Alpha Freight Solutions Limited fraud notice",
+      "do not use Alpha Freight Solutions Limited",
+      "Alpha Freight ownership dispute",
+      "Alpha Freight directorship dispute",
+      "Alastair James Massey Alpha Freight",
+      "Khalid Mehmood Alpha Freight CEO",
+      "public notice UK company warning",
+      "Alpha Freight UK warning",
     ],
   }),
   academy: createPageMetadata({

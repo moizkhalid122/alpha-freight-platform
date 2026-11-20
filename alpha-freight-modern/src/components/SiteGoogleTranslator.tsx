@@ -44,11 +44,15 @@ function loadGoogleTranslateScript(): Promise<void> {
   });
 }
 
+const STANDALONE_PUBLIC_PATHS = new Set(["/official-public-warning"]);
+
 export default function SiteGoogleTranslator() {
   const pathname = usePathname();
   const readyRef = useRef(false);
+  const disabled = STANDALONE_PUBLIC_PATHS.has(pathname);
 
   useEffect(() => {
+    if (disabled) return;
     let observer: MutationObserver | undefined;
 
     const boot = window.setTimeout(async () => {
@@ -77,13 +81,15 @@ export default function SiteGoogleTranslator() {
       observer?.disconnect();
       window.removeEventListener(SITE_LOCALE_CHANGE_EVENT, onLocaleChange);
     };
-  }, []);
+  }, [disabled]);
 
   useEffect(() => {
-    if (!readyRef.current) return;
+    if (disabled || !readyRef.current) return;
     const timer = window.setTimeout(() => reapplyGoogleTranslate(getSiteLocaleId()), 400);
     return () => window.clearTimeout(timer);
-  }, [pathname]);
+  }, [pathname, disabled]);
+
+  if (disabled) return null;
 
   return <div id="google_translate_element" className="hidden" aria-hidden="true" />;
 }

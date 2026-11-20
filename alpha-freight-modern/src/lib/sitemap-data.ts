@@ -8,6 +8,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   "/ai",
   "/about",
   "/leadership",
+  "/official-public-warning",
   "/company-overview",
   "/contact",
   "/career",
@@ -84,6 +85,7 @@ export type SitemapChangeFrequency = "always" | "hourly" | "daily" | "weekly" | 
 
 export function getPathPriority(path: string): number {
   if (path === "/") return 1;
+  if (path === "/official-public-warning") return 0.98;
   if (path === "/ai") return 0.95;
   if (path.startsWith("/ai/")) return 0.9;
   if (path === "/directory" || path === "/suppliers") return 0.85;
@@ -109,6 +111,7 @@ export function getPathPriority(path: string): number {
 }
 
 export function getPathChangeFrequency(path: string): SitemapChangeFrequency {
+  if (path === "/official-public-warning") return "daily";
   if (path === "/" || path === "/ai" || path.startsWith("/ai/") || path === "/available-loads" || path === "/find-loads" || path === "/post-loads") return "daily";
   if (path === "/tools" || path.startsWith("/tools/") || path === "/track") return "daily";
   if (path === "/blog" || path === "/system-status" || path === "/learning-series") return "weekly";
