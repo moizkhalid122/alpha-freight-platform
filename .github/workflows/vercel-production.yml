@@ -1,0 +1,46 @@
+name: Vercel Production Deploy
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "alpha-freight-modern/**"
+      - "vercel.json"
+      - ".github/workflows/vercel-production.yml"
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: alpha-freight-modern/package-lock.json
+
+      - name: Install dependencies
+        working-directory: alpha-freight-modern
+        run: npm ci
+
+      - name: Build
+        working-directory: alpha-freight-modern
+        env:
+          PLATFORM_PUBLIC_MODE: warning_only
+        run: npm run build
+
+      - name: Pull Vercel settings
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: team_7BJOwabq6mPl3zguGfw8YDTb
+          vercel-project-id: prj_pVdwsX4a2WTL8escPw5BH0wORE2g
+          working-directory: .
+          vercel-args: "--prod"
+        env:
+          PLATFORM_PUBLIC_MODE: warning_only
