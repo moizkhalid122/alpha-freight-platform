@@ -7,6 +7,7 @@ on:
       - "alpha-freight-modern/**"
       - "vercel.json"
       - ".github/workflows/vercel-production.yml"
+  workflow_dispatch:
 
 concurrency:
   group: vercel-production
@@ -15,32 +16,18 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_7BJOwabq6mPl3zguGfw8YDTb
+      VERCEL_PROJECT_ID: prj_pVdwsX4a2WTL8escPw5BH0wORE2g
+      PLATFORM_PUBLIC_MODE: warning_only
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: alpha-freight-modern/package-lock.json
 
-      - name: Install dependencies
-        working-directory: alpha-freight-modern
-        run: npm ci
-
-      - name: Build
-        working-directory: alpha-freight-modern
+      - name: Deploy to Vercel (production)
+        run: npx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
         env:
-          PLATFORM_PUBLIC_MODE: warning_only
-        run: npm run build
-
-      - name: Pull Vercel settings
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: team_7BJOwabq6mPl3zguGfw8YDTb
-          vercel-project-id: prj_pVdwsX4a2WTL8escPw5BH0wORE2g
-          working-directory: .
-          vercel-args: "--prod"
-        env:
-          PLATFORM_PUBLIC_MODE: warning_only
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
