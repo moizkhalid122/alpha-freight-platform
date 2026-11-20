@@ -5,7 +5,12 @@ export type PlatformPublicMode = "live" | "warning_only";
 
 export function getPlatformPublicMode(): PlatformPublicMode {
   const raw = process.env.PLATFORM_PUBLIC_MODE?.trim().toLowerCase();
+  if (raw === "live") return "live";
   if (raw === "warning_only" || raw === "warning" || raw === "off" || raw === "locked") {
+    return "warning_only";
+  }
+  // Production stays on public warning until explicitly set to live (safe default for deploy).
+  if (process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production") {
     return "warning_only";
   }
   return "live";
