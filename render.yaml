@@ -1,0 +1,18 @@
+# Primary public frontend: Vercel (www.alphafreightuk.com).
+# This file fixes Render "alpha-freight-frontend" when it tracks this repo — point build at Next.js app.
+services:
+  - type: web
+    name: alpha-freight-frontend
+    runtime: node
+    plan: starter
+    rootDir: alpha-freight-modern
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    autoDeploy: false
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PLATFORM_PUBLIC_MODE
+        value: warning_only
+      - key: NODE_ENV
+        value: production
