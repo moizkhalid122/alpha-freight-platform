@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 
 import JsonLd from "@/components/seo/JsonLd";
-import { officialPublicWarningSeoDescription, officialPublicWarningTitle } from "@/lib/official-public-warning-content";
+import {
+  officialPublicWarningSeoDescription,
+  officialPublicWarningTitle,
+  officialWarningIssuer,
+} from "@/lib/official-public-warning-content";
 import { marketingSeo } from "@/lib/marketing-seo";
 import { SITE_URL } from "@/lib/sitemap-data";
 
@@ -42,7 +46,8 @@ export default function OfficialPublicWarningLayout({ children }: { children: Re
             inLanguage: "en-GB",
             author: {
               "@type": "Person",
-              name: "Khalid Mehmood",
+              name: officialWarningIssuer.name,
+              jobTitle: officialWarningIssuer.role,
             },
             publisher: {
               "@type": "Organization",

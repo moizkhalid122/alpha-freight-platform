@@ -5,6 +5,7 @@ import {
   alastairMasseyWarningImage,
   officialPublicWarningBlocks,
   officialPublicWarningTitle,
+  officialWarningIssuer,
 } from "@/lib/official-public-warning-content";
 
 const displayFont = "var(--font-air-display), Georgia, 'Times New Roman', serif";
@@ -42,6 +43,13 @@ export default function OfficialPublicWarningDocument() {
             {alastairMasseyWarningImage.name}
           </figcaption>
         </figure>
+
+        <p
+          className="mx-auto mb-4 max-w-3xl text-center text-lg font-semibold text-white md:text-xl"
+          style={{ fontFamily: serifFont }}
+        >
+          Statement by {officialWarningIssuer.name} — {officialWarningIssuer.role}
+        </p>
 
         <h1
           className="mx-auto max-w-4xl text-center text-[clamp(1.5rem,4.2vw,2.85rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-white"

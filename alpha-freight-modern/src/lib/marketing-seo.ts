@@ -90,7 +90,7 @@ export const marketingSeo = {
   }),
   officialPublicWarning: createPageMetadata({
     title:
-      "Official Public Warning — Alpha Freight Solutions Limited | Do Not Use | Public Notice UK",
+      "Official Public Warning — Khalid Mehmood CEO | Alpha Freight Solutions Limited | UK",
     description: officialPublicWarningSeoDescription,
     path: "/official-public-warning",
     type: "article",

@@ -1,9 +1,14 @@
 export const officialPublicWarningTitle =
   "OFFICIAL PUBLIC WARNING – ALPHA FREIGHT SOLUTIONS LIMITED";
 
+export const officialWarningIssuer = {
+  name: "Khalid Mehmood",
+  role: "Chief Executive Officer & 100% shareholder",
+};
+
 /** Meta description & schema — plain-language summary for search engines. */
 export const officialPublicWarningSeoDescription =
-  "Official public warning about Alpha Freight Solutions Limited: alleged unauthorised company control, ownership dispute, and advice not to book or contract with current management. Read the full statement.";
+  "Official public warning from Khalid Mehmood, CEO and 100% shareholder of Alpha Freight Solutions Limited — unauthorised company control, ownership dispute, and advice not to book or contract with current management. Read the full statement.";
 
 export type OfficialWarningBlock =
   | { type: "paragraph"; text: string }
@@ -16,7 +21,7 @@ export const officialPublicWarningBlocks: OfficialWarningBlock[] = [
   },
   {
     type: "emphasis",
-    text: "I was the CEO and 100% shareholder of Alpha Freight Solutions Limited. I owned this company and personally invested my time, effort and hard work into building it. Alastair James Massey was appointed as a director, not the owner of my company.",
+    text: "I, Khalid Mehmood, was the CEO and 100% shareholder of Alpha Freight Solutions Limited. I owned this company and personally invested my time, effort and hard work into building it. Alastair James Massey was appointed as a director, not the owner of my company.",
   },
   {
     type: "paragraph",
